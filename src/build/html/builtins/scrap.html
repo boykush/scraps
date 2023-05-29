@@ -1,0 +1,13 @@
+{% extends "__builtins/base.html" %}
+{% import "__builtins/macros.html" as macros %}
+
+{% block main %}
+    <div class="main-content">
+        <h1>{{ scrap_title }}</h1>
+        {# define raw for manual insert markdown content #}
+        {% raw %}
+            {{ content }}
+        {% endraw %}
+    </div>
+    {{ macros::links(scraps = scraps) }}
+{% endblock %}

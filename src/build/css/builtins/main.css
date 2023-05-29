@@ -1,0 +1,120 @@
+:root {
+    --nord0: #2e3440;
+    --nord1: #3b4252;
+    --nord2: #434c5e;
+    --nord3: #4c566a;
+    --nord4: #d8dee9;
+    --nord5: #e5e9f0;
+    --nord6: #eceff4;
+    --nord7: #8fbcbb;
+    --nord8: #88c0d0;
+    --nord9: #81a1c1;
+    --nord10: #5e81ac;
+    --nord11: #bf616a;
+    --nord12: #d08770;
+    --nord13: #ebcb8b;
+    --nord14: #a3be8c;
+    --nord15: #b48ead;
+}
+
+/* html tag */
+body {
+  background-color: var(--nord6);
+  color: var(--nord3);
+  font-family: 'Rubik', 'Noto Sans JP', sans-serif;
+}
+
+pre {
+    background-color: var(--nord3);
+    color: var(--nord6);
+    padding: 8px;
+    border-radius: 8px;
+}
+
+p code {
+    background-color: var(--nord4);
+    padding: 1px;
+    border-radius: 2px;
+}
+
+hr {
+    background-color: var(--nord3);
+    border: none;
+    border-bottom: 1px solid var(--nord6);
+}
+
+a {
+    color: var(--nord3);
+    text-decoration: none;
+}
+
+a:visited {
+    color: var(--nord3);
+}
+
+/* header */
+header {
+    padding-top: 32px;
+    text-align: center;
+}
+
+header h1 {
+    display: inline-block;
+    font-size: 40px;
+}
+
+/* main */
+main {
+    width: 90%;
+    margin: 32px auto;
+}
+
+/* main content */
+div.main-content {
+    background-color: white;
+    border-radius: 8px;
+    padding: 32px;
+    box-shadow: rgba(184, 194, 215, 0.35) 0px 6px 9px 0px;
+}
+
+div.main-content a {
+    text-decoration: none;
+    color: var(--nord8);
+}
+
+div.main-content a:hover {
+    background-color: none;
+}
+
+/* links */
+ul.links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 200px);
+    gap: 32px;
+    width: 100%;
+    padding-left: 0;
+    list-style: none;
+}
+
+ul.links a {
+    color: var(--nord3);
+}
+
+li.links-card {
+    background-color: white;
+    padding: 16px;
+    height: 168px;
+    border-radius: 4px;
+    box-shadow: rgba(184, 194, 215, 0.35) 0px 6px 9px 0px;
+}
+
+p.links-card__title {
+    font-weight: bold;
+}
+
+p.links-card__summary {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+}

@@ -1,0 +1,6 @@
+{% extends "__builtins/base.html" %}
+{% import "__builtins/macros.html" as macros %}
+
+{% block main %}
+    {{ macros::links(scraps = scraps) }}
+{% endblock %}

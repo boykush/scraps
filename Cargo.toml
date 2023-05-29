@@ -1,0 +1,27 @@
+[package]
+name = "scraps"
+authors = ["boykush <k.taichi0315@gmail.com>"]
+version = "0.1.2"
+edition = "2021"
+license = "MIT"
+description = "A static site generator that builds a wiki from a set of markdown files. Inspired by https://scrapbox.io/."
+homepage = "https://boykush.github.io/scraps"
+repository = "https://github.com/boykush/scraps"
+readme = "README.md"
+exclude = [
+    "scraps/",
+    ".github/"
+]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { version = "4.3.0", features = ["derive"] }
+serde = { version = "1.0.164", features = ["derive"] }
+anyhow = "1.0.71"
+config = { version = "0.13.3", features = ["toml"] }
+tera = "1.19.0"
+regex = "1.8.4"
+thiserror = "1.0.40"
+once_cell = "1.18.0"
+markdown = "0.3.0"
