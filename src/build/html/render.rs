@@ -71,7 +71,7 @@ impl HtmlRender {
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
 
-        context.insert("scrap_title", &scrap.title);
+        context.insert("scrap", &SScrap(scrap.to_owned()));
         // scrap content
         let html_content = to_html(&scrap.text);
 
