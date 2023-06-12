@@ -22,7 +22,7 @@ See [[Configuration]] for other config.
 ## Write scraps
 Write markdown files under `/scraps` dir.
 
-```
+```bash
 ❯ tree scraps
 scraps
 ├── Getting Started.md
@@ -33,13 +33,13 @@ See [[Scraps]] for scraps notation in markdown files.
 
 ## Build static site
 
-```
+```bash
 scraps build
 ```
 
 The output is as follows.
 
-```
+```bash
 ❯ tree public
 public
 ├── Getting Started.html

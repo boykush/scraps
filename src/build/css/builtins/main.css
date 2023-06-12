@@ -24,17 +24,8 @@ body {
   font-family: 'Rubik', 'Noto Sans JP', sans-serif;
 }
 
-pre {
-    background-color: var(--nord3);
-    color: var(--nord6);
-    padding: 8px;
-    border-radius: 8px;
-}
-
-p code {
-    background-color: var(--nord4);
-    padding: 1px;
-    border-radius: 2px;
+pre code {
+    border-radius: 4px;
 }
 
 hr {
@@ -72,7 +63,7 @@ main {
 /* main content */
 div.main-content {
     background-color: white;
-    border-radius: 8px;
+    border-radius: 4px;
     padding: 32px;
     box-shadow: rgba(184, 194, 215, 0.35) 0px 6px 9px 0px;
 }
