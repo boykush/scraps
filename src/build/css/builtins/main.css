@@ -28,6 +28,12 @@ pre code {
     border-radius: 4px;
 }
 
+p code {
+    background-color: var(--nord6);
+    padding: 1px 2px;
+    border-radius: 2px;
+}
+
 hr {
     background-color: var(--nord3);
     border: none;
