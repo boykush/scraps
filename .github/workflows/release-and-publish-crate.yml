@@ -1,4 +1,4 @@
-name: Rust
+name: Release and Publish Crate
 
 on:
   push:
@@ -21,6 +21,8 @@ jobs:
       run: cargo test --verbose
     - name: GitHub Release
       uses: softprops/action-gh-release@v1
+      with:
+        token: ${{ secrets.RELEASE_TOKEN }}
     - name: Crate Publish
       run: cargo publish
       env:
