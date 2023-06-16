@@ -14,4 +14,9 @@ pub struct Cli {
 pub enum SubCommands {
     #[command(about = "Build scraps")]
     Build,
+
+    #[command(about = "Init scraps project")]
+    Init {
+        project_name: String
+    }
 }
