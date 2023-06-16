@@ -89,7 +89,7 @@ mod tests {
     fn it_run() {
         // args
         let site_title = "Scrap";
-        let test_resource_path = PathBuf::from("tests/resource/cmd/it_run");
+        let test_resource_path = PathBuf::from("tests/resource/build/cmd/it_run");
         let scraps_dir_path = test_resource_path.join("scraps");
         let static_dir_path = test_resource_path.join("static");
         let public_dir_path = test_resource_path.join("public");
