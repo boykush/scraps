@@ -5,14 +5,22 @@ cargo install scraps
 
 ## Init project
 ```bash
-mkdir -p your-scraps-project/scraps
+scraps init your-scraps-project
 cd your-scraps-project
-touch Config.toml
 ```
-※ Soon, we will provide a `scraps init` command instead.
+
+The output result will look like this
+
+```bash
+❯ tree
+.
+├── Config.toml
+└── scraps
+```
 
 ## Configuration
-Please set the required fields.
+Edit `Config.toml` to settings.
+
 ```toml:Config.toml
 title = "your scraps project"
 ```

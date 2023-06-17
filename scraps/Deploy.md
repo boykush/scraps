@@ -16,20 +16,17 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
       - name: build_and_deploy
-        uses: boykush/scraps-deploy-action@v0.1.2
+        uses: boykush/scraps-deploy-action@v1.0.0
         env:
           # Target branch
           PAGES_BRANCH: gh-pages
           # Provide personal access token
-          TOKEN: ${{ secrets.TOKEN }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ### GitHub settings
-#### 1. Set up GitHub Pages for the repository.
+Set up GitHub Pages for the repository.
 
 `Build and deployment` parameter as follows.
 - Source: `Deploy from a branch`
 - Branch: `gh-pages`
-
-#### 2. Set `TOKEN` variable as Actions secrets.
-
