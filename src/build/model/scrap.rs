@@ -1,10 +1,12 @@
 use regex::Regex;
 
+use crate::libs::markdown;
+
 #[derive(PartialEq, Clone, Debug)]
 pub struct Scrap {
     pub title: String,
     pub links: Vec<String>,
-    pub text: String,
+    pub html_content: String,
 }
 
 impl Scrap {
@@ -17,12 +19,12 @@ impl Scrap {
             .map(|caps| caps["title"].to_string())
             .collect();
 
-        let replaced_link_text = re.replace_all(text, "[$title](./${title}.html)");
+        let html_text = markdown::to_html(text);
 
         Scrap {
             title: title.to_string(),
             links: links,
-            text: replaced_link_text.to_string(),
+            html_content: html_text,
         }
     }
 }
@@ -39,7 +41,7 @@ mod tests {
             Scrap {
                 title: "scrap1".to_string(),
                 links: vec!("link1".to_string()),
-                text: "[link1](./link1.html)".to_string()
+                html_content: "<p><a href=\"./link1.html\">link1</a></p>\n".to_string()
             }
         );
 
@@ -49,7 +51,9 @@ mod tests {
             Scrap {
                 title: "scrap2".to_string(),
                 links: vec!("link1".to_string(), "link2".to_string()),
-                text: "[link1](./link1.html) [link2](./link2.html)".to_string()
+                html_content:
+                    "<p><a href=\"./link1.html\">link1</a> <a href=\"./link2.html\">link2</a></p>\n"
+                        .to_string()
             }
         )
     }

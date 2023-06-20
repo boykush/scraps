@@ -3,7 +3,6 @@ use std::{fs::File, io::Write, path::PathBuf};
 
 use crate::build::model::{scrap::Scrap, scraps::Scraps};
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
-use crate::libs::markdown::to_html;
 use anyhow::Context;
 
 use crate::build::html::{
@@ -72,8 +71,6 @@ impl HtmlRender {
         )?;
 
         context.insert("scrap", &SScrap(scrap.to_owned()));
-        // scrap content
-        let html_content = to_html(&scrap.text);
 
         // insert to context for linked list
         let linked_map = Scraps::new(&self.scraps).gen_linked_map();
@@ -91,7 +88,7 @@ impl HtmlRender {
         let rendered = tera
             .render("__builtins/scrap.html", &context)
             .context(ScrapError::PublicRenderError)?;
-        let html = content::insert(&rendered, &html_content);
+        let html = content::insert(&rendered, &scrap.html_content);
 
         // write
         let file_name = &format!("{}.html", scrap.title);

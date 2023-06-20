@@ -23,7 +23,7 @@ impl InitCommand {
 
         fs::create_dir_all(&project_dir).context(ScrapError::FileWriteError)?;
         fs::create_dir(&scraps_dir).context(ScrapError::FileWriteError)?;
-        fs::write(&config_toml_file , "title = \"\"").context(ScrapError::FileWriteError)?;
+        fs::write(&config_toml_file, "title = \"\"").context(ScrapError::FileWriteError)?;
         fs::write(&gitignore_file, "public").context(ScrapError::FileWriteError)
     }
 }

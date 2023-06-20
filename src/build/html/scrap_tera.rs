@@ -3,8 +3,6 @@ use anyhow::Context;
 use once_cell::sync::Lazy;
 use tera::Tera;
 
-use crate::build::html::filters;
-
 static SCRAP_TERA: Lazy<Tera> = Lazy::new(|| {
     let mut tera = Tera::default();
     tera.add_raw_templates(vec![
@@ -17,7 +15,6 @@ static SCRAP_TERA: Lazy<Tera> = Lazy::new(|| {
         ("__builtins/scrap.html", include_str!("builtins/scrap.html")),
     ])
     .unwrap();
-    tera.register_filter("to_html_text", filters::to_html_text);
     tera
 });
 

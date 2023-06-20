@@ -16,7 +16,5 @@ pub enum SubCommands {
     Build,
 
     #[command(about = "Init scraps project")]
-    Init {
-        project_name: String
-    }
+    Init { project_name: String },
 }

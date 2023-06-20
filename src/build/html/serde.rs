@@ -5,7 +5,7 @@ use crate::build::model::scrap::Scrap;
 struct SerializeScrap {
     title: String,
     links: Vec<String>,
-    text: String,
+    html_content: String,
 }
 
 #[derive(serde::Serialize)]
