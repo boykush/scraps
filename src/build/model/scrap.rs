@@ -1,5 +1,3 @@
-use regex::Regex;
-
 use crate::libs::markdown;
 
 #[derive(PartialEq, Clone, Debug)]
@@ -11,20 +9,13 @@ pub struct Scrap {
 
 impl Scrap {
     pub fn new(title: &str, text: &str) -> Scrap {
-        let re = Regex::new(r"\[\[(?P<title>[^,\s]+)\]\]").unwrap();
-
-        let links = re
-            .captures_iter(text)
-            .into_iter()
-            .map(|caps| caps["title"].to_string())
-            .collect();
-
-        let html_text = markdown::to_html(text);
+        let links = markdown::extract_link_titles(text);
+        let html_content = markdown::to_html(text);
 
         Scrap {
             title: title.to_string(),
             links: links,
-            html_content: html_text,
+            html_content: html_content,
         }
     }
 }

@@ -1,6 +1,27 @@
 use itertools::Itertools;
 use pulldown_cmark::{html::push_html, CowStr, Event, LinkType, Parser, Tag};
 
+pub fn extract_link_titles(text: &str) -> Vec<String> {
+    let parser = Parser::new(text);
+    let mut parser_windows = parser.tuple_windows();
+    let mut link_titles = vec![];
+
+    while let Some(events) = parser_windows.next() {
+        match events {
+            (
+                Event::Text(CowStr::Borrowed("[")),
+                Event::Text(CowStr::Borrowed("[")),
+                Event::Text(CowStr::Borrowed(title)),
+                Event::Text(CowStr::Borrowed("]")),
+                Event::Text(CowStr::Borrowed("]")),
+            ) => link_titles.push(title.to_string()),
+            _ => (),
+        }
+    }
+
+    link_titles
+}
+
 pub fn to_html(text: &str) -> String {
     let mut html_buf = String::new();
     let mut parser = Parser::new(text);
