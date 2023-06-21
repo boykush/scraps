@@ -24,46 +24,116 @@ pub fn extract_link_titles(text: &str) -> Vec<String> {
 
 pub fn to_html(text: &str) -> String {
     let mut html_buf = String::new();
-    let mut parser = Parser::new(text);
+    let parser = Parser::new(text);
+    let parser_vec = parser.collect::<Vec<Event<'_>>>();
+    let mut parser_windows = parser_vec.iter().circular_tuple_windows::<(_, _, _, _, _)>().into_iter();
 
-    while let Some(event) = parser.next() {
-        match event {
-            Event::Text(CowStr::Borrowed("[")) => {
-                push_link_events_match_macro(&mut parser, &mut html_buf)
-            }
-            _ => push_html(&mut html_buf, vec![event].into_iter()),
+    while let Some(events) = parser_windows.next() {
+        match events {
+            (
+                &Event::Text(CowStr::Borrowed("[")),
+                &Event::Text(CowStr::Borrowed("[")),
+                &Event::Text(CowStr::Borrowed(title)),
+                &Event::Text(CowStr::Borrowed("]")),
+                &Event::Text(CowStr::Borrowed("]")),
+            ) => {
+                let link = &format!("./{}.html", title);
+                let link_events = vec![
+                    Event::Start(Tag::Link(
+                        LinkType::Inline,
+                        CowStr::Borrowed(link),
+                        CowStr::Borrowed(""),
+                    )),
+                    Event::Text(CowStr::Borrowed(title)),
+                    Event::End(Tag::Link(
+                        LinkType::Inline,
+                        CowStr::Borrowed(link),
+                        CowStr::Borrowed(""),
+                    )),
+                ]
+                .into_iter();
+                
+                // skip next
+                (0..4).for_each(|_| {
+                    parser_windows.next();
+                });
+                push_html(&mut html_buf, link_events)
+            },
+            (e1, _, _, _, _) => push_html(&mut html_buf , vec![e1.clone()].into_iter()),
         }
     }
 
     html_buf
 }
 
-fn push_link_events_match_macro(parser: &mut Parser, html_buf: &mut String) {
-    match parser.next_tuple() {
-        Some((
-            Event::Text(CowStr::Borrowed("[")),
-            Event::Text(CowStr::Borrowed(title)),
-            Event::Text(CowStr::Borrowed("]")),
-            Event::Text(CowStr::Borrowed("]")),
-        )) => {
-            let link = &format!("./{}.html", title);
-            let link_events = vec![
-                Event::Start(Tag::Link(
-                    LinkType::Inline,
-                    CowStr::Borrowed(link),
-                    CowStr::Borrowed(""),
-                )),
-                Event::Text(CowStr::Borrowed(title)),
-                Event::End(Tag::Link(
-                    LinkType::Inline,
-                    CowStr::Borrowed(link),
-                    CowStr::Borrowed(""),
-                )),
-            ]
-            .into_iter();
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-            push_html(html_buf, link_events)
-        }
-        _ => (),
+    #[test]
+    fn it_extract_link_titles() {
+        let valid_links = &vec![
+            "[[head]]",
+            "[[contain space]]",
+            "[[last]]"
+        ].join("\n");
+        let result1 = extract_link_titles(valid_links);
+        assert_eq!(
+            result1,
+            vec!["head", "contain space", "last"]
+        );
+
+        let invalid_links = &vec![
+            "`[[quote block]]`",
+            "```\n[[code block]]\n```",
+            "[single braces]",
+            "[[contain\nbreak]]",
+            "only close]]",
+            "[[only open",
+            "[ [space between brace] ]",
+            "[[]]", // empty title
+        ].join("\n");
+        let result2 = extract_link_titles(invalid_links);
+        
+        assert_eq!(
+            result2,
+            Vec::<&str>::new() 
+        );
+    }
+
+    #[test]
+    fn it_to_html() {
+       let code_text = vec![
+            "`[[quote block]]`",
+            "```\n[[code block]]\n```"
+        ].join("\n");
+        let result1 = to_html(&code_text);
+        assert_eq!(
+            result1,
+            vec![
+                "<p><code>[[quote block]]</code></p>",
+                "<pre><code>[[code block]]\n</code></pre>",
+            ].join("\n") + "\n"
+        );
+
+        let link_text = "[[link]]";
+        let result2 = to_html(&link_text);
+        assert_eq!(
+            result2,
+            "<p><a href=\"./link.html\">link</a></p>\n",
+        );
+
+        let not_link_text = vec![
+            "only close]]",
+            "[[only open",
+        ].join("\n");
+        let result3 = to_html(&not_link_text);
+        assert_eq!(
+            result3,
+            vec![
+                "<p>only close]]",
+                "[[only open</p>",
+            ].join("\n") + "\n"
+        )
     }
 }
