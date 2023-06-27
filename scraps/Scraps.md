@@ -8,8 +8,8 @@ scraps
 ├── Overview.md
 └── Usage.md
 ```
-Generate a link by filling in `Overview.md` as follows.
 
+Fill in the file name in the `scraps` directory in `Overview.md` as follows to generate the link.
 ```markdown:Overview.md
 See [[Usage]] for detail.
 ```
