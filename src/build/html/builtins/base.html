@@ -11,6 +11,9 @@
                 {{ title }}
             {% endif %}
         </title>
+        {% if description %}
+            <meta name="description" content="{{ description }}" />
+        {% endif %}
 
         <!-- Rubik font -->
         <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">

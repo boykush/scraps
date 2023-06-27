@@ -18,12 +18,17 @@ static SCRAP_TERA: Lazy<Tera> = Lazy::new(|| {
     tera
 });
 
-pub fn init(site_title: &str, template_dir: &str) -> ScrapResult<(Tera, tera::Context)> {
+pub fn init(
+    site_title: &str,
+    site_description: &Option<String>,
+    template_dir: &str,
+) -> ScrapResult<(Tera, tera::Context)> {
     let mut tera = Tera::new(template_dir).context(ScrapError::PublicRenderError)?;
     tera.extend(&SCRAP_TERA).unwrap();
 
     let mut context = tera::Context::new();
     context.insert("title", site_title);
+    context.insert("description", site_description);
 
     Ok((tera, context))
 }

@@ -26,7 +26,10 @@ pub fn to_html(text: &str) -> String {
     let mut html_buf = String::new();
     let parser = Parser::new(text);
     let parser_vec = parser.collect::<Vec<Event<'_>>>();
-    let mut parser_windows = parser_vec.iter().circular_tuple_windows::<(_, _, _, _, _)>().into_iter();
+    let mut parser_windows = parser_vec
+        .iter()
+        .circular_tuple_windows::<(_, _, _, _, _)>()
+        .into_iter();
 
     while let Some(events) = parser_windows.next() {
         match events {
@@ -52,14 +55,14 @@ pub fn to_html(text: &str) -> String {
                     )),
                 ]
                 .into_iter();
-                
+
                 // skip next
                 (0..4).for_each(|_| {
                     parser_windows.next();
                 });
                 push_html(&mut html_buf, link_events)
-            },
-            (e1, _, _, _, _) => push_html(&mut html_buf , vec![e1.clone()].into_iter()),
+            }
+            (e1, _, _, _, _) => push_html(&mut html_buf, vec![e1.clone()].into_iter()),
         }
     }
 
@@ -72,16 +75,9 @@ mod tests {
 
     #[test]
     fn it_extract_link_titles() {
-        let valid_links = &vec![
-            "[[head]]",
-            "[[contain space]]",
-            "[[last]]"
-        ].join("\n");
+        let valid_links = &vec!["[[head]]", "[[contain space]]", "[[last]]"].join("\n");
         let result1 = extract_link_titles(valid_links);
-        assert_eq!(
-            result1,
-            vec!["head", "contain space", "last"]
-        );
+        assert_eq!(result1, vec!["head", "contain space", "last"]);
 
         let invalid_links = &vec![
             "`[[quote block]]`",
@@ -92,48 +88,36 @@ mod tests {
             "[[only open",
             "[ [space between brace] ]",
             "[[]]", // empty title
-        ].join("\n");
+        ]
+        .join("\n");
         let result2 = extract_link_titles(invalid_links);
-        
-        assert_eq!(
-            result2,
-            Vec::<&str>::new() 
-        );
+
+        assert_eq!(result2, Vec::<&str>::new());
     }
 
     #[test]
     fn it_to_html() {
-       let code_text = vec![
-            "`[[quote block]]`",
-            "```\n[[code block]]\n```"
-        ].join("\n");
+        let code_text = vec!["`[[quote block]]`", "```\n[[code block]]\n```"].join("\n");
         let result1 = to_html(&code_text);
         assert_eq!(
             result1,
             vec![
                 "<p><code>[[quote block]]</code></p>",
                 "<pre><code>[[code block]]\n</code></pre>",
-            ].join("\n") + "\n"
+            ]
+            .join("\n")
+                + "\n"
         );
 
         let link_text = "[[link]]";
         let result2 = to_html(&link_text);
-        assert_eq!(
-            result2,
-            "<p><a href=\"./link.html\">link</a></p>\n",
-        );
+        assert_eq!(result2, "<p><a href=\"./link.html\">link</a></p>\n",);
 
-        let not_link_text = vec![
-            "only close]]",
-            "[[only open",
-        ].join("\n");
+        let not_link_text = vec!["only close]]", "[[only open"].join("\n");
         let result3 = to_html(&not_link_text);
         assert_eq!(
             result3,
-            vec![
-                "<p>only close]]",
-                "[[only open</p>",
-            ].join("\n") + "\n"
+            vec!["<p>only close]]", "[[only open</p>",].join("\n") + "\n"
         )
     }
 }

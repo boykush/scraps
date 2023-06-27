@@ -10,21 +10,27 @@ use crate::libs::error::{error::ScrapError, result::ScrapResult};
 use anyhow::{bail, Context};
 
 pub struct BuildCommand {
-    site_title: String,
+    html_metadata: HtmlMetadata,
     scraps_dir_path: PathBuf,
     static_dir_path: PathBuf,
     public_dir_path: PathBuf,
 }
 
+#[derive(Clone)]
+pub struct HtmlMetadata {
+    pub title: String,
+    pub description: Option<String>,
+}
+
 impl BuildCommand {
     pub fn new(
-        site_title: &str,
+        html_metadata: &HtmlMetadata,
         scraps_dir_path: &PathBuf,
         static_dir_path: &PathBuf,
         public_dir_path: &PathBuf,
     ) -> BuildCommand {
         BuildCommand {
-            site_title: site_title.to_string(),
+            html_metadata: html_metadata.to_owned(),
             scraps_dir_path: scraps_dir_path.to_owned(),
             static_dir_path: static_dir_path.to_owned(),
             public_dir_path: public_dir_path.to_owned(),
@@ -46,7 +52,8 @@ impl BuildCommand {
             .collect::<ScrapResult<Vec<Scrap>>>()?;
 
         let html_render = HtmlRender::new(
-            &self.site_title,
+            &self.html_metadata.title,
+            &self.html_metadata.description,
             &self.static_dir_path,
             &self.public_dir_path,
             &scraps,
@@ -88,7 +95,10 @@ mod tests {
     #[test]
     fn it_run() {
         // args
-        let site_title = "Scrap";
+        let html_metadata = &HtmlMetadata {
+            title: "Scrap".to_string(),
+            description: Some("Scrap Wiki".to_string()),
+        };
         let test_resource_path = PathBuf::from("tests/resource/build/cmd/it_run");
         let scraps_dir_path = test_resource_path.join("scraps");
         let static_dir_path = test_resource_path.join("static");
@@ -117,7 +127,7 @@ mod tests {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
                     let command = BuildCommand::new(
-                        site_title,
+                        html_metadata,
                         &scraps_dir_path,
                         &static_dir_path,
                         &public_dir_path,

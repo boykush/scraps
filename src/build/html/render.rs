@@ -12,6 +12,7 @@ use crate::build::html::{
 
 pub struct HtmlRender {
     site_title: String,
+    site_description: Option<String>,
     static_dir_path: PathBuf,
     public_dir_path: PathBuf,
     scraps: Vec<Scrap>,
@@ -20,6 +21,7 @@ pub struct HtmlRender {
 impl HtmlRender {
     pub fn new(
         site_title: &str,
+        site_description: &Option<String>,
         static_dir_path: &PathBuf,
         public_dir_path: &PathBuf,
         scraps: &Vec<Scrap>,
@@ -27,7 +29,8 @@ impl HtmlRender {
         fs::create_dir_all(&public_dir_path).context(ScrapError::FileWriteError)?;
 
         Ok(HtmlRender {
-            site_title: site_title.to_string(),
+            site_title: site_title.to_owned(),
+            site_description: site_description.to_owned(),
             static_dir_path: static_dir_path.to_owned(),
             public_dir_path: public_dir_path.to_owned(),
             scraps: scraps.to_vec(),
@@ -37,6 +40,7 @@ impl HtmlRender {
     pub fn render_index_html(&self) -> ScrapResult<()> {
         let (tera, mut context) = scrap_tera::init(
             &self.site_title,
+            &self.site_description,
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
 
@@ -67,6 +71,7 @@ impl HtmlRender {
     fn render_scrap_html(&self, scrap: &Scrap) -> ScrapResult<()> {
         let (tera, mut context) = scrap_tera::init(
             &self.site_title,
+            &self.site_description,
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
 
@@ -111,6 +116,7 @@ mod tests {
     fn it_render_index_html() {
         // args
         let site_title = "Scrap";
+        let site_description = Some("Scrap Wiki".to_string());
 
         let test_resource_path =
             PathBuf::from("tests/resource/build/html/render/it_render_index_html");
@@ -132,8 +138,14 @@ mod tests {
         let index_html_path = public_dir_path.join("index.html");
 
         resource_template_html.run(resource_template_html_byte, || {
-            let render =
-                HtmlRender::new(site_title, &static_dir_path, &public_dir_path, &scraps).unwrap();
+            let render = HtmlRender::new(
+                site_title,
+                &site_description,
+                &static_dir_path,
+                &public_dir_path,
+                &scraps,
+            )
+            .unwrap();
             let result1 = render.render_index_html();
 
             assert!(result1.is_ok());
@@ -150,6 +162,7 @@ mod tests {
     fn it_render_scrap_htmls() {
         // args
         let site_title = "Scrap";
+        let site_description = Some("Scrap Wiki".to_string());
         let test_resource_path =
             PathBuf::from("tests/resource/build/html/render/it_render_scrap_htmls");
         let static_dir_path = test_resource_path.join("static");
@@ -163,8 +176,14 @@ mod tests {
         let scrap1_html_path = public_dir_path.join(format!("{}.html", scrap1.title));
         let scrap2_html_path = public_dir_path.join(format!("{}.html", scrap2.title));
 
-        let render =
-            HtmlRender::new(site_title, &static_dir_path, &public_dir_path, &scraps).unwrap();
+        let render = HtmlRender::new(
+            site_title,
+            &site_description,
+            &static_dir_path,
+            &public_dir_path,
+            &scraps,
+        )
+        .unwrap();
         let result1 = render.render_scrap_htmls();
 
         assert!(result1.is_ok());

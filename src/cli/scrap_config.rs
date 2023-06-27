@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Default, Debug, Serialize, Deserialize)]
 pub struct ScrapConfig {
     pub title: String,
+    pub description: Option<String>,
 }
 
 impl ScrapConfig {
