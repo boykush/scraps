@@ -66,6 +66,14 @@ main {
     margin: 32px auto;
 }
 
+/* footer */
+footer {
+    text-align: center;
+    font-size: 12.8px;
+    color: #7b88a1;
+    margin-bottom: 32px;
+}
+
 /* main content */
 div.main-content {
     background-color: white;
