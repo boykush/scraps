@@ -2,11 +2,13 @@ use crate::libs::error::{error::ScrapError, result::ScrapResult};
 use anyhow::Context;
 use config::Config;
 use serde::{Deserialize, Serialize};
+use url::Url;
 
 #[derive(Default, Debug, Serialize, Deserialize)]
 pub struct ScrapConfig {
     pub title: String,
     pub description: Option<String>,
+    pub favicon: Option<Url>,
 }
 
 impl ScrapConfig {

@@ -11,6 +11,7 @@ pub fn run() -> ScrapResult<()> {
     let html_metadata = &HtmlMetadata {
         title: config.title,
         description: config.description,
+        favicon: config.favicon,
     };
 
     let scraps_dir_path = PathBuf::from("scraps");

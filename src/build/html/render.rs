@@ -4,6 +4,7 @@ use std::{fs::File, io::Write, path::PathBuf};
 use crate::build::model::{scrap::Scrap, scraps::Scraps};
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
 use anyhow::Context;
+use url::Url;
 
 use crate::build::html::{
     content, scrap_tera,
@@ -13,6 +14,7 @@ use crate::build::html::{
 pub struct HtmlRender {
     site_title: String,
     site_description: Option<String>,
+    site_favicon: Option<Url>,
     static_dir_path: PathBuf,
     public_dir_path: PathBuf,
     scraps: Vec<Scrap>,
@@ -22,6 +24,7 @@ impl HtmlRender {
     pub fn new(
         site_title: &str,
         site_description: &Option<String>,
+        site_favicon: &Option<Url>,
         static_dir_path: &PathBuf,
         public_dir_path: &PathBuf,
         scraps: &Vec<Scrap>,
@@ -31,6 +34,7 @@ impl HtmlRender {
         Ok(HtmlRender {
             site_title: site_title.to_owned(),
             site_description: site_description.to_owned(),
+            site_favicon: site_favicon.to_owned(),
             static_dir_path: static_dir_path.to_owned(),
             public_dir_path: public_dir_path.to_owned(),
             scraps: scraps.to_vec(),
@@ -41,6 +45,7 @@ impl HtmlRender {
         let (tera, mut context) = scrap_tera::init(
             &self.site_title,
             &self.site_description,
+            &self.site_favicon,
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
 
@@ -72,6 +77,7 @@ impl HtmlRender {
         let (tera, mut context) = scrap_tera::init(
             &self.site_title,
             &self.site_description,
+            &self.site_favicon,
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
 
@@ -117,6 +123,7 @@ mod tests {
         // args
         let site_title = "Scrap";
         let site_description = Some("Scrap Wiki".to_string());
+        let site_favicon = Some(Url::parse("https://github.io/image.png").unwrap());
 
         let test_resource_path =
             PathBuf::from("tests/resource/build/html/render/it_render_index_html");
@@ -141,6 +148,7 @@ mod tests {
             let render = HtmlRender::new(
                 site_title,
                 &site_description,
+                &site_favicon,
                 &static_dir_path,
                 &public_dir_path,
                 &scraps,
@@ -163,6 +171,8 @@ mod tests {
         // args
         let site_title = "Scrap";
         let site_description = Some("Scrap Wiki".to_string());
+        let site_favicon = Some(Url::parse("https://github.io/image.png").unwrap());
+
         let test_resource_path =
             PathBuf::from("tests/resource/build/html/render/it_render_scrap_htmls");
         let static_dir_path = test_resource_path.join("static");
@@ -179,6 +189,7 @@ mod tests {
         let render = HtmlRender::new(
             site_title,
             &site_description,
+            &site_favicon,
             &static_dir_path,
             &public_dir_path,
             &scraps,

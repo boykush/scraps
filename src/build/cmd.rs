@@ -8,6 +8,7 @@ use crate::build::html::render::HtmlRender;
 use crate::build::model::scrap::Scrap;
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
 use anyhow::{bail, Context};
+use url::Url;
 
 pub struct BuildCommand {
     html_metadata: HtmlMetadata,
@@ -20,6 +21,7 @@ pub struct BuildCommand {
 pub struct HtmlMetadata {
     pub title: String,
     pub description: Option<String>,
+    pub favicon: Option<Url>,
 }
 
 impl BuildCommand {
@@ -54,6 +56,7 @@ impl BuildCommand {
         let html_render = HtmlRender::new(
             &self.html_metadata.title,
             &self.html_metadata.description,
+            &self.html_metadata.favicon,
             &self.static_dir_path,
             &self.public_dir_path,
             &scraps,
@@ -98,6 +101,7 @@ mod tests {
         let html_metadata = &HtmlMetadata {
             title: "Scrap".to_string(),
             description: Some("Scrap Wiki".to_string()),
+            favicon: Some(Url::parse("https://github.io/image.png").unwrap()),
         };
         let test_resource_path = PathBuf::from("tests/resource/build/cmd/it_run");
         let scraps_dir_path = test_resource_path.join("scraps");
