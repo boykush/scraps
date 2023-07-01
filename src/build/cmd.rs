@@ -3,10 +3,10 @@ use std::{
     path::PathBuf,
 };
 
-use crate::build::css::render::CSSRender;
 use crate::build::html::render::HtmlRender;
 use crate::build::model::scrap::Scrap;
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
+use crate::{build::css::render::CSSRender, libs::git::GitCommand};
 use anyhow::{bail, Context};
 use url::Url;
 
@@ -15,6 +15,7 @@ pub struct BuildCommand {
     scraps_dir_path: PathBuf,
     static_dir_path: PathBuf,
     public_dir_path: PathBuf,
+    git_command: Box<dyn GitCommand>,
 }
 
 #[derive(Clone)]
@@ -30,12 +31,14 @@ impl BuildCommand {
         scraps_dir_path: &PathBuf,
         static_dir_path: &PathBuf,
         public_dir_path: &PathBuf,
+        git_command: Box<dyn GitCommand>,
     ) -> BuildCommand {
         BuildCommand {
             html_metadata: html_metadata.to_owned(),
             scraps_dir_path: scraps_dir_path.to_owned(),
             static_dir_path: static_dir_path.to_owned(),
             public_dir_path: public_dir_path.to_owned(),
+            git_command: git_command,
         }
     }
     pub fn run(&self) -> ScrapResult<()> {
@@ -81,19 +84,22 @@ impl BuildCommand {
         let file_prefix = path
             .file_stem()
             .ok_or(ScrapError::FileLoadError)
-            .map(|o| o.to_str())?;
+            .map(|o| o.to_str())
+            .and_then(|fp| fp.ok_or(ScrapError::FileLoadError.into()))?;
         let md_text = fs::read_to_string(&path).context(ScrapError::FileLoadError)?;
+        let commited_ts = self.git_command.commited_ts(&path)?;
 
-        file_prefix
-            .ok_or(ScrapError::FileLoadError.into())
-            .map(|prefix| Scrap::new(prefix, &md_text))
+        Ok(Scrap::new(file_prefix, &md_text, &commited_ts))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::libs::resource::tests::{DirResource, FileResource};
+    use crate::libs::{
+        git::tests::GitCommandTest,
+        resource::tests::{DirResource, FileResource},
+    };
 
     #[test]
     fn it_run() {
@@ -107,6 +113,7 @@ mod tests {
         let scraps_dir_path = test_resource_path.join("scraps");
         let static_dir_path = test_resource_path.join("static");
         let public_dir_path = test_resource_path.join("public");
+        let git_command = GitCommandTest::new();
 
         // scrap1
         let md_path_1 = scraps_dir_path.join("test1.md");
@@ -135,6 +142,7 @@ mod tests {
                         &scraps_dir_path,
                         &static_dir_path,
                         &public_dir_path,
+                        Box::new(git_command),
                     );
                     let result1 = command.run();
                     assert!(result1.is_ok());

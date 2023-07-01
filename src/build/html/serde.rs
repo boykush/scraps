@@ -6,6 +6,7 @@ struct SerializeScrap {
     title: String,
     links: Vec<String>,
     html_content: String,
+    commited_ts: Option<i64>,
 }
 
 #[derive(serde::Serialize)]

@@ -16,4 +16,7 @@ pub enum ScrapError {
 
     #[error("Failed git init. git is required")]
     GitInitError,
+
+    #[error("Failed git log. git is required")]
+    GitLogError,
 }
