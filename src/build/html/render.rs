@@ -8,7 +8,7 @@ use url::Url;
 
 use crate::build::html::{
     content, scrap_tera,
-    serde::{SScrap, SScraps},
+    serde::{SerializeScrap, SerializeScraps},
 };
 
 pub struct HtmlRender {
@@ -57,7 +57,13 @@ impl HtmlRender {
 
         context.insert(
             "scraps",
-            &SScraps(self.scraps.iter().map(|n| SScrap(n.clone())).collect()),
+            &SerializeScraps::new_with_sort(
+                &self
+                    .scraps
+                    .iter()
+                    .map(|s| SerializeScrap::new(&s))
+                    .collect(),
+            ),
         );
 
         let wtr = File::create(self.public_dir_path.join("index.html"))
@@ -81,7 +87,7 @@ impl HtmlRender {
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
 
-        context.insert("scrap", &SScrap(scrap.to_owned()));
+        context.insert("scrap", &SerializeScrap::new(&scrap));
 
         // insert to context for linked list
         let linked_map = Scraps::new(&self.scraps).gen_linked_map();
@@ -89,10 +95,12 @@ impl HtmlRender {
         if let Some(scraps) = linked_list {
             context.insert(
                 "scraps",
-                &SScraps(scraps.iter().map(|n| SScrap(n.to_owned())).collect()),
+                &SerializeScraps::new_with_sort(
+                    &scraps.iter().map(|s| SerializeScrap::new(&s)).collect(),
+                ),
             );
         } else {
-            context.insert("scraps", &Vec::<SScrap>::new())
+            context.insert("scraps", &Vec::<SerializeScrap>::new())
         };
 
         // render html
@@ -138,8 +146,8 @@ mod tests {
         .as_bytes();
 
         // scraps
-        let scrap1 = &Scrap::new("scrap1", "# header1", &None);
-        let scrap2 = &Scrap::new("scrap2", "## header2", &None);
+        let scrap1 = &Scrap::new("scrap1", "# header1", &Some(1));
+        let scrap2 = &Scrap::new("scrap2", "## header2", &Some(0));
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
         let index_html_path = public_dir_path.join("index.html");
