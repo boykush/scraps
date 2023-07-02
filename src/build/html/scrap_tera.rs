@@ -1,8 +1,8 @@
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
 use anyhow::Context;
+use chrono_tz::Tz;
 use once_cell::sync::Lazy;
 use tera::Tera;
-use chrono_tz::Tz;
 use url::Url;
 
 static SCRAP_TERA: Lazy<Tera> = Lazy::new(|| {

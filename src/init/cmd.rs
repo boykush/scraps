@@ -8,20 +8,18 @@ use crate::libs::{
 };
 
 pub struct InitCommand {
-    project_name: String,
     git_command: Box<dyn GitCommand>,
 }
 
 impl InitCommand {
-    pub fn new(project_name: &str, git_command: Box<dyn GitCommand>) -> InitCommand {
+    pub fn new(git_command: Box<dyn GitCommand>) -> InitCommand {
         InitCommand {
-            project_name: project_name.to_string(),
             git_command: git_command,
         }
     }
 
-    pub fn run(&self) -> ScrapResult<()> {
-        let project_dir = PathBuf::from(format!("./{}", &self.project_name));
+    pub fn run(&self, project_name: &str) -> ScrapResult<()> {
+        let project_dir = PathBuf::from(format!("./{}", project_name));
         let scraps_dir = project_dir.join("scraps");
         let config_toml_file = project_dir.join("Config.toml");
         let gitignore_file = project_dir.join(".gitignore");
@@ -42,20 +40,20 @@ mod tests {
 
     #[test]
     fn it_run() {
-        let project_name = PathBuf::from("tests/resource/init/cmd/it_run");
         let git_command = GitCommandImpl::new();
+        let project_path = PathBuf::from("tests/resource/init/cmd/it_run");
 
-        let command = InitCommand::new(project_name.to_str().unwrap(), Box::new(git_command));
+        let command = InitCommand::new(Box::new(git_command));
 
-        let result = command.run();
+        let result = command.run(project_path.to_str().unwrap());
         assert!(result.is_ok());
 
-        assert!(project_name.exists());
-        assert!(project_name.join("scraps").exists());
-        assert!(project_name.join("Config.toml").exists());
-        assert!(project_name.join(".gitignore").exists());
-        assert!(project_name.join(".git").exists());
+        assert!(project_path.exists());
+        assert!(project_path.join("scraps").exists());
+        assert!(project_path.join("Config.toml").exists());
+        assert!(project_path.join(".gitignore").exists());
+        assert!(project_path.join(".git").exists());
 
-        fs::remove_dir_all(&project_name).unwrap()
+        fs::remove_dir_all(&project_path).unwrap()
     }
 }

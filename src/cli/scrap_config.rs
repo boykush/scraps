@@ -10,7 +10,7 @@ pub struct ScrapConfig {
     pub title: String,
     pub description: Option<String>,
     pub favicon: Option<Url>,
-    pub timezone: Option<Tz>
+    pub timezone: Option<Tz>,
 }
 
 impl ScrapConfig {

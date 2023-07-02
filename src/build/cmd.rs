@@ -3,7 +3,6 @@ use std::{
     path::PathBuf,
 };
 
-use crate::build::html::render::HtmlRender;
 use crate::build::model::scrap::Scrap;
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
 use crate::{build::css::render::CSSRender, libs::git::GitCommand};
@@ -11,13 +10,13 @@ use anyhow::{bail, Context};
 use chrono_tz::Tz;
 use url::Url;
 
+use super::html::{index_render::IndexRender, scrap_render::ScrapRender};
+
 pub struct BuildCommand {
-    html_metadata: HtmlMetadata,
-    timezone: Tz,
+    git_command: Box<dyn GitCommand>,
     scraps_dir_path: PathBuf,
     static_dir_path: PathBuf,
     public_dir_path: PathBuf,
-    git_command: Box<dyn GitCommand>,
 }
 
 #[derive(Clone)]
@@ -29,23 +28,19 @@ pub struct HtmlMetadata {
 
 impl BuildCommand {
     pub fn new(
-        html_metadata: &HtmlMetadata,
-        timezone: &Tz,
+        git_command: Box<dyn GitCommand>,
         scraps_dir_path: &PathBuf,
         static_dir_path: &PathBuf,
         public_dir_path: &PathBuf,
-        git_command: Box<dyn GitCommand>,
     ) -> BuildCommand {
         BuildCommand {
-            html_metadata: html_metadata.to_owned(),
-            timezone: timezone.to_owned(),
+            git_command: git_command,
             scraps_dir_path: scraps_dir_path.to_owned(),
             static_dir_path: static_dir_path.to_owned(),
             public_dir_path: public_dir_path.to_owned(),
-            git_command: git_command,
         }
     }
-    pub fn run(&self) -> ScrapResult<()> {
+    pub fn run(&self, timezone: &Tz, html_metadata: &HtmlMetadata) -> ScrapResult<()> {
         let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapError::FileLoadError)?;
 
         let paths = read_dir
@@ -60,17 +55,24 @@ impl BuildCommand {
             .map(|path| self.to_scrap_by_path(path))
             .collect::<ScrapResult<Vec<Scrap>>>()?;
 
-        let html_render = HtmlRender::new(
-            &self.html_metadata.title,
-            &self.html_metadata.description,
-            &self.html_metadata.favicon,
-            &self.static_dir_path,
-            &self.public_dir_path,
-            &self.timezone,
+        let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
+        index_render.run(
+            timezone,
+            &html_metadata.title,
+            &html_metadata.description,
+            &html_metadata.favicon,
             &scraps,
         )?;
-        html_render.render_scrap_htmls()?;
-        html_render.render_index_html()?;
+        scraps.iter().map(|scrap| {
+            let scrap_render = ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
+            scrap_render.run(
+                timezone,
+                &html_metadata.title,
+                &html_metadata.description,
+                &html_metadata.favicon,
+                scrap
+            )
+        }).collect::<ScrapResult<()>>()?;
 
         let css_render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
         css_render.render_main()
@@ -144,14 +146,12 @@ mod tests {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
                     let command = BuildCommand::new(
-                        html_metadata,
-                        &timezone,
+                        Box::new(git_command),
                         &scraps_dir_path,
                         &static_dir_path,
                         &public_dir_path,
-                        Box::new(git_command),
                     );
-                    let result1 = command.run();
+                    let result1 = command.run(&timezone, &html_metadata);
                     assert!(result1.is_ok());
 
                     let result2 = fs::read_to_string(html_path_1);
