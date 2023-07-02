@@ -11,4 +11,7 @@ description = ""
 
 # The site favicon in the form of png file URL (optional)
 favicon = ""
+
+# The site timezone
+timezone = "UTC"
 ```

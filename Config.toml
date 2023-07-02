@@ -1,3 +1,4 @@
 title = "Scraps Doc"
 description = "A static site generator that builds a wiki from a set of markdown files."
 favicon = "https://gist.github.com/boykush/c0ec36a9380b51044fffb2ccdc9c5be5/raw/eeec544c7d3143d151cba7d733083dfc0bb76481/scraps_logo.png"
+timezone = "Asia/Tokyo"

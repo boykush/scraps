@@ -5,10 +5,11 @@ pub struct Scrap {
     pub title: String,
     pub links: Vec<String>,
     pub html_content: String,
+    pub commited_ts: Option<i64>,
 }
 
 impl Scrap {
-    pub fn new(title: &str, text: &str) -> Scrap {
+    pub fn new(title: &str, text: &str, commited_ts: &Option<i64>) -> Scrap {
         let links = markdown::extract_link_titles(text);
         let html_content = markdown::to_html(text);
 
@@ -16,6 +17,7 @@ impl Scrap {
             title: title.to_string(),
             links: links,
             html_content: html_content,
+            commited_ts: commited_ts.to_owned(),
         }
     }
 }
@@ -26,17 +28,18 @@ mod tests {
 
     #[test]
     fn it_new() {
-        let scrap1 = Scrap::new("scrap1", "[[link1]]");
+        let scrap1 = Scrap::new("scrap1", "[[link1]]", &None);
         assert_eq!(
             scrap1,
             Scrap {
                 title: "scrap1".to_string(),
                 links: vec!("link1".to_string()),
-                html_content: "<p><a href=\"./link1.html\">link1</a></p>\n".to_string()
+                html_content: "<p><a href=\"./link1.html\">link1</a></p>\n".to_string(),
+                commited_ts: None
             }
         );
 
-        let scrap2 = Scrap::new("scrap2", "[[link1]] [[link2]]");
+        let scrap2 = Scrap::new("scrap2", "[[link1]] [[link2]]", &None);
         assert_eq!(
             scrap2,
             Scrap {
@@ -44,7 +47,8 @@ mod tests {
                 links: vec!("link1".to_string(), "link2".to_string()),
                 html_content:
                     "<p><a href=\"./link1.html\">link1</a> <a href=\"./link2.html\">link2</a></p>\n"
-                        .to_string()
+                        .to_string(),
+                commited_ts: None
             }
         )
     }

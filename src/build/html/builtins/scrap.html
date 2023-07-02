@@ -2,12 +2,20 @@
 {% import "__builtins/macros.html" as macros %}
 
 {% block main %}
-    <div class="main-content">
+    <div class="scrap">
         <h1>{{ scrap.title }}</h1>
-        {# define raw for manual insert markdown content #}
-        {% raw %}
-            {{ content }}
-        {% endraw %}
+        {% if scrap.commited_ts %}
+            <p class="commited-date">
+                commited date: {{ scrap.commited_ts | date(format="%Y-%m-%d", timezone=timezone) }}
+            </p>
+        {% endif %}
+        <div class="content">
+            {# define raw for manual insert markdown content #}
+            {% raw %}
+                {{ content }}
+            {% endraw %}
+        </div>
+        
     </div>
     {{ macros::links(scraps = scraps) }}
 {% endblock %}

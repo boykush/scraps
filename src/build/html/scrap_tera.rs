@@ -1,5 +1,6 @@
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
 use anyhow::Context;
+use chrono_tz::Tz;
 use once_cell::sync::Lazy;
 use tera::Tera;
 use url::Url;
@@ -20,6 +21,7 @@ static SCRAP_TERA: Lazy<Tera> = Lazy::new(|| {
 });
 
 pub fn init(
+    timezone: &Tz,
     site_title: &str,
     site_description: &Option<String>,
     site_favicon: &Option<Url>,
@@ -29,6 +31,7 @@ pub fn init(
     tera.extend(&SCRAP_TERA).unwrap();
 
     let mut context = tera::Context::new();
+    context.insert("timezone", timezone);
     context.insert("title", site_title);
     context.insert("description", site_description);
     context.insert("favicon", site_favicon);
