@@ -4,6 +4,7 @@ use std::{fs::File, io::Write, path::PathBuf};
 use crate::build::model::{scrap::Scrap, scraps::Scraps};
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
 use anyhow::Context;
+use chrono_tz::Tz;
 use url::Url;
 
 use crate::build::html::{
@@ -17,6 +18,7 @@ pub struct HtmlRender {
     site_favicon: Option<Url>,
     static_dir_path: PathBuf,
     public_dir_path: PathBuf,
+    timezone: Tz,
     scraps: Vec<Scrap>,
 }
 
@@ -27,6 +29,7 @@ impl HtmlRender {
         site_favicon: &Option<Url>,
         static_dir_path: &PathBuf,
         public_dir_path: &PathBuf,
+        timezone: &Tz,
         scraps: &Vec<Scrap>,
     ) -> ScrapResult<HtmlRender> {
         fs::create_dir_all(&public_dir_path).context(ScrapError::FileWriteError)?;
@@ -37,12 +40,14 @@ impl HtmlRender {
             site_favicon: site_favicon.to_owned(),
             static_dir_path: static_dir_path.to_owned(),
             public_dir_path: public_dir_path.to_owned(),
+            timezone: timezone.to_owned(),
             scraps: scraps.to_vec(),
         })
     }
 
     pub fn render_index_html(&self) -> ScrapResult<()> {
         let (tera, mut context) = scrap_tera::init(
+            &self.timezone,
             &self.site_title,
             &self.site_description,
             &self.site_favicon,
@@ -81,6 +86,7 @@ impl HtmlRender {
 
     fn render_scrap_html(&self, scrap: &Scrap) -> ScrapResult<()> {
         let (tera, mut context) = scrap_tera::init(
+            &self.timezone,
             &self.site_title,
             &self.site_description,
             &self.site_favicon,
@@ -129,6 +135,7 @@ mod tests {
     #[test]
     fn it_render_index_html() {
         // args
+        let timezone = chrono_tz::UTC;
         let site_title = "Scrap";
         let site_description = Some("Scrap Wiki".to_string());
         let site_favicon = Some(Url::parse("https://github.io/image.png").unwrap());
@@ -159,6 +166,7 @@ mod tests {
                 &site_favicon,
                 &static_dir_path,
                 &public_dir_path,
+                &timezone,
                 &scraps,
             )
             .unwrap();
@@ -177,6 +185,7 @@ mod tests {
     #[test]
     fn it_render_scrap_htmls() {
         // args
+        let timezone = chrono_tz::UTC;
         let site_title = "Scrap";
         let site_description = Some("Scrap Wiki".to_string());
         let site_favicon = Some(Url::parse("https://github.io/image.png").unwrap());
@@ -200,6 +209,7 @@ mod tests {
             &site_favicon,
             &static_dir_path,
             &public_dir_path,
+            &timezone,
             &scraps,
         )
         .unwrap();

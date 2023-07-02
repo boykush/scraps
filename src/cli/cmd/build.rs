@@ -15,6 +15,8 @@ pub fn run() -> ScrapResult<()> {
         favicon: config.favicon,
     };
 
+    let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
+
     let scraps_dir_path = PathBuf::from("scraps");
     let static_dir_path = PathBuf::from("static");
     let public_dir_path = PathBuf::from("public");
@@ -22,6 +24,7 @@ pub fn run() -> ScrapResult<()> {
 
     BuildCommand::new(
         &html_metadata,
+        &timezone,
         &scraps_dir_path,
         &static_dir_path,
         &public_dir_path,

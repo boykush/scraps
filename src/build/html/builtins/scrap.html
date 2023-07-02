@@ -5,7 +5,9 @@
     <div class="scrap">
         <h1>{{ scrap.title }}</h1>
         {% if scrap.commited_ts %}
-            <p class="commited-date">commited date: {{ scrap.commited_ts | date(format="%Y-%m-%d") }}</p>
+            <p class="commited-date">
+                commited date: {{ scrap.commited_ts | date(format="%Y-%m-%d", timezone=timezone) }}
+            </p>
         {% endif %}
         <div class="content">
             {# define raw for manual insert markdown content #}

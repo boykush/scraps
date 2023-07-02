@@ -8,10 +8,12 @@ use crate::build::model::scrap::Scrap;
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
 use crate::{build::css::render::CSSRender, libs::git::GitCommand};
 use anyhow::{bail, Context};
+use chrono_tz::Tz;
 use url::Url;
 
 pub struct BuildCommand {
     html_metadata: HtmlMetadata,
+    timezone: Tz,
     scraps_dir_path: PathBuf,
     static_dir_path: PathBuf,
     public_dir_path: PathBuf,
@@ -28,6 +30,7 @@ pub struct HtmlMetadata {
 impl BuildCommand {
     pub fn new(
         html_metadata: &HtmlMetadata,
+        timezone: &Tz,
         scraps_dir_path: &PathBuf,
         static_dir_path: &PathBuf,
         public_dir_path: &PathBuf,
@@ -35,6 +38,7 @@ impl BuildCommand {
     ) -> BuildCommand {
         BuildCommand {
             html_metadata: html_metadata.to_owned(),
+            timezone: timezone.to_owned(),
             scraps_dir_path: scraps_dir_path.to_owned(),
             static_dir_path: static_dir_path.to_owned(),
             public_dir_path: public_dir_path.to_owned(),
@@ -62,6 +66,7 @@ impl BuildCommand {
             &self.html_metadata.favicon,
             &self.static_dir_path,
             &self.public_dir_path,
+            &self.timezone,
             &scraps,
         )?;
         html_render.render_scrap_htmls()?;
@@ -104,6 +109,7 @@ mod tests {
     #[test]
     fn it_run() {
         // args
+        let timezone = chrono_tz::UTC;
         let html_metadata = &HtmlMetadata {
             title: "Scrap".to_string(),
             description: Some("Scrap Wiki".to_string()),
@@ -139,6 +145,7 @@ mod tests {
                 resource_2.run(resource_bytes_2, || {
                     let command = BuildCommand::new(
                         html_metadata,
+                        &timezone,
                         &scraps_dir_path,
                         &static_dir_path,
                         &public_dir_path,
