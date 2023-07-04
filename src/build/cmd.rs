@@ -63,16 +63,20 @@ impl BuildCommand {
             &html_metadata.favicon,
             &scraps,
         )?;
-        scraps.iter().map(|scrap| {
-            let scrap_render = ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-            scrap_render.run(
-                timezone,
-                &html_metadata.title,
-                &html_metadata.description,
-                &html_metadata.favicon,
-                scrap
-            )
-        }).collect::<ScrapResult<()>>()?;
+        scraps
+            .iter()
+            .map(|scrap| {
+                let scrap_render =
+                    ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
+                scrap_render.run(
+                    timezone,
+                    &html_metadata.title,
+                    &html_metadata.description,
+                    &html_metadata.favicon,
+                    scrap,
+                )
+            })
+            .collect::<ScrapResult<()>>()?;
 
         let css_render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
         css_render.render_main()

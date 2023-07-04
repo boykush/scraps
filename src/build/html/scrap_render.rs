@@ -39,7 +39,7 @@ impl ScrapRender {
         site_title: &str,
         site_description: &Option<String>,
         site_favicon: &Option<Url>,
-        scrap: &Scrap
+        scrap: &Scrap,
     ) -> ScrapResult<()> {
         let (tera, mut context) = scrap_tera::init(
             timezone,
@@ -107,19 +107,14 @@ mod tests {
 
         let scrap1_html_path = public_dir_path.join(format!("{}.html", scrap1.title));
 
-        let render = ScrapRender::new(
-            &static_dir_path,
-            &public_dir_path,
-            &scraps
-        )
-        .unwrap();
+        let render = ScrapRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 
         let result1 = render.run(
             &timezone,
             site_title,
             &site_description,
             &site_favicon,
-            scrap1
+            scrap1,
         );
         assert!(result1.is_ok());
 

@@ -1,5 +1,6 @@
 use itertools::Itertools;
 use pulldown_cmark::{html::push_html, CowStr, Event, LinkType, Parser, Tag};
+use url::Url;
 
 pub fn extract_link_titles(text: &str) -> Vec<String> {
     let parser = Parser::new(text);
@@ -20,6 +21,14 @@ pub fn extract_link_titles(text: &str) -> Vec<String> {
     }
 
     link_titles
+}
+
+pub fn head_image(text: &str) -> Option<Url> {
+    let mut parser = Parser::new(text);
+    parser.find_map(|event| match event {
+        Event::Start(Tag::Image(_, url, _)) => Url::parse(&url).ok(),
+        _ => None,
+    })
 }
 
 pub fn to_html(text: &str) -> String {
@@ -93,6 +102,18 @@ mod tests {
         let result2 = extract_link_titles(invalid_links);
 
         assert_eq!(result2, Vec::<&str>::new());
+    }
+
+    #[test]
+    fn it_head_image() {
+        assert_eq!(
+            head_image("![alt](https://example.com/image.png)"),
+            Some(Url::parse("https://example.com/image.png").unwrap())
+        );
+        assert_eq!(
+            head_image("# header1"),
+            None
+        )
     }
 
     #[test]

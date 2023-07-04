@@ -1,3 +1,5 @@
+use url::Url;
+
 use crate::libs::markdown;
 
 #[derive(PartialEq, Clone, Debug)]
@@ -5,18 +7,21 @@ pub struct Scrap {
     pub title: String,
     pub links: Vec<String>,
     pub html_content: String,
+    pub thumbnail: Option<Url>,
     pub commited_ts: Option<i64>,
 }
 
 impl Scrap {
     pub fn new(title: &str, text: &str, commited_ts: &Option<i64>) -> Scrap {
         let links = markdown::extract_link_titles(text);
+        let thumbnail = markdown::head_image(text);
         let html_content = markdown::to_html(text);
 
         Scrap {
             title: title.to_string(),
             links: links,
             html_content: html_content,
+            thumbnail: thumbnail,
             commited_ts: commited_ts.to_owned(),
         }
     }
@@ -28,13 +33,18 @@ mod tests {
 
     #[test]
     fn it_new() {
-        let scrap1 = Scrap::new("scrap1", "[[link1]]", &None);
+        let scrap1 = Scrap::new(
+            "scrap1",
+            "[[link1]] ![](https://example.com/image.png)",
+            &None,
+        );
         assert_eq!(
             scrap1,
             Scrap {
                 title: "scrap1".to_string(),
                 links: vec!("link1".to_string()),
-                html_content: "<p><a href=\"./link1.html\">link1</a></p>\n".to_string(),
+                html_content: "<p><a href=\"./link1.html\">link1</a> <img src=\"https://example.com/image.png\" alt=\"\" /></p>\n".to_string(),
+                thumbnail: Some(Url::parse("https://example.com/image.png").unwrap()),
                 commited_ts: None
             }
         );
@@ -48,6 +58,7 @@ mod tests {
                 html_content:
                     "<p><a href=\"./link1.html\">link1</a> <a href=\"./link2.html\">link2</a></p>\n"
                         .to_string(),
+                thumbnail: None,
                 commited_ts: None
             }
         )
