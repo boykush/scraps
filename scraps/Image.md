@@ -1,1 +1,0 @@
-![](https://m.media-amazon.com/images/I/41Jlj3e0CDL._SX350_BO1,204,203,200_.jpg)

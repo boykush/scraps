@@ -3,8 +3,12 @@
         {% for scrap in scraps %}
             <a href="./{{scrap.title}}.html">
                 <li class="links-card">
-                    <p class="links-card__title">{{ scrap.title }}</p>
-                    <p class="links-card__summary">{{ scrap.html_content | striptags }}</p>
+                    <p class="title">{{ scrap.title }}</p>
+                    {% if scrap.thumbnail %}
+                        <img class="thumbnail" alt="thumbnail" src="{{ scrap.thumbnail }}" />
+                    {% else %}
+                        <p class="summary">{{ scrap.html_content | striptags }}</p>
+                    {% endif %}
                 </li>
             </a>
         {% endfor %}

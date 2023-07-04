@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use url::Url;
 
 use crate::build::model::scrap::Scrap;
 
@@ -8,6 +9,7 @@ struct SScrap {
     title: String,
     links: Vec<String>,
     html_content: String,
+    thumbnail: Option<Url>,
     commited_ts: Option<i64>,
 }
 

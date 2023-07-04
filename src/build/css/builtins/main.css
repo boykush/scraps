@@ -122,11 +122,18 @@ li.links-card {
     box-shadow: rgba(184, 194, 215, 0.35) 0px 6px 9px 0px;
 }
 
-p.links-card__title {
+.links-card p.title {
+    margin: 12px 0;
     font-weight: bold;
 }
 
-p.links-card__summary {
+.links-card img.thumbnail {
+    height: 124px;
+    width: 168px;
+    object-fit: contain;
+}
+
+.links-card p.summary {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;
