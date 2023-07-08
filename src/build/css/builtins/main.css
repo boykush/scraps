@@ -115,12 +115,13 @@ ul.links a {
 }
 
 li.links-card {
+    display: flex;
+    flex-direction: column;
     background-color: white;
     padding: 16px;
     height: 168px;
     border-radius: 4px;
     box-shadow: rgba(184, 194, 215, 0.35) 0px 6px 9px 0px;
-    overflow: hidden;
 }
 
 .links-card p.title {
@@ -128,8 +129,12 @@ li.links-card {
     font-weight: bold;
 }
 
-.links-card img.thumbnail {
-    height: 124px;
+.links-card div.thumbnail {
+    overflow: hidden;
+}
+
+.links-card img.thumbnail-image {
+    height: 125px;
     width: 168px;
     object-fit: contain;
 }

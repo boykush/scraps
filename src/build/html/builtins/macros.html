@@ -5,7 +5,9 @@
                 <li class="links-card">
                     <p class="title">{{ scrap.title }}</p>
                     {% if scrap.thumbnail %}
-                        <img class="thumbnail" alt="thumbnail" src="{{ scrap.thumbnail }}" />
+                        <div class="thumbnail">
+                            <img class="thumbnail-image" alt="thumbnail" src="{{ scrap.thumbnail }}" />
+                        </div>
                     {% else %}
                         <p class="summary">{{ scrap.html_content | striptags }}</p>
                     {% endif %}
