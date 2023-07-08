@@ -134,7 +134,7 @@ li.links-card {
 }
 
 .links-card img.thumbnail-image {
-    height: 125px;
+    height: 120px;
     width: 168px;
     object-fit: contain;
 }
