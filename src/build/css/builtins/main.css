@@ -120,6 +120,7 @@ li.links-card {
     height: 168px;
     border-radius: 4px;
     box-shadow: rgba(184, 194, 215, 0.35) 0px 6px 9px 0px;
+    overflow: hidden;
 }
 
 .links-card p.title {
