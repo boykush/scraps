@@ -12,7 +12,7 @@ pub fn run() -> ScrapResult<()> {
     let static_dir_path = PathBuf::from("static");
     let public_dir_path = PathBuf::from("public");
     let command = BuildCommand::new(
-        Box::new(git_command),
+        git_command,
         &scraps_dir_path,
         &static_dir_path,
         &public_dir_path,

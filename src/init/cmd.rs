@@ -7,12 +7,12 @@ use crate::libs::{
     git::GitCommand,
 };
 
-pub struct InitCommand {
-    git_command: Box<dyn GitCommand>,
+pub struct InitCommand<GC: GitCommand> {
+    git_command: GC,
 }
 
-impl InitCommand {
-    pub fn new(git_command: Box<dyn GitCommand>) -> InitCommand {
+impl <GC: GitCommand> InitCommand<GC> {
+    pub fn new(git_command: GC) -> InitCommand<GC> {
         InitCommand {
             git_command: git_command,
         }
@@ -43,7 +43,7 @@ mod tests {
         let git_command = GitCommandImpl::new();
         let project_path = PathBuf::from("tests/resource/init/cmd/it_run");
 
-        let command = InitCommand::new(Box::new(git_command));
+        let command = InitCommand::new(git_command);
 
         let result = command.run(project_path.to_str().unwrap());
         assert!(result.is_ok());

@@ -12,8 +12,8 @@ use url::Url;
 
 use super::html::{index_render::IndexRender, scrap_render::ScrapRender};
 
-pub struct BuildCommand {
-    git_command: Box<dyn GitCommand>,
+pub struct BuildCommand<GC: GitCommand> {
+    git_command: GC,
     scraps_dir_path: PathBuf,
     static_dir_path: PathBuf,
     public_dir_path: PathBuf,
@@ -26,13 +26,13 @@ pub struct HtmlMetadata {
     pub favicon: Option<Url>,
 }
 
-impl BuildCommand {
+impl <GC: GitCommand> BuildCommand <GC> {
     pub fn new(
-        git_command: Box<dyn GitCommand>,
+        git_command: GC,
         scraps_dir_path: &PathBuf,
         static_dir_path: &PathBuf,
         public_dir_path: &PathBuf,
-    ) -> BuildCommand {
+    ) -> BuildCommand<GC> {
         BuildCommand {
             git_command: git_command,
             scraps_dir_path: scraps_dir_path.to_owned(),
@@ -150,7 +150,7 @@ mod tests {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
                     let command = BuildCommand::new(
-                        Box::new(git_command),
+                        git_command,
                         &scraps_dir_path,
                         &static_dir_path,
                         &public_dir_path,

@@ -5,5 +5,5 @@ use crate::{
 
 pub fn run(project_name: &str) -> ScrapResult<()> {
     let git_command = GitCommandImpl::new();
-    InitCommand::new(Box::new(git_command)).run(project_name)
+    InitCommand::new(git_command).run(project_name)
 }
