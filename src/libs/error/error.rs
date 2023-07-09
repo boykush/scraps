@@ -13,10 +13,4 @@ pub enum ScrapError {
 
     #[error("Failed write file")]
     FileWriteError,
-
-    #[error("Failed git init. git is required")]
-    GitInitError,
-
-    #[error("Failed git log. git is required")]
-    GitLogError,
 }
