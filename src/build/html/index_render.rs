@@ -90,8 +90,8 @@ mod tests {
         .as_bytes();
 
         // scraps
-        let scrap1 = &Scrap::new("scrap1", "# header1", &1);
-        let scrap2 = &Scrap::new("scrap2", "## header2", &0);
+        let scrap1 = &Scrap::new("scrap1", "# header1", &Some(1));
+        let scrap2 = &Scrap::new("scrap2", "## header2", &Some(0));
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
         let index_html_path = public_dir_path.join("index.html");

@@ -110,7 +110,10 @@ mod tests {
             head_image("![alt](https://example.com/image.png)"),
             Some(Url::parse("https://example.com/image.png").unwrap())
         );
-        assert_eq!(head_image("# header1"), None)
+        assert_eq!(
+            head_image("# header1"),
+            None
+        )
     }
 
     #[test]

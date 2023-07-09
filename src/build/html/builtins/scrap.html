@@ -4,9 +4,11 @@
 {% block main %}
     <div class="scrap">
         <h1>{{ scrap.title }}</h1>
-        <p class="updated-date">
-            updated date: {{ scrap.updated_ts | date(format="%Y-%m-%d", timezone=timezone) }}
-        </p>
+        {% if scrap.commited_ts %}
+            <p class="commited-date">
+                commited date: {{ scrap.commited_ts | date(format="%Y-%m-%d", timezone=timezone) }}
+            </p>
+        {% endif %}
         <div class="content">
             {# define raw for manual insert markdown content #}
             {% raw %}

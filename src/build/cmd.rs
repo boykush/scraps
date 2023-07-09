@@ -1,7 +1,6 @@
 use std::{
     fs::{self, DirEntry},
     path::PathBuf,
-    time::UNIX_EPOCH,
 };
 
 use crate::build::model::scrap::Scrap;
@@ -99,15 +98,9 @@ impl BuildCommand {
             .map(|o| o.to_str())
             .and_then(|fp| fp.ok_or(ScrapError::FileLoadError.into()))?;
         let md_text = fs::read_to_string(&path).context(ScrapError::FileLoadError)?;
-        let file_systime = fs::metadata(&path)
-            .and_then(|m| m.modified())
-            .context(ScrapError::FileLoadError)?;
-        let updated_ts = file_systime
-            .duration_since(UNIX_EPOCH)
-            .map(|d| d.as_secs())
-            .context(ScrapError::FileLoadError)?;
+        let commited_ts = self.git_command.commited_ts(&path)?;
 
-        Ok(Scrap::new(file_prefix, &md_text, &updated_ts))
+        Ok(Scrap::new(file_prefix, &md_text, &commited_ts))
     }
 }
 
