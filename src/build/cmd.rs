@@ -1,12 +1,11 @@
 use std::{
     fs::{self, DirEntry},
     path::PathBuf,
-    time::UNIX_EPOCH,
 };
 
 use crate::build::model::scrap::Scrap;
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
-use crate::build::css::render::CSSRender;
+use crate::{build::css::render::CSSRender, libs::file};
 use anyhow::{bail, Context};
 use chrono_tz::Tz;
 use url::Url;
@@ -96,13 +95,7 @@ impl BuildCommand {
             .map(|o| o.to_str())
             .and_then(|fp| fp.ok_or(ScrapError::FileLoadError.into()))?;
         let md_text = fs::read_to_string(&path).context(ScrapError::FileLoadError)?;
-        let file_systime = fs::metadata(&path)
-            .and_then(|m| m.modified())
-            .context(ScrapError::FileLoadError)?;
-        let updated_ts = file_systime
-            .duration_since(UNIX_EPOCH)
-            .map(|d| d.as_secs())
-            .context(ScrapError::FileLoadError)?;
+        let updated_ts = file::updated_ts(path)?;
 
         Ok(Scrap::new(file_prefix, &md_text, &updated_ts))
     }
@@ -149,11 +142,8 @@ mod tests {
         resource_static_dir.run(|| {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
-                    let command = BuildCommand::new(
-                        &scraps_dir_path,
-                        &static_dir_path,
-                        &public_dir_path,
-                    );
+                    let command =
+                        BuildCommand::new(&scraps_dir_path, &static_dir_path, &public_dir_path);
                     let result1 = command.run(&timezone, &html_metadata);
                     assert!(result1.is_ok());
 
