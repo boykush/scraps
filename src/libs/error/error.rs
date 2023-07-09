@@ -13,7 +13,4 @@ pub enum ScrapError {
 
     #[error("Failed write file")]
     FileWriteError,
-
-    #[error("Failed convert file systemtime")]
-    SystemTimeConvertError,
 }

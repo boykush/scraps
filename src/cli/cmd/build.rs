@@ -9,7 +9,11 @@ pub fn run() -> ScrapResult<()> {
     let scraps_dir_path = PathBuf::from("scraps");
     let static_dir_path = PathBuf::from("static");
     let public_dir_path = PathBuf::from("public");
-    let command = BuildCommand::new(&scraps_dir_path, &static_dir_path, &public_dir_path);
+    let command = BuildCommand::new(
+        &scraps_dir_path,
+        &static_dir_path,
+        &public_dir_path,
+    );
 
     let config = ScrapConfig::new()?;
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
