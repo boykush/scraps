@@ -4,7 +4,6 @@ cargo install scraps
 ```
 
 ## Init project
-`git` command is required for features
 ```bash
 scraps init your-scraps-project
 cd your-scraps-project
@@ -15,7 +14,6 @@ The output result will look like this
 ```bash
 ❯ tree -a -L 1
 .
-├── .git
 ├── .gitignore
 ├── Config.toml
 └── scraps
