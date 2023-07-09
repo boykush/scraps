@@ -8,11 +8,11 @@ pub struct Scrap {
     pub links: Vec<String>,
     pub html_content: String,
     pub thumbnail: Option<Url>,
-    pub commited_ts: Option<i64>,
+    pub updated_ts: u64,
 }
 
 impl Scrap {
-    pub fn new(title: &str, text: &str, commited_ts: &Option<i64>) -> Scrap {
+    pub fn new(title: &str, text: &str, updated_ts: &u64) -> Scrap {
         let links = markdown::extract_link_titles(text);
         let thumbnail = markdown::head_image(text);
         let html_content = markdown::to_html(text);
@@ -22,7 +22,7 @@ impl Scrap {
             links: links,
             html_content: html_content,
             thumbnail: thumbnail,
-            commited_ts: commited_ts.to_owned(),
+            updated_ts: updated_ts.to_owned(),
         }
     }
 }
@@ -33,11 +33,7 @@ mod tests {
 
     #[test]
     fn it_new() {
-        let scrap1 = Scrap::new(
-            "scrap1",
-            "[[link1]] ![](https://example.com/image.png)",
-            &None,
-        );
+        let scrap1 = Scrap::new("scrap1", "[[link1]] ![](https://example.com/image.png)", &0);
         assert_eq!(
             scrap1,
             Scrap {
@@ -45,11 +41,11 @@ mod tests {
                 links: vec!("link1".to_string()),
                 html_content: "<p><a href=\"./link1.html\">link1</a> <img src=\"https://example.com/image.png\" alt=\"\" /></p>\n".to_string(),
                 thumbnail: Some(Url::parse("https://example.com/image.png").unwrap()),
-                commited_ts: None
+                updated_ts: 0
             }
         );
 
-        let scrap2 = Scrap::new("scrap2", "[[link1]] [[link2]]", &None);
+        let scrap2 = Scrap::new("scrap2", "[[link1]] [[link2]]", &0);
         assert_eq!(
             scrap2,
             Scrap {
@@ -59,7 +55,7 @@ mod tests {
                     "<p><a href=\"./link1.html\">link1</a> <a href=\"./link2.html\">link2</a></p>\n"
                         .to_string(),
                 thumbnail: None,
-                commited_ts: None
+                updated_ts: 0
             }
         )
     }
