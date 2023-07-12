@@ -26,6 +26,8 @@ pub fn run() -> ScrapResult<()> {
         description: config.description,
         favicon: config.favicon,
     };
-    let sort_key = config.sort_key.map_or_else(|| SortKey::CommitedDate, |c| c.into_sort_key());
+    let sort_key = config
+        .sort_key
+        .map_or_else(|| SortKey::CommitedDate, |c| c.into_sort_key());
     command.run(&timezone, &html_metadata, &sort_key)
 }

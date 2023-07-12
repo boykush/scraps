@@ -10,7 +10,10 @@ use anyhow::{bail, Context};
 use chrono_tz::Tz;
 use url::Url;
 
-use super::{html::{index_render::IndexRender, scrap_render::ScrapRender}, model::sort::SortKey};
+use super::{
+    html::{index_render::IndexRender, scrap_render::ScrapRender},
+    model::sort::SortKey,
+};
 
 pub struct BuildCommand<GC: GitCommand> {
     git_command: GC,
@@ -26,7 +29,7 @@ pub struct HtmlMetadata {
     pub favicon: Option<Url>,
 }
 
-impl <GC: GitCommand> BuildCommand <GC> {
+impl<GC: GitCommand> BuildCommand<GC> {
     pub fn new(
         git_command: GC,
         scraps_dir_path: &PathBuf,
@@ -40,7 +43,12 @@ impl <GC: GitCommand> BuildCommand <GC> {
             public_dir_path: public_dir_path.to_owned(),
         }
     }
-    pub fn run(&self, timezone: &Tz, html_metadata: &HtmlMetadata, _sort_key: &SortKey) -> ScrapResult<()> {
+    pub fn run(
+        &self,
+        timezone: &Tz,
+        html_metadata: &HtmlMetadata,
+        sort_key: &SortKey,
+    ) -> ScrapResult<()> {
         let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapError::FileLoadError)?;
 
         let paths = read_dir
@@ -62,6 +70,7 @@ impl <GC: GitCommand> BuildCommand <GC> {
             &html_metadata.description,
             &html_metadata.favicon,
             &scraps,
+            sort_key,
         )?;
         scraps
             .iter()
@@ -74,6 +83,7 @@ impl <GC: GitCommand> BuildCommand <GC> {
                     &html_metadata.description,
                     &html_metadata.favicon,
                     scrap,
+                    sort_key,
                 )
             })
             .collect::<ScrapResult<()>>()?;

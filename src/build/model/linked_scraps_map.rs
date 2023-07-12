@@ -3,19 +3,19 @@ use std::collections::HashMap;
 use crate::build::model::scrap::Scrap;
 
 pub struct LinkedScrapsMap {
-    values: HashMap<String, Vec<Scrap>>
+    values: HashMap<String, Vec<Scrap>>,
 }
 
 impl LinkedScrapsMap {
     pub fn new(scraps: &Vec<Scrap>) -> LinkedScrapsMap {
         let linked_map = Self::gen_linked_map(scraps);
-        LinkedScrapsMap {
-            values: linked_map
-        }
+        LinkedScrapsMap { values: linked_map }
     }
 
     pub fn linked_by(&self, title: &str) -> Vec<Scrap> {
-        self.values.get(title).map_or_else(|| vec![], |s| s.to_owned())
+        self.values
+            .get(title)
+            .map_or_else(|| vec![], |s| s.to_owned())
     }
 
     fn gen_linked_map(scraps: &Vec<Scrap>) -> HashMap<String, Vec<Scrap>> {

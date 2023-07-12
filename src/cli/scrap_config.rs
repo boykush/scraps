@@ -1,4 +1,7 @@
-use crate::{libs::error::{error::ScrapError, result::ScrapResult}, build::model::sort::SortKey};
+use crate::{
+    build::model::sort::SortKey,
+    libs::error::{error::ScrapError, result::ScrapResult},
+};
 use anyhow::Context;
 use chrono_tz::Tz;
 use config::Config;
@@ -11,7 +14,7 @@ pub struct ScrapConfig {
     pub description: Option<String>,
     pub favicon: Option<Url>,
     pub timezone: Option<Tz>,
-    pub sort_key: Option<SortKeyConfig>
+    pub sort_key: Option<SortKeyConfig>,
 }
 
 impl ScrapConfig {
@@ -30,7 +33,7 @@ impl ScrapConfig {
 #[serde(remote = "SortKey", rename_all = "snake_case")]
 pub enum SerdeSortKey {
     CommitedDate,
-    LinkedCount
+    LinkedCount,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
