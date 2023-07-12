@@ -10,7 +10,7 @@ use anyhow::{bail, Context};
 use chrono_tz::Tz;
 use url::Url;
 
-use super::html::{index_render::IndexRender, scrap_render::ScrapRender};
+use super::{html::{index_render::IndexRender, scrap_render::ScrapRender}, model::sort::SortKey};
 
 pub struct BuildCommand<GC: GitCommand> {
     git_command: GC,
@@ -40,7 +40,7 @@ impl <GC: GitCommand> BuildCommand <GC> {
             public_dir_path: public_dir_path.to_owned(),
         }
     }
-    pub fn run(&self, timezone: &Tz, html_metadata: &HtmlMetadata) -> ScrapResult<()> {
+    pub fn run(&self, timezone: &Tz, html_metadata: &HtmlMetadata, _sort_key: &SortKey) -> ScrapResult<()> {
         let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapError::FileLoadError)?;
 
         let paths = read_dir
@@ -114,18 +114,21 @@ mod tests {
 
     #[test]
     fn it_run() {
-        // args
+        // fields
+        let test_resource_path = PathBuf::from("tests/resource/build/cmd/it_run");
+        let git_command = GitCommandTest::new();
+        let scraps_dir_path = test_resource_path.join("scraps");
+        let static_dir_path = test_resource_path.join("static");
+        let public_dir_path = test_resource_path.join("public");
+
+        // run args
         let timezone = chrono_tz::UTC;
         let html_metadata = &HtmlMetadata {
             title: "Scrap".to_string(),
             description: Some("Scrap Wiki".to_string()),
             favicon: Some(Url::parse("https://github.io/image.png").unwrap()),
         };
-        let test_resource_path = PathBuf::from("tests/resource/build/cmd/it_run");
-        let scraps_dir_path = test_resource_path.join("scraps");
-        let static_dir_path = test_resource_path.join("static");
-        let public_dir_path = test_resource_path.join("public");
-        let git_command = GitCommandTest::new();
+        let sort_key = SortKey::LinkedCount;
 
         // scrap1
         let md_path_1 = scraps_dir_path.join("test1.md");
@@ -155,7 +158,7 @@ mod tests {
                         &static_dir_path,
                         &public_dir_path,
                     );
-                    let result1 = command.run(&timezone, &html_metadata);
+                    let result1 = command.run(&timezone, &html_metadata, &sort_key);
                     assert!(result1.is_ok());
 
                     let result2 = fs::read_to_string(html_path_1);
