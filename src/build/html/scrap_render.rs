@@ -48,6 +48,7 @@ impl ScrapRender {
             site_title,
             site_description,
             site_favicon,
+            sort_key,
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
 
