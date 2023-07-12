@@ -1,7 +1,7 @@
 use std::fs;
 use std::{fs::File, io::Write, path::PathBuf};
 
-use crate::build::model::{scrap::Scrap, scraps::Scraps};
+use crate::build::model::{scrap::Scrap, linked_scraps_map::LinkedScrapsMap};
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
 use anyhow::Context;
 use chrono_tz::Tz;
@@ -52,18 +52,13 @@ impl ScrapRender {
         context.insert("scrap", &SerializeScrap::new(&scrap));
 
         // insert to context for linked list
-        let linked_map = Scraps::new(&self.scraps).gen_linked_map();
-        let linked_list = linked_map.get(&scrap.title);
-        if let Some(scraps) = linked_list {
-            context.insert(
-                "scraps",
-                &SerializeScraps::new_with_sort(
-                    &scraps.iter().map(|s| SerializeScrap::new(&s)).collect(),
-                ),
-            );
-        } else {
-            context.insert("scraps", &Vec::<SerializeScrap>::new())
-        };
+        let linked_list = LinkedScrapsMap::new(&self.scraps).linked_by(&scrap.title);
+        context.insert(
+            "scraps",
+            &SerializeScraps::new_with_sort(
+                &linked_list.iter().map(|s| SerializeScrap::new(&s)).collect(),
+            ),
+        );
 
         // render html
         let rendered = tera

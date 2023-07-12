@@ -1,2 +1,2 @@
 pub mod scrap;
-pub mod scraps;
+pub mod linked_scraps_map;
