@@ -49,14 +49,15 @@ impl ScrapRender {
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
 
-        context.insert("scrap", &SerializeScrap::new(&scrap));
-
         // insert to context for linked list
-        let linked_list = LinkedScrapsMap::new(&self.scraps).linked_by(&scrap.title);
+        let linked_scraps_map = LinkedScrapsMap::new(&self.scraps);
+        context.insert("scrap", &SerializeScrap::new(&scrap, &linked_scraps_map));
+
+        let linked_list = linked_scraps_map.linked_by(&scrap.title);
         context.insert(
             "scraps",
             &SerializeScraps::new_with_sort(
-                &linked_list.iter().map(|s| SerializeScrap::new(&s)).collect(),
+                &linked_list.iter().map(|s| SerializeScrap::new(&s, &linked_scraps_map)).collect(),
             ),
         );
 

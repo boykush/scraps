@@ -1,6 +1,7 @@
 use std::fs;
 use std::{fs::File, path::PathBuf};
 
+use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::scrap::Scrap;
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
 use anyhow::Context;
@@ -42,10 +43,11 @@ impl IndexRender {
             site_favicon,
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
+        let linked_scraps_map = LinkedScrapsMap::new(scraps);
         context.insert(
             "scraps",
             &SerializeScraps::new_with_sort(
-                &scraps.iter().map(|s| SerializeScrap::new(&s)).collect(),
+                &scraps.iter().map(|s| SerializeScrap::new(&s, &linked_scraps_map)).collect(),
             ),
         );
 

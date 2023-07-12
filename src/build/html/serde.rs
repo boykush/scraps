@@ -1,24 +1,29 @@
 use itertools::Itertools;
 use url::Url;
 
-use crate::build::model::scrap::Scrap;
+use crate::build::model::{scrap::Scrap, linked_scraps_map::LinkedScrapsMap};
 
-#[derive(serde::Serialize)]
-#[serde(remote = "Scrap")]
-struct SScrap {
+#[derive(serde::Serialize, Clone, PartialEq, Debug)]
+pub struct SerializeScrap {
     title: String,
     links: Vec<String>,
     html_content: String,
     thumbnail: Option<Url>,
     commited_ts: Option<i64>,
+    linked_count: usize
 }
 
-#[derive(serde::Serialize, Clone, PartialEq, Debug)]
-pub struct SerializeScrap(#[serde(with = "SScrap")] Scrap);
-
 impl SerializeScrap {
-    pub fn new(scrap: &Scrap) -> SerializeScrap {
-        SerializeScrap(scrap.to_owned())
+    pub fn new(scrap: &Scrap, linked_scraps_map: &LinkedScrapsMap) -> SerializeScrap {
+        let linked_count = linked_scraps_map.linked_by(&scrap.title).len();
+        SerializeScrap {
+            title: scrap.title.to_owned(),
+            links: scrap.links.to_owned(),
+            html_content: scrap.html_content.to_owned(),
+            thumbnail: scrap.thumbnail.to_owned(),
+            commited_ts: scrap.commited_ts.to_owned(),
+            linked_count: linked_count
+        }
     }
 }
 
@@ -29,7 +34,7 @@ impl SerializeScraps {
     pub fn new_with_sort(scraps: &Vec<SerializeScrap>) -> SerializeScraps {
         let sorted = scraps
             .iter()
-            .sorted_by_key(|s| s.0.commited_ts)
+            .sorted_by_key(|s| s.commited_ts)
             .rev()
             .cloned()
             .collect_vec();
@@ -43,10 +48,12 @@ mod tests {
 
     #[test]
     fn it_new_with_sort() {
-        let scrap1 = SerializeScrap::new(&Scrap::new("title1", "text1", &Some(1)));
-        let scrap2 = SerializeScrap::new(&Scrap::new("title2", "text2", &Some(0)));
-        let scrap3 = SerializeScrap::new(&Scrap::new("title3", "text3", &None));
-        let scrap4 = SerializeScrap::new(&Scrap::new("title4", "text4", &Some(2)));
+        let linked_scraps_map = LinkedScrapsMap::new(&vec![]);
+
+        let scrap1 = SerializeScrap::new(&Scrap::new("title1", "text1", &Some(1)), &linked_scraps_map);
+        let scrap2 = SerializeScrap::new(&Scrap::new("title2", "text2", &Some(0)), &linked_scraps_map);
+        let scrap3 = SerializeScrap::new(&Scrap::new("title3", "text3", &None), &linked_scraps_map);
+        let scrap4 = SerializeScrap::new(&Scrap::new("title4", "text4", &Some(2)), &linked_scraps_map);
 
         let scraps = SerializeScraps::new_with_sort(&vec![
             scrap1.clone(),
