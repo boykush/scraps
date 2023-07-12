@@ -11,7 +11,7 @@ pub struct InitCommand<GC: GitCommand> {
     git_command: GC,
 }
 
-impl <GC: GitCommand> InitCommand<GC> {
+impl<GC: GitCommand> InitCommand<GC> {
     pub fn new(git_command: GC) -> InitCommand<GC> {
         InitCommand {
             git_command: git_command,

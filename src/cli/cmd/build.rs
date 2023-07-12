@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use crate::build::cmd::{BuildCommand, HtmlMetadata};
+use crate::build::model::sort::SortKey;
 use crate::libs::error::result::ScrapResult;
 
 use crate::cli::scrap_config::ScrapConfig;
@@ -25,5 +26,8 @@ pub fn run() -> ScrapResult<()> {
         description: config.description,
         favicon: config.favicon,
     };
-    command.run(&timezone, &html_metadata)
+    let sort_key = config
+        .sort_key
+        .map_or_else(|| SortKey::CommitedDate, |c| c.into_sort_key());
+    command.run(&timezone, &html_metadata, &sort_key)
 }

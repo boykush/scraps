@@ -1,7 +1,8 @@
 use std::fs;
 use std::{fs::File, io::Write, path::PathBuf};
 
-use crate::build::model::{scrap::Scrap, scraps::Scraps};
+use crate::build::model::sort::SortKey;
+use crate::build::model::{linked_scraps_map::LinkedScrapsMap, scrap::Scrap};
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
 use anyhow::Context;
 use chrono_tz::Tz;
@@ -40,30 +41,32 @@ impl ScrapRender {
         site_description: &Option<String>,
         site_favicon: &Option<Url>,
         scrap: &Scrap,
+        sort_key: &SortKey,
     ) -> ScrapResult<()> {
         let (tera, mut context) = scrap_tera::init(
             timezone,
             site_title,
             site_description,
             site_favicon,
+            sort_key,
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
 
-        context.insert("scrap", &SerializeScrap::new(&scrap));
-
         // insert to context for linked list
-        let linked_map = Scraps::new(&self.scraps).gen_linked_map();
-        let linked_list = linked_map.get(&scrap.title);
-        if let Some(scraps) = linked_list {
-            context.insert(
-                "scraps",
-                &SerializeScraps::new_with_sort(
-                    &scraps.iter().map(|s| SerializeScrap::new(&s)).collect(),
-                ),
-            );
-        } else {
-            context.insert("scraps", &Vec::<SerializeScrap>::new())
-        };
+        let linked_scraps_map = LinkedScrapsMap::new(&self.scraps);
+        context.insert("scrap", &SerializeScrap::new(&scrap, &linked_scraps_map));
+
+        let linked_list = linked_scraps_map.linked_by(&scrap.title);
+        context.insert(
+            "scraps",
+            &SerializeScraps::new_with_sort(
+                &linked_list
+                    .iter()
+                    .map(|s| SerializeScrap::new(&s, &linked_scraps_map))
+                    .collect(),
+                sort_key,
+            ),
+        );
 
         // render html
         let rendered = tera
@@ -94,6 +97,7 @@ mod tests {
         let site_title = "Scrap";
         let site_description = Some("Scrap Wiki".to_string());
         let site_favicon = Some(Url::parse("https://github.io/image.png").unwrap());
+        let sort_key = SortKey::CommitedDate;
 
         let test_resource_path =
             PathBuf::from("tests/resource/build/html/render/it_render_scrap_htmls");
@@ -115,6 +119,7 @@ mod tests {
             &site_description,
             &site_favicon,
             scrap1,
+            &sort_key,
         );
         assert!(result1.is_ok());
 

@@ -1,7 +1,9 @@
 use std::fs;
 use std::{fs::File, path::PathBuf};
 
+use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::scrap::Scrap;
+use crate::build::model::sort::SortKey;
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
 use anyhow::Context;
 use chrono_tz::Tz;
@@ -34,18 +36,25 @@ impl IndexRender {
         site_description: &Option<String>,
         site_favicon: &Option<Url>,
         scraps: &Vec<Scrap>,
+        sort_key: &SortKey,
     ) -> ScrapResult<()> {
         let (tera, mut context) = scrap_tera::init(
             timezone,
             site_title,
             site_description,
             site_favicon,
+            sort_key,
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
+        let linked_scraps_map = LinkedScrapsMap::new(scraps);
         context.insert(
             "scraps",
             &SerializeScraps::new_with_sort(
-                &scraps.iter().map(|s| SerializeScrap::new(&s)).collect(),
+                &scraps
+                    .iter()
+                    .map(|s| SerializeScrap::new(&s, &linked_scraps_map))
+                    .collect(),
+                sort_key,
             ),
         );
 
@@ -76,6 +85,7 @@ mod tests {
         let site_title = "Scrap";
         let site_description = Some("Scrap Wiki".to_string());
         let site_favicon = Some(Url::parse("https://github.io/image.png").unwrap());
+        let sort_key = SortKey::CommitedDate;
 
         let test_resource_path =
             PathBuf::from("tests/resource/build/html/render/it_render_index_html");
@@ -104,6 +114,7 @@ mod tests {
                 &site_description,
                 &site_favicon,
                 &scraps,
+                &sort_key,
             );
 
             assert!(result1.is_ok());

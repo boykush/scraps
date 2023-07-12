@@ -1,4 +1,7 @@
-use crate::libs::error::{error::ScrapError, result::ScrapResult};
+use crate::{
+    build::model::sort::SortKey,
+    libs::error::{error::ScrapError, result::ScrapResult},
+};
 use anyhow::Context;
 use chrono_tz::Tz;
 use once_cell::sync::Lazy;
@@ -25,6 +28,7 @@ pub fn init(
     site_title: &str,
     site_description: &Option<String>,
     site_favicon: &Option<Url>,
+    sort_key: &SortKey,
     template_dir: &str,
 ) -> ScrapResult<(Tera, tera::Context)> {
     let mut tera = Tera::new(template_dir).context(ScrapError::PublicRenderError)?;
@@ -35,6 +39,12 @@ pub fn init(
     context.insert("title", site_title);
     context.insert("description", site_description);
     context.insert("favicon", site_favicon);
+
+    let sort_key_text = match sort_key {
+        SortKey::CommitedDate => "commited date",
+        SortKey::LinkedCount => "linked count"
+    };
+    context.insert("sort_key", sort_key_text);
 
     Ok((tera, context))
 }
