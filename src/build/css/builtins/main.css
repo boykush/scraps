@@ -74,12 +74,6 @@ footer {
     margin-bottom: 32px;
 }
 
-/* index */
-div.index p.sort-key {
-    text-align: right;
-    font-size: 14px;
-}
-
 /* scrap */
 div.scrap {
     background-color: white;
@@ -104,6 +98,12 @@ div.scrap a {
 
 div.scrap a:hover {
     background-color: none;
+}
+
+/* index */
+div.index p.sort-key {
+    color: #7b88a1;
+    font-size: 16px;
 }
 
 /* links */
