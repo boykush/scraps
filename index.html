@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>
+            
+                Scraps Doc
+            
+        </title>
+        
+            <meta name="description" content="A static site generator that builds a wiki from a set of markdown files." />
+        
+        
+            <link rel="icon" type="image/png" href="https:&#x2F;&#x2F;gist.github.com&#x2F;boykush&#x2F;c0ec36a9380b51044fffb2ccdc9c5be5&#x2F;raw&#x2F;eeec544c7d3143d151cba7d733083dfc0bb76481&#x2F;scraps_logo.png" />
+        
+
+        <!-- Rubik font -->
+        <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">
+        <!-- Noto Sans JP font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+        <!-- Code syntax highlight -->
+        <link href="https://unpkg.com/nord-highlightjs@0.1.0/dist/nord.css" rel="stylesheet" type="text/css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!-- Style sheet -->
+        <link rel="stylesheet" href="./main.css">
+    </head>
+    <body>
+        <header>
+            <a href="./">
+                <h1>Scraps Doc</h1>
+            </a>
+        </header>
+        <main>
+            
+    <div class="index">
+        <p class="sort-key">Sort by: commited date</p>
+        
+    <ul class="links">
+        
+            <a href="./Configuration.html">
+                <li class="links-card">
+                    <p class="title">Configuration</p>
+                    
+                        <p class="summary">Configuration is managed by Config.toml in the Scraps project.
+Only the title variable is required. Everything else is optional. All configuration variables used by Scraps and their default values are listed below.
+# The site title
+title = &amp;quot;&amp;quot;
+
+# The site description (optional)
+description = &amp;quot;&amp;quot;
+
+# The site favicon in the form of png file URL (optional)
+favicon = &amp;quot;&amp;quot;
+
+# The site timezone (optional, default=UTC)
+timezone = &amp;quot;UTC&amp;quot;
+
+# Scraps sort key choice (optional, default=commited_date, choices=commited_date or linked_count)
+sort_key = &amp;quot;commited_date&amp;quot;
+
+</p>
+                    
+                </li>
+            </a>
+        
+            <a href="./Getting Started.html">
+                <li class="links-card">
+                    <p class="title">Getting Started</p>
+                    
+                        <p class="summary">Installation
+cargo install scraps
+
+Init project
+git command is required for features
+scraps init your-scraps-project
+cd your-scraps-project
+
+The output result will look like this
+❯ tree -a -L 1
+.
+├── .git
+├── .gitignore
+├── Config.toml
+└── scraps
+
+Configuration
+Edit Config.toml to settings.
+title = &amp;quot;your scraps project&amp;quot;
+
+See Configuration for other config.
+Write scraps
+Write markdown files under &#x2F;scraps dir.
+❯ tree scraps
+scraps
+├── Getting Started.md
+└── Scraps.md
+
+See Scraps for scraps notation in markdown files.
+Build static site
+scraps build
+
+The output is as follows.
+❯ tree public
+public
+├── Getting Started.html
+├── Scraps.html
+├── index.html
+└── main.css
+
+Deploy pages
+See Deploy.
+</p>
+                    
+                </li>
+            </a>
+        
+            <a href="./Deploy.html">
+                <li class="links-card">
+                    <p class="title">Deploy</p>
+                    
+                        <p class="summary">Github Pages
+Custom actions are available to deploy Scraps to Github Pages.
+scraps-deploy-action
+YAML file
+Prepare a yaml file under .github&#x2F;workflows&#x2F; like this
+on: push
+name: Build and deploy GH Pages
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions&#x2F;checkout@v3
+        with:
+          fetch-depth: 0 # For scraps git commited date
+      - name: build_and_deploy
+        uses: boykush&#x2F;scraps-deploy-action@v1.0.0
+        env:
+          # Target branch
+          PAGES_BRANCH: gh-pages
+          # Provide personal access token
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+GitHub settings
+Set up GitHub Pages for the repository.
+Build and deployment parameter as follows.
+
+Source: Deploy from a branch
+Branch: gh-pages
+
+</p>
+                    
+                </li>
+            </a>
+        
+            <a href="./Scraps.html">
+                <li class="links-card">
+                    <p class="title">Scraps</p>
+                    
+                        <p class="summary">Internal links like wiki
+Specifying the name of the markdown file with a notation such as [[Link]] will generate a wiki-like internal link.
+For example, if you have the following set of files.
+❯ tree scraps
+scraps
+├── Overview.md
+└── Usage.md
+
+Fill in the file name in the scraps directory in Overview.md as follows to generate the link.
+See [[Usage]] for detail.
+
+</p>
+                    
+                </li>
+            </a>
+        
+    </ul>
+
+    </div>
+
+        </main>
+        <footer>
+            Generated by <a href="https://github.com/boykush/scraps" target="_blank" rel="noopener noreferrer">Scraps</a>
+        </footer>
+    </body>
+</html>
