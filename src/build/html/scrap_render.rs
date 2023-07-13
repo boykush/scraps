@@ -56,11 +56,11 @@ impl ScrapRender {
         let linked_scraps_map = LinkedScrapsMap::new(&self.scraps);
         context.insert("scrap", &SerializeScrap::new(&scrap, &linked_scraps_map));
 
-        let linked_list = linked_scraps_map.linked_by(&scrap.title);
+        let linked_scraps = linked_scraps_map.linked_by(&scrap.title);
         context.insert(
-            "scraps",
+            "linked_scraps",
             &SerializeScraps::new_with_sort(
-                &linked_list
+                &linked_scraps
                     .iter()
                     .map(|s| SerializeScrap::new(&s, &linked_scraps_map))
                     .collect(),
