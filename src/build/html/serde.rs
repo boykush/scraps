@@ -17,8 +17,8 @@ impl SerializeScrap {
     pub fn new(scrap: &Scrap, linked_scraps_map: &LinkedScrapsMap) -> SerializeScrap {
         let linked_count = linked_scraps_map.linked_by(&scrap.title).len();
         SerializeScrap {
-            title: scrap.title.to_owned(),
-            links: scrap.links.to_owned(),
+            title: scrap.title.to_string(),
+            links: scrap.links.iter().map(|t| t.to_string()).collect(),
             html_content: scrap.html_content.to_owned(),
             thumbnail: scrap.thumbnail.to_owned(),
             commited_ts: scrap.commited_ts.to_owned(),

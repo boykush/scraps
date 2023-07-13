@@ -1,11 +1,13 @@
+use std::fmt::Display;
+
 use url::Url;
 
 use crate::libs::markdown;
 
 #[derive(PartialEq, Clone, Debug)]
 pub struct Scrap {
-    pub title: String,
-    pub links: Vec<String>,
+    pub title: Title,
+    pub links: Vec<Title>,
     pub html_content: String,
     pub thumbnail: Option<Url>,
     pub commited_ts: Option<i64>,
@@ -13,17 +15,35 @@ pub struct Scrap {
 
 impl Scrap {
     pub fn new(title: &str, text: &str, commited_ts: &Option<i64>) -> Scrap {
-        let links = markdown::extract_link_titles(text);
+        let links = markdown::extract_link_titles(text)
+            .iter()
+            .map(|t| Title::new(t))
+            .collect();
         let thumbnail = markdown::head_image(text);
         let html_content = markdown::to_html(text);
 
         Scrap {
-            title: title.to_string(),
+            title: Title::new(title),
             links: links,
             html_content: html_content,
             thumbnail: thumbnail,
             commited_ts: commited_ts.to_owned(),
         }
+    }
+}
+
+#[derive(PartialEq, Clone, Debug, Eq, Hash)]
+pub struct Title(String);
+
+impl Title {
+    fn new(title: &str) -> Title {
+        Title(title.to_owned())
+    }
+}
+
+impl Display for Title {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
@@ -41,8 +61,8 @@ mod tests {
         assert_eq!(
             scrap1,
             Scrap {
-                title: "scrap1".to_string(),
-                links: vec!("link1".to_string()),
+                title: Title::new("scrap1"),
+                links: vec!(Title::new("link1")),
                 html_content: "<p><a href=\"./link1.html\">link1</a> <img src=\"https://example.com/image.png\" alt=\"\" /></p>\n".to_string(),
                 thumbnail: Some(Url::parse("https://example.com/image.png").unwrap()),
                 commited_ts: None
@@ -53,8 +73,8 @@ mod tests {
         assert_eq!(
             scrap2,
             Scrap {
-                title: "scrap2".to_string(),
-                links: vec!("link1".to_string(), "link2".to_string()),
+                title: Title::new("scrap2"),
+                links: vec!(Title::new("link1"), Title::new("link2")),
                 html_content:
                     "<p><a href=\"./link1.html\">link1</a> <a href=\"./link2.html\">link2</a></p>\n"
                         .to_string(),

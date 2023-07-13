@@ -2,8 +2,10 @@ use std::collections::HashMap;
 
 use crate::build::model::scrap::Scrap;
 
+use super::scrap::Title;
+
 pub struct LinkedScrapsMap {
-    values: HashMap<String, Vec<Scrap>>,
+    values: HashMap<Title, Vec<Scrap>>,
 }
 
 impl LinkedScrapsMap {
@@ -12,24 +14,24 @@ impl LinkedScrapsMap {
         LinkedScrapsMap { values: linked_map }
     }
 
-    pub fn linked_by(&self, title: &str) -> Vec<Scrap> {
+    pub fn linked_by(&self, title: &Title) -> Vec<Scrap> {
         self.values
             .get(title)
             .map_or_else(|| vec![], |s| s.to_owned())
     }
 
-    fn gen_linked_map(scraps: &Vec<Scrap>) -> HashMap<String, Vec<Scrap>> {
+    fn gen_linked_map(scraps: &Vec<Scrap>) -> HashMap<Title, Vec<Scrap>> {
         scraps
             .iter()
             .fold(HashMap::new(), |acc1, scrap| {
                 scrap.to_owned().links.iter().fold(acc1, |mut acc2, link| {
-                    acc2.entry(link.to_string())
+                    acc2.entry(link.to_owned())
                         .or_insert_with(Vec::new)
                         .push(scrap.to_owned());
                     acc2
                 })
             })
             .into_iter()
-            .collect::<HashMap<String, Vec<Scrap>>>()
+            .collect::<HashMap<Title, Vec<Scrap>>>()
     }
 }
