@@ -1,4 +1,6 @@
 use std::path::PathBuf;
+use std::time::Duration;
+use colored::Colorize;
 
 use crate::build::cmd::{BuildCommand, HtmlMetadata};
 use crate::build::model::sort::SortKey;
@@ -29,5 +31,11 @@ pub fn run() -> ScrapResult<()> {
     let sort_key = config
         .sort_key
         .map_or_else(|| SortKey::CommitedDate, |c| c.into_sort_key());
-    command.run(&timezone, &html_metadata, &sort_key)
+
+    println!("{}", "Building site...".bold());
+
+    let result = command.run(&timezone, &html_metadata, &sort_key)?;
+
+    println!("-> Created {} pages", result);
+    Ok(println!("{}", "Done".green()))
 }
