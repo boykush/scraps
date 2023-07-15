@@ -1,6 +1,6 @@
-use std::path::PathBuf;
-use std::time::Duration;
 use colored::Colorize;
+use std::path::PathBuf;
+use std::time::Instant;
 
 use crate::build::cmd::{BuildCommand, HtmlMetadata};
 use crate::build::model::sort::SortKey;
@@ -33,9 +33,17 @@ pub fn run() -> ScrapResult<()> {
         .map_or_else(|| SortKey::CommitedDate, |c| c.into_sort_key());
 
     println!("{}", "Building site...".bold());
+    let start = Instant::now();
 
     let result = command.run(&timezone, &html_metadata, &sort_key)?;
 
-    println!("-> Created {} pages", result);
-    Ok(println!("{}", "Done".green()))
+    let end = start.elapsed();
+    println!("-> Created {} scraps", result);
+    Ok(println!(
+        "{} {}.{} {}",
+        "Done in".green(),
+        end.as_secs().to_string().green(),
+        end.subsec_millis().to_string().green(),
+        "secs".green(),
+    ))
 }
