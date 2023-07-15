@@ -15,12 +15,16 @@
     --nord13: #ebcb8b;
     --nord14: #a3be8c;
     --nord15: #b48ead;
+
+    --primary-color: var(--nord6);
+    --secondary-color: var(--nord3);
+    --gray-color: #7b88a1
 }
 
 /* html tag */
 body {
-  background-color: var(--nord6);
-  color: var(--nord3);
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
   font-family: 'Rubik', 'Noto Sans JP', sans-serif;
 }
 
@@ -29,24 +33,24 @@ pre code {
 }
 
 p code {
-    background-color: var(--nord6);
+    background-color: var(--primary-color);
     padding: 1px 2px;
     border-radius: 2px;
 }
 
 hr {
-    background-color: var(--nord3);
+    background-color: var(--secondary-color);
     border: none;
-    border-bottom: 1px solid var(--nord6);
+    border-bottom: 1px solid var(--primary-color);
 }
 
 a {
-    color: var(--nord3);
+    color: var(--secondary-color);
     text-decoration: none;
 }
 
 a:visited {
-    color: var(--nord3);
+    color: var(--secondary-color);
 }
 
 /* header */
@@ -70,7 +74,7 @@ main {
 footer {
     text-align: center;
     font-size: 12.8px;
-    color: #7b88a1;
+    color: var(--gray-color);
     margin-bottom: 32px;
 }
 
@@ -84,7 +88,7 @@ div.scrap {
 
 div.scrap .commited-date {
     font-size: 12.8px;
-    color: #7b88a1;
+    color: var(--gray-color);
 }
 
 div.scrap .content {
@@ -102,7 +106,7 @@ div.scrap a:hover {
 
 /* index */
 div.index p.sort-key {
-    color: #7b88a1;
+    color: var(--gray-color);
     font-size: 16px;
 }
 
@@ -117,7 +121,7 @@ ul.links {
 }
 
 ul.links a {
-    color: var(--nord3);
+    color: var(--secondary-color);
 }
 
 li.links-card {
