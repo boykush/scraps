@@ -1,9 +1,9 @@
 [package]
 name = "scraps"
 authors = ["boykush <k.taichi0315@gmail.com>"]
-version = "0.7.3"
+version = "0.7.4"
 edition = "2021"
-license-file = "LICENSE.md"
+license = "MIT"
 description = "A static site generator that builds a wiki from a set of markdown files. Inspired by https://scrapbox.io/."
 homepage = "https://boykush.github.io/scraps"
 repository = "https://github.com/boykush/scraps"
