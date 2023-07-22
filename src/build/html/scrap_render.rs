@@ -1,5 +1,5 @@
 use std::fs;
-use std::{fs::File, io::Write, path::PathBuf};
+use std::{fs::File, path::PathBuf};
 
 use crate::build::model::sort::SortKey;
 use crate::build::model::{linked_scraps_map::LinkedScrapsMap, scrap::Scrap};
@@ -9,7 +9,7 @@ use chrono_tz::Tz;
 use url::Url;
 
 use crate::build::html::{
-    content, scrap_tera,
+    scrap_tera,
     serde::{SerializeScrap, SerializeScraps},
 };
 
@@ -69,18 +69,11 @@ impl ScrapRender {
         );
 
         // render html
-        let rendered = tera
-            .render("__builtins/scrap.html", &context)
-            .context(ScrapError::PublicRenderError)?;
-        let html = content::insert(&rendered, &scrap.html_content);
-
-        // write
         let file_name = &format!("{}.html", scrap.title);
-        let mut wtr = File::create(self.public_dir_path.join(file_name))
+        let wtr = File::create(self.public_dir_path.join(file_name))
             .context(ScrapError::FileWriteError)?;
-        wtr.write_all(html.as_bytes())
-            .context(ScrapError::FileWriteError)?;
-        wtr.flush().context(ScrapError::FileWriteError)
+        tera.render_to("__builtins/scrap.html", &context, wtr)
+            .context(ScrapError::PublicRenderError)
     }
 }
 

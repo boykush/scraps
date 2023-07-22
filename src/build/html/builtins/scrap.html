@@ -10,10 +10,7 @@
             </p>
         {% endif %}
         <div class="content">
-            {# define raw for manual insert markdown content #}
-            {% raw %}
-                {{ content }}
-            {% endraw %}
+            {{ scrap.html_content | safe }}
         </div>
         
     </div>
