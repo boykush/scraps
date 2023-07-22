@@ -1,5 +1,5 @@
+name: Build and deploy scraps 
 on: push
-name: Build and deploy GH Pages
 jobs:
   build:
     runs-on: ubuntu-latest

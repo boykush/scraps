@@ -1,0 +1,26 @@
+name: Upload rust binary
+
+on:
+    release:
+      types: [created]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+        fail-fast: false
+        matrix:
+          include:
+            - target: x86_64-apple-darwin
+              archive: tar.gz
+    steps:
+      - uses: actions/checkout@master
+      - name: Compile
+        id: compile
+        uses: rust-build/rust-build.action@v1.4.3
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          RUSTTARGET: ${{ matrix.target }} 
+          ARCHIVE_TYPES: ${{ matrix.archive }}
