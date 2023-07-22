@@ -1,4 +1,4 @@
-name: Build and deploy scraps 
+name: Deploy scraps github pages
 on: push
 jobs:
   build:

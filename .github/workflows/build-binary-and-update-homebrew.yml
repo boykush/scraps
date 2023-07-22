@@ -1,0 +1,50 @@
+name: Build binary and update homebrew
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+        fail-fast: false
+        matrix:
+          include:
+            - target: x86_64-apple-darwin
+              archive: tar.gz
+    steps:
+      - uses: actions/checkout@master
+      - name: Compile
+        id: compile
+        uses: rust-build/rust-build.action@v1.4.3
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          RUSTTARGET: ${{ matrix.target }} 
+          ARCHIVE_TYPES: ${{ matrix.archive }}
+  
+  update-homebrew:
+    name: Update homebrew
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract version
+        id: extract-version
+        run: |
+          printf "::set-output name=%s::%s\n" tag-name "${GITHUB_REF#refs/tags/}"
+      - uses: mislav/bump-homebrew-formula-action@v2
+        if: ${{ !contains(github.ref, '-') }} # skip prereleases
+        with:
+          formula-name: scraps
+          formula-path: Formula/scraps.rb
+          homebrew-tap: boykush/homebrew-tap
+          base-branch: main
+          download-url: https://github.com/boykush/scraps/releases/download/${{ steps.extract-version.outputs.tag-name }}/scraps_${{ steps.extract-version.outputs.tag-name }}_x86_64-apple-darwin.tar.gz
+          commit-message: |
+            {{formulaName}} {{version}}
+  
+            Created by https://github.com/mislav/bump-homebrew-formula-action
+        env:
+          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_COMMITTER_TOKEN }}
