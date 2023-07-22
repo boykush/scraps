@@ -23,11 +23,7 @@ jobs:
       - name: GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Download Artifact
-        uses: actions/download-artifact@v1
-        with:
-          name: checksum-x86_64-apple-darwin
+          token: ${{ secrets.RELEASE_TOKEN }}
   cargo_publish:
     needs: test
     runs-on: ubuntu-latest
