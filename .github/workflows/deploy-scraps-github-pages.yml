@@ -13,5 +13,4 @@ jobs:
         env:
           # Target branch
           PAGES_BRANCH: gh-pages
-          # Provide personal access token
-          TOKEN: ${{ secrets.PAGES_TOKEN }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
