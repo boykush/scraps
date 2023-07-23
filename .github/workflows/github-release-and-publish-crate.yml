@@ -1,4 +1,4 @@
-name: Release and publish crate
+name: GitHub release and publish crate
 
 on:
   push:
