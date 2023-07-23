@@ -10,7 +10,8 @@ repository = "https://github.com/boykush/scraps"
 readme = "README.md"
 exclude = [
     "scraps/",
-    ".github/"
+    ".github/",
+    "Dockerfile"
 ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
