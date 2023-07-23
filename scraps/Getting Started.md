@@ -3,6 +3,11 @@
 cargo install scraps
 ```
 
+### mac OS
+```
+brew install boykush/tap/scraps
+```
+
 ## Init project
 `git` command is required for features
 ```bash
