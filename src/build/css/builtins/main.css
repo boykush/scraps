@@ -104,6 +104,12 @@ div.scrap a:hover {
     background-color: none;
 }
 
+/* tag */
+div.tag h1.title::before {
+    content: "\1F3F7";
+    margin-right: 8px;
+}
+
 /* index */
 div.index p.sort-key {
     color: var(--gray-color);
