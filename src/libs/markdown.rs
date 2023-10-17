@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use itertools::Itertools;
 use pulldown_cmark::{html::push_html, CowStr, Event, LinkType, Parser, Tag};
 use url::Url;
@@ -20,7 +22,8 @@ pub fn extract_link_titles(text: &str) -> Vec<String> {
         }
     }
 
-    link_titles
+    let hashed:HashSet<String> = link_titles.into_iter().collect();
+    hashed.into_iter().collect()
 }
 
 pub fn head_image(text: &str) -> Option<Url> {
@@ -84,9 +87,9 @@ mod tests {
 
     #[test]
     fn it_extract_link_titles() {
-        let valid_links = &vec!["[[head]]", "[[contain space]]", "[[last]]"].join("\n");
-        let result1 = extract_link_titles(valid_links);
-        assert_eq!(result1, vec!["head", "contain space", "last"]);
+        let valid_links = &vec!["[[head]]", "[[contain space]]", "[[last]]", "[[duplicate]]", "[[duplicate]]"].join("\n");
+        let result1 = extract_link_titles(valid_links).sort();
+        assert_eq!(result1, vec!["head", "contain space", "last", "duplicate"].sort());
 
         let invalid_links = &vec![
             "`[[quote block]]`",
