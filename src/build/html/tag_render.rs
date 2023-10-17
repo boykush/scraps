@@ -9,12 +9,10 @@ use anyhow::Context;
 use chrono_tz::Tz;
 use url::Url;
 
-use crate::build::html::{
-    scrap_tera,
-    serde::{SerializeScrap, SerializeScraps},
-};
+use crate::build::html::scrap_tera;
 
-use super::serde::SerializeTag;
+use super::serde::scraps::SerializeScraps;
+use super::serde::tag::SerializeTag;
 
 pub struct TagRender {
     static_dir_path: PathBuf,
@@ -62,13 +60,7 @@ impl TagRender {
         let linked_scraps = linked_scraps_map.linked_by(&tag.title);
         context.insert(
             "linked_scraps",
-            &SerializeScraps::new_with_sort(
-                &linked_scraps
-                    .iter()
-                    .map(|s| SerializeScrap::new(&s, &linked_scraps_map))
-                    .collect(),
-                sort_key,
-            ),
+            &SerializeScraps::new_with_sort(&linked_scraps, &linked_scraps_map, sort_key),
         );
 
         // render html

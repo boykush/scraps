@@ -10,12 +10,10 @@ use anyhow::Context;
 use chrono_tz::Tz;
 use url::Url;
 
-use crate::build::html::{
-    scrap_tera,
-    serde::{SerializeScrap, SerializeScraps},
-};
+use crate::build::html::scrap_tera;
 
-use super::serde::SerializeTags;
+use super::serde::scraps::SerializeScraps;
+use super::serde::tags::SerializeTags;
 
 pub struct IndexRender {
     static_dir_path: PathBuf,
@@ -52,13 +50,7 @@ impl IndexRender {
         let linked_scraps_map = LinkedScrapsMap::new(scraps);
         context.insert(
             "scraps",
-            &SerializeScraps::new_with_sort(
-                &scraps
-                    .iter()
-                    .map(|s| SerializeScrap::new(&s, &linked_scraps_map))
-                    .collect(),
-                sort_key,
-            ),
+            &SerializeScraps::new_with_sort(&scraps, &linked_scraps_map, sort_key),
         );
         let tags = Tags::new(scraps);
         context.insert(

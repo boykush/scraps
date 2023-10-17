@@ -8,10 +8,10 @@ use anyhow::Context;
 use chrono_tz::Tz;
 use url::Url;
 
-use crate::build::html::{
-    scrap_tera,
-    serde::{SerializeScrap, SerializeScraps},
-};
+use crate::build::html::scrap_tera;
+
+use super::serde::scrap::SerializeScrap;
+use super::serde::scraps::SerializeScraps;
 
 pub struct ScrapRender {
     static_dir_path: PathBuf,
@@ -59,13 +59,7 @@ impl ScrapRender {
         let linked_scraps = linked_scraps_map.linked_by(&scrap.title);
         context.insert(
             "linked_scraps",
-            &SerializeScraps::new_with_sort(
-                &linked_scraps
-                    .iter()
-                    .map(|s| SerializeScrap::new(&s, &linked_scraps_map))
-                    .collect(),
-                sort_key,
-            ),
+            &SerializeScraps::new_with_sort(&linked_scraps, &linked_scraps_map, sort_key),
         );
 
         // render html
