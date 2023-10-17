@@ -104,13 +104,19 @@ div.scrap a:hover {
     background-color: none;
 }
 
+/* tag */
+div.tag h1.title::before {
+    content: "\1F3F7";
+    margin-right: 8px;
+}
+
 /* index */
 div.index p.sort-key {
     color: var(--gray-color);
     font-size: 16px;
 }
 
-/* links */
+/* scrap links */
 ul.links {
     display: grid;
     grid-template-columns: repeat(auto-fit, 200px);
@@ -154,4 +160,23 @@ li.links-card {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 4;
+}
+
+/* tag links */
+ul.tag-links {
+    list-style: none;
+}
+
+ul.tag-links li.item {
+    display: inline;
+    margin-right: 8px;
+}
+
+ul.tag-links li.item span.title {
+    margin-right: 2px;
+}
+
+ul.tag-links li.item span.title::before {
+    content: "\1F3F7";
+    margin-right: 8px;
 }

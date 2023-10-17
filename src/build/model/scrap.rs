@@ -36,7 +36,7 @@ impl Scrap {
 pub struct Title(String);
 
 impl Title {
-    fn new(title: &str) -> Title {
+    pub fn new(title: &str) -> Title {
         Title(title.to_owned())
     }
 }

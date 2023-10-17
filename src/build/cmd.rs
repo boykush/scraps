@@ -11,8 +11,8 @@ use chrono_tz::Tz;
 use url::Url;
 
 use super::{
-    html::{index_render::IndexRender, scrap_render::ScrapRender},
-    model::sort::SortKey,
+    html::{index_render::IndexRender, scrap_render::ScrapRender, tag_render::TagRender},
+    model::{sort::SortKey, tags::Tags},
 };
 
 pub struct BuildCommand<GC: GitCommand> {
@@ -83,6 +83,23 @@ impl<GC: GitCommand> BuildCommand<GC> {
                     &html_metadata.description,
                     &html_metadata.favicon,
                     scrap,
+                    sort_key,
+                )
+            })
+            .collect::<ScrapResult<()>>()?;
+
+        let tags = Tags::new(&scraps);
+        tags.values
+            .iter()
+            .map(|tag| {
+                let tag_render =
+                    TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
+                tag_render.run(
+                    timezone,
+                    &html_metadata.title,
+                    &html_metadata.description,
+                    &html_metadata.favicon,
+                    tag,
                     sort_key,
                 )
             })

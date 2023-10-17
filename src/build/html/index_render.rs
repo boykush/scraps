@@ -4,15 +4,16 @@ use std::{fs::File, path::PathBuf};
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::scrap::Scrap;
 use crate::build::model::sort::SortKey;
+use crate::build::model::tags::Tags;
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
 use anyhow::Context;
 use chrono_tz::Tz;
 use url::Url;
 
-use crate::build::html::{
-    scrap_tera,
-    serde::{SerializeScrap, SerializeScraps},
-};
+use crate::build::html::scrap_tera;
+
+use super::serde::scraps::SerializeScraps;
+use super::serde::tags::SerializeTags;
 
 pub struct IndexRender {
     static_dir_path: PathBuf,
@@ -49,13 +50,12 @@ impl IndexRender {
         let linked_scraps_map = LinkedScrapsMap::new(scraps);
         context.insert(
             "scraps",
-            &SerializeScraps::new_with_sort(
-                &scraps
-                    .iter()
-                    .map(|s| SerializeScrap::new(&s, &linked_scraps_map))
-                    .collect(),
-                sort_key,
-            ),
+            &SerializeScraps::new_with_sort(&scraps, &linked_scraps_map, sort_key),
+        );
+        let tags = Tags::new(scraps);
+        context.insert(
+            "tags",
+            &SerializeTags::new(&tags.values.iter().cloned().collect(), &linked_scraps_map),
         );
 
         let template_name = if tera.get_template_names().any(|t| t == "index.html") {
