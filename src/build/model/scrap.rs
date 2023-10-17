@@ -32,7 +32,7 @@ impl Scrap {
     }
 }
 
-#[derive(PartialEq, Clone, Debug, Eq, Hash)]
+#[derive(PartialEq, Clone, Debug, Eq, Hash, Ord, PartialOrd)]
 pub struct Title(String);
 
 impl Title {
@@ -69,18 +69,12 @@ mod tests {
             }
         );
 
-        let scrap2 = Scrap::new("scrap2", "[[link1]] [[link2]]", &None);
-        assert_eq!(
-            scrap2,
-            Scrap {
-                title: Title::new("scrap2"),
-                links: vec!(Title::new("link1"), Title::new("link2")),
-                html_content:
-                    "<p><a href=\"./link1.html\">link1</a> <a href=\"./link2.html\">link2</a></p>\n"
-                        .to_string(),
-                thumbnail: None,
-                commited_ts: None
-            }
-        )
+        let mut scrap2 = Scrap::new("scrap2", "[[link1]] [[link2]]", &None);
+        assert_eq!(scrap2.title, Title::new("scrap2"));
+        assert_eq!(scrap2.links.sort(), vec!(Title::new("link1"), Title::new("link2")).sort());
+        assert_eq!(scrap2.html_content, "<p><a href=\"./link1.html\">link1</a> <a href=\"./link2.html\">link2</a></p>\n"
+                        .to_string());
+        assert_eq!(scrap2.thumbnail, None);
+        assert_eq!(scrap2.commited_ts, None);
     }
 }
