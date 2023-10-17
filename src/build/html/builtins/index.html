@@ -5,5 +5,6 @@
     <div class="index">
         <p class="sort-key">Sort by - {{ sort_key }}</p>
         {{ macros::links(scraps = scraps) }}
+        {{ macros::tag_links(tags = tags) }}
     </div>
 {% endblock %}
