@@ -23,7 +23,7 @@ jobs:
       - name: GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          token: ${{ secrets.RELEASE_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
   cargo_publish:
     needs: test
     runs-on: ubuntu-latest
