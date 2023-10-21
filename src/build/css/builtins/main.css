@@ -111,7 +111,11 @@ div.tag h1.title::before {
 }
 
 /* index */
-div.index p.sort-key {
+div.index div.tags-block {
+    margin-bottom: 64px;
+}
+
+div.index div.links-block p.sort-key {
     color: var(--gray-color);
     font-size: 16px;
 }
