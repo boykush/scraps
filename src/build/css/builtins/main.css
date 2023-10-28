@@ -121,7 +121,7 @@ div.index div.links-block p.sort-key {
 }
 
 /* scrap links */
-ul.links {
+ul.scrap-links {
     display: grid;
     grid-template-columns: repeat(auto-fit, 200px);
     gap: 32px;
@@ -131,11 +131,11 @@ ul.links {
     justify-content: center;
 }
 
-ul.links a {
+ul.scrap-links a {
     color: var(--secondary-color);
 }
 
-li.links-card {
+ul.scrap-links li.item {
     display: flex;
     flex-direction: column;
     background-color: white;
@@ -145,22 +145,22 @@ li.links-card {
     box-shadow: rgba(184, 194, 215, 0.35) 0px 6px 9px 0px;
 }
 
-.links-card p.title {
+ul.scrap-links li.item p.title {
     margin: 12px 0;
     font-weight: bold;
 }
 
-.links-card div.thumbnail {
+ul.scrap-links li.item div.thumbnail {
     overflow: hidden;
 }
 
-.links-card img.thumbnail-image {
+ul.scrap-links li.item img.thumbnail-image {
     height: 120px;
     width: 168px;
     object-fit: contain;
 }
 
-.links-card p.summary {
+ul.scrap-links li.item p.summary {
     overflow: hidden;
     display: -webkit-box;
     -webkit-box-orient: vertical;

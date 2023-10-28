@@ -1,8 +1,8 @@
-{% macro links(scraps) %}
-    <ul class="links">
+{% macro scrap_links(scraps) %}
+    <ul class="scrap-links">
         {% for scrap in scraps %}
             <a href="./{{scrap.title}}.html">
-                <li class="links-card">
+                <li class="item">
                     <p class="title">{{ scrap.title }}</p>
                     {% if scrap.thumbnail %}
                         <div class="thumbnail">
@@ -15,7 +15,7 @@
             </a>
         {% endfor %}
     </ul>
-{% endmacro links %}
+{% endmacro scrap_links %}
 
 {% macro tag_links(tags) %}
     <ul class="tag-links">
