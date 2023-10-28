@@ -128,6 +128,7 @@ ul.links {
     width: 100%;
     padding-left: 0;
     list-style: none;
+    justify-content: center;
 }
 
 ul.links a {
