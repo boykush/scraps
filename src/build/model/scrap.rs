@@ -41,6 +41,10 @@ impl Title {
     pub fn new(title: &str) -> Title {
         Title(title.to_owned())
     }
+
+    pub fn to_slug(self) -> Slug {
+        Slug::new(&self.0)
+    }
 }
 
 impl Display for Title {

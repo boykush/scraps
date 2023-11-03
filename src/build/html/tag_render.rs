@@ -64,7 +64,7 @@ impl TagRender {
         );
 
         // render html
-        let file_name = &format!("{}.html", tag.title);
+        let file_name = &format!("{}.html", tag.slug);
         let wtr = File::create(self.public_dir_path.join(file_name))
             .context(ScrapError::FileWriteError)?;
         tera.render_to("__builtins/tag.html", &context, wtr)
@@ -97,9 +97,9 @@ mod tests {
         let scrap2 = &Scrap::new("scrap2", "[[tag1]][[tag2]]", &None);
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
         // tag
-        let tag1 = Tag::new(&Title::new("tag1"));
+        let tag1 = Tag::new(&Title::new("tag 1"));
 
-        let tag1_html_path = public_dir_path.join(format!("{}.html", tag1.title));
+        let tag1_html_path = public_dir_path.join(format!("{}.html", tag1.slug));
 
         let render = TagRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 
