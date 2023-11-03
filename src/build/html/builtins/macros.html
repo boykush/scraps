@@ -20,7 +20,7 @@
 {% macro tag_links(tags) %}
     <ul class="tag-links">
         {% for tag in tags %}
-            <a href="./{{tag.title}}.html">
+            <a href="./{{tag.slug}}.html">
                 <li class="item">
                     <span class="title">{{ tag.title }}</span><span>({{ tag.linked_count }})</span>
                 </li>
