@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use crate::build::model::scrap::Scrap;
 
-use super::{scrap::Title, tag::Tag};
+use super::{tag::Tag, title::Title};
 
 #[derive(PartialEq, Debug)]
 pub struct Tags {

@@ -4,6 +4,8 @@ use itertools::Itertools;
 use pulldown_cmark::{html::push_html, CowStr, Event, LinkType, Parser, Tag};
 use url::Url;
 
+use super::slugify;
+
 pub fn extract_link_titles(text: &str) -> Vec<String> {
     let parser = Parser::new(text);
     let mut parser_windows = parser.tuple_windows();
@@ -52,7 +54,8 @@ pub fn to_html(text: &str) -> String {
                 &Event::Text(CowStr::Borrowed("]")),
                 &Event::Text(CowStr::Borrowed("]")),
             ) => {
-                let link = &format!("./{}.html", title);
+                let slug = slugify::by_dash(title);
+                let link = &format!("./{}.html", slug);
                 let link_events = vec![
                     Event::Start(Tag::Link(
                         LinkType::Inline,
@@ -130,9 +133,9 @@ mod tests {
                 + "\n"
         );
 
-        let link_text = "[[link]]";
+        let link_text = "[[link]][[expect slugify]]";
         let result2 = to_html(&link_text);
-        assert_eq!(result2, "<p><a href=\"./link.html\">link</a></p>\n",);
+        assert_eq!(result2, "<p><a href=\"./link.html\">link</a><a href=\"./expect-slugify.html\">expect slugify</a></p>\n",);
 
         let not_link_text = vec!["only close]]", "[[only open"].join("\n");
         let result3 = to_html(&not_link_text);

@@ -3,6 +3,7 @@ use crate::build::model::{linked_scraps_map::LinkedScrapsMap, tag::Tag};
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 pub struct SerializeTag {
     title: String,
+    slug: String,
     pub linked_count: usize,
 }
 
@@ -11,6 +12,7 @@ impl SerializeTag {
         let linked_count = linked_scraps_map.linked_by(&tag.title).len();
         SerializeTag {
             title: tag.title.to_string(),
+            slug: tag.title.slug.to_string(),
             linked_count: linked_count,
         }
     }

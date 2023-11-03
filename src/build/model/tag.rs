@@ -1,4 +1,6 @@
-use crate::build::model::scrap::Title;
+use super::title::Title;
+
+
 
 #[derive(Eq, Hash, PartialEq, Debug, Clone)]
 pub struct Tag {
@@ -12,3 +14,4 @@ impl Tag {
         }
     }
 }
+

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::build::model::scrap::Scrap;
 
-use super::scrap::Title;
+use super::title::Title;
 
 pub struct LinkedScrapsMap {
     values: HashMap<Title, Vec<Scrap>>,
