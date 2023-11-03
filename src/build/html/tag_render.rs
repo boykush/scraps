@@ -64,7 +64,7 @@ impl TagRender {
         );
 
         // render html
-        let file_name = &format!("{}.html", tag.slug);
+        let file_name = &format!("{}.html", tag.title.slug);
         let wtr = File::create(self.public_dir_path.join(file_name))
             .context(ScrapError::FileWriteError)?;
         tera.render_to("__builtins/tag.html", &context, wtr)
@@ -74,7 +74,7 @@ impl TagRender {
 
 #[cfg(test)]
 mod tests {
-    use crate::build::model::scrap::Title;
+    use crate::build::model::title::Title;
 
     use super::*;
 
@@ -99,7 +99,7 @@ mod tests {
         // tag
         let tag1 = Tag::new(&Title::new("tag 1"));
 
-        let tag1_html_path = public_dir_path.join(format!("{}.html", tag1.slug));
+        let tag1_html_path = public_dir_path.join(format!("{}.html", tag1.title.slug));
 
         let render = TagRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 

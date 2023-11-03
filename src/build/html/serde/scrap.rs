@@ -18,7 +18,7 @@ impl SerializeScrap {
         let linked_count = linked_scraps_map.linked_by(&scrap.title).len();
         SerializeScrap {
             title: scrap.title.to_string(),
-            slug: scrap.slug.to_string(),
+            slug: scrap.title.slug.to_string(),
             links: scrap.links.iter().map(|t| t.to_string()).collect(),
             html_content: scrap.html_content.to_owned(),
             thumbnail: scrap.thumbnail.to_owned(),
