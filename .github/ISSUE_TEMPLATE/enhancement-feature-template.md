@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 ## Context
-[ index page | scrap page | command line ]
+[ index page | scrap page | tag page | command line ]
 
 ## Idea
 Describe the requirements or requests for features to be developed.
