@@ -53,13 +53,13 @@ See [[Scraps]] for scraps notation in markdown files.
 scraps build
 ```
 
-The output is as follows.
+The output will be a slugged html file as follows.
 
 ```bash
 ❯ tree public
 public
-├── Getting Started.html
-├── Scraps.html
+├── getting-started.html
+├── scraps.html
 ├── index.html
 └── main.css
 ```
