@@ -63,7 +63,7 @@ impl ScrapRender {
         );
 
         // render html
-        let file_name = &format!("{}.html", scrap.title);
+        let file_name = &format!("{}.html", scrap.slug);
         let wtr = File::create(self.public_dir_path.join(file_name))
             .context(ScrapError::FileWriteError)?;
         tera.render_to("__builtins/scrap.html", &context, wtr)
@@ -92,11 +92,11 @@ mod tests {
         let public_dir_path = test_resource_path.join("public");
 
         // scraps
-        let scrap1 = &Scrap::new("scrap1", "# header1", &None);
-        let scrap2 = &Scrap::new("scrap2", "[[scrap1]]", &None);
+        let scrap1 = &Scrap::new("scrap 1", "# header1", &None);
+        let scrap2 = &Scrap::new("scrap 2", "[[scrap1]]", &None);
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
-        let scrap1_html_path = public_dir_path.join(format!("{}.html", scrap1.title));
+        let scrap1_html_path = public_dir_path.join(format!("{}.html", scrap1.slug));
 
         let render = ScrapRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 
