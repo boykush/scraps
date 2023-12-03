@@ -23,11 +23,7 @@ pub fn run() -> ScrapResult<()> {
 
     let config = ScrapConfig::new()?;
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
-    let html_metadata = &HtmlMetadata {
-        title: config.title,
-        description: config.description,
-        favicon: config.favicon,
-    };
+    let html_metadata = HtmlMetadata::new(&config.title, &config.description, &config.favicon);
     let sort_key = config
         .sort_key
         .map_or_else(|| SortKey::CommitedDate, |c| c.into_sort_key());

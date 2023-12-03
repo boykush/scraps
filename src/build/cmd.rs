@@ -22,13 +22,6 @@ pub struct BuildCommand<GC: GitCommand> {
     public_dir_path: PathBuf,
 }
 
-#[derive(Clone)]
-pub struct HtmlMetadata {
-    pub title: String,
-    pub description: Option<String>,
-    pub favicon: Option<Url>,
-}
-
 impl<GC: GitCommand> BuildCommand<GC> {
     pub fn new(
         git_command: GC,
@@ -64,27 +57,13 @@ impl<GC: GitCommand> BuildCommand<GC> {
             .collect::<ScrapResult<Vec<Scrap>>>()?;
 
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
-        index_render.run(
-            timezone,
-            &html_metadata.title,
-            &html_metadata.description,
-            &html_metadata.favicon,
-            &scraps,
-            sort_key,
-        )?;
+        index_render.run(timezone, html_metadata, &scraps, sort_key)?;
         scraps
             .iter()
             .map(|scrap| {
                 let scrap_render =
                     ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-                scrap_render.run(
-                    timezone,
-                    &html_metadata.title,
-                    &html_metadata.description,
-                    &html_metadata.favicon,
-                    scrap,
-                    sort_key,
-                )
+                scrap_render.run(timezone, html_metadata, scrap, sort_key)
             })
             .collect::<ScrapResult<()>>()?;
 
@@ -94,14 +73,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
             .map(|tag| {
                 let tag_render =
                     TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-                tag_render.run(
-                    timezone,
-                    &html_metadata.title,
-                    &html_metadata.description,
-                    &html_metadata.favicon,
-                    tag,
-                    sort_key,
-                )
+                tag_render.run(timezone, html_metadata, tag, sort_key)
             })
             .collect::<ScrapResult<()>>()?;
 
@@ -130,6 +102,33 @@ impl<GC: GitCommand> BuildCommand<GC> {
         let commited_ts = self.git_command.commited_ts(&path)?;
 
         Ok(Scrap::new(file_prefix, &md_text, &commited_ts))
+    }
+}
+
+#[derive(Clone)]
+pub struct HtmlMetadata {
+    title: String,
+    description: Option<String>,
+    favicon: Option<Url>,
+}
+
+impl HtmlMetadata {
+    pub fn new(title: &str, description: &Option<String>, favicon: &Option<Url>) -> HtmlMetadata {
+        HtmlMetadata {
+            title: title.to_owned(),
+            description: description.to_owned(),
+            favicon: favicon.to_owned(),
+        }
+    }
+
+    pub fn title(&self) -> String {
+        self.title.clone()
+    }
+    pub fn description(&self) -> Option<String> {
+        self.description.clone()
+    }
+    pub fn favicon(&self) -> Option<Url> {
+        self.favicon.clone()
     }
 }
 

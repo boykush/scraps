@@ -1,12 +1,12 @@
 use std::fs;
 use std::{fs::File, path::PathBuf};
 
+use crate::build::cmd::HtmlMetadata;
 use crate::build::model::sort::SortKey;
 use crate::build::model::{linked_scraps_map::LinkedScrapsMap, scrap::Scrap};
 use crate::libs::error::{error::ScrapError, result::ScrapResult};
 use anyhow::Context;
 use chrono_tz::Tz;
-use url::Url;
 
 use crate::build::html::scrap_tera;
 
@@ -37,17 +37,13 @@ impl ScrapRender {
     pub fn run(
         &self,
         timezone: &Tz,
-        site_title: &str,
-        site_description: &Option<String>,
-        site_favicon: &Option<Url>,
+        metadata: &HtmlMetadata,
         scrap: &Scrap,
         sort_key: &SortKey,
     ) -> ScrapResult<()> {
         let (tera, mut context) = scrap_tera::init(
             timezone,
-            site_title,
-            site_description,
-            site_favicon,
+            metadata,
             sort_key,
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
@@ -81,9 +77,11 @@ mod tests {
     fn it_run() {
         // args
         let timezone = chrono_tz::UTC;
-        let site_title = "Scrap";
-        let site_description = Some("Scrap Wiki".to_string());
-        let site_favicon = Some(Url::parse("https://github.io/image.png").unwrap());
+        let metadata = HtmlMetadata::new(
+            "Scrap",
+            &Some("Scrap Wiki".to_string()),
+            &Some(Url::parse("https://github.io/image.png").unwrap()),
+        );
         let sort_key = SortKey::CommitedDate;
 
         let test_resource_path =
@@ -100,14 +98,7 @@ mod tests {
 
         let render = ScrapRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 
-        let result1 = render.run(
-            &timezone,
-            site_title,
-            &site_description,
-            &site_favicon,
-            scrap1,
-            &sort_key,
-        );
+        let result1 = render.run(&timezone, &metadata, scrap1, &sort_key);
         assert!(result1.is_ok());
 
         let result2 = fs::read_to_string(scrap1_html_path);
