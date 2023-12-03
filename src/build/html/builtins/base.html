@@ -3,21 +3,24 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-        <title>
-            {% if scrap %}
-                {{ scrap.title }} - {{ title }}
-            {% else %}
-                {{ title }}
-            {% endif %}
-        </title>
+        <!-- Page title -->
+        {% if scrap %}
+            {% set title_var=[ scrap.title,title ] | join(sep=" - ") %}
+            <title>{{ title_var }}</title>
+            <meta property="og:title" content="{{ title_var }}" />
+        {% else %}
+            <title>{{ title }}</title>
+            <meta property="og:title" content="{{ title }}" />
+        {% endif %}
+        <!-- Page description -->
         {% if description %}
             <meta name="description" content="{{ description }}" />
+            <meta property="og:description" content="{{description}}" />
         {% endif %}
+        <!-- Page favicon -->
         {% if favicon %}
             <link rel="icon" type="image/png" href="{{ favicon }}" />
         {% endif %}
-
         <!-- Rubik font -->
         <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">
         <!-- Noto Sans JP font -->
