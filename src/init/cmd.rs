@@ -26,7 +26,8 @@ impl<GC: GitCommand> InitCommand<GC> {
 
         fs::create_dir_all(&project_dir).context(ScrapError::FileWriteError)?;
         fs::create_dir(&scraps_dir).context(ScrapError::FileWriteError)?;
-        fs::write(&config_toml_file, include_str!("builtins/Config.toml")).context(ScrapError::FileWriteError)?;
+        fs::write(&config_toml_file, include_str!("builtins/Config.toml"))
+            .context(ScrapError::FileWriteError)?;
         fs::write(&gitignore_file, "public").context(ScrapError::FileWriteError)?;
         self.git_command.init(&project_dir)
     }

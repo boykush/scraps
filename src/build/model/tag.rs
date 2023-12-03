@@ -1,7 +1,5 @@
 use super::title::Title;
 
-
-
 #[derive(Eq, Hash, PartialEq, Debug, Clone)]
 pub struct Tag {
     pub title: Title,
@@ -14,4 +12,3 @@ impl Tag {
         }
     }
 }
-

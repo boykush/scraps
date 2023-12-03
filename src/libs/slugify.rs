@@ -1,6 +1,6 @@
 pub fn by_dash(v: &str) -> String {
     let lower = v.to_lowercase();
-    let slug = lower.replace( " ", "-");
+    let slug = lower.replace(" ", "-");
     slug
 }
 

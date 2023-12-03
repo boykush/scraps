@@ -40,9 +40,15 @@ mod tests {
     fn it_new() {
         let mut scrap = Scrap::new("scrap title", "[[link1]] [[link2]]", &None);
         assert_eq!(scrap.title, Title::new("scrap title"));
-        assert_eq!(scrap.links.sort(), vec!(Title::new("link1"), Title::new("link2")).sort());
-        assert_eq!(scrap.html_content, "<p><a href=\"./link1.html\">link1</a> <a href=\"./link2.html\">link2</a></p>\n"
-                        .to_string());
+        assert_eq!(
+            scrap.links.sort(),
+            vec!(Title::new("link1"), Title::new("link2")).sort()
+        );
+        assert_eq!(
+            scrap.html_content,
+            "<p><a href=\"./link1.html\">link1</a> <a href=\"./link2.html\">link2</a></p>\n"
+                .to_string()
+        );
         assert_eq!(scrap.thumbnail, None);
         assert_eq!(scrap.commited_ts, None);
     }

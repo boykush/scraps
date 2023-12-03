@@ -70,6 +70,7 @@ impl ScrapRender {
 #[cfg(test)]
 mod tests {
     use std::fs;
+    use url::Url;
 
     use super::*;
 

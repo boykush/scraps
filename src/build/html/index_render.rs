@@ -70,6 +70,7 @@ impl IndexRender {
 #[cfg(test)]
 mod tests {
     use std::fs;
+    use url::Url;
 
     use super::*;
     use crate::libs::resource::tests::FileResource;

@@ -71,6 +71,7 @@ impl TagRender {
 #[cfg(test)]
 mod tests {
     use crate::build::model::title::Title;
+    use url::Url;
 
     use super::*;
 

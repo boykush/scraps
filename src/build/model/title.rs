@@ -2,18 +2,17 @@ use std::fmt::Display;
 
 use crate::libs::slugify;
 
-
 #[derive(PartialEq, Clone, Debug, Eq, Hash, Ord, PartialOrd)]
 pub struct Title {
     v: String,
-    pub slug: Slug
+    pub slug: Slug,
 }
 
 impl Title {
     pub fn new(title: &str) -> Title {
         Title {
             v: title.to_owned(),
-            slug: Slug::new(title)
+            slug: Slug::new(title),
         }
     }
 }

@@ -24,7 +24,7 @@ pub fn extract_link_titles(text: &str) -> Vec<String> {
         }
     }
 
-    let hashed:HashSet<String> = link_titles.into_iter().collect();
+    let hashed: HashSet<String> = link_titles.into_iter().collect();
     hashed.into_iter().collect()
 }
 
@@ -90,9 +90,19 @@ mod tests {
 
     #[test]
     fn it_extract_link_titles() {
-        let valid_links = &vec!["[[head]]", "[[contain space]]", "[[last]]", "[[duplicate]]", "[[duplicate]]"].join("\n");
+        let valid_links = &vec![
+            "[[head]]",
+            "[[contain space]]",
+            "[[last]]",
+            "[[duplicate]]",
+            "[[duplicate]]",
+        ]
+        .join("\n");
         let result1 = extract_link_titles(valid_links).sort();
-        assert_eq!(result1, vec!["head", "contain space", "last", "duplicate"].sort());
+        assert_eq!(
+            result1,
+            vec!["head", "contain space", "last", "duplicate"].sort()
+        );
 
         let invalid_links = &vec![
             "`[[quote block]]`",
