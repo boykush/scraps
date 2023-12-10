@@ -30,3 +30,7 @@ itertools = "0.12.0"
 url = { version = "2.4.1", features = ["serde"] }
 chrono-tz = { version = "0.8.3", features = ["serde"] }
 colored = "2.0.4"
+hyper = { version = "1.0.1", features = ["full"] }
+tokio = { version = "1.34.0", features = ["full"] }
+http-body-util = "0.1.0"
+hyper-util = { version = "0.1.1", features = ["full"] }
