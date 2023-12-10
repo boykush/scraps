@@ -1,18 +1,18 @@
 ## Installation
 ```bash
-cargo install scraps
+❯ cargo install scraps
 ```
 
 ### mac OS
-```
-brew install boykush/tap/scraps
+```bash
+❯ brew install boykush/tap/scraps
 ```
 
 ## Init project
 `git` command is required for features
 ```bash
-scraps init your-scraps-project
-cd your-scraps-project
+❯ scraps init your-scraps-project
+❯ cd your-scraps-project
 ```
 
 The output result will look like this
@@ -50,7 +50,7 @@ See [[Scraps]] for scraps notation in markdown files.
 ## Build static site
 
 ```bash
-scraps build
+❯ scraps build
 ```
 
 The output will be a slugged html file as follows.
@@ -63,6 +63,14 @@ public
 ├── index.html
 └── main.css
 ```
+
+## Debug server
+
+```bash
+❯ scraps serve
+```
+
+You can debug the build outputs by visiting `http://127.0.0.1:1112`
 
 ## Deploy pages
 See [[Deploy]].
