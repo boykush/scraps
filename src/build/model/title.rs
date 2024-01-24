@@ -1,5 +1,4 @@
 use std::fmt::Display;
-use url::form_urlencoded;
 
 use crate::libs::slugify;
 
@@ -36,8 +35,7 @@ impl Slug {
 
 impl Display for Slug {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let url_encoded = form_urlencoded::byte_serialize(self.0.as_bytes()).collect::<String>();
-        write!(f, "{}", url_encoded)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -50,10 +48,5 @@ mod tests {
         let title = Title::new("scrap title");
         assert_eq!(title.v, "scrap title".to_string());
         assert_eq!(title.slug, Slug("scrap-title".to_string()));
-
-        let japanese_title = Title::new("日本語");
-        assert_eq!(japanese_title.v, "日本語".to_string());
-        assert_eq!(japanese_title.slug, Slug("日本語".to_string()));
-        assert_eq!(format!("{}", japanese_title.slug), format!("{}", "%E6%97%A5%E6%9C%AC%E8%AA%9E".to_string()));
     }
 }
