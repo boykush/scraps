@@ -6,7 +6,7 @@ name: Publish docker package
 # documentation.
 on:
     release:
-      types: [created]
+      types: [prereleased]
 
 env:
   # Use docker.io for Docker Hub if empty
