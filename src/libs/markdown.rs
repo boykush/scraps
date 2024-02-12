@@ -31,7 +31,12 @@ pub fn extract_link_titles(text: &str) -> Vec<String> {
 pub fn head_image(text: &str) -> Option<Url> {
     let mut parser = Parser::new(text);
     parser.find_map(|event| match event {
-        Event::Start(Tag::Image(_, url, _)) => Url::parse(&url).ok(),
+        Event::Start(Tag::Image {
+            link_type: _,
+            dest_url,
+            title: _,
+            id: _,
+        }) => Url::parse(&dest_url).ok(),
         _ => None,
     })
 }
@@ -57,17 +62,22 @@ pub fn to_html(text: &str) -> String {
                 let slug = slugify::by_dash(title);
                 let link = &format!("./{}.html", slug);
                 let link_events = vec![
-                    Event::Start(Tag::Link(
-                        LinkType::Inline,
-                        CowStr::Borrowed(link),
-                        CowStr::Borrowed(""),
-                    )),
+                    Event::Start(Tag::Link {
+                        link_type: LinkType::Inline,
+                        dest_url: CowStr::Borrowed(link),
+                        title: CowStr::Borrowed(""),
+                        id: CowStr::Borrowed(""),
+                    }),
                     Event::Text(CowStr::Borrowed(title)),
-                    Event::End(Tag::Link(
-                        LinkType::Inline,
-                        CowStr::Borrowed(link),
-                        CowStr::Borrowed(""),
-                    )),
+                    Event::End(
+                        Tag::Link {
+                            link_type: LinkType::Inline,
+                            dest_url: CowStr::Borrowed(link),
+                            title: CowStr::Borrowed(""),
+                            id: CowStr::Borrowed(""),
+                        }
+                        .into(),
+                    ),
                 ]
                 .into_iter();
 
