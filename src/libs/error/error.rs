@@ -19,7 +19,4 @@ pub enum ScrapError {
 
     #[error("Failed git log. git is required")]
     GitLogError,
-
-    #[error("Not found")]
-    NotFoundError,
 }
