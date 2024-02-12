@@ -2,7 +2,7 @@ name: Build binary and update homebrew
 
 on:
   release:
-    types: [prereleased]
+    types: [released]
 
 jobs:
   build:

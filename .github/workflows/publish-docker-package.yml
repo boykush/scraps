@@ -5,8 +5,8 @@ name: Publish docker package
 # separate terms of service, privacy policy, and support
 # documentation.
 on:
-    release:
-      types: [prereleased]
+  release:
+    types: [released]
 
 env:
   # Use docker.io for Docker Hub if empty

@@ -1,8 +1,9 @@
 name: Publish rust crate
 
 on:
-    release:
-      types: [released]
+  push:
+    tags:
+      - v*.*.*
 
 env:
   CARGO_TERM_COLOR: always
