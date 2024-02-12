@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - './scraps/'
 jobs:
   build:
     runs-on: ubuntu-latest
