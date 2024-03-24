@@ -4,3 +4,4 @@ pub mod sort;
 pub mod tag;
 pub mod tags;
 pub mod title;
+mod slug;
