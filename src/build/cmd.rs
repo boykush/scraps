@@ -12,7 +12,7 @@ use url::Url;
 
 use super::{
     html::{index_render::IndexRender, scrap_render::ScrapRender, tag_render::TagRender},
-    model::{sort::SortKey, tags::Tags},
+    model::{paging::Paging, sort::SortKey, tags::Tags},
 };
 
 pub struct BuildCommand<GC: GitCommand> {
@@ -41,6 +41,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
         timezone: &Tz,
         html_metadata: &HtmlMetadata,
         sort_key: &SortKey,
+        paging: &Paging
     ) -> ScrapResult<i64> {
         let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapError::FileLoadError)?;
 
@@ -57,7 +58,8 @@ impl<GC: GitCommand> BuildCommand<GC> {
             .collect::<ScrapResult<Vec<Scrap>>>()?;
 
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
-        index_render.run(timezone, html_metadata, &scraps, sort_key)?;
+        index_render.run(timezone, html_metadata, &scraps, sort_key, paging)?;
+
         scraps
             .iter()
             .map(|scrap| {
@@ -157,6 +159,7 @@ mod tests {
             favicon: Some(Url::parse("https://github.io/image.png").unwrap()),
         };
         let sort_key = SortKey::LinkedCount;
+        let paging = Paging::Not;
 
         // scrap1
         let md_path_1 = scraps_dir_path.join("test1.md");
@@ -186,7 +189,7 @@ mod tests {
                         &static_dir_path,
                         &public_dir_path,
                     );
-                    let result1 = command.run(&timezone, &html_metadata, &sort_key);
+                    let result1 = command.run(&timezone, &html_metadata, &sort_key, &paging);
                     assert!(result1.is_ok());
 
                     let result2 = fs::read_to_string(html_path_1);

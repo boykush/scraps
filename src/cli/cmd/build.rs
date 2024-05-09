@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 use crate::build::cmd::{BuildCommand, HtmlMetadata};
+use crate::build::model::paging::Paging;
 use crate::build::model::sort::SortKey;
 use crate::libs::error::result::ScrapResult;
 
@@ -31,7 +32,7 @@ pub fn run() -> ScrapResult<()> {
     println!("{}", "Building site...".bold());
     let start = Instant::now();
 
-    let result = command.run(&timezone, &html_metadata, &sort_key)?;
+    let result = command.run(&timezone, &html_metadata, &sort_key, &Paging::Not)?;
 
     let end = start.elapsed();
     println!("-> Created {} scraps", result);
