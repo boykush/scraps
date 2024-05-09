@@ -1,6 +1,6 @@
 pub mod index_render;
+mod page_pointer;
 pub mod scrap_render;
-pub mod tag_render;
 mod scrap_tera;
 mod serde;
-mod page_pointer;
+pub mod tag_render;

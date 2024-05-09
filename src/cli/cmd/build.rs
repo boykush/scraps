@@ -30,7 +30,7 @@ pub fn run() -> ScrapResult<()> {
         .map_or_else(|| SortKey::CommitedDate, |c| c.into_sort_key());
     let paging = match config.paginate_by {
         None => Paging::Not,
-        Some(u) => Paging::By(u)
+        Some(u) => Paging::By(u),
     };
 
     println!("{}", "Building site...".bold());

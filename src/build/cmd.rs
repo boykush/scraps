@@ -41,7 +41,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
         timezone: &Tz,
         html_metadata: &HtmlMetadata,
         sort_key: &SortKey,
-        paging: &Paging
+        paging: &Paging,
     ) -> ScrapResult<i64> {
         let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapError::FileLoadError)?;
 

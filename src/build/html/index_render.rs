@@ -49,38 +49,40 @@ impl IndexRender {
             (pointer, paginated_scraps)
         });
 
-        paginated_with_pointer.map(|(pointer, paginated_scraps)| {
-            let (tera, mut context) = scrap_tera::init(
-                timezone,
-                metadata,
-                sort_key,
-                self.static_dir_path.join("*.html").to_str().unwrap(),
-            )?;
-            let template_name = if tera.get_template_names().any(|t| t == "index.html") {
-                "index.html"
-            } else {
-                "__builtins/index.html"
-            };
-            context.insert(
-                "scraps",
-                &SerializeScraps::new_with_sort(&paginated_scraps.to_vec(), &linked_scraps_map, sort_key),
-            );
-            let tags = Tags::new(scraps);
-            context.insert(
-                "tags",
-                &SerializeTags::new(&tags.values.iter().cloned().collect(), &linked_scraps_map),
-            );
-            context.insert(
-                "prev",
-                &pointer.prev
-            );
-            context.insert(
-                "next",
-                &pointer.next
-            );
-            let wtr = File::create(self.public_dir_path.join(pointer.current_file_name())).context(ScrapError::PublicRenderError)?;
-            tera.render_to(template_name, &context, wtr).context(ScrapError::PublicRenderError)
-        }).collect::<ScrapResult<()>>()
+        paginated_with_pointer
+            .map(|(pointer, paginated_scraps)| {
+                let (tera, mut context) = scrap_tera::init(
+                    timezone,
+                    metadata,
+                    sort_key,
+                    self.static_dir_path.join("*.html").to_str().unwrap(),
+                )?;
+                let template_name = if tera.get_template_names().any(|t| t == "index.html") {
+                    "index.html"
+                } else {
+                    "__builtins/index.html"
+                };
+                context.insert(
+                    "scraps",
+                    &SerializeScraps::new_with_sort(
+                        &paginated_scraps.to_vec(),
+                        &linked_scraps_map,
+                        sort_key,
+                    ),
+                );
+                let tags = Tags::new(scraps);
+                context.insert(
+                    "tags",
+                    &SerializeTags::new(&tags.values.iter().cloned().collect(), &linked_scraps_map),
+                );
+                context.insert("prev", &pointer.prev);
+                context.insert("next", &pointer.next);
+                let wtr = File::create(self.public_dir_path.join(pointer.current_file_name()))
+                    .context(ScrapError::PublicRenderError)?;
+                tera.render_to(template_name, &context, wtr)
+                    .context(ScrapError::PublicRenderError)
+            })
+            .collect::<ScrapResult<()>>()
     }
 }
 
@@ -166,7 +168,12 @@ mod tests {
         let scrap2 = &Scrap::new("scrap2", "## header2", &Some(2));
         let scrap3 = &Scrap::new("scrap3", "### header3", &Some(1));
         let scrap4 = &Scrap::new("scrap4", "#### header4", &Some(0));
-        let scraps = vec![scrap1.to_owned(), scrap2.to_owned(), scrap3.to_owned(), scrap4.to_owned()];
+        let scraps = vec![
+            scrap1.to_owned(),
+            scrap2.to_owned(),
+            scrap3.to_owned(),
+            scrap4.to_owned(),
+        ];
 
         let index_html_path = public_dir_path.join("index.html");
         let page2_html_path = public_dir_path.join("2.html");
