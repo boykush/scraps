@@ -28,11 +28,15 @@ pub fn run() -> ScrapResult<()> {
     let sort_key = config
         .sort_key
         .map_or_else(|| SortKey::CommitedDate, |c| c.into_sort_key());
+    let paging = match config.paginate_by {
+        None => Paging::Not,
+        Some(u) => Paging::By(u)
+    };
 
     println!("{}", "Building site...".bold());
     let start = Instant::now();
 
-    let result = command.run(&timezone, &html_metadata, &sort_key, &Paging::Not)?;
+    let result = command.run(&timezone, &html_metadata, &sort_key, &paging)?;
 
     let end = start.elapsed();
     println!("-> Created {} scraps", result);

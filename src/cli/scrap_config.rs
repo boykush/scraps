@@ -15,6 +15,7 @@ pub struct ScrapConfig {
     pub favicon: Option<Url>,
     pub timezone: Option<Tz>,
     pub sort_key: Option<SortKeyConfig>,
+    pub paginate_by: Option<usize>
 }
 
 impl ScrapConfig {
