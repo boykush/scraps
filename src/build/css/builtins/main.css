@@ -120,6 +120,31 @@ div.index div.links-block p.sort-key {
     font-size: 16px;
 }
 
+div.index div.paging-arrows {
+    margin-top: 32px;
+    text-align: center;
+}
+
+div.index div.paging-arrows a {
+    margin-right: 16px;
+    color: var(--gray-color);
+    font-size: 20px;
+}
+
+div.index div.paging-arrows a.prev::before {
+    content: "\2B05";
+    font-size: 16px;
+    line-height: 16px;
+    margin-right: 8px;
+}
+
+div.index div.paging-arrows a.next::after {
+    content: "\27A1";
+    font-size: 16px;
+    line-height: 16px;
+    margin-left: 8px;
+}
+
 /* scrap links */
 ul.scrap-links {
     display: grid;

@@ -17,4 +17,7 @@ timezone = "UTC"
 
 # Scraps sort key choice (optional, default=commited_date, choices=commited_date or linked_count)
 sort_key = "commited_date"
+
+# Scraps pagination on index page(optional)
+paginate_by = 20
 ```

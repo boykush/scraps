@@ -4,11 +4,21 @@
 {% block main %}
     <div class="index">
         <div class="tags-block">
-            {{ macros::tag_links(tags = tags) }}
+            {% if tags %}
+                {{ macros::tag_links(tags = tags) }}
+            {% endif %}
         </div>
         <div class="links-block">
             <p class="sort-key">Sort by - {{ sort_key }}</p>
             {{ macros::scrap_links(scraps = scraps) }}
+        </div>
+        <div class="paging-arrows">
+            {% if prev %}
+                <a class="prev" href="{{ prev }}">prev</a>
+            {% endif %}
+            {% if next %}
+                <a class="next" href="{{ next }}">next</a>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
