@@ -30,8 +30,12 @@ impl PagePointer {
         format!("./{}.html", u)
     }
 
+    pub fn is_index(&self) -> bool {
+        self.current == "./".to_string()
+    }
+
     pub fn current_file_name(self) -> String {
-        if self.current == "./".to_string() {
+        if Self::is_index(&self) {
             "index.html".to_string()
         } else {
             self.current

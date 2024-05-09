@@ -70,11 +70,16 @@ impl IndexRender {
                         sort_key,
                     ),
                 );
-                let tags = Tags::new(scraps);
-                context.insert(
-                    "tags",
-                    &SerializeTags::new(&tags.values.iter().cloned().collect(), &linked_scraps_map),
-                );
+                if pointer.is_index() {
+                    let tags = Tags::new(scraps);
+                    context.insert(
+                        "tags",
+                        &SerializeTags::new(
+                            &tags.values.iter().cloned().collect(),
+                            &linked_scraps_map,
+                        ),
+                    );
+                };
                 context.insert("prev", &pointer.prev);
                 context.insert("next", &pointer.next);
                 let wtr = File::create(self.public_dir_path.join(pointer.current_file_name()))
