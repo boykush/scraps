@@ -34,11 +34,11 @@ impl PagePointer {
         self.current == "./".to_string()
     }
 
-    pub fn current_file_name(self) -> String {
-        if Self::is_index(&self) {
+    pub fn current_file_name(&self) -> String {
+        if Self::is_index(self) {
             "index.html".to_string()
         } else {
-            self.current
+            self.current.to_string()
         }
     }
 }

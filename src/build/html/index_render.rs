@@ -53,39 +53,53 @@ impl IndexRender {
             let pointer = PagePointer::new(page_num, last_page_num);
             (pointer, paginated_scraps)
         });
+        let stags = &SerializeTags::new(&Tags::new(scraps), &linked_scraps_map);
 
         paginated_with_pointer
             .map(|(pointer, paginated_scraps)| {
-                let (tera, mut context) = scrap_tera::init(
+                Self::render_paginated_html(
+                    &self,
                     timezone,
                     metadata,
                     sort_key,
-                    self.static_dir_path.join("*.html").to_str().unwrap(),
-                )?;
-                let template_name = if tera.get_template_names().any(|t| t == "index.html") {
-                    "index.html"
-                } else {
-                    "__builtins/index.html"
-                };
-                context.insert("scraps", &paginated_scraps);
-                if pointer.is_index() {
-                    let tags = Tags::new(scraps);
-                    context.insert(
-                        "tags",
-                        &SerializeTags::new(
-                            &tags.values.iter().cloned().collect(),
-                            &linked_scraps_map,
-                        ),
-                    );
-                };
-                context.insert("prev", &pointer.prev);
-                context.insert("next", &pointer.next);
-                let wtr = File::create(self.public_dir_path.join(pointer.current_file_name()))
-                    .context(ScrapError::PublicRenderError)?;
-                tera.render_to(template_name, &context, wtr)
-                    .context(ScrapError::PublicRenderError)
+                    stags,
+                    &paginated_scraps,
+                    &pointer,
+                )
             })
             .collect::<ScrapResult<()>>()
+    }
+
+    fn render_paginated_html(
+        &self,
+        timezone: &Tz,
+        metadata: &HtmlMetadata,
+        sort_key: &SortKey,
+        tags: &SerializeTags,
+        paginated_scraps: &SerializeScraps,
+        pointer: &PagePointer,
+    ) -> ScrapResult<()> {
+        let (tera, mut context) = scrap_tera::init(
+            timezone,
+            metadata,
+            sort_key,
+            self.static_dir_path.join("*.html").to_str().unwrap(),
+        )?;
+        let template_name = if tera.get_template_names().any(|t| t == "index.html") {
+            "index.html"
+        } else {
+            "__builtins/index.html"
+        };
+        context.insert("scraps", &paginated_scraps);
+        if pointer.is_index() {
+            context.insert("tags", tags);
+        };
+        context.insert("prev", &pointer.prev);
+        context.insert("next", &pointer.next);
+        let wtr = File::create(self.public_dir_path.join(&pointer.current_file_name()))
+            .context(ScrapError::PublicRenderError)?;
+        tera.render_to(template_name, &context, wtr)
+            .context(ScrapError::PublicRenderError)
     }
 }
 
