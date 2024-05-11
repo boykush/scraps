@@ -5,7 +5,7 @@ use crate::build::model::{linked_scraps_map::LinkedScrapsMap, scrap::Scrap, sort
 use super::scrap::SerializeScrap;
 
 #[derive(serde::Serialize, PartialEq, Debug)]
-pub struct SerializeScraps(pub Vec<SerializeScrap>);
+pub struct SerializeScraps(Vec<SerializeScrap>);
 
 impl SerializeScraps {
     pub fn new_with_sort(
@@ -23,6 +23,13 @@ impl SerializeScraps {
         .collect_vec();
 
         SerializeScraps(sorted)
+    }
+
+    pub fn chunks(&self, chunk_size: usize) -> Vec<SerializeScraps> {
+        self.0
+            .chunks(chunk_size)
+            .map(|scraps| SerializeScraps(scraps.to_vec()))
+            .collect_vec()
     }
 }
 

@@ -41,12 +41,12 @@ impl IndexRender {
         paging: &Paging,
     ) -> ScrapResult<()> {
         let linked_scraps_map = LinkedScrapsMap::new(scraps);
-        let sorted_scraps = SerializeScraps::new_with_sort(
-            &scraps.to_vec(),
-            &linked_scraps_map,
-            sort_key,
-        );
-        let paginated = sorted_scraps.0.chunks(paging.size_with(scraps)).enumerate();
+        let sorted_scraps =
+            SerializeScraps::new_with_sort(&scraps.to_vec(), &linked_scraps_map, sort_key);
+        let paginated = sorted_scraps
+            .chunks(paging.size_with(scraps))
+            .into_iter()
+            .enumerate();
         let last_page_num = paginated.len();
         let paginated_with_pointer = paginated.map(|(idx, paginated_scraps)| {
             let page_num = idx + 1;
@@ -67,10 +67,7 @@ impl IndexRender {
                 } else {
                     "__builtins/index.html"
                 };
-                context.insert(
-                    "scraps",
-                    &paginated_scraps.to_vec(),
-                );
+                context.insert("scraps", &paginated_scraps);
                 if pointer.is_index() {
                     let tags = Tags::new(scraps);
                     context.insert(
