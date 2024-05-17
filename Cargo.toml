@@ -26,7 +26,7 @@ tera = "1.19.1"
 thiserror = "1.0.50"
 once_cell = "1.18.0"
 pulldown-cmark = "0.10.0"
-itertools = "0.12.0"
+itertools = "0.13.0"
 url = { version = "2.4.1", features = ["serde"] }
 chrono-tz = { version = "0.9.0", features = ["serde"] }
 colored = "2.0.4"
