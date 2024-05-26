@@ -1,5 +1,5 @@
 # Scraps
-A static site generator that builds a wiki from a set of markdown files. Inspired by [Scrapbox](https://scrapbox.io/).
+A static site generator that builds a wiki from a set of markdown files.
 
 [Document](https://boykush.github.io/scraps/getting-started.html)
 
