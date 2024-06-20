@@ -47,7 +47,7 @@ scraps
 
 See [[Scraps]] for scraps notation in markdown files.
 
-## Build static site
+## Build a static site
 
 ```bash
 ❯ scraps build
