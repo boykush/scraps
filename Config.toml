@@ -1,5 +1,5 @@
 title = "Scraps Doc"
 description = "A static site generator that builds a wiki from a set of markdown files."
-favicon = "https://github.com/boykush/scraps/blob/main/logo.png?raw=true"
+favicon = "https://github.com/boykush/scraps/blob/main/assets/logo.png?raw=true"
 timezone = "Asia/Tokyo"
 sort_key = "commited_date"
