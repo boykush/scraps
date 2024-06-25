@@ -21,7 +21,7 @@ Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 
 # Features
 ### Static Site
-- [x] Sorting (linked_count, commited_date)
+- [x] Sorting (linked_count, committed_date)
 - [x] Tagging
 - [x] Pagination
 - [ ] Themes (default is the [Nord](https://www.nordtheme.com/) theme)
