@@ -61,8 +61,8 @@ impl TagRender {
 
         // render html
         let file_name = &format!("{}.html", tag.title.slug);
-        let wtr = File::create(self.public_dir_path.join(file_name))
-            .context(ScrapError::FileWrite)?;
+        let wtr =
+            File::create(self.public_dir_path.join(file_name)).context(ScrapError::FileWrite)?;
         tera.render_to("__builtins/tag.html", &context, wtr)
             .context(ScrapError::PublicRender)
     }

@@ -15,8 +15,7 @@ impl Tags {
             .iter()
             .flat_map(|scrap| scrap.links.clone())
             .collect();
-        let scrap_titles: HashSet<Title> =
-            scraps.iter().map(|scrap| scrap.title.clone()).collect();
+        let scrap_titles: HashSet<Title> = scraps.iter().map(|scrap| scrap.title.clone()).collect();
 
         let titles: Vec<Title> = scrap_links
             .into_iter()

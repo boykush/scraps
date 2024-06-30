@@ -41,8 +41,7 @@ impl IndexRender {
         paging: &Paging,
     ) -> ScrapResult<()> {
         let linked_scraps_map = LinkedScrapsMap::new(scraps);
-        let sorted_scraps =
-            SerializeScraps::new_with_sort(scraps, &linked_scraps_map, sort_key);
+        let sorted_scraps = SerializeScraps::new_with_sort(scraps, &linked_scraps_map, sort_key);
         let paginated = sorted_scraps
             .chunks(paging.size_with(scraps))
             .into_iter()
@@ -55,18 +54,17 @@ impl IndexRender {
         });
         let stags = &SerializeTags::new(&Tags::new(scraps), &linked_scraps_map);
 
-        paginated_with_pointer
-            .try_for_each(|(pointer, paginated_scraps)| {
-                Self::render_paginated_html(
-                    self,
-                    timezone,
-                    metadata,
-                    sort_key,
-                    stags,
-                    &paginated_scraps,
-                    &pointer,
-                )
-            })
+        paginated_with_pointer.try_for_each(|(pointer, paginated_scraps)| {
+            Self::render_paginated_html(
+                self,
+                timezone,
+                metadata,
+                sort_key,
+                stags,
+                &paginated_scraps,
+                &pointer,
+            )
+        })
     }
 
     fn render_paginated_html(

@@ -13,9 +13,7 @@ pub struct InitCommand<GC: GitCommand> {
 
 impl<GC: GitCommand> InitCommand<GC> {
     pub fn new(git_command: GC) -> InitCommand<GC> {
-        InitCommand {
-            git_command,
-        }
+        InitCommand { git_command }
     }
 
     pub fn run(&self, project_name: &str) -> ScrapResult<()> {

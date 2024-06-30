@@ -15,9 +15,7 @@ impl LinkedScrapsMap {
     }
 
     pub fn linked_by(&self, title: &Title) -> Vec<Scrap> {
-        self.values
-            .get(title)
-            .map_or_else(Vec::new, Vec::clone)
+        self.values.get(title).map_or_else(Vec::new, Vec::clone)
     }
 
     fn gen_linked_map(scraps: &[Scrap]) -> HashMap<Title, Vec<Scrap>> {

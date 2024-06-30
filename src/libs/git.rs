@@ -41,9 +41,7 @@ impl GitCommand for GitCommandImpl {
             .context(ScrapError::GitLog)?;
 
         let output_str = String::from_utf8_lossy(&output.stdout);
-        let commited_ts = output_str
-            .trim()
-            .parse::<i64>().ok();
+        let commited_ts = output_str.trim().parse::<i64>().ok();
         Ok(commited_ts)
     }
 }
