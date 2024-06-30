@@ -33,7 +33,7 @@ impl ScrapConfig {
 #[derive(Serialize, Deserialize)]
 #[serde(remote = "SortKey", rename_all = "snake_case")]
 pub enum SerdeSortKey {
-    CommitedDate,
+    CommittedDate,
     LinkedCount,
 }
 

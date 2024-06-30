@@ -84,7 +84,7 @@ mod tests {
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
-        let sort_key = SortKey::CommitedDate;
+        let sort_key = SortKey::CommittedDate;
 
         let test_resource_path =
             PathBuf::from("tests/resource/build/html/render/it_render_tag_htmls");

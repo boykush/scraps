@@ -17,7 +17,7 @@ impl SerializeScraps {
             .iter()
             .map(|s| SerializeScrap::new(&s, &linked_scraps_map));
         let sorted = (match sort_key {
-            SortKey::CommitedDate => sscraps.sorted_by_key(|s| s.commited_ts).rev(),
+            SortKey::CommittedDate => sscraps.sorted_by_key(|s| s.commited_ts).rev(),
             SortKey::LinkedCount => sscraps.sorted_by_key(|s| s.linked_count).rev(),
         })
         .collect_vec();
@@ -64,7 +64,7 @@ mod tests {
                 scrap4.clone(),
             ],
             &linked_scraps_map,
-            &SortKey::CommitedDate,
+            &SortKey::CommittedDate,
         );
 
         assert_eq!(

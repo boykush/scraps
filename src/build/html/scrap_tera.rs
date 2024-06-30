@@ -39,7 +39,7 @@ pub fn init(
     context.insert("favicon", &metadata.favicon());
 
     let sort_key_text = match sort_key {
-        SortKey::CommitedDate => "commited date",
+        SortKey::CommittedDate => "commited date",
         SortKey::LinkedCount => "linked count",
     };
     context.insert("sort_key", sort_key_text);

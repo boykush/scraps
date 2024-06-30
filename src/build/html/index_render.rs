@@ -120,7 +120,7 @@ mod tests {
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
-        let sort_key = SortKey::CommitedDate;
+        let sort_key = SortKey::CommittedDate;
         let paging = Paging::Not;
 
         let test_resource_path =
@@ -165,7 +165,7 @@ mod tests {
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
-        let sort_key = SortKey::CommitedDate;
+        let sort_key = SortKey::CommittedDate;
         let paging = Paging::By(2);
 
         let test_resource_path =

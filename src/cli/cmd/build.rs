@@ -27,7 +27,7 @@ pub fn run() -> ScrapResult<()> {
     let html_metadata = HtmlMetadata::new(&config.title, &config.description, &config.favicon);
     let sort_key = config
         .sort_key
-        .map_or_else(|| SortKey::CommitedDate, |c| c.into_sort_key());
+        .map_or_else(|| SortKey::CommittedDate, |c| c.into_sort_key());
     let paging = match config.paginate_by {
         None => Paging::Not,
         Some(u) => Paging::By(u),
