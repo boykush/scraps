@@ -8,19 +8,19 @@ use super::slugify;
 
 pub fn extract_link_titles(text: &str) -> Vec<String> {
     let parser = Parser::new(text);
-    let mut parser_windows = parser.tuple_windows();
+    let parser_windows = parser.tuple_windows();
     let mut link_titles = vec![];
 
-    while let Some(events) = parser_windows.next() {
-        match events {
-            (
-                Event::Text(CowStr::Borrowed("[")),
-                Event::Text(CowStr::Borrowed("[")),
-                Event::Text(CowStr::Borrowed(title)),
-                Event::Text(CowStr::Borrowed("]")),
-                Event::Text(CowStr::Borrowed("]")),
-            ) => link_titles.push(title.to_string()),
-            _ => (),
+    for events in parser_windows {
+        if let (
+            Event::Text(CowStr::Borrowed("[")),
+            Event::Text(CowStr::Borrowed("[")),
+            Event::Text(CowStr::Borrowed(title)),
+            Event::Text(CowStr::Borrowed("]")),
+            Event::Text(CowStr::Borrowed("]")),
+        ) = events
+        {
+            link_titles.push(title.to_string());
         }
     }
 
@@ -47,8 +47,7 @@ pub fn to_html(text: &str) -> String {
     let parser_vec = parser.collect::<Vec<Event<'_>>>();
     let mut parser_windows = parser_vec
         .iter()
-        .circular_tuple_windows::<(_, _, _, _, _)>()
-        .into_iter();
+        .circular_tuple_windows::<(_, _, _, _, _)>();
 
     while let Some(events) = parser_windows.next() {
         match events {
@@ -60,7 +59,7 @@ pub fn to_html(text: &str) -> String {
                 &Event::Text(CowStr::Borrowed("]")),
             ) => {
                 let slug = slugify::by_dash(title);
-                let link = &format!("./{}.html", slug);
+                let link = &format!("./{slug}.html");
                 let link_events = vec![
                     Event::Start(Tag::Link {
                         link_type: LinkType::Inline,
@@ -85,7 +84,7 @@ pub fn to_html(text: &str) -> String {
                 (0..4).for_each(|_| {
                     parser_windows.next();
                 });
-                push_html(&mut html_buf, link_events)
+                push_html(&mut html_buf, link_events);
             }
             (e1, _, _, _, _) => push_html(&mut html_buf, vec![e1.clone()].into_iter()),
         }

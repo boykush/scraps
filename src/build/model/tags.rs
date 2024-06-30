@@ -10,13 +10,12 @@ pub struct Tags {
 }
 
 impl Tags {
-    pub fn new(scraps: &Vec<Scrap>) -> Tags {
+    pub fn new(scraps: &[Scrap]) -> Tags {
         let scrap_links: HashSet<Title> = scraps
             .iter()
-            .flat_map(|scrap| scrap.links.to_owned())
+            .flat_map(|scrap| scrap.links.clone())
             .collect();
-        let scrap_titles: HashSet<Title> =
-            scraps.iter().map(|scrap| scrap.title.to_owned()).collect();
+        let scrap_titles: HashSet<Title> = scraps.iter().map(|scrap| scrap.title.clone()).collect();
 
         let titles: Vec<Title> = scrap_links
             .into_iter()
@@ -24,7 +23,7 @@ impl Tags {
             .collect();
 
         Tags {
-            values: titles.iter().map(|t| Tag::new(t)).collect(),
+            values: titles.iter().map(Tag::new).collect(),
         }
     }
 }

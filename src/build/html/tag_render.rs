@@ -5,7 +5,7 @@ use crate::build::cmd::HtmlMetadata;
 use crate::build::model::sort::SortKey;
 use crate::build::model::tag::Tag;
 use crate::build::model::{linked_scraps_map::LinkedScrapsMap, scrap::Scrap};
-use crate::libs::error::{error::ScrapError, result::ScrapResult};
+use crate::libs::error::{ScrapError, ScrapResult};
 use anyhow::Context;
 use chrono_tz::Tz;
 
@@ -26,7 +26,7 @@ impl TagRender {
         public_dir_path: &PathBuf,
         scraps: &Vec<Scrap>,
     ) -> ScrapResult<TagRender> {
-        fs::create_dir_all(&public_dir_path).context(ScrapError::FileWriteError)?;
+        fs::create_dir_all(public_dir_path).context(ScrapError::FileWrite)?;
 
         Ok(TagRender {
             static_dir_path: static_dir_path.to_owned(),
@@ -37,7 +37,7 @@ impl TagRender {
 
     pub fn run(
         &self,
-        timezone: &Tz,
+        timezone: Tz,
         metadata: &HtmlMetadata,
         tag: &Tag,
         sort_key: &SortKey,
@@ -61,10 +61,10 @@ impl TagRender {
 
         // render html
         let file_name = &format!("{}.html", tag.title.slug);
-        let wtr = File::create(self.public_dir_path.join(file_name))
-            .context(ScrapError::FileWriteError)?;
+        let wtr =
+            File::create(self.public_dir_path.join(file_name)).context(ScrapError::FileWrite)?;
         tera.render_to("__builtins/tag.html", &context, wtr)
-            .context(ScrapError::PublicRenderError)
+            .context(ScrapError::PublicRender)
     }
 }
 
@@ -102,7 +102,7 @@ mod tests {
 
         let render = TagRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 
-        let result1 = render.run(&timezone, &metadata, &tag1, &sort_key);
+        let result1 = render.run(timezone, &metadata, &tag1, &sort_key);
         assert!(result1.is_ok());
 
         let result2 = fs::read_to_string(tag1_html_path);

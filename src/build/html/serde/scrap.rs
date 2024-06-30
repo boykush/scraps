@@ -1,6 +1,6 @@
 use url::Url;
 
-use crate::build::model::{linked_scraps_map::LinkedScrapsMap, scrap::Scrap};
+use crate::build::model::{linked_scraps_map::LinkedScrapsMap, scrap::Scrap, title::Title};
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 pub struct SerializeScrap {
@@ -19,11 +19,11 @@ impl SerializeScrap {
         SerializeScrap {
             title: scrap.title.to_string(),
             slug: scrap.title.slug.to_string(),
-            links: scrap.links.iter().map(|t| t.to_string()).collect(),
-            html_content: scrap.html_content.to_owned(),
-            thumbnail: scrap.thumbnail.to_owned(),
-            commited_ts: scrap.commited_ts.to_owned(),
-            linked_count: linked_count,
+            links: scrap.links.iter().map(Title::to_string).collect(),
+            html_content: scrap.html_content.clone(),
+            thumbnail: scrap.thumbnail.clone(),
+            commited_ts: scrap.commited_ts,
+            linked_count,
         }
     }
 }

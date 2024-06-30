@@ -1,6 +1,6 @@
 use std::{net::SocketAddr, path::PathBuf};
 
-use crate::{libs::error::result::ScrapResult, serve::cmd::ServeCommand};
+use crate::{libs::error::ScrapResult, serve::cmd::ServeCommand};
 
 pub fn run() -> ScrapResult<()> {
     let public_dir_path = PathBuf::from("public");

@@ -7,7 +7,7 @@ use crate::build::model::paging::Paging;
 use crate::build::model::scrap::Scrap;
 use crate::build::model::sort::SortKey;
 use crate::build::model::tags::Tags;
-use crate::libs::error::{error::ScrapError, result::ScrapResult};
+use crate::libs::error::{ScrapError, ScrapResult};
 use anyhow::Context;
 use chrono_tz::Tz;
 
@@ -24,7 +24,7 @@ pub struct IndexRender {
 
 impl IndexRender {
     pub fn new(static_dir_path: &PathBuf, public_dir_path: &PathBuf) -> ScrapResult<IndexRender> {
-        fs::create_dir_all(&public_dir_path).context(ScrapError::FileWriteError)?;
+        fs::create_dir_all(public_dir_path).context(ScrapError::FileWrite)?;
 
         Ok(IndexRender {
             static_dir_path: static_dir_path.to_owned(),
@@ -34,45 +34,42 @@ impl IndexRender {
 
     pub fn run(
         &self,
-        timezone: &Tz,
+        timezone: Tz,
         metadata: &HtmlMetadata,
-        scraps: &Vec<Scrap>,
+        scraps: &[Scrap],
         sort_key: &SortKey,
         paging: &Paging,
     ) -> ScrapResult<()> {
         let linked_scraps_map = LinkedScrapsMap::new(scraps);
-        let sorted_scraps =
-            SerializeScraps::new_with_sort(&scraps.to_vec(), &linked_scraps_map, sort_key);
+        let sorted_scraps = SerializeScraps::new_with_sort(scraps, &linked_scraps_map, sort_key);
         let paginated = sorted_scraps
             .chunks(paging.size_with(scraps))
             .into_iter()
             .enumerate();
         let last_page_num = paginated.len();
-        let paginated_with_pointer = paginated.map(|(idx, paginated_scraps)| {
+        let mut paginated_with_pointer = paginated.map(|(idx, paginated_scraps)| {
             let page_num = idx + 1;
             let pointer = PagePointer::new(page_num, last_page_num);
             (pointer, paginated_scraps)
         });
         let stags = &SerializeTags::new(&Tags::new(scraps), &linked_scraps_map);
 
-        paginated_with_pointer
-            .map(|(pointer, paginated_scraps)| {
-                Self::render_paginated_html(
-                    &self,
-                    timezone,
-                    metadata,
-                    sort_key,
-                    stags,
-                    &paginated_scraps,
-                    &pointer,
-                )
-            })
-            .collect::<ScrapResult<()>>()
+        paginated_with_pointer.try_for_each(|(pointer, paginated_scraps)| {
+            Self::render_paginated_html(
+                self,
+                timezone,
+                metadata,
+                sort_key,
+                stags,
+                &paginated_scraps,
+                &pointer,
+            )
+        })
     }
 
     fn render_paginated_html(
         &self,
-        timezone: &Tz,
+        timezone: Tz,
         metadata: &HtmlMetadata,
         sort_key: &SortKey,
         tags: &SerializeTags,
@@ -96,10 +93,10 @@ impl IndexRender {
         };
         context.insert("prev", &pointer.prev);
         context.insert("next", &pointer.next);
-        let wtr = File::create(self.public_dir_path.join(&pointer.current_file_name()))
-            .context(ScrapError::PublicRenderError)?;
+        let wtr = File::create(self.public_dir_path.join(pointer.current_file_name()))
+            .context(ScrapError::PublicRender)?;
         tera.render_to(template_name, &context, wtr)
-            .context(ScrapError::PublicRenderError)
+            .context(ScrapError::PublicRender)
     }
 }
 
@@ -144,7 +141,7 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            let result1 = render.run(&timezone, &metadata, &scraps, &sort_key, &paging);
+            let result1 = render.run(timezone, &metadata, &scraps, &sort_key, &paging);
 
             assert!(result1.is_ok());
 
@@ -197,7 +194,7 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            let result1 = render.run(&timezone, &metadata, &scraps, &sort_key, &paging);
+            let result1 = render.run(timezone, &metadata, &scraps, &sort_key, &paging);
 
             assert!(result1.is_ok());
 

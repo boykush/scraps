@@ -9,24 +9,22 @@ pub struct LinkedScrapsMap {
 }
 
 impl LinkedScrapsMap {
-    pub fn new(scraps: &Vec<Scrap>) -> LinkedScrapsMap {
+    pub fn new(scraps: &[Scrap]) -> LinkedScrapsMap {
         let linked_map = Self::gen_linked_map(scraps);
         LinkedScrapsMap { values: linked_map }
     }
 
     pub fn linked_by(&self, title: &Title) -> Vec<Scrap> {
-        self.values
-            .get(title)
-            .map_or_else(|| vec![], |s| s.to_owned())
+        self.values.get(title).map_or_else(Vec::new, Vec::clone)
     }
 
-    fn gen_linked_map(scraps: &Vec<Scrap>) -> HashMap<Title, Vec<Scrap>> {
+    fn gen_linked_map(scraps: &[Scrap]) -> HashMap<Title, Vec<Scrap>> {
         scraps
             .iter()
-            .fold(HashMap::new(), |acc1, scrap| {
+            .fold(HashMap::new(), |acc1: HashMap<Title, Vec<Scrap>>, scrap| {
                 scrap.to_owned().links.iter().fold(acc1, |mut acc2, link| {
                     acc2.entry(link.to_owned())
-                        .or_insert_with(Vec::new)
+                        .or_default()
                         .push(scrap.to_owned());
                     acc2
                 })

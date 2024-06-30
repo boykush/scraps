@@ -13,7 +13,7 @@ impl SerializeTag {
         SerializeTag {
             title: tag.title.to_string(),
             slug: tag.title.slug.to_string(),
-            linked_count: linked_count,
+            linked_count,
         }
     }
 }

@@ -5,7 +5,7 @@ mod libs;
 mod serve;
 
 use clap::Parser;
-use libs::error::result::ScrapResult;
+use libs::error::ScrapResult;
 
 fn main() -> ScrapResult<()> {
     let cli = cli::Cli::parse();

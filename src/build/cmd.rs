@@ -4,7 +4,7 @@ use std::{
 };
 
 use crate::build::model::scrap::Scrap;
-use crate::libs::error::{error::ScrapError, result::ScrapResult};
+use crate::libs::error::{ScrapError, ScrapResult};
 use crate::{build::css::render::CSSRender, libs::git::GitCommand};
 use anyhow::{bail, Context};
 use chrono_tz::Tz;
@@ -30,7 +30,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
         public_dir_path: &PathBuf,
     ) -> BuildCommand<GC> {
         BuildCommand {
-            git_command: git_command,
+            git_command,
             scraps_dir_path: scraps_dir_path.to_owned(),
             static_dir_path: static_dir_path.to_owned(),
             public_dir_path: public_dir_path.to_owned(),
@@ -38,17 +38,17 @@ impl<GC: GitCommand> BuildCommand<GC> {
     }
     pub fn run(
         &self,
-        timezone: &Tz,
+        timezone: Tz,
         html_metadata: &HtmlMetadata,
         sort_key: &SortKey,
         paging: &Paging,
-    ) -> ScrapResult<i64> {
-        let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapError::FileLoadError)?;
+    ) -> ScrapResult<usize> {
+        let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapError::FileLoad)?;
 
         let paths = read_dir
             .map(|entry_res| {
                 let entry = entry_res?;
-                self.to_path_by_dir_entry(&entry)
+                Self::to_path_by_dir_entry(&entry)
             })
             .collect::<ScrapResult<Vec<PathBuf>>>()?;
 
@@ -60,35 +60,28 @@ impl<GC: GitCommand> BuildCommand<GC> {
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         index_render.run(timezone, html_metadata, &scraps, sort_key, paging)?;
 
-        scraps
-            .iter()
-            .map(|scrap| {
-                let scrap_render =
-                    ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-                scrap_render.run(timezone, html_metadata, scrap, sort_key)
-            })
-            .collect::<ScrapResult<()>>()?;
+        scraps.iter().try_for_each(|scrap| {
+            let scrap_render =
+                ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
+            scrap_render.run(timezone, html_metadata, scrap, sort_key)
+        })?;
 
         let tags = Tags::new(&scraps);
-        tags.values
-            .iter()
-            .map(|tag| {
-                let tag_render =
-                    TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-                tag_render.run(timezone, html_metadata, tag, sort_key)
-            })
-            .collect::<ScrapResult<()>>()?;
+        tags.values.iter().try_for_each(|tag| {
+            let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
+            tag_render.run(timezone, html_metadata, tag, sort_key)
+        })?;
 
         let css_render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
         css_render.render_main()?;
 
-        Ok(scraps.len() as i64)
+        Ok(scraps.len())
     }
 
-    fn to_path_by_dir_entry(&self, dir_entry: &DirEntry) -> ScrapResult<PathBuf> {
+    fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapResult<PathBuf> {
         if let Ok(file_type) = dir_entry.file_type() {
             if file_type.is_dir() {
-                bail!(ScrapError::FileLoadError)
+                bail!(ScrapError::FileLoad)
             }
         };
         Ok(dir_entry.path())
@@ -97,11 +90,11 @@ impl<GC: GitCommand> BuildCommand<GC> {
     fn to_scrap_by_path(&self, path: &PathBuf) -> ScrapResult<Scrap> {
         let file_prefix = path
             .file_stem()
-            .ok_or(ScrapError::FileLoadError)
+            .ok_or(ScrapError::FileLoad)
             .map(|o| o.to_str())
-            .and_then(|fp| fp.ok_or(ScrapError::FileLoadError.into()))?;
-        let md_text = fs::read_to_string(&path).context(ScrapError::FileLoadError)?;
-        let commited_ts = self.git_command.commited_ts(&path)?;
+            .and_then(|fp| fp.ok_or(ScrapError::FileLoad))?;
+        let md_text = fs::read_to_string(path).context(ScrapError::FileLoad)?;
+        let commited_ts = self.git_command.commited_ts(path)?;
 
         Ok(Scrap::new(file_prefix, &md_text, &commited_ts))
     }
@@ -189,7 +182,7 @@ mod tests {
                         &static_dir_path,
                         &public_dir_path,
                     );
-                    let result1 = command.run(&timezone, &html_metadata, &sort_key, &paging);
+                    let result1 = command.run(timezone, &html_metadata, &sort_key, &paging);
                     assert!(result1.is_ok());
 
                     let result2 = fs::read_to_string(html_path_1);
