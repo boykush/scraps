@@ -15,8 +15,8 @@ favicon = ""
 # The site timezone (optional, default=UTC)
 timezone = "UTC"
 
-# Scraps sort key choice (optional, default=commited_date, choices=commited_date or linked_count)
-sort_key = "commited_date"
+# Scraps sort key choice (optional, default=committed_date, choices=committed_date or linked_count)
+sort_key = "committed_date"
 
 # Scraps pagination on index page(optional)
 paginate_by = 20
