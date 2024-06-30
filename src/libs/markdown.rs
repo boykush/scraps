@@ -99,7 +99,7 @@ mod tests {
 
     #[test]
     fn it_extract_link_titles() {
-        let valid_links = &vec![
+        let valid_links = &[
             "[[head]]",
             "[[contain space]]",
             "[[last]]",
@@ -107,13 +107,13 @@ mod tests {
             "[[duplicate]]",
         ]
         .join("\n");
-        let result1 = extract_link_titles(valid_links).sort();
-        assert_eq!(
-            result1,
-            vec!["head", "contain space", "last", "duplicate"].sort()
-        );
+        let mut result1 = extract_link_titles(valid_links);
+        let mut expected1 = ["head", "contain space", "last", "duplicate"];
+        result1.sort();
+        expected1.sort();
+        assert_eq!(result1, expected1);
 
-        let invalid_links = &vec![
+        let invalid_links = &[
             "`[[quote block]]`",
             "```\n[[code block]]\n```",
             "[single braces]",
@@ -140,11 +140,11 @@ mod tests {
 
     #[test]
     fn it_to_html() {
-        let code_text = vec!["`[[quote block]]`", "```\n[[code block]]\n```"].join("\n");
+        let code_text = ["`[[quote block]]`", "```\n[[code block]]\n```"].join("\n");
         let result1 = to_html(&code_text);
         assert_eq!(
             result1,
-            vec![
+            [
                 "<p><code>[[quote block]]</code></p>",
                 "<pre><code>[[code block]]\n</code></pre>",
             ]
@@ -153,14 +153,14 @@ mod tests {
         );
 
         let link_text = "[[link]][[expect slugify]]";
-        let result2 = to_html(&link_text);
+        let result2 = to_html(link_text);
         assert_eq!(result2, "<p><a href=\"./link.html\">link</a><a href=\"./expect-slugify.html\">expect slugify</a></p>\n",);
 
-        let not_link_text = vec!["only close]]", "[[only open"].join("\n");
+        let not_link_text = ["only close]]", "[[only open"].join("\n");
         let result3 = to_html(&not_link_text);
         assert_eq!(
             result3,
-            vec!["<p>only close]]", "[[only open</p>",].join("\n") + "\n"
+            ["<p>only close]]", "[[only open</p>",].join("\n") + "\n"
         )
     }
 }

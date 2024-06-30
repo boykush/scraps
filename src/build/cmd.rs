@@ -182,7 +182,7 @@ mod tests {
                         &static_dir_path,
                         &public_dir_path,
                     );
-                    let result1 = command.run(timezone, &html_metadata, &sort_key, &paging);
+                    let result1 = command.run(timezone, html_metadata, &sort_key, &paging);
                     assert!(result1.is_ok());
 
                     let result2 = fs::read_to_string(html_path_1);

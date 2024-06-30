@@ -80,7 +80,7 @@ mod tests {
         // args
         let timezone = chrono_tz::UTC;
         let metadata = HtmlMetadata::new(
-            &"Scrap",
+            "Scrap",
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );

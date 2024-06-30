@@ -14,7 +14,7 @@ pub mod tests {
             let parent = path.parent().map(|p| p.to_owned());
             FileResource {
                 path: path.to_owned(),
-                parent: parent,
+                parent,
             }
         }
 
@@ -23,7 +23,7 @@ pub mod tests {
             F: FnOnce(),
         {
             let mut file = self.open();
-            file.write(init_bytes).unwrap();
+            file.write_all(init_bytes).unwrap();
             b();
             self.close();
         }
@@ -36,7 +36,7 @@ pub mod tests {
             File::create(&self.path).unwrap()
         }
 
-        fn close(&self) -> () {
+        fn close(&self) {
             remove_file(&self.path).unwrap_or(());
             if let Some(p) = &self.parent {
                 fs::remove_dir_all(p).unwrap_or(())
@@ -64,11 +64,11 @@ pub mod tests {
             self.close();
         }
 
-        fn open(&self) -> () {
+        fn open(&self) {
             fs::create_dir_all(&self.path).unwrap()
         }
 
-        fn close(&self) -> () {
+        fn close(&self) {
             fs::remove_dir_all(&self.path).unwrap()
         }
     }
