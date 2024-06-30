@@ -1,6 +1,6 @@
 use crate::{
     init::cmd::InitCommand,
-    libs::{error::result::ScrapResult, git::GitCommandImpl},
+    libs::{error::ScrapResult, git::GitCommandImpl},
 };
 
 pub fn run(project_name: &str) -> ScrapResult<()> {

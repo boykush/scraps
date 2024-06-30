@@ -1,6 +1,6 @@
 use crate::{
     build::model::sort::SortKey,
-    libs::error::{error::ScrapError, result::ScrapResult},
+    libs::error::{ScrapError, ScrapResult},
 };
 use anyhow::Context;
 use chrono_tz::Tz;
@@ -23,10 +23,10 @@ impl ScrapConfig {
         let config = Config::builder()
             .add_source(config::File::with_name("Config.toml"))
             .build()
-            .context(ScrapError::ConfigLoadError)?;
+            .context(ScrapError::ConfigLoad)?;
         config
             .try_deserialize::<ScrapConfig>()
-            .context(ScrapError::ConfigLoadError)
+            .context(ScrapError::ConfigLoad)
     }
 }
 
@@ -41,7 +41,7 @@ pub enum SerdeSortKey {
 pub struct SortKeyConfig(#[serde(with = "SerdeSortKey")] SortKey);
 
 impl SortKeyConfig {
-    pub fn into_sort_key(&self) -> SortKey {
+    pub fn into_sort_key(self) -> SortKey {
         self.0.to_owned()
     }
 }

@@ -9,7 +9,7 @@ use hyper::{
 };
 use percent_encoding::percent_decode_str;
 
-use crate::libs::error::error::ScrapError;
+use crate::libs::error::ScrapError;
 
 #[derive(Clone)]
 pub struct ScrapsService {
@@ -40,7 +40,7 @@ impl ScrapsService {
         let mut contents = String::new();
         let read = file
             .read_to_string(&mut contents)
-            .context(ScrapError::FileLoadError);
+            .context(ScrapError::FileLoad);
 
         match read {
             Ok(_) => Self::mk_response(contents),
@@ -58,20 +58,19 @@ impl Service<Request<Incoming>> for ScrapsService {
         let path_parts = req
             .uri()
             .path()
-            .split("/")
+            .split('/')
             .filter(|f| !f.is_empty())
             .collect::<Vec<&str>>();
-        let file_name = path_parts.first().map(|&f| f).unwrap_or("index.html");
+        let file_name = path_parts.first().copied().unwrap_or("index.html");
         let decoded_file_name = percent_decode_str(file_name).decode_utf8();
         let res = match decoded_file_name {
             Ok(name) => {
                 let file_path = self.public_dir_path.join(name.to_string());
-                let file = File::open(file_path).context(ScrapError::FileLoadError);
-                let res = match file {
+                let file = File::open(file_path).context(ScrapError::FileLoad);
+                match file {
                     Ok(mut f) => Self::mk_page_response(&mut f),
                     Err(_) => Self::mk_not_found_response(),
-                };
-                res
+                }
             }
             Err(_) => Self::mk_failed_url_decode_response(),
         };

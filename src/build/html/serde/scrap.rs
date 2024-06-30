@@ -23,7 +23,7 @@ impl SerializeScrap {
             html_content: scrap.html_content.to_owned(),
             thumbnail: scrap.thumbnail.to_owned(),
             commited_ts: scrap.commited_ts.to_owned(),
-            linked_count: linked_count,
+            linked_count,
         }
     }
 }

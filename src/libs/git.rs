@@ -1,15 +1,15 @@
 use std::{
-    path::PathBuf,
+    path::Path,
     process::{Command, Stdio},
 };
 
 use anyhow::Context;
 
-use super::error::{error::ScrapError, result::ScrapResult};
+use super::error::{ScrapError, ScrapResult};
 
 pub trait GitCommand {
-    fn init(&self, path: &PathBuf) -> ScrapResult<()>;
-    fn commited_ts(&self, path: &PathBuf) -> ScrapResult<Option<i64>>;
+    fn init(&self, path: &Path) -> ScrapResult<()>;
+    fn commited_ts(&self, path: &Path) -> ScrapResult<Option<i64>>;
 }
 
 pub struct GitCommandImpl {}
@@ -21,16 +21,16 @@ impl GitCommandImpl {
 }
 
 impl GitCommand for GitCommandImpl {
-    fn init(&self, path: &PathBuf) -> ScrapResult<()> {
+    fn init(&self, path: &Path) -> ScrapResult<()> {
         Command::new("git")
             .current_dir(path)
             .arg("init")
             .output()
             .map(|_| ())
-            .context(ScrapError::GitInitError)
+            .context(ScrapError::GitInit)
     }
 
-    fn commited_ts(&self, path: &PathBuf) -> ScrapResult<Option<i64>> {
+    fn commited_ts(&self, path: &Path) -> ScrapResult<Option<i64>> {
         let output = Command::new("git")
             .arg("log")
             .arg("-1")
@@ -38,13 +38,12 @@ impl GitCommand for GitCommandImpl {
             .arg(path)
             .stdout(Stdio::piped())
             .output()
-            .context(ScrapError::GitLogError)?;
+            .context(ScrapError::GitLog)?;
 
         let output_str = String::from_utf8_lossy(&output.stdout);
         let commited_ts = output_str
             .trim()
-            .parse::<i64>()
-            .map_or_else(|_| None, |s| Some(s));
+            .parse::<i64>().ok();
         Ok(commited_ts)
     }
 }
@@ -62,10 +61,10 @@ pub mod tests {
     }
 
     impl GitCommand for GitCommandTest {
-        fn init(&self, _path: &PathBuf) -> ScrapResult<()> {
+        fn init(&self, _path: &Path) -> ScrapResult<()> {
             Ok(())
         }
-        fn commited_ts(&self, _path: &PathBuf) -> ScrapResult<Option<i64>> {
+        fn commited_ts(&self, _path: &Path) -> ScrapResult<Option<i64>> {
             Ok(Some(0))
         }
     }

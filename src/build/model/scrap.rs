@@ -24,9 +24,9 @@ impl Scrap {
 
         Scrap {
             title: Title::new(title),
-            links: links,
-            html_content: html_content,
-            thumbnail: thumbnail,
+            links,
+            html_content,
+            thumbnail,
             commited_ts: commited_ts.to_owned(),
         }
     }

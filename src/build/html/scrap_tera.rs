@@ -1,6 +1,6 @@
 use crate::{
     build::{cmd::HtmlMetadata, model::sort::SortKey},
-    libs::error::{error::ScrapError, result::ScrapResult},
+    libs::error::{ScrapError, ScrapResult},
 };
 use anyhow::Context;
 use chrono_tz::Tz;
@@ -29,7 +29,7 @@ pub fn init(
     sort_key: &SortKey,
     template_dir: &str,
 ) -> ScrapResult<(Tera, tera::Context)> {
-    let mut tera = Tera::new(template_dir).context(ScrapError::PublicRenderError)?;
+    let mut tera = Tera::new(template_dir).context(ScrapError::PublicRender)?;
     tera.extend(&SCRAP_TERA).unwrap();
 
     let mut context = tera::Context::new();

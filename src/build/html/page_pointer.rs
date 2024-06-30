@@ -7,12 +7,12 @@ pub struct PagePointer {
 impl PagePointer {
     pub fn new(page_num: usize, last_page_num: usize) -> PagePointer {
         let prev = match page_num {
-            n if n == 1 => None,
-            n if n == 2 => Some("./".to_string()),
+            1 => None,
+            2 => Some("./".to_string()),
             n => Some(Self::format_html(n - 1)),
         };
         let current = match page_num {
-            n if n == 1 => "./".to_string(),
+            1 => "./".to_string(),
             n => Self::format_html(n),
         };
         let next = match page_num {
@@ -31,7 +31,7 @@ impl PagePointer {
     }
 
     pub fn is_index(&self) -> bool {
-        self.current == "./".to_string()
+        self.current == *"./".to_string()
     }
 
     pub fn current_file_name(&self) -> String {

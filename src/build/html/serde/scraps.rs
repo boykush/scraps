@@ -9,13 +9,13 @@ pub struct SerializeScraps(Vec<SerializeScrap>);
 
 impl SerializeScraps {
     pub fn new_with_sort(
-        scraps: &Vec<Scrap>,
+        scraps: &[Scrap],
         linked_scraps_map: &LinkedScrapsMap,
         sort_key: &SortKey,
     ) -> SerializeScraps {
         let sscraps = scraps
             .iter()
-            .map(|s| SerializeScrap::new(&s, &linked_scraps_map));
+            .map(|s| SerializeScrap::new(s, linked_scraps_map));
         let sorted = (match sort_key {
             SortKey::CommittedDate => sscraps.sorted_by_key(|s| s.commited_ts).rev(),
             SortKey::LinkedCount => sscraps.sorted_by_key(|s| s.linked_count).rev(),

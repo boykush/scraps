@@ -4,7 +4,7 @@ use std::{fs::File, path::PathBuf};
 use crate::build::cmd::HtmlMetadata;
 use crate::build::model::sort::SortKey;
 use crate::build::model::{linked_scraps_map::LinkedScrapsMap, scrap::Scrap};
-use crate::libs::error::{error::ScrapError, result::ScrapResult};
+use crate::libs::error::{ScrapError, ScrapResult};
 use anyhow::Context;
 use chrono_tz::Tz;
 
@@ -25,7 +25,7 @@ impl ScrapRender {
         public_dir_path: &PathBuf,
         scraps: &Vec<Scrap>,
     ) -> ScrapResult<ScrapRender> {
-        fs::create_dir_all(&public_dir_path).context(ScrapError::FileWriteError)?;
+        fs::create_dir_all(public_dir_path).context(ScrapError::FileWrite)?;
 
         Ok(ScrapRender {
             static_dir_path: static_dir_path.to_owned(),
@@ -50,7 +50,7 @@ impl ScrapRender {
 
         // insert to context for linked list
         let linked_scraps_map = LinkedScrapsMap::new(&self.scraps);
-        context.insert("scrap", &SerializeScrap::new(&scrap, &linked_scraps_map));
+        context.insert("scrap", &SerializeScrap::new(scrap, &linked_scraps_map));
 
         let linked_scraps = linked_scraps_map.linked_by(&scrap.title);
         context.insert(
@@ -61,9 +61,9 @@ impl ScrapRender {
         // render html
         let file_name = &format!("{}.html", scrap.title.slug);
         let wtr = File::create(self.public_dir_path.join(file_name))
-            .context(ScrapError::FileWriteError)?;
+            .context(ScrapError::FileWrite)?;
         tera.render_to("__builtins/scrap.html", &context, wtr)
-            .context(ScrapError::PublicRenderError)
+            .context(ScrapError::PublicRender)
     }
 }
 

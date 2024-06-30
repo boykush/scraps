@@ -5,7 +5,7 @@ use std::time::Instant;
 use crate::build::cmd::{BuildCommand, HtmlMetadata};
 use crate::build::model::paging::Paging;
 use crate::build::model::sort::SortKey;
-use crate::libs::error::result::ScrapResult;
+use crate::libs::error::ScrapResult;
 
 use crate::cli::scrap_config::ScrapConfig;
 use crate::libs::git::GitCommandImpl;

@@ -5,7 +5,7 @@ use std::{
     path::PathBuf,
 };
 
-use crate::libs::error::{error::ScrapError, result::ScrapResult};
+use crate::libs::error::{ScrapError, ScrapResult};
 
 pub struct CSSRender {
     static_dir_path: PathBuf,
@@ -25,9 +25,9 @@ impl CSSRender {
         let css = fs::read_to_string(self.static_dir_path.join("main.css")).unwrap_or(builtins_css);
 
         let mut wtr = File::create(self.public_dir_path.join("main.css"))
-            .context(ScrapError::FileWriteError)?;
+            .context(ScrapError::FileWrite)?;
         wtr.write_all(css.as_bytes())
-            .context(ScrapError::FileWriteError)?;
-        wtr.flush().context(ScrapError::FileWriteError)
+            .context(ScrapError::FileWrite)?;
+        wtr.flush().context(ScrapError::FileWrite)
     }
 }

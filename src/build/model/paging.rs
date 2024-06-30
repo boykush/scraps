@@ -6,7 +6,7 @@ pub enum Paging {
 }
 
 impl Paging {
-    pub fn size_with(&self, scraps: &Vec<Scrap>) -> usize {
+    pub fn size_with(&self, scraps: &[Scrap]) -> usize {
         match self {
             Paging::Not => scraps.len(),
             Paging::By(size) => size.to_owned(),
