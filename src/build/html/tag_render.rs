@@ -37,7 +37,7 @@ impl TagRender {
 
     pub fn run(
         &self,
-        timezone: &Tz,
+        timezone: Tz,
         metadata: &HtmlMetadata,
         tag: &Tag,
         sort_key: &SortKey,
@@ -102,7 +102,7 @@ mod tests {
 
         let render = TagRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 
-        let result1 = render.run(&timezone, &metadata, &tag1, &sort_key);
+        let result1 = render.run(timezone, &metadata, &tag1, &sort_key);
         assert!(result1.is_ok());
 
         let result2 = fs::read_to_string(tag1_html_path);

@@ -34,7 +34,7 @@ impl IndexRender {
 
     pub fn run(
         &self,
-        timezone: &Tz,
+        timezone: Tz,
         metadata: &HtmlMetadata,
         scraps: &[Scrap],
         sort_key: &SortKey,
@@ -71,7 +71,7 @@ impl IndexRender {
 
     fn render_paginated_html(
         &self,
-        timezone: &Tz,
+        timezone: Tz,
         metadata: &HtmlMetadata,
         sort_key: &SortKey,
         tags: &SerializeTags,
@@ -143,7 +143,7 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            let result1 = render.run(&timezone, &metadata, &scraps, &sort_key, &paging);
+            let result1 = render.run(timezone, &metadata, &scraps, &sort_key, &paging);
 
             assert!(result1.is_ok());
 
@@ -196,7 +196,7 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            let result1 = render.run(&timezone, &metadata, &scraps, &sort_key, &paging);
+            let result1 = render.run(timezone, &metadata, &scraps, &sort_key, &paging);
 
             assert!(result1.is_ok());
 

@@ -38,17 +38,17 @@ impl<GC: GitCommand> BuildCommand<GC> {
     }
     pub fn run(
         &self,
-        timezone: &Tz,
+        timezone: Tz,
         html_metadata: &HtmlMetadata,
         sort_key: &SortKey,
         paging: &Paging,
-    ) -> ScrapResult<i64> {
+    ) -> ScrapResult<usize> {
         let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapError::FileLoad)?;
 
         let paths = read_dir
             .map(|entry_res| {
                 let entry = entry_res?;
-                self.to_path_by_dir_entry(&entry)
+                Self::to_path_by_dir_entry(&entry)
             })
             .collect::<ScrapResult<Vec<PathBuf>>>()?;
 
@@ -80,10 +80,10 @@ impl<GC: GitCommand> BuildCommand<GC> {
         let css_render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
         css_render.render_main()?;
 
-        Ok(scraps.len() as i64)
+        Ok(scraps.len())
     }
 
-    fn to_path_by_dir_entry(&self, dir_entry: &DirEntry) -> ScrapResult<PathBuf> {
+    fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapResult<PathBuf> {
         if let Ok(file_type) = dir_entry.file_type() {
             if file_type.is_dir() {
                 bail!(ScrapError::FileLoad)
@@ -187,7 +187,7 @@ mod tests {
                         &static_dir_path,
                         &public_dir_path,
                     );
-                    let result1 = command.run(&timezone, &html_metadata, &sort_key, &paging);
+                    let result1 = command.run(timezone, &html_metadata, &sort_key, &paging);
                     assert!(result1.is_ok());
 
                     let result2 = fs::read_to_string(html_path_1);

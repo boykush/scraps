@@ -7,7 +7,7 @@ use crate::build::model::paging::Paging;
 use crate::build::model::sort::SortKey;
 use crate::libs::error::ScrapResult;
 
-use crate::cli::scrap_config::ScrapConfig;
+use crate::cli::scrap_config::{ScrapConfig, SortKeyConfig};
 use crate::libs::git::GitCommandImpl;
 
 pub fn run() -> ScrapResult<()> {
@@ -27,7 +27,7 @@ pub fn run() -> ScrapResult<()> {
     let html_metadata = HtmlMetadata::new(&config.title, &config.description, &config.favicon);
     let sort_key = config
         .sort_key
-        .map_or_else(|| SortKey::CommittedDate, |c| c.into_sort_key());
+        .map_or_else(|| SortKey::CommittedDate, SortKeyConfig::into_sort_key);
     let paging = match config.paginate_by {
         None => Paging::Not,
         Some(u) => Paging::By(u),
@@ -36,10 +36,10 @@ pub fn run() -> ScrapResult<()> {
     println!("{}", "Building site...".bold());
     let start = Instant::now();
 
-    let result = command.run(&timezone, &html_metadata, &sort_key, &paging)?;
+    let result = command.run(timezone, &html_metadata, &sort_key, &paging)?;
 
     let end = start.elapsed();
-    println!("-> Created {} scraps", result);
+    println!("-> Created {result} scraps");
     Ok(println!(
         "{} {}.{} {}",
         "Done in".green(),

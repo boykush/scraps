@@ -36,7 +36,7 @@ impl ScrapRender {
 
     pub fn run(
         &self,
-        timezone: &Tz,
+        timezone: Tz,
         metadata: &HtmlMetadata,
         scrap: &Scrap,
         sort_key: &SortKey,
@@ -99,7 +99,7 @@ mod tests {
 
         let render = ScrapRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 
-        let result1 = render.run(&timezone, &metadata, scrap1, &sort_key);
+        let result1 = render.run(timezone, &metadata, scrap1, &sort_key);
         assert!(result1.is_ok());
 
         let result2 = fs::read_to_string(scrap1_html_path);

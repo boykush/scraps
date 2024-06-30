@@ -27,7 +27,7 @@ impl PagePointer {
     }
 
     fn format_html(u: usize) -> String {
-        format!("./{}.html", u)
+        format!("./{u}.html")
     }
 
     pub fn is_index(&self) -> bool {

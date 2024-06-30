@@ -54,8 +54,8 @@ impl Service<Request<Incoming>> for ScrapsService {
     type Error = ScrapError;
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 
-    fn call(&self, req: Request<Incoming>) -> Self::Future {
-        let path_parts = req
+    fn call(&self, request: Request<Incoming>) -> Self::Future {
+        let path_parts = request
             .uri()
             .path()
             .split('/')
@@ -63,7 +63,7 @@ impl Service<Request<Incoming>> for ScrapsService {
             .collect::<Vec<&str>>();
         let file_name = path_parts.first().copied().unwrap_or("index.html");
         let decoded_file_name = percent_decode_str(file_name).decode_utf8();
-        let res = match decoded_file_name {
+        let result = match decoded_file_name {
             Ok(name) => {
                 let file_path = self.public_dir_path.join(name.to_string());
                 let file = File::open(file_path).context(ScrapError::FileLoad);
@@ -75,6 +75,6 @@ impl Service<Request<Incoming>> for ScrapsService {
             Err(_) => Self::mk_failed_url_decode_response(),
         };
 
-        Box::pin(async { res })
+        Box::pin(async { result })
     }
 }

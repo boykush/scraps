@@ -20,7 +20,7 @@ pub fn extract_link_titles(text: &str) -> Vec<String> {
             Event::Text(CowStr::Borrowed("]")),
         ) = events
         {
-            link_titles.push(title.to_string())
+            link_titles.push(title.to_string());
         }
     }
 
@@ -59,7 +59,7 @@ pub fn to_html(text: &str) -> String {
                 &Event::Text(CowStr::Borrowed("]")),
             ) => {
                 let slug = slugify::by_dash(title);
-                let link = &format!("./{}.html", slug);
+                let link = &format!("./{slug}.html");
                 let link_events = vec![
                     Event::Start(Tag::Link {
                         link_type: LinkType::Inline,
@@ -84,7 +84,7 @@ pub fn to_html(text: &str) -> String {
                 (0..4).for_each(|_| {
                     parser_windows.next();
                 });
-                push_html(&mut html_buf, link_events)
+                push_html(&mut html_buf, link_events);
             }
             (e1, _, _, _, _) => push_html(&mut html_buf, vec![e1.clone()].into_iter()),
         }

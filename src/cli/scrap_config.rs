@@ -42,6 +42,6 @@ pub struct SortKeyConfig(#[serde(with = "SerdeSortKey")] SortKey);
 
 impl SortKeyConfig {
     pub fn into_sort_key(self) -> SortKey {
-        self.0.to_owned()
+        self.0.clone()
     }
 }

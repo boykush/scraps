@@ -19,7 +19,7 @@ impl<GC: GitCommand> InitCommand<GC> {
     }
 
     pub fn run(&self, project_name: &str) -> ScrapResult<()> {
-        let project_dir = &PathBuf::from(format!("./{}", project_name));
+        let project_dir = &PathBuf::from(format!("./{project_name}"));
         let scraps_dir = project_dir.join("scraps");
         let config_toml_file = project_dir.join("Config.toml");
         let gitignore_file = project_dir.join(".gitignore");

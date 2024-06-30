@@ -24,7 +24,7 @@ static SCRAP_TERA: Lazy<Tera> = Lazy::new(|| {
 });
 
 pub fn init(
-    timezone: &Tz,
+    timezone: Tz,
     metadata: &HtmlMetadata,
     sort_key: &SortKey,
     template_dir: &str,
@@ -33,7 +33,7 @@ pub fn init(
     tera.extend(&SCRAP_TERA).unwrap();
 
     let mut context = tera::Context::new();
-    context.insert("timezone", timezone);
+    context.insert("timezone", &timezone);
     context.insert("title", &metadata.title());
     context.insert("description", &metadata.description());
     context.insert("favicon", &metadata.favicon());
