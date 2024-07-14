@@ -18,20 +18,20 @@ exclude = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = { version = "4.5.7", features = ["derive"] }
-serde = { version = "1.0.203", features = ["derive"] }
+clap = { version = "4.5.9", features = ["derive"] }
+serde = { version = "1.0.204", features = ["derive"] }
 anyhow = "1.0.86"
 config = { version = "0.14.0", features = ["toml"] }
 tera = "1.20.0"
-thiserror = "1.0.61"
+thiserror = "1.0.62"
 once_cell = "1.19.0"
 pulldown-cmark = "0.11.0"
 itertools = "0.13.0"
-url = { version = "2.5.1", features = ["serde"] }
+url = { version = "2.5.2", features = ["serde"] }
 chrono-tz = { version = "0.9.0", features = ["serde"] }
 colored = "2.1.0"
-hyper = { version = "1.3.1", features = ["full"] }
+hyper = { version = "1.4.1", features = ["full"] }
 tokio = { version = "1.38.0", features = ["full"] }
 http-body-util = "0.1.2"
-hyper-util = { version = "0.1.5", features = ["full"] }
+hyper-util = { version = "0.1.6", features = ["full"] }
 percent-encoding = "2.3.1"
