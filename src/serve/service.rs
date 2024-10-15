@@ -61,11 +61,19 @@ impl Service<Request<Incoming>> for ScrapsService {
             .split('/')
             .filter(|f| !f.is_empty())
             .collect::<Vec<&str>>();
-        let file_name = path_parts.first().copied().unwrap_or("index.html");
-        let decoded_file_name = percent_decode_str(file_name).decode_utf8();
+        let (dir_path, file_name) = match path_parts.as_slice() {
+            [] => (None, ""),
+            [name]=> (None, *name),
+            [dir @ .., name] => (Some(dir.join("/")), *name),
+        };
+        let file_name_with_index = if file_name.is_empty() {"index.html"} else {file_name};
+        let decoded_file_name = percent_decode_str(&file_name_with_index).decode_utf8();
         let result = match decoded_file_name {
             Ok(name) => {
-                let file_path = self.public_dir_path.join(name.to_string());
+                let file_path = match dir_path {
+                    Some(dp) => self.public_dir_path.join(dp).join(name.to_string()),
+                    None => self.public_dir_path.join(name.to_string()),
+                };
                 let file = File::open(file_path).context(ScrapError::FileLoad);
                 match file {
                     Ok(mut f) => Self::mk_page_response(&mut f),
