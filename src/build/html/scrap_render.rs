@@ -1,5 +1,4 @@
 use std::fs;
-use std::path::Path;
 use std::{fs::File, path::PathBuf};
 
 use crate::build::cmd::HtmlMetadata;
@@ -22,8 +21,8 @@ pub struct ScrapRender {
 
 impl ScrapRender {
     pub fn new(
-        static_dir_path: &Path,
-        public_dir_path: &Path,
+        static_dir_path: &PathBuf,
+        public_dir_path: &PathBuf,
         scraps: &Vec<Scrap>,
     ) -> ScrapResult<ScrapRender> {
         let public_scraps_dir_path = &public_dir_path.join("scraps");

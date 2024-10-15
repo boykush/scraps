@@ -55,7 +55,7 @@ impl Service<Request<Incoming>> for ScrapsService {
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 
     fn call(&self, request: Request<Incoming>) -> Self::Future {
-        let requested_path = request.uri().path().replacen('/', "", 1); // remove head absolute slash;
+        let requested_path = request.uri().path().replacen("/", "", 1); // remove head absolute slash;
         let allowed_path = self.public_dir_path.join(requested_path);
         let resolved_index_path = if allowed_path.is_dir() {
             allowed_path.join("index.html")
@@ -66,7 +66,7 @@ impl Service<Request<Incoming>> for ScrapsService {
             let file_name = resolved_index_path
                 .file_name()
                 .map_or("", |s: &std::ffi::OsStr| s.to_str().expect(""));
-            percent_decode_str(file_name).decode_utf8()
+            percent_decode_str(&file_name).decode_utf8()
         };
         let result = match decoded_file_name {
             Ok(name) => {
