@@ -17,21 +17,14 @@
     </ul>
 {% endmacro scrap_links %}
 
-{% macro tag_links(tags, slice_size=100) %}
+{% macro tag_links(tags) %}
     <ul class="tag-links">
-        {% for tag in tags | slice(end=slice_size) %}
+        {% for tag in tags %}
             <a href="/scraps/{{tag.slug}}.html">
                 <li class="item">
                     <span class="title">{{ tag.title }}</span><span>({{ tag.linked_count }})</span>
                 </li>
             </a>
         {% endfor %}
-        {% if tags | length > slice_size %}
-            <a href="/tags/">
-                <li class="item">
-                    <span class="more-link">More...</span>
-                </li>
-            </a>
-        {% endif %}
     </ul>
 {% endmacro tag_links %}

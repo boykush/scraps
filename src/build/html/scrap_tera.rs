@@ -18,10 +18,6 @@ static SCRAP_TERA: Lazy<Tera> = Lazy::new(|| {
         ),
         ("__builtins/scrap.html", include_str!("builtins/scrap.html")),
         ("__builtins/tag.html", include_str!("builtins/tag.html")),
-        (
-            "__builtins/tags_index.html",
-            include_str!("builtins/tags_index.html"),
-        ),
     ])
     .unwrap();
     tera
