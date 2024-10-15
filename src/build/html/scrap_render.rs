@@ -15,7 +15,7 @@ use super::serde::scraps::SerializeScraps;
 
 pub struct ScrapRender {
     static_dir_path: PathBuf,
-    public_scraps_dir_path: PathBuf,
+    public_dir_path: PathBuf,
     scraps: Vec<Scrap>,
 }
 
@@ -25,12 +25,11 @@ impl ScrapRender {
         public_dir_path: &PathBuf,
         scraps: &Vec<Scrap>,
     ) -> ScrapResult<ScrapRender> {
-        let public_scraps_dir_path = &public_dir_path.join("scraps");
-        fs::create_dir_all(public_scraps_dir_path).context(ScrapError::FileWrite)?;
+        fs::create_dir_all(public_dir_path).context(ScrapError::FileWrite)?;
 
         Ok(ScrapRender {
             static_dir_path: static_dir_path.to_owned(),
-            public_scraps_dir_path: public_scraps_dir_path.to_owned(),
+            public_dir_path: public_dir_path.to_owned(),
             scraps: scraps.to_owned(),
         })
     }
@@ -62,7 +61,7 @@ impl ScrapRender {
         // render html
         let file_name = &format!("{}.html", scrap.title.slug);
         let wtr =
-            File::create(self.public_scraps_dir_path.join(file_name)).context(ScrapError::FileWrite)?;
+            File::create(self.public_dir_path.join(file_name)).context(ScrapError::FileWrite)?;
         tera.render_to("__builtins/scrap.html", &context, wtr)
             .context(ScrapError::PublicRender)
     }
@@ -96,7 +95,7 @@ mod tests {
         let scrap2 = &Scrap::new("scrap 2", "[[scrap1]]", &None);
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
-        let scrap1_html_path = public_dir_path.join(format!("scraps/{}.html", scrap1.title.slug));
+        let scrap1_html_path = public_dir_path.join(format!("{}.html", scrap1.title.slug));
 
         let render = ScrapRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 

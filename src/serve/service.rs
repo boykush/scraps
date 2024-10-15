@@ -7,7 +7,6 @@ use hyper::{
     service::Service,
     Request, Response,
 };
-use itertools::Itertools;
 use percent_encoding::percent_decode_str;
 
 use crate::libs::error::ScrapError;
@@ -56,31 +55,23 @@ impl Service<Request<Incoming>> for ScrapsService {
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 
     fn call(&self, request: Request<Incoming>) -> Self::Future {
-        println!("{:?}", request.uri().path());
         let path_parts = request
             .uri()
             .path()
             .split('/')
-            //.filter(|f| !f.is_empty())
+            .filter(|f| !f.is_empty())
             .collect::<Vec<&str>>();
         let (dir_path, file_name) = match path_parts.as_slice() {
             [] => (None, ""),
-            ["", ""] => (None, "index.html"),
-            ["", name] => (None, *name),
-            [dir @ .. , ""] => {
-                (Some(dir.into_iter().filter(|f| !f.is_empty()).join("/")), "index.html")
-            },
-            [dir @ .., name] => {
-                (Some(dir.into_iter().filter(|f| !f.is_empty()).join("/")), *name)
-            },
+            [name]=> (None, *name),
+            [dir @ .., name] => (Some(dir.join("/")), *name),
         };
-        println!("{:?}, {:?}", dir_path, file_name);
         let file_name_with_index = if file_name.is_empty() {"index.html"} else {file_name};
         let decoded_file_name = percent_decode_str(&file_name_with_index).decode_utf8();
         let result = match decoded_file_name {
             Ok(name) => {
                 let file_path = match dir_path {
-                    Some(dp) =>self.public_dir_path.join(dp + "/" + &name.to_string()),
+                    Some(dp) => self.public_dir_path.join(dp).join(name.to_string()),
                     None => self.public_dir_path.join(name.to_string()),
                 };
                 let file = File::open(file_path).context(ScrapError::FileLoad);

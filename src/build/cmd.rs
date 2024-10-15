@@ -156,13 +156,13 @@ mod tests {
 
         // scrap1
         let md_path_1 = scraps_dir_path.join("test1.md");
-        let html_path_1 = public_dir_path.join("scraps/test1.html");
+        let html_path_1 = public_dir_path.join("test1.html");
         let resource_1 = FileResource::new(&md_path_1);
         let resource_bytes_1 = concat!("# header1\n", "## header2\n",).as_bytes();
 
         // scrap2
         let md_path_2 = scraps_dir_path.join("test2.md");
-        let html_path_2 = public_dir_path.join("scraps/test2.html");
+        let html_path_2 = public_dir_path.join("test2.html");
         let resource_2 = FileResource::new(&md_path_2);
         let resource_bytes_2 = concat!("[[test1]]\n").as_bytes();
 
