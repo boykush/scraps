@@ -1,4 +1,5 @@
 use std::fs;
+use std::path::Path;
 use std::{fs::File, path::PathBuf};
 
 use crate::build::cmd::HtmlMetadata;
@@ -21,10 +22,7 @@ pub struct TagsIndexRender {
 }
 
 impl TagsIndexRender {
-    pub fn new(
-        static_dir_path: &PathBuf,
-        public_dir_path: &PathBuf,
-    ) -> ScrapResult<TagsIndexRender> {
+    pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> ScrapResult<TagsIndexRender> {
         let public_tags_dir_path = &public_dir_path.join("tags");
         fs::create_dir_all(public_tags_dir_path).context(ScrapError::FileWrite)?;
 
@@ -45,10 +43,10 @@ impl TagsIndexRender {
         let linked_scraps_map = LinkedScrapsMap::new(scraps);
         let stags = &SerializeTags::new(&Tags::new(scraps), &linked_scraps_map);
 
-        Self::render_paginated_html(self, base_url, timezone, metadata, sort_key, stags)
+        Self::render_html(self, base_url, timezone, metadata, sort_key, stags)
     }
 
-    fn render_paginated_html(
+    fn render_html(
         &self,
         base_url: &Url,
         timezone: Tz,
@@ -71,7 +69,7 @@ impl TagsIndexRender {
         context.insert("tags", tags);
         let wtr = File::create(self.public_tags_dir_path.join("index.html"))
             .context(ScrapError::PublicRender)?;
-        tera.render_to(&template_name, &context, wtr)
+        tera.render_to(template_name, &context, wtr)
             .context(ScrapError::PublicRender)
     }
 }
