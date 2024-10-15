@@ -1,0 +1,12 @@
+{% extends "__builtins/base.html" %}
+{% import "__builtins/macros.html" as macros %}
+
+{% block main %}
+    <div class="index">
+        <div class="tags-block">
+            {% if tags %}
+                {{ macros::tag_links(tags = tags) }}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
