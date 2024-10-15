@@ -1,7 +1,7 @@
 {% macro scrap_links(scraps) %}
     <ul class="scrap-links">
         {% for scrap in scraps %}
-            <a href="./{{scrap.slug}}.html">
+            <a href="/scraps/{{scrap.slug}}.html">
                 <li class="item">
                     <p class="title">{{ scrap.title }}</p>
                     {% if scrap.thumbnail %}
@@ -20,7 +20,7 @@
 {% macro tag_links(tags) %}
     <ul class="tag-links">
         {% for tag in tags %}
-            <a href="./{{tag.slug}}.html">
+            <a href="/scraps/{{tag.slug}}.html">
                 <li class="item">
                     <span class="title">{{ tag.title }}</span><span>({{ tag.linked_count }})</span>
                 </li>
