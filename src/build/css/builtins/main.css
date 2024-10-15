@@ -210,3 +210,8 @@ ul.tag-links li.item span.title::before {
     content: "\1F3F7";
     margin-right: 8px;
 }
+
+ul.tag-links li.item span.more-link {
+    color: var(--nord8);
+    margin-right: 8px;
+}

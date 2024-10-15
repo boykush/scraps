@@ -11,7 +11,10 @@ use chrono_tz::Tz;
 use url::Url;
 
 use super::{
-    html::{index_render::IndexRender, scrap_render::ScrapRender, tag_render::TagRender},
+    html::{
+        index_render::IndexRender, scrap_render::ScrapRender, tag_render::TagRender,
+        tags_index_render::TagsIndexRender,
+    },
     model::{paging::Paging, sort::SortKey, tags::Tags},
 };
 
@@ -57,15 +60,22 @@ impl<GC: GitCommand> BuildCommand<GC> {
             .map(|path| self.to_scrap_by_path(path))
             .collect::<ScrapResult<Vec<Scrap>>>()?;
 
+        // render index
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         index_render.run(timezone, html_metadata, &scraps, sort_key, paging)?;
 
+        // render scraps
         scraps.iter().try_for_each(|scrap| {
             let scrap_render =
                 ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
             scrap_render.run(timezone, html_metadata, scrap, sort_key)
         })?;
 
+        // render tags index
+        let tags_index_render = TagsIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
+        tags_index_render.run(timezone, html_metadata, &scraps, sort_key)?;
+
+        // render tag
         let tags = Tags::new(&scraps);
         tags.values.iter().try_for_each(|tag| {
             let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
