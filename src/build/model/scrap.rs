@@ -14,13 +14,13 @@ pub struct Scrap {
 }
 
 impl Scrap {
-    pub fn new(title: &str, text: &str, commited_ts: &Option<i64>) -> Scrap {
+    pub fn new(base_url: &Url, title: &str, text: &str, commited_ts: &Option<i64>) -> Scrap {
         let links = markdown::extract_link_titles(text)
             .iter()
             .map(|t| Title::new(t))
             .collect();
         let thumbnail = markdown::head_image(text);
-        let html_content = markdown::to_html(text);
+        let html_content = markdown::to_html(text, base_url);
 
         Scrap {
             title: Title::new(title),
@@ -38,7 +38,8 @@ mod tests {
 
     #[test]
     fn it_new() {
-        let mut scrap = Scrap::new("scrap title", "[[link1]] [[link2]]", &None);
+        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let mut scrap = Scrap::new(&base_url, "scrap title", "[[link1]] [[link2]]", &None);
         assert_eq!(scrap.title, Title::new("scrap title"));
         scrap.links.sort();
         let mut expected = [Title::new("link1"), Title::new("link2")];
@@ -46,7 +47,7 @@ mod tests {
         assert_eq!(scrap.links, expected);
         assert_eq!(
             scrap.html_content,
-            "<p><a href=\"./link1.html\">link1</a> <a href=\"./link2.html\">link2</a></p>\n"
+            "<p><a href=\"http://localhost:1112/link1.html\">link1</a> <a href=\"http://localhost:1112/link2.html\">link2</a></p>\n"
                 .to_string()
         );
         assert_eq!(scrap.thumbnail, None);

@@ -10,6 +10,7 @@ use url::Url;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ScrapConfig {
+    pub base_url: Url,
     pub title: String,
     pub description: Option<String>,
     pub favicon: Option<Url>,

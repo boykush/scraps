@@ -41,7 +41,7 @@ pub fn head_image(text: &str) -> Option<Url> {
     })
 }
 
-pub fn to_html(text: &str) -> String {
+pub fn to_html(text: &str, base_url: &Url) -> String {
     let mut html_buf = String::new();
     let parser = Parser::new(text);
     let parser_vec = parser.collect::<Vec<Event<'_>>>();
@@ -59,7 +59,7 @@ pub fn to_html(text: &str) -> String {
                 &Event::Text(CowStr::Borrowed("]")),
             ) => {
                 let slug = slugify::by_dash(title);
-                let link = &format!("./{slug}.html");
+                let link = &format!("{base_url}{slug}.html");
                 let link_events = vec![
                     Event::Start(Tag::Link {
                         link_type: LinkType::Inline,
@@ -141,7 +141,8 @@ mod tests {
     #[test]
     fn it_to_html() {
         let code_text = ["`[[quote block]]`", "```\n[[code block]]\n```"].join("\n");
-        let result1 = to_html(&code_text);
+        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let result1 = to_html(&code_text, &base_url);
         assert_eq!(
             result1,
             [
@@ -153,11 +154,11 @@ mod tests {
         );
 
         let link_text = "[[link]][[expect slugify]]";
-        let result2 = to_html(link_text);
-        assert_eq!(result2, "<p><a href=\"./link.html\">link</a><a href=\"./expect-slugify.html\">expect slugify</a></p>\n",);
+        let result2 = to_html(link_text, &base_url);
+        assert_eq!(result2, "<p><a href=\"http://localhost:1112/link.html\">link</a><a href=\"http://localhost:1112/expect-slugify.html\">expect slugify</a></p>\n",);
 
         let not_link_text = ["only close]]", "[[only open"].join("\n");
-        let result3 = to_html(&not_link_text);
+        let result3 = to_html(&not_link_text, &base_url);
         assert_eq!(
             result3,
             ["<p>only close]]", "[[only open</p>",].join("\n") + "\n"

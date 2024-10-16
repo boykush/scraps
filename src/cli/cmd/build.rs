@@ -1,6 +1,7 @@
 use colored::Colorize;
 use std::path::PathBuf;
 use std::time::Instant;
+use url::Url;
 
 use crate::build::cmd::{BuildCommand, HtmlMetadata};
 use crate::build::model::paging::Paging;
@@ -23,6 +24,12 @@ pub fn run() -> ScrapResult<()> {
     );
 
     let config = ScrapConfig::new()?;
+    // Automatically append a trailing slash to URLs
+    let base_url = if config.base_url.path().ends_with('/') {
+        config.base_url
+    } else {
+        Url::parse((config.base_url.to_string() + "/").as_str()).unwrap()
+    };
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
     let html_metadata = HtmlMetadata::new(&config.title, &config.description, &config.favicon);
     let sort_key = config
@@ -36,7 +43,7 @@ pub fn run() -> ScrapResult<()> {
     println!("{}", "Building site...".bold());
     let start = Instant::now();
 
-    let result = command.run(timezone, &html_metadata, &sort_key, &paging)?;
+    let result = command.run(&base_url, timezone, &html_metadata, &sort_key, &paging)?;
 
     let end = start.elapsed();
     println!("-> Created {result} scraps");
