@@ -1,7 +1,7 @@
 use colored::Colorize;
-use url::Url;
 use std::path::PathBuf;
 use std::time::Instant;
+use url::Url;
 
 use crate::build::cmd::{BuildCommand, HtmlMetadata};
 use crate::build::model::paging::Paging;
@@ -25,9 +25,11 @@ pub fn run() -> ScrapResult<()> {
 
     let config = ScrapConfig::new()?;
     // Automatically append a trailing slash to URLs
-    let base_url = if config.base_url.path().ends_with("/") {
+    let base_url = if config.base_url.path().ends_with('/') {
         config.base_url
-    } else { Url::parse((config.base_url.to_string() + "/").as_str()).unwrap() };
+    } else {
+        Url::parse((config.base_url.to_string() + "/").as_str()).unwrap()
+    };
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
     let html_metadata = HtmlMetadata::new(&config.title, &config.description, &config.favicon);
     let sort_key = config

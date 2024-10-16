@@ -15,7 +15,7 @@ use crate::{
 pub fn run() -> ScrapResult<()> {
     // set local environment
     let addr: SocketAddr = ([127, 0, 0, 1], 1112).into();
-    let base_url = Url::parse(&format!("http://{}", addr.to_string()))?.join("").unwrap();
+    let base_url = Url::parse(&format!("http://{}", addr))?.join("").unwrap();
 
     // build command
     let git_command = GitCommandImpl::new();

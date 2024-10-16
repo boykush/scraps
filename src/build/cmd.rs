@@ -64,13 +64,13 @@ impl<GC: GitCommand> BuildCommand<GC> {
         scraps.iter().try_for_each(|scrap| {
             let scrap_render =
                 ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-            scrap_render.run(base_url,timezone, html_metadata, scrap, sort_key)
+            scrap_render.run(base_url, timezone, html_metadata, scrap, sort_key)
         })?;
 
         let tags = Tags::new(&scraps);
         tags.values.iter().try_for_each(|tag| {
             let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-            tag_render.run(base_url,timezone, html_metadata, tag, sort_key)
+            tag_render.run(base_url, timezone, html_metadata, tag, sort_key)
         })?;
 
         let css_render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
@@ -184,7 +184,8 @@ mod tests {
                         &static_dir_path,
                         &public_dir_path,
                     );
-                    let result1 = command.run(&base_url, timezone, html_metadata, &sort_key, &paging);
+                    let result1 =
+                        command.run(&base_url, timezone, html_metadata, &sort_key, &paging);
                     assert!(result1.is_ok());
 
                     let result2 = fs::read_to_string(html_path_1);
