@@ -10,6 +10,7 @@ use crate::build::model::tags::Tags;
 use crate::libs::error::{ScrapError, ScrapResult};
 use anyhow::Context;
 use chrono_tz::Tz;
+use url::Url;
 
 use crate::build::html::scrap_tera;
 
@@ -34,6 +35,7 @@ impl IndexRender {
 
     pub fn run(
         &self,
+        base_url: &Url,
         timezone: Tz,
         metadata: &HtmlMetadata,
         scraps: &[Scrap],
@@ -57,6 +59,7 @@ impl IndexRender {
         paginated_with_pointer.try_for_each(|(pointer, paginated_scraps)| {
             Self::render_paginated_html(
                 self,
+                base_url,
                 timezone,
                 metadata,
                 sort_key,
@@ -69,6 +72,7 @@ impl IndexRender {
 
     fn render_paginated_html(
         &self,
+        base_url: &Url,
         timezone: Tz,
         metadata: &HtmlMetadata,
         sort_key: &SortKey,
@@ -77,6 +81,7 @@ impl IndexRender {
         pointer: &PagePointer,
     ) -> ScrapResult<()> {
         let (tera, mut context) = scrap_tera::init(
+            base_url,
             timezone,
             metadata,
             sort_key,
@@ -111,6 +116,7 @@ mod tests {
     #[test]
     fn it_run() {
         // args
+        let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
         let metadata = HtmlMetadata::new(
             "Scrap",
@@ -133,15 +139,15 @@ mod tests {
         .as_bytes();
 
         // scraps
-        let scrap1 = &Scrap::new("scrap1", "# header1", &Some(1));
-        let scrap2 = &Scrap::new("scrap2", "## header2", &Some(0));
+        let scrap1 = &Scrap::new(&base_url, "scrap1", "# header1", &Some(1));
+        let scrap2 = &Scrap::new(&base_url, "scrap2", "## header2", &Some(0));
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
         let index_html_path = public_dir_path.join("index.html");
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            let result1 = render.run(timezone, &metadata, &scraps, &sort_key, &paging);
+            let result1 = render.run(&base_url, timezone, &metadata, &scraps, &sort_key, &paging);
 
             assert!(result1.is_ok());
 
@@ -156,6 +162,7 @@ mod tests {
     #[test]
     fn it_run_paging() {
         // args
+        let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
         let metadata = HtmlMetadata::new(
             "Scrap",
@@ -178,10 +185,10 @@ mod tests {
         .as_bytes();
 
         // scraps
-        let scrap1 = &Scrap::new("scrap1", "# header1", &Some(3));
-        let scrap2 = &Scrap::new("scrap2", "## header2", &Some(2));
-        let scrap3 = &Scrap::new("scrap3", "### header3", &Some(1));
-        let scrap4 = &Scrap::new("scrap4", "#### header4", &Some(0));
+        let scrap1 = &Scrap::new(&base_url, "scrap1", "# header1", &Some(3));
+        let scrap2 = &Scrap::new(&base_url, "scrap2", "## header2", &Some(2));
+        let scrap3 = &Scrap::new(&base_url, "scrap3", "### header3", &Some(1));
+        let scrap4 = &Scrap::new(&base_url, "scrap4", "#### header4", &Some(0));
         let scraps = vec![
             scrap1.to_owned(),
             scrap2.to_owned(),
@@ -194,7 +201,7 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            let result1 = render.run(timezone, &metadata, &scraps, &sort_key, &paging);
+            let result1 = render.run(&base_url, timezone, &metadata, &scraps, &sort_key, &paging);
 
             assert!(result1.is_ok());
 

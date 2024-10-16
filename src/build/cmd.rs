@@ -38,6 +38,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
     }
     pub fn run(
         &self,
+        base_url: &Url,
         timezone: Tz,
         html_metadata: &HtmlMetadata,
         sort_key: &SortKey,
@@ -54,22 +55,22 @@ impl<GC: GitCommand> BuildCommand<GC> {
 
         let scraps = paths
             .iter()
-            .map(|path| self.to_scrap_by_path(path))
+            .map(|path| self.to_scrap_by_path(base_url, path))
             .collect::<ScrapResult<Vec<Scrap>>>()?;
 
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
-        index_render.run(timezone, html_metadata, &scraps, sort_key, paging)?;
+        index_render.run(base_url, timezone, html_metadata, &scraps, sort_key, paging)?;
 
         scraps.iter().try_for_each(|scrap| {
             let scrap_render =
                 ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-            scrap_render.run(timezone, html_metadata, scrap, sort_key)
+            scrap_render.run(base_url,timezone, html_metadata, scrap, sort_key)
         })?;
 
         let tags = Tags::new(&scraps);
         tags.values.iter().try_for_each(|tag| {
             let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-            tag_render.run(timezone, html_metadata, tag, sort_key)
+            tag_render.run(base_url,timezone, html_metadata, tag, sort_key)
         })?;
 
         let css_render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
@@ -87,7 +88,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
         Ok(dir_entry.path())
     }
 
-    fn to_scrap_by_path(&self, path: &PathBuf) -> ScrapResult<Scrap> {
+    fn to_scrap_by_path(&self, base_url: &Url, path: &PathBuf) -> ScrapResult<Scrap> {
         let file_prefix = path
             .file_stem()
             .ok_or(ScrapError::FileLoad)
@@ -96,7 +97,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
         let md_text = fs::read_to_string(path).context(ScrapError::FileLoad)?;
         let commited_ts = self.git_command.commited_ts(path)?;
 
-        Ok(Scrap::new(file_prefix, &md_text, &commited_ts))
+        Ok(Scrap::new(base_url, file_prefix, &md_text, &commited_ts))
     }
 }
 
@@ -145,6 +146,7 @@ mod tests {
         let public_dir_path = test_resource_path.join("public");
 
         // run args
+        let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
         let html_metadata = &HtmlMetadata {
             title: "Scrap".to_string(),
@@ -182,7 +184,7 @@ mod tests {
                         &static_dir_path,
                         &public_dir_path,
                     );
-                    let result1 = command.run(timezone, html_metadata, &sort_key, &paging);
+                    let result1 = command.run(&base_url, timezone, html_metadata, &sort_key, &paging);
                     assert!(result1.is_ok());
 
                     let result2 = fs::read_to_string(html_path_1);

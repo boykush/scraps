@@ -30,12 +30,15 @@ impl Tags {
 
 #[cfg(test)]
 mod tests {
+    use url::Url;
+
     use super::*;
 
     #[test]
     fn it_new() {
-        let scrap1 = Scrap::new("scrap1", "[[tag1]]", &None);
-        let scrap2 = Scrap::new("scrap2", "[[scrap1]]", &None);
+        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let scrap1 = Scrap::new(&base_url, "scrap1", "[[tag1]]", &None);
+        let scrap2 = Scrap::new(&base_url, "scrap2", "[[scrap1]]", &None);
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
         let tags = Tags::new(&scraps);

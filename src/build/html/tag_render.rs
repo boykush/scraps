@@ -8,6 +8,7 @@ use crate::build::model::{linked_scraps_map::LinkedScrapsMap, scrap::Scrap};
 use crate::libs::error::{ScrapError, ScrapResult};
 use anyhow::Context;
 use chrono_tz::Tz;
+use url::Url;
 
 use crate::build::html::scrap_tera;
 
@@ -37,12 +38,14 @@ impl TagRender {
 
     pub fn run(
         &self,
+        base_url: &Url,
         timezone: Tz,
         metadata: &HtmlMetadata,
         tag: &Tag,
         sort_key: &SortKey,
     ) -> ScrapResult<()> {
         let (tera, mut context) = scrap_tera::init(
+            base_url,
             timezone,
             metadata,
             sort_key,
@@ -78,6 +81,7 @@ mod tests {
     #[test]
     fn it_run() {
         // args
+        let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
         let metadata = HtmlMetadata::new(
             "Scrap",
@@ -92,8 +96,8 @@ mod tests {
         let public_dir_path = test_resource_path.join("public");
 
         // scraps
-        let scrap1 = &Scrap::new("scrap1", "[[tag1]]", &None);
-        let scrap2 = &Scrap::new("scrap2", "[[tag1]][[tag2]]", &None);
+        let scrap1 = &Scrap::new(&base_url, "scrap1", "[[tag1]]", &None);
+        let scrap2 = &Scrap::new(&base_url, "scrap2", "[[tag1]][[tag2]]", &None);
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
         // tag
         let tag1 = Tag::new(&Title::new("tag 1"));
@@ -102,7 +106,7 @@ mod tests {
 
         let render = TagRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 
-        let result1 = render.run(timezone, &metadata, &tag1, &sort_key);
+        let result1 = render.run(&base_url, timezone, &metadata, &tag1, &sort_key);
         assert!(result1.is_ok());
 
         let result2 = fs::read_to_string(tag1_html_path);

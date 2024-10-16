@@ -14,10 +14,10 @@
         </div>
         <div class="paging-arrows">
             {% if prev %}
-                <a class="prev" href="{{ prev }}">prev</a>
+                <a class="prev" href="{{ base_url }}{{ prev }}">prev</a>
             {% endif %}
             {% if next %}
-                <a class="next" href="{{ next }}">next</a>
+                <a class="next" href="{{ base_url }}{{ next }}">next</a>
             {% endif %}
         </div>
     </div>

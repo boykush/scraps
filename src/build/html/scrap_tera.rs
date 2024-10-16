@@ -6,6 +6,7 @@ use anyhow::Context;
 use chrono_tz::Tz;
 use once_cell::sync::Lazy;
 use tera::Tera;
+use url::Url;
 
 static SCRAP_TERA: Lazy<Tera> = Lazy::new(|| {
     let mut tera = Tera::default();
@@ -24,6 +25,7 @@ static SCRAP_TERA: Lazy<Tera> = Lazy::new(|| {
 });
 
 pub fn init(
+    base_url: &Url,
     timezone: Tz,
     metadata: &HtmlMetadata,
     sort_key: &SortKey,
@@ -33,6 +35,7 @@ pub fn init(
     tera.extend(&SCRAP_TERA).unwrap();
 
     let mut context = tera::Context::new();
+    context.insert("base_url", &base_url);
     context.insert("timezone", &timezone);
     context.insert("title", &metadata.title());
     context.insert("description", &metadata.description());

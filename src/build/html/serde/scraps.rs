@@ -35,14 +35,17 @@ impl SerializeScraps {
 
 #[cfg(test)]
 mod tests {
+    use url::Url;
+
     use super::*;
 
     #[test]
     fn it_new_with_sort() {
-        let scrap1 = &Scrap::new("title1", "[[title4]][[title2]]", &None);
-        let scrap2 = &Scrap::new("title2", "[[title4]][[title1]]", &Some(3));
-        let scrap3 = &Scrap::new("title3", "[[title4]]", &Some(2));
-        let scrap4 = &Scrap::new("title4", "[[title1]]", &Some(1));
+        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let scrap1 = &Scrap::new(&base_url, "title1", "[[title4]][[title2]]", &None);
+        let scrap2 = &Scrap::new(&base_url, "title2", "[[title4]][[title1]]", &Some(3));
+        let scrap3 = &Scrap::new(&base_url, "title3", "[[title4]]", &Some(2));
+        let scrap4 = &Scrap::new(&base_url, "title4", "[[title1]]", &Some(1));
         let linked_scraps_map = LinkedScrapsMap::new(&vec![
             scrap1.clone(),
             scrap2.clone(),
