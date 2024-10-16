@@ -15,6 +15,6 @@ See [[Usage]] for detail.
 ```
 
 ## Tags as nonexistent links
-If there is no scraps with the specified title, such as `[[Link]]`, then it will be a tag.
+If there is no scraps with the specified title, such as #[[SampleTag1]], then it will be a tag.
 
 Tags are lined up on the index page, and the link is to a page with a list of scraps that have the tag.
