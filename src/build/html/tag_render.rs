@@ -1,4 +1,5 @@
 use std::fs;
+use std::path::Path;
 use std::{fs::File, path::PathBuf};
 
 use crate::build::cmd::HtmlMetadata;
@@ -17,21 +18,22 @@ use super::serde::tag::SerializeTag;
 
 pub struct TagRender {
     static_dir_path: PathBuf,
-    public_dir_path: PathBuf,
+    public_scraps_dir_path: PathBuf,
     scraps: Vec<Scrap>,
 }
 
 impl TagRender {
     pub fn new(
-        static_dir_path: &PathBuf,
-        public_dir_path: &PathBuf,
+        static_dir_path: &Path,
+        public_dir_path: &Path,
         scraps: &Vec<Scrap>,
     ) -> ScrapResult<TagRender> {
-        fs::create_dir_all(public_dir_path).context(ScrapError::FileWrite)?;
+        let public_tags_dir_path = &public_dir_path.join("scraps");
+        fs::create_dir_all(public_tags_dir_path).context(ScrapError::FileWrite)?;
 
         Ok(TagRender {
             static_dir_path: static_dir_path.to_owned(),
-            public_dir_path: public_dir_path.to_owned(),
+            public_scraps_dir_path: public_tags_dir_path.to_owned(),
             scraps: scraps.to_owned(),
         })
     }
@@ -64,8 +66,8 @@ impl TagRender {
 
         // render html
         let file_name = &format!("{}.html", tag.title.slug);
-        let wtr =
-            File::create(self.public_dir_path.join(file_name)).context(ScrapError::FileWrite)?;
+        let wtr = File::create(self.public_scraps_dir_path.join(file_name))
+            .context(ScrapError::FileWrite)?;
         tera.render_to("__builtins/tag.html", &context, wtr)
             .context(ScrapError::PublicRender)
     }
@@ -102,7 +104,7 @@ mod tests {
         // tag
         let tag1 = Tag::new(&Title::new("tag 1"));
 
-        let tag1_html_path = public_dir_path.join(format!("{}.html", tag1.title.slug));
+        let tag1_html_path = public_dir_path.join(format!("scraps/{}.html", tag1.title.slug));
 
         let render = TagRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 

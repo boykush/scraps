@@ -59,7 +59,7 @@ pub fn to_html(text: &str, base_url: &Url) -> String {
                 &Event::Text(CowStr::Borrowed("]")),
             ) => {
                 let slug = slugify::by_dash(title);
-                let link = &format!("{base_url}{slug}.html");
+                let link = &format!("{base_url}scraps/{slug}.html");
                 let link_events = vec![
                     Event::Start(Tag::Link {
                         link_type: LinkType::Inline,
@@ -155,7 +155,7 @@ mod tests {
 
         let link_text = "[[link]][[expect slugify]]";
         let result2 = to_html(link_text, &base_url);
-        assert_eq!(result2, "<p><a href=\"http://localhost:1112/link.html\">link</a><a href=\"http://localhost:1112/expect-slugify.html\">expect slugify</a></p>\n",);
+        assert_eq!(result2, "<p><a href=\"http://localhost:1112/scraps/link.html\">link</a><a href=\"http://localhost:1112/scraps/expect-slugify.html\">expect slugify</a></p>\n",);
 
         let not_link_text = ["only close]]", "[[only open"].join("\n");
         let result3 = to_html(&not_link_text, &base_url);

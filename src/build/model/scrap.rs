@@ -47,7 +47,7 @@ mod tests {
         assert_eq!(scrap.links, expected);
         assert_eq!(
             scrap.html_content,
-            "<p><a href=\"http://localhost:1112/link1.html\">link1</a> <a href=\"http://localhost:1112/link2.html\">link2</a></p>\n"
+            "<p><a href=\"http://localhost:1112/scraps/link1.html\">link1</a> <a href=\"http://localhost:1112/scraps/link2.html\">link2</a></p>\n"
                 .to_string()
         );
         assert_eq!(scrap.thumbnail, None);

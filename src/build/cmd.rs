@@ -11,7 +11,10 @@ use chrono_tz::Tz;
 use url::Url;
 
 use super::{
-    html::{index_render::IndexRender, scrap_render::ScrapRender, tag_render::TagRender},
+    html::{
+        index_render::IndexRender, scrap_render::ScrapRender, tag_render::TagRender,
+        tags_index_render::TagsIndexRender,
+    },
     model::{paging::Paging, sort::SortKey, tags::Tags},
 };
 
@@ -58,15 +61,22 @@ impl<GC: GitCommand> BuildCommand<GC> {
             .map(|path| self.to_scrap_by_path(base_url, path))
             .collect::<ScrapResult<Vec<Scrap>>>()?;
 
+        // render index
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         index_render.run(base_url, timezone, html_metadata, &scraps, sort_key, paging)?;
 
+        // render scraps
         scraps.iter().try_for_each(|scrap| {
             let scrap_render =
                 ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
             scrap_render.run(base_url, timezone, html_metadata, scrap, sort_key)
         })?;
 
+        // render tags index
+        let tags_index_render = TagsIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
+        tags_index_render.run(base_url, timezone, html_metadata, &scraps, sort_key)?;
+
+        // render tag
         let tags = Tags::new(&scraps);
         tags.values.iter().try_for_each(|tag| {
             let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
@@ -158,13 +168,13 @@ mod tests {
 
         // scrap1
         let md_path_1 = scraps_dir_path.join("test1.md");
-        let html_path_1 = public_dir_path.join("test1.html");
+        let html_path_1 = public_dir_path.join("scraps/test1.html");
         let resource_1 = FileResource::new(&md_path_1);
         let resource_bytes_1 = concat!("# header1\n", "## header2\n",).as_bytes();
 
         // scrap2
         let md_path_2 = scraps_dir_path.join("test2.md");
-        let html_path_2 = public_dir_path.join("test2.html");
+        let html_path_2 = public_dir_path.join("scraps/test2.html");
         let resource_2 = FileResource::new(&md_path_2);
         let resource_bytes_2 = concat!("[[test1]]\n").as_bytes();
 
