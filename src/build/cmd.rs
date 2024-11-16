@@ -61,6 +61,9 @@ impl<GC: GitCommand> BuildCommand<GC> {
             .map(|path| self.to_scrap_by_path(base_url, path))
             .collect::<ScrapResult<Vec<Scrap>>>()?;
 
+        // prune exists public
+        fs::remove_dir_all(&self.public_dir_path).context(ScrapError::DirRemove)?;
+
         // render index
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         index_render.run(base_url, timezone, html_metadata, &scraps, sort_key, paging)?;

@@ -11,6 +11,9 @@ pub enum ScrapError {
     #[error("Failed write file")]
     FileWrite,
 
+    #[error("Failed remove dir")]
+    DirRemove,
+
     #[error("Failed when render to html")]
     PublicRender,
 
