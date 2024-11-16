@@ -9,8 +9,6 @@ scraps
 └── Usage.md
 ```
 
-![](https://kubernetes.io/images/kubernetes.png)
-
 Fill in the file name in the `scraps` directory in `Overview.md` as follows to generate the link.
 ```markdown:Overview.md
 See [[Usage]] for detail.
