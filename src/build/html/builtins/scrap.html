@@ -1,6 +1,10 @@
 {% extends "__builtins/base.html" %}
 {% import "__builtins/macros.html" as macros %}
 
+{% block head %}
+<meta property="og:url" content="{{ base_url }}scraps/{{ scrap.slug }}.html" />
+{% endblock %}
+
 {% block main %}
     <div class="scrap">
         <h1>{{ scrap.title }}</h1>
