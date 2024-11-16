@@ -4,19 +4,23 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
         <!-- Page title -->
         {% if scrap %}
             {% set title_var=[ scrap.title,title ] | join(sep=" - ") %}
             <title>{{ title_var }}</title>
             <meta property="og:title" content="{{ title_var }}" />
+            <meta name="twitter:title" content="{{ title_var }}" />
         {% else %}
             <title>{{ title }}</title>
             <meta property="og:title" content="{{ title }}" />
+            <meta name="twitter:title" content="{{ title }}" />
         {% endif %}
         <!-- Page description -->
         {% if description %}
             <meta name="description" content="{{ description }}" />
             <meta property="og:description" content="{{ description }}" />
+            <meta name="twitter:description" content="{{ description }}" />
         {% endif %}
         <!-- Page favicon -->
         {% if favicon %}
