@@ -59,7 +59,7 @@ impl IndexRender {
             let pointer = PagePointer::new(page_num, last_page_num);
             (pointer, paginated_scraps)
         });
-        let stags = &SerializeTags::new(&&Tags::new(scraps), &linked_scraps_map);
+        let stags = &SerializeTags::new(&Tags::new(scraps), &linked_scraps_map);
 
         paginated_with_pointer.try_for_each(|(pointer, paginated_scraps)| {
             Self::render_paginated_html(

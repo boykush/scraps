@@ -21,7 +21,7 @@ impl ScrapWithCommitedTs {
     }
 
     pub fn commited_ts(&self) -> Option<i64> {
-        self.commited_ts.clone()
+        self.commited_ts
     }
 }
 
