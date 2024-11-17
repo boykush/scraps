@@ -17,7 +17,11 @@ use super::{
         index_render::IndexRender, scrap_render::ScrapRender, tag_render::TagRender,
         tags_index_render::TagsIndexRender,
     },
-    model::{paging::Paging, sort::SortKey},
+    model::{
+        paging::Paging,
+        scrap_with_commited_ts::{ScrapWithCommitedTs, ScrapsWithCommitedTs},
+        sort::SortKey,
+    },
 };
 
 pub struct BuildCommand<GC: GitCommand> {
@@ -58,21 +62,30 @@ impl<GC: GitCommand> BuildCommand<GC> {
             })
             .collect::<ScrapResult<Vec<PathBuf>>>()?;
 
-        let scraps = paths
+        let scraps_with_commited_ts = paths
             .iter()
             .map(|path| self.to_scrap_by_path(base_url, path))
-            .collect::<ScrapResult<Vec<Scrap>>>()?;
+            .collect::<ScrapResult<Vec<ScrapWithCommitedTs>>>()?;
+        let scraps = ScrapsWithCommitedTs::new(&scraps_with_commited_ts).to_scraps();
 
         // render index
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         index_render.run(base_url, timezone, html_metadata, &scraps, sort_key, paging)?;
 
         // render scraps
-        scraps.iter().try_for_each(|scrap| {
-            let scrap_render =
-                ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-            scrap_render.run(base_url, timezone, html_metadata, scrap, sort_key)
-        })?;
+        scraps_with_commited_ts
+            .into_iter()
+            .try_for_each(|scrap_with_commited_ts| {
+                let scrap_render =
+                    ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
+                scrap_render.run(
+                    base_url,
+                    timezone,
+                    html_metadata,
+                    &scrap_with_commited_ts,
+                    sort_key,
+                )
+            })?;
 
         // render tags index
         let tags_index_render = TagsIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
@@ -100,7 +113,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
         Ok(dir_entry.path())
     }
 
-    fn to_scrap_by_path(&self, base_url: &Url, path: &PathBuf) -> ScrapResult<Scrap> {
+    fn to_scrap_by_path(&self, base_url: &Url, path: &PathBuf) -> ScrapResult<ScrapWithCommitedTs> {
         let file_prefix = path
             .file_stem()
             .ok_or(ScrapError::FileLoad)
@@ -108,8 +121,9 @@ impl<GC: GitCommand> BuildCommand<GC> {
             .and_then(|fp| fp.ok_or(ScrapError::FileLoad))?;
         let md_text = fs::read_to_string(path).context(ScrapError::FileLoad)?;
         let commited_ts = self.git_command.commited_ts(path)?;
+        let scrap = Scrap::new(base_url, file_prefix, &md_text, &commited_ts);
 
-        Ok(Scrap::new(base_url, file_prefix, &md_text, &commited_ts))
+        Ok(ScrapWithCommitedTs::new(&scrap, &commited_ts))
     }
 }
 
