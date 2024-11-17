@@ -3,6 +3,7 @@ mod cli;
 mod init;
 mod libs;
 mod serve;
+mod tag;
 
 use clap::Parser;
 use libs::error::ScrapResult;
@@ -14,6 +15,6 @@ fn main() -> ScrapResult<()> {
         cli::SubCommands::Init { project_name } => cli::cmd::init::run(&project_name),
         cli::SubCommands::Build => cli::cmd::build::run(),
         cli::SubCommands::Serve => cli::cmd::serve::run(),
-        cli::SubCommands::Tag => todo!(),
+        cli::SubCommands::Tag => cli::cmd::tag::run(),
     }
 }
