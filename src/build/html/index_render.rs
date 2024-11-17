@@ -4,9 +4,9 @@ use std::{fs::File, path::PathBuf};
 use crate::build::cmd::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::paging::Paging;
+use crate::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
 use crate::build::model::sort::SortKey;
 use crate::libs::error::{ScrapError, ScrapResult};
-use crate::libs::model::scrap::Scrap;
 use crate::libs::model::tags::Tags;
 use anyhow::Context;
 use chrono_tz::Tz;
@@ -38,13 +38,17 @@ impl IndexRender {
         base_url: &Url,
         timezone: Tz,
         metadata: &HtmlMetadata,
-        scraps: &[Scrap],
+        scraps_with_commited_ts: &ScrapsWithCommitedTs,
         sort_key: &SortKey,
         paging: &Paging,
     ) -> ScrapResult<()> {
+        let scraps = &scraps_with_commited_ts.to_scraps();
         let linked_scraps_map = LinkedScrapsMap::new(scraps);
-        let sorted_scraps =
-            SerializeIndexScraps::new_with_sort(scraps, &linked_scraps_map, sort_key);
+        let sorted_scraps = SerializeIndexScraps::new_with_sort(
+            scraps_with_commited_ts,
+            &linked_scraps_map,
+            sort_key,
+        );
         let paginated = sorted_scraps
             .chunks(paging.size_with(scraps))
             .into_iter()
@@ -112,7 +116,10 @@ mod tests {
     use url::Url;
 
     use super::*;
-    use crate::libs::resource::tests::FileResource;
+    use crate::{
+        build::model::scrap_with_commited_ts::ScrapWithCommitedTs,
+        libs::{model::scrap::Scrap, resource::tests::FileResource},
+    };
 
     #[test]
     fn it_run() {
@@ -140,15 +147,29 @@ mod tests {
         .as_bytes();
 
         // scraps
-        let scrap1 = &Scrap::new(&base_url, "scrap1", "# header1", &Some(1));
-        let scrap2 = &Scrap::new(&base_url, "scrap2", "## header2", &Some(0));
-        let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
+        let sc1 = ScrapWithCommitedTs::new(
+            &Scrap::new(&base_url, "scrap1", "# header1", &Some(1)),
+            &Some(1),
+        );
+        let sc2 = ScrapWithCommitedTs::new(
+            &Scrap::new(&base_url, "scrap2", "## header2", &Some(0)),
+            &Some(0),
+        );
+        let scraps_with_commited_ts =
+            ScrapsWithCommitedTs::new(&vec![sc1.to_owned(), sc2.to_owned()]);
 
         let index_html_path = public_dir_path.join("index.html");
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            let result1 = render.run(&base_url, timezone, &metadata, &scraps, &sort_key, &paging);
+            let result1 = render.run(
+                &base_url,
+                timezone,
+                &metadata,
+                &scraps_with_commited_ts,
+                &sort_key,
+                &paging,
+            );
 
             assert!(result1.is_ok());
 
@@ -186,23 +207,42 @@ mod tests {
         .as_bytes();
 
         // scraps
-        let scrap1 = &Scrap::new(&base_url, "scrap1", "# header1", &Some(3));
-        let scrap2 = &Scrap::new(&base_url, "scrap2", "## header2", &Some(2));
-        let scrap3 = &Scrap::new(&base_url, "scrap3", "### header3", &Some(1));
-        let scrap4 = &Scrap::new(&base_url, "scrap4", "#### header4", &Some(0));
-        let scraps = vec![
-            scrap1.to_owned(),
-            scrap2.to_owned(),
-            scrap3.to_owned(),
-            scrap4.to_owned(),
-        ];
+        let sc1 = ScrapWithCommitedTs::new(
+            &Scrap::new(&base_url, "scrap1", "# header1", &Some(3)),
+            &Some(3),
+        );
+        let sc2 = ScrapWithCommitedTs::new(
+            &Scrap::new(&base_url, "scrap2", "## header2", &Some(2)),
+            &Some(2),
+        );
+        let sc3 = ScrapWithCommitedTs::new(
+            &Scrap::new(&base_url, "scrap3", "### header3", &Some(1)),
+            &Some(1),
+        );
+        let sc4 = ScrapWithCommitedTs::new(
+            &Scrap::new(&base_url, "scrap4", "#### header4", &Some(0)),
+            &Some(0),
+        );
+        let scraps_with_commited_ts = ScrapsWithCommitedTs::new(&vec![
+            sc1.to_owned(),
+            sc2.to_owned(),
+            sc3.to_owned(),
+            sc4.to_owned(),
+        ]);
 
         let index_html_path = public_dir_path.join("index.html");
         let page2_html_path = public_dir_path.join("2.html");
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            let result1 = render.run(&base_url, timezone, &metadata, &scraps, &sort_key, &paging);
+            let result1 = render.run(
+                &base_url,
+                timezone,
+                &metadata,
+                &scraps_with_commited_ts,
+                &sort_key,
+                &paging,
+            );
 
             assert!(result1.is_ok());
 

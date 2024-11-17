@@ -32,6 +32,10 @@ impl ScrapsWithCommitedTs {
         ScrapsWithCommitedTs(scraps.to_owned())
     }
 
+    pub fn to_vec(&self) -> Vec<ScrapWithCommitedTs> {
+        self.0.clone()
+    }
+
     pub fn to_scraps(&self) -> Vec<Scrap> {
         self.0
             .clone()

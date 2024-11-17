@@ -70,7 +70,14 @@ impl<GC: GitCommand> BuildCommand<GC> {
 
         // render index
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
-        index_render.run(base_url, timezone, html_metadata, &scraps, sort_key, paging)?;
+        index_render.run(
+            base_url,
+            timezone,
+            html_metadata,
+            &ScrapsWithCommitedTs::new(&scraps_with_commited_ts),
+            sort_key,
+            paging,
+        )?;
 
         // render scraps
         scraps_with_commited_ts
