@@ -14,5 +14,6 @@ fn main() -> ScrapResult<()> {
         cli::SubCommands::Init { project_name } => cli::cmd::init::run(&project_name),
         cli::SubCommands::Build => cli::cmd::build::run(),
         cli::SubCommands::Serve => cli::cmd::serve::run(),
+        cli::SubCommands::Tag => todo!(),
     }
 }

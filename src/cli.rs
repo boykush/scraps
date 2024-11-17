@@ -18,6 +18,9 @@ pub enum SubCommands {
     #[command(about = "Init scraps project")]
     Init { project_name: String },
 
-    #[command(about = "Serve the site. result of build.")]
+    #[command(about = "Serve the site with build scraps.")]
     Serve,
+
+    #[command(about = "List a tags")]
+    Tag,
 }
