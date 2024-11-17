@@ -1,6 +1,9 @@
 use url::Url;
 
-use crate::build::model::{linked_scraps_map::LinkedScrapsMap, scrap::Scrap, title::Title};
+use crate::{
+    build::model::linked_scraps_map::LinkedScrapsMap,
+    libs::model::{scrap::Scrap, title::Title},
+};
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 pub struct SerializeScrap {

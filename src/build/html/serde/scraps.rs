@@ -1,6 +1,9 @@
 use itertools::Itertools;
 
-use crate::build::model::{linked_scraps_map::LinkedScrapsMap, scrap::Scrap, sort::SortKey};
+use crate::{
+    build::model::{linked_scraps_map::LinkedScrapsMap, sort::SortKey},
+    libs::model::scrap::Scrap,
+};
 
 use super::scrap::SerializeScrap;
 

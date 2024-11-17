@@ -1,8 +1,6 @@
 use std::collections::HashSet;
 
-use crate::build::model::scrap::Scrap;
-
-use super::{tag::Tag, title::Title};
+use super::{scrap::Scrap, tag::Tag, title::Title};
 
 #[derive(PartialEq, Debug)]
 pub struct Tags {

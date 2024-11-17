@@ -4,10 +4,10 @@ use std::{fs::File, path::PathBuf};
 use crate::build::cmd::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::paging::Paging;
-use crate::build::model::scrap::Scrap;
 use crate::build::model::sort::SortKey;
-use crate::build::model::tags::Tags;
 use crate::libs::error::{ScrapError, ScrapResult};
+use crate::libs::model::scrap::Scrap;
+use crate::libs::model::tags::Tags;
 use anyhow::Context;
 use chrono_tz::Tz;
 use url::Url;
@@ -54,7 +54,7 @@ impl IndexRender {
             let pointer = PagePointer::new(page_num, last_page_num);
             (pointer, paginated_scraps)
         });
-        let stags = &SerializeTags::new(&Tags::new(scraps), &linked_scraps_map);
+        let stags = &SerializeTags::new(&&Tags::new(scraps), &linked_scraps_map);
 
         paginated_with_pointer.try_for_each(|(pointer, paginated_scraps)| {
             Self::render_paginated_html(

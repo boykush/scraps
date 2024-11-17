@@ -25,7 +25,6 @@ impl Display for Title {
 
 #[cfg(test)]
 mod tests {
-    use crate::build::model::title::Title;
 
     use super::*;
 

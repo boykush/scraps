@@ -3,9 +3,10 @@ use std::path::Path;
 use std::{fs::File, path::PathBuf};
 
 use crate::build::cmd::HtmlMetadata;
+use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::sort::SortKey;
-use crate::build::model::{linked_scraps_map::LinkedScrapsMap, scrap::Scrap};
 use crate::libs::error::{ScrapError, ScrapResult};
+use crate::libs::model::scrap::Scrap;
 use anyhow::Context;
 use chrono_tz::Tz;
 use url::Url;

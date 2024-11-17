@@ -3,8 +3,10 @@ use std::{
     path::PathBuf,
 };
 
-use crate::build::model::scrap::Scrap;
-use crate::libs::error::{ScrapError, ScrapResult};
+use crate::libs::{
+    error::{ScrapError, ScrapResult},
+    model::{scrap::Scrap, tags::Tags},
+};
 use crate::{build::css::render::CSSRender, libs::git::GitCommand};
 use anyhow::{bail, Context};
 use chrono_tz::Tz;
@@ -15,7 +17,7 @@ use super::{
         index_render::IndexRender, scrap_render::ScrapRender, tag_render::TagRender,
         tags_index_render::TagsIndexRender,
     },
-    model::{paging::Paging, sort::SortKey, tags::Tags},
+    model::{paging::Paging, sort::SortKey},
 };
 
 pub struct BuildCommand<GC: GitCommand> {

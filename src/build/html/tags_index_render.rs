@@ -4,10 +4,10 @@ use std::{fs::File, path::PathBuf};
 
 use crate::build::cmd::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
-use crate::build::model::scrap::Scrap;
 use crate::build::model::sort::SortKey;
-use crate::build::model::tags::Tags;
 use crate::libs::error::{ScrapError, ScrapResult};
+use crate::libs::model::scrap::Scrap;
+use crate::libs::model::tags::Tags;
 use anyhow::Context;
 use chrono_tz::Tz;
 use url::Url;
