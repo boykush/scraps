@@ -147,14 +147,9 @@ mod tests {
         .as_bytes();
 
         // scraps
-        let sc1 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "scrap1", "# header1", &Some(1)),
-            &Some(1),
-        );
-        let sc2 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "scrap2", "## header2", &Some(0)),
-            &Some(0),
-        );
+        let sc1 = ScrapWithCommitedTs::new(&Scrap::new(&base_url, "scrap1", "# header1"), &Some(1));
+        let sc2 =
+            ScrapWithCommitedTs::new(&Scrap::new(&base_url, "scrap2", "## header2"), &Some(0));
         let scraps_with_commited_ts =
             ScrapsWithCommitedTs::new(&vec![sc1.to_owned(), sc2.to_owned()]);
 
@@ -207,22 +202,13 @@ mod tests {
         .as_bytes();
 
         // scraps
-        let sc1 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "scrap1", "# header1", &Some(3)),
-            &Some(3),
-        );
-        let sc2 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "scrap2", "## header2", &Some(2)),
-            &Some(2),
-        );
-        let sc3 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "scrap3", "### header3", &Some(1)),
-            &Some(1),
-        );
-        let sc4 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "scrap4", "#### header4", &Some(0)),
-            &Some(0),
-        );
+        let sc1 = ScrapWithCommitedTs::new(&Scrap::new(&base_url, "scrap1", "# header1"), &Some(3));
+        let sc2 =
+            ScrapWithCommitedTs::new(&Scrap::new(&base_url, "scrap2", "## header2"), &Some(2));
+        let sc3 =
+            ScrapWithCommitedTs::new(&Scrap::new(&base_url, "scrap3", "### header3"), &Some(1));
+        let sc4 =
+            ScrapWithCommitedTs::new(&Scrap::new(&base_url, "scrap4", "#### header4"), &Some(0));
         let scraps_with_commited_ts = ScrapsWithCommitedTs::new(&vec![
             sc1.to_owned(),
             sc2.to_owned(),

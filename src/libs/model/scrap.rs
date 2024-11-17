@@ -10,11 +10,10 @@ pub struct Scrap {
     pub links: Vec<Title>,
     pub html_content: String,
     pub thumbnail: Option<Url>,
-    pub commited_ts: Option<i64>,
 }
 
 impl Scrap {
-    pub fn new(base_url: &Url, title: &str, text: &str, commited_ts: &Option<i64>) -> Scrap {
+    pub fn new(base_url: &Url, title: &str, text: &str) -> Scrap {
         let links = markdown::extract_link_titles(text)
             .iter()
             .map(|t| Title::new(t))
@@ -27,7 +26,6 @@ impl Scrap {
             links,
             html_content,
             thumbnail,
-            commited_ts: commited_ts.to_owned(),
         }
     }
 }
@@ -39,7 +37,7 @@ mod tests {
     #[test]
     fn it_new() {
         let base_url = Url::parse("http://localhost:1112/").unwrap();
-        let mut scrap = Scrap::new(&base_url, "scrap title", "[[link1]] [[link2]]", &None);
+        let mut scrap = Scrap::new(&base_url, "scrap title", "[[link1]] [[link2]]");
         assert_eq!(scrap.title, Title::new("scrap title"));
         scrap.links.sort();
         let mut expected = [Title::new("link1"), Title::new("link2")];
@@ -51,6 +49,5 @@ mod tests {
                 .to_string()
         );
         assert_eq!(scrap.thumbnail, None);
-        assert_eq!(scrap.commited_ts, None);
     }
 }

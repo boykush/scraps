@@ -78,21 +78,17 @@ mod tests {
     fn it_new_with_sort() {
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let sc1 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "title1", "[[title4]][[title2]]", &None),
+            &Scrap::new(&base_url, "title1", "[[title4]][[title2]]"),
             &None,
         );
         let sc2 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "title2", "[[title4]][[title1]]", &Some(3)),
+            &Scrap::new(&base_url, "title2", "[[title4]][[title1]]"),
             &Some(3),
         );
-        let sc3 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "title3", "[[title4]]", &Some(2)),
-            &Some(2),
-        );
-        let sc4 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "title4", "[[title1]]", &Some(1)),
-            &Some(1),
-        );
+        let sc3 =
+            ScrapWithCommitedTs::new(&Scrap::new(&base_url, "title3", "[[title4]]"), &Some(2));
+        let sc4 =
+            ScrapWithCommitedTs::new(&Scrap::new(&base_url, "title4", "[[title1]]"), &Some(1));
         let linked_scraps_map =
             LinkedScrapsMap::new(&vec![sc1.scrap(), sc2.scrap(), sc3.scrap(), sc4.scrap()]);
 

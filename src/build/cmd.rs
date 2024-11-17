@@ -127,8 +127,8 @@ impl<GC: GitCommand> BuildCommand<GC> {
             .map(|o| o.to_str())
             .and_then(|fp| fp.ok_or(ScrapError::FileLoad))?;
         let md_text = fs::read_to_string(path).context(ScrapError::FileLoad)?;
+        let scrap = Scrap::new(base_url, file_prefix, &md_text);
         let commited_ts = self.git_command.commited_ts(path)?;
-        let scrap = Scrap::new(base_url, file_prefix, &md_text, &commited_ts);
 
         Ok(ScrapWithCommitedTs::new(&scrap, &commited_ts))
     }
