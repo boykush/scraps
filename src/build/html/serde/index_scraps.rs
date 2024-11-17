@@ -1,37 +1,60 @@
 use itertools::Itertools;
+use url::Url;
 
 use crate::{
     build::model::{linked_scraps_map::LinkedScrapsMap, sort::SortKey},
     libs::model::scrap::Scrap,
 };
 
-use super::scrap::SerializeScrap;
+#[derive(serde::Serialize, Clone, PartialEq, Debug)]
+pub struct SerializeIndexScrap {
+    title: String,
+    slug: String,
+    html_content: String,
+    thumbnail: Option<Url>,
+    pub commited_ts: Option<i64>,
+    pub linked_count: usize,
+}
+
+impl SerializeIndexScrap {
+    pub fn new(scrap: &Scrap, linked_scraps_map: &LinkedScrapsMap) -> SerializeIndexScrap {
+        let linked_count = linked_scraps_map.linked_by(&scrap.title).len();
+        SerializeIndexScrap {
+            title: scrap.title.to_string(),
+            slug: scrap.title.slug.to_string(),
+            html_content: scrap.html_content.clone(),
+            thumbnail: scrap.thumbnail.clone(),
+            commited_ts: scrap.commited_ts,
+            linked_count,
+        }
+    }
+}
 
 #[derive(serde::Serialize, PartialEq, Debug)]
-pub struct SerializeScraps(Vec<SerializeScrap>);
+pub struct SerializeIndexScraps(Vec<SerializeIndexScrap>);
 
-impl SerializeScraps {
+impl SerializeIndexScraps {
     pub fn new_with_sort(
         scraps: &[Scrap],
         linked_scraps_map: &LinkedScrapsMap,
         sort_key: &SortKey,
-    ) -> SerializeScraps {
+    ) -> SerializeIndexScraps {
         let serialize_scraps = scraps
             .iter()
-            .map(|s| SerializeScrap::new(s, linked_scraps_map));
+            .map(|s| SerializeIndexScrap::new(s, linked_scraps_map));
         let sorted = (match sort_key {
             SortKey::CommittedDate => serialize_scraps.sorted_by_key(|s| s.commited_ts).rev(),
             SortKey::LinkedCount => serialize_scraps.sorted_by_key(|s| s.linked_count).rev(),
         })
         .collect_vec();
 
-        SerializeScraps(sorted)
+        SerializeIndexScraps(sorted)
     }
 
-    pub fn chunks(&self, chunk_size: usize) -> Vec<SerializeScraps> {
+    pub fn chunks(&self, chunk_size: usize) -> Vec<SerializeIndexScraps> {
         self.0
             .chunks(chunk_size)
-            .map(|scraps| SerializeScraps(scraps.to_vec()))
+            .map(|scraps| SerializeIndexScraps(scraps.to_vec()))
             .collect_vec()
     }
 }
@@ -56,13 +79,13 @@ mod tests {
             scrap4.clone(),
         ]);
 
-        let sscrap1 = SerializeScrap::new(&scrap1.clone(), &linked_scraps_map);
-        let sscrap2 = SerializeScrap::new(&scrap2.clone(), &linked_scraps_map);
-        let sscrap3 = SerializeScrap::new(&scrap3.clone(), &linked_scraps_map);
-        let sscrap4 = SerializeScrap::new(&scrap4.clone(), &linked_scraps_map);
+        let sscrap1 = SerializeIndexScrap::new(&scrap1.clone(), &linked_scraps_map);
+        let sscrap2 = SerializeIndexScrap::new(&scrap2.clone(), &linked_scraps_map);
+        let sscrap3 = SerializeIndexScrap::new(&scrap3.clone(), &linked_scraps_map);
+        let sscrap4 = SerializeIndexScrap::new(&scrap4.clone(), &linked_scraps_map);
 
         // Sort by commited date
-        let result1 = SerializeScraps::new_with_sort(
+        let result1 = SerializeIndexScraps::new_with_sort(
             &vec![
                 scrap1.clone(),
                 scrap2.clone(),
@@ -84,7 +107,7 @@ mod tests {
         );
 
         // Sort by linked count
-        let result2 = SerializeScraps::new_with_sort(
+        let result2 = SerializeIndexScraps::new_with_sort(
             &vec![
                 scrap1.clone(),
                 scrap2.clone(),

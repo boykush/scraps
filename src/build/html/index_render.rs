@@ -15,7 +15,7 @@ use url::Url;
 use crate::build::html::scrap_tera;
 
 use super::page_pointer::PagePointer;
-use super::serde::scraps::SerializeScraps;
+use super::serde::index_scraps::SerializeIndexScraps;
 use super::serde::tags::SerializeTags;
 
 pub struct IndexRender {
@@ -43,7 +43,8 @@ impl IndexRender {
         paging: &Paging,
     ) -> ScrapResult<()> {
         let linked_scraps_map = LinkedScrapsMap::new(scraps);
-        let sorted_scraps = SerializeScraps::new_with_sort(scraps, &linked_scraps_map, sort_key);
+        let sorted_scraps =
+            SerializeIndexScraps::new_with_sort(scraps, &linked_scraps_map, sort_key);
         let paginated = sorted_scraps
             .chunks(paging.size_with(scraps))
             .into_iter()
@@ -77,7 +78,7 @@ impl IndexRender {
         metadata: &HtmlMetadata,
         sort_key: &SortKey,
         tags: &SerializeTags,
-        paginated_scraps: &SerializeScraps,
+        paginated_scraps: &SerializeIndexScraps,
         pointer: &PagePointer,
     ) -> ScrapResult<()> {
         let (tera, mut context) = scrap_tera::init(

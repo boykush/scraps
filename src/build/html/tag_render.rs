@@ -14,7 +14,7 @@ use url::Url;
 
 use crate::build::html::scrap_tera;
 
-use super::serde::scraps::SerializeScraps;
+use super::serde::link_scraps::SerializeLinkScraps;
 use super::serde::tag::SerializeTag;
 
 pub struct TagRender {
@@ -60,10 +60,7 @@ impl TagRender {
         context.insert("tag", &SerializeTag::new(tag, &linked_scraps_map));
 
         let linked_scraps = linked_scraps_map.linked_by(&tag.title);
-        context.insert(
-            "linked_scraps",
-            &SerializeScraps::new_with_sort(&linked_scraps, &linked_scraps_map, sort_key),
-        );
+        context.insert("linked_scraps", &SerializeLinkScraps::new(&linked_scraps));
 
         // render html
         let file_name = &format!("{}.html", tag.title.slug);
