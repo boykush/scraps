@@ -3,9 +3,12 @@ use std::{
     path::PathBuf,
 };
 
-use crate::libs::{
-    error::{ScrapError, ScrapResult},
-    model::{scrap::Scrap, tags::Tags},
+use crate::{
+    build::model::linked_scraps_map::LinkedScrapsMap,
+    libs::{
+        error::{ScrapError, ScrapResult},
+        model::{scrap::Scrap, tags::Tags},
+    },
 };
 use anyhow::{bail, Context};
 use url::Url;
@@ -20,7 +23,7 @@ impl TagCommand {
             scraps_dir_path: scraps_dir_path.to_owned(),
         }
     }
-    pub fn run(&self, base_url: &Url) -> ScrapResult<Tags> {
+    pub fn run(&self, base_url: &Url) -> ScrapResult<(Tags, LinkedScrapsMap)> {
         let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapError::FileLoad)?;
 
         let paths = read_dir
@@ -35,10 +38,10 @@ impl TagCommand {
             .map(|path| self.to_scrap_by_path(base_url, path))
             .collect::<ScrapResult<Vec<Scrap>>>()?;
 
-        // render tag
         let tags = Tags::new(&scraps);
+        let linked_scraps_map = LinkedScrapsMap::new(&scraps);
 
-        Ok(tags)
+        Ok((tags, linked_scraps_map))
     }
 
     fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapResult<PathBuf> {

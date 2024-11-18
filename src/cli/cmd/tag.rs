@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use itertools::Itertools;
 use url::Url;
 
 use crate::cli::display::tag::DisplayTag;
@@ -20,15 +21,19 @@ pub fn run() -> ScrapResult<()> {
         Url::parse((config.base_url.to_string() + "/").as_str()).unwrap()
     };
 
-    let tags = command.run(&base_url)?;
+    let (tags, linked_scraps_map) = command.run(&base_url)?;
     let display_tags_result = tags
         .values
         .into_iter()
-        .map(|tag| DisplayTag::new(&tag, &base_url))
+        .map(|tag| DisplayTag::new(&tag, &base_url, &linked_scraps_map))
         .collect::<ScrapResult<Vec<DisplayTag>>>();
 
     display_tags_result.map(|tags| {
-        for tag in tags {
+        let sorted = tags
+            .into_iter()
+            .sorted_by_key(|tag| tag.linked_count())
+            .rev();
+        for tag in sorted {
             println!("{}", tag)
         }
     })
