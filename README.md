@@ -30,6 +30,7 @@ Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 - [x] Build a static site
 - [x] Init scraps project
 - [x] Serve on localhost
+- [x] List a tags
 ### Deploy
 - [x] GitHub Pages
 
