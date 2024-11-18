@@ -1,4 +1,4 @@
-use crate::build::model::{linked_scraps_map::LinkedScrapsMap, tag::Tag};
+use crate::{build::model::linked_scraps_map::LinkedScrapsMap, libs::model::tag::Tag};
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 pub struct SerializeTag {

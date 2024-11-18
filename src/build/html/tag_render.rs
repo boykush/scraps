@@ -3,17 +3,18 @@ use std::path::Path;
 use std::{fs::File, path::PathBuf};
 
 use crate::build::cmd::HtmlMetadata;
+use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::sort::SortKey;
-use crate::build::model::tag::Tag;
-use crate::build::model::{linked_scraps_map::LinkedScrapsMap, scrap::Scrap};
 use crate::libs::error::{ScrapError, ScrapResult};
+use crate::libs::model::scrap::Scrap;
+use crate::libs::model::tag::Tag;
 use anyhow::Context;
 use chrono_tz::Tz;
 use url::Url;
 
 use crate::build::html::scrap_tera;
 
-use super::serde::scraps::SerializeScraps;
+use super::serde::link_scraps::SerializeLinkScraps;
 use super::serde::tag::SerializeTag;
 
 pub struct TagRender {
@@ -59,10 +60,7 @@ impl TagRender {
         context.insert("tag", &SerializeTag::new(tag, &linked_scraps_map));
 
         let linked_scraps = linked_scraps_map.linked_by(&tag.title);
-        context.insert(
-            "linked_scraps",
-            &SerializeScraps::new_with_sort(&linked_scraps, &linked_scraps_map, sort_key),
-        );
+        context.insert("linked_scraps", &SerializeLinkScraps::new(&linked_scraps));
 
         // render html
         let file_name = &format!("{}.html", tag.title.slug);
@@ -75,8 +73,9 @@ impl TagRender {
 
 #[cfg(test)]
 mod tests {
-    use crate::build::model::title::Title;
     use url::Url;
+
+    use crate::libs::model::title::Title;
 
     use super::*;
 
@@ -98,8 +97,8 @@ mod tests {
         let public_dir_path = test_resource_path.join("public");
 
         // scraps
-        let scrap1 = &Scrap::new(&base_url, "scrap1", "[[tag1]]", &None);
-        let scrap2 = &Scrap::new(&base_url, "scrap2", "[[tag1]][[tag2]]", &None);
+        let scrap1 = &Scrap::new(&base_url, "scrap1", "[[tag1]]");
+        let scrap2 = &Scrap::new(&base_url, "scrap2", "[[tag1]][[tag2]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
         // tag
         let tag1 = Tag::new(&Title::new("tag 1"));

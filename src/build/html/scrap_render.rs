@@ -3,17 +3,19 @@ use std::path::Path;
 use std::{fs::File, path::PathBuf};
 
 use crate::build::cmd::HtmlMetadata;
+use crate::build::model::linked_scraps_map::LinkedScrapsMap;
+use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
 use crate::build::model::sort::SortKey;
-use crate::build::model::{linked_scraps_map::LinkedScrapsMap, scrap::Scrap};
 use crate::libs::error::{ScrapError, ScrapResult};
+use crate::libs::model::scrap::Scrap;
 use anyhow::Context;
 use chrono_tz::Tz;
 use url::Url;
 
 use crate::build::html::scrap_tera;
 
-use super::serde::scrap::SerializeScrap;
-use super::serde::scraps::SerializeScraps;
+use super::serde::link_scraps::SerializeLinkScraps;
+use super::serde::scrap_detail::SerializeScrapDetail;
 
 pub struct ScrapRender {
     static_dir_path: PathBuf,
@@ -42,7 +44,7 @@ impl ScrapRender {
         base_url: &Url,
         timezone: Tz,
         metadata: &HtmlMetadata,
-        scrap: &Scrap,
+        scrap_with_commited_ts: &ScrapWithCommitedTs,
         sort_key: &SortKey,
     ) -> ScrapResult<()> {
         let (tera, mut context) = scrap_tera::init(
@@ -55,16 +57,13 @@ impl ScrapRender {
 
         // insert to context for linked list
         let linked_scraps_map = LinkedScrapsMap::new(&self.scraps);
-        context.insert("scrap", &SerializeScrap::new(scrap, &linked_scraps_map));
+        context.insert("scrap", &SerializeScrapDetail::new(scrap_with_commited_ts));
 
-        let linked_scraps = linked_scraps_map.linked_by(&scrap.title);
-        context.insert(
-            "linked_scraps",
-            &SerializeScraps::new_with_sort(&linked_scraps, &linked_scraps_map, sort_key),
-        );
+        let linked_scraps = linked_scraps_map.linked_by(&scrap_with_commited_ts.scrap().title);
+        context.insert("linked_scraps", &SerializeLinkScraps::new(&linked_scraps));
 
         // render html
-        let file_name = &format!("{}.html", scrap.title.slug);
+        let file_name = &format!("{}.html", &scrap_with_commited_ts.scrap().title.slug);
         let wtr = File::create(self.public_scraps_dir_path.join(file_name))
             .context(ScrapError::FileWrite)?;
         tera.render_to("__builtins/scrap.html", &context, wtr)
@@ -97,15 +96,22 @@ mod tests {
         let public_dir_path = test_resource_path.join("public");
 
         // scraps
-        let scrap1 = &Scrap::new(&base_url, "scrap 1", "# header1", &None);
-        let scrap2 = &Scrap::new(&base_url, "scrap 2", "[[scrap1]]", &None);
+        let commited_ts1 = None;
+        let scrap1 = &Scrap::new(&base_url, "scrap 1", "# header1");
+        let scrap2 = &Scrap::new(&base_url, "scrap 2", "[[scrap1]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
         let scrap1_html_path = public_dir_path.join(format!("scraps/{}.html", scrap1.title.slug));
 
         let render = ScrapRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 
-        let result1 = render.run(&base_url, timezone, &metadata, scrap1, &sort_key);
+        let result1 = render.run(
+            &base_url,
+            timezone,
+            &metadata,
+            &ScrapWithCommitedTs::new(scrap1, &commited_ts1),
+            &sort_key,
+        );
         assert!(result1.is_ok());
 
         let result2 = fs::read_to_string(scrap1_html_path);
