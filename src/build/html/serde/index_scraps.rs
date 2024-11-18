@@ -116,7 +116,7 @@ mod tests {
 
         // Sort by linked count
         let result2 = SerializeIndexScraps::new_with_sort(
-            &&ScrapsWithCommitedTs::new(&vec![sc1.clone(), sc2.clone(), sc3.clone(), sc4.clone()]),
+            &ScrapsWithCommitedTs::new(&vec![sc1.clone(), sc2.clone(), sc3.clone(), sc4.clone()]),
             &linked_scraps_map,
             &SortKey::LinkedCount,
         );
