@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::libs::model::{scrap::Scrap, title::Title};
 
+#[derive(PartialEq, Debug)]
 pub struct LinkedScrapsMap {
     values: HashMap<Title, Vec<Scrap>>,
 }

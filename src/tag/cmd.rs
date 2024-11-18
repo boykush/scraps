@@ -69,8 +69,13 @@ impl TagCommand {
 #[cfg(test)]
 mod tests {
 
+    use itertools::Itertools;
+
     use super::*;
-    use crate::libs::resource::tests::FileResource;
+    use crate::libs::{
+        model::{tag::Tag, title::Title},
+        resource::tests::FileResource,
+    };
 
     #[test]
     fn it_run() {
@@ -84,7 +89,7 @@ mod tests {
         // scrap1
         let md_path_1 = scraps_dir_path.join("test1.md");
         let resource_1 = FileResource::new(&md_path_1);
-        let resource_bytes_1 = concat!("#[[Tag1]] #[[Tag2]",).as_bytes();
+        let resource_bytes_1 = concat!("#[[Tag1]] #[[Tag2]]",).as_bytes();
 
         // scrap2
         let md_path_2 = scraps_dir_path.join("test2.md");
@@ -94,8 +99,53 @@ mod tests {
         resource_1.run(resource_bytes_1, || {
             resource_2.run(resource_bytes_2, || {
                 let command = TagCommand::new(&scraps_dir_path);
-                let result1 = command.run(&base_url);
-                assert!(result1.is_ok());
+
+                let result = command.run(&base_url);
+                assert!(result.is_ok());
+
+                let (tags, linked_scraps_map) = result.unwrap();
+
+                // test tags
+                let tag1 = Tag::new(&Title::new("Tag1"));
+                let tag2 = Tag::new(&Title::new("Tag2"));
+                let tag3 = Tag::new(&Title::new("Tag3"));
+                assert_eq!(tags.values.len(), 3);
+                assert_eq!(
+                    tags.values
+                        .into_iter()
+                        .sorted_by_key(|t| t.title.to_string())
+                        .collect_vec(),
+                    vec![tag1.clone(), tag2.clone(), tag3.clone(),]
+                );
+
+                // test linked scraps map
+                let scrap1 = Scrap::new(&base_url, "test1", "#[[Tag1]] #[[Tag2]]");
+                let scrap2 = Scrap::new(&base_url, "test2", "#[[Tag1]] #[[Tag3]]");
+                assert_eq!(
+                    linked_scraps_map
+                        .linked_by(&tag1.title)
+                        .into_iter()
+                        .map(|s| s.title)
+                        .sorted_by_key(|t| t.to_string())
+                        .collect_vec(),
+                    vec![scrap1.title.clone(), scrap2.title.clone()]
+                );
+                assert_eq!(
+                    linked_scraps_map
+                        .linked_by(&tag2.title)
+                        .into_iter()
+                        .map(|s| s.title)
+                        .collect_vec(),
+                    vec![scrap1.title.clone()]
+                );
+                assert_eq!(
+                    linked_scraps_map
+                        .linked_by(&tag3.title)
+                        .into_iter()
+                        .map(|s| s.title)
+                        .collect_vec(),
+                    vec![scrap2.title.clone()]
+                );
             })
         })
     }
