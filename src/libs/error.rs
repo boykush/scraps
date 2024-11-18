@@ -14,6 +14,9 @@ pub enum ScrapError {
     #[error("Failed when render to html")]
     PublicRender,
 
+    #[error("Not display data on cli")]
+    CliDisplay,
+
     #[error("Failed git init. git is required")]
     GitInit,
 

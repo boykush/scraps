@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 
 pub mod cmd;
+mod display;
 mod scrap_config;
 
 #[derive(Parser)]

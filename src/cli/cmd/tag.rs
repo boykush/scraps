@@ -1,6 +1,8 @@
 use std::path::PathBuf;
+
 use url::Url;
 
+use crate::cli::display::tag::DisplayTag;
 use crate::libs::error::ScrapResult;
 
 use crate::cli::scrap_config::ScrapConfig;
@@ -8,9 +10,7 @@ use crate::tag::cmd::TagCommand;
 
 pub fn run() -> ScrapResult<()> {
     let scraps_dir_path = PathBuf::from("scraps");
-    let command = TagCommand::new(
-        &scraps_dir_path,
-    );
+    let command = TagCommand::new(&scraps_dir_path);
 
     let config = ScrapConfig::new()?;
     // Automatically append a trailing slash to URLs
@@ -20,10 +20,16 @@ pub fn run() -> ScrapResult<()> {
         Url::parse((config.base_url.to_string() + "/").as_str()).unwrap()
     };
 
-    let result = command.run(&base_url)?;
+    let tags = command.run(&base_url)?;
+    let display_tags_result = tags
+        .values
+        .into_iter()
+        .map(|tag| DisplayTag::new(&tag, &base_url))
+        .collect::<ScrapResult<Vec<DisplayTag>>>();
 
-    Ok(println!(
-        "{:?}",
-        result,
-    ))
+    display_tags_result.map(|tags| {
+        for tag in tags {
+            println!("{}", tag)
+        }
+    })
 }
