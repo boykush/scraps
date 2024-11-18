@@ -26,7 +26,7 @@ impl DisplayTag {
         linked_scraps_map: &LinkedScrapsMap,
     ) -> ScrapResult<DisplayTag> {
         let url = base_url
-            .join(&tag.title.slug.to_string())
+            .join(&format!("scraps/{}.html", tag.title.slug.to_string()))
             .context(ScrapError::CliDisplay)?;
         let linked_count = linked_scraps_map.linked_by(&tag.title).len();
 
