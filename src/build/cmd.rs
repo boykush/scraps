@@ -65,8 +65,9 @@ impl<GC: GitCommand> BuildCommand<GC> {
         let scraps_with_commited_ts = paths
             .iter()
             .map(|path| self.to_scrap_by_path(base_url, path))
-            .collect::<ScrapResult<Vec<ScrapWithCommitedTs>>>()?;
-        let scraps = ScrapsWithCommitedTs::new(&scraps_with_commited_ts).to_scraps();
+            .collect::<ScrapResult<Vec<ScrapWithCommitedTs>>>()
+            .map(|s| ScrapsWithCommitedTs::new(&s))?;
+        let scraps = scraps_with_commited_ts.to_scraps();
 
         // render index
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
@@ -74,13 +75,14 @@ impl<GC: GitCommand> BuildCommand<GC> {
             base_url,
             timezone,
             html_metadata,
-            &ScrapsWithCommitedTs::new(&scraps_with_commited_ts),
+            &scraps_with_commited_ts,
             sort_key,
             paging,
         )?;
 
         // render scraps
         scraps_with_commited_ts
+            .to_vec()
             .into_iter()
             .try_for_each(|scrap_with_commited_ts| {
                 let scrap_render =
