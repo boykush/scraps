@@ -1,0 +1,17 @@
+#[[Getting Started]]
+
+##  What is the Scraps?
+
+Scraps is a static site generator that builds a wiki from a set of markdown files.
+
+## Getting Started
+
+See the links for more details.
+
+1. [[Installation]] of Scraps.
+2. [[Init]] project.
+3. Edit the [[Configuration]]. See the .
+4. Write Markdown files as [[Scraps]] under the `/scraps` directory..
+5. [[Build]] static site files.
+6. [[Serve]] the site for debugging.
+7. Deploy the site. for example, there's [[GitHub Pages]].

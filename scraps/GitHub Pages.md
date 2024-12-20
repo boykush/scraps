@@ -1,4 +1,5 @@
-## Github Pages
+#[[Deployment]]
+
 Custom actions are available to deploy Scraps to Github Pages.
 
 [scraps-deploy-action](https://github.com/boykush/scraps-deploy-action)

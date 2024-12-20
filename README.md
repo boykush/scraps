@@ -11,11 +11,11 @@
   <a href="https://boykush.github.io/scraps/"><img alt="Scraps documentation" src="https://img.shields.io/badge/scraps-documentation-fc0060?style=flat-square"></a>
 </p>
 
-# What is this?
+# What is the Scraps?
 
 Scraps is a static site generator that builds a wiki from a set of markdown files.
 
-You can refer to the [Getting Started](https://boykush.github.io/scraps/getting-started.html) document to quickly begin using Scraps.
+You can refer to the [Overview](https://boykush.github.io/scraps/overview.html) document to quickly begin using Scraps.
 
 Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 
