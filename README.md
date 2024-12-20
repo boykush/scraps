@@ -15,7 +15,7 @@
 
 Scraps is a static site generator that builds a wiki from a set of markdown files.
 
-You can refer to the [Overview](https://boykush.github.io/scraps/overview.html) document to quickly begin using Scraps.
+You can refer to the [Overview](https://boykush.github.io/scraps/scraps/overview.html) document to quickly begin using Scraps.
 
 Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 
