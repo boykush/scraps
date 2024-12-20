@@ -1,5 +1,7 @@
 #[[Getting Started]]
 
+![](https://github.com/boykush/scraps/raw/main/assets/logo_opacity.png?raw=true)
+
 ##  What is the Scraps?
 
 Scraps is a static site generator that builds a wiki from a set of markdown files.
