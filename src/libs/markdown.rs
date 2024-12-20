@@ -1,13 +1,15 @@
 use std::collections::HashSet;
 
 use itertools::Itertools;
-use pulldown_cmark::{html::push_html, CowStr, Event, LinkType, Parser, Tag};
+use pulldown_cmark::{html::push_html, CowStr, Event, LinkType, Options, Parser, Tag};
 use url::Url;
 
 use super::slugify;
 
+const PARSER_OPTION: Options = Options::all();
+
 pub fn extract_link_titles(text: &str) -> Vec<String> {
-    let parser = Parser::new(text);
+    let parser = Parser::new_ext(text, PARSER_OPTION);
     let parser_windows = parser.tuple_windows();
     let mut link_titles = vec![];
 
@@ -29,7 +31,7 @@ pub fn extract_link_titles(text: &str) -> Vec<String> {
 }
 
 pub fn head_image(text: &str) -> Option<Url> {
-    let mut parser = Parser::new(text);
+    let mut parser = Parser::new_ext(text, PARSER_OPTION);
     parser.find_map(|event| match event {
         Event::Start(Tag::Image {
             link_type: _,
@@ -43,7 +45,7 @@ pub fn head_image(text: &str) -> Option<Url> {
 
 pub fn to_html(text: &str, base_url: &Url) -> String {
     let mut html_buf = String::new();
-    let parser = Parser::new(text);
+    let parser = Parser::new_ext(text, PARSER_OPTION);
     let parser_vec = parser.collect::<Vec<Event<'_>>>();
     let mut parser_windows = parser_vec
         .iter()
