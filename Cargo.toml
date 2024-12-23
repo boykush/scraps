@@ -1,22 +1,6 @@
-[package]
-name = "scraps"
-authors = ["boykush <boykush315@gmail.com>"]
-version = "0.15.5"
-edition = "2021"
-license = "MIT"
-description = "A static site generator that builds a wiki from a set of markdown files."
-homepage = "https://boykush.github.io/scraps"
-repository = "https://github.com/boykush/scraps"
-documentation = "https://boykush.github.io/scraps"
-readme = "README.md"
-exclude = [
-    "scraps/",
-    ".github/",
-    "Dockerfile",
-    "assets/"
-]
 [workspace]
 [workspace.package]
+edition = "2021"
 authors = ["boykush <boykush315@gmail.com>"]
 license = "MIT"
 version = "0.15.5"
@@ -25,11 +9,32 @@ homepage = "https://boykush.github.io/scraps"
 repository = "https://github.com/boykush/scraps"
 documentation = "https://boykush.github.io/scraps"
 rust-version = "1.83"
-
 [workspace.dependencies]
 scraps_libs = { version = "0.15.5", path = "modules/libs" }
+
+[package]
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+version.workspace = true
+description.workspace = true
+homepage.workspace = true
+repository.workspace = true
+documentation.workspace = true
+rust-version.workspace = true
+name = "scraps"
+readme = "README.md"
+exclude = [
+    "scraps/",
+    ".github/",
+    "Dockerfile",
+    "assets/"
+]
 [dependencies]
+# sub crates
 scraps_libs.workspace = true
+
+# external crates
 clap = { version = "4.5", features = ["derive"] }
 serde = { version = "1.0", features = ["derive"] }
 anyhow = "1.0"
