@@ -17,6 +17,6 @@ jobs:
       - name: Install cargo release
         run: cargo install cargo-release
       - name: Crate Release
-        run: cargo release --execute --no-tag --no-push
+        run: cargo release --execute --no-tag --no-push --workspace
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
