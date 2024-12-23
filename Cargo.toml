@@ -19,6 +19,7 @@ exclude = [
 [workspace.package]
 authors = ["boykush <boykush315@gmail.com>"]
 license = "MIT"
+version = "0.15.5"
 description = "A static site generator that builds a wiki from a set of markdown files."
 homepage = "https://boykush.github.io/scraps"
 repository = "https://github.com/boykush/scraps"
@@ -26,7 +27,7 @@ documentation = "https://boykush.github.io/scraps"
 rust-version = "1.83"
 
 [workspace.dependencies]
-scraps_libs = { version = "0.1.0", path = "modules/libs" }
+scraps_libs = { version = "0.15.5", path = "modules/libs" }
 [dependencies]
 scraps_libs.workspace = true
 clap = { version = "4.5", features = ["derive"] }
