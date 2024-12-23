@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use scraps_libs_slugify::slugify;
+use scraps_libs::slugify;
 
 #[derive(PartialEq, Clone, Debug, Eq, Hash, Ord, PartialOrd)]
 pub struct Slug(String);
