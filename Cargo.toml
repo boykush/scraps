@@ -1,3 +1,5 @@
+[workspace]
+
 [package]
 name = "scraps"
 authors = ["boykush <boykush315@gmail.com>"]
@@ -7,6 +9,7 @@ license = "MIT"
 description = "A static site generator that builds a wiki from a set of markdown files."
 homepage = "https://boykush.github.io/scraps"
 repository = "https://github.com/boykush/scraps"
+documentation = "https://boykush.github.io/scraps"
 readme = "README.md"
 exclude = [
     "scraps/",
@@ -14,11 +17,22 @@ exclude = [
     "Dockerfile",
     "assets/"
 ]
+[workspace.package]
+authors = ["boykush <boykush315@gmail.com>"]
+license = "MIT"
+version = "0.15.2"
+description = "A static site generator that builds a wiki from a set of markdown files."
+homepage = "https://boykush.github.io/scraps"
+repository = "https://github.com/boykush/scraps"
+documentation = "https://boykush.github.io/scraps"
 rust-version = "1.83"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+# libs
+slugify = { path = "modules/libs/slugify" }
+# deps
 clap = { version = "4.5", features = ["derive"] }
 serde = { version = "1.0", features = ["derive"] }
 anyhow = "1.0"

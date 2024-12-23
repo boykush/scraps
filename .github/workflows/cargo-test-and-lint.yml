@@ -17,9 +17,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build
-      run: cargo build --verbose
+      run: cargo build --verbose --workspace
     - name: Run tests
-      run: cargo test --verbose
+      run: cargo test --verbose --workspace
     - name: Run rustfmt
       run: cargo fmt --all -- --check
     - name: Run Clippy

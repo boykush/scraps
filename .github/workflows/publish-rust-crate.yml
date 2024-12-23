@@ -14,7 +14,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Crate Publish
-        run: cargo publish
+      - name: Install cargo release
+        run: cargo install cargo-release
+      - name: Crate Release
+        run: cargo release --execute --no-tags --no-push
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

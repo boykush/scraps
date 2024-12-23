@@ -4,8 +4,6 @@ use itertools::Itertools;
 use pulldown_cmark::{html::push_html, CowStr, Event, LinkType, Options, Parser, Tag};
 use url::Url;
 
-use super::slugify;
-
 const PARSER_OPTION: Options = Options::all();
 
 pub fn extract_link_titles(text: &str) -> Vec<String> {

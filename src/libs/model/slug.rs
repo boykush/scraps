@@ -1,7 +1,5 @@
 use std::fmt::Display;
 
-use crate::libs::slugify;
-
 #[derive(PartialEq, Clone, Debug, Eq, Hash, Ord, PartialOrd)]
 pub struct Slug(String);
 
