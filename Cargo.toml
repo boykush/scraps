@@ -1,7 +1,7 @@
 [package]
 name = "scraps"
 authors = ["boykush <boykush315@gmail.com>"]
-version = "0.15.5"
+version = "0.15.4"
 edition = "2021"
 license = "MIT"
 description = "A static site generator that builds a wiki from a set of markdown files."
@@ -19,7 +19,7 @@ exclude = [
 [workspace.package]
 authors = ["boykush <boykush315@gmail.com>"]
 license = "MIT"
-version = "0.15.5"
+version = "0.15.4"
 description = "A static site generator that builds a wiki from a set of markdown files."
 homepage = "https://boykush.github.io/scraps"
 repository = "https://github.com/boykush/scraps"
@@ -28,7 +28,7 @@ rust-version = "1.83"
 
 
 [workspace.dependencies]
-slugify = { version = "0.15.5", path = "modules/libs/slugify" }
+slugify = { version = "0.15.4", path = "modules/libs/slugify" }
 [dependencies]
 slugify.workspace = true
 clap = { version = "4.5", features = ["derive"] }
