@@ -1,5 +1,5 @@
 [package]
-name = "slugify"
+name = "scraps_libs_slugify"
 edition = "2021"
 authors.workspace = true
 license.workspace = true

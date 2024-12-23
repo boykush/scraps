@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use itertools::Itertools;
 use pulldown_cmark::{html::push_html, CowStr, Event, LinkType, Options, Parser, Tag};
 use url::Url;
+use scraps_libs_slugify::slugify;
 
 const PARSER_OPTION: Options = Options::all();
 
