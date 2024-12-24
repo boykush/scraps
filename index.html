@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <!-- Page title -->
+        
+            <title>Scraps Doc</title>
+            <meta property="og:title" content="Scraps Doc" />
+            <meta name="twitter:title" content="Scraps Doc" />
+        
+        <!-- Page description -->
+        
+            <meta name="description" content="A static site generator that builds a wiki from a set of markdown files." />
+            <meta property="og:description" content="A static site generator that builds a wiki from a set of markdown files." />
+            <meta name="twitter:description" content="A static site generator that builds a wiki from a set of markdown files." />
+        
+        <!-- Page favicon -->
+        
+            <link rel="icon" type="image/png" href="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;logo.png?raw=true" />
+        
+        <!-- Rubik font -->
+        <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">
+        <!-- Noto Sans JP font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+        <!-- Code syntax highlight theme -->
+        <link href="https://unpkg.com/nord-highlightjs@0.1.0/dist/nord.css" rel="stylesheet" type="text/css" />
+        <!-- Style sheet -->
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;main.css">
+        
+        
+    </head>
+    <body>
+        <header>
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;">
+                <h1>Scraps Doc</h1>
+            </a>
+        </header>
+        <main>
+            
+    <div class="index">
+        <div class="tags-block">
+            
+                
+    <ul class="tag-links">
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/cli-usage.html">
+                <li class="item">
+                    <span class="title">CLI Usage</span><span>(4)</span>
+                </li>
+            </a>
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/getting-started.html">
+                <li class="item">
+                    <span class="title">Getting Started</span><span>(3)</span>
+                </li>
+            </a>
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/content.html">
+                <li class="item">
+                    <span class="title">Content</span><span>(2)</span>
+                </li>
+            </a>
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/deployment.html">
+                <li class="item">
+                    <span class="title">Deployment</span><span>(1)</span>
+                </li>
+            </a>
+        
+        
+    </ul>
+
+            
+        </div>
+        <div class="links-block">
+            <p class="sort-key">Sort by - commited date</p>
+            
+    <ul class="scrap-links">
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/build.html">
+                <li class="item">
+                    <p class="title">Build</p>
+                    
+                        <p class="summary">#CLI Usage
+❯ scraps build
+
+This command builds the Markdown files under the &#x2F;scraps directory and generates static site files.
+Markdown files
+❯ tree scraps
+scraps
+├── Overview.md
+└── Markdown Syntax.md
+
+Generated files
+The output will be a slugged html file as follows.
+❯ tree public
+public
+├── overview.html
+├── markdown-syntax.html
+├── index.html
+└── main.css
+
+The next step is Serve.
+</p>
+                    
+                </li>
+            </a>
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/tag.html">
+                <li class="item">
+                    <p class="title">Tag</p>
+                    
+                        <p class="summary">#CLI Usage
+❯ scraps tag
+
+You can debug tag lists.
+</p>
+                    
+                </li>
+            </a>
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/init.html">
+                <li class="item">
+                    <p class="title">Init</p>
+                    
+                        <p class="summary">#CLI Usage
+❯ scraps init your-scraps-project
+❯ cd your-scraps-project
+
+This command initializes a new Scraps project.
+The output result will look like this.
+❯ tree -a -L 1
+.
+├── .gitignore
+├── Config.toml
+└── scraps
+
+The next step is Build.
+</p>
+                    
+                </li>
+            </a>
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/internal-links.html">
+                <li class="item">
+                    <p class="title">Internal Links</p>
+                    
+                        <p class="summary">#Content
+Internal links like wiki
+Specifying the name of the markdown file with a notation such as [[Link]] will generate a wiki-like internal link.
+For example, if you have the following set of files.
+❯ tree scraps
+scraps
+├── Overview.md
+└── Usage.md
+
+Fill in the file name in the scraps directory in Overview.md as follows to generate the link.
+See [[Usage]] for detail.
+
+Tags as nonexistent links
+If there is no scraps with the specified title, such as #Content, then it will be a tag.
+Tags are lined up on the index page, and the link is to a page with a list of scraps that have the tag.
+</p>
+                    
+                </li>
+            </a>
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/overview.html">
+                <li class="item">
+                    <p class="title">Overview</p>
+                    
+                        <div class="thumbnail">
+                            <img class="thumbnail-image" alt="thumbnail" src="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;raw&#x2F;main&#x2F;assets&#x2F;logo_opacity.png?raw=true" loading="lazy" />
+                        </div>
+                    
+                </li>
+            </a>
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/markdown-syntax.html">
+                <li class="item">
+                    <p class="title">Markdown Syntax</p>
+                    
+                        <p class="summary">#Content
+CommonMark specification
+Scraps supports Markdown syntax according to the CommonMark specification.
+Please refer to the documentation of the pulldown-cmark library used internally for more details.
+CommonMark specification - pulldown-cmark guide
+GitHub-flavored Markdown
+As an extension, GitHub-flavored Markdown is also supported. This includes features such as strikethrough, tables, and task lists.
+Strikethrough:
+Markdown
+~~This text is strikethrough.~~
+Result
+This text is strikethrough.
+Task Lists:
+Markdown
+- [x] Task 1
+- [ ] Task 2
+- [ ] Task 3
+
+Result
+
+
+Task 1
+
+Task 2
+
+Task 3
+
+Mermaid
+By specifying mermaid as the language for a code block, you can use Mermaid diagrams.
+Markdown
+
+```mermaid
+graph LR
+    A --- B
+    B--&gt;C[fa:fa-ban forbidden]
+    B--&gt;D(fa:fa-spinner);
+```
+
+Result
+graph LR
+    A --- B
+    B--&amp;gt;C[fa:fa-ban forbidden]
+    B--&amp;gt;D(fa:fa-spinner);
+
+</p>
+                    
+                </li>
+            </a>
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/configuration.html">
+                <li class="item">
+                    <p class="title">Configuration</p>
+                    
+                        <p class="summary">#Getting Started
+Configuration is managed by Config.toml in the Scraps project.
+Only the title and base_url variables are required. Everything else is optional. All configuration variables used by Scraps and their default values are listed below.
+# The site base url
+base_url = &quot;https:&#x2F;&#x2F;username.github.io&#x2F;repository-name&#x2F;&quot;
+
+# The site title
+title = &quot;&quot;
+
+# The site description (optional)
+description = &quot;&quot;
+
+# The site favicon in the form of png file URL (optional)
+favicon = &quot;&quot;
+
+# The site timezone (optional, default=UTC)
+timezone = &quot;UTC&quot;
+
+# Scraps sort key choice on index page (optional, default=committed_date, choices=committed_date or linked_count)
+sort_key = &quot;committed_date&quot;
+
+# Scraps pagination on index page(optional)
+paginate_by = 20
+
+</p>
+                    
+                </li>
+            </a>
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/serve.html">
+                <li class="item">
+                    <p class="title">Serve</p>
+                    
+                        <p class="summary">#CLI Usage
+❯ scraps serve
+
+You can debug the build outputs by visiting http:&#x2F;&#x2F;127.0.0.1:1112
+</p>
+                    
+                </li>
+            </a>
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/github-pages.html">
+                <li class="item">
+                    <p class="title">GitHub Pages</p>
+                    
+                        <p class="summary">#Deployment
+Custom actions are available to deploy Scraps to Github Pages.
+scraps-deploy-action
+YAML file
+Prepare a yaml file under .github&#x2F;workflows&#x2F; like this
+name: Build and deploy GH Pages
+on: push
+  branches:
+      - main
+    paths:
+      - &#x27;scraps&#x2F;**&#x27;
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions&#x2F;checkout@v3
+        with:
+          fetch-depth: 0 # For scraps git commited date
+      - name: build_and_deploy
+        uses: boykush&#x2F;scraps-deploy-action@v2
+        env:
+          # Target branch
+          PAGES_BRANCH: gh-pages
+          # Provide personal access token
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+GitHub settings
+Set up GitHub Pages for the repository.
+Build and deployment parameter as follows.
+
+Source: Deploy from a branch
+Branch: gh-pages
+
+</p>
+                    
+                </li>
+            </a>
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/installation.html">
+                <li class="item">
+                    <p class="title">Installation</p>
+                    
+                        <p class="summary">#Getting Started
+You can find the latest version on GitHub Releases.
+Requires
+git command is required for features.
+cargo
+❯ cargo install scraps
+
+mac OS
+❯ brew install boykush&#x2F;tap&#x2F;scraps
+
+</p>
+                    
+                </li>
+            </a>
+        
+    </ul>
+
+        </div>
+        <div class="paging-arrows">
+            
+            
+        </div>
+    </div>
+
+        </main>
+        <footer>
+            Generated by <a href="https://github.com/boykush/scraps" target="_blank" rel="noopener noreferrer">Scraps</a>
+        </footer>
+        <!-- Code syntax highlight -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!-- Mermaid -->
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        </script>
+    </body>
+</html>
