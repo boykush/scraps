@@ -70,4 +70,10 @@ pub mod tests {
             Ok(Some(0))
         }
     }
+
+    impl Default for GitCommandTest {
+        fn default() -> Self {
+            Self::new()
+        }
+    }
 }
