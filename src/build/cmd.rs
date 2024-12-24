@@ -4,8 +4,8 @@ use std::{
 };
 
 use crate::build::css::render::CSSRender;
-use crate::libs::model::{scrap::Scrap, tags::Tags};
 use chrono_tz::Tz;
+use scraps_libs::model::{scrap::Scrap, tags::Tags};
 use scraps_libs::{
     error::{
         anyhow::{bail, Context},

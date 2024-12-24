@@ -6,9 +6,11 @@ use crate::build::cmd::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
 use crate::build::model::sort::SortKey;
-use crate::libs::model::scrap::Scrap;
 use chrono_tz::Tz;
-use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
+use scraps_libs::{
+    error::{anyhow::Context, ScrapError, ScrapResult},
+    model::scrap::Scrap,
+};
 use url::Url;
 
 use crate::build::html::scrap_tera;

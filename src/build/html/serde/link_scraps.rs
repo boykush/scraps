@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use url::Url;
 
-use crate::libs::model::scrap::Scrap;
+use scraps_libs::model::scrap::Scrap;
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 pub struct SerializeLinkScrap {

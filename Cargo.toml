@@ -40,7 +40,7 @@ exclude = [
 [dependencies]
 # sub crates
 scraps_libs.workspace = true
-scraps_libs.features = ["error", "git", "markdown", "slugify"]
+scraps_libs.features = ["error", "git", "markdown", "model" , "slugify"]
 #external crates
 url.workspace = true
 itertools.workspace = true

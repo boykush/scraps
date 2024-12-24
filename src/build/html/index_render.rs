@@ -6,9 +6,11 @@ use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::paging::Paging;
 use crate::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
 use crate::build::model::sort::SortKey;
-use crate::libs::model::tags::Tags;
 use chrono_tz::Tz;
-use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
+use scraps_libs::{
+    error::{anyhow::Context, ScrapError, ScrapResult},
+    model::tags::Tags,
+};
 use url::Url;
 
 use crate::build::html::scrap_tera;
@@ -115,9 +117,8 @@ mod tests {
     use url::Url;
 
     use super::*;
-    use crate::{
-        build::model::scrap_with_commited_ts::ScrapWithCommitedTs, libs::model::scrap::Scrap,
-    };
+    use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
+    use scraps_libs::model::scrap::Scrap;
     use scraps_libs::tests::FileResource;
 
     #[test]

@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::libs::model::scrap::Scrap;
+use scraps_libs::model::scrap::Scrap;
 
 #[derive(Clone)]
 pub struct ScrapWithCommitedTs {

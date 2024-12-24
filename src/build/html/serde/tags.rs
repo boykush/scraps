@@ -1,6 +1,7 @@
 use itertools::Itertools;
 
-use crate::{build::model::linked_scraps_map::LinkedScrapsMap, libs::model::tags::Tags};
+use crate::build::model::linked_scraps_map::LinkedScrapsMap;
+use scraps_libs::model::tags::Tags;
 
 use super::tag::SerializeTag;
 

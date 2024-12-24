@@ -5,10 +5,10 @@ use std::{fs::File, path::PathBuf};
 use crate::build::cmd::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::sort::SortKey;
-use crate::libs::model::scrap::Scrap;
-use crate::libs::model::tag::Tag;
 use chrono_tz::Tz;
 use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
+use scraps_libs::model::scrap::Scrap;
+use scraps_libs::model::tag::Tag;
 use url::Url;
 
 use crate::build::html::scrap_tera;
@@ -74,7 +74,7 @@ impl TagRender {
 mod tests {
     use url::Url;
 
-    use crate::libs::model::title::Title;
+    use scraps_libs::model::title::Title;
 
     use super::*;
 

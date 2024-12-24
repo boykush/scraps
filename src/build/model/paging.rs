@@ -1,4 +1,4 @@
-use crate::libs::model::scrap::Scrap;
+use scraps_libs::model::scrap::Scrap;
 
 pub enum Paging {
     Not,
