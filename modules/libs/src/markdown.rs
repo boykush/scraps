@@ -59,28 +59,7 @@ pub fn to_html(text: &str, base_url: &Url) -> String {
                 &Event::Text(CowStr::Borrowed("]")),
                 &Event::Text(CowStr::Borrowed("]")),
             ) => {
-                let slug = slugify::by_dash(title);
-                let link = &format!("{base_url}scraps/{slug}.html");
-                let link_events = vec![
-                    Event::Start(Tag::Link {
-                        link_type: LinkType::Inline,
-                        dest_url: CowStr::Borrowed(link),
-                        title: CowStr::Borrowed(""),
-                        id: CowStr::Borrowed(""),
-                    }),
-                    Event::Text(CowStr::Borrowed(title)),
-                    Event::End(
-                        Tag::Link {
-                            link_type: LinkType::Inline,
-                            dest_url: CowStr::Borrowed(link),
-                            title: CowStr::Borrowed(""),
-                            id: CowStr::Borrowed(""),
-                        }
-                        .into(),
-                    ),
-                ]
-                .into_iter();
-
+                let link_events = to_html_link_events(title, base_url).into_iter();
                 // skip next
                 (0..4).for_each(|_| {
                     parser_windows.next();
@@ -92,6 +71,30 @@ pub fn to_html(text: &str, base_url: &Url) -> String {
     }
 
     html_buf
+}
+
+fn to_html_link_events<'a>(title: &'a str, base_url: &'a Url) -> Vec<Event<'a>> {
+    let slug = slugify::by_dash(title);
+    let link = format!("{base_url}scraps/{slug}.html");
+    let dest_url = CowStr::Boxed(link.into_boxed_str());
+    vec![
+        Event::Start(Tag::Link {
+            link_type: LinkType::Inline,
+            dest_url: dest_url.clone(),
+            title: CowStr::Borrowed(""),
+            id: CowStr::Borrowed(""),
+        }),
+        Event::Text(CowStr::Borrowed(title)),
+        Event::End(
+            Tag::Link {
+                link_type: LinkType::Inline,
+                dest_url: dest_url.clone(),
+                title: CowStr::Borrowed(""),
+                id: CowStr::Borrowed(""),
+            }
+            .into(),
+        ),
+    ]
 }
 
 #[cfg(test)]
@@ -140,12 +143,12 @@ mod tests {
     }
 
     #[test]
-    fn it_to_html() {
+    fn it_to_html_code() {
         let code_text = ["`[[quote block]]`", "```\n[[code block]]\n```"].join("\n");
         let base_url = Url::parse("http://localhost:1112/").unwrap();
-        let result1 = to_html(&code_text, &base_url);
+        let result = to_html(&code_text, &base_url);
         assert_eq!(
-            result1,
+            result,
             [
                 "<p><code>[[quote block]]</code></p>",
                 "<pre><code>[[code block]]\n</code></pre>",
@@ -153,15 +156,19 @@ mod tests {
             .join("\n")
                 + "\n"
         );
+    }
 
+    #[test]
+    fn it_to_html_link() {
+        let base_url = Url::parse("http://localhost:1112/").unwrap();
         let link_text = "[[link]][[expect slugify]]";
-        let result2 = to_html(link_text, &base_url);
-        assert_eq!(result2, "<p><a href=\"http://localhost:1112/scraps/link.html\">link</a><a href=\"http://localhost:1112/scraps/expect-slugify.html\">expect slugify</a></p>\n",);
+        let result1 = to_html(link_text, &base_url);
+        assert_eq!(result1, "<p><a href=\"http://localhost:1112/scraps/link.html\">link</a><a href=\"http://localhost:1112/scraps/expect-slugify.html\">expect slugify</a></p>\n",);
 
         let not_link_text = ["only close]]", "[[only open"].join("\n");
-        let result3 = to_html(&not_link_text, &base_url);
+        let result2 = to_html(&not_link_text, &base_url);
         assert_eq!(
-            result3,
+            result2,
             ["<p>only close]]", "[[only open</p>",].join("\n") + "\n"
         )
     }
