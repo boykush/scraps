@@ -169,8 +169,10 @@ impl HtmlMetadata {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::libs::resource::tests::{DirResource, FileResource};
-    use scraps_libs::git::tests::GitCommandTest;
+    use scraps_libs::{
+        git::tests::GitCommandTest,
+        tests::{DirResource, FileResource},
+    };
 
     #[test]
     fn it_run() {

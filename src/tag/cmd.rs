@@ -70,10 +70,8 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use crate::libs::{
-        model::{tag::Tag, title::Title},
-        resource::tests::FileResource,
-    };
+    use crate::libs::model::{tag::Tag, title::Title};
+    use scraps_libs::tests::FileResource;
 
     #[test]
     fn it_run() {

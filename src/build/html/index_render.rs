@@ -116,9 +116,9 @@ mod tests {
 
     use super::*;
     use crate::{
-        build::model::scrap_with_commited_ts::ScrapWithCommitedTs,
-        libs::{model::scrap::Scrap, resource::tests::FileResource},
+        build::model::scrap_with_commited_ts::ScrapWithCommitedTs, libs::model::scrap::Scrap,
     };
+    use scraps_libs::tests::FileResource;
 
     #[test]
     fn it_run() {

@@ -55,4 +55,4 @@ percent-encoding = "2.3"
 
 [dev-dependencies]
 scraps_libs.workspace = true
-scraps_libs.features = ["git_test"]
+scraps_libs.features = ["git_test", "test_supports"]

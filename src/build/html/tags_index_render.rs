@@ -79,7 +79,7 @@ mod tests {
     use url::Url;
 
     use super::*;
-    use crate::libs::resource::tests::FileResource;
+    use scraps_libs::tests::FileResource;
 
     #[test]
     fn it_run() {
