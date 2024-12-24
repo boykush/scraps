@@ -5,7 +5,9 @@
 ❯ cd your-scraps-project
 ```
 
-The output result will look like this
+This command initializes a new Scraps project.
+
+The output result will look like this.
 
 ```bash
 ❯ tree -a -L 1
@@ -14,3 +16,5 @@ The output result will look like this
 ├── Config.toml
 └── scraps
 ```
+
+The next step is [[Build]].
