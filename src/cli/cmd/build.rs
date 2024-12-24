@@ -6,10 +6,10 @@ use url::Url;
 use crate::build::cmd::{BuildCommand, HtmlMetadata};
 use crate::build::model::paging::Paging;
 use crate::build::model::sort::SortKey;
-use crate::libs::error::ScrapResult;
+use scraps_libs::error::ScrapResult;
 
 use crate::cli::scrap_config::{ScrapConfig, SortKeyConfig};
-use crate::libs::git::GitCommandImpl;
+use scraps_libs::git::GitCommandImpl;
 
 pub fn run() -> ScrapResult<()> {
     let git_command = GitCommandImpl::new();
@@ -47,11 +47,12 @@ pub fn run() -> ScrapResult<()> {
 
     let end = start.elapsed();
     println!("-> Created {result} scraps");
-    Ok(println!(
+    println!(
         "{} {}.{} {}",
         "Done in".green(),
         end.as_secs().to_string().green(),
         end.subsec_millis().to_string().green(),
-        "secs".green(),
-    ))
+        "secs".green()
+    );
+    Ok(())
 }

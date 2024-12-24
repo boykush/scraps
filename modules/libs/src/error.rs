@@ -1,3 +1,5 @@
+pub extern crate anyhow;
+
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq)]

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::libs::model::{scrap::Scrap, title::Title};
+use scraps_libs::model::{scrap::Scrap, title::Title};
 
 #[derive(PartialEq, Debug)]
 pub struct LinkedScrapsMap {

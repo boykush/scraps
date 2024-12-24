@@ -1,16 +1,12 @@
+use scraps_libs::error::{ScrapError, ScrapResult};
+use scraps_libs::model::{scrap::Scrap, tags::Tags};
 use std::{
     fs::{self, DirEntry},
     path::PathBuf,
 };
 
-use crate::{
-    build::model::linked_scraps_map::LinkedScrapsMap,
-    libs::{
-        error::{ScrapError, ScrapResult},
-        model::{scrap::Scrap, tags::Tags},
-    },
-};
-use anyhow::{bail, Context};
+use crate::build::model::linked_scraps_map::LinkedScrapsMap;
+use scraps_libs::error::anyhow::{bail, Context};
 use url::Url;
 
 pub struct TagCommand {
@@ -72,10 +68,8 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use crate::libs::{
-        model::{tag::Tag, title::Title},
-        resource::tests::FileResource,
-    };
+    use scraps_libs::model::{tag::Tag, title::Title};
+    use scraps_libs::tests::FileResource;
 
     #[test]
     fn it_run() {

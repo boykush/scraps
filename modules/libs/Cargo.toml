@@ -11,3 +11,17 @@ documentation.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+anyhow.workspace = true
+thiserror.workspace = true
+url.workspace = true
+itertools.workspace = true
+pulldown-cmark.workspace = true
+
+[features]
+error = []
+git = []
+git_test = []
+markdown = []
+model = []
+slugify = []
+test_supports = []

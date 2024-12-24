@@ -1,10 +1,7 @@
-use crate::{
-    build::model::sort::SortKey,
-    libs::error::{ScrapError, ScrapResult},
-};
-use anyhow::Context;
+use crate::build::model::sort::SortKey;
 use chrono_tz::Tz;
 use config::Config;
+use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
 use serde::{Deserialize, Serialize};
 use url::Url;
 

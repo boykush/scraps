@@ -3,13 +3,16 @@ use std::{
     path::PathBuf,
 };
 
-use crate::libs::{
-    error::{ScrapError, ScrapResult},
-    model::{scrap::Scrap, tags::Tags},
-};
-use crate::{build::css::render::CSSRender, libs::git::GitCommand};
-use anyhow::{bail, Context};
+use crate::build::css::render::CSSRender;
 use chrono_tz::Tz;
+use scraps_libs::model::{scrap::Scrap, tags::Tags};
+use scraps_libs::{
+    error::{
+        anyhow::{bail, Context},
+        ScrapError, ScrapResult,
+    },
+    git::GitCommand,
+};
 use url::Url;
 
 use super::{
@@ -166,9 +169,9 @@ impl HtmlMetadata {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::libs::{
+    use scraps_libs::{
         git::tests::GitCommandTest,
-        resource::tests::{DirResource, FileResource},
+        tests::{DirResource, FileResource},
     };
 
     #[test]

@@ -1,6 +1,5 @@
 use std::{fs::File, future::Future, io::Read, path::PathBuf, pin::Pin};
 
-use anyhow::Context;
 use http_body_util::Full;
 use hyper::{
     body::{Bytes, Incoming},
@@ -8,8 +7,7 @@ use hyper::{
     Request, Response,
 };
 use percent_encoding::percent_decode_str;
-
-use crate::libs::error::ScrapError;
+use scraps_libs::error::{anyhow::Context, ScrapError};
 
 #[derive(Clone)]
 pub struct ScrapsService {

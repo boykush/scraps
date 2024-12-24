@@ -1,6 +1,6 @@
 use url::Url;
 
-use crate::libs::markdown;
+use crate::markdown;
 
 use super::title::Title;
 

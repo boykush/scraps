@@ -3,9 +3,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-use anyhow::Context;
-
-use super::error::{ScrapError, ScrapResult};
+use super::error::{anyhow::Context, ScrapError, ScrapResult};
 
 pub trait GitCommand {
     fn init(&self, path: &Path) -> ScrapResult<()>;
@@ -17,6 +15,12 @@ pub struct GitCommandImpl {}
 impl GitCommandImpl {
     pub fn new() -> GitCommandImpl {
         GitCommandImpl {}
+    }
+}
+
+impl Default for GitCommandImpl {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -46,7 +50,7 @@ impl GitCommand for GitCommandImpl {
     }
 }
 
-#[cfg(test)]
+#[cfg(feature = "git_test")]
 pub mod tests {
     use super::*;
 

@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 
+use super::slugify;
 use itertools::Itertools;
 use pulldown_cmark::{html::push_html, CowStr, Event, LinkType, Options, Parser, Tag};
-use scraps_libs::slugify;
 use url::Url;
 
 const PARSER_OPTION: Options = Options::all();
