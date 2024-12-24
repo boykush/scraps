@@ -105,7 +105,7 @@ fn to_html_link_events<'a>(title: &'a str, base_url: &'a Url) -> Vec<Event<'a>> 
     ]
 }
 
-fn to_html_code_start_event<'a>(language: &'a str) -> Event<'a> {
+fn to_html_code_start_event(language: &str) -> Event<'_> {
     if language == "mermaid" {
         Event::Html(CowStr::Borrowed(
             // Add the `mermaid`` class in addition to the existing `language-mermaid` class to target it with mermaid.js.
