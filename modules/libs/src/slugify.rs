@@ -1,3 +1,4 @@
+#[cfg(feature = "slugify")]
 pub fn by_dash(v: &str) -> String {
     let lower = v.to_lowercase();
     lower.replace(' ', "-")

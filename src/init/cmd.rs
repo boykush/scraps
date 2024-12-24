@@ -1,8 +1,10 @@
 use std::{fs, path::PathBuf};
 
-use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
+use scraps_libs::{
+    error::{anyhow::Context, ScrapError, ScrapResult},
+    git::GitCommand
+};
 
-use crate::libs::git::GitCommand;
 
 pub struct InitCommand<GC: GitCommand> {
     git_command: GC,
@@ -30,7 +32,7 @@ impl<GC: GitCommand> InitCommand<GC> {
 
 #[cfg(test)]
 mod tests {
-    use crate::libs::git::GitCommandImpl;
+    use scraps_libs::git::GitCommandImpl;
 
     use super::*;
 

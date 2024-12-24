@@ -1,6 +1,5 @@
 use crate::init::cmd::InitCommand;
-use crate::libs::git::GitCommandImpl;
-use scraps_libs::error::ScrapResult;
+use scraps_libs::{error::ScrapResult, git::GitCommandImpl};
 
 pub fn run(project_name: &str) -> ScrapResult<()> {
     let git_command = GitCommandImpl::new();

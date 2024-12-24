@@ -2,6 +2,7 @@ pub extern crate anyhow;
 
 use thiserror::Error;
 
+#[cfg(feature = "error")]
 #[derive(Error, Debug, PartialEq)]
 pub enum ScrapError {
     #[error("Not load config")]
@@ -26,4 +27,5 @@ pub enum ScrapError {
     GitLog,
 }
 
+#[cfg(feature = "error")]
 pub type ScrapResult<T> = anyhow::Result<T>;

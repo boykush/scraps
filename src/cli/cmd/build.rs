@@ -9,7 +9,7 @@ use crate::build::model::sort::SortKey;
 use scraps_libs::error::ScrapResult;
 
 use crate::cli::scrap_config::{ScrapConfig, SortKeyConfig};
-use crate::libs::git::GitCommandImpl;
+use scraps_libs::git::GitCommandImpl;
 
 pub fn run() -> ScrapResult<()> {
     let git_command = GitCommandImpl::new();
