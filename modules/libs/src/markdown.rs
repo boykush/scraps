@@ -69,7 +69,10 @@ pub fn to_html(text: &str, base_url: &Url) -> String {
                 push_html(&mut html_buf, link_events);
             }
             (&Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(ref language))), _, _, _, _) => {
-                push_html(&mut html_buf, vec![to_html_code_start_event(language)].into_iter())
+                push_html(
+                    &mut html_buf,
+                    vec![to_html_code_start_event(language)].into_iter(),
+                )
             }
             (e1, _, _, _, _) => push_html(&mut html_buf, vec![e1.clone()].into_iter()),
         }
@@ -166,7 +169,7 @@ mod tests {
             "`[[quote block]]`",
             "```\n[[code block]]\n```",
             "```bash\nscraps build\n```",
-            "```mermaid\nflowchart LR\nid\n```"
+            "```mermaid\nflowchart LR\nid\n```",
         ]
         .join("\n");
         let base_url = Url::parse("http://localhost:1112/").unwrap();
