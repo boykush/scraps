@@ -15,6 +15,9 @@ path = "modules/libs"
 [workspace.dependencies]
 anyhow = "1.0"
 thiserror = "2.0"
+url = { version = "2.5", features = ["serde"] }
+itertools = "0.13"
+pulldown-cmark = "0.12"
 
 [package]
 edition.workspace = true
@@ -35,16 +38,17 @@ exclude = [
     "assets/"
 ]
 [dependencies]
+# sub crates
 scraps_libs.workspace = true
-scraps_libs.features = ["error", "git", "slugify"]
+scraps_libs.features = ["error", "git", "markdown", "slugify"]
+#external crates
+url.workspace = true
+itertools.workspace = true
 clap = { version = "4.5", features = ["derive"] }
 serde = { version = "1.0", features = ["derive"] }
 config = { version = "0.15", features = ["toml"] }
 tera = "1.20"
 once_cell = "1.20"
-pulldown-cmark = "0.12"
-itertools = "0.13"
-url = { version = "2.5", features = ["serde"] }
 chrono-tz = { version = "0.10", features = ["serde"] }
 colored = "2.2"
 hyper = { version = "1.5", features = ["full"] }

@@ -2,6 +2,8 @@
 pub mod error;
 #[cfg(feature = "git")]
 pub mod git;
+#[cfg(feature = "markdown")]
+pub mod markdown;
 #[cfg(feature = "slugify")]
 pub mod slugify;
 #[cfg(feature = "test_supports")]
