@@ -2,13 +2,11 @@ use std::fs::{self, remove_file, File};
 use std::io::Write;
 use std::path::PathBuf;
 
-#[cfg(feature = "test_supports")]
 pub struct FileResource {
     path: PathBuf,
     parent: Option<PathBuf>,
 }
 
-#[cfg(feature = "test_supports")]
 impl FileResource {
     pub fn new(path: &PathBuf) -> Self {
         let parent = path.parent().map(|p| p.to_owned());
@@ -44,12 +42,10 @@ impl FileResource {
     }
 }
 
-#[cfg(feature = "test_supports")]
 pub struct DirResource {
     path: PathBuf,
 }
 
-#[cfg(feature = "test_supports")]
 impl DirResource {
     pub fn new(path: &PathBuf) -> Self {
         DirResource {
