@@ -9,10 +9,10 @@ homepage = "https://boykush.github.io/scraps"
 repository = "https://github.com/boykush/scraps"
 documentation = "https://boykush.github.io/scraps"
 rust-version = "1.83"
+[workspace.dependencies.scraps_libs]
+version = "0.15.5"
+path = "modules/libs"
 [workspace.dependencies]
-# sub crates
-scraps_libs = { version = "0.15.5", path = "modules/libs", features = ["error", "git", "slugify"]}
-# external crates
 anyhow = "1.0"
 thiserror = "2.0"
 
@@ -35,9 +35,8 @@ exclude = [
     "assets/"
 ]
 [dependencies]
-# sub crates
 scraps_libs.workspace = true
-# external crates
+scraps_libs.features = ["error", "git", "slugify"]
 clap = { version = "4.5", features = ["derive"] }
 serde = { version = "1.0", features = ["derive"] }
 config = { version = "0.15", features = ["toml"] }
@@ -55,4 +54,5 @@ hyper-util = { version = "0.1", features = ["full"] }
 percent-encoding = "2.3"
 
 [dev-dependencies]
-scraps_libs = { version = "0.15.5", path = "modules/libs", features = ["git_test"]}
+scraps_libs.workspace = true
+scraps_libs.features = ["git_test"]
