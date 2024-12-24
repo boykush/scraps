@@ -3,9 +3,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-use anyhow::Context;
-
-use super::error::{ScrapError, ScrapResult};
+use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
 
 pub trait GitCommand {
     fn init(&self, path: &Path) -> ScrapResult<()>;

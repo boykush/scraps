@@ -3,13 +3,13 @@ use std::{
     path::PathBuf,
 };
 
-use crate::libs::{
-    error::{ScrapError, ScrapResult},
-    model::{scrap::Scrap, tags::Tags},
-};
+use crate::libs::model::{scrap::Scrap, tags::Tags};
 use crate::{build::css::render::CSSRender, libs::git::GitCommand};
-use anyhow::{bail, Context};
 use chrono_tz::Tz;
+use scraps_libs::error::{
+    anyhow::{bail, Context},
+    ScrapError, ScrapResult,
+};
 use url::Url;
 
 use super::{

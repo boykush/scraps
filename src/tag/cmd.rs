@@ -1,3 +1,4 @@
+use scraps_libs::error::{ScrapError, ScrapResult};
 use std::{
     fs::{self, DirEntry},
     path::PathBuf,
@@ -5,12 +6,9 @@ use std::{
 
 use crate::{
     build::model::linked_scraps_map::LinkedScrapsMap,
-    libs::{
-        error::{ScrapError, ScrapResult},
-        model::{scrap::Scrap, tags::Tags},
-    },
+    libs::model::{scrap::Scrap, tags::Tags},
 };
-use anyhow::{bail, Context};
+use scraps_libs::error::anyhow::{bail, Context};
 use url::Url;
 
 pub struct TagCommand {

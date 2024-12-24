@@ -1,16 +1,13 @@
 use std::fmt;
 
-use anyhow::Context;
 use colored::Colorize;
 use itertools::Itertools;
+use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
 use url::Url;
 
 use crate::{
     build::model::linked_scraps_map::LinkedScrapsMap,
-    libs::{
-        error::{ScrapError, ScrapResult},
-        model::{tag::Tag, title::Title},
-    },
+    libs::model::{tag::Tag, title::Title},
 };
 
 pub struct DisplayTag {

@@ -8,9 +8,10 @@ use crate::{
         model::{paging::Paging, sort::SortKey},
     },
     cli::scrap_config::{ScrapConfig, SortKeyConfig},
-    libs::{error::ScrapResult, git::GitCommandImpl},
+    libs::git::GitCommandImpl,
     serve::cmd::ServeCommand,
 };
+use scraps_libs::error::ScrapResult;
 
 pub fn run() -> ScrapResult<()> {
     // set local environment

@@ -10,7 +10,12 @@ repository = "https://github.com/boykush/scraps"
 documentation = "https://boykush.github.io/scraps"
 rust-version = "1.83"
 [workspace.dependencies]
+# sub crates
 scraps_libs = { version = "0.15.5", path = "modules/libs" }
+
+# external crates
+anyhow = "1.0"
+thiserror = "2.0"
 
 [package]
 edition.workspace = true
@@ -37,10 +42,8 @@ scraps_libs.workspace = true
 # external crates
 clap = { version = "4.5", features = ["derive"] }
 serde = { version = "1.0", features = ["derive"] }
-anyhow = "1.0"
 config = { version = "0.15", features = ["toml"] }
 tera = "1.20"
-thiserror = "2.0"
 once_cell = "1.20"
 pulldown-cmark = "0.12"
 itertools = "0.13"

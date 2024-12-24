@@ -11,3 +11,5 @@ documentation.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+anyhow.workspace = true
+thiserror.workspace = true

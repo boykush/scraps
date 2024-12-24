@@ -5,7 +5,7 @@ use hyper::server::conn::http1;
 use hyper_util::rt::TokioIo;
 use tokio::net::TcpListener;
 
-use crate::libs::error::ScrapResult;
+use scraps_libs::error::ScrapResult;
 
 pub struct ServeCommand {
     public_dir_path: PathBuf,

@@ -1,11 +1,8 @@
 use std::{fs, path::PathBuf};
 
-use anyhow::Context;
+use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
 
-use crate::libs::{
-    error::{ScrapError, ScrapResult},
-    git::GitCommand,
-};
+use crate::libs::git::GitCommand;
 
 pub struct InitCommand<GC: GitCommand> {
     git_command: GC,

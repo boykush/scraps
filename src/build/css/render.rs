@@ -1,11 +1,11 @@
-use anyhow::Context;
+use scraps_libs::error::anyhow::Context;
 use std::{
     fs::{self, File},
     io::Write,
     path::PathBuf,
 };
 
-use crate::libs::error::{ScrapError, ScrapResult};
+use scraps_libs::error::{ScrapError, ScrapResult};
 
 pub struct CSSRender {
     static_dir_path: PathBuf,

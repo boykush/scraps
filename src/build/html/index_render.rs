@@ -6,10 +6,9 @@ use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::paging::Paging;
 use crate::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
 use crate::build::model::sort::SortKey;
-use crate::libs::error::{ScrapError, ScrapResult};
 use crate::libs::model::tags::Tags;
-use anyhow::Context;
 use chrono_tz::Tz;
+use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
 use url::Url;
 
 use crate::build::html::scrap_tera;
