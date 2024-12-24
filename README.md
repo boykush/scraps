@@ -24,6 +24,7 @@ Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 - [x] Sorting (linked_count, committed_date)
 - [x] Tagging
 - [x] Pagination
+- [x] Mermaid Diagrams
 - [ ] Search
 - [ ] Themes (default is the [Nord](https://www.nordtheme.com/) theme)
 ### CLI
