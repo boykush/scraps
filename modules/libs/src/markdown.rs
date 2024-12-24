@@ -2,7 +2,9 @@ use std::collections::HashSet;
 
 use super::slugify;
 use itertools::Itertools;
-use pulldown_cmark::{html::push_html, CowStr, Event, LinkType, Options, Parser, Tag};
+use pulldown_cmark::{
+    html::push_html, CodeBlockKind, CowStr, Event, LinkType, Options, Parser, Tag,
+};
 use url::Url;
 
 const PARSER_OPTION: Options = Options::all();
@@ -66,6 +68,9 @@ pub fn to_html(text: &str, base_url: &Url) -> String {
                 });
                 push_html(&mut html_buf, link_events);
             }
+            (&Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(ref language))), _, _, _, _) => {
+                push_html(&mut html_buf, vec![to_html_code_start_event(language)].into_iter())
+            }
             (e1, _, _, _, _) => push_html(&mut html_buf, vec![e1.clone()].into_iter()),
         }
     }
@@ -95,6 +100,19 @@ fn to_html_link_events<'a>(title: &'a str, base_url: &'a Url) -> Vec<Event<'a>> 
             .into(),
         ),
     ]
+}
+
+fn to_html_code_start_event<'a>(language: &'a str) -> Event<'a> {
+    if language == "mermaid" {
+        Event::Html(CowStr::Borrowed(
+            // Add the `mermaid`` class in addition to the existing `language-mermaid` class to target it with mermaid.js.
+            "<pre><code class=\"language-mermaid mermaid\">",
+        ))
+    } else {
+        Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(CowStr::Borrowed(
+            language,
+        ))))
+    }
 }
 
 #[cfg(test)]
@@ -144,7 +162,13 @@ mod tests {
 
     #[test]
     fn it_to_html_code() {
-        let code_text = ["`[[quote block]]`", "```\n[[code block]]\n```"].join("\n");
+        let code_text = [
+            "`[[quote block]]`",
+            "```\n[[code block]]\n```",
+            "```bash\nscraps build\n```",
+            "```mermaid\nflowchart LR\nid\n```"
+        ]
+        .join("\n");
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let result = to_html(&code_text, &base_url);
         assert_eq!(
@@ -152,6 +176,8 @@ mod tests {
             [
                 "<p><code>[[quote block]]</code></p>",
                 "<pre><code>[[code block]]\n</code></pre>",
+                "<pre><code class=\"language-bash\">scraps build\n</code></pre>",
+                "<pre><code class=\"language-mermaid mermaid\">flowchart LR\nid\n</code></pre>"
             ]
             .join("\n")
                 + "\n"
