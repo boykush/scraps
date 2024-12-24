@@ -18,6 +18,12 @@ impl GitCommandImpl {
     }
 }
 
+impl Default for GitCommandImpl {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl GitCommand for GitCommandImpl {
     fn init(&self, path: &Path) -> ScrapResult<()> {
         Command::new("git")
