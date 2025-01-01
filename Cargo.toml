@@ -16,7 +16,7 @@ path = "modules/libs"
 anyhow = "1.0"
 thiserror = "2.0"
 url = { version = "2.5", features = ["serde"] }
-itertools = "0.13"
+itertools = "0.14"
 pulldown-cmark = "0.12"
 
 [package]
