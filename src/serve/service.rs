@@ -1,10 +1,14 @@
-use std::{fs::File, future::Future, io::Read, path::PathBuf, pin::Pin};
+use std::{
+    fs::File,
+    future::Future,
+    io::Read,
+    path::{Path, PathBuf},
+    pin::Pin,
+};
 
 use http_body_util::Full;
 use hyper::{
-    body::{Bytes, Incoming},
-    service::Service,
-    Request, Response,
+    body::{Bytes, Incoming}, header, service::Service, Request, Response
 };
 use percent_encoding::percent_decode_str;
 use scraps_libs::error::{anyhow::Context, ScrapError};
@@ -21,28 +25,48 @@ impl ScrapsService {
         }
     }
 
-    fn mk_response(s: String) -> Result<Response<Full<Bytes>>, ScrapError> {
-        Ok(Response::builder().body(Full::new(Bytes::from(s))).unwrap())
+    fn mk_response(
+        mime_type: &str,
+        contents: Vec<u8>,
+    ) -> Result<Response<Full<Bytes>>, ScrapError> {
+        Ok(Response::builder()
+            .header(header::CONTENT_TYPE, mime_type)
+            .body(Full::new(Bytes::from(contents)))
+            .unwrap())
     }
 
     fn mk_not_found_response() -> Result<Response<Full<Bytes>>, ScrapError> {
         // Return the 404 Not Found for other routes, and don't increment counter.
-        Self::mk_response("oh no! not found".into())
+        Self::mk_response("text/plain", "oh no! not found".into())
     }
 
     fn mk_failed_url_decode_response() -> Result<Response<Full<Bytes>>, ScrapError> {
-        Self::mk_response("oh no! failed url decode by utf8".into())
+        Self::mk_response("text/plain", "oh no! failed url decode by utf8".into())
     }
 
-    fn mk_page_response(file: &mut File) -> Result<Response<Full<Bytes>>, ScrapError> {
-        let mut contents = String::new();
+    fn mk_page_response(
+        mime_type: &str,
+        file: &mut File,
+    ) -> Result<Response<Full<Bytes>>, ScrapError> {
+        let mut contents = Vec::new();
         let read = file
-            .read_to_string(&mut contents)
+            .read_to_end(&mut contents)
             .context(ScrapError::FileLoad);
 
         match read {
-            Ok(_) => Self::mk_response(contents),
+            Ok(_) => Self::mk_response(mime_type, contents),
             _ => Self::mk_not_found_response(),
+        }
+    }
+
+    fn gen_mime_type_from(file_path: &Path) -> &str {
+        match file_path.extension().and_then(|ext| ext.to_str()) {
+            Some("html") => "text/html",
+            Some("js") => "application/javascript",
+            Some("json") => "text/json",
+            Some("css") => "text/css",
+            Some("wasm") => "application/wasm",
+            _ => "application/octet-stream",
         }
     }
 }
@@ -69,9 +93,10 @@ impl Service<Request<Incoming>> for ScrapsService {
         let result = match decoded_file_name {
             Ok(name) => {
                 let file_path = resolved_index_path.with_file_name(name.to_string());
-                let file = File::open(file_path).context(ScrapError::FileLoad);
+                let file = File::open(&file_path).context(ScrapError::FileLoad);
+                let mime_type = Self::gen_mime_type_from(file_path.as_path());
                 match file {
-                    Ok(mut f) => Self::mk_page_response(&mut f),
+                    Ok(mut f) => Self::mk_page_response(mime_type, &mut f),
                     Err(_) => Self::mk_not_found_response(),
                 }
             }
