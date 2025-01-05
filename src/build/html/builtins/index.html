@@ -3,6 +3,16 @@
 
 {% block main %}
     <div class="index">
+        <div class="search-block">
+            <span class="icon" />
+            <input
+              type="text"
+              id="search-input"
+              onkeyup="doSearch()"
+              placeholder="Search by title..."
+              />
+            <ul id="results"></ul>
+        </div>
         <div class="tags-block">
             {% if tags %}
                 {{ macros::tag_links(tags = tags, slice_size = 10) }}
@@ -21,4 +31,48 @@
             {% endif %}
         </div>
     </div>
+{% endblock %}
+
+{% block script %}
+<!-- For search scraps -->
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+<script type="module">
+  import search_index from './search_index.json' with { type: "json" };
+  const fuseOptions = {
+    minMatchCharLength: 3,
+    keys: ["title"]
+  };
+  const fuse = new Fuse(search_index, fuseOptions);
+  const search = function (query, numResults) {
+    return fuse.search(query).slice(0, numResults).map(result => [result.item.title, result.item.url]);
+  };
+  window.search = search;
+</script>
+<script>
+  function doSearch() {
+    let value = document.getElementById("search-input").value;
+    console.log(`Search query: ${value}`);
+
+    // Retrieve 5 results
+    const results = search(value, 5);
+
+    console.log(`Results: ${results}`);
+
+    let ul = document.getElementById("results");
+    ul.innerHTML = "";
+
+    results.forEach((result, index) => {
+      var li = document.createElement("li");
+
+      let [title, url] = result;
+      console.log(`Title: ${title}, URL: ${url}`);
+      let elemlink = document.createElement('a');
+      elemlink.innerHTML = title;
+      elemlink.setAttribute('href', url);
+      li.appendChild(elemlink);
+      li.style.top = `${(index * 30) - 16}px`;
+      ul.appendChild(li);
+    })
+  }
+</script>
 {% endblock %}
