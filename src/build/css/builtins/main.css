@@ -115,15 +115,73 @@ div.tag h1.title::before {
 }
 
 /* index */
+/** search block **/
+div.index div.search-block {
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+div.index div.search-block input {
+    color: var(--secondary-color);
+    border: 1px solid transparent;
+    border-color: white;
+    border-radius: 4px;
+    width: 240px;
+    height: 20px;
+    padding: 4px 8px;
+    display: inline-block;
+}
+
+div.index div.search-block input:focus {
+    outline: none;
+}
+
+div.index div.search-block .icon::before {
+    content: "\1F50D";
+    margin-right: 8px;
+}
+
+div.index div.search-block ul {
+    list-style-position: inside;
+    width: 240px;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+div.index div.search-block li {
+    position: absolute;
+    left: 25px;
+    list-style: none;
+    display: inline-block;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    height: 20px;
+    width: 240px;
+    background-color: white;;
+    padding: 4px 8px;
+    overflow: hidden;
+    text-wrap: nowrap;
+    text-overflow: ellipsis;
+}
+
+div.index div.search-block li:hover {
+    background-color: var(--nord5);
+}
+
+/** tags block **/
 div.index div.tags-block {
     margin-bottom: 64px;
 }
 
+/** links block **/
 div.index div.links-block p.sort-key {
     color: var(--gray-color);
     font-size: 16px;
 }
 
+/** paging arrows **/
 div.index div.paging-arrows {
     margin-top: 32px;
     text-align: center;

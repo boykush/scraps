@@ -1,0 +1,9 @@
+[
+  {% for scrap in scraps %}
+    {
+      "title": "{{ scrap.title }}",
+      "url": "{{ base_url }}scraps/{{ scrap.slug }}.html"
+    }
+    {% if not loop.last %},{% endif %}
+  {% endfor %}
+]

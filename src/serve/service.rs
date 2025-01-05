@@ -8,7 +8,10 @@ use std::{
 
 use http_body_util::Full;
 use hyper::{
-    body::{Bytes, Incoming}, header, service::Service, Request, Response
+    body::{Bytes, Incoming},
+    header,
+    service::Service,
+    Request, Response,
 };
 use percent_encoding::percent_decode_str;
 use scraps_libs::error::{anyhow::Context, ScrapError};

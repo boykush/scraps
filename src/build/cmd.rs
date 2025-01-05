@@ -20,6 +20,7 @@ use super::{
         index_render::IndexRender, scrap_render::ScrapRender, tag_render::TagRender,
         tags_index_render::TagsIndexRender,
     },
+    json::search_index_render::SearchIndexRender,
     model::{
         paging::Paging,
         scrap_with_commited_ts::{ScrapWithCommitedTs, ScrapsWithCommitedTs},
@@ -110,8 +111,14 @@ impl<GC: GitCommand> BuildCommand<GC> {
             tag_render.run(base_url, timezone, html_metadata, tag, sort_key)
         })?;
 
+        // render css
         let css_render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
         css_render.render_main()?;
+
+        // render search index json
+        let search_index_render =
+            SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path);
+        search_index_render.run(base_url, &scraps)?;
 
         Ok(scraps.len())
     }
@@ -212,6 +219,7 @@ mod tests {
         // public
         let html_path_3 = public_dir_path.join("index.html");
         let css_path = public_dir_path.join("main.css");
+        let search_index_json_path = public_dir_path.join("search_index.json");
 
         resource_static_dir.run(|| {
             resource_1.run(resource_bytes_1, || {
@@ -237,6 +245,9 @@ mod tests {
 
                     let result5 = fs::read_to_string(css_path);
                     assert!(result5.is_ok());
+
+                    let result6 = fs::read_to_string(search_index_json_path);
+                    assert!(result6.is_ok());
                 })
             })
         })
