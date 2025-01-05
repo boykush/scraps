@@ -11,7 +11,7 @@
               onkeyup="doSearch()"
               placeholder="Search by title..."
               />
-            <ul id="results"></ul>
+            <ul id="search-results"></ul>
         </div>
         <div class="tags-block">
             {% if tags %}
@@ -58,7 +58,7 @@
 
     console.log(`Results: ${results}`);
 
-    let ul = document.getElementById("results");
+    let ul = document.getElementById("search-results");
     ul.innerHTML = "";
 
     results.forEach((result, index) => {
