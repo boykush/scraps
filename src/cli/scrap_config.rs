@@ -12,6 +12,7 @@ pub struct ScrapConfig {
     pub description: Option<String>,
     pub favicon: Option<Url>,
     pub timezone: Option<Tz>,
+    pub build_search_index: Option<bool>,
     pub sort_key: Option<SortKeyConfig>,
     pub paginate_by: Option<usize>,
 }

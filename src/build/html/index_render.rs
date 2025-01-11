@@ -39,6 +39,7 @@ impl IndexRender {
         base_url: &Url,
         timezone: Tz,
         metadata: &HtmlMetadata,
+        build_serach_index: &bool,
         scraps_with_commited_ts: &ScrapsWithCommitedTs,
         sort_key: &SortKey,
         paging: &Paging,
@@ -68,6 +69,7 @@ impl IndexRender {
                 base_url,
                 timezone,
                 metadata,
+                build_serach_index,
                 sort_key,
                 stags,
                 &paginated_scraps,
@@ -81,6 +83,7 @@ impl IndexRender {
         base_url: &Url,
         timezone: Tz,
         metadata: &HtmlMetadata,
+        build_serach_index: &bool,
         sort_key: &SortKey,
         tags: &SerializeTags,
         paginated_scraps: &SerializeIndexScraps,
@@ -98,10 +101,9 @@ impl IndexRender {
         } else {
             "__builtins/index.html"
         };
+        context.insert("build_search_index", build_serach_index);
         context.insert("scraps", &paginated_scraps);
-        if pointer.is_index() {
-            context.insert("tags", tags);
-        };
+        context.insert("tags", tags);
         context.insert("prev", &pointer.prev);
         context.insert("next", &pointer.next);
         let wtr = File::create(self.public_dir_path.join(pointer.current_file_name()))
@@ -131,6 +133,7 @@ mod tests {
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
+        let build_serach_index = true;
         let sort_key = SortKey::CommittedDate;
         let paging = Paging::Not;
 
@@ -143,7 +146,7 @@ mod tests {
         let template_html_path = static_dir_path.join("index.html");
         let resource_template_html = FileResource::new(&template_html_path);
         let resource_template_html_byte =
-        "{% for scrap in scraps %}<a href=\"./{{ scrap.title }}.html\">{{ scrap.title }}</a>{% endfor %}"
+        "{{ build_search_index }}{% for scrap in scraps %}<a href=\"./{{ scrap.title }}.html\">{{ scrap.title }}</a>{% endfor %}"
         .as_bytes();
 
         // scraps
@@ -161,6 +164,7 @@ mod tests {
                 &base_url,
                 timezone,
                 &metadata,
+                &build_serach_index,
                 &scraps_with_commited_ts,
                 &sort_key,
                 &paging,
@@ -171,7 +175,7 @@ mod tests {
             let result2 = fs::read_to_string(index_html_path).unwrap();
             assert_eq!(
                 result2,
-                "<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
+                "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
             );
         })
     }
@@ -186,6 +190,7 @@ mod tests {
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
+        let build_serach_index = true;
         let sort_key = SortKey::CommittedDate;
         let paging = Paging::By(2);
 
@@ -198,7 +203,7 @@ mod tests {
         let template_html_path = static_dir_path.join("index.html");
         let resource_template_html = FileResource::new(&template_html_path);
         let resource_template_html_byte =
-        "{% for scrap in scraps %}<a href=\"./{{ scrap.title }}.html\">{{ scrap.title }}</a>{% endfor %}"
+        "{{ build_search_index }}{% for scrap in scraps %}<a href=\"./{{ scrap.title }}.html\">{{ scrap.title }}</a>{% endfor %}"
         .as_bytes();
 
         // scraps
@@ -225,6 +230,7 @@ mod tests {
                 &base_url,
                 timezone,
                 &metadata,
+                &build_serach_index,
                 &scraps_with_commited_ts,
                 &sort_key,
                 &paging,
@@ -235,13 +241,13 @@ mod tests {
             let result2 = fs::read_to_string(index_html_path).unwrap();
             assert_eq!(
                 result2,
-                "<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
+                "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
             );
 
             let result3 = fs::read_to_string(page2_html_path).unwrap();
             assert_eq!(
                 result3,
-                "<a href=\"./scrap3.html\">scrap3</a><a href=\"./scrap4.html\">scrap4</a>"
+                "true<a href=\"./scrap3.html\">scrap3</a><a href=\"./scrap4.html\">scrap4</a>"
             );
         })
     }

@@ -31,6 +31,7 @@ pub fn run() -> ScrapResult<()> {
     let config = ScrapConfig::new()?;
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
     let html_metadata = HtmlMetadata::new(&config.title, &config.description, &config.favicon);
+    let build_search_index = config.build_search_index.unwrap_or(true);
     let sort_key = config
         .sort_key
         .map_or_else(|| SortKey::CommittedDate, SortKeyConfig::into_sort_key);
@@ -38,7 +39,14 @@ pub fn run() -> ScrapResult<()> {
         None => Paging::Not,
         Some(u) => Paging::By(u),
     };
-    let build_result = build_command.run(&base_url, timezone, &html_metadata, &sort_key, &paging);
+    let build_result = build_command.run(
+        &base_url,
+        timezone,
+        &html_metadata,
+        &build_search_index,
+        &sort_key,
+        &paging,
+    );
 
     // serve command
     let serve_command = ServeCommand::new(&public_dir_path);

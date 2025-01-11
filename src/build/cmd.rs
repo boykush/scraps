@@ -54,6 +54,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
         base_url: &Url,
         timezone: Tz,
         html_metadata: &HtmlMetadata,
+        build_search_index: &bool,
         sort_key: &SortKey,
         paging: &Paging,
     ) -> ScrapResult<usize> {
@@ -79,6 +80,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
             base_url,
             timezone,
             html_metadata,
+            build_search_index,
             &scraps_with_commited_ts,
             sort_key,
             paging,
@@ -115,10 +117,11 @@ impl<GC: GitCommand> BuildCommand<GC> {
         let css_render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
         css_render.render_main()?;
 
-        // render search index json
-        let search_index_render =
-            SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path);
-        search_index_render.run(base_url, &scraps)?;
+        // render search index json when build_search_index is true
+        if let true = build_search_index {
+            let search_index_render = SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path);
+            search_index_render.run(base_url, &scraps)?;
+        }
 
         Ok(scraps.len())
     }
@@ -175,20 +178,32 @@ impl HtmlMetadata {
 
 #[cfg(test)]
 mod tests {
+    use std::path::Path;
+
     use super::*;
     use scraps_libs::{
         git::tests::GitCommandTest,
         tests::{DirResource, FileResource},
     };
 
-    #[test]
-    fn it_run() {
-        // fields
-        let test_resource_path = PathBuf::from("tests/resource/build/cmd/it_run");
+    fn setup_command(test_resource_path: &Path) -> BuildCommand<GitCommandTest> {
         let git_command = GitCommandTest::new();
         let scraps_dir_path = test_resource_path.join("scraps");
         let static_dir_path = test_resource_path.join("static");
         let public_dir_path = test_resource_path.join("public");
+        BuildCommand::new(
+            git_command,
+            &scraps_dir_path,
+            &static_dir_path,
+            &public_dir_path,
+        )
+    }
+
+    #[test]
+    fn it_run() {
+        // fields
+        let test_resource_path = PathBuf::from("tests/resource/build/cmd/it_run");
+        let command = setup_command(&test_resource_path);
 
         // run args
         let base_url = Url::parse("http://localhost:1112/").unwrap();
@@ -198,40 +213,41 @@ mod tests {
             description: Some("Scrap Wiki".to_string()),
             favicon: Some(Url::parse("https://github.io/image.png").unwrap()),
         };
+        let build_search_index = true;
         let sort_key = SortKey::LinkedCount;
         let paging = Paging::Not;
 
         // scrap1
-        let md_path_1 = scraps_dir_path.join("test1.md");
-        let html_path_1 = public_dir_path.join("scraps/test1.html");
+        let md_path_1 = command.scraps_dir_path.join("test1.md");
+        let html_path_1 = command.public_dir_path.join("scraps/test1.html");
         let resource_1 = FileResource::new(&md_path_1);
         let resource_bytes_1 = concat!("# header1\n", "## header2\n",).as_bytes();
 
         // scrap2
-        let md_path_2 = scraps_dir_path.join("test2.md");
-        let html_path_2 = public_dir_path.join("scraps/test2.html");
+        let md_path_2 = command.scraps_dir_path.join("test2.md");
+        let html_path_2 = command.public_dir_path.join("scraps/test2.html");
         let resource_2 = FileResource::new(&md_path_2);
         let resource_bytes_2 = concat!("[[test1]]\n").as_bytes();
 
         // static
-        let resource_static_dir = DirResource::new(&static_dir_path);
+        let resource_static_dir = DirResource::new(&command.static_dir_path);
 
         // public
-        let html_path_3 = public_dir_path.join("index.html");
-        let css_path = public_dir_path.join("main.css");
-        let search_index_json_path = public_dir_path.join("search_index.json");
+        let html_path_3 = command.public_dir_path.join("index.html");
+        let css_path = command.public_dir_path.join("main.css");
+        let search_index_json_path = command.public_dir_path.join("search_index.json");
 
         resource_static_dir.run(|| {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
-                    let command = BuildCommand::new(
-                        git_command,
-                        &scraps_dir_path,
-                        &static_dir_path,
-                        &public_dir_path,
+                    let result1 = command.run(
+                        &base_url,
+                        timezone,
+                        html_metadata,
+                        &build_search_index,
+                        &sort_key,
+                        &paging,
                     );
-                    let result1 =
-                        command.run(&base_url, timezone, html_metadata, &sort_key, &paging);
                     assert!(result1.is_ok());
 
                     let result2 = fs::read_to_string(html_path_1);
@@ -248,6 +264,60 @@ mod tests {
 
                     let result6 = fs::read_to_string(search_index_json_path);
                     assert!(result6.is_ok());
+                })
+            })
+        })
+    }
+
+    #[test]
+    fn it_run_when_build_search_index_is_false() {
+        // fields
+        let test_resource_path = PathBuf::from("tests/resource/build/cmd/it_run_when_build_search_index_is_false");
+        let command = setup_command(&test_resource_path);
+
+        // run args
+        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let timezone = chrono_tz::UTC;
+        let html_metadata = &HtmlMetadata {
+            title: "Scrap".to_string(),
+            description: Some("Scrap Wiki".to_string()),
+            favicon: Some(Url::parse("https://github.io/image.png").unwrap()),
+        };
+        let build_search_index = false;
+        let sort_key = SortKey::LinkedCount;
+        let paging = Paging::Not;
+
+        // scrap1
+        let md_path_1 = command.scraps_dir_path.join("test1.md");
+        let resource_1 = FileResource::new(&md_path_1);
+        let resource_bytes_1 = concat!("# header1\n", "## header2\n",).as_bytes();
+
+        // scrap2
+        let md_path_2 = command.scraps_dir_path.join("test2.md");
+        let resource_2 = FileResource::new(&md_path_2);
+        let resource_bytes_2 = concat!("[[test1]]\n").as_bytes();
+
+        // static
+        let resource_static_dir = DirResource::new(&command.static_dir_path);
+
+        // public
+        let search_index_json_path = command.public_dir_path.join("search_index.json");
+
+        resource_static_dir.run(|| {
+            resource_1.run(resource_bytes_1, || {
+                resource_2.run(resource_bytes_2, || {
+                    let result1 = command.run(
+                        &base_url,
+                        timezone,
+                        html_metadata,
+                        &build_search_index,
+                        &sort_key,
+                        &paging,
+                    );
+                    assert!(result1.is_ok());
+
+                    let result2 = fs::read_to_string(search_index_json_path);
+                    assert!(result2.is_err());
                 })
             })
         })
