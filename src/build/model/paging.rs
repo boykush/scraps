@@ -1,5 +1,6 @@
 use scraps_libs::model::scrap::Scrap;
 
+#[derive(Clone)]
 pub enum Paging {
     Not,
     By(usize),

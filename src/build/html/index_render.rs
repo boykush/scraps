@@ -1,9 +1,10 @@
 use std::fs;
+use std::path::Path;
 use std::{fs::File, path::PathBuf};
 
 use crate::build::cmd::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
-use crate::build::model::paging::Paging;
+use crate::build::model::list_view_configs::ListViewConfigs;
 use crate::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
 use crate::build::model::sort::SortKey;
 use chrono_tz::Tz;
@@ -25,12 +26,12 @@ pub struct IndexRender {
 }
 
 impl IndexRender {
-    pub fn new(static_dir_path: &PathBuf, public_dir_path: &PathBuf) -> ScrapResult<IndexRender> {
+    pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> ScrapResult<IndexRender> {
         fs::create_dir_all(public_dir_path).context(ScrapError::FileWrite)?;
 
         Ok(IndexRender {
-            static_dir_path: static_dir_path.to_owned(),
-            public_dir_path: public_dir_path.to_owned(),
+            static_dir_path: static_dir_path.to_path_buf(),
+            public_dir_path: public_dir_path.to_path_buf(),
         })
     }
 
@@ -39,20 +40,18 @@ impl IndexRender {
         base_url: &Url,
         timezone: Tz,
         metadata: &HtmlMetadata,
-        build_serach_index: &bool,
+        list_view_configs: &ListViewConfigs,
         scraps_with_commited_ts: &ScrapsWithCommitedTs,
-        sort_key: &SortKey,
-        paging: &Paging,
     ) -> ScrapResult<()> {
         let scraps = &scraps_with_commited_ts.to_scraps();
         let linked_scraps_map = LinkedScrapsMap::new(scraps);
         let sorted_scraps = SerializeIndexScraps::new_with_sort(
             scraps_with_commited_ts,
             &linked_scraps_map,
-            sort_key,
+            &list_view_configs.sort_key,
         );
         let paginated = sorted_scraps
-            .chunks(paging.size_with(scraps))
+            .chunks(list_view_configs.paging.size_with(scraps))
             .into_iter()
             .enumerate();
         let last_page_num = paginated.len();
@@ -69,8 +68,8 @@ impl IndexRender {
                 base_url,
                 timezone,
                 metadata,
-                build_serach_index,
-                sort_key,
+                &list_view_configs.build_search_index,
+                &list_view_configs.sort_key,
                 stags,
                 &paginated_scraps,
                 &pointer,
@@ -119,6 +118,7 @@ mod tests {
     use url::Url;
 
     use super::*;
+    use crate::build::model::paging::Paging;
     use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
     use scraps_libs::model::scrap::Scrap;
     use scraps_libs::tests::FileResource;
@@ -133,9 +133,8 @@ mod tests {
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
-        let build_serach_index = true;
-        let sort_key = SortKey::CommittedDate;
-        let paging = Paging::Not;
+        let list_view_configs =
+            ListViewConfigs::new(&true, &SortKey::CommittedDate, &Paging::By(2));
 
         let test_resource_path =
             PathBuf::from("tests/resource/build/html/render/it_render_index_html_1");
@@ -164,10 +163,8 @@ mod tests {
                 &base_url,
                 timezone,
                 &metadata,
-                &build_serach_index,
+                &list_view_configs,
                 &scraps_with_commited_ts,
-                &sort_key,
-                &paging,
             );
 
             assert!(result1.is_ok());
@@ -190,9 +187,8 @@ mod tests {
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
-        let build_serach_index = true;
-        let sort_key = SortKey::CommittedDate;
-        let paging = Paging::By(2);
+        let list_view_configs =
+            ListViewConfigs::new(&true, &SortKey::CommittedDate, &Paging::By(2));
 
         let test_resource_path =
             PathBuf::from("tests/resource/build/html/render/it_render_index_html_2");
@@ -230,10 +226,8 @@ mod tests {
                 &base_url,
                 timezone,
                 &metadata,
-                &build_serach_index,
+                &list_view_configs,
                 &scraps_with_commited_ts,
-                &sort_key,
-                &paging,
             );
 
             assert!(result1.is_ok());
