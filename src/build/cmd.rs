@@ -119,7 +119,8 @@ impl<GC: GitCommand> BuildCommand<GC> {
 
         // render search index json when build_search_index is true
         if let true = build_search_index {
-            let search_index_render = SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path);
+            let search_index_render =
+                SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path);
             search_index_render.run(base_url, &scraps)?;
         }
 
@@ -272,7 +273,8 @@ mod tests {
     #[test]
     fn it_run_when_build_search_index_is_false() {
         // fields
-        let test_resource_path = PathBuf::from("tests/resource/build/cmd/it_run_when_build_search_index_is_false");
+        let test_resource_path =
+            PathBuf::from("tests/resource/build/cmd/it_run_when_build_search_index_is_false");
         let command = setup_command(&test_resource_path);
 
         // run args
