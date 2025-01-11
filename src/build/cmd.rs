@@ -118,7 +118,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
         css_render.render_main()?;
 
         // render search index json when build_search_index is true
-        if let true = build_search_index {
+        if *build_search_index {
             let search_index_render =
                 SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path);
             search_index_render.run(base_url, &scraps)?;
