@@ -3,4 +3,6 @@ title = "Scraps Doc"
 description = "A static site generator that builds a wiki from a set of markdown files."
 favicon = "https://github.com/boykush/scraps/blob/main/assets/logo.png?raw=true"
 timezone = "Asia/Tokyo"
+build_search_index = true
 sort_key = "committed_date"
+paginate_by = 5
