@@ -22,9 +22,8 @@ use super::{
     },
     json::search_index_render::SearchIndexRender,
     model::{
-        paging::Paging,
+        list_view_configs::ListViewConfigs,
         scrap_with_commited_ts::{ScrapWithCommitedTs, ScrapsWithCommitedTs},
-        sort::SortKey,
     },
 };
 
@@ -54,9 +53,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
         base_url: &Url,
         timezone: Tz,
         html_metadata: &HtmlMetadata,
-        build_search_index: &bool,
-        sort_key: &SortKey,
-        paging: &Paging,
+        list_view_configs: &ListViewConfigs,
     ) -> ScrapResult<usize> {
         let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapError::FileLoad)?;
 
@@ -80,10 +77,8 @@ impl<GC: GitCommand> BuildCommand<GC> {
             base_url,
             timezone,
             html_metadata,
-            build_search_index,
+            list_view_configs,
             &scraps_with_commited_ts,
-            sort_key,
-            paging,
         )?;
 
         // render scraps
@@ -98,19 +93,31 @@ impl<GC: GitCommand> BuildCommand<GC> {
                     timezone,
                     html_metadata,
                     &scrap_with_commited_ts,
-                    sort_key,
+                    &list_view_configs.sort_key,
                 )
             })?;
 
         // render tags index
         let tags_index_render = TagsIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
-        tags_index_render.run(base_url, timezone, html_metadata, &scraps, sort_key)?;
+        tags_index_render.run(
+            base_url,
+            timezone,
+            html_metadata,
+            &scraps,
+            &list_view_configs.sort_key,
+        )?;
 
         // render tag
         let tags = Tags::new(&scraps);
         tags.values.iter().try_for_each(|tag| {
             let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-            tag_render.run(base_url, timezone, html_metadata, tag, sort_key)
+            tag_render.run(
+                base_url,
+                timezone,
+                html_metadata,
+                tag,
+                &list_view_configs.sort_key,
+            )
         })?;
 
         // render css
@@ -118,7 +125,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
         css_render.render_main()?;
 
         // render search index json when build_search_index is true
-        if *build_search_index {
+        if list_view_configs.build_search_index {
             let search_index_render =
                 SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path);
             search_index_render.run(base_url, &scraps)?;
@@ -181,6 +188,8 @@ impl HtmlMetadata {
 mod tests {
     use std::path::Path;
 
+    use crate::build::model::{paging::Paging, sort::SortKey};
+
     use super::*;
     use scraps_libs::{
         git::tests::GitCommandTest,
@@ -214,9 +223,7 @@ mod tests {
             description: Some("Scrap Wiki".to_string()),
             favicon: Some(Url::parse("https://github.io/image.png").unwrap()),
         };
-        let build_search_index = true;
-        let sort_key = SortKey::LinkedCount;
-        let paging = Paging::Not;
+        let list_view_configs = ListViewConfigs::new(&true, &SortKey::LinkedCount, &Paging::Not);
 
         // scrap1
         let md_path_1 = command.scraps_dir_path.join("test1.md");
@@ -241,14 +248,8 @@ mod tests {
         resource_static_dir.run(|| {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
-                    let result1 = command.run(
-                        &base_url,
-                        timezone,
-                        html_metadata,
-                        &build_search_index,
-                        &sort_key,
-                        &paging,
-                    );
+                    let result1 =
+                        command.run(&base_url, timezone, html_metadata, &list_view_configs);
                     assert!(result1.is_ok());
 
                     let result2 = fs::read_to_string(html_path_1);
@@ -285,9 +286,7 @@ mod tests {
             description: Some("Scrap Wiki".to_string()),
             favicon: Some(Url::parse("https://github.io/image.png").unwrap()),
         };
-        let build_search_index = false;
-        let sort_key = SortKey::LinkedCount;
-        let paging = Paging::Not;
+        let list_view_configs = ListViewConfigs::new(&false, &SortKey::LinkedCount, &Paging::Not);
 
         // scrap1
         let md_path_1 = command.scraps_dir_path.join("test1.md");
@@ -308,14 +307,8 @@ mod tests {
         resource_static_dir.run(|| {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
-                    let result1 = command.run(
-                        &base_url,
-                        timezone,
-                        html_metadata,
-                        &build_search_index,
-                        &sort_key,
-                        &paging,
-                    );
+                    let result1 =
+                        command.run(&base_url, timezone, html_metadata, &list_view_configs);
                     assert!(result1.is_ok());
 
                     let result2 = fs::read_to_string(search_index_json_path);

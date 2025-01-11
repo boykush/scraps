@@ -4,6 +4,7 @@ use std::time::Instant;
 use url::Url;
 
 use crate::build::cmd::{BuildCommand, HtmlMetadata};
+use crate::build::model::list_view_configs::ListViewConfigs;
 use crate::build::model::paging::Paging;
 use crate::build::model::sort::SortKey;
 use scraps_libs::error::ScrapResult;
@@ -40,18 +41,12 @@ pub fn run() -> ScrapResult<()> {
         None => Paging::Not,
         Some(u) => Paging::By(u),
     };
+    let list_view_configs = ListViewConfigs::new(&build_search_index, &sort_key, &paging);
 
     println!("{}", "Building site...".bold());
     let start = Instant::now();
 
-    let result = command.run(
-        &base_url,
-        timezone,
-        &html_metadata,
-        &build_search_index,
-        &sort_key,
-        &paging,
-    )?;
+    let result = command.run(&base_url, timezone, &html_metadata, &list_view_configs)?;
 
     let end = start.elapsed();
     println!("-> Created {result} scraps");

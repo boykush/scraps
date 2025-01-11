@@ -5,7 +5,7 @@ use url::Url;
 use crate::{
     build::{
         cmd::{BuildCommand, HtmlMetadata},
-        model::{paging::Paging, sort::SortKey},
+        model::{list_view_configs, paging::Paging, sort::SortKey},
     },
     cli::scrap_config::{ScrapConfig, SortKeyConfig},
     serve::cmd::ServeCommand,
@@ -39,14 +39,10 @@ pub fn run() -> ScrapResult<()> {
         None => Paging::Not,
         Some(u) => Paging::By(u),
     };
-    let build_result = build_command.run(
-        &base_url,
-        timezone,
-        &html_metadata,
-        &build_search_index,
-        &sort_key,
-        &paging,
-    );
+    let list_view_configs =
+        list_view_configs::ListViewConfigs::new(&build_search_index, &sort_key, &paging);
+
+    let build_result = build_command.run(&base_url, timezone, &html_metadata, &list_view_configs);
 
     // serve command
     let serve_command = ServeCommand::new(&public_dir_path);
