@@ -20,3 +20,8 @@ See [[Usage]] for detail.
 If there is no scraps with the specified title, such as #[[Content]], then it will be a tag.
 
 Tags are lined up on the index page, and the link is to a page with a list of scraps that have the tag.
+
+## Alias by display text
+Internal links allow you to use different display text as aliases.
+
+Writing `[[Content|here]]` creates a link that displays as [[Content|here]] but links to the "Content" page.
