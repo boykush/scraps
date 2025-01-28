@@ -61,9 +61,7 @@ pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapResult<()> {
     let list_view_configs = ListViewConfigs::new(&build_search_index, &sort_key, &paging);
 
     let start = Instant::now();
-
     let result = command.run(&base_url, timezone, &html_metadata, &list_view_configs)?;
-
     let end = start.elapsed();
 
     span_run.exit();
