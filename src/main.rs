@@ -12,7 +12,7 @@ fn main() -> ScrapResult<()> {
 
     match cli.command {
         cli::SubCommands::Init { project_name } => cli::cmd::init::run(&project_name),
-        cli::SubCommands::Build => cli::cmd::build::run(),
+        cli::SubCommands::Build { verbose } => cli::cmd::build::run(verbose),
         cli::SubCommands::Serve => cli::cmd::serve::run(),
         cli::SubCommands::Tag => cli::cmd::tag::run(),
     }

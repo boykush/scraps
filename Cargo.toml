@@ -58,6 +58,7 @@ hyper-util = { version = "0.1", features = ["full"] }
 percent-encoding = "2.3"
 tracing = "0.1.41"
 tracing-subscriber = "0.3.19"
+clap-verbosity-flag = "3.0.2"
 
 [dev-dependencies]
 scraps_libs.workspace = true

@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use clap_verbosity_flag::{Verbosity, WarnLevel};
 
 pub mod cmd;
 mod display;
@@ -14,7 +15,10 @@ pub struct Cli {
 #[derive(Subcommand)]
 pub enum SubCommands {
     #[command(about = "Build scraps")]
-    Build,
+    Build {
+        #[command(flatten)]
+        verbose: Verbosity<WarnLevel>,
+    },
 
     #[command(about = "Init scraps project")]
     Init { project_name: String },

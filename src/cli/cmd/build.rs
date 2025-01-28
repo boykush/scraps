@@ -1,3 +1,4 @@
+use clap_verbosity_flag::{log, Verbosity, WarnLevel};
 use colored::Colorize;
 use std::path::PathBuf;
 use std::time::Instant;
@@ -14,12 +15,20 @@ use scraps_libs::error::ScrapResult;
 use crate::cli::scrap_config::{ScrapConfig, SortKeyConfig};
 use scraps_libs::git::GitCommandImpl;
 
-pub fn run() -> ScrapResult<()> {
+pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapResult<()> {
+    let log_level = match verbose.log_level() {
+        Some(log::Level::Error) => Level::ERROR,
+        Some(log::Level::Warn) => Level::WARN,
+        Some(log::Level::Info) => Level::INFO,
+        Some(log::Level::Debug) => Level::DEBUG,
+        Some(log::Level::Trace) => Level::TRACE,
+        None => Level::WARN,
+    };
     tracing_subscriber::fmt()
         .with_span_events(FmtSpan::CLOSE)
-        .with_max_level(Level::INFO)
+        .with_max_level(log_level)
         .init();
-    let _span_run = span!(Level::INFO, "run").entered();
+    let span_run = span!(Level::INFO, "run").entered();
 
     let git_command = GitCommandImpl::new();
     let scraps_dir_path = PathBuf::from("scraps");
@@ -56,6 +65,8 @@ pub fn run() -> ScrapResult<()> {
     let result = command.run(&base_url, timezone, &html_metadata, &list_view_configs)?;
 
     let end = start.elapsed();
+
+    span_run.exit();
     println!("-> Created {result} scraps");
     println!(
         "{} {}.{} {}",
