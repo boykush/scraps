@@ -13,6 +13,7 @@ use scraps_libs::{
     },
     git::GitCommand,
 };
+use tracing::{span, Level};
 use url::Url;
 
 use super::{
@@ -55,6 +56,8 @@ impl<GC: GitCommand> BuildCommand<GC> {
         html_metadata: &HtmlMetadata,
         list_view_configs: &ListViewConfigs,
     ) -> ScrapResult<usize> {
+        let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
+
         let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapError::FileLoad)?;
 
         let paths = read_dir
@@ -70,8 +73,10 @@ impl<GC: GitCommand> BuildCommand<GC> {
             .collect::<ScrapResult<Vec<ScrapWithCommitedTs>>>()
             .map(|s| ScrapsWithCommitedTs::new(&s))?;
         let scraps = scraps_with_commited_ts.to_scraps();
+        span_read_scraps.exit();
 
         // render index
+        let span_render_index = span!(Level::INFO, "render_index").entered();
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         index_render.run(
             base_url,
@@ -80,12 +85,15 @@ impl<GC: GitCommand> BuildCommand<GC> {
             list_view_configs,
             &scraps_with_commited_ts,
         )?;
+        span_render_index.exit();
 
         // render scraps
+        let span_render_scraps = span!(Level::INFO, "render_scraps").entered();
         scraps_with_commited_ts
             .to_vec()
             .into_iter()
             .try_for_each(|scrap_with_commited_ts| {
+                let _span_render_scrap = span!(Level::INFO, "render_scrap").entered();
                 let scrap_render =
                     ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
                 scrap_render.run(
@@ -96,8 +104,10 @@ impl<GC: GitCommand> BuildCommand<GC> {
                     &list_view_configs.sort_key,
                 )
             })?;
+        span_render_scraps.exit();
 
         // render tags index
+        let span_render_tags_index = span!(Level::INFO, "render_tags_index").entered();
         let tags_index_render = TagsIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         tags_index_render.run(
             base_url,
@@ -106,10 +116,13 @@ impl<GC: GitCommand> BuildCommand<GC> {
             &scraps,
             &list_view_configs.sort_key,
         )?;
+        span_render_tags_index.exit();
 
         // render tag
+        let span_render_tags = span!(Level::INFO, "render_tags").entered();
         let tags = Tags::new(&scraps);
         tags.values.iter().try_for_each(|tag| {
+            let _span_render_tag = span!(Level::INFO, "render_tag").entered();
             let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
             tag_render.run(
                 base_url,
@@ -119,13 +132,18 @@ impl<GC: GitCommand> BuildCommand<GC> {
                 &list_view_configs.sort_key,
             )
         })?;
+        span_render_tags.exit();
 
         // render css
+        let span_render_css = span!(Level::INFO, "render_css").entered();
         let css_render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
         css_render.render_main()?;
+        span_render_css.exit();
 
         // render search index json when build_search_index is true
         if list_view_configs.build_search_index {
+            let _span_render_search_index =
+                span!(Level::INFO, "render_search_index").entered();
             let search_index_render =
                 SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path);
             search_index_render.run(base_url, &scraps)?;

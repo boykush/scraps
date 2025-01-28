@@ -1,6 +1,8 @@
 use colored::Colorize;
 use std::path::PathBuf;
 use std::time::Instant;
+use tracing::{span, Level};
+use tracing_subscriber::fmt::format::FmtSpan;
 use url::Url;
 
 use crate::build::cmd::{BuildCommand, HtmlMetadata};
@@ -13,6 +15,12 @@ use crate::cli::scrap_config::{ScrapConfig, SortKeyConfig};
 use scraps_libs::git::GitCommandImpl;
 
 pub fn run() -> ScrapResult<()> {
+    tracing_subscriber::fmt()
+        .with_span_events(FmtSpan::CLOSE)
+        .with_max_level(Level::INFO)
+        .init();
+    let _span_run = span!(Level::INFO, "run").entered();
+
     let git_command = GitCommandImpl::new();
     let scraps_dir_path = PathBuf::from("scraps");
     let static_dir_path = PathBuf::from("static");
@@ -43,7 +51,6 @@ pub fn run() -> ScrapResult<()> {
     };
     let list_view_configs = ListViewConfigs::new(&build_search_index, &sort_key, &paging);
 
-    println!("{}", "Building site...".bold());
     let start = Instant::now();
 
     let result = command.run(&base_url, timezone, &html_metadata, &list_view_configs)?;
