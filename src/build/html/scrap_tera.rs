@@ -1,4 +1,4 @@
-use crate::build::{cmd::HtmlMetadata, model::sort::SortKey};
+use crate::build::model::{html::HtmlMetadata, sort::SortKey};
 use chrono_tz::Tz;
 use once_cell::sync::Lazy;
 use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};

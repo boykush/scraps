@@ -6,7 +6,8 @@ use tracing::{span, Level};
 use tracing_subscriber::fmt::format::FmtSpan;
 use url::Url;
 
-use crate::build::cmd::{BuildCommand, HtmlMetadata};
+use crate::build::cmd::BuildCommand;
+use crate::build::model::html::HtmlMetadata;
 use crate::build::model::list_view_configs::ListViewConfigs;
 use crate::build::model::paging::Paging;
 use crate::build::model::sort::SortKey;

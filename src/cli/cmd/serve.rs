@@ -4,8 +4,8 @@ use url::Url;
 
 use crate::{
     build::{
-        cmd::{BuildCommand, HtmlMetadata},
-        model::{list_view_configs, paging::Paging, sort::SortKey},
+        cmd::BuildCommand,
+        model::{html::HtmlMetadata, list_view_configs, paging::Paging, sort::SortKey},
     },
     cli::config::{scrap_config::ScrapConfig, sort_key::SortKeyConfig},
     serve::cmd::ServeCommand,

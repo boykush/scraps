@@ -23,8 +23,7 @@ use super::{
     },
     json::search_index_render::SearchIndexRender,
     model::{
-        list_view_configs::ListViewConfigs,
-        scrap_with_commited_ts::{ScrapWithCommitedTs, ScrapsWithCommitedTs},
+        html::HtmlMetadata, list_view_configs::ListViewConfigs, scrap_with_commited_ts::{ScrapWithCommitedTs, ScrapsWithCommitedTs}
     },
 };
 
@@ -174,33 +173,6 @@ impl<GC: GitCommand> BuildCommand<GC> {
     }
 }
 
-#[derive(Clone)]
-pub struct HtmlMetadata {
-    title: String,
-    description: Option<String>,
-    favicon: Option<Url>,
-}
-
-impl HtmlMetadata {
-    pub fn new(title: &str, description: &Option<String>, favicon: &Option<Url>) -> HtmlMetadata {
-        HtmlMetadata {
-            title: title.to_owned(),
-            description: description.to_owned(),
-            favicon: favicon.to_owned(),
-        }
-    }
-
-    pub fn title(&self) -> String {
-        self.title.clone()
-    }
-    pub fn description(&self) -> Option<String> {
-        self.description.clone()
-    }
-    pub fn favicon(&self) -> Option<Url> {
-        self.favicon.clone()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use std::path::Path;
@@ -235,11 +207,11 @@ mod tests {
         // run args
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
-        let html_metadata = &HtmlMetadata {
-            title: "Scrap".to_string(),
-            description: Some("Scrap Wiki".to_string()),
-            favicon: Some(Url::parse("https://github.io/image.png").unwrap()),
-        };
+        let html_metadata = &HtmlMetadata::new(
+            "Scrap",
+            &Some("Scrap Wiki".to_string()),
+            &Some(Url::parse("https://github.io/image.png").unwrap())
+        );
         let list_view_configs = ListViewConfigs::new(&true, &SortKey::LinkedCount, &Paging::Not);
 
         // scrap1
@@ -298,11 +270,11 @@ mod tests {
         // run args
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
-        let html_metadata = &HtmlMetadata {
-            title: "Scrap".to_string(),
-            description: Some("Scrap Wiki".to_string()),
-            favicon: Some(Url::parse("https://github.io/image.png").unwrap()),
-        };
+        let html_metadata = &HtmlMetadata::new(
+            "Scrap",
+            &Some("Scrap Wiki".to_string()),
+            &Some(Url::parse("https://github.io/image.png").unwrap()),
+        );
         let list_view_configs = ListViewConfigs::new(&false, &SortKey::LinkedCount, &Paging::Not);
 
         // scrap1
