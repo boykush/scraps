@@ -26,7 +26,7 @@ Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 - [x] Pagination
 - [x] Mermaid Diagrams
 - [x] Search
-- [ ] Themes (default is the [Nord](https://www.nordtheme.com/) theme)
+- [x] Color Scheme (Theme is the [Nord](https://www.nordtheme.com/))
 ### CLI
 - [x] Build a static site
 - [x] Init scraps project
