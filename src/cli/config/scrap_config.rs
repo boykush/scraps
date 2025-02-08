@@ -4,7 +4,7 @@ use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
 use serde::Deserialize;
 use url::Url;
 
-use super::sort_key::SortKeyConfig;
+use super::{color_scheme::ColorSchemeConfig, sort_key::SortKeyConfig};
 
 #[derive(Debug, Deserialize)]
 pub struct ScrapConfig {
@@ -16,6 +16,7 @@ pub struct ScrapConfig {
     pub build_search_index: Option<bool>,
     pub sort_key: Option<SortKeyConfig>,
     pub paginate_by: Option<usize>,
+    pub color_scheme: Option<ColorSchemeConfig>,
 }
 
 impl ScrapConfig {
