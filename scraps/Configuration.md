@@ -20,6 +20,9 @@ favicon = ""
 # The site timezone (optional, default=UTC)
 timezone = "UTC"
 
+# The site color scheme (optional, default=os_setting, choices=os_setting or only_light or only_dark)
+color_scheme = "os_setting"
+
 # Build a search index with the Fuse JSON and display search UI (optional, default=true, choices=true or false)
 build_search_index = true
 
@@ -28,4 +31,5 @@ sort_key = "committed_date"
 
 # Scraps pagination on index page(optional, default=no paginsation)
 paginate_by = 20
+
 ```
