@@ -25,7 +25,7 @@
     --shadow-color: light-dark(rgba(184, 194, 215, 0.3), rgba(15, 17, 21, 0.3));
     --gray-color: #7b88a1;
 
-    --highlight-link-text-color: var(--nord8);
+    --scrap-link-highlight-color: var(--nord8);
 }
 
 /* html tag */
@@ -103,7 +103,7 @@ div.scrap .content {
 
 div.scrap a {
     text-decoration: none;
-    color: var(--highlight-link-text-color);
+    color: var(--scrap-link-highlight-color);
 }
 
 div.scrap a:hover {
@@ -174,7 +174,7 @@ div.index div.search-block li {
 }
 
 div.index div.search-block li:hover {
-    background-color: var(--highlight-link-text-color);
+    background-color: var(--scrap-link-highlight-color);
 }
 
 /** tags block **/
@@ -239,6 +239,7 @@ ul.scrap-links li.item {
 ul.scrap-links li.item p.title {
     margin: 12px 0;
     font-size: 18px;
+    color: var(--scrap-link-highlight-color);
 }
 
 ul.scrap-links li.item div.thumbnail {
@@ -271,6 +272,7 @@ ul.tag-links li.item {
 
 ul.tag-links li.item span.title {
     margin-right: 2px;
+    color: var(--scrap-link-highlight-color);
 }
 
 ul.tag-links li.item span.title::before {
@@ -279,6 +281,5 @@ ul.tag-links li.item span.title::before {
 }
 
 ul.tag-links li.item span.more-link {
-    color: var(--highlight-link-text-color);
     margin-right: 8px;
 }
