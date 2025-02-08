@@ -7,7 +7,7 @@ use crate::{
         cmd::{BuildCommand, HtmlMetadata},
         model::{list_view_configs, paging::Paging, sort::SortKey},
     },
-    cli::scrap_config::{ScrapConfig, SortKeyConfig},
+    cli::config::{scrap_config::ScrapConfig, sort_key::SortKeyConfig},
     serve::cmd::ServeCommand,
 };
 use scraps_libs::{error::ScrapResult, git::GitCommandImpl};

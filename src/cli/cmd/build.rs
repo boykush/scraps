@@ -10,9 +10,10 @@ use crate::build::cmd::{BuildCommand, HtmlMetadata};
 use crate::build::model::list_view_configs::ListViewConfigs;
 use crate::build::model::paging::Paging;
 use crate::build::model::sort::SortKey;
+use crate::cli::config::sort_key::SortKeyConfig;
 use scraps_libs::error::ScrapResult;
 
-use crate::cli::scrap_config::{ScrapConfig, SortKeyConfig};
+use crate::cli::config::scrap_config::ScrapConfig;
 use scraps_libs::git::GitCommandImpl;
 
 pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapResult<()> {

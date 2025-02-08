@@ -3,7 +3,7 @@ use clap_verbosity_flag::{Verbosity, WarnLevel};
 
 pub mod cmd;
 mod display;
-mod scrap_config;
+mod config;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
