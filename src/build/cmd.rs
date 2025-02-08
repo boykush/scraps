@@ -181,10 +181,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
 mod tests {
     use std::path::Path;
 
-    use crate::build::{
-        css,
-        model::{color_scheme::ColorScheme, paging::Paging, sort::SortKey},
-    };
+    use crate::build::model::{color_scheme::ColorScheme, paging::Paging, sort::SortKey};
 
     use super::*;
     use scraps_libs::{
