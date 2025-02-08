@@ -14,7 +14,7 @@ pub enum SerdeColorScheme {
 pub struct ColorSchemeConfig(#[serde(with = "SerdeColorScheme")] ColorScheme);
 
 impl ColorSchemeConfig {
-    pub fn into_sort_key(self) -> ColorScheme {
+    pub fn into_color_scheme(self) -> ColorScheme {
         self.0.clone()
     }
 }

@@ -2,8 +2,8 @@ use clap::{Parser, Subcommand};
 use clap_verbosity_flag::{Verbosity, WarnLevel};
 
 pub mod cmd;
-mod display;
 mod config;
+mod display;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]

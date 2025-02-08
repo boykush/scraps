@@ -7,6 +7,8 @@ use std::{
 
 use scraps_libs::error::{ScrapError, ScrapResult};
 
+use crate::build::model::css::CssMetadata;
+
 pub struct CSSRender {
     static_dir_path: PathBuf,
     public_dir_path: PathBuf,
@@ -20,7 +22,7 @@ impl CSSRender {
         }
     }
 
-    pub fn render_main(&self) -> ScrapResult<()> {
+    pub fn render_main(&self, css_metadata: &CssMetadata) -> ScrapResult<()> {
         let builtins_css = include_str!("builtins/main.css").to_string();
         let css = fs::read_to_string(self.static_dir_path.join("main.css")).unwrap_or(builtins_css);
 
