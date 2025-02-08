@@ -268,11 +268,11 @@ ul.tag-links {
 ul.tag-links li.item {
     display: inline;
     margin-right: 8px;
+    color: var(--scrap-link-highlight-color);
 }
 
 ul.tag-links li.item span.title {
     margin-right: 2px;
-    color: var(--scrap-link-highlight-color);
 }
 
 ul.tag-links li.item span.title::before {
@@ -281,5 +281,6 @@ ul.tag-links li.item span.title::before {
 }
 
 ul.tag-links li.item span.more-link {
+    color: var(--scrap-link-highlight-color);
     margin-right: 8px;
 }
