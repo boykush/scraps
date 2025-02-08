@@ -6,13 +6,18 @@ use tracing::{span, Level};
 use tracing_subscriber::fmt::format::FmtSpan;
 use url::Url;
 
-use crate::build::cmd::{BuildCommand, HtmlMetadata};
+use crate::build::cmd::BuildCommand;
+use crate::build::model::color_scheme::ColorScheme;
+use crate::build::model::css::CssMetadata;
+use crate::build::model::html::HtmlMetadata;
 use crate::build::model::list_view_configs::ListViewConfigs;
 use crate::build::model::paging::Paging;
 use crate::build::model::sort::SortKey;
+use crate::cli::config::color_scheme::ColorSchemeConfig;
+use crate::cli::config::sort_key::SortKeyConfig;
 use scraps_libs::error::ScrapResult;
 
-use crate::cli::scrap_config::{ScrapConfig, SortKeyConfig};
+use crate::cli::config::scrap_config::ScrapConfig;
 use scraps_libs::git::GitCommandImpl;
 
 pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapResult<()> {
@@ -50,6 +55,10 @@ pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapResult<()> {
     };
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
     let html_metadata = HtmlMetadata::new(&config.title, &config.description, &config.favicon);
+    let css_metadata = CssMetadata::new(&config.color_scheme.map_or_else(
+        || ColorScheme::OsSetting,
+        ColorSchemeConfig::into_color_scheme,
+    ));
     let build_search_index = config.build_search_index.unwrap_or(true);
     let sort_key = config
         .sort_key
@@ -61,7 +70,13 @@ pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapResult<()> {
     let list_view_configs = ListViewConfigs::new(&build_search_index, &sort_key, &paging);
 
     let start = Instant::now();
-    let result = command.run(&base_url, timezone, &html_metadata, &list_view_configs)?;
+    let result = command.run(
+        &base_url,
+        timezone,
+        &html_metadata,
+        &css_metadata,
+        &list_view_configs,
+    )?;
     let end = start.elapsed();
 
     span_run.exit();

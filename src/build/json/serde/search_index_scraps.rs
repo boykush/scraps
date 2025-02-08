@@ -26,9 +26,3 @@ impl SerializeSearchIndexScraps {
         SerializeSearchIndexScraps(serialize_scraps.collect_vec())
     }
 }
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_new() {}
-}

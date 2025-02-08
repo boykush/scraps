@@ -21,8 +21,10 @@ use super::{
         index_render::IndexRender, scrap_render::ScrapRender, tag_render::TagRender,
         tags_index_render::TagsIndexRender,
     },
-    json::search_index_render::SearchIndexRender,
+    json::render::SearchIndexRender,
     model::{
+        css::CssMetadata,
+        html::HtmlMetadata,
         list_view_configs::ListViewConfigs,
         scrap_with_commited_ts::{ScrapWithCommitedTs, ScrapsWithCommitedTs},
     },
@@ -54,6 +56,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
         base_url: &Url,
         timezone: Tz,
         html_metadata: &HtmlMetadata,
+        css_metadata: &CssMetadata,
         list_view_configs: &ListViewConfigs,
     ) -> ScrapResult<usize> {
         let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
@@ -137,7 +140,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
         // render css
         let span_render_css = span!(Level::INFO, "render_css").entered();
         let css_render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
-        css_render.render_main()?;
+        css_render.render_main(css_metadata)?;
         span_render_css.exit();
 
         // render search index json when build_search_index is true
@@ -174,38 +177,11 @@ impl<GC: GitCommand> BuildCommand<GC> {
     }
 }
 
-#[derive(Clone)]
-pub struct HtmlMetadata {
-    title: String,
-    description: Option<String>,
-    favicon: Option<Url>,
-}
-
-impl HtmlMetadata {
-    pub fn new(title: &str, description: &Option<String>, favicon: &Option<Url>) -> HtmlMetadata {
-        HtmlMetadata {
-            title: title.to_owned(),
-            description: description.to_owned(),
-            favicon: favicon.to_owned(),
-        }
-    }
-
-    pub fn title(&self) -> String {
-        self.title.clone()
-    }
-    pub fn description(&self) -> Option<String> {
-        self.description.clone()
-    }
-    pub fn favicon(&self) -> Option<Url> {
-        self.favicon.clone()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use std::path::Path;
 
-    use crate::build::model::{paging::Paging, sort::SortKey};
+    use crate::build::model::{color_scheme::ColorScheme, paging::Paging, sort::SortKey};
 
     use super::*;
     use scraps_libs::{
@@ -235,11 +211,12 @@ mod tests {
         // run args
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
-        let html_metadata = &HtmlMetadata {
-            title: "Scrap".to_string(),
-            description: Some("Scrap Wiki".to_string()),
-            favicon: Some(Url::parse("https://github.io/image.png").unwrap()),
-        };
+        let html_metadata = &HtmlMetadata::new(
+            "Scrap",
+            &Some("Scrap Wiki".to_string()),
+            &Some(Url::parse("https://github.io/image.png").unwrap()),
+        );
+        let css_metadata = &CssMetadata::new(&ColorScheme::OsSetting);
         let list_view_configs = ListViewConfigs::new(&true, &SortKey::LinkedCount, &Paging::Not);
 
         // scrap1
@@ -265,8 +242,13 @@ mod tests {
         resource_static_dir.run(|| {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
-                    let result1 =
-                        command.run(&base_url, timezone, html_metadata, &list_view_configs);
+                    let result1 = command.run(
+                        &base_url,
+                        timezone,
+                        html_metadata,
+                        css_metadata,
+                        &list_view_configs,
+                    );
                     assert!(result1.is_ok());
 
                     let result2 = fs::read_to_string(html_path_1);
@@ -298,11 +280,12 @@ mod tests {
         // run args
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
-        let html_metadata = &HtmlMetadata {
-            title: "Scrap".to_string(),
-            description: Some("Scrap Wiki".to_string()),
-            favicon: Some(Url::parse("https://github.io/image.png").unwrap()),
-        };
+        let html_metadata = &HtmlMetadata::new(
+            "Scrap",
+            &Some("Scrap Wiki".to_string()),
+            &Some(Url::parse("https://github.io/image.png").unwrap()),
+        );
+        let css_metadata = &CssMetadata::new(&ColorScheme::OsSetting);
         let list_view_configs = ListViewConfigs::new(&false, &SortKey::LinkedCount, &Paging::Not);
 
         // scrap1
@@ -324,8 +307,13 @@ mod tests {
         resource_static_dir.run(|| {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
-                    let result1 =
-                        command.run(&base_url, timezone, html_metadata, &list_view_configs);
+                    let result1 = command.run(
+                        &base_url,
+                        timezone,
+                        html_metadata,
+                        css_metadata,
+                        &list_view_configs,
+                    );
                     assert!(result1.is_ok());
 
                     let result2 = fs::read_to_string(search_index_json_path);

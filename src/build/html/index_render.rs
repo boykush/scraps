@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::{fs::File, path::PathBuf};
 
-use crate::build::cmd::HtmlMetadata;
+use crate::build::model::html::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::list_view_configs::ListViewConfigs;
 use crate::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
