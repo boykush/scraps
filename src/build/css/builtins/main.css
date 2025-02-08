@@ -1,4 +1,6 @@
 :root {
+    color-scheme: light dark;
+
     --nord0: #2e3440;
     --nord1: #3b4252;
     --nord2: #434c5e;
@@ -16,15 +18,20 @@
     --nord14: #a3be8c;
     --nord15: #b48ead;
 
-    --primary-color: var(--nord6);
-    --secondary-color: var(--nord3);
-    --gray-color: #7b88a1
+    --primary-background-color: light-dark(var(--nord6), var(--nord0));
+    --secondary-background-color: light-dark(white, var(--nord1));
+    --text-color: light-dark(var(--nord3), var(--nord6));
+    --horizontal-rule-color: var(--nord5);
+    --shadow-color: light-dark(rgba(184, 194, 215, 0.3), rgba(15, 17, 21, 0.3));
+    --gray-color: #7b88a1;
+
+    --highlight-link-text-color: var(--nord8);
 }
 
 /* html tag */
 body {
-  background-color: var(--primary-color);
-  color: var(--secondary-color);
+  background-color: var(--primary-background-color);
+  color: var(--text-color);
   font-family: 'Rubik', 'Noto Sans JP', sans-serif;
 }
 
@@ -33,24 +40,23 @@ pre code {
 }
 
 p code {
-    background-color: var(--primary-color);
+    background-color: var(--primary-background-color);
     padding: 1px 2px;
     border-radius: 2px;
 }
 
 hr {
-    background-color: var(--secondary-color);
     border: none;
-    border-bottom: 1px solid var(--primary-color);
+    border-bottom: 1px solid var(--horizontal-rule-color);
 }
 
 a {
-    color: var(--secondary-color);
+    color: var(--text-color);
     text-decoration: none;
 }
 
 a:visited {
-    color: var(--secondary-color);
+    color: var(--text-color);
 }
 
 /* header */
@@ -80,10 +86,10 @@ footer {
 
 /* scrap */
 div.scrap {
-    background-color: white;
+    background-color: var(--secondary-background-color);
     border-radius: 4px;
     padding: 32px;
-    box-shadow: rgba(184, 194, 215, 0.35) 0px 6px 9px 0px;
+    box-shadow: var(--shadow-color) 0px 6px 9px 0px;
 }
 
 div.scrap .commited-date {
@@ -97,7 +103,7 @@ div.scrap .content {
 
 div.scrap a {
     text-decoration: none;
-    color: var(--nord8);
+    color: var(--highlight-link-text-color);
 }
 
 div.scrap a:hover {
@@ -122,9 +128,10 @@ div.index div.search-block {
 }
 
 div.index div.search-block input {
-    color: var(--secondary-color);
+    color: var(--text-color);
     border: 1px solid transparent;
-    border-color: white;
+    background-color: var(--secondary-background-color);
+    border-color: var(--secondary-background-color);
     border-radius: 4px;
     width: 240px;
     height: 20px;
@@ -159,7 +166,7 @@ div.index div.search-block li {
     cursor: pointer;
     height: 20px;
     width: 240px;
-    background-color: white;;
+    background-color: var(--secondary-background-color);
     padding: 4px 8px;
     overflow: hidden;
     text-wrap: nowrap;
@@ -167,7 +174,7 @@ div.index div.search-block li {
 }
 
 div.index div.search-block li:hover {
-    background-color: var(--nord5);
+    background-color: var(--highlight-link-text-color);
 }
 
 /** tags block **/
@@ -213,28 +220,25 @@ ul.scrap-links {
     grid-template-columns: repeat(auto-fit, 200px);
     gap: 32px;
     width: 100%;
+    padding-top: 16px;
     padding-left: 0;
     list-style: none;
     justify-content: center;
 }
 
-ul.scrap-links a {
-    color: var(--secondary-color);
-}
-
 ul.scrap-links li.item {
     display: flex;
     flex-direction: column;
-    background-color: white;
+    background-color: var(--secondary-background-color);
     padding: 16px;
     height: 168px;
     border-radius: 4px;
-    box-shadow: rgba(184, 194, 215, 0.35) 0px 6px 9px 0px;
+    box-shadow: var(--shadow-color) 0px 6px 9px 0px;
 }
 
 ul.scrap-links li.item p.title {
     margin: 12px 0;
-    font-weight: bold;
+    font-size: 18px;
 }
 
 ul.scrap-links li.item div.thumbnail {
@@ -275,6 +279,6 @@ ul.tag-links li.item span.title::before {
 }
 
 ul.tag-links li.item span.more-link {
-    color: var(--nord8);
+    color: var(--highlight-link-text-color);
     margin-right: 8px;
 }
