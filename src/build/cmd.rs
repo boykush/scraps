@@ -21,7 +21,7 @@ use super::{
         index_render::IndexRender, scrap_render::ScrapRender, tag_render::TagRender,
         tags_index_render::TagsIndexRender,
     },
-    json::search_index_render::SearchIndexRender,
+    json::render::SearchIndexRender,
     model::{
         css::CssMetadata,
         html::HtmlMetadata,

@@ -89,8 +89,6 @@ mod tests {
                 let render = SearchIndexRender::new(&static_dir_path, &public_dir_path);
                 let result1 = render.run(&base_url, &scraps);
 
-                println!("{:?}", result1);
-
                 assert!(result1.is_ok());
 
                 let result2 = fs::read_to_string(search_index_json_path).unwrap();
