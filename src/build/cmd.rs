@@ -80,7 +80,7 @@ impl BuildCommand {
         span_read_scraps.exit();
 
         // render index
-        let span_render_index = span!(Level::INFO, "render_index").entered();
+        let span_render_indexes = span!(Level::INFO, "render_indexes").entered();
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         index_render.run(
             base_url,
@@ -89,13 +89,13 @@ impl BuildCommand {
             list_view_configs,
             &scraps_with_commited_ts,
         )?;
-        span_render_index.exit();
+        span_render_indexes.exit();
 
         // render scraps
         let span_render_scraps = span!(Level::INFO, "render_scraps").entered();
         scraps_with_commited_ts
             .to_vec()
-            .into_iter()
+            .into_par_iter()
             .try_for_each(|scrap_with_commited_ts| {
                 let _span_render_scrap = span!(Level::INFO, "render_scrap").entered();
                 let scrap_render =

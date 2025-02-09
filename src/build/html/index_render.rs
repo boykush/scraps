@@ -8,10 +8,13 @@ use crate::build::model::list_view_configs::ListViewConfigs;
 use crate::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
 use crate::build::model::sort::SortKey;
 use chrono_tz::Tz;
+use rayon::iter::IntoParallelIterator;
+use rayon::prelude::*;
 use scraps_libs::{
     error::{anyhow::Context, ScrapError, ScrapResult},
     model::tags::Tags,
 };
+use tracing::{span, Level};
 use url::Url;
 
 use crate::build::html::scrap_tera;
@@ -52,10 +55,10 @@ impl IndexRender {
         );
         let paginated = sorted_scraps
             .chunks(list_view_configs.paging.size_with(scraps))
-            .into_iter()
+            .into_par_iter()
             .enumerate();
         let last_page_num = paginated.len();
-        let mut paginated_with_pointer = paginated.map(|(idx, paginated_scraps)| {
+        let paginated_with_pointer = paginated.map(|(idx, paginated_scraps)| {
             let page_num = idx + 1;
             let pointer = PagePointer::new(page_num, last_page_num);
             (pointer, paginated_scraps)
@@ -88,6 +91,7 @@ impl IndexRender {
         paginated_scraps: &SerializeIndexScraps,
         pointer: &PagePointer,
     ) -> ScrapResult<()> {
+        let span_render_index = span!(Level::INFO, "render_index").entered();
         let (tera, mut context) = scrap_tera::init(
             base_url,
             timezone,
@@ -108,7 +112,9 @@ impl IndexRender {
         let wtr = File::create(self.public_dir_path.join(pointer.current_file_name()))
             .context(ScrapError::PublicRender)?;
         tera.render_to(template_name, &context, wtr)
-            .context(ScrapError::PublicRender)
+            .context(ScrapError::PublicRender)?;
+        span_render_index.exit();
+        Ok(())
     }
 }
 
