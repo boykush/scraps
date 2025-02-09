@@ -27,12 +27,7 @@ pub fn run() -> ScrapResult<()> {
     let scraps_dir_path = PathBuf::from("scraps");
     let static_dir_path = PathBuf::from("static");
     let public_dir_path = PathBuf::from("public");
-    let build_command = BuildCommand::new(
-        git_command,
-        &scraps_dir_path,
-        &static_dir_path,
-        &public_dir_path,
-    );
+    let build_command = BuildCommand::new(&scraps_dir_path, &static_dir_path, &public_dir_path);
     let config = ScrapConfig::new()?;
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
     let html_metadata = HtmlMetadata::new(&config.title, &config.description, &config.favicon);
@@ -52,6 +47,7 @@ pub fn run() -> ScrapResult<()> {
         list_view_configs::ListViewConfigs::new(&build_search_index, &sort_key, &paging);
 
     let build_result = build_command.run(
+        git_command,
         &base_url,
         timezone,
         &html_metadata,

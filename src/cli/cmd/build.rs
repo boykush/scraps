@@ -39,12 +39,7 @@ pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapResult<()> {
     let scraps_dir_path = PathBuf::from("scraps");
     let static_dir_path = PathBuf::from("static");
     let public_dir_path = PathBuf::from("public");
-    let command = BuildCommand::new(
-        git_command,
-        &scraps_dir_path,
-        &static_dir_path,
-        &public_dir_path,
-    );
+    let command = BuildCommand::new(&scraps_dir_path, &static_dir_path, &public_dir_path);
 
     let config = ScrapConfig::new()?;
     // Automatically append a trailing slash to URLs
@@ -71,6 +66,7 @@ pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapResult<()> {
 
     let start = Instant::now();
     let result = command.run(
+        git_command,
         &base_url,
         timezone,
         &html_metadata,

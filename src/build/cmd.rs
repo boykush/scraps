@@ -1,10 +1,13 @@
 use std::{
     fs::{self, DirEntry},
+    marker::{Send, Sync},
     path::PathBuf,
 };
 
 use crate::build::css::render::CSSRender;
 use chrono_tz::Tz;
+use rayon::iter::IntoParallelIterator;
+use rayon::prelude::*;
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 use scraps_libs::{
     error::{
@@ -30,29 +33,27 @@ use super::{
     },
 };
 
-pub struct BuildCommand<GC: GitCommand> {
-    git_command: GC,
+pub struct BuildCommand {
     scraps_dir_path: PathBuf,
     static_dir_path: PathBuf,
     public_dir_path: PathBuf,
 }
 
-impl<GC: GitCommand> BuildCommand<GC> {
+impl BuildCommand {
     pub fn new(
-        git_command: GC,
         scraps_dir_path: &PathBuf,
         static_dir_path: &PathBuf,
         public_dir_path: &PathBuf,
-    ) -> BuildCommand<GC> {
+    ) -> BuildCommand {
         BuildCommand {
-            git_command,
             scraps_dir_path: scraps_dir_path.to_owned(),
             static_dir_path: static_dir_path.to_owned(),
             public_dir_path: public_dir_path.to_owned(),
         }
     }
-    pub fn run(
+    pub fn run<GC: GitCommand + Send + Sync + Copy>(
         &self,
+        git_command: GC,
         base_url: &Url,
         timezone: Tz,
         html_metadata: &HtmlMetadata,
@@ -71,8 +72,8 @@ impl<GC: GitCommand> BuildCommand<GC> {
             .collect::<ScrapResult<Vec<PathBuf>>>()?;
 
         let scraps_with_commited_ts = paths
-            .iter()
-            .map(|path| self.to_scrap_by_path(base_url, path))
+            .into_par_iter()
+            .map(|path| self.to_scrap_by_path(git_command, base_url, &path))
             .collect::<ScrapResult<Vec<ScrapWithCommitedTs>>>()
             .map(|s| ScrapsWithCommitedTs::new(&s))?;
         let scraps = scraps_with_commited_ts.to_scraps();
@@ -163,7 +164,12 @@ impl<GC: GitCommand> BuildCommand<GC> {
         Ok(dir_entry.path())
     }
 
-    fn to_scrap_by_path(&self, base_url: &Url, path: &PathBuf) -> ScrapResult<ScrapWithCommitedTs> {
+    fn to_scrap_by_path<GC: GitCommand + Send + Sync + Copy>(
+        &self,
+        git_command: GC,
+        base_url: &Url,
+        path: &PathBuf,
+    ) -> ScrapResult<ScrapWithCommitedTs> {
         let span_convert_to_scrap = span!(Level::INFO, "convert_to_scrap").entered();
         let file_prefix = path
             .file_stem()
@@ -172,7 +178,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
             .and_then(|fp| fp.ok_or(ScrapError::FileLoad))?;
         let md_text = fs::read_to_string(path).context(ScrapError::FileLoad)?;
         let scrap = Scrap::new(base_url, file_prefix, &md_text);
-        let commited_ts = self.git_command.commited_ts(path)?;
+        let commited_ts = git_command.commited_ts(path)?;
         span_convert_to_scrap.exit();
 
         Ok(ScrapWithCommitedTs::new(&scrap, &commited_ts))
@@ -191,17 +197,11 @@ mod tests {
         tests::{DirResource, FileResource},
     };
 
-    fn setup_command(test_resource_path: &Path) -> BuildCommand<GitCommandTest> {
-        let git_command = GitCommandTest::new();
+    fn setup_command(test_resource_path: &Path) -> BuildCommand {
         let scraps_dir_path = test_resource_path.join("scraps");
         let static_dir_path = test_resource_path.join("static");
         let public_dir_path = test_resource_path.join("public");
-        BuildCommand::new(
-            git_command,
-            &scraps_dir_path,
-            &static_dir_path,
-            &public_dir_path,
-        )
+        BuildCommand::new(&scraps_dir_path, &static_dir_path, &public_dir_path)
     }
 
     #[test]
@@ -211,6 +211,7 @@ mod tests {
         let command = setup_command(&test_resource_path);
 
         // run args
+        let git_command = GitCommandTest::new();
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
         let html_metadata = &HtmlMetadata::new(
@@ -245,6 +246,7 @@ mod tests {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
                     let result1 = command.run(
+                        git_command,
                         &base_url,
                         timezone,
                         html_metadata,
@@ -280,6 +282,7 @@ mod tests {
         let command = setup_command(&test_resource_path);
 
         // run args
+        let git_command = GitCommandTest::new();
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
         let html_metadata = &HtmlMetadata::new(
@@ -310,6 +313,7 @@ mod tests {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
                     let result1 = command.run(
+                        git_command,
                         &base_url,
                         timezone,
                         html_metadata,

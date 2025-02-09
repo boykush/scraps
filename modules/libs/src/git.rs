@@ -10,6 +10,7 @@ pub trait GitCommand {
     fn commited_ts(&self, path: &Path) -> ScrapResult<Option<i64>>;
 }
 
+#[derive(Clone, Copy)]
 pub struct GitCommandImpl {}
 
 impl GitCommandImpl {
@@ -54,6 +55,7 @@ impl GitCommand for GitCommandImpl {
 pub mod tests {
     use super::*;
 
+    #[derive(Clone, Copy)]
     pub struct GitCommandTest {}
 
     impl GitCommandTest {
