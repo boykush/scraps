@@ -164,6 +164,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
     }
 
     fn to_scrap_by_path(&self, base_url: &Url, path: &PathBuf) -> ScrapResult<ScrapWithCommitedTs> {
+        let span_convert_to_scrap = span!(Level::INFO, "convert_to_scrap").entered();
         let file_prefix = path
             .file_stem()
             .ok_or(ScrapError::FileLoad)
@@ -172,6 +173,7 @@ impl<GC: GitCommand> BuildCommand<GC> {
         let md_text = fs::read_to_string(path).context(ScrapError::FileLoad)?;
         let scrap = Scrap::new(base_url, file_prefix, &md_text);
         let commited_ts = self.git_command.commited_ts(path)?;
+        span_convert_to_scrap.exit();
 
         Ok(ScrapWithCommitedTs::new(&scrap, &commited_ts))
     }
