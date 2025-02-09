@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 ## Context
-[ index page | scrap page | tag page | command line ]
+- [ ] Add a label that begins with `context:`
 
 ## Idea
 Describe the requirements or requests for features to be developed.
