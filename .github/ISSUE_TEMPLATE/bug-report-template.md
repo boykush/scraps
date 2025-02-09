@@ -8,6 +8,11 @@ assignees: ''
 ---
 
 ## Context
-[ index page | scrap page | tag page | command line ]
+- [ ] Add a label that begins with `context:`
+
+## Version
+Please run the `scraps -V` command.
+```
+```
 
 ## Describe the bug
