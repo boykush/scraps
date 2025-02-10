@@ -4,7 +4,7 @@
 
 ##  What is the Scraps?
 
-Scraps is a static site generator that generates wiki-style links from a set of markdown files..
+Scraps is a static site generator that writes wiki-style links from a set of markdown files.
 
 ## Getting Started
 
