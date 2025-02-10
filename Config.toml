@@ -1,6 +1,6 @@
 base_url = "https://boykush.github.io/scraps/"
 title = "Scraps Doc"
-description = "A static site generator that builds a wiki from a set of markdown files."
+description = "A static site generator that generates wiki-style links from a set of markdown files."
 favicon = "https://github.com/boykush/scraps/blob/main/assets/logo.png?raw=true"
 timezone = "Asia/Tokyo"
 build_search_index = true
