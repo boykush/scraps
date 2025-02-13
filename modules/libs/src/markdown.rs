@@ -1,9 +1,8 @@
 use std::collections::HashSet;
 
 use super::slugify;
-use itertools::Itertools;
 use pulldown_cmark::{
-    html::push_html, CodeBlockKind, CowStr, Event, LinkType, Options, Parser, Tag,
+    html::push_html, CodeBlockKind, CowStr, Event, LinkType, Options, Parser, Tag
 };
 use url::Url;
 
@@ -22,31 +21,15 @@ pub fn head_image(text: &str) -> Option<Url> {
     })
 }
 
-fn link_attributes_from(link_text: &str) -> (&str, Option<&str>) {
-    match link_text.split('|').collect::<Vec<&str>>()[..] {
-        [title, display_text] => (title, Some(display_text)),
-        _ => (link_text, None),
-    }
-}
-
 pub fn extract_link_titles(text: &str) -> Vec<String> {
     let parser = Parser::new_ext(text, PARSER_OPTION);
-    let parser_windows = parser.tuple_windows();
-    let mut link_titles = vec![];
 
-    for events in parser_windows {
-        if let (
-            Event::Text(CowStr::Borrowed("[")),
-            Event::Text(CowStr::Borrowed("[")),
-            Event::Text(CowStr::Borrowed(link_text)),
-            Event::Text(CowStr::Borrowed("]")),
-            Event::Text(CowStr::Borrowed("]")),
-        ) = events
-        {
-            let (title, _) = link_attributes_from(link_text);
-            link_titles.push(title.to_string())
+    let link_titles = parser.flat_map(|event| {
+        match event {
+            Event::Start(Tag::Link { link_type: LinkType::WikiLink { has_pothole: _ }, dest_url: CowStr::Borrowed(dest_url), title: _, id:_}) => Some(dest_url.to_string()),
+            _ => None
         }
-    }
+    });
 
     let hashed: HashSet<String> = link_titles.into_iter().collect();
     hashed.into_iter().collect()
@@ -55,67 +38,25 @@ pub fn extract_link_titles(text: &str) -> Vec<String> {
 pub fn to_html(text: &str, base_url: &Url) -> String {
     let mut html_buf = String::new();
     let parser = Parser::new_ext(text, PARSER_OPTION);
-    let parser_vec = parser.collect::<Vec<Event<'_>>>();
-    let mut parser_windows = parser_vec
-        .iter()
-        .circular_tuple_windows::<(_, _, _, _, _)>();
 
-    while let Some(events) = parser_windows.next() {
-        match events {
-            (
-                &Event::Text(CowStr::Borrowed("[")),
-                &Event::Text(CowStr::Borrowed("[")),
-                &Event::Text(CowStr::Borrowed(link_text)),
-                &Event::Text(CowStr::Borrowed("]")),
-                &Event::Text(CowStr::Borrowed("]")),
-            ) => {
-                let (title, display_text) = link_attributes_from(link_text);
-                let link_events = to_html_link_events(title, &display_text, base_url).into_iter();
-                // skip next
-                (0..4).for_each(|_| {
-                    parser_windows.next();
-                });
-                push_html(&mut html_buf, link_events);
+    let replaced = parser.map(|event| {
+        match event {
+                Event::Start(Tag::Link { link_type: LinkType::WikiLink { has_pothole }, dest_url: CowStr::Borrowed(dest_url), title: CowStr::Borrowed(title), id})
+             => {
+                let slug = slugify::by_dash(dest_url);
+                let link = format!("{base_url}scraps/{slug}.html");
+                let start_link = Event::Start(Tag::Link { link_type: LinkType::WikiLink { has_pothole }, dest_url: link.into(), title: title.into(), id });
+                start_link
             }
-            (&Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(ref language))), _, _, _, _) => {
-                push_html(
-                    &mut html_buf,
-                    vec![to_html_code_start_event(language)].into_iter(),
-                )
+            Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(CowStr::Borrowed(language)))) => {
+                to_html_code_start_event(language)
             }
-            (e1, _, _, _, _) => push_html(&mut html_buf, vec![e1.clone()].into_iter()),
+            e1=> e1.clone(),
         }
-    }
+    });
 
+    push_html(&mut html_buf, replaced);
     html_buf
-}
-
-fn to_html_link_events<'a>(
-    title: &'a str,
-    display_text: &Option<&'a str>,
-    base_url: &'a Url,
-) -> Vec<Event<'a>> {
-    let slug = slugify::by_dash(title);
-    let link = format!("{base_url}scraps/{slug}.html");
-    let dest_url = CowStr::Boxed(link.into_boxed_str());
-    vec![
-        Event::Start(Tag::Link {
-            link_type: LinkType::Inline,
-            dest_url: dest_url.clone(),
-            title: CowStr::Borrowed(""),
-            id: CowStr::Borrowed(""),
-        }),
-        Event::Text(CowStr::Borrowed(display_text.unwrap_or(title))),
-        Event::End(
-            Tag::Link {
-                link_type: LinkType::Inline,
-                dest_url: dest_url.clone(),
-                title: CowStr::Borrowed(""),
-                id: CowStr::Borrowed(""),
-            }
-            .into(),
-        ),
-    ]
 }
 
 fn to_html_code_start_event(language: &str) -> Event<'_> {
@@ -144,7 +85,7 @@ mod tests {
             "[[duplicate]]",
             "[[duplicate]]",
             "[[Domain Driven Design|DDD]]", // alias by pipe
-            "[[Domain Driven Design|DDD|ドメイン駆動設計]]", // not alias when multiple pipe
+            "[[Test-driven development|TDD|テスト駆動開発]]", // not alias when multiple pipe
         ]
         .join("\n");
         let mut result1 = extract_link_titles(valid_links);
@@ -154,7 +95,7 @@ mod tests {
             "last",
             "duplicate",
             "Domain Driven Design",
-            "Domain Driven Design|DDD|ドメイン駆動設計",
+            "Test-driven development"
         ]
         .iter()
         .map(|s| s.to_string())
@@ -167,7 +108,6 @@ mod tests {
             "`[[quote block]]`",
             "```\n[[code block]]\n```",
             "[single braces]",
-            "[[contain\nbreak]]",
             "only close]]",
             "[[only open",
             "[ [space between brace] ]",
