@@ -33,9 +33,8 @@ pub enum SubCommands {
     Template {
         #[command(subcommand)]
         template_command: TemplateSubCommands,
-    }
+    },
 }
-
 
 #[derive(Subcommand)]
 pub enum TemplateSubCommands {
@@ -43,7 +42,7 @@ pub enum TemplateSubCommands {
     Generate {
         #[command(flatten)]
         template: Template,
-    }
+    },
 }
 
 #[derive(Args, Clone)]

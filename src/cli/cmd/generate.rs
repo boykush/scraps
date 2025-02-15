@@ -2,7 +2,7 @@ use std::path::Path;
 
 use scraps_libs::error::ScrapResult;
 
-use crate::generate::cmd::GenerateCommand;
+use crate::{cli::config::scrap_config::ScrapConfig, generate::cmd::GenerateCommand};
 
 pub fn run(template_name: &str) -> ScrapResult<()> {
     let templates_dir_path = Path::new("templates");
@@ -10,7 +10,9 @@ pub fn run(template_name: &str) -> ScrapResult<()> {
 
     let command = GenerateCommand::new(scraps_dir_path, templates_dir_path);
 
-    command.run(template_name)?;
+    let config = ScrapConfig::new()?;
+    let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
+    command.run(template_name, &timezone)?;
 
     Ok(())
 }

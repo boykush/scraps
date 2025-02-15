@@ -3,6 +3,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use chrono_tz::Tz;
 use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
 
 use super::markdown_tera;
@@ -20,8 +21,8 @@ impl MarkdownRender {
         }
     }
 
-    pub fn render_from_template(&self, template_name: &str) -> ScrapResult<()> {
-        let (tera, context) =
+    pub fn render_from_template(&self, template_name: &str, timezone: &Tz) -> ScrapResult<()> {
+        let (tera, mut context) =
             markdown_tera::init(self.templates_dir_path.join("*.md").to_str().unwrap())?;
         let template_file_name = format!("{}.md", template_name);
         let template = if tera.get_template_names().any(|t| t == template_file_name) {
@@ -29,6 +30,9 @@ impl MarkdownRender {
         } else {
             Err(ScrapError::NotFoundTemplate)
         }?;
+
+        context.insert("timezone", &timezone);
+
         let wtr = File::create(self.scraps_dir_path.join(&template_file_name))
             .context(ScrapError::PublicRender)?;
         tera.render_to(template, &context, wtr)
