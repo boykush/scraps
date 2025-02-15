@@ -1,7 +1,7 @@
 use std::{
     fs::{self, DirEntry},
     marker::{Send, Sync},
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
 use crate::build::css::render::CSSRender;
@@ -41,14 +41,14 @@ pub struct BuildCommand {
 
 impl BuildCommand {
     pub fn new(
-        scraps_dir_path: &PathBuf,
-        static_dir_path: &PathBuf,
-        public_dir_path: &PathBuf,
+        scraps_dir_path: &Path,
+        static_dir_path: &Path,
+        public_dir_path: &Path,
     ) -> BuildCommand {
         BuildCommand {
-            scraps_dir_path: scraps_dir_path.to_owned(),
-            static_dir_path: static_dir_path.to_owned(),
-            public_dir_path: public_dir_path.to_owned(),
+            scraps_dir_path: scraps_dir_path.to_path_buf(),
+            static_dir_path: static_dir_path.to_path_buf(),
+            public_dir_path: public_dir_path.to_path_buf(),
         }
     }
     pub fn run<GC: GitCommand + Send + Sync + Copy>(

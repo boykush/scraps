@@ -1,4 +1,7 @@
-use std::{net::SocketAddr, path::PathBuf};
+use std::{
+    net::SocketAddr,
+    path::{Path, PathBuf},
+};
 
 use crate::serve::service::ScrapsService;
 use hyper::server::conn::http1;
@@ -12,9 +15,9 @@ pub struct ServeCommand {
 }
 
 impl ServeCommand {
-    pub fn new(public_dir_path: &PathBuf) -> ServeCommand {
+    pub fn new(public_dir_path: &Path) -> ServeCommand {
         ServeCommand {
-            public_dir_path: public_dir_path.to_owned(),
+            public_dir_path: public_dir_path.to_path_buf(),
         }
     }
 

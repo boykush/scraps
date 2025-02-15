@@ -1,4 +1,4 @@
-use std::{net::SocketAddr, path::PathBuf};
+use std::{net::SocketAddr, path::Path};
 
 use url::Url;
 
@@ -24,10 +24,10 @@ pub fn run() -> ScrapResult<()> {
 
     // build command
     let git_command = GitCommandImpl::new();
-    let scraps_dir_path = PathBuf::from("scraps");
-    let static_dir_path = PathBuf::from("static");
-    let public_dir_path = PathBuf::from("public");
-    let build_command = BuildCommand::new(&scraps_dir_path, &static_dir_path, &public_dir_path);
+    let scraps_dir_path = Path::new("scraps");
+    let static_dir_path = Path::new("static");
+    let public_dir_path = Path::new("public");
+    let build_command = BuildCommand::new(scraps_dir_path, static_dir_path, public_dir_path);
     let config = ScrapConfig::new()?;
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
     let html_metadata = HtmlMetadata::new(&config.title, &config.description, &config.favicon);
@@ -56,7 +56,7 @@ pub fn run() -> ScrapResult<()> {
     );
 
     // serve command
-    let serve_command = ServeCommand::new(&public_dir_path);
+    let serve_command = ServeCommand::new(public_dir_path);
     let serve_result = serve_command.run(&addr);
 
     // merge result

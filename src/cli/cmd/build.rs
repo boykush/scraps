@@ -1,6 +1,6 @@
 use clap_verbosity_flag::{log, Verbosity, WarnLevel};
 use colored::Colorize;
-use std::path::PathBuf;
+use std::path::Path;
 use std::time::Instant;
 use tracing::{span, Level};
 use tracing_subscriber::fmt::format::FmtSpan;
@@ -36,10 +36,10 @@ pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapResult<()> {
     let span_run = span!(Level::INFO, "run").entered();
 
     let git_command = GitCommandImpl::new();
-    let scraps_dir_path = PathBuf::from("scraps");
-    let static_dir_path = PathBuf::from("static");
-    let public_dir_path = PathBuf::from("public");
-    let command = BuildCommand::new(&scraps_dir_path, &static_dir_path, &public_dir_path);
+    let scraps_dir_path = Path::new("scraps");
+    let static_dir_path = Path::new("static");
+    let public_dir_path = Path::new("public");
+    let command = BuildCommand::new(scraps_dir_path, static_dir_path, public_dir_path);
 
     let config = ScrapConfig::new()?;
     // Automatically append a trailing slash to URLs
