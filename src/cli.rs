@@ -1,4 +1,4 @@
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 use clap_verbosity_flag::{Verbosity, WarnLevel};
 
 pub mod cmd;
@@ -23,9 +23,36 @@ pub enum SubCommands {
     #[command(about = "Init scraps project")]
     Init { project_name: String },
 
-    #[command(about = "Serve the site with build scraps.")]
+    #[command(about = "Serve the site with build scraps")]
     Serve,
 
     #[command(about = "List a tags")]
     Tag,
+
+    #[command(about = "Template of scraps")]
+    Template {
+        #[command(subcommand)]
+        template_command: TemplateSubCommands,
+    }
+}
+
+
+#[derive(Subcommand)]
+pub enum TemplateSubCommands {
+    #[command(about = "Generate scrap from template")]
+    Generate {
+        #[command(flatten)]
+        template: Template,
+    }
+}
+
+#[derive(Args, Clone)]
+pub struct Template {
+    template_name: String,
+}
+
+impl Template {
+    pub fn name(&self) -> &str {
+        &self.template_name
+    }
 }

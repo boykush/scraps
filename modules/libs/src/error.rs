@@ -16,6 +16,9 @@ pub enum ScrapError {
     #[error("Failed when render to html")]
     PublicRender,
 
+    #[error("Not found template for generate")]
+    NotFoundTemplate,
+
     #[error("Not display data on cli")]
     CliDisplay,
 
