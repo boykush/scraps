@@ -1,1 +1,4 @@
-## {{ now() | date(timezone=timezone) }}
++++
+[template]
+title = "{{ now() | date(timezone=timezone) }}"
++++

@@ -4,7 +4,7 @@ use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq)]
 pub enum ScrapError {
-    #[error("Not load config")]
+    #[error("Failed when load config")]
     ConfigLoad,
 
     #[error("Not load file")]
@@ -15,6 +15,9 @@ pub enum ScrapError {
 
     #[error("Failed when render to html")]
     PublicRender,
+
+    #[error("Failed when load scrap metadata")]
+    ScrapMetadataLoad,
 
     #[error("Not found template for generate")]
     NotFoundTemplate,

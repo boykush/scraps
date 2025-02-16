@@ -44,13 +44,13 @@ mod tests {
         // template
         let template_md_path = templates_dir_path.join(format!("{}.md", template_name));
         let resource_template_md = FileResource::new(&template_md_path);
-        let template_bytes =
-            "{{ \"2019-09-19T15:00:00.000Z\" | date(timezone=timezone) }}".as_bytes();
 
         // scraps
         let resource_scraps_dir = DirResource::new(&scraps_dir_path);
-        let scraps_md_path = scraps_dir_path.join(format!("{}.md", template_name));
+        let scraps_md_path = scraps_dir_path.join("test_title.md");
 
+        let template_bytes =
+            "+++\n[template]\ntitle = \"test_title\"\n+++\n\n{{ \"2019-09-19T15:00:00.000Z\" | date(timezone=timezone) }}".as_bytes();
         resource_scraps_dir.run(|| {
             resource_template_md.run(template_bytes, || {
                 // run
@@ -59,7 +59,10 @@ mod tests {
 
                 // assert
                 let result = fs::read_to_string(scraps_md_path);
-                assert_eq!(result.unwrap(), "2019-09-20".to_string())
+                assert_eq!(
+                    result.unwrap(),
+                    "+++\n[template]\ntitle = \"test_title\"\n+++\n\n2019-09-20"
+                )
             });
         });
     }

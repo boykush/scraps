@@ -4,7 +4,10 @@ use std::{
 };
 
 use chrono_tz::Tz;
-use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
+use scraps_libs::{
+    error::{anyhow::Context, ScrapError, ScrapResult},
+    markdown,
+};
 
 use super::markdown_tera;
 
@@ -33,7 +36,14 @@ impl MarkdownRender {
 
         context.insert("timezone", &timezone);
 
-        let wtr = File::create(self.scraps_dir_path.join(&template_file_name))
+        let text = tera
+            .render(template, &context)
+            .context(ScrapError::PublicRender)?;
+        let metadata_text = markdown::extractor::extract_metadata_text(&text);
+        let metadata = scraps_libs::metadata::ScrapMetadata::new(&metadata_text)?;
+        let scrap_file_name = format!("{}.md", metadata.template.title);
+
+        let wtr = File::create(self.scraps_dir_path.join(&scrap_file_name))
             .context(ScrapError::PublicRender)?;
         tera.render_to(template, &context, wtr)
             .context(ScrapError::PublicRender)
