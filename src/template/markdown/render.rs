@@ -49,10 +49,12 @@ impl MarkdownRender {
                 let text = tera
                     .render(template, &context)
                     .context(ScrapError::PublicRender)?;
-                let metadata_text = markdown::extractor::extract_metadata_text(&text);
-                let metadata = scraps_libs::metadata::ScrapMetadata::new(&metadata_text)?;
-                metadata
-                    .template
+                let metadata_text = markdown::extract::metadata_text(&text);
+                let metadata_result = metadata_text
+                    .map(|t| scraps_libs::metadata::ScrapMetadata::new(&t))
+                    .transpose()?;
+                metadata_result
+                    .and_then(|m| m.template)
                     .map(|t| Ok(t.title))
                     .unwrap_or(Err(ScrapError::RequiredTemplateTitle))
             })?;

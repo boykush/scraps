@@ -4,7 +4,7 @@ use pulldown_cmark::{
 };
 use url::Url;
 
-pub mod extractor;
+pub mod extract;
 
 const PARSER_OPTION: Options = Options::all();
 
