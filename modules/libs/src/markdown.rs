@@ -54,7 +54,7 @@ fn to_html_code_start_event(language: &str) -> Event<'_> {
 
 #[cfg(test)]
 mod tests {
-    use super::*; 
+    use super::*;
 
     #[test]
     fn it_to_html_code() {
