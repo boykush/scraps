@@ -24,7 +24,12 @@ impl MarkdownRender {
         }
     }
 
-    pub fn render_from_template(&self, template_name: &str, input_scrap_title: &Option<Title>, timezone: &Tz) -> ScrapResult<()> {
+    pub fn render_from_template(
+        &self,
+        template_name: &str,
+        input_scrap_title: &Option<Title>,
+        timezone: &Tz,
+    ) -> ScrapResult<()> {
         let (tera, mut context) =
             markdown_tera::init(self.templates_dir_path.join("*.md").to_str().unwrap())?;
         let template_file_name = format!("{}.md", template_name);
@@ -37,14 +42,15 @@ impl MarkdownRender {
         context.insert("timezone", &timezone);
 
         let scrap_title = input_scrap_title.clone().map(|t| Ok(t.to_string())).unwrap_or({
-                let text = tera
-                    .render(template, &context)
-                    .context(ScrapError::PublicRender)?;
-                let metadata_text = markdown::extractor::extract_metadata_text(&text);
-                let metadata = scraps_libs::metadata::ScrapMetadata::new(&metadata_text)?;
-                metadata.template.map(|t| Ok(t.title)).unwrap_or(
-                    Err(ScrapError::RequiredTemplateTitle)
-                )
+            let text = tera
+                .render(template, &context)
+                .context(ScrapError::PublicRender)?;
+            let metadata_text = markdown::extractor::extract_metadata_text(&text);
+            let metadata = scraps_libs::metadata::ScrapMetadata::new(&metadata_text)?;
+            metadata
+                .template
+                .map(|t| Ok(t.title))
+                .unwrap_or(Err(ScrapError::RequiredTemplateTitle))
         })?;
         let scrap_file_name = format!("{}.md", scrap_title);
 

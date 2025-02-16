@@ -1,9 +1,9 @@
 mod build;
 mod cli;
-mod generate;
 mod init;
 mod serve;
 mod tag;
+mod template;
 
 use clap::Parser;
 use scraps_libs::error::ScrapResult;
@@ -19,8 +19,8 @@ fn main() -> ScrapResult<()> {
         cli::SubCommands::Template {
             template_command: template_commands,
         } => match template_commands {
-            cli::TemplateSubCommands::Generate { template,  } => {
-                cli::cmd::generate::run(template.name(), &template.title())
+            cli::TemplateSubCommands::Generate { template } => {
+                cli::cmd::template::generate::run(template.name(), &template.title())
             }
         },
     }

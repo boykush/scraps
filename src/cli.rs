@@ -43,7 +43,6 @@ pub enum TemplateSubCommands {
     Generate {
         #[command(flatten)]
         template: Template,
-
     },
 }
 
