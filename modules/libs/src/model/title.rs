@@ -11,7 +11,7 @@ pub struct Title {
 impl Title {
     pub fn new(title: &str) -> Title {
         Title {
-            v: title.to_owned(),
+            v: title.to_string(),
             slug: Slug::new(title),
         }
     }

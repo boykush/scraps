@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub struct ScrapMetadata {
-    pub template: TemplateMetadata,
+    pub template: Option<TemplateMetadata>,
 }
 
 impl ScrapMetadata {

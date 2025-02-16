@@ -1,10 +1,10 @@
 use std::path::Path;
 
-use scraps_libs::error::ScrapResult;
+use scraps_libs::{error::ScrapResult, model::title::Title};
 
 use crate::{cli::config::scrap_config::ScrapConfig, generate::cmd::GenerateCommand};
 
-pub fn run(template_name: &str) -> ScrapResult<()> {
+pub fn run(template_name: &str, scrap_title: &Option<Title>) -> ScrapResult<()> {
     let templates_dir_path = Path::new("templates");
     let scraps_dir_path = Path::new("scraps");
 
@@ -12,7 +12,7 @@ pub fn run(template_name: &str) -> ScrapResult<()> {
 
     let config = ScrapConfig::new()?;
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
-    command.run(template_name, &timezone)?;
+    command.run(template_name, scrap_title, &timezone)?;
 
     Ok(())
 }

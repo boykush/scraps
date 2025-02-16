@@ -19,6 +19,9 @@ pub enum ScrapError {
     #[error("Failed when load scrap metadata")]
     ScrapMetadataLoad,
 
+    #[error("Template title are required to be entered via the command line or defined in the template file.")]
+    RequiredTemplateTitle,
+
     #[error("Not found template for generate")]
     NotFoundTemplate,
 

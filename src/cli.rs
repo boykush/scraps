@@ -1,5 +1,6 @@
 use clap::{Args, Parser, Subcommand};
 use clap_verbosity_flag::{Verbosity, WarnLevel};
+use scraps_libs::model::title::Title;
 
 pub mod cmd;
 mod config;
@@ -42,16 +43,24 @@ pub enum TemplateSubCommands {
     Generate {
         #[command(flatten)]
         template: Template,
+
     },
 }
 
 #[derive(Args, Clone)]
 pub struct Template {
     template_name: String,
+
+    #[arg(short = 't', long, help = "This overrides the template metadata.")]
+    scrap_title: Option<String>,
 }
 
 impl Template {
     pub fn name(&self) -> &str {
         &self.template_name
+    }
+
+    pub fn title(&self) -> Option<Title> {
+        self.scrap_title.clone().map(|s| Title::new(s.as_str()))
     }
 }
