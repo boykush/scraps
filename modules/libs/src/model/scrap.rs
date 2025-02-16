@@ -14,11 +14,11 @@ pub struct Scrap {
 
 impl Scrap {
     pub fn new(base_url: &Url, title: &str, text: &str) -> Scrap {
-        let links = markdown::extract_link_titles(text)
+        let links = markdown::extractor::extract_link_titles(text)
             .iter()
             .map(|t| Title::new(t))
             .collect();
-        let thumbnail = markdown::head_image(text);
+        let thumbnail = markdown::extractor::extract_head_image(text);
         let html_content = markdown::to_html(text, base_url);
 
         Scrap {
