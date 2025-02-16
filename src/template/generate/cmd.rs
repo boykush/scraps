@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use chrono_tz::Tz;
 use scraps_libs::{error::ScrapResult, model::title::Title};
 
-use super::markdown::render::MarkdownRender;
+use crate::template::markdown::render::MarkdownRender;
 
 pub struct GenerateCommand {
     scraps_dir_path: PathBuf,

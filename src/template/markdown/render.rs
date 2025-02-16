@@ -6,7 +6,8 @@ use std::{
 use chrono_tz::Tz;
 use scraps_libs::{
     error::{anyhow::Context, ScrapError, ScrapResult},
-    markdown, model::title::Title,
+    markdown,
+    model::title::Title,
 };
 
 use super::markdown_tera;
@@ -41,17 +42,20 @@ impl MarkdownRender {
 
         context.insert("timezone", &timezone);
 
-        let scrap_title = input_scrap_title.clone().map(|t| Ok(t.to_string())).unwrap_or({
-            let text = tera
-                .render(template, &context)
-                .context(ScrapError::PublicRender)?;
-            let metadata_text = markdown::extractor::extract_metadata_text(&text);
-            let metadata = scraps_libs::metadata::ScrapMetadata::new(&metadata_text)?;
-            metadata
-                .template
-                .map(|t| Ok(t.title))
-                .unwrap_or(Err(ScrapError::RequiredTemplateTitle))
-        })?;
+        let scrap_title = input_scrap_title
+            .clone()
+            .map(|t| Ok(t.to_string()))
+            .unwrap_or({
+                let text = tera
+                    .render(template, &context)
+                    .context(ScrapError::PublicRender)?;
+                let metadata_text = markdown::extractor::extract_metadata_text(&text);
+                let metadata = scraps_libs::metadata::ScrapMetadata::new(&metadata_text)?;
+                metadata
+                    .template
+                    .map(|t| Ok(t.title))
+                    .unwrap_or(Err(ScrapError::RequiredTemplateTitle))
+            })?;
         let scrap_file_name = format!("{}.md", scrap_title);
 
         let wtr = File::create(self.scraps_dir_path.join(&scrap_file_name))

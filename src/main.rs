@@ -22,6 +22,7 @@ fn main() -> ScrapResult<()> {
             cli::TemplateSubCommands::Generate { template } => {
                 cli::cmd::template::generate::run(template.name(), &template.title())
             }
+            cli::TemplateSubCommands::List => cli::cmd::template::list::run(),
         },
     }
 }

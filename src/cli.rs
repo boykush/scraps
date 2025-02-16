@@ -44,6 +44,9 @@ pub enum TemplateSubCommands {
         #[command(flatten)]
         template: Template,
     },
+
+    #[command(about = "List templates")]
+    List,
 }
 
 #[derive(Args, Clone)]

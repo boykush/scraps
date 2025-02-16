@@ -39,16 +39,16 @@ pub fn extract_link_titles(text: &str) -> Vec<String> {
 pub fn extract_metadata_text(text: &str) -> String {
     let mut metadata_text = String::new();
     let parser = Parser::new_ext(text, PARSER_OPTION);
-    let mut parser_windows = parser.tuple_windows::<(_, _, _)>();
+    let parser_windows = parser.tuple_windows::<(_, _, _)>();
 
-    while let Some(events) = parser_windows.next() {
-        match events {
-            (
-                Event::Start(Tag::MetadataBlock(MetadataBlockKind::PlusesStyle)),
-                Event::Text(CowStr::Borrowed(t)),
-                Event::End(TagEnd::MetadataBlock(MetadataBlockKind::PlusesStyle)),
-            ) => metadata_text.push_str(t),
-            _ => (),
+    for events in parser_windows {
+        if let (
+            Event::Start(Tag::MetadataBlock(MetadataBlockKind::PlusesStyle)),
+            Event::Text(CowStr::Borrowed(t)),
+            Event::End(TagEnd::MetadataBlock(MetadataBlockKind::PlusesStyle)),
+        ) = events
+        {
+            metadata_text.push_str(t)
         }
     }
 
