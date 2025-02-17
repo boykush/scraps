@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 
-use itertools::Itertools;
-use pulldown_cmark::{CowStr, Event, LinkType, MetadataBlockKind, Options, Parser, Tag, TagEnd};
+use pulldown_cmark::{CowStr, Event, LinkType, Options, Parser, Tag};
 use url::Url;
 
 const PARSER_OPTION: Options = Options::all();
@@ -34,20 +33,6 @@ pub fn link_titles(text: &str) -> Vec<String> {
 
     let hashed: HashSet<String> = link_titles.into_iter().collect();
     hashed.into_iter().collect()
-}
-
-pub fn metadata_text(text: &str) -> Option<String> {
-    let parser = Parser::new_ext(text, PARSER_OPTION);
-    let mut parser_windows = parser.tuple_windows::<(_, _, _)>();
-
-    parser_windows.find_map(|events| match events {
-        (
-            Event::Start(Tag::MetadataBlock(MetadataBlockKind::PlusesStyle)),
-            Event::Text(CowStr::Borrowed(t)),
-            Event::End(TagEnd::MetadataBlock(MetadataBlockKind::PlusesStyle)),
-        ) => Some(t.to_string()),
-        _ => None,
-    })
 }
 
 #[cfg(test)]
@@ -104,18 +89,5 @@ mod tests {
         let result2 = link_titles(invalid_links);
 
         assert_eq!(result2, Vec::<&str>::new());
-    }
-
-    #[test]
-    fn it_metadata_text() {
-        let has_metadata = "+++\n[template]\ntitle = \"title\"\n+++\n\n## Scrap";
-
-        let result1 = metadata_text(&has_metadata);
-        assert_eq!(result1, Some("[template]\ntitle = \"title\"\n".to_string()));
-
-        let has_not_metadata = "+++\ntitle = \"title\"\n\n## Scrap";
-
-        let result2 = metadata_text(&has_not_metadata);
-        assert_eq!(result2, None);
     }
 }

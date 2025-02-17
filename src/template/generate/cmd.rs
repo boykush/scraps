@@ -57,7 +57,7 @@ mod tests {
         let scraps_md_path = scraps_dir_path.join("test_title.md");
 
         let template_bytes =
-            "+++\n[template]\ntitle = \"test_title\"\n+++\n\n{{ \"2019-09-19T15:00:00.000Z\" | date(timezone=timezone) }}".as_bytes();
+            "+++\ntitle = \"test_title\"\n+++\n\n{{ \"2019-09-19T15:00:00.000Z\" | date(timezone=timezone) }}".as_bytes();
         resource_scraps_dir.run(|| {
             resource_template_md.run(template_bytes, || {
                 // run
@@ -68,10 +68,7 @@ mod tests {
 
                 // assert
                 let result = fs::read_to_string(scraps_md_path);
-                assert_eq!(
-                    result.unwrap(),
-                    "+++\n[template]\ntitle = \"test_title\"\n+++\n\n2019-09-20"
-                )
+                assert_eq!(result.unwrap(), "\n2019-09-20")
             });
         });
     }
@@ -98,7 +95,7 @@ mod tests {
             scraps_dir_path.join(format!("{}.md", template_title.as_ref().unwrap()));
 
         let template_bytes =
-            "+++\n[template]\ntitle = \"test_title\"\n+++\n\n{{ \"2019-09-19T15:00:00.000Z\" | date(timezone=timezone) }}".as_bytes();
+            "+++\ntitle = \"test_title\"\n+++\n\n{{ \"2019-09-19T15:00:00.000Z\" | date(timezone=timezone) }}".as_bytes();
         resource_scraps_dir.run(|| {
             resource_template_md.run(template_bytes, || {
                 // run
@@ -109,10 +106,7 @@ mod tests {
 
                 // assert
                 let result = fs::read_to_string(scraps_md_path);
-                assert_eq!(
-                    result.unwrap(),
-                    "+++\n[template]\ntitle = \"test_title\"\n+++\n\n2019-09-20"
-                )
+                assert_eq!(result.unwrap(), "\n2019-09-20")
             });
         });
     }

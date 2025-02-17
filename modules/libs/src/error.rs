@@ -16,8 +16,8 @@ pub enum ScrapError {
     #[error("Failed when render to html")]
     PublicRender,
 
-    #[error("Failed when load scrap metadata")]
-    ScrapMetadataLoad,
+    #[error("Failed when load template metadata")]
+    TemplateMetadataLoad,
 
     #[error("Template title are required to be entered via the command line or defined in the template file.")]
     RequiredTemplateTitle,

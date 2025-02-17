@@ -1,14 +1,17 @@
 use std::{
     fs::File,
+    io::Write,
     path::{Path, PathBuf},
 };
 
 use chrono_tz::Tz;
 use scraps_libs::{
     error::{anyhow::Context, ScrapError, ScrapResult},
-    markdown,
+    markdown::frontmatter,
     model::title::Title,
 };
+
+use crate::template::metadata::TemplateMetadata;
 
 use super::markdown_tera;
 
@@ -42,27 +45,29 @@ impl MarkdownRender {
 
         context.insert("timezone", &timezone);
 
+        let markdown_text = tera
+            .render(template, &context)
+            .context(ScrapError::PublicRender)?;
+
         let scrap_title = input_scrap_title
             .clone()
             .map(|t| Ok(t.to_string()))
             .unwrap_or({
-                let text = tera
-                    .render(template, &context)
-                    .context(ScrapError::PublicRender)?;
-                let metadata_text = markdown::extract::metadata_text(&text);
+                let metadata_text = frontmatter::get_metadata_text(&markdown_text);
                 let metadata_result = metadata_text
-                    .map(|t| scraps_libs::metadata::ScrapMetadata::new(&t))
+                    .map(|t| TemplateMetadata::new(&t))
                     .transpose()?;
                 metadata_result
-                    .and_then(|m| m.template)
                     .map(|t| Ok(t.title))
                     .unwrap_or(Err(ScrapError::RequiredTemplateTitle))
             })?;
         let scrap_file_name = format!("{}.md", scrap_title);
+        let ignored_metadata_text = frontmatter::ignore_metadata(&markdown_text);
 
-        let wtr = File::create(self.scraps_dir_path.join(&scrap_file_name))
+        let mut wtr = File::create(self.scraps_dir_path.join(&scrap_file_name))
             .context(ScrapError::PublicRender)?;
-        tera.render_to(template, &context, wtr)
-            .context(ScrapError::PublicRender)
+        wtr.write(ignored_metadata_text.as_bytes())
+            .context(ScrapError::PublicRender)?;
+        wtr.flush().context(ScrapError::FileWrite)
     }
 }

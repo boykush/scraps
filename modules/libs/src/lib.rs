@@ -4,8 +4,6 @@ pub mod error;
 pub mod git;
 #[cfg(feature = "markdown")]
 pub mod markdown;
-#[cfg(feature = "metadata")]
-pub mod metadata;
 #[cfg(feature = "model")]
 pub mod model;
 #[cfg(feature = "slugify")]
