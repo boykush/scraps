@@ -25,4 +25,4 @@ public
 └── main.css
 ```
 
-The next step is [[Serve]].
+The next step is [[serve command]].

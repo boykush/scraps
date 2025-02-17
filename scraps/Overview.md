@@ -11,9 +11,9 @@ Scraps is a static site generator that makes it easy to write internal links (Wi
 See the links for more details.
 
 1. [[Installation]] of Scraps.
-2. [[Init]] project.
+2. [[init command|Init]] project.
 3. Edit the [[Configuration]].
 4. Write Markdown files under the `/scraps` directory, referring to the [[Markdown Syntax]] and [[Internal Links]] pages.
-5. [[Build]] static site files.
-6. [[Serve]] the site for debugging.
+5. [[scraps build command|Build]] static site files.
+6. [[serve command|Serve]] the site for debugging.
 7. Deploy the site. for example, there's [[GitHub Pages]].
