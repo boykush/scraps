@@ -5,7 +5,7 @@ use url::Url;
 
 const PARSER_OPTION: Options = Options::all();
 
-pub fn extract_head_image(text: &str) -> Option<Url> {
+pub fn head_image(text: &str) -> Option<Url> {
     let mut parser = Parser::new_ext(text, PARSER_OPTION);
     parser.find_map(|event| match event {
         Event::Start(Tag::Image {
@@ -18,7 +18,7 @@ pub fn extract_head_image(text: &str) -> Option<Url> {
     })
 }
 
-pub fn extract_link_titles(text: &str) -> Vec<String> {
+pub fn link_titles(text: &str) -> Vec<String> {
     let parser = Parser::new_ext(text, PARSER_OPTION);
 
     let link_titles = parser.flat_map(|event| match event {
@@ -42,14 +42,14 @@ mod tests {
     #[test]
     fn it_head_image() {
         assert_eq!(
-            extract_head_image("![alt](https://example.com/image.png)"),
+            head_image("![alt](https://example.com/image.png)"),
             Some(Url::parse("https://example.com/image.png").unwrap())
         );
-        assert_eq!(extract_head_image("# header1"), None)
+        assert_eq!(head_image("# header1"), None)
     }
 
     #[test]
-    fn it_extract_link_titles() {
+    fn it_link_titles() {
         let valid_links = &[
             "[[head]]",
             "[[contain space]]",
@@ -60,7 +60,7 @@ mod tests {
             "[[Test-driven development|TDD|テスト駆動開発]]", // not alias when multiple pipe
         ]
         .join("\n");
-        let mut result1 = extract_link_titles(valid_links);
+        let mut result1 = link_titles(valid_links);
         let mut expected1 = [
             "head",
             "contain space",
@@ -86,7 +86,7 @@ mod tests {
             "[[]]", // empty title
         ]
         .join("\n");
-        let result2 = extract_link_titles(invalid_links);
+        let result2 = link_titles(invalid_links);
 
         assert_eq!(result2, Vec::<&str>::new());
     }
