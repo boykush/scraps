@@ -17,4 +17,4 @@ The output result will look like this.
 └── scraps
 ```
 
-The next step is [[scraps build command|Build]].
+The next step is [[build command|Build]].

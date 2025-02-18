@@ -33,6 +33,7 @@ Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 - [x] Init scraps project
 - [x] Serve on localhost
 - [x] List a tags
+- [x] Template to generate the scrap
 ### Deploy
 - [x] GitHub Pages
 
