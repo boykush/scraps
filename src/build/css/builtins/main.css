@@ -99,6 +99,7 @@ div.scrap .commited-date {
 
 div.scrap .content {
     margin: 32px 0;
+    line-height: 1.5;
 }
 
 div.scrap a {
