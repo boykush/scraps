@@ -1,4 +1,4 @@
-#[[Template]]
+#[[Templates]]
 
 ## Daily note
 Utilizes Tera's standard [now()](https://keats.github.io/tera/docs/#now) function, [date](https://keats.github.io/tera/docs/#date) filter, and Scraps' custom `timezone` variable.
@@ -22,6 +22,5 @@ title = "[Book] {{ get_env(name="TITLE") }}"
 
 When execute generate
 ```
-TITLE="Test-Driven Development By Example" COVER="https://m.media-amazon.com/images/I/71I1GcjT-IL._SY522_.jpg" cargo run template generate book
-
+TITLE="Test-Driven Development By Example" COVER="https://m.media-amazon.com/images/I/71I1GcjT-IL._SY522_.jpg" scraps template generate book
 ```

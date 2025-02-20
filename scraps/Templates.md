@@ -1,5 +1,3 @@
-#[[Template]]
-
 The template feature can be used by preparing Markdown files as templates under the `templates/` directory.
 
 This feature is implemented based on [Tera](https://github.com/Keats/tera), a template engine written in Rust. 
@@ -29,4 +27,4 @@ As an example, use it as the `timezone` argument in the [date](https://keats.git
 Please submit your extension requests to the [Issue](https://github.com/boykush/scraps/issues/new?template=enhancement-feature-template.md).
 
 ## Others
-For samples of templates using Tera, please refer to [[Template samples]].
+For samples of templates using Tera, please refer to [[Scraps templates]].

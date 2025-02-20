@@ -1,5 +1,3 @@
-#[[Getting Started]]
-
 Configuration is managed by `Config.toml` in the Scraps project.
 
 Only the `base_url` and `title` variables are required. Everything else is optional. All configuration variables used by Scraps and their default values are listed below.

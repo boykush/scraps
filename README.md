@@ -16,7 +16,7 @@
 
 Scraps is a static site generator that makes it easy to write internal links (Wiki links) in Markdown files.
 
-You can refer to the [Overview](https://boykush.github.io/scraps/scraps/overview.html) document to quickly begin using Scraps.
+You can refer to the [Getting Started](https://boykush.github.io/scraps/scraps/getting-started.html) document to quickly begin using Scraps.
 
 Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 

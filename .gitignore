@@ -2,3 +2,4 @@ target
 public
 Cargo.lock
 tests/resource
+scraps/.moxide.toml

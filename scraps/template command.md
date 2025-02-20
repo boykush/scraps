@@ -1,4 +1,4 @@
-#[[CLI Usage]] #[[Template]]
+#[[CLI Usage]]
 
 ```bash
 ❯ scraps template
@@ -17,7 +17,7 @@ title = "{{ now() | date(timezone=timezone) }}"
 +++
 ```
 
- For the features available in the template, please refer to [[Template feature]]. Sample templates is [[Template samples|here]]. 
+ For the features available in the template, please refer to [[Templates]]. Sample templates is [[Scraps templates|here]]. 
  
 You can check the templates added under `/templates` with the following command:
 ```bash
