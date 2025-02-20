@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <!-- Page title -->
+        
+            <title>Scraps Doc</title>
+            <meta property="og:title" content="Scraps Doc" />
+            <meta name="twitter:title" content="Scraps Doc" />
+        
+        <!-- Page description -->
+        
+            <meta name="description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta property="og:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta name="twitter:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+        
+        <!-- Page favicon -->
+        
+            <link rel="icon" type="image/png" href="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;logo.png?raw=true" />
+        
+        <!-- Rubik font -->
+        <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">
+        <!-- Noto Sans JP font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+        <!-- Code syntax highlight theme -->
+        <link href="https://unpkg.com/nord-highlightjs@0.1.0/dist/nord.css" rel="stylesheet" type="text/css" />
+        <!-- Style sheet -->
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;main.css">
+        
+        
+    </head>
+    <body>
+        <header>
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;">
+                <h1>Scraps Doc</h1>
+            </a>
+        </header>
+        <main>
+            
+    <div class="tag">
+        <h1 class="title">Content</h1>
+    </div>
+    
+    <ul class="scrap-links">
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/markdown-syntax.html">
+                <li class="item">
+                    <p class="title">Markdown Syntax</p>
+                    
+                        <p class="summary">#Content
+CommonMark specification
+Scraps supports Markdown syntax according to the CommonMark specification.
+Please refer to the documentation of the pulldown-cmark library used internally for more details.
+CommonMark specification - pulldown-cmark guide
+GitHub-flavored Markdown
+As an extension, GitHub-flavored Markdown is also supported. This includes features such as strikethrough, tables, and task lists.
+Strikethrough:
+Markdown
+~~This text is strikethrough.~~
+Result
+This text is strikethrough.
+Task Lists:
+Markdown
+- [x] Task 1
+- [ ] Task 2
+- [ ] Task 3
+
+Result
+
+
+Task 1
+
+Task 2
+
+Task 3
+
+Mermaid
+By specifying mermaid as the language for a code block, you can use Mermaid diagrams.
+Markdown
+
+```mermaid
+graph LR
+    A --- B
+    B--&gt;C[fa:fa-ban forbidden]
+    B--&gt;D(fa:fa-spinner);
+```
+
+Result
+graph LR
+    A --- B
+    B--&amp;gt;C[fa:fa-ban forbidden]
+    B--&amp;gt;D(fa:fa-spinner);
+
+</p>
+                    
+                </li>
+            </a>
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/internal-links.html">
+                <li class="item">
+                    <p class="title">Internal Links</p>
+                    
+                        <p class="summary">#Content
+Internal links like wiki
+Specifying the name of the markdown file with a notation such as [[Link]] will generate a wiki-like internal link.
+For example, if you have the following set of files.
+❯ tree scraps
+scraps
+├── Overview.md
+└── Usage.md
+
+Fill in the file name in the scraps directory in Overview.md as follows to generate the link.
+See [[Usage]] for detail.
+
+Tags as nonexistent links
+If there is no scraps with the specified title, such as #Content, then it will be a tag.
+Tags are lined up on the index page, and the link is to a page with a list of scraps that have the tag.
+Alias by display text
+Internal links allow you to use different display text as aliases.
+Writing [[Content|here]] creates a link that displays as here but links to the “Content” page.
+</p>
+                    
+                </li>
+            </a>
+        
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/search.html">
+                <li class="item">
+                    <p class="title">Search</p>
+                    
+                        <p class="summary">#Content
+Search index format
+Scraps can build a search index using the Fuse JSON schema as shown below.
+[
+  
+    {
+      &quot;title&quot;: &quot;Search&quot;,
+      &quot;url&quot;: &quot;http:&#x2F;&#x2F;127.0.0.1:1112&#x2F;scraps&#x2F;search.html&quot;
+    },
+    {
+      &quot;title&quot;: &quot;Overview&quot;,
+      &quot;url&quot;: &quot;http:&#x2F;&#x2F;127.0.0.1:1112&#x2F;scraps&#x2F;overview.html&quot;
+    },
+    ...
+]
+
+Search libraries
+Scraps content perform searches with fuse.js using an index.
+We are considering WASM solutions like tinysearch for future performance improvements in our deployment environment.
+Configuration
+If you are not using the search function, please modify your Config.toml as follows. See here for Configuration page.
+# Build a search index with the Fuse JSON and display search UI (optional, default=true, choices=true or false)
+build_search_index = false
+
+</p>
+                    
+                </li>
+            </a>
+        
+    </ul>
+
+
+        </main>
+        <footer>
+            Generated by <a href="https://github.com/boykush/scraps" target="_blank" rel="noopener noreferrer">Scraps</a>
+        </footer>
+        <!-- Code syntax highlight -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!-- Mermaid -->
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+        </script>
+        
+         
+    </body>
+</html>
