@@ -1,6 +1,4 @@
-The template feature can be used by preparing Markdown files as templates under the `templates/` directory.
-
-This feature is implemented based on [Tera](https://github.com/Keats/tera), a template engine written in Rust. 
+The template feature can be used by preparing Markdown files as templates under the `templates/` directory, and it is implemented based on [Tera](https://github.com/Keats/tera), a template engine written in Rust.
 
 In templare feature of Scraps, you can mainly use Tera syntax and [built-in functions](https://keats.github.io/tera/docs/#built-in-functions).
 
