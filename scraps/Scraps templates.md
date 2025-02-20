@@ -14,10 +14,10 @@ Using the [get_env()](https://keats.github.io/tera/docs/#get-env) function, you 
 
 ```
 +++
-title = "[Book] {{ get_env(name="TITLE") }}"
+title = "[Book] {{ get_env(name="TITLE", default="") }}"
 +++
 
-![cover]({{ get_env(name="COVER") }})
+![cover]({{ get_env(name="COVER", default="") }})
 ```
 
 When execute generate
