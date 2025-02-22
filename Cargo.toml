@@ -8,7 +8,7 @@ description = "A static site generator that makes it easy to write internal link
 homepage = "https://boykush.github.io/scraps"
 repository = "https://github.com/boykush/scraps"
 documentation = "https://boykush.github.io/scraps"
-rust-version = "1.84"
+rust-version = "1.85"
 [workspace.dependencies.scraps_libs]
 version = "0.19.0"
 path = "modules/libs"
