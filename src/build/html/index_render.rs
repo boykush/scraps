@@ -69,7 +69,7 @@ impl IndexRender {
                 base_url,
                 metadata,
                 &list_view_configs.build_search_index,
-                &list_view_configs.sort_key.into(),
+                &list_view_configs.sort_key.clone().into(),
                 stags,
                 &paginated_scraps,
                 &pointer,
