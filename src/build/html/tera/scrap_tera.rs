@@ -8,12 +8,18 @@ use url::Url;
 static SCRAP_TERA: Lazy<Tera> = Lazy::new(|| {
     let mut tera = Tera::default();
     tera.add_raw_templates(vec![
-        ("__builtins/base.html", include_str!("../builtins/base.html")),
+        (
+            "__builtins/base.html",
+            include_str!("../builtins/base.html"),
+        ),
         (
             "__builtins/macros.html",
             include_str!("../builtins/macros.html"),
         ),
-        ("__builtins/scrap.html", include_str!("../builtins/scrap.html")),
+        (
+            "__builtins/scrap.html",
+            include_str!("../builtins/scrap.html"),
+        ),
     ])
     .unwrap();
     tera

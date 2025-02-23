@@ -102,23 +102,14 @@ impl BuildCommand {
                 let _span_render_scrap = span!(Level::INFO, "render_scrap").entered();
                 let scrap_render =
                     ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-                scrap_render.run(
-                    base_url,
-                    timezone,
-                    html_metadata,
-                    &scrap_with_commited_ts,
-                )
+                scrap_render.run(base_url, timezone, html_metadata, &scrap_with_commited_ts)
             })?;
         span_render_scraps.exit();
 
         // render tags index
         let span_render_tags_index = span!(Level::INFO, "render_tags_index").entered();
         let tags_index_render = TagsIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
-        tags_index_render.run(
-            base_url,
-            html_metadata,
-            &scraps,
-        )?;
+        tags_index_render.run(base_url, html_metadata, &scraps)?;
         span_render_tags_index.exit();
 
         // render tag
@@ -127,11 +118,7 @@ impl BuildCommand {
         tags.values.into_par_iter().try_for_each(|tag| {
             let _span_render_tag = span!(Level::INFO, "render_tag").entered();
             let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-            tag_render.run(
-                base_url,
-                html_metadata,
-                &tag,
-            )
+            tag_render.run(base_url, html_metadata, &tag)
         })?;
         span_render_tags.exit();
 

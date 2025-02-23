@@ -7,8 +7,14 @@ use url::Url;
 static INDEX_TERA: Lazy<Tera> = Lazy::new(|| {
     let mut tera = Tera::default();
     tera.add_raw_templates(vec![
-        ("__builtins/base.html", include_str!("../builtins/base.html")),
-        ("__builtins/index.html", include_str!("../builtins/index.html")),
+        (
+            "__builtins/base.html",
+            include_str!("../builtins/base.html"),
+        ),
+        (
+            "__builtins/index.html",
+            include_str!("../builtins/index.html"),
+        ),
         (
             "__builtins/macros.html",
             include_str!("../builtins/macros.html"),

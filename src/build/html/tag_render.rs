@@ -36,12 +36,7 @@ impl TagRender {
         })
     }
 
-    pub fn run(
-        &self,
-        base_url: &Url,
-        metadata: &HtmlMetadata,
-        tag: &Tag,
-    ) -> ScrapResult<()> {
+    pub fn run(&self, base_url: &Url, metadata: &HtmlMetadata, tag: &Tag) -> ScrapResult<()> {
         let (tera, mut context) = tag_tera::init(
             base_url,
             metadata,
