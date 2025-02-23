@@ -87,7 +87,6 @@ impl BuildCommand {
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         index_render.run(
             base_url,
-            timezone,
             html_metadata,
             list_view_configs,
             &scraps_with_commited_ts,
