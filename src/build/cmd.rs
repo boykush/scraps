@@ -117,10 +117,8 @@ impl BuildCommand {
         let tags_index_render = TagsIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         tags_index_render.run(
             base_url,
-            timezone,
             html_metadata,
             &scraps,
-            &list_view_configs.sort_key,
         )?;
         span_render_tags_index.exit();
 

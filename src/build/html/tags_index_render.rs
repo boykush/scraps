@@ -4,14 +4,12 @@ use std::{fs::File, path::PathBuf};
 
 use crate::build::model::html::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
-use crate::build::model::sort::SortKey;
-use chrono_tz::Tz;
 use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::tags::Tags;
 use url::Url;
 
-use crate::build::html::scrap_tera;
+use crate::build::html::tera::tags_index_tera;
 
 use super::serde::tags::SerializeTags;
 
@@ -34,30 +32,24 @@ impl TagsIndexRender {
     pub fn run(
         &self,
         base_url: &Url,
-        timezone: Tz,
         metadata: &HtmlMetadata,
         scraps: &[Scrap],
-        sort_key: &SortKey,
     ) -> ScrapResult<()> {
         let linked_scraps_map = LinkedScrapsMap::new(scraps);
         let stags = &SerializeTags::new(&Tags::new(scraps), &linked_scraps_map);
 
-        Self::render_html(self, base_url, timezone, metadata, sort_key, stags)
+        Self::render_html(self, base_url, metadata, stags)
     }
 
     fn render_html(
         &self,
         base_url: &Url,
-        timezone: Tz,
         metadata: &HtmlMetadata,
-        sort_key: &SortKey,
         tags: &SerializeTags,
     ) -> ScrapResult<()> {
-        let (tera, mut context) = scrap_tera::init(
+        let (tera, mut context) = tags_index_tera::init(
             base_url,
-            timezone,
             metadata,
-            sort_key,
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
         let template_name = if tera.get_template_names().any(|t| t == "tags_index.html") {
@@ -85,13 +77,11 @@ mod tests {
     fn it_run() {
         // args
         let base_url = Url::parse("http://localhost:1112/").unwrap();
-        let timezone = chrono_tz::UTC;
         let metadata = HtmlMetadata::new(
             "Scrap",
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
-        let sort_key = SortKey::CommittedDate;
 
         let test_resource_path =
             PathBuf::from("tests/resource/build/html/render/it_render_tags_index_html_1");
@@ -114,7 +104,7 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = TagsIndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            let result1 = render.run(&base_url, timezone, &metadata, &scraps, &sort_key);
+            let result1 = render.run(&base_url, &metadata, &scraps);
 
             assert!(result1.is_ok());
 
