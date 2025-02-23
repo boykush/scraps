@@ -133,10 +133,8 @@ impl BuildCommand {
             let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
             tag_render.run(
                 base_url,
-                timezone,
                 html_metadata,
                 &tag,
-                &list_view_configs.sort_key,
             )
         })?;
         span_render_tags.exit();
