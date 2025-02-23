@@ -6,7 +6,6 @@ use crate::build::model::html::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::list_view_configs::ListViewConfigs;
 use crate::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
-use crate::build::model::sort::SortKey;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use scraps_libs::{
@@ -20,6 +19,7 @@ use crate::build::html::tera::index_tera;
 
 use super::page_pointer::PagePointer;
 use super::serde::index_scraps::SerializeIndexScraps;
+use super::serde::sort::SerializeSortKey;
 use super::serde::tags::SerializeTags;
 
 pub struct IndexRender {
@@ -69,7 +69,7 @@ impl IndexRender {
                 base_url,
                 metadata,
                 &list_view_configs.build_search_index,
-                &list_view_configs.sort_key,
+                &list_view_configs.sort_key.into(),
                 stags,
                 &paginated_scraps,
                 &pointer,
@@ -82,7 +82,7 @@ impl IndexRender {
         base_url: &Url,
         metadata: &HtmlMetadata,
         build_serach_index: &bool,
-        sort_key: &SortKey,
+        sort_key: &SerializeSortKey,
         tags: &SerializeTags,
         paginated_scraps: &SerializeIndexScraps,
         pointer: &PagePointer,
@@ -121,6 +121,7 @@ mod tests {
     use super::*;
     use crate::build::model::paging::Paging;
     use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
+    use crate::build::model::sort::SortKey;
     use scraps_libs::model::scrap::Scrap;
     use scraps_libs::tests::FileResource;
 

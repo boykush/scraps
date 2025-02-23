@@ -1,4 +1,4 @@
-use crate::build::model::{html::HtmlMetadata, sort::SortKey};
+use crate::build::{html::serde::sort::SerializeSortKey, model::html::HtmlMetadata};
 use once_cell::sync::Lazy;
 use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
 use tera::Tera;
@@ -21,7 +21,7 @@ static INDEX_TERA: Lazy<Tera> = Lazy::new(|| {
 pub fn init(
     base_url: &Url,
     metadata: &HtmlMetadata,
-    sort_key: &SortKey,
+    sort_key: &SerializeSortKey,
     template_dir: &str,
 ) -> ScrapResult<(Tera, tera::Context)> {
     let mut tera = Tera::new(template_dir).context(ScrapError::PublicRender)?;
@@ -33,11 +33,7 @@ pub fn init(
     context.insert("description", &metadata.description());
     context.insert("favicon", &metadata.favicon());
 
-    let sort_key_text = match sort_key {
-        SortKey::CommittedDate => "commited date",
-        SortKey::LinkedCount => "linked count",
-    };
-    context.insert("sort_key", sort_key_text);
+    context.insert("sort_key", sort_key);
 
     Ok((tera, context))
 }
