@@ -107,7 +107,6 @@ impl BuildCommand {
                     timezone,
                     html_metadata,
                     &scrap_with_commited_ts,
-                    &list_view_configs.sort_key,
                 )
             })?;
         span_render_scraps.exit();

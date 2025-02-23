@@ -5,7 +5,6 @@ use std::{fs::File, path::PathBuf};
 use crate::build::model::html::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
-use crate::build::model::sort::SortKey;
 use chrono_tz::Tz;
 use scraps_libs::{
     error::{anyhow::Context, ScrapError, ScrapResult},
@@ -13,7 +12,7 @@ use scraps_libs::{
 };
 use url::Url;
 
-use crate::build::html::scrap_tera;
+use crate::build::html::tera::scrap_tera;
 
 use super::serde::link_scraps::SerializeLinkScraps;
 use super::serde::scrap_detail::SerializeScrapDetail;
@@ -46,13 +45,11 @@ impl ScrapRender {
         timezone: Tz,
         metadata: &HtmlMetadata,
         scrap_with_commited_ts: &ScrapWithCommitedTs,
-        sort_key: &SortKey,
     ) -> ScrapResult<()> {
         let (tera, mut context) = scrap_tera::init(
             base_url,
             timezone,
             metadata,
-            sort_key,
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
 
@@ -91,7 +88,6 @@ mod tests {
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
-        let sort_key = SortKey::CommittedDate;
 
         let test_resource_path =
             PathBuf::from("tests/resource/build/html/render/it_render_scrap_htmls");
@@ -113,7 +109,6 @@ mod tests {
             timezone,
             &metadata,
             &ScrapWithCommitedTs::new(scrap1, &commited_ts1),
-            &sort_key,
         );
         assert!(result1.is_ok());
 
