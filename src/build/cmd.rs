@@ -69,7 +69,10 @@ impl BuildCommand {
                 let entry = entry_res?;
                 Self::to_path_by_dir_entry(&entry)
             })
-            .collect::<ScrapResult<Vec<PathBuf>>>()?;
+            .collect::<ScrapResult<Vec<Option<PathBuf>>>>()?
+            .into_iter()
+            .flatten()
+            .collect::<Vec<PathBuf>>();
 
         let scraps_with_commited_ts = paths
             .into_par_iter()
@@ -155,13 +158,17 @@ impl BuildCommand {
         Ok(scraps.len())
     }
 
-    fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapResult<PathBuf> {
+    fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapResult<Option<PathBuf>> {
         if let Ok(file_type) = dir_entry.file_type() {
             if file_type.is_dir() {
                 bail!(ScrapError::FileLoad)
             }
         };
-        Ok(dir_entry.path())
+        if dir_entry.path().extension() == Some("md".as_ref()) {
+            Ok(Some(dir_entry.path()))
+        } else {
+            Ok(None)
+        }
     }
 
     fn to_scrap_by_path<GC: GitCommand + Send + Sync + Copy>(
@@ -234,6 +241,12 @@ mod tests {
         let resource_2 = FileResource::new(&md_path_2);
         let resource_bytes_2 = concat!("[[test1]]\n").as_bytes();
 
+        // excluded not markdown file
+        let not_md_path = command.scraps_dir_path.join("test3.txt");
+        let not_exists_path = command.public_dir_path.join("scraps/test3.html");
+        let resource_3 = FileResource::new(&not_md_path);
+        let resource_bytes_3 = concat!("# header1\n", "## header2\n",).as_bytes();
+
         // static
         let resource_static_dir = DirResource::new(&command.static_dir_path);
 
@@ -245,30 +258,36 @@ mod tests {
         resource_static_dir.run(|| {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
-                    let result1 = command.run(
-                        git_command,
-                        &base_url,
-                        timezone,
-                        html_metadata,
-                        css_metadata,
-                        &list_view_configs,
-                    );
-                    assert!(result1.is_ok());
+                    resource_3.run(resource_bytes_3, || {
+                        let result1 = command.run(
+                            git_command,
+                            &base_url,
+                            timezone,
+                            html_metadata,
+                            css_metadata,
+                            &list_view_configs,
+                        );
+                        assert!(result1.is_ok());
 
-                    let result2 = fs::read_to_string(html_path_1);
-                    assert!(result2.is_ok());
+                        let result2 = fs::read_to_string(html_path_1);
+                        assert!(result2.is_ok());
 
-                    let result3 = fs::read_to_string(html_path_2);
-                    assert!(result3.is_ok());
+                        let result3 = fs::read_to_string(html_path_2);
+                        assert!(result3.is_ok());
 
-                    let result4 = fs::read_to_string(html_path_3);
-                    assert!(result4.is_ok());
+                        let result4 = fs::read_to_string(not_exists_path);
+                        println!("{:?}", result4);
+                        assert!(result4.is_err());
 
-                    let result5 = fs::read_to_string(css_path);
-                    assert!(result5.is_ok());
+                        let result5 = fs::read_to_string(html_path_3);
+                        assert!(result5.is_ok());
 
-                    let result6 = fs::read_to_string(search_index_json_path);
-                    assert!(result6.is_ok());
+                        let result6 = fs::read_to_string(css_path);
+                        assert!(result6.is_ok());
+
+                        let result7 = fs::read_to_string(search_index_json_path);
+                        assert!(result7.is_ok());
+                    })
                 })
             })
         })
