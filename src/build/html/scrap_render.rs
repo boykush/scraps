@@ -14,8 +14,8 @@ use url::Url;
 
 use crate::build::html::tera::scrap_tera;
 
-use super::serde::link_scraps::SerializeLinkScraps;
-use super::serde::scrap_detail::SerializeScrapDetail;
+use super::serde::link_scraps::LinkScrapsTera;
+use super::serde::scrap_detail::ScrapDetailTera;
 
 pub struct ScrapRender {
     static_dir_path: PathBuf,
@@ -55,10 +55,10 @@ impl ScrapRender {
 
         // insert to context for linked list
         let linked_scraps_map = LinkedScrapsMap::new(&self.scraps);
-        context.insert("scrap", &SerializeScrapDetail::new(scrap_with_commited_ts));
+        context.insert("scrap", &ScrapDetailTera::from(scrap_with_commited_ts));
 
         let linked_scraps = linked_scraps_map.linked_by(&scrap_with_commited_ts.scrap().title);
-        context.insert("linked_scraps", &SerializeLinkScraps::new(&linked_scraps));
+        context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
 
         // render html
         let file_name = &format!("{}.html", &scrap_with_commited_ts.scrap().title.slug);

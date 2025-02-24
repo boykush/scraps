@@ -1,18 +1,19 @@
 use crate::build::model::sort::SortKey;
 
 #[derive(serde::Serialize)]
-pub enum SerializeSortKey {
+#[serde(remote = "SortKey")]
+enum SerializeSortKey {
     #[serde(rename = "committed date")]
     CommittedDate,
     #[serde(rename = "linked count")]
     LinkedCount,
 }
 
-impl From<SortKey> for SerializeSortKey {
+#[derive(serde::Serialize, Debug)]
+pub struct SortKeyTera(#[serde(with = "SerializeSortKey")] SortKey);
+
+impl From<SortKey> for SortKeyTera {
     fn from(sort_key: SortKey) -> Self {
-        match sort_key {
-            SortKey::CommittedDate => SerializeSortKey::CommittedDate,
-            SortKey::LinkedCount => SerializeSortKey::LinkedCount,
-        }
+        SortKeyTera(sort_key)
     }
 }

@@ -5,7 +5,7 @@ use scraps_libs::model::scrap::Scrap;
 use url::Url;
 
 use super::search_index_tera;
-use super::serde::search_index_scraps::SerializeSearchIndexScraps;
+use super::serde::search_index_scraps::SearchIndexScrapsTera;
 
 pub struct SearchIndexRender {
     static_dir_path: PathBuf,
@@ -21,7 +21,7 @@ impl SearchIndexRender {
     }
 
     pub fn run(&self, base_url: &Url, scraps: &[Scrap]) -> ScrapResult<()> {
-        let serialize_scraps = SerializeSearchIndexScraps::new(scraps);
+        let serialize_scraps = SearchIndexScrapsTera::new(scraps);
 
         Self::render_search_index_json(self, base_url, &serialize_scraps)
     }
@@ -29,7 +29,7 @@ impl SearchIndexRender {
     fn render_search_index_json(
         &self,
         base_url: &Url,
-        scraps: &SerializeSearchIndexScraps,
+        scraps: &SearchIndexScrapsTera,
     ) -> ScrapResult<()> {
         let (tera, mut context) = search_index_tera::init(
             base_url,

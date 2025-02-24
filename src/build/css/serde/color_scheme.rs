@@ -4,7 +4,7 @@ use crate::build::model::color_scheme::ColorScheme;
 
 #[derive(Serialize)]
 #[serde(remote = "ColorScheme")]
-pub enum SerializeColorScheme {
+enum SerializeColorScheme {
     #[serde(rename = "light dark")]
     OsSetting,
 

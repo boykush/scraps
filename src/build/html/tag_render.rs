@@ -11,8 +11,8 @@ use url::Url;
 
 use crate::build::html::tera::tag_tera;
 
-use super::serde::link_scraps::SerializeLinkScraps;
-use super::serde::tag::SerializeTag;
+use super::serde::link_scraps::LinkScrapsTera;
+use super::serde::tag::TagTera;
 
 pub struct TagRender {
     static_dir_path: PathBuf,
@@ -45,10 +45,10 @@ impl TagRender {
 
         // insert to context for linked list
         let linked_scraps_map = LinkedScrapsMap::new(&self.scraps);
-        context.insert("tag", &SerializeTag::new(tag, &linked_scraps_map));
+        context.insert("tag", &TagTera::new(tag, &linked_scraps_map));
 
         let linked_scraps = linked_scraps_map.linked_by(&tag.title);
-        context.insert("linked_scraps", &SerializeLinkScraps::new(&linked_scraps));
+        context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
 
         // render html
         let file_name = &format!("{}.html", tag.title.slug);
