@@ -11,7 +11,7 @@ use scraps_libs::{
     model::title::Title,
 };
 
-use crate::template::metadata::TemplateMetadata;
+use crate::template::serde::metadata::TemplateMetadata;
 
 use super::markdown_tera;
 

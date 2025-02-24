@@ -6,8 +6,6 @@ use crate::build::model::html::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::list_view_configs::ListViewConfigs;
 use crate::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
-use crate::build::model::sort::SortKey;
-use chrono_tz::Tz;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use scraps_libs::{
@@ -17,10 +15,11 @@ use scraps_libs::{
 use tracing::{span, Level};
 use url::Url;
 
-use crate::build::html::scrap_tera;
+use crate::build::html::tera::index_tera;
 
 use super::page_pointer::PagePointer;
 use super::serde::index_scraps::SerializeIndexScraps;
+use super::serde::sort::SerializeSortKey;
 use super::serde::tags::SerializeTags;
 
 pub struct IndexRender {
@@ -41,7 +40,6 @@ impl IndexRender {
     pub fn run(
         &self,
         base_url: &Url,
-        timezone: Tz,
         metadata: &HtmlMetadata,
         list_view_configs: &ListViewConfigs,
         scraps_with_commited_ts: &ScrapsWithCommitedTs,
@@ -69,10 +67,9 @@ impl IndexRender {
             Self::render_paginated_html(
                 self,
                 base_url,
-                timezone,
                 metadata,
                 &list_view_configs.build_search_index,
-                &list_view_configs.sort_key,
+                &list_view_configs.sort_key.clone().into(),
                 stags,
                 &paginated_scraps,
                 &pointer,
@@ -83,18 +80,16 @@ impl IndexRender {
     fn render_paginated_html(
         &self,
         base_url: &Url,
-        timezone: Tz,
         metadata: &HtmlMetadata,
         build_serach_index: &bool,
-        sort_key: &SortKey,
+        sort_key: &SerializeSortKey,
         tags: &SerializeTags,
         paginated_scraps: &SerializeIndexScraps,
         pointer: &PagePointer,
     ) -> ScrapResult<()> {
         let span_render_index = span!(Level::INFO, "render_index").entered();
-        let (tera, mut context) = scrap_tera::init(
+        let (tera, mut context) = index_tera::init(
             base_url,
-            timezone,
             metadata,
             sort_key,
             self.static_dir_path.join("*.html").to_str().unwrap(),
@@ -126,6 +121,7 @@ mod tests {
     use super::*;
     use crate::build::model::paging::Paging;
     use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
+    use crate::build::model::sort::SortKey;
     use scraps_libs::model::scrap::Scrap;
     use scraps_libs::tests::FileResource;
 
@@ -133,7 +129,6 @@ mod tests {
     fn it_run() {
         // args
         let base_url = Url::parse("http://localhost:1112/").unwrap();
-        let timezone = chrono_tz::UTC;
         let metadata = HtmlMetadata::new(
             "Scrap",
             &Some("Scrap Wiki".to_string()),
@@ -167,7 +162,6 @@ mod tests {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
             let result1 = render.run(
                 &base_url,
-                timezone,
                 &metadata,
                 &list_view_configs,
                 &scraps_with_commited_ts,
@@ -187,7 +181,6 @@ mod tests {
     fn it_run_paging() {
         // args
         let base_url = Url::parse("http://localhost:1112/").unwrap();
-        let timezone = chrono_tz::UTC;
         let metadata = HtmlMetadata::new(
             "Scrap",
             &Some("Scrap Wiki".to_string()),
@@ -230,7 +223,6 @@ mod tests {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
             let result1 = render.run(
                 &base_url,
-                timezone,
                 &metadata,
                 &list_view_configs,
                 &scraps_with_commited_ts,
