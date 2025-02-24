@@ -49,12 +49,12 @@ mod tests {
         let linked_map = LinkedScrapsMap::new(&scraps);
         // scraps links
         assert_eq!(
-            linked_map.linked_by(&Title::new("scrap1")),
+            linked_map.linked_by(&"scrap1".into()),
             vec![scrap2.to_owned()]
         );
         // tags
         assert_eq!(
-            linked_map.linked_by(&Title::new("tag1")),
+            linked_map.linked_by(&"tag1".into()),
             vec![scrap1.to_owned(), scrap2.to_owned()]
         )
     }

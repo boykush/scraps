@@ -68,7 +68,7 @@ mod tests {
     use itertools::Itertools;
 
     use super::*;
-    use scraps_libs::model::{tag::Tag, title::Title};
+    use scraps_libs::model::tag::Tag;
     use scraps_libs::tests::FileResource;
 
     #[test]
@@ -100,9 +100,9 @@ mod tests {
                 let (tags, linked_scraps_map) = result.unwrap();
 
                 // test tags
-                let tag1 = Tag::new(&Title::new("Tag1"));
-                let tag2 = Tag::new(&Title::new("Tag2"));
-                let tag3 = Tag::new(&Title::new("Tag3"));
+                let tag1 = Tag::new(&"Tag1".into());
+                let tag2 = Tag::new(&"Tag2".into());
+                let tag3 = Tag::new(&"Tag3".into());
                 assert_eq!(tags.values.len(), 3);
                 assert_eq!(
                     tags.values

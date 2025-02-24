@@ -8,8 +8,8 @@ pub struct Title {
     pub slug: Slug,
 }
 
-impl Title {
-    pub fn new(title: &str) -> Title {
+impl From<&str> for Title {
+    fn from(title: &str) -> Self {
         Title {
             v: title.to_string(),
             slug: Slug::new(title),
@@ -30,7 +30,7 @@ mod tests {
 
     #[test]
     fn it_new() {
-        let title = Title::new("scrap title");
+        let title: Title = "scrap title".into();
         assert_eq!(title.v, "scrap title".to_string());
         assert_eq!(title.slug, Slug::new("scrap-title"));
     }

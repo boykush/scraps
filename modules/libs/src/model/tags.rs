@@ -42,7 +42,7 @@ mod tests {
         let tags = Tags::new(&scraps);
         assert_eq!(
             tags.values.into_iter().collect::<Vec<Tag>>(),
-            vec![Tag::new(&Title::new("tag1"))]
+            vec![Tag::new(&"tag1".into())]
         )
     }
 }

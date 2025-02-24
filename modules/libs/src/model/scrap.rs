@@ -16,13 +16,13 @@ impl Scrap {
     pub fn new(base_url: &Url, title: &str, text: &str) -> Scrap {
         let links = markdown::extract::link_titles(text)
             .iter()
-            .map(|t| Title::new(t))
+            .map(|t| t.as_str().into())
             .collect();
         let thumbnail = markdown::extract::head_image(text);
         let html_content = markdown::to_html(text, base_url);
 
         Scrap {
-            title: Title::new(title),
+            title: title.into(),
             links,
             html_content,
             thumbnail,
@@ -38,9 +38,9 @@ mod tests {
     fn it_new() {
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let mut scrap = Scrap::new(&base_url, "scrap title", "[[link1]] [[link2]]");
-        assert_eq!(scrap.title, Title::new("scrap title"));
+        assert_eq!(scrap.title, "scrap title".into());
         scrap.links.sort();
-        let mut expected = [Title::new("link1"), Title::new("link2")];
+        let mut expected = ["link1".into(), "link2".into()];
         expected.sort();
         assert_eq!(scrap.links, expected);
         assert_eq!(
