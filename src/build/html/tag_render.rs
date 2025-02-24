@@ -85,7 +85,7 @@ mod tests {
         let scrap2 = &Scrap::new(&base_url, "scrap2", "[[tag1]][[tag2]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
         // tag
-        let tag1 = Tag::new(&"tag 1".into());
+        let tag1: Tag = "tag 1".into();
 
         let tag1_html_path = public_dir_path.join(format!("scraps/{}.html", tag1.title.slug));
 

@@ -100,9 +100,9 @@ mod tests {
                 let (tags, linked_scraps_map) = result.unwrap();
 
                 // test tags
-                let tag1 = Tag::new(&"Tag1".into());
-                let tag2 = Tag::new(&"Tag2".into());
-                let tag3 = Tag::new(&"Tag3".into());
+                let tag1: Tag = "Tag1".into();
+                let tag2: Tag = "Tag2".into();
+                let tag3: Tag = "Tag3".into();
                 assert_eq!(tags.values.len(), 3);
                 assert_eq!(
                     tags.values

@@ -38,6 +38,5 @@ pub fn init(
     context.insert("description", &metadata.description());
     context.insert("favicon", &metadata.favicon());
 
-
     Ok((tera, context))
 }
