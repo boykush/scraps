@@ -3,18 +3,18 @@ use itertools::Itertools;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use scraps_libs::model::tags::Tags;
 
-use super::tag::SerializeTag;
+use super::tag::TagTera;
 
 #[derive(serde::Serialize, PartialEq, Debug)]
-pub struct SerializeTags(Vec<SerializeTag>);
+pub struct TagsTera(Vec<TagTera>);
 
-impl SerializeTags {
-    pub fn new(tags: &Tags, linked_scraps_map: &LinkedScrapsMap) -> SerializeTags {
+impl TagsTera {
+    pub fn new(tags: &Tags, linked_scraps_map: &LinkedScrapsMap) -> TagsTera {
         let stags = tags
             .values
             .iter()
-            .map(|tag| SerializeTag::new(tag, linked_scraps_map));
+            .map(|tag| TagTera::new(tag, linked_scraps_map));
         let sorted = stags.sorted_by_key(|s| s.linked_count).rev();
-        SerializeTags(sorted.collect_vec())
+        TagsTera(sorted.collect_vec())
     }
 }

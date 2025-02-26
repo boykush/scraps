@@ -82,7 +82,7 @@ mod tests {
 
         // run args
         let template_name = "it_render_from_template";
-        let template_title = &Some(Title::new("override_title"));
+        let template_title = &Some("override_title".into());
         let timezone = chrono_tz::Asia::Tokyo;
 
         // template

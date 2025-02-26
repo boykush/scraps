@@ -8,7 +8,7 @@ use crate::build::model::{
 };
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
-pub struct SerializeIndexScrap {
+struct SerializeIndexScrap {
     title: String,
     slug: String,
     html_content: String,
@@ -37,14 +37,14 @@ impl SerializeIndexScrap {
 }
 
 #[derive(serde::Serialize, PartialEq, Debug)]
-pub struct SerializeIndexScraps(Vec<SerializeIndexScrap>);
+pub struct IndexScrapsTera(Vec<SerializeIndexScrap>);
 
-impl SerializeIndexScraps {
+impl IndexScrapsTera {
     pub fn new_with_sort(
         scraps_with_commited_ts: &ScrapsWithCommitedTs,
         linked_scraps_map: &LinkedScrapsMap,
         sort_key: &SortKey,
-    ) -> SerializeIndexScraps {
+    ) -> IndexScrapsTera {
         let serialize_scraps = scraps_with_commited_ts
             .to_vec()
             .into_iter()
@@ -55,13 +55,13 @@ impl SerializeIndexScraps {
         })
         .collect_vec();
 
-        SerializeIndexScraps(sorted)
+        IndexScrapsTera(sorted)
     }
 
-    pub fn chunks(&self, chunk_size: usize) -> Vec<SerializeIndexScraps> {
+    pub fn chunks(&self, chunk_size: usize) -> Vec<IndexScrapsTera> {
         self.0
             .chunks(chunk_size)
-            .map(|scraps| SerializeIndexScraps(scraps.to_vec()))
+            .map(|scraps| IndexScrapsTera(scraps.to_vec()))
             .collect_vec()
     }
 }
@@ -98,7 +98,7 @@ mod tests {
         let sscrap4 = SerializeIndexScrap::new(&sc4.clone(), &linked_scraps_map);
 
         // Sort by commited date
-        let result1 = SerializeIndexScraps::new_with_sort(
+        let result1 = IndexScrapsTera::new_with_sort(
             &ScrapsWithCommitedTs::new(&vec![sc1.clone(), sc2.clone(), sc3.clone(), sc4.clone()]),
             &linked_scraps_map,
             &SortKey::CommittedDate,
@@ -115,7 +115,7 @@ mod tests {
         );
 
         // Sort by linked count
-        let result2 = SerializeIndexScraps::new_with_sort(
+        let result2 = IndexScrapsTera::new_with_sort(
             &ScrapsWithCommitedTs::new(&vec![sc1.clone(), sc2.clone(), sc3.clone(), sc4.clone()]),
             &linked_scraps_map,
             &SortKey::LinkedCount,

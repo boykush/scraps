@@ -18,9 +18,9 @@ use url::Url;
 use crate::build::html::tera::index_tera;
 
 use super::page_pointer::PagePointer;
-use super::serde::index_scraps::SerializeIndexScraps;
-use super::serde::sort::SerializeSortKey;
-use super::serde::tags::SerializeTags;
+use super::serde::index_scraps::IndexScrapsTera;
+use super::serde::sort::SortKeyTera;
+use super::serde::tags::TagsTera;
 
 pub struct IndexRender {
     static_dir_path: PathBuf,
@@ -46,7 +46,7 @@ impl IndexRender {
     ) -> ScrapResult<()> {
         let scraps = &scraps_with_commited_ts.to_scraps();
         let linked_scraps_map = LinkedScrapsMap::new(scraps);
-        let sorted_scraps = SerializeIndexScraps::new_with_sort(
+        let sorted_scraps = IndexScrapsTera::new_with_sort(
             scraps_with_commited_ts,
             &linked_scraps_map,
             &list_view_configs.sort_key,
@@ -61,7 +61,7 @@ impl IndexRender {
             let pointer = PagePointer::new(page_num, last_page_num);
             (pointer, paginated_scraps)
         });
-        let stags = &SerializeTags::new(&Tags::new(scraps), &linked_scraps_map);
+        let stags = &TagsTera::new(&Tags::new(scraps), &linked_scraps_map);
 
         paginated_with_pointer.try_for_each(|(pointer, paginated_scraps)| {
             Self::render_paginated_html(
@@ -82,16 +82,15 @@ impl IndexRender {
         base_url: &Url,
         metadata: &HtmlMetadata,
         build_serach_index: &bool,
-        sort_key: &SerializeSortKey,
-        tags: &SerializeTags,
-        paginated_scraps: &SerializeIndexScraps,
+        sort_key: &SortKeyTera,
+        tags: &TagsTera,
+        paginated_scraps: &IndexScrapsTera,
         pointer: &PagePointer,
     ) -> ScrapResult<()> {
         let span_render_index = span!(Level::INFO, "render_index").entered();
         let (tera, mut context) = index_tera::init(
             base_url,
             metadata,
-            sort_key,
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
         let template_name = if tera.get_template_names().any(|t| t == "index.html") {
@@ -99,6 +98,7 @@ impl IndexRender {
         } else {
             "__builtins/index.html"
         };
+        context.insert("sort_key", sort_key);
         context.insert("build_search_index", build_serach_index);
         context.insert("scraps", &paginated_scraps);
         context.insert("tags", tags);

@@ -4,7 +4,7 @@ use url::Url;
 use scraps_libs::model::scrap::Scrap;
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
-pub struct SerializeLinkScrap {
+struct SerializeLinkScrap {
     title: String,
     slug: String,
     html_content: String,
@@ -12,7 +12,7 @@ pub struct SerializeLinkScrap {
 }
 
 impl SerializeLinkScrap {
-    pub fn new(scrap: &Scrap) -> SerializeLinkScrap {
+    fn new(scrap: &Scrap) -> SerializeLinkScrap {
         SerializeLinkScrap {
             title: scrap.title.to_string(),
             slug: scrap.title.slug.to_string(),
@@ -23,12 +23,12 @@ impl SerializeLinkScrap {
 }
 
 #[derive(serde::Serialize, PartialEq, Debug)]
-pub struct SerializeLinkScraps(Vec<SerializeLinkScrap>);
+pub struct LinkScrapsTera(Vec<SerializeLinkScrap>);
 
-impl SerializeLinkScraps {
-    pub fn new(scraps: &[Scrap]) -> SerializeLinkScraps {
+impl LinkScrapsTera {
+    pub fn new(scraps: &[Scrap]) -> LinkScrapsTera {
         let serialize_scraps = scraps.iter().map(SerializeLinkScrap::new).collect_vec();
 
-        SerializeLinkScraps(serialize_scraps)
+        LinkScrapsTera(serialize_scraps)
     }
 }

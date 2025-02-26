@@ -21,7 +21,7 @@ impl Tags {
             .collect();
 
         Tags {
-            values: titles.iter().map(Tag::new).collect(),
+            values: titles.iter().map(|t| t.clone().into()).collect(),
         }
     }
 }
@@ -42,7 +42,7 @@ mod tests {
         let tags = Tags::new(&scraps);
         assert_eq!(
             tags.values.into_iter().collect::<Vec<Tag>>(),
-            vec![Tag::new(&Title::new("tag1"))]
+            vec!["tag1".into()]
         )
     }
 }

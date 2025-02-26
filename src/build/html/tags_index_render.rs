@@ -11,7 +11,7 @@ use url::Url;
 
 use crate::build::html::tera::tags_index_tera;
 
-use super::serde::tags::SerializeTags;
+use super::serde::tags::TagsTera;
 
 pub struct TagsIndexRender {
     static_dir_path: PathBuf,
@@ -36,7 +36,7 @@ impl TagsIndexRender {
         scraps: &[Scrap],
     ) -> ScrapResult<()> {
         let linked_scraps_map = LinkedScrapsMap::new(scraps);
-        let stags = &SerializeTags::new(&Tags::new(scraps), &linked_scraps_map);
+        let stags = &TagsTera::new(&Tags::new(scraps), &linked_scraps_map);
 
         Self::render_html(self, base_url, metadata, stags)
     }
@@ -45,7 +45,7 @@ impl TagsIndexRender {
         &self,
         base_url: &Url,
         metadata: &HtmlMetadata,
-        tags: &SerializeTags,
+        tags: &TagsTera,
     ) -> ScrapResult<()> {
         let (tera, mut context) = tags_index_tera::init(
             base_url,

@@ -5,10 +5,16 @@ pub struct Tag {
     pub title: Title,
 }
 
-impl Tag {
-    pub fn new(title: &Title) -> Tag {
+impl From<Title> for Tag {
+    fn from(title: Title) -> Self {
+        Tag { title }
+    }
+}
+
+impl From<&str> for Tag {
+    fn from(title: &str) -> Self {
         Tag {
-            title: title.to_owned(),
+            title: title.into(),
         }
     }
 }

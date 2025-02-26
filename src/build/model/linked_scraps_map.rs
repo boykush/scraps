@@ -3,18 +3,16 @@ use std::collections::HashMap;
 use scraps_libs::model::{scrap::Scrap, title::Title};
 
 #[derive(PartialEq, Debug)]
-pub struct LinkedScrapsMap {
-    values: HashMap<Title, Vec<Scrap>>,
-}
+pub struct LinkedScrapsMap(HashMap<Title, Vec<Scrap>>);
 
 impl LinkedScrapsMap {
     pub fn new(scraps: &[Scrap]) -> LinkedScrapsMap {
         let linked_map = Self::gen_linked_map(scraps);
-        LinkedScrapsMap { values: linked_map }
+        LinkedScrapsMap(linked_map)
     }
 
     pub fn linked_by(&self, title: &Title) -> Vec<Scrap> {
-        self.values.get(title).map_or_else(Vec::new, Vec::clone)
+        self.0.get(title).map_or_else(Vec::new, Vec::clone)
     }
 
     fn gen_linked_map(scraps: &[Scrap]) -> HashMap<Title, Vec<Scrap>> {
@@ -49,12 +47,12 @@ mod tests {
         let linked_map = LinkedScrapsMap::new(&scraps);
         // scraps links
         assert_eq!(
-            linked_map.linked_by(&Title::new("scrap1")),
+            linked_map.linked_by(&"scrap1".into()),
             vec![scrap2.to_owned()]
         );
         // tags
         assert_eq!(
-            linked_map.linked_by(&Title::new("tag1")),
+            linked_map.linked_by(&"tag1".into()),
             vec![scrap1.to_owned(), scrap2.to_owned()]
         )
     }
