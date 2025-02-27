@@ -122,6 +122,7 @@ mod tests {
     use crate::build::model::paging::Paging;
     use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
     use crate::build::model::sort::SortKey;
+    use scraps_libs::lang::LangCode;
     use scraps_libs::model::scrap::Scrap;
     use scraps_libs::tests::FileResource;
 
@@ -130,6 +131,7 @@ mod tests {
         // args
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let metadata = HtmlMetadata::new(
+            &LangCode::default(),
             "Scrap",
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
@@ -182,6 +184,7 @@ mod tests {
         // args
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let metadata = HtmlMetadata::new(
+            &LangCode::default(),
             "Scrap",
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),

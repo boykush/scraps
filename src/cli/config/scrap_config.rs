@@ -4,11 +4,12 @@ use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
 use serde::Deserialize;
 use url::Url;
 
-use super::{color_scheme::ColorSchemeConfig, sort_key::SortKeyConfig};
+use super::{color_scheme::ColorSchemeConfig, lang::LangCodeConfig, sort_key::SortKeyConfig};
 
 #[derive(Debug, Deserialize)]
 pub struct ScrapConfig {
     pub base_url: Url,
+    pub lang_code: Option<LangCodeConfig>,
     pub title: String,
     pub description: Option<String>,
     pub favicon: Option<Url>,

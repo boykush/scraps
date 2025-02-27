@@ -20,6 +20,7 @@ itertools = "0.14"
 pulldown-cmark = "0.13"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
+iso639-1 = "0.4.1"
 
 [package]
 edition.workspace = true
@@ -42,7 +43,7 @@ exclude = [
 [dependencies]
 # sub crates
 scraps_libs.workspace = true
-scraps_libs.features = ["error", "git", "markdown", "model" , "slugify"]
+scraps_libs.features = ["error", "git", "lang", "markdown", "model" , "slugify"]
 #external crates
 url.workspace = true
 itertools.workspace = true

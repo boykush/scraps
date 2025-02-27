@@ -67,6 +67,7 @@ impl TagsIndexRender {
 
 #[cfg(test)]
 mod tests {
+    use scraps_libs::lang::LangCode;
     use std::fs;
     use url::Url;
 
@@ -78,6 +79,7 @@ mod tests {
         // args
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let metadata = HtmlMetadata::new(
+            &LangCode::default(),
             "Scrap",
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),

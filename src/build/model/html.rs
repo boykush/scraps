@@ -1,15 +1,23 @@
+use scraps_libs::lang::LangCode;
 use url::Url;
 
 #[derive(Clone)]
 pub struct HtmlMetadata {
+    lang_code: LangCode,
     title: String,
     description: Option<String>,
     favicon: Option<Url>,
 }
 
 impl HtmlMetadata {
-    pub fn new(title: &str, description: &Option<String>, favicon: &Option<Url>) -> HtmlMetadata {
+    pub fn new(
+        lang_code: &LangCode,
+        title: &str,
+        description: &Option<String>,
+        favicon: &Option<Url>,
+    ) -> HtmlMetadata {
         HtmlMetadata {
+            lang_code: lang_code.clone(),
             title: title.to_string(),
             description: description.clone(),
             favicon: favicon.clone(),
