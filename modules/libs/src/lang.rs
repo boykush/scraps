@@ -1,5 +1,6 @@
 use super::error::ScrapError;
 use iso639_1::Iso639_1;
+use std::fmt;
 
 #[derive(Debug, Clone)]
 pub struct LangCode(Iso639_1);
@@ -9,14 +10,14 @@ impl std::str::FromStr for LangCode {
 
     fn from_str(s: &str) -> Result<Self, ScrapError> {
         Iso639_1::try_from(s)
-            .map(|i| LangCode(i))
+            .map(LangCode)
             .map_err(|_| ScrapError::FromStrErr)
     }
 }
 
-impl ToString for LangCode {
-    fn to_string(&self) -> String {
-        self.0.name().to_string()
+impl fmt::Display for LangCode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0.name())
     }
 }
 

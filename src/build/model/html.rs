@@ -24,6 +24,10 @@ impl HtmlMetadata {
         }
     }
 
+    pub fn lang_code(&self) -> LangCode {
+        self.lang_code.clone()
+    }
+
     pub fn title(&self) -> String {
         self.title.to_string()
     }
