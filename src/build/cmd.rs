@@ -182,6 +182,7 @@ mod tests {
     use super::*;
     use scraps_libs::{
         git::tests::GitCommandTest,
+        lang::LangCode,
         tests::{DirResource, FileResource},
     };
 
@@ -203,6 +204,7 @@ mod tests {
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
         let html_metadata = &HtmlMetadata::new(
+            &LangCode::default(),
             "Scrap",
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
@@ -286,6 +288,7 @@ mod tests {
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
         let html_metadata = &HtmlMetadata::new(
+            &LangCode::default(),
             "Scrap",
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),

@@ -28,9 +28,20 @@ pub fn run() -> ScrapResult<()> {
     let static_dir_path = Path::new("static");
     let public_dir_path = Path::new("public");
     let build_command = BuildCommand::new(scraps_dir_path, static_dir_path, public_dir_path);
+
     let config = ScrapConfig::new()?;
+    let lang_code = config
+        .lang_code
+        .map(|c| c.into_lang_code())
+        .unwrap_or_default();
+    println!("{:?}", lang_code);
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
-    let html_metadata = HtmlMetadata::new(&config.title, &config.description, &config.favicon);
+    let html_metadata = HtmlMetadata::new(
+        &lang_code,
+        &config.title,
+        &config.description,
+        &config.favicon,
+    );
     let css_metadata = CssMetadata::new(&config.color_scheme.map_or_else(
         || ColorScheme::OsSetting,
         ColorSchemeConfig::into_color_scheme,

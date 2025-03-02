@@ -34,6 +34,7 @@ pub fn init(
 
     let mut context = tera::Context::new();
     context.insert("base_url", &base_url);
+    context.insert("lang_code", &metadata.lang_code().to_string());
     context.insert("title", &metadata.title());
     context.insert("description", &metadata.description());
     context.insert("favicon", &metadata.favicon());

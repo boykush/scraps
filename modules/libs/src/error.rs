@@ -33,6 +33,9 @@ pub enum ScrapError {
 
     #[error("Failed git log. git is required")]
     GitLog,
+
+    #[error("Failed when convert from str")]
+    FromStrErr,
 }
 
 pub type ScrapResult<T> = anyhow::Result<T>;

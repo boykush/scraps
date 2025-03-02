@@ -75,6 +75,7 @@ mod tests {
     use url::Url;
 
     use crate::build::model::html::HtmlMetadata;
+    use scraps_libs::lang::LangCode;
 
     use super::*;
 
@@ -84,6 +85,7 @@ mod tests {
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
         let metadata = HtmlMetadata::new(
+            &LangCode::default(),
             "Scrap",
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),

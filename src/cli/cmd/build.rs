@@ -48,8 +48,17 @@ pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapResult<()> {
     } else {
         Url::parse((config.base_url.to_string() + "/").as_str()).unwrap()
     };
+    let lang_code = config
+        .lang_code
+        .map(|c| c.into_lang_code())
+        .unwrap_or_default();
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
-    let html_metadata = HtmlMetadata::new(&config.title, &config.description, &config.favicon);
+    let html_metadata = HtmlMetadata::new(
+        &lang_code,
+        &config.title,
+        &config.description,
+        &config.favicon,
+    );
     let css_metadata = CssMetadata::new(&config.color_scheme.map_or_else(
         || ColorScheme::OsSetting,
         ColorSchemeConfig::into_color_scheme,
