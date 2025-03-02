@@ -1,5 +1,6 @@
 base_url = "https://boykush.github.io/scraps/"
 title = "Scraps Doc"
+lang_code = "en"
 description = "A static site generator that makes it easy to write internal links (Wiki links) in Markdown files."
 favicon = "https://github.com/boykush/scraps/blob/main/assets/logo.png?raw=true"
 timezone = "Asia/Tokyo"
