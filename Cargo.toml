@@ -3,14 +3,14 @@
 edition = "2021"
 authors = ["boykush <boykush315@gmail.com>"]
 license = "MIT"
-version = "0.20.0"
+version = "0.20.1"
 description = "A static site generator that makes it easy to write internal links (Wiki links) in Markdown files."
 homepage = "https://boykush.github.io/scraps"
 repository = "https://github.com/boykush/scraps"
 documentation = "https://boykush.github.io/scraps"
 rust-version = "1.84"
 [workspace.dependencies.scraps_libs]
-version = "0.20.0"
+version = "0.20.1"
 path = "modules/libs"
 [workspace.dependencies]
 anyhow = "1.0"
