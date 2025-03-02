@@ -259,7 +259,6 @@ mod tests {
                         assert!(result3.is_ok());
 
                         let result4 = fs::read_to_string(not_exists_path);
-                        println!("{:?}", result4);
                         assert!(result4.is_err());
 
                         let result5 = fs::read_to_string(html_path_3);

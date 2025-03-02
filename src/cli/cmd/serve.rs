@@ -34,7 +34,6 @@ pub fn run() -> ScrapResult<()> {
         .lang_code
         .map(|c| c.into_lang_code())
         .unwrap_or_default();
-    println!("{:?}", lang_code);
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
     let html_metadata = HtmlMetadata::new(
         &lang_code,
