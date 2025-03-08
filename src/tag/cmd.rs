@@ -103,9 +103,9 @@ mod tests {
                 let tag1: Tag = "Tag1".into();
                 let tag2: Tag = "Tag2".into();
                 let tag3: Tag = "Tag3".into();
-                assert_eq!(tags.values.len(), 3);
+                assert_eq!(tags.clone().into_iter().len(), 3);
                 assert_eq!(
-                    tags.values
+                    tags.clone()
                         .into_iter()
                         .sorted_by_key(|t| t.title.to_string())
                         .collect_vec(),

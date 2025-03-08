@@ -23,7 +23,6 @@ pub fn run() -> ScrapResult<()> {
 
     let (tags, linked_scraps_map) = command.run(&base_url)?;
     let display_tags_result = tags
-        .values
         .into_iter()
         .map(|tag| DisplayTag::new(&tag, &base_url, &linked_scraps_map))
         .collect::<ScrapResult<Vec<DisplayTag>>>();

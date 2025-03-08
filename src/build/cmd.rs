@@ -115,7 +115,7 @@ impl BuildCommand {
         // render tag
         let span_render_tags = span!(Level::INFO, "render_tags").entered();
         let tags = Tags::new(&scraps);
-        tags.values.into_par_iter().try_for_each(|tag| {
+        tags.into_iter().par_bridge().try_for_each(|tag| {
             let _span_render_tag = span!(Level::INFO, "render_tag").entered();
             let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
             tag_render.run(base_url, html_metadata, &tag)
