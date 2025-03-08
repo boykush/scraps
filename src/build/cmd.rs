@@ -12,7 +12,7 @@ use scraps_libs::model::{scrap::Scrap, tags::Tags};
 use scraps_libs::{
     error::{
         anyhow::{bail, Context},
-        ScrapsError, ScrapResult,
+        ScrapResult, ScrapsError,
     },
     git::GitCommand,
 };

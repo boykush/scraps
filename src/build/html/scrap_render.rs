@@ -7,7 +7,7 @@ use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
 use chrono_tz::Tz;
 use scraps_libs::{
-    error::{anyhow::Context, ScrapsError, ScrapResult},
+    error::{anyhow::Context, ScrapResult, ScrapsError},
     model::scrap::Scrap,
 };
 use url::Url;

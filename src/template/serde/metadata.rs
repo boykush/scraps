@@ -1,4 +1,4 @@
-use scraps_libs::error::{anyhow::Context, ScrapsError, ScrapResult};
+use scraps_libs::error::{anyhow::Context, ScrapResult, ScrapsError};
 use serde::Deserialize;
 
 #[derive(Deserialize)]

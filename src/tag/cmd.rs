@@ -1,4 +1,4 @@
-use scraps_libs::error::{ScrapsError, ScrapResult};
+use scraps_libs::error::{ScrapResult, ScrapsError};
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 use std::{
     fs::{self, DirEntry},

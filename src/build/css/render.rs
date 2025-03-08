@@ -1,7 +1,7 @@
 use scraps_libs::error::anyhow::Context;
 use std::{fs::File, path::PathBuf};
 
-use scraps_libs::error::{ScrapsError, ScrapResult};
+use scraps_libs::error::{ScrapResult, ScrapsError};
 
 use crate::build::model::css::CssMetadata;
 

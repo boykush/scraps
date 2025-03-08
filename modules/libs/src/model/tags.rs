@@ -27,9 +27,7 @@ impl Tags {
             .filter(|link| !scrap_titles.contains(link))
             .collect();
 
-        Tags(
-            titles.iter().map(|t| t.clone().into()).collect()
-        )
+        Tags(titles.iter().map(|t| t.clone().into()).collect())
     }
 }
 
@@ -47,9 +45,6 @@ mod tests {
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
         let tags = Tags::new(&scraps);
-        assert_eq!(
-            tags.into_iter().collect::<Vec<Tag>>(),
-            vec!["tag1".into()]
-        )
+        assert_eq!(tags.into_iter().collect::<Vec<Tag>>(), vec!["tag1".into()])
     }
 }

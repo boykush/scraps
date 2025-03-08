@@ -1,7 +1,7 @@
 use std::{fs, path::PathBuf};
 
 use scraps_libs::{
-    error::{anyhow::Context, ScrapsError, ScrapResult},
+    error::{anyhow::Context, ScrapResult, ScrapsError},
     git::GitCommand,
 };
 

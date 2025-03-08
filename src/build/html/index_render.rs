@@ -9,7 +9,7 @@ use crate::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use scraps_libs::{
-    error::{anyhow::Context, ScrapsError, ScrapResult},
+    error::{anyhow::Context, ScrapResult, ScrapsError},
     model::tags::Tags,
 };
 use tracing::{span, Level};

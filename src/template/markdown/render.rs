@@ -6,7 +6,7 @@ use std::{
 
 use chrono_tz::Tz;
 use scraps_libs::{
-    error::{anyhow::Context, ScrapsError, ScrapResult},
+    error::{anyhow::Context, ScrapResult, ScrapsError},
     markdown::frontmatter,
     model::title::Title,
 };

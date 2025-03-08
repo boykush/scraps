@@ -1,6 +1,6 @@
 use chrono_tz::Tz;
 use config::Config;
-use scraps_libs::error::{anyhow::Context, ScrapsError, ScrapResult};
+use scraps_libs::error::{anyhow::Context, ScrapResult, ScrapsError};
 use serde::Deserialize;
 use url::Url;
 
