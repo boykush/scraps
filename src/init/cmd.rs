@@ -1,7 +1,7 @@
 use std::{fs, path::PathBuf};
 
 use scraps_libs::{
-    error::{anyhow::Context, ScrapError, ScrapResult},
+    error::{anyhow::Context, ScrapResult, ScrapsError},
     git::GitCommand,
 };
 
@@ -20,11 +20,11 @@ impl<GC: GitCommand> InitCommand<GC> {
         let config_toml_file = project_dir.join("Config.toml");
         let gitignore_file = project_dir.join(".gitignore");
 
-        fs::create_dir_all(project_dir).context(ScrapError::FileWrite)?;
-        fs::create_dir(scraps_dir).context(ScrapError::FileWrite)?;
+        fs::create_dir_all(project_dir).context(ScrapsError::FileWrite)?;
+        fs::create_dir(scraps_dir).context(ScrapsError::FileWrite)?;
         fs::write(config_toml_file, include_str!("builtins/Config.toml"))
-            .context(ScrapError::FileWrite)?;
-        fs::write(gitignore_file, "public").context(ScrapError::FileWrite)?;
+            .context(ScrapsError::FileWrite)?;
+        fs::write(gitignore_file, "public").context(ScrapsError::FileWrite)?;
         self.git_command.init(project_dir)
     }
 }

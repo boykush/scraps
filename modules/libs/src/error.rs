@@ -3,7 +3,7 @@ pub extern crate anyhow;
 use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq)]
-pub enum ScrapError {
+pub enum ScrapsError {
     #[error("Failed when load config")]
     ConfigLoad,
 

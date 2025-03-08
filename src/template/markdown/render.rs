@@ -6,7 +6,7 @@ use std::{
 
 use chrono_tz::Tz;
 use scraps_libs::{
-    error::{anyhow::Context, ScrapError, ScrapResult},
+    error::{anyhow::Context, ScrapResult, ScrapsError},
     markdown::frontmatter,
     model::title::Title,
 };
@@ -40,14 +40,14 @@ impl MarkdownRender {
         let template = if tera.get_template_names().any(|t| t == template_file_name) {
             Ok(template_file_name.as_str())
         } else {
-            Err(ScrapError::NotFoundTemplate)
+            Err(ScrapsError::NotFoundTemplate)
         }?;
 
         context.insert("timezone", &timezone);
 
         let markdown_text = tera
             .render(template, &context)
-            .context(ScrapError::PublicRender)?;
+            .context(ScrapsError::PublicRender)?;
 
         let scrap_title = input_scrap_title
             .clone()
@@ -59,15 +59,15 @@ impl MarkdownRender {
                     .transpose()?;
                 metadata_result
                     .map(|t| Ok(t.title))
-                    .unwrap_or(Err(ScrapError::RequiredTemplateTitle))
+                    .unwrap_or(Err(ScrapsError::RequiredTemplateTitle))
             })?;
         let scrap_file_name = format!("{}.md", scrap_title);
         let ignored_metadata_text = frontmatter::ignore_metadata(&markdown_text);
 
         let mut wtr = File::create(self.scraps_dir_path.join(&scrap_file_name))
-            .context(ScrapError::PublicRender)?;
+            .context(ScrapsError::PublicRender)?;
         wtr.write(ignored_metadata_text.as_bytes())
-            .context(ScrapError::PublicRender)?;
-        wtr.flush().context(ScrapError::FileWrite)
+            .context(ScrapsError::PublicRender)?;
+        wtr.flush().context(ScrapsError::FileWrite)
     }
 }

@@ -1,6 +1,6 @@
 use crate::build::model::html::HtmlMetadata;
 use once_cell::sync::Lazy;
-use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
+use scraps_libs::error::{anyhow::Context, ScrapResult, ScrapsError};
 use tera::Tera;
 use url::Url;
 
@@ -21,12 +21,12 @@ static TAG_TERA: Lazy<Tera> = Lazy::new(|| {
     tera
 });
 
-pub fn init(
+pub fn base(
     base_url: &Url,
     metadata: &HtmlMetadata,
     template_dir: &str,
 ) -> ScrapResult<(Tera, tera::Context)> {
-    let mut tera = Tera::new(template_dir).context(ScrapError::PublicRender)?;
+    let mut tera = Tera::new(template_dir).context(ScrapsError::PublicRender)?;
     tera.extend(&TAG_TERA).unwrap();
 
     let mut context = tera::Context::new();

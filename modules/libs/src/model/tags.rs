@@ -2,9 +2,16 @@ use std::collections::HashSet;
 
 use super::{scrap::Scrap, tag::Tag, title::Title};
 
-#[derive(PartialEq, Debug)]
-pub struct Tags {
-    pub values: HashSet<Tag>,
+#[derive(PartialEq, Debug, Clone)]
+pub struct Tags(HashSet<Tag>);
+
+impl IntoIterator for Tags {
+    type Item = Tag;
+    type IntoIter = std::collections::hash_set::IntoIter<Tag>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
 }
 
 impl Tags {
@@ -20,9 +27,7 @@ impl Tags {
             .filter(|link| !scrap_titles.contains(link))
             .collect();
 
-        Tags {
-            values: titles.iter().map(|t| t.clone().into()).collect(),
-        }
+        Tags(titles.iter().map(|t| t.clone().into()).collect())
     }
 }
 
@@ -40,9 +45,6 @@ mod tests {
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
         let tags = Tags::new(&scraps);
-        assert_eq!(
-            tags.values.into_iter().collect::<Vec<Tag>>(),
-            vec!["tag1".into()]
-        )
+        assert_eq!(tags.into_iter().collect::<Vec<Tag>>(), vec!["tag1".into()])
     }
 }

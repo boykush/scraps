@@ -1,6 +1,6 @@
 use chrono_tz::Tz;
 use config::Config;
-use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
+use scraps_libs::error::{anyhow::Context, ScrapResult, ScrapsError};
 use serde::Deserialize;
 use url::Url;
 
@@ -25,9 +25,9 @@ impl ScrapConfig {
         let config = Config::builder()
             .add_source(config::File::with_name("Config.toml"))
             .build()
-            .context(ScrapError::ConfigLoad)?;
+            .context(ScrapsError::ConfigLoad)?;
         config
             .try_deserialize::<ScrapConfig>()
-            .context(ScrapError::ConfigLoad)
+            .context(ScrapsError::ConfigLoad)
     }
 }

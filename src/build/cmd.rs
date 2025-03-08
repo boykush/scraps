@@ -12,7 +12,7 @@ use scraps_libs::model::{scrap::Scrap, tags::Tags};
 use scraps_libs::{
     error::{
         anyhow::{bail, Context},
-        ScrapError, ScrapResult,
+        ScrapResult, ScrapsError,
     },
     git::GitCommand,
 };
@@ -62,7 +62,7 @@ impl BuildCommand {
     ) -> ScrapResult<usize> {
         let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
 
-        let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapError::FileLoad)?;
+        let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapsError::FileLoad)?;
 
         let paths = read_dir
             .map(|entry_res| {
@@ -115,7 +115,7 @@ impl BuildCommand {
         // render tag
         let span_render_tags = span!(Level::INFO, "render_tags").entered();
         let tags = Tags::new(&scraps);
-        tags.values.into_par_iter().try_for_each(|tag| {
+        tags.into_iter().par_bridge().try_for_each(|tag| {
             let _span_render_tag = span!(Level::INFO, "render_tag").entered();
             let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
             tag_render.run(base_url, html_metadata, &tag)
@@ -142,7 +142,7 @@ impl BuildCommand {
     fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapResult<Option<PathBuf>> {
         if let Ok(file_type) = dir_entry.file_type() {
             if file_type.is_dir() {
-                bail!(ScrapError::FileLoad)
+                bail!(ScrapsError::FileLoad)
             }
         };
         if dir_entry.path().extension() == Some("md".as_ref()) {
@@ -161,10 +161,10 @@ impl BuildCommand {
         let span_convert_to_scrap = span!(Level::INFO, "convert_to_scrap").entered();
         let file_prefix = path
             .file_stem()
-            .ok_or(ScrapError::FileLoad)
+            .ok_or(ScrapsError::FileLoad)
             .map(|o| o.to_str())
-            .and_then(|fp| fp.ok_or(ScrapError::FileLoad))?;
-        let md_text = fs::read_to_string(path).context(ScrapError::FileLoad)?;
+            .and_then(|fp| fp.ok_or(ScrapsError::FileLoad))?;
+        let md_text = fs::read_to_string(path).context(ScrapsError::FileLoad)?;
         let scrap = Scrap::new(base_url, file_prefix, &md_text);
         let commited_ts = git_command.commited_ts(path)?;
         span_convert_to_scrap.exit();

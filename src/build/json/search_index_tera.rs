@@ -1,5 +1,5 @@
 use once_cell::sync::Lazy;
-use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
+use scraps_libs::error::{anyhow::Context, ScrapResult, ScrapsError};
 use tera::Tera;
 use url::Url;
 
@@ -13,8 +13,8 @@ static SEARCH_INDEX_TERA: Lazy<Tera> = Lazy::new(|| {
     tera
 });
 
-pub fn init(base_url: &Url, template_dir: &str) -> ScrapResult<(Tera, tera::Context)> {
-    let mut tera = Tera::new(template_dir).context(ScrapError::PublicRender)?;
+pub fn base(base_url: &Url, template_dir: &str) -> ScrapResult<(Tera, tera::Context)> {
+    let mut tera = Tera::new(template_dir).context(ScrapsError::PublicRender)?;
     tera.extend(&SEARCH_INDEX_TERA).unwrap();
 
     let mut context = tera::Context::new();

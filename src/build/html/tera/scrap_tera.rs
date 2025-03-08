@@ -1,7 +1,7 @@
 use crate::build::model::html::HtmlMetadata;
 use chrono_tz::Tz;
 use once_cell::sync::Lazy;
-use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
+use scraps_libs::error::{anyhow::Context, ScrapResult, ScrapsError};
 use tera::Tera;
 use url::Url;
 
@@ -25,13 +25,13 @@ static SCRAP_TERA: Lazy<Tera> = Lazy::new(|| {
     tera
 });
 
-pub fn init(
+pub fn base(
     base_url: &Url,
     timezone: Tz,
     metadata: &HtmlMetadata,
     template_dir: &str,
 ) -> ScrapResult<(Tera, tera::Context)> {
-    let mut tera = Tera::new(template_dir).context(ScrapError::PublicRender)?;
+    let mut tera = Tera::new(template_dir).context(ScrapsError::PublicRender)?;
     tera.extend(&SCRAP_TERA).unwrap();
 
     let mut context = tera::Context::new();

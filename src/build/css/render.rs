@@ -1,7 +1,7 @@
 use scraps_libs::error::anyhow::Context;
 use std::{fs::File, path::PathBuf};
 
-use scraps_libs::error::{ScrapError, ScrapResult};
+use scraps_libs::error::{ScrapResult, ScrapsError};
 
 use crate::build::model::css::CssMetadata;
 
@@ -21,7 +21,7 @@ impl CSSRender {
     }
 
     pub fn render_main(&self, css_metadata: &CssMetadata) -> ScrapResult<()> {
-        let (tera, context) = css_tera::init(
+        let (tera, context) = css_tera::base(
             self.static_dir_path.join("*.css").to_str().unwrap(),
             &css_metadata.color_scheme,
         )?;
@@ -31,9 +31,9 @@ impl CSSRender {
             "__builtins/main.css"
         };
         let wtr = File::create(self.public_dir_path.join("main.css"))
-            .context(ScrapError::PublicRender)?;
+            .context(ScrapsError::PublicRender)?;
         tera.render_to(template_name, &context, wtr)
-            .context(ScrapError::PublicRender)
+            .context(ScrapsError::PublicRender)
     }
 }
 

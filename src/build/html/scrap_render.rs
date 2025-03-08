@@ -7,7 +7,7 @@ use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
 use chrono_tz::Tz;
 use scraps_libs::{
-    error::{anyhow::Context, ScrapError, ScrapResult},
+    error::{anyhow::Context, ScrapResult, ScrapsError},
     model::scrap::Scrap,
 };
 use url::Url;
@@ -30,7 +30,7 @@ impl ScrapRender {
         scraps: &Vec<Scrap>,
     ) -> ScrapResult<ScrapRender> {
         let public_scraps_dir_path = &public_dir_path.join("scraps");
-        fs::create_dir_all(public_scraps_dir_path).context(ScrapError::FileWrite)?;
+        fs::create_dir_all(public_scraps_dir_path).context(ScrapsError::FileWrite)?;
 
         Ok(ScrapRender {
             static_dir_path: static_dir_path.to_owned(),
@@ -46,7 +46,7 @@ impl ScrapRender {
         metadata: &HtmlMetadata,
         scrap_with_commited_ts: &ScrapWithCommitedTs,
     ) -> ScrapResult<()> {
-        let (tera, mut context) = scrap_tera::init(
+        let (tera, mut context) = scrap_tera::base(
             base_url,
             timezone,
             metadata,
@@ -63,9 +63,9 @@ impl ScrapRender {
         // render html
         let file_name = &format!("{}.html", &scrap_with_commited_ts.scrap().title.slug);
         let wtr = File::create(self.public_scraps_dir_path.join(file_name))
-            .context(ScrapError::FileWrite)?;
+            .context(ScrapsError::FileWrite)?;
         tera.render_to("__builtins/scrap.html", &context, wtr)
-            .context(ScrapError::PublicRender)
+            .context(ScrapsError::PublicRender)
     }
 }
 
