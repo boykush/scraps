@@ -47,7 +47,7 @@ impl TagsIndexRender {
         metadata: &HtmlMetadata,
         tags: &TagsTera,
     ) -> ScrapResult<()> {
-        let (tera, mut context) = tags_index_tera::init(
+        let (tera, mut context) = tags_index_tera::base(
             base_url,
             metadata,
             self.static_dir_path.join("*.html").to_str().unwrap(),

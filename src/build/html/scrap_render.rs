@@ -46,7 +46,7 @@ impl ScrapRender {
         metadata: &HtmlMetadata,
         scrap_with_commited_ts: &ScrapWithCommitedTs,
     ) -> ScrapResult<()> {
-        let (tera, mut context) = scrap_tera::init(
+        let (tera, mut context) = scrap_tera::base(
             base_url,
             timezone,
             metadata,

@@ -16,7 +16,7 @@ static CSS_TERA: Lazy<Tera> = Lazy::new(|| {
     tera
 });
 
-pub fn init(template_dir: &str, color_scheme: &ColorScheme) -> ScrapResult<(Tera, tera::Context)> {
+pub fn base(template_dir: &str, color_scheme: &ColorScheme) -> ScrapResult<(Tera, tera::Context)> {
     let mut tera = Tera::new(template_dir).context(ScrapError::PublicRender)?;
     tera.extend(&CSS_TERA).unwrap();
 

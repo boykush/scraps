@@ -21,7 +21,7 @@ impl CSSRender {
     }
 
     pub fn render_main(&self, css_metadata: &CssMetadata) -> ScrapResult<()> {
-        let (tera, context) = css_tera::init(
+        let (tera, context) = css_tera::base(
             self.static_dir_path.join("*.css").to_str().unwrap(),
             &css_metadata.color_scheme,
         )?;

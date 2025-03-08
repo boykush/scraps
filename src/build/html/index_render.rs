@@ -88,7 +88,7 @@ impl IndexRender {
         pointer: &PagePointer,
     ) -> ScrapResult<()> {
         let span_render_index = span!(Level::INFO, "render_index").entered();
-        let (tera, mut context) = index_tera::init(
+        let (tera, mut context) = index_tera::base(
             base_url,
             metadata,
             self.static_dir_path.join("*.html").to_str().unwrap(),

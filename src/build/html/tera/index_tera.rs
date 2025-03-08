@@ -24,7 +24,7 @@ static INDEX_TERA: Lazy<Tera> = Lazy::new(|| {
     tera
 });
 
-pub fn init(
+pub fn base(
     base_url: &Url,
     metadata: &HtmlMetadata,
     template_dir: &str,

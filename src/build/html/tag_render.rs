@@ -37,7 +37,7 @@ impl TagRender {
     }
 
     pub fn run(&self, base_url: &Url, metadata: &HtmlMetadata, tag: &Tag) -> ScrapResult<()> {
-        let (tera, mut context) = tag_tera::init(
+        let (tera, mut context) = tag_tera::base(
             base_url,
             metadata,
             self.static_dir_path.join("*.html").to_str().unwrap(),

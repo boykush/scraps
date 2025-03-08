@@ -31,7 +31,7 @@ impl SearchIndexRender {
         base_url: &Url,
         scraps: &SearchIndexScrapsTera,
     ) -> ScrapResult<()> {
-        let (tera, mut context) = search_index_tera::init(
+        let (tera, mut context) = search_index_tera::base(
             base_url,
             self.static_dir_path.join("*.json").to_str().unwrap(),
         )?;
