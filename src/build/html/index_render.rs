@@ -9,7 +9,7 @@ use crate::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use scraps_libs::{
-    error::{anyhow::Context, ScrapError, ScrapResult},
+    error::{anyhow::Context, ScrapsError, ScrapResult},
     model::tags::Tags,
 };
 use tracing::{span, Level};
@@ -29,7 +29,7 @@ pub struct IndexRender {
 
 impl IndexRender {
     pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> ScrapResult<IndexRender> {
-        fs::create_dir_all(public_dir_path).context(ScrapError::FileWrite)?;
+        fs::create_dir_all(public_dir_path).context(ScrapsError::FileWrite)?;
 
         Ok(IndexRender {
             static_dir_path: static_dir_path.to_path_buf(),
@@ -105,9 +105,9 @@ impl IndexRender {
         context.insert("prev", &pointer.prev);
         context.insert("next", &pointer.next);
         let wtr = File::create(self.public_dir_path.join(pointer.current_file_name()))
-            .context(ScrapError::PublicRender)?;
+            .context(ScrapsError::PublicRender)?;
         tera.render_to(template_name, &context, wtr)
-            .context(ScrapError::PublicRender)?;
+            .context(ScrapsError::PublicRender)?;
         span_render_index.exit();
         Ok(())
     }

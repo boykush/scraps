@@ -3,7 +3,7 @@ use std::{
     process::{Command, Stdio},
 };
 
-use super::error::{anyhow::Context, ScrapError, ScrapResult};
+use super::error::{anyhow::Context, ScrapsError, ScrapResult};
 
 pub trait GitCommand {
     fn init(&self, path: &Path) -> ScrapResult<()>;
@@ -32,7 +32,7 @@ impl GitCommand for GitCommandImpl {
             .arg("init")
             .output()
             .map(|_| ())
-            .context(ScrapError::GitInit)
+            .context(ScrapsError::GitInit)
     }
 
     fn commited_ts(&self, path: &Path) -> ScrapResult<Option<i64>> {
@@ -43,7 +43,7 @@ impl GitCommand for GitCommandImpl {
             .arg(path)
             .stdout(Stdio::piped())
             .output()
-            .context(ScrapError::GitLog)?;
+            .context(ScrapsError::GitLog)?;
 
         let output_str = String::from_utf8_lossy(&output.stdout);
         let commited_ts = output_str.trim().parse::<i64>().ok();

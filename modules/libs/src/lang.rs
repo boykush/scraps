@@ -1,4 +1,4 @@
-use super::error::ScrapError;
+use super::error::ScrapsError;
 use iso639_1::Iso639_1;
 use std::fmt;
 
@@ -6,12 +6,12 @@ use std::fmt;
 pub struct LangCode(Iso639_1);
 
 impl std::str::FromStr for LangCode {
-    type Err = ScrapError;
+    type Err = ScrapsError;
 
-    fn from_str(s: &str) -> Result<Self, ScrapError> {
+    fn from_str(s: &str) -> Result<Self, ScrapsError> {
         Iso639_1::try_from(s)
             .map(LangCode)
-            .map_err(|_| ScrapError::FromStrErr)
+            .map_err(|_| ScrapsError::FromStrErr)
     }
 }
 

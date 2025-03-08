@@ -1,5 +1,5 @@
 use once_cell::sync::Lazy;
-use scraps_libs::error::{anyhow::Context, ScrapError, ScrapResult};
+use scraps_libs::error::{anyhow::Context, ScrapsError, ScrapResult};
 use tera::Tera;
 
 use crate::build::model::color_scheme::ColorScheme;
@@ -17,7 +17,7 @@ static CSS_TERA: Lazy<Tera> = Lazy::new(|| {
 });
 
 pub fn base(template_dir: &str, color_scheme: &ColorScheme) -> ScrapResult<(Tera, tera::Context)> {
-    let mut tera = Tera::new(template_dir).context(ScrapError::PublicRender)?;
+    let mut tera = Tera::new(template_dir).context(ScrapsError::PublicRender)?;
     tera.extend(&CSS_TERA).unwrap();
 
     let mut context = tera::Context::new();
