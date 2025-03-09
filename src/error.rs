@@ -17,14 +17,11 @@ pub enum ScrapsError {
     #[error("Build error: {0}")]
     Build(#[from] BuildError),
 
+    #[error("CLI error: {0}")]
+    Cli(#[from] CliError),
+
     #[error("Failed to read scraps")]
     ReadScraps,
-
-    #[error("Failed when load config")]
-    ConfigLoad,
-
-    #[error("Not display data on cli")]
-    CliDisplay,
 }
 
 #[derive(Error, Debug)]
@@ -54,7 +51,7 @@ pub enum InitError {
     CreateDirectory,
 
     #[error("Failed to write file: {0}")]
-    WriteFailure(PathBuf)
+    WriteFailure(PathBuf),
 }
 
 #[derive(Error, Debug)]
@@ -80,7 +77,15 @@ pub enum BuildError {
 
 #[derive(Error, Debug)]
 pub enum ServeError {
-
     #[error("Failed to load file")]
     LoadFile,
+}
+
+#[derive(Error, Debug)]
+pub enum CliError {
+    #[error("Not display data on cli")]
+    Display,
+
+    #[error("Failed when load config")]
+    ConfigLoad,
 }

@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
+use crate::error::{anyhow::Context, CliError, ScrapsResult};
 use colored::Colorize;
 use itertools::Itertools;
 use scraps_libs::model::{tag::Tag, title::Title};
@@ -22,7 +22,7 @@ impl DisplayTag {
     ) -> ScrapsResult<DisplayTag> {
         let url = base_url
             .join(&format!("scraps/{}.html", tag.title.slug))
-            .context(ScrapsError::CliDisplay)?;
+            .context(CliError::Display)?;
         let linked_count = linked_scraps_map.linked_by(&tag.title).len();
 
         Ok(DisplayTag {

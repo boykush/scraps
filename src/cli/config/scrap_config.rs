@@ -1,4 +1,4 @@
-use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
+use crate::error::{anyhow::Context, CliError, ScrapsResult};
 use chrono_tz::Tz;
 use config::Config;
 use serde::Deserialize;
@@ -25,9 +25,9 @@ impl ScrapConfig {
         let config = Config::builder()
             .add_source(config::File::with_name("Config.toml"))
             .build()
-            .context(ScrapsError::ConfigLoad)?;
+            .context(CliError::ConfigLoad)?;
         config
             .try_deserialize::<ScrapConfig>()
-            .context(ScrapsError::ConfigLoad)
+            .context(CliError::ConfigLoad)
     }
 }

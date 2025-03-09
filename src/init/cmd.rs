@@ -1,4 +1,4 @@
-use crate::error::{anyhow::Context, InitError, ScrapsError, ScrapsResult};
+use crate::error::{anyhow::Context, InitError, ScrapsResult};
 use std::{fs, path::PathBuf};
 
 use scraps_libs::git::GitCommand;
@@ -22,7 +22,8 @@ impl<GC: GitCommand> InitCommand<GC> {
         fs::create_dir(scraps_dir).context(InitError::CreateDirectory)?;
         fs::write(config_toml_file, include_str!("builtins/Config.toml"))
             .context(InitError::WriteFailure(config_toml_file.clone()))?;
-        fs::write(gitignore_file, "public").context(InitError::WriteFailure(gitignore_file.clone()))?;
+        fs::write(gitignore_file, "public")
+            .context(InitError::WriteFailure(gitignore_file.clone()))?;
         self.git_command
             .init(project_dir)
             .context(InitError::GitInit)

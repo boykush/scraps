@@ -96,7 +96,7 @@ impl Service<Request<Incoming>> for ScrapsService {
         let result = match decoded_file_name {
             Ok(name) => {
                 let file_path = &resolved_index_path.with_file_name(name.to_string());
-                let file = File::open(&file_path).context(ServeError::LoadFile);
+                let file = File::open(file_path).context(ServeError::LoadFile);
                 let mime_type = Self::gen_mime_type_from(file_path.as_path());
                 match file {
                     Ok(mut f) => Self::mk_page_response(mime_type, &mut f),
