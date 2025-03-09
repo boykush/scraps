@@ -1,6 +1,6 @@
-use crate::build::model::html::HtmlMetadata;
 use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
+use crate::usecase::build::model::html::HtmlMetadata;
 use once_cell::sync::Lazy;
 use tera::Tera;
 use url::Url;

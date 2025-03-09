@@ -8,7 +8,7 @@ use crate::error::{
     anyhow::{bail, Context},
     ScrapsError, ScrapsResult,
 };
-use crate::{build::css::render::CSSRender, error::BuildError};
+use crate::{error::BuildError, usecase::build::css::render::CSSRender};
 use chrono_tz::Tz;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
@@ -177,7 +177,7 @@ impl BuildCommand {
 mod tests {
     use std::path::Path;
 
-    use crate::build::model::{color_scheme::ColorScheme, paging::Paging, sort::SortKey};
+    use crate::usecase::build::model::{color_scheme::ColorScheme, paging::Paging, sort::SortKey};
 
     use super::*;
     use scraps_libs::{

@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use crate::build::model::color_scheme::ColorScheme;
+use crate::usecase::build::model::color_scheme::ColorScheme;
 
 #[derive(Serialize)]
 #[serde(remote = "ColorScheme")]

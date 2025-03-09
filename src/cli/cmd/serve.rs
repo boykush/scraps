@@ -4,17 +4,17 @@ use url::Url;
 
 use crate::error::ScrapsResult;
 use crate::{
-    build::{
+    cli::config::{
+        color_scheme::ColorSchemeConfig, scrap_config::ScrapConfig, sort_key::SortKeyConfig,
+    },
+    serve::cmd::ServeCommand,
+    usecase::build::{
         cmd::BuildCommand,
         model::{
             color_scheme::ColorScheme, css::CssMetadata, html::HtmlMetadata, list_view_configs,
             paging::Paging, sort::SortKey,
         },
     },
-    cli::config::{
-        color_scheme::ColorSchemeConfig, scrap_config::ScrapConfig, sort_key::SortKeyConfig,
-    },
-    serve::cmd::ServeCommand,
 };
 use scraps_libs::git::GitCommandImpl;
 

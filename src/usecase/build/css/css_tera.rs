@@ -2,7 +2,7 @@ use crate::error::{anyhow::Context, BuildError, ScrapsResult};
 use once_cell::sync::Lazy;
 use tera::Tera;
 
-use crate::build::model::color_scheme::ColorScheme;
+use crate::usecase::build::model::color_scheme::ColorScheme;
 
 use super::serde::color_scheme::ColorSchemeTera;
 

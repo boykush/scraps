@@ -2,15 +2,15 @@ use std::fs;
 use std::path::Path;
 use std::{fs::File, path::PathBuf};
 
-use crate::build::model::html::HtmlMetadata;
-use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
+use crate::usecase::build::model::html::HtmlMetadata;
+use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::tag::Tag;
 use url::Url;
 
-use crate::build::html::tera::tag_tera;
+use crate::usecase::build::html::tera::tag_tera;
 
 use super::serde::link_scraps::LinkScrapsTera;
 use super::serde::tag::TagTera;

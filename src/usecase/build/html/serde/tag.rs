@@ -1,4 +1,4 @@
-use crate::build::model::linked_scraps_map::LinkedScrapsMap;
+use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
 use scraps_libs::model::tag::Tag;
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]

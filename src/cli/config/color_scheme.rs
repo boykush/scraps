@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::build::model::color_scheme::ColorScheme;
+use crate::usecase::build::model::color_scheme::ColorScheme;
 
 #[derive(Deserialize)]
 #[serde(remote = "ColorScheme", rename_all = "snake_case")]

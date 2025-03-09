@@ -6,16 +6,16 @@ use tracing::{span, Level};
 use tracing_subscriber::fmt::format::FmtSpan;
 use url::Url;
 
-use crate::build::cmd::BuildCommand;
-use crate::build::model::color_scheme::ColorScheme;
-use crate::build::model::css::CssMetadata;
-use crate::build::model::html::HtmlMetadata;
-use crate::build::model::list_view_configs::ListViewConfigs;
-use crate::build::model::paging::Paging;
-use crate::build::model::sort::SortKey;
 use crate::cli::config::color_scheme::ColorSchemeConfig;
 use crate::cli::config::sort_key::SortKeyConfig;
 use crate::error::ScrapsResult;
+use crate::usecase::build::cmd::BuildCommand;
+use crate::usecase::build::model::color_scheme::ColorScheme;
+use crate::usecase::build::model::css::CssMetadata;
+use crate::usecase::build::model::html::HtmlMetadata;
+use crate::usecase::build::model::list_view_configs::ListViewConfigs;
+use crate::usecase::build::model::paging::Paging;
+use crate::usecase::build::model::sort::SortKey;
 
 use crate::cli::config::scrap_config::ScrapConfig;
 use scraps_libs::git::GitCommandImpl;

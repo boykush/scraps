@@ -1,4 +1,4 @@
-mod build;
+mod usecase;
 mod cli;
 mod error;
 mod init;

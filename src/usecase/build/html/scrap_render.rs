@@ -2,16 +2,16 @@ use std::fs;
 use std::path::Path;
 use std::{fs::File, path::PathBuf};
 
-use crate::build::model::html::HtmlMetadata;
-use crate::build::model::linked_scraps_map::LinkedScrapsMap;
-use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
 use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
+use crate::usecase::build::model::html::HtmlMetadata;
+use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
+use crate::usecase::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
 use chrono_tz::Tz;
 use scraps_libs::model::scrap::Scrap;
 use url::Url;
 
-use crate::build::html::tera::scrap_tera;
+use crate::usecase::build::html::tera::scrap_tera;
 
 use super::serde::link_scraps::LinkScrapsTera;
 use super::serde::scrap_detail::ScrapDetailTera;
@@ -73,7 +73,7 @@ mod tests {
     use std::fs;
     use url::Url;
 
-    use crate::build::model::html::HtmlMetadata;
+    use crate::usecase::build::model::html::HtmlMetadata;
     use scraps_libs::lang::LangCode;
 
     use super::*;

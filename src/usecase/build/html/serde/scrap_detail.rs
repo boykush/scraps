@@ -1,6 +1,6 @@
 use url::Url;
 
-use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
+use crate::usecase::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 pub struct ScrapDetailTera {

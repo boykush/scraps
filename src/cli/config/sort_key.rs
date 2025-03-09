@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::build::model::sort::SortKey;
+use crate::usecase::build::model::sort::SortKey;
 
 #[derive(Deserialize)]
 #[serde(remote = "SortKey", rename_all = "snake_case")]

@@ -1,11 +1,12 @@
-use crate::build::model::html::HtmlMetadata;
 use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
+use crate::usecase::build::model::html::HtmlMetadata;
+use chrono_tz::Tz;
 use once_cell::sync::Lazy;
 use tera::Tera;
 use url::Url;
 
-static TAG_TERA: Lazy<Tera> = Lazy::new(|| {
+static SCRAP_TERA: Lazy<Tera> = Lazy::new(|| {
     let mut tera = Tera::default();
     tera.add_raw_templates(vec![
         (
@@ -16,7 +17,10 @@ static TAG_TERA: Lazy<Tera> = Lazy::new(|| {
             "__builtins/macros.html",
             include_str!("../builtins/macros.html"),
         ),
-        ("__builtins/tag.html", include_str!("../builtins/tag.html")),
+        (
+            "__builtins/scrap.html",
+            include_str!("../builtins/scrap.html"),
+        ),
     ])
     .unwrap();
     tera
@@ -24,15 +28,17 @@ static TAG_TERA: Lazy<Tera> = Lazy::new(|| {
 
 pub fn base(
     base_url: &Url,
+    timezone: Tz,
     metadata: &HtmlMetadata,
     template_dir: &str,
 ) -> ScrapsResult<(Tera, tera::Context)> {
     let mut tera = Tera::new(template_dir).context(BuildError::RenderHtml)?;
-    tera.extend(&TAG_TERA).unwrap();
+    tera.extend(&SCRAP_TERA).unwrap();
 
     let mut context = tera::Context::new();
     context.insert("base_url", &base_url);
     context.insert("lang_code", &metadata.lang_code().to_string());
+    context.insert("timezone", &timezone);
     context.insert("title", &metadata.title());
     context.insert("description", &metadata.description());
     context.insert("favicon", &metadata.favicon());

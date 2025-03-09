@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use url::Url;
 
-use crate::build::model::{
+use crate::usecase::build::model::{
     linked_scraps_map::LinkedScrapsMap,
     scrap_with_commited_ts::{ScrapWithCommitedTs, ScrapsWithCommitedTs},
     sort::SortKey,

@@ -2,19 +2,19 @@ use std::fs;
 use std::path::Path;
 use std::{fs::File, path::PathBuf};
 
-use crate::build::model::html::HtmlMetadata;
-use crate::build::model::linked_scraps_map::LinkedScrapsMap;
-use crate::build::model::list_view_configs::ListViewConfigs;
-use crate::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
 use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
+use crate::usecase::build::model::html::HtmlMetadata;
+use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
+use crate::usecase::build::model::list_view_configs::ListViewConfigs;
+use crate::usecase::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use scraps_libs::model::tags::Tags;
 use tracing::{span, Level};
 use url::Url;
 
-use crate::build::html::tera::index_tera;
+use crate::usecase::build::html::tera::index_tera;
 
 use super::page_pointer::PagePointer;
 use super::serde::index_scraps::IndexScrapsTera;
@@ -118,9 +118,9 @@ mod tests {
     use url::Url;
 
     use super::*;
-    use crate::build::model::paging::Paging;
-    use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
-    use crate::build::model::sort::SortKey;
+    use crate::usecase::build::model::paging::Paging;
+    use crate::usecase::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
+    use crate::usecase::build::model::sort::SortKey;
     use scraps_libs::lang::LangCode;
     use scraps_libs::model::scrap::Scrap;
     use scraps_libs::tests::FileResource;

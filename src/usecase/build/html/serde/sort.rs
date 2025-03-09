@@ -1,4 +1,4 @@
-use crate::build::model::sort::SortKey;
+use crate::usecase::build::model::sort::SortKey;
 
 #[derive(serde::Serialize)]
 #[serde(remote = "SortKey")]

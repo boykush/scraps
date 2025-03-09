@@ -8,7 +8,7 @@ use std::{
     path::PathBuf,
 };
 
-use crate::build::model::linked_scraps_map::LinkedScrapsMap;
+use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
 use url::Url;
 
 pub struct TagCommand {

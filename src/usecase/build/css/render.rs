@@ -3,7 +3,7 @@ use std::{fs::File, path::PathBuf};
 
 use crate::error::{BuildError, ScrapsResult};
 
-use crate::build::model::css::CssMetadata;
+use crate::usecase::build::model::css::CssMetadata;
 
 use super::css_tera;
 
@@ -41,7 +41,7 @@ impl CSSRender {
 mod tests {
     use scraps_libs::tests::{DirResource, FileResource};
 
-    use crate::build::model::color_scheme::ColorScheme;
+    use crate::usecase::build::model::color_scheme::ColorScheme;
 
     use super::*;
     use std::fs;
