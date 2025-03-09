@@ -25,7 +25,7 @@ impl<GC: GitCommand> InitCommand<GC> {
         fs::write(config_toml_file, include_str!("builtins/Config.toml"))
             .context(ScrapsError::FileWrite)?;
         fs::write(gitignore_file, "public").context(ScrapsError::FileWrite)?;
-        self.git_command.init(project_dir)
+        self.git_command.init(project_dir).context(ScrapsError::GitInit)
     }
 }
 
