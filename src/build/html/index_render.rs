@@ -9,7 +9,7 @@ use crate::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use scraps_libs::{
-    error::{anyhow::Context, ScrapResult, ScrapsError},
+    error::{anyhow::Context, ScrapsResult, ScrapsError},
     model::tags::Tags,
 };
 use tracing::{span, Level};
@@ -28,7 +28,7 @@ pub struct IndexRender {
 }
 
 impl IndexRender {
-    pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> ScrapResult<IndexRender> {
+    pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> ScrapsResult<IndexRender> {
         fs::create_dir_all(public_dir_path).context(ScrapsError::FileWrite)?;
 
         Ok(IndexRender {
@@ -43,7 +43,7 @@ impl IndexRender {
         metadata: &HtmlMetadata,
         list_view_configs: &ListViewConfigs,
         scraps_with_commited_ts: &ScrapsWithCommitedTs,
-    ) -> ScrapResult<()> {
+    ) -> ScrapsResult<()> {
         let scraps = &scraps_with_commited_ts.to_scraps();
         let linked_scraps_map = LinkedScrapsMap::new(scraps);
         let sorted_scraps = IndexScrapsTera::new_with_sort(
@@ -86,7 +86,7 @@ impl IndexRender {
         tags: &TagsTera,
         paginated_scraps: &IndexScrapsTera,
         pointer: &PagePointer,
-    ) -> ScrapResult<()> {
+    ) -> ScrapsResult<()> {
         let span_render_index = span!(Level::INFO, "render_index").entered();
         let (tera, mut context) = index_tera::base(
             base_url,

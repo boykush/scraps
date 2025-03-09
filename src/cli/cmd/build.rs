@@ -15,12 +15,12 @@ use crate::build::model::paging::Paging;
 use crate::build::model::sort::SortKey;
 use crate::cli::config::color_scheme::ColorSchemeConfig;
 use crate::cli::config::sort_key::SortKeyConfig;
-use scraps_libs::error::ScrapResult;
+use scraps_libs::error::ScrapsResult;
 
 use crate::cli::config::scrap_config::ScrapConfig;
 use scraps_libs::git::GitCommandImpl;
 
-pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapResult<()> {
+pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapsResult<()> {
     let log_level = match verbose.log_level() {
         Some(log::Level::Error) => Level::ERROR,
         Some(log::Level::Warn) => Level::WARN,

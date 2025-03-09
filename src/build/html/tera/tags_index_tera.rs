@@ -1,6 +1,6 @@
 use crate::build::model::html::HtmlMetadata;
 use once_cell::sync::Lazy;
-use scraps_libs::error::{anyhow::Context, ScrapResult, ScrapsError};
+use scraps_libs::error::{anyhow::Context, ScrapsResult, ScrapsError};
 use tera::Tera;
 use url::Url;
 
@@ -28,7 +28,7 @@ pub fn base(
     base_url: &Url,
     metadata: &HtmlMetadata,
     template_dir: &str,
-) -> ScrapResult<(Tera, tera::Context)> {
+) -> ScrapsResult<(Tera, tera::Context)> {
     let mut tera = Tera::new(template_dir).context(ScrapsError::PublicRender)?;
     tera.extend(&TAGS_INDEX_TERA).unwrap();
 

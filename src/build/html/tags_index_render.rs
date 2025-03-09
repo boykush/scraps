@@ -4,7 +4,7 @@ use std::{fs::File, path::PathBuf};
 
 use crate::build::model::html::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
-use scraps_libs::error::{anyhow::Context, ScrapResult, ScrapsError};
+use scraps_libs::error::{anyhow::Context, ScrapsResult, ScrapsError};
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::tags::Tags;
 use url::Url;
@@ -19,7 +19,7 @@ pub struct TagsIndexRender {
 }
 
 impl TagsIndexRender {
-    pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> ScrapResult<TagsIndexRender> {
+    pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> ScrapsResult<TagsIndexRender> {
         let public_tags_dir_path = &public_dir_path.join("tags");
         fs::create_dir_all(public_tags_dir_path).context(ScrapsError::FileWrite)?;
 
@@ -34,7 +34,7 @@ impl TagsIndexRender {
         base_url: &Url,
         metadata: &HtmlMetadata,
         scraps: &[Scrap],
-    ) -> ScrapResult<()> {
+    ) -> ScrapsResult<()> {
         let linked_scraps_map = LinkedScrapsMap::new(scraps);
         let stags = &TagsTera::new(&Tags::new(scraps), &linked_scraps_map);
 
@@ -46,7 +46,7 @@ impl TagsIndexRender {
         base_url: &Url,
         metadata: &HtmlMetadata,
         tags: &TagsTera,
-    ) -> ScrapResult<()> {
+    ) -> ScrapsResult<()> {
         let (tera, mut context) = tags_index_tera::base(
             base_url,
             metadata,

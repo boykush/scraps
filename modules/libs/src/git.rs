@@ -3,11 +3,11 @@ use std::{
     process::{Command, Stdio},
 };
 
-use super::error::{anyhow::Context, ScrapResult, ScrapsError};
+use super::error::{anyhow::Context, ScrapsResult, ScrapsError};
 
 pub trait GitCommand {
-    fn init(&self, path: &Path) -> ScrapResult<()>;
-    fn commited_ts(&self, path: &Path) -> ScrapResult<Option<i64>>;
+    fn init(&self, path: &Path) -> ScrapsResult<()>;
+    fn commited_ts(&self, path: &Path) -> ScrapsResult<Option<i64>>;
 }
 
 #[derive(Clone, Copy)]
@@ -26,7 +26,7 @@ impl Default for GitCommandImpl {
 }
 
 impl GitCommand for GitCommandImpl {
-    fn init(&self, path: &Path) -> ScrapResult<()> {
+    fn init(&self, path: &Path) -> ScrapsResult<()> {
         Command::new("git")
             .current_dir(path)
             .arg("init")
@@ -35,7 +35,7 @@ impl GitCommand for GitCommandImpl {
             .context(ScrapsError::GitInit)
     }
 
-    fn commited_ts(&self, path: &Path) -> ScrapResult<Option<i64>> {
+    fn commited_ts(&self, path: &Path) -> ScrapsResult<Option<i64>> {
         let output = Command::new("git")
             .arg("log")
             .arg("-1")
@@ -65,10 +65,10 @@ pub mod tests {
     }
 
     impl GitCommand for GitCommandTest {
-        fn init(&self, _path: &Path) -> ScrapResult<()> {
+        fn init(&self, _path: &Path) -> ScrapsResult<()> {
             Ok(())
         }
-        fn commited_ts(&self, _path: &Path) -> ScrapResult<Option<i64>> {
+        fn commited_ts(&self, _path: &Path) -> ScrapsResult<Option<i64>> {
             Ok(Some(0))
         }
     }

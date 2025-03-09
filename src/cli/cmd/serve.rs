@@ -15,9 +15,9 @@ use crate::{
     },
     serve::cmd::ServeCommand,
 };
-use scraps_libs::{error::ScrapResult, git::GitCommandImpl};
+use scraps_libs::{error::ScrapsResult, git::GitCommandImpl};
 
-pub fn run() -> ScrapResult<()> {
+pub fn run() -> ScrapsResult<()> {
     // set local environment
     let addr: SocketAddr = ([127, 0, 0, 1], 1112).into();
     let base_url = Url::parse(&format!("http://{}", addr))?.join("").unwrap();

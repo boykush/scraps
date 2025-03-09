@@ -1,4 +1,4 @@
-use scraps_libs::error::{ScrapResult, ScrapsError};
+use scraps_libs::error::{ScrapsResult, ScrapsError};
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 use std::{
     fs::{self, DirEntry},
@@ -19,7 +19,7 @@ impl TagCommand {
             scraps_dir_path: scraps_dir_path.to_owned(),
         }
     }
-    pub fn run(&self, base_url: &Url) -> ScrapResult<(Tags, LinkedScrapsMap)> {
+    pub fn run(&self, base_url: &Url) -> ScrapsResult<(Tags, LinkedScrapsMap)> {
         let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapsError::FileLoad)?;
 
         let paths = read_dir
@@ -27,12 +27,12 @@ impl TagCommand {
                 let entry = entry_res?;
                 Self::to_path_by_dir_entry(&entry)
             })
-            .collect::<ScrapResult<Vec<PathBuf>>>()?;
+            .collect::<ScrapsResult<Vec<PathBuf>>>()?;
 
         let scraps = paths
             .iter()
             .map(|path| self.to_scrap_by_path(base_url, path))
-            .collect::<ScrapResult<Vec<Scrap>>>()?;
+            .collect::<ScrapsResult<Vec<Scrap>>>()?;
 
         let tags = Tags::new(&scraps);
         let linked_scraps_map = LinkedScrapsMap::new(&scraps);
@@ -40,7 +40,7 @@ impl TagCommand {
         Ok((tags, linked_scraps_map))
     }
 
-    fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapResult<PathBuf> {
+    fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapsResult<PathBuf> {
         if let Ok(file_type) = dir_entry.file_type() {
             if file_type.is_dir() {
                 bail!(ScrapsError::FileLoad)
@@ -49,7 +49,7 @@ impl TagCommand {
         Ok(dir_entry.path())
     }
 
-    fn to_scrap_by_path(&self, base_url: &Url, path: &PathBuf) -> ScrapResult<Scrap> {
+    fn to_scrap_by_path(&self, base_url: &Url, path: &PathBuf) -> ScrapsResult<Scrap> {
         let file_prefix = path
             .file_stem()
             .ok_or(ScrapsError::FileLoad)

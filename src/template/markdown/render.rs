@@ -6,7 +6,7 @@ use std::{
 
 use chrono_tz::Tz;
 use scraps_libs::{
-    error::{anyhow::Context, ScrapResult, ScrapsError},
+    error::{anyhow::Context, ScrapsResult, ScrapsError},
     markdown::frontmatter,
     model::title::Title,
 };
@@ -33,7 +33,7 @@ impl MarkdownRender {
         template_name: &str,
         input_scrap_title: &Option<Title>,
         timezone: &Tz,
-    ) -> ScrapResult<()> {
+    ) -> ScrapsResult<()> {
         let (tera, mut context) =
             markdown_tera::init(self.templates_dir_path.join("*.md").to_str().unwrap())?;
         let template_file_name = format!("{}.md", template_name);

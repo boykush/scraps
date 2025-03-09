@@ -1,7 +1,7 @@
 use std::{fs, path::PathBuf};
 
 use scraps_libs::{
-    error::{anyhow::Context, ScrapResult, ScrapsError},
+    error::{anyhow::Context, ScrapsResult, ScrapsError},
     git::GitCommand,
 };
 
@@ -14,7 +14,7 @@ impl<GC: GitCommand> InitCommand<GC> {
         InitCommand { git_command }
     }
 
-    pub fn run(&self, project_name: &str) -> ScrapResult<()> {
+    pub fn run(&self, project_name: &str) -> ScrapsResult<()> {
         let project_dir = &PathBuf::from(format!("./{project_name}"));
         let scraps_dir = project_dir.join("scraps");
         let config_toml_file = project_dir.join("Config.toml");

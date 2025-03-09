@@ -6,9 +6,9 @@ mod tag;
 mod template;
 
 use clap::Parser;
-use scraps_libs::error::ScrapResult;
+use scraps_libs::error::ScrapsResult;
 
-fn main() -> ScrapResult<()> {
+fn main() -> ScrapsResult<()> {
     let cli = cli::Cli::parse();
 
     match cli.command {

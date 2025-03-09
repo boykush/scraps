@@ -7,7 +7,7 @@ use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
 use chrono_tz::Tz;
 use scraps_libs::{
-    error::{anyhow::Context, ScrapResult, ScrapsError},
+    error::{anyhow::Context, ScrapsResult, ScrapsError},
     model::scrap::Scrap,
 };
 use url::Url;
@@ -28,7 +28,7 @@ impl ScrapRender {
         static_dir_path: &Path,
         public_dir_path: &Path,
         scraps: &Vec<Scrap>,
-    ) -> ScrapResult<ScrapRender> {
+    ) -> ScrapsResult<ScrapRender> {
         let public_scraps_dir_path = &public_dir_path.join("scraps");
         fs::create_dir_all(public_scraps_dir_path).context(ScrapsError::FileWrite)?;
 
@@ -45,7 +45,7 @@ impl ScrapRender {
         timezone: Tz,
         metadata: &HtmlMetadata,
         scrap_with_commited_ts: &ScrapWithCommitedTs,
-    ) -> ScrapResult<()> {
+    ) -> ScrapsResult<()> {
         let (tera, mut context) = scrap_tera::base(
             base_url,
             timezone,

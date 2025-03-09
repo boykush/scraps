@@ -12,7 +12,7 @@ use scraps_libs::model::{scrap::Scrap, tags::Tags};
 use scraps_libs::{
     error::{
         anyhow::{bail, Context},
-        ScrapResult, ScrapsError,
+        ScrapsResult, ScrapsError,
     },
     git::GitCommand,
 };
@@ -59,7 +59,7 @@ impl BuildCommand {
         html_metadata: &HtmlMetadata,
         css_metadata: &CssMetadata,
         list_view_configs: &ListViewConfigs,
-    ) -> ScrapResult<usize> {
+    ) -> ScrapsResult<usize> {
         let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
 
         let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapsError::FileLoad)?;
@@ -69,7 +69,7 @@ impl BuildCommand {
                 let entry = entry_res?;
                 Self::to_path_by_dir_entry(&entry)
             })
-            .collect::<ScrapResult<Vec<Option<PathBuf>>>>()?
+            .collect::<ScrapsResult<Vec<Option<PathBuf>>>>()?
             .into_iter()
             .flatten()
             .collect::<Vec<PathBuf>>();
@@ -77,7 +77,7 @@ impl BuildCommand {
         let scraps_with_commited_ts = paths
             .into_par_iter()
             .map(|path| self.to_scrap_by_path(git_command, base_url, &path))
-            .collect::<ScrapResult<Vec<ScrapWithCommitedTs>>>()
+            .collect::<ScrapsResult<Vec<ScrapWithCommitedTs>>>()
             .map(|s| ScrapsWithCommitedTs::new(&s))?;
         let scraps = scraps_with_commited_ts.to_scraps();
         span_read_scraps.exit();
@@ -139,7 +139,7 @@ impl BuildCommand {
         Ok(scraps.len())
     }
 
-    fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapResult<Option<PathBuf>> {
+    fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapsResult<Option<PathBuf>> {
         if let Ok(file_type) = dir_entry.file_type() {
             if file_type.is_dir() {
                 bail!(ScrapsError::FileLoad)
@@ -157,7 +157,7 @@ impl BuildCommand {
         git_command: GC,
         base_url: &Url,
         path: &PathBuf,
-    ) -> ScrapResult<ScrapWithCommitedTs> {
+    ) -> ScrapsResult<ScrapWithCommitedTs> {
         let span_convert_to_scrap = span!(Level::INFO, "convert_to_scrap").entered();
         let file_prefix = path
             .file_stem()

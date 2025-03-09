@@ -1,10 +1,10 @@
 use std::path::Path;
 
-use scraps_libs::error::ScrapResult;
+use scraps_libs::error::ScrapsResult;
 
 use crate::template::list::cmd::ListCommand;
 
-pub fn run() -> ScrapResult<()> {
+pub fn run() -> ScrapsResult<()> {
     let templates_dir_path = Path::new("templates");
 
     let command = ListCommand::new(templates_dir_path);

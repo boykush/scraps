@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use chrono_tz::Tz;
-use scraps_libs::{error::ScrapResult, model::title::Title};
+use scraps_libs::{error::ScrapsResult, model::title::Title};
 
 use crate::template::markdown::render::MarkdownRender;
 
@@ -22,7 +22,7 @@ impl GenerateCommand {
         template_name: &str,
         input_scrap_title: &Option<Title>,
         timezone: &Tz,
-    ) -> ScrapResult<()> {
+    ) -> ScrapsResult<()> {
         let render = MarkdownRender::new(&self.scraps_dir_path, &self.templates_dir_path);
 
         render.render_from_template(template_name, input_scrap_title, timezone)

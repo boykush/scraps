@@ -4,12 +4,12 @@ use itertools::Itertools;
 use url::Url;
 
 use crate::cli::display::tag::DisplayTag;
-use scraps_libs::error::ScrapResult;
+use scraps_libs::error::ScrapsResult;
 
 use crate::cli::config::scrap_config::ScrapConfig;
 use crate::tag::cmd::TagCommand;
 
-pub fn run() -> ScrapResult<()> {
+pub fn run() -> ScrapsResult<()> {
     let scraps_dir_path = PathBuf::from("scraps");
     let command = TagCommand::new(&scraps_dir_path);
 
@@ -25,7 +25,7 @@ pub fn run() -> ScrapResult<()> {
     let display_tags_result = tags
         .into_iter()
         .map(|tag| DisplayTag::new(&tag, &base_url, &linked_scraps_map))
-        .collect::<ScrapResult<Vec<DisplayTag>>>();
+        .collect::<ScrapsResult<Vec<DisplayTag>>>();
 
     display_tags_result.map(|tags| {
         let sorted = tags

@@ -1,7 +1,7 @@
 use scraps_libs::error::anyhow::Context;
 use std::{fs::File, path::PathBuf};
 
-use scraps_libs::error::{ScrapResult, ScrapsError};
+use scraps_libs::error::{ScrapsResult, ScrapsError};
 
 use crate::build::model::css::CssMetadata;
 
@@ -20,7 +20,7 @@ impl CSSRender {
         }
     }
 
-    pub fn render_main(&self, css_metadata: &CssMetadata) -> ScrapResult<()> {
+    pub fn render_main(&self, css_metadata: &CssMetadata) -> ScrapsResult<()> {
         let (tera, context) = css_tera::base(
             self.static_dir_path.join("*.css").to_str().unwrap(),
             &css_metadata.color_scheme,

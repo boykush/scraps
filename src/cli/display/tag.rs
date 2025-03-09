@@ -2,7 +2,7 @@ use std::fmt;
 
 use colored::Colorize;
 use itertools::Itertools;
-use scraps_libs::error::{anyhow::Context, ScrapResult, ScrapsError};
+use scraps_libs::error::{anyhow::Context, ScrapsResult, ScrapsError};
 use scraps_libs::model::{tag::Tag, title::Title};
 use url::Url;
 
@@ -19,7 +19,7 @@ impl DisplayTag {
         tag: &Tag,
         base_url: &Url,
         linked_scraps_map: &LinkedScrapsMap,
-    ) -> ScrapResult<DisplayTag> {
+    ) -> ScrapsResult<DisplayTag> {
         let url = base_url
             .join(&format!("scraps/{}.html", tag.title.slug))
             .context(ScrapsError::CliDisplay)?;

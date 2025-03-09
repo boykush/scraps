@@ -8,7 +8,7 @@ use hyper::server::conn::http1;
 use hyper_util::rt::TokioIo;
 use tokio::net::TcpListener;
 
-use scraps_libs::error::ScrapResult;
+use scraps_libs::error::ScrapsResult;
 
 pub struct ServeCommand {
     public_dir_path: PathBuf,
@@ -22,7 +22,7 @@ impl ServeCommand {
     }
 
     #[tokio::main]
-    pub async fn run(&self, addr: &SocketAddr) -> ScrapResult<()> {
+    pub async fn run(&self, addr: &SocketAddr) -> ScrapsResult<()> {
         let listener = TcpListener::bind(&addr).await?;
         println!("\nListening on http://{addr}\n");
 

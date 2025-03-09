@@ -38,4 +38,4 @@ pub enum ScrapsError {
     FromStrErr,
 }
 
-pub type ScrapResult<T> = anyhow::Result<T>;
+pub type ScrapsResult<T> = anyhow::Result<T>;
