@@ -1,5 +1,6 @@
 use crate::build::model::html::HtmlMetadata;
-use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
+use crate::error::BuildError;
+use crate::error::{anyhow::Context, ScrapsResult};
 use once_cell::sync::Lazy;
 use tera::Tera;
 use url::Url;
@@ -26,7 +27,7 @@ pub fn base(
     metadata: &HtmlMetadata,
     template_dir: &str,
 ) -> ScrapsResult<(Tera, tera::Context)> {
-    let mut tera = Tera::new(template_dir).context(ScrapsError::PublicRender)?;
+    let mut tera = Tera::new(template_dir).context(BuildError::RenderHtml)?;
     tera.extend(&TAG_TERA).unwrap();
 
     let mut context = tera::Context::new();

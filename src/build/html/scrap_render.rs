@@ -5,7 +5,8 @@ use std::{fs::File, path::PathBuf};
 use crate::build::model::html::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
-use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
+use crate::error::BuildError;
+use crate::error::{anyhow::Context, ScrapsResult};
 use chrono_tz::Tz;
 use scraps_libs::model::scrap::Scrap;
 use url::Url;
@@ -28,7 +29,7 @@ impl ScrapRender {
         scraps: &Vec<Scrap>,
     ) -> ScrapsResult<ScrapRender> {
         let public_scraps_dir_path = &public_dir_path.join("scraps");
-        fs::create_dir_all(public_scraps_dir_path).context(ScrapsError::FileWrite)?;
+        fs::create_dir_all(public_scraps_dir_path).context(BuildError::CreateDir)?;
 
         Ok(ScrapRender {
             static_dir_path: static_dir_path.to_owned(),
@@ -60,10 +61,10 @@ impl ScrapRender {
 
         // render html
         let file_name = &format!("{}.html", &scrap_with_commited_ts.scrap().title.slug);
-        let wtr = File::create(self.public_scraps_dir_path.join(file_name))
-            .context(ScrapsError::FileWrite)?;
+        let file_path = &self.public_scraps_dir_path.join(file_name);
+        let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to("__builtins/scrap.html", &context, wtr)
-            .context(ScrapsError::PublicRender)
+            .context(BuildError::WriteFailure(file_path.clone()))
     }
 }
 

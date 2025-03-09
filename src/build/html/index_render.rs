@@ -1,4 +1,3 @@
-use std::fs;
 use std::path::Path;
 use std::{fs::File, path::PathBuf};
 
@@ -6,7 +5,8 @@ use crate::build::model::html::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::list_view_configs::ListViewConfigs;
 use crate::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
-use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
+use crate::error::BuildError;
+use crate::error::{anyhow::Context, ScrapsResult};
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use scraps_libs::model::tags::Tags;
@@ -27,8 +27,6 @@ pub struct IndexRender {
 
 impl IndexRender {
     pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> ScrapsResult<IndexRender> {
-        fs::create_dir_all(public_dir_path).context(ScrapsError::FileWrite)?;
-
         Ok(IndexRender {
             static_dir_path: static_dir_path.to_path_buf(),
             public_dir_path: public_dir_path.to_path_buf(),
@@ -102,10 +100,10 @@ impl IndexRender {
         context.insert("tags", tags);
         context.insert("prev", &pointer.prev);
         context.insert("next", &pointer.next);
-        let wtr = File::create(self.public_dir_path.join(pointer.current_file_name()))
-            .context(ScrapsError::PublicRender)?;
+        let file_path = &self.public_dir_path.join(pointer.current_file_name());
+        let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to(template_name, &context, wtr)
-            .context(ScrapsError::PublicRender)?;
+            .context(BuildError::WriteFailure(file_path.clone()))?;
         span_render_index.exit();
         Ok(())
     }

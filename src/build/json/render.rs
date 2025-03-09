@@ -1,6 +1,7 @@
 use std::{fs::File, path::PathBuf};
 
-use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
+use crate::error::BuildError;
+use crate::error::{anyhow::Context, ScrapsResult};
 use scraps_libs::model::scrap::Scrap;
 use url::Url;
 
@@ -41,10 +42,10 @@ impl SearchIndexRender {
             "__builtins/search_index.json"
         };
         context.insert("scraps", scraps);
-        let wtr = File::create(self.public_dir_path.join("search_index.json"))
-            .context(ScrapsError::PublicRender)?;
+        let file_path = &self.public_dir_path.join("search_index.json");
+        let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to(template_name, &context, wtr)
-            .context(ScrapsError::PublicRender)
+            .context(BuildError::WriteFailure(file_path.clone()))
     }
 }
 

@@ -1,7 +1,7 @@
 use crate::error::anyhow::Context;
 use std::{fs::File, path::PathBuf};
 
-use crate::error::{ScrapsError, ScrapsResult};
+use crate::error::{BuildError, ScrapsResult};
 
 use crate::build::model::css::CssMetadata;
 
@@ -30,10 +30,10 @@ impl CSSRender {
         } else {
             "__builtins/main.css"
         };
-        let wtr = File::create(self.public_dir_path.join("main.css"))
-            .context(ScrapsError::PublicRender)?;
+        let file_path = &self.public_dir_path.join("main.css");
+        let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to(template_name, &context, wtr)
-            .context(ScrapsError::PublicRender)
+            .context(BuildError::WriteFailure(file_path.clone()))
     }
 }
 

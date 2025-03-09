@@ -1,5 +1,7 @@
 pub extern crate anyhow;
 
+use std::path::PathBuf;
+
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -9,6 +11,9 @@ pub enum ScrapsError {
 
     #[error("Init error: {0}")]
     Init(#[from] InitError),
+
+    #[error("Build error: {0}")]
+    Build(#[from] BuildError),
 
     #[error("Failed when load config")]
     ConfigLoad,
@@ -21,9 +26,6 @@ pub enum ScrapsError {
 
     #[error("Not display data on cli")]
     CliDisplay,
-
-    #[error("Failed when convert from str")]
-    FromStrErr,
 }
 
 #[derive(Error, Debug)]
@@ -51,6 +53,30 @@ pub enum InitError {
 
     #[error("Failed to create directory or file")]
     CreateDirectoryOrFile,
+}
+
+#[derive(Error, Debug)]
+pub enum BuildError {
+    #[error("Failed to read scraps")]
+    ReadScraps,
+
+    #[error("Failed to get commited timestamp")]
+    GitCommitedTs,
+
+    #[error("Failed to create directory")]
+    CreateDir,
+
+    #[error("Failed to write file: {0}")]
+    WriteFailure(PathBuf),
+
+    #[error("Failed to render html")]
+    RenderHtml,
+
+    #[error("Failed to render css")]
+    RenderCss,
+
+    #[error("Failed to render json")]
+    RenderJson,
 }
 
 pub type ScrapsResult<T> = anyhow::Result<T>;

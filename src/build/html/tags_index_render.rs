@@ -4,7 +4,8 @@ use std::{fs::File, path::PathBuf};
 
 use crate::build::model::html::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
-use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
+use crate::error::BuildError;
+use crate::error::{anyhow::Context, ScrapsResult};
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::tags::Tags;
 use url::Url;
@@ -21,7 +22,7 @@ pub struct TagsIndexRender {
 impl TagsIndexRender {
     pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> ScrapsResult<TagsIndexRender> {
         let public_tags_dir_path = &public_dir_path.join("tags");
-        fs::create_dir_all(public_tags_dir_path).context(ScrapsError::FileWrite)?;
+        fs::create_dir_all(public_tags_dir_path).context(BuildError::CreateDir)?;
 
         Ok(TagsIndexRender {
             static_dir_path: static_dir_path.to_owned(),
@@ -58,10 +59,10 @@ impl TagsIndexRender {
             "__builtins/tags_index.html"
         };
         context.insert("tags", tags);
-        let wtr = File::create(self.public_tags_dir_path.join("index.html"))
-            .context(ScrapsError::PublicRender)?;
+        let file_path = &self.public_tags_dir_path.join("index.html");
+        let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to(template_name, &context, wtr)
-            .context(ScrapsError::PublicRender)
+            .context(BuildError::WriteFailure(file_path.clone()))
     }
 }
 
