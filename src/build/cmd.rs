@@ -80,9 +80,6 @@ impl BuildCommand {
         let scraps = scraps_with_commited_ts.to_scraps();
         span_read_scraps.exit();
 
-        // create public dir
-        fs::create_dir_all(&self.public_dir_path).context(BuildError::CreateDir)?;
-
         // render index
         let span_render_indexes = span!(Level::INFO, "render_indexes").entered();
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
