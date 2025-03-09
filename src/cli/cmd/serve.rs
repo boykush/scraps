@@ -7,7 +7,6 @@ use crate::{
     cli::config::{
         color_scheme::ColorSchemeConfig, scrap_config::ScrapConfig, sort_key::SortKeyConfig,
     },
-    serve::cmd::ServeCommand,
     usecase::build::{
         cmd::BuildCommand,
         model::{
@@ -15,6 +14,7 @@ use crate::{
             paging::Paging, sort::SortKey,
         },
     },
+    usecase::serve::cmd::ServeCommand,
 };
 use scraps_libs::git::GitCommandImpl;
 
