@@ -4,6 +4,9 @@ use thiserror::Error;
 
 #[derive(Error, Debug, PartialEq)]
 pub enum ScrapsError {
+    #[error("Template error: {0}")]
+    Template(#[from] TemplateError),
+
     #[error("Failed when load config")]
     ConfigLoad,
 
@@ -12,18 +15,6 @@ pub enum ScrapsError {
 
     #[error("Failed write file")]
     FileWrite,
-
-    #[error("Failed when render to html")]
-    PublicRender,
-
-    #[error("Failed when load template metadata")]
-    TemplateMetadataLoad,
-
-    #[error("Template title are required to be entered via the command line or defined in the template file.")]
-    RequiredTemplateTitle,
-
-    #[error("Not found template for generate")]
-    NotFoundTemplate,
 
     #[error("Not display data on cli")]
     CliDisplay,
@@ -36,6 +27,21 @@ pub enum ScrapsError {
 
     #[error("Failed when convert from str")]
     FromStrErr,
+}
+
+#[derive(Error, Debug, PartialEq)]
+pub enum TemplateError {
+    #[error("Failed to load template metadata")]
+    MetadataLoad,
+
+    #[error("Template title is required via command line or in template file")]
+    RequiredTitle,
+
+    #[error("Template not found: {0}")]
+    NotFound(String),
+
+    #[error("Failed to render template: {0}")]
+    RenderFailure(String),
 }
 
 pub type ScrapsResult<T> = anyhow::Result<T>;

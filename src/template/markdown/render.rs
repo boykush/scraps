@@ -4,7 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
+use crate::error::{anyhow::Context, ScrapsResult, TemplateError};
 use chrono_tz::Tz;
 use scraps_libs::{markdown::frontmatter, model::title::Title};
 
@@ -32,19 +32,19 @@ impl MarkdownRender {
         timezone: &Tz,
     ) -> ScrapsResult<()> {
         let (tera, mut context) =
-            markdown_tera::init(self.templates_dir_path.join("*.md").to_str().unwrap())?;
+            markdown_tera::base(self.templates_dir_path.join("*.md").to_str().unwrap())?;
         let template_file_name = format!("{}.md", template_name);
         let template = if tera.get_template_names().any(|t| t == template_file_name) {
             Ok(template_file_name.as_str())
         } else {
-            Err(ScrapsError::NotFoundTemplate)
+            Err(TemplateError::NotFound(template_name.to_string()))
         }?;
 
         context.insert("timezone", &timezone);
 
         let markdown_text = tera
             .render(template, &context)
-            .context(ScrapsError::PublicRender)?;
+            .context(TemplateError::RenderFailure)?;
 
         let scrap_title = input_scrap_title
             .clone()
@@ -56,15 +56,15 @@ impl MarkdownRender {
                     .transpose()?;
                 metadata_result
                     .map(|t| Ok(t.title))
-                    .unwrap_or(Err(ScrapsError::RequiredTemplateTitle))
+                    .unwrap_or(Err(TemplateError::RequiredTitle))
             })?;
         let scrap_file_name = format!("{}.md", scrap_title);
         let ignored_metadata_text = frontmatter::ignore_metadata(&markdown_text);
 
         let mut wtr = File::create(self.scraps_dir_path.join(&scrap_file_name))
-            .context(ScrapsError::PublicRender)?;
+            .context(TemplateError::WriteFailure)?;
         wtr.write(ignored_metadata_text.as_bytes())
-            .context(ScrapsError::PublicRender)?;
-        wtr.flush().context(ScrapsError::FileWrite)
+            .context(TemplateError::WriteFailure)?;
+        wtr.flush().context(TemplateError::WriteFailure)
     }
 }
