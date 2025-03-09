@@ -1,6 +1,5 @@
 mod cli;
 mod error;
-mod init;
 mod serve;
 mod template;
 mod usecase;
