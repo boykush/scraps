@@ -1,19 +1,19 @@
 use std::{
-    fs::{self, DirEntry},
+    fs::{self},
     marker::{Send, Sync},
     path::{Path, PathBuf},
 };
 
-use crate::error::{
-    anyhow::{bail, Context},
-    ScrapsError, ScrapsResult,
-};
 use crate::{error::BuildError, usecase::build::css::render::CSSRender};
+use crate::{
+    error::{anyhow::Context, ScrapsError, ScrapsResult},
+    usecase::read_scraps,
+};
 use chrono_tz::Tz;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use scraps_libs::git::GitCommand;
-use scraps_libs::model::{scrap::Scrap, tags::Tags};
+use scraps_libs::model::tags::Tags;
 use tracing::{span, Level};
 use url::Url;
 
@@ -65,7 +65,7 @@ impl BuildCommand {
         let paths = read_dir
             .map(|entry_res| {
                 let entry = entry_res?;
-                Self::to_path_by_dir_entry(&entry)
+                read_scraps::to_path_by_dir_entry(&entry)
             })
             .collect::<ScrapsResult<Vec<Option<PathBuf>>>>()?
             .into_iter()
@@ -74,7 +74,7 @@ impl BuildCommand {
 
         let scraps_with_commited_ts = paths
             .into_par_iter()
-            .map(|path| self.to_scrap_by_path(git_command, base_url, &path))
+            .map(|path| self.to_scrap_with_commited_ts_by_path(git_command, base_url, &path))
             .collect::<ScrapsResult<Vec<ScrapWithCommitedTs>>>()
             .map(|s| ScrapsWithCommitedTs::new(&s))?;
         let scraps = scraps_with_commited_ts.to_scraps();
@@ -137,33 +137,14 @@ impl BuildCommand {
         Ok(scraps.len())
     }
 
-    fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapsResult<Option<PathBuf>> {
-        if let Ok(file_type) = dir_entry.file_type() {
-            if file_type.is_dir() {
-                bail!(ScrapsError::ReadScrap(dir_entry.path()))
-            }
-        };
-        if dir_entry.path().extension() == Some("md".as_ref()) {
-            Ok(Some(dir_entry.path()))
-        } else {
-            Ok(None)
-        }
-    }
-
-    fn to_scrap_by_path<GC: GitCommand + Send + Sync + Copy>(
+    fn to_scrap_with_commited_ts_by_path<GC: GitCommand + Send + Sync + Copy>(
         &self,
         git_command: GC,
         base_url: &Url,
         path: &PathBuf,
     ) -> ScrapsResult<ScrapWithCommitedTs> {
         let span_convert_to_scrap = span!(Level::INFO, "convert_to_scrap").entered();
-        let file_prefix = path
-            .file_stem()
-            .ok_or(ScrapsError::ReadScrap(path.clone()))
-            .map(|o| o.to_str())
-            .and_then(|fp| fp.ok_or(ScrapsError::ReadScrap(path.clone())))?;
-        let md_text = fs::read_to_string(path).context(ScrapsError::ReadScrap(path.clone()))?;
-        let scrap = Scrap::new(base_url, file_prefix, &md_text);
+        let scrap = read_scraps::to_scrap_by_path(base_url, path)?;
         let commited_ts = git_command
             .commited_ts(path)
             .context(BuildError::GitCommitedTs)?;

@@ -1,10 +1,10 @@
-use crate::error::{
-    anyhow::{bail, Context},
-    ScrapsError, ScrapsResult,
+use crate::{
+    error::{anyhow::Context, ScrapsError, ScrapsResult},
+    usecase::read_scraps,
 };
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 use std::{
-    fs::{self, DirEntry},
+    fs::{self},
     path::PathBuf,
 };
 
@@ -27,40 +27,22 @@ impl TagCommand {
         let paths = read_dir
             .map(|entry_res| {
                 let entry = entry_res?;
-                Self::to_path_by_dir_entry(&entry)
+                read_scraps::to_path_by_dir_entry(&entry)
             })
-            .collect::<ScrapsResult<Vec<PathBuf>>>()?;
+            .collect::<ScrapsResult<Vec<Option<PathBuf>>>>()?
+            .into_iter()
+            .flatten()
+            .collect::<Vec<PathBuf>>();
 
         let scraps = paths
             .iter()
-            .map(|path| self.to_scrap_by_path(base_url, path))
+            .map(|path| read_scraps::to_scrap_by_path(base_url, path))
             .collect::<ScrapsResult<Vec<Scrap>>>()?;
 
         let tags = Tags::new(&scraps);
         let linked_scraps_map = LinkedScrapsMap::new(&scraps);
 
         Ok((tags, linked_scraps_map))
-    }
-
-    fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapsResult<PathBuf> {
-        if let Ok(file_type) = dir_entry.file_type() {
-            if file_type.is_dir() {
-                bail!(ScrapsError::ReadScrap(dir_entry.path()))
-            }
-        };
-        Ok(dir_entry.path())
-    }
-
-    fn to_scrap_by_path(&self, base_url: &Url, path: &PathBuf) -> ScrapsResult<Scrap> {
-        let file_prefix = path
-            .file_stem()
-            .ok_or(ScrapsError::ReadScrap(path.clone()))
-            .map(|o| o.to_str())
-            .and_then(|fp| fp.ok_or(ScrapsError::ReadScrap(path.clone())))?;
-        let md_text = fs::read_to_string(path).context(ScrapsError::ReadScrap(path.clone()))?;
-        let scrap = Scrap::new(base_url, file_prefix, &md_text);
-
-        Ok(scrap)
     }
 }
 
