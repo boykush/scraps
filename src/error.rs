@@ -23,12 +23,6 @@ pub enum ScrapsError {
     #[error("Failed when load config")]
     ConfigLoad,
 
-    #[error("Not load file")]
-    FileLoad,
-
-    #[error("Failed write file")]
-    FileWrite,
-
     #[error("Not display data on cli")]
     CliDisplay,
 }
@@ -56,8 +50,11 @@ pub enum InitError {
     #[error("Failed to initialize git repository")]
     GitInit,
 
-    #[error("Failed to create directory or file")]
-    CreateDirectoryOrFile,
+    #[error("Failed to create directory")]
+    CreateDirectory,
+
+    #[error("Failed to write file: {0}")]
+    WriteFailure(PathBuf)
 }
 
 #[derive(Error, Debug)]
@@ -79,4 +76,11 @@ pub enum BuildError {
 
     #[error("Failed to render json")]
     RenderJson,
+}
+
+#[derive(Error, Debug)]
+pub enum ServeError {
+
+    #[error("Failed to load file")]
+    LoadFile,
 }
