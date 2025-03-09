@@ -2,7 +2,7 @@ use std::path::Path;
 
 use crate::error::ScrapsResult;
 
-use crate::template::list::cmd::ListCommand;
+use crate::usecase::template::list::cmd::ListCommand;
 
 pub fn run() -> ScrapsResult<()> {
     let templates_dir_path = Path::new("templates");

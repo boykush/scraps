@@ -1,7 +1,6 @@
 mod cli;
 mod error;
 mod serve;
-mod template;
 mod usecase;
 
 use clap::Parser;

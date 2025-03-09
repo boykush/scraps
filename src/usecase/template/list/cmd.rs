@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use crate::error::{anyhow::Ok, ScrapsResult};
 
-use crate::template::markdown::markdown_tera;
+use crate::usecase::template::markdown::markdown_tera;
 
 pub struct ListCommand {
     templates_dir_path: PathBuf,

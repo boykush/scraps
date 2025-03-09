@@ -8,7 +8,7 @@ use crate::error::{anyhow::Context, ScrapsResult, TemplateError};
 use chrono_tz::Tz;
 use scraps_libs::{markdown::frontmatter, model::title::Title};
 
-use crate::template::serde::metadata::TemplateMetadata;
+use crate::usecase::template::serde::metadata::TemplateMetadata;
 
 use super::markdown_tera;
 

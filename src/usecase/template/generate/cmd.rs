@@ -4,7 +4,7 @@ use crate::error::ScrapsResult;
 use chrono_tz::Tz;
 use scraps_libs::model::title::Title;
 
-use crate::template::markdown::render::MarkdownRender;
+use crate::usecase::template::markdown::render::MarkdownRender;
 
 pub struct GenerateCommand {
     scraps_dir_path: PathBuf,

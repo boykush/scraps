@@ -3,7 +3,9 @@ use std::path::Path;
 use crate::error::ScrapsResult;
 use scraps_libs::model::title::Title;
 
-use crate::{cli::config::scrap_config::ScrapConfig, template::generate::cmd::GenerateCommand};
+use crate::{
+    cli::config::scrap_config::ScrapConfig, usecase::template::generate::cmd::GenerateCommand,
+};
 
 pub fn run(template_name: &str, scrap_title: &Option<Title>) -> ScrapsResult<()> {
     let templates_dir_path = Path::new("templates");
