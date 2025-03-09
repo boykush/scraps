@@ -22,7 +22,7 @@ impl TagCommand {
         }
     }
     pub fn run(&self, base_url: &Url) -> ScrapsResult<(Tags, LinkedScrapsMap)> {
-        let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapsError::FileLoad)?;
+        let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapsError::ReadScraps)?;
 
         let paths = read_dir
             .map(|entry_res| {
@@ -45,7 +45,7 @@ impl TagCommand {
     fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapsResult<PathBuf> {
         if let Ok(file_type) = dir_entry.file_type() {
             if file_type.is_dir() {
-                bail!(ScrapsError::FileLoad)
+                bail!(ScrapsError::ReadScraps)
             }
         };
         Ok(dir_entry.path())
@@ -54,10 +54,10 @@ impl TagCommand {
     fn to_scrap_by_path(&self, base_url: &Url, path: &PathBuf) -> ScrapsResult<Scrap> {
         let file_prefix = path
             .file_stem()
-            .ok_or(ScrapsError::FileLoad)
+            .ok_or(ScrapsError::ReadScraps)
             .map(|o| o.to_str())
-            .and_then(|fp| fp.ok_or(ScrapsError::FileLoad))?;
-        let md_text = fs::read_to_string(path).context(ScrapsError::FileLoad)?;
+            .and_then(|fp| fp.ok_or(ScrapsError::ReadScraps))?;
+        let md_text = fs::read_to_string(path).context(ScrapsError::ReadScraps)?;
         let scrap = Scrap::new(base_url, file_prefix, &md_text);
 
         Ok(scrap)

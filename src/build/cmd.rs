@@ -6,7 +6,7 @@ use std::{
 
 use crate::error::{
     anyhow::{bail, Context},
-    ScrapsResult,
+    ScrapsError, ScrapsResult,
 };
 use crate::{build::css::render::CSSRender, error::BuildError};
 use chrono_tz::Tz;
@@ -60,7 +60,7 @@ impl BuildCommand {
     ) -> ScrapsResult<usize> {
         let span_read_scraps = span!(Level::INFO, "load_scraps").entered();
 
-        let read_dir = fs::read_dir(&self.scraps_dir_path).context(BuildError::ReadScraps)?;
+        let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapsError::ReadScraps)?;
 
         let paths = read_dir
             .map(|entry_res| {
@@ -143,7 +143,7 @@ impl BuildCommand {
     fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapsResult<Option<PathBuf>> {
         if let Ok(file_type) = dir_entry.file_type() {
             if file_type.is_dir() {
-                bail!(BuildError::ReadScraps)
+                bail!(ScrapsError::ReadScraps)
             }
         };
         if dir_entry.path().extension() == Some("md".as_ref()) {
@@ -162,10 +162,10 @@ impl BuildCommand {
         let span_convert_to_scrap = span!(Level::INFO, "convert_to_scrap").entered();
         let file_prefix = path
             .file_stem()
-            .ok_or(BuildError::ReadScraps)
+            .ok_or(ScrapsError::ReadScraps)
             .map(|o| o.to_str())
-            .and_then(|fp| fp.ok_or(BuildError::ReadScraps))?;
-        let md_text = fs::read_to_string(path).context(BuildError::ReadScraps)?;
+            .and_then(|fp| fp.ok_or(ScrapsError::ReadScraps))?;
+        let md_text = fs::read_to_string(path).context(ScrapsError::ReadScraps)?;
         let scrap = Scrap::new(base_url, file_prefix, &md_text);
         let commited_ts = git_command
             .commited_ts(path)

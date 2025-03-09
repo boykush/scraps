@@ -4,6 +4,8 @@ use std::path::PathBuf;
 
 use thiserror::Error;
 
+pub type ScrapsResult<T> = anyhow::Result<T>;
+
 #[derive(Error, Debug)]
 pub enum ScrapsError {
     #[error("Template error: {0}")]
@@ -14,6 +16,9 @@ pub enum ScrapsError {
 
     #[error("Build error: {0}")]
     Build(#[from] BuildError),
+
+    #[error("Failed to read scraps")]
+    ReadScraps,
 
     #[error("Failed when load config")]
     ConfigLoad,
@@ -57,9 +62,6 @@ pub enum InitError {
 
 #[derive(Error, Debug)]
 pub enum BuildError {
-    #[error("Failed to read scraps")]
-    ReadScraps,
-
     #[error("Failed to get commited timestamp")]
     GitCommitedTs,
 
@@ -78,5 +80,3 @@ pub enum BuildError {
     #[error("Failed to render json")]
     RenderJson,
 }
-
-pub type ScrapsResult<T> = anyhow::Result<T>;
