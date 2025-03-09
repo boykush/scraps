@@ -7,7 +7,7 @@ use crate::cli::display::tag::DisplayTag;
 use crate::error::ScrapsResult;
 
 use crate::cli::config::scrap_config::ScrapConfig;
-use crate::tag::cmd::TagCommand;
+use crate::usecase::tag::cmd::TagCommand;
 
 pub fn run() -> ScrapsResult<()> {
     let scraps_dir_path = PathBuf::from("scraps");
