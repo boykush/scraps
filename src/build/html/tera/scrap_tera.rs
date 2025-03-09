@@ -1,7 +1,7 @@
 use crate::build::model::html::HtmlMetadata;
+use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
 use chrono_tz::Tz;
 use once_cell::sync::Lazy;
-use scraps_libs::error::{anyhow::Context, ScrapsResult, ScrapsError};
 use tera::Tera;
 use url::Url;
 

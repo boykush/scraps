@@ -5,17 +5,15 @@ use std::{
 };
 
 use crate::build::css::render::CSSRender;
+use crate::error::{
+    anyhow::{bail, Context},
+    ScrapsError, ScrapsResult,
+};
 use chrono_tz::Tz;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
+use scraps_libs::git::GitCommand;
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
-use scraps_libs::{
-    error::{
-        anyhow::{bail, Context},
-        ScrapsResult, ScrapsError,
-    },
-    git::GitCommand,
-};
 use tracing::{span, Level};
 use url::Url;
 

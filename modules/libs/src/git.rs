@@ -1,5 +1,7 @@
 use std::{
-    io, path::Path, process::{Command, Stdio}
+    io,
+    path::Path,
+    process::{Command, Stdio},
 };
 
 pub trait GitCommand {

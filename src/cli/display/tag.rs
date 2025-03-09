@@ -1,8 +1,8 @@
 use std::fmt;
 
+use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
 use colored::Colorize;
 use itertools::Itertools;
-use scraps_libs::error::{anyhow::Context, ScrapsResult, ScrapsError};
 use scraps_libs::model::{tag::Tag, title::Title};
 use url::Url;
 

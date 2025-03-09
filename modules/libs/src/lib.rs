@@ -1,5 +1,3 @@
-#[cfg(feature = "error")]
-pub mod error;
 #[cfg(feature = "git")]
 pub mod git;
 #[cfg(feature = "lang")]

@@ -1,6 +1,7 @@
 use std::path::Path;
 
-use scraps_libs::{error::ScrapsResult, model::title::Title};
+use crate::error::ScrapsResult;
+use scraps_libs::model::title::Title;
 
 use crate::{cli::config::scrap_config::ScrapConfig, template::generate::cmd::GenerateCommand};
 

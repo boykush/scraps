@@ -6,6 +6,7 @@ use std::{
     pin::Pin,
 };
 
+use crate::error::{anyhow::Context, ScrapsError};
 use http_body_util::Full;
 use hyper::{
     body::{Bytes, Incoming},
@@ -14,7 +15,6 @@ use hyper::{
     Request, Response,
 };
 use percent_encoding::percent_decode_str;
-use scraps_libs::error::{anyhow::Context, ScrapsError};
 
 #[derive(Clone)]
 pub struct ScrapsService {

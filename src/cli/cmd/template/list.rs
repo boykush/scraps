@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use scraps_libs::error::ScrapsResult;
+use crate::error::ScrapsResult;
 
 use crate::template::list::cmd::ListCommand;
 

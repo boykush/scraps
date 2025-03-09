@@ -4,12 +4,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
 use chrono_tz::Tz;
-use scraps_libs::{
-    error::{anyhow::Context, ScrapsResult, ScrapsError},
-    markdown::frontmatter,
-    model::title::Title,
-};
+use scraps_libs::{markdown::frontmatter, model::title::Title};
 
 use crate::template::serde::metadata::TemplateMetadata;
 

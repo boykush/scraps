@@ -4,7 +4,7 @@ use std::{fs::File, path::PathBuf};
 
 use crate::build::model::html::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
-use scraps_libs::error::{anyhow::Context, ScrapsResult, ScrapsError};
+use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::tags::Tags;
 use url::Url;

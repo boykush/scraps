@@ -1,7 +1,8 @@
 use std::path::{Path, PathBuf};
 
+use crate::error::ScrapsResult;
 use chrono_tz::Tz;
-use scraps_libs::{error::ScrapsResult, model::title::Title};
+use scraps_libs::model::title::Title;
 
 use crate::template::markdown::render::MarkdownRender;
 

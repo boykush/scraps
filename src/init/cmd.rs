@@ -1,9 +1,7 @@
+use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
 use std::{fs, path::PathBuf};
 
-use scraps_libs::{
-    error::{anyhow::Context, ScrapsResult, ScrapsError},
-    git::GitCommand,
-};
+use scraps_libs::git::GitCommand;
 
 pub struct InitCommand<GC: GitCommand> {
     git_command: GC,
@@ -25,7 +23,9 @@ impl<GC: GitCommand> InitCommand<GC> {
         fs::write(config_toml_file, include_str!("builtins/Config.toml"))
             .context(ScrapsError::FileWrite)?;
         fs::write(gitignore_file, "public").context(ScrapsError::FileWrite)?;
-        self.git_command.init(project_dir).context(ScrapsError::GitInit)
+        self.git_command
+            .init(project_dir)
+            .context(ScrapsError::GitInit)
     }
 }
 

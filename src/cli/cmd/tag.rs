@@ -4,7 +4,7 @@ use itertools::Itertools;
 use url::Url;
 
 use crate::cli::display::tag::DisplayTag;
-use scraps_libs::error::ScrapsResult;
+use crate::error::ScrapsResult;
 
 use crate::cli::config::scrap_config::ScrapConfig;
 use crate::tag::cmd::TagCommand;

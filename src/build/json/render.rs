@@ -1,6 +1,6 @@
 use std::{fs::File, path::PathBuf};
 
-use scraps_libs::error::{anyhow::Context, ScrapsResult, ScrapsError};
+use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
 use scraps_libs::model::scrap::Scrap;
 use url::Url;
 

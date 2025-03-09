@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use scraps_libs::error::{anyhow::Ok, ScrapsResult};
+use crate::error::{anyhow::Ok, ScrapsResult};
 
 use crate::template::markdown::markdown_tera;
 

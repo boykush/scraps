@@ -6,12 +6,10 @@ use crate::build::model::html::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::list_view_configs::ListViewConfigs;
 use crate::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
+use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
-use scraps_libs::{
-    error::{anyhow::Context, ScrapsResult, ScrapsError},
-    model::tags::Tags,
-};
+use scraps_libs::model::tags::Tags;
 use tracing::{span, Level};
 use url::Url;
 

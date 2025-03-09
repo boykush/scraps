@@ -1,7 +1,6 @@
-use iso639_1::Iso639_1;
 use core::str;
+use iso639_1::Iso639_1;
 use std::fmt;
-
 
 #[derive(Debug, Clone)]
 pub struct LangCode(Iso639_1);
@@ -12,12 +11,7 @@ impl std::str::FromStr for LangCode {
     fn from_str(s: &str) -> Result<Self, String> {
         Iso639_1::try_from(s)
             .map(LangCode)
-            .map_err(|e| {
-                format!(
-                    "Failed to parse language code '{}': {}",
-                    s, e
-                )
-            })
+            .map_err(|e| format!("Failed to parse language code '{}': {}", s, e))
     }
 }
 

@@ -1,6 +1,6 @@
+use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
 use chrono_tz::Tz;
 use config::Config;
-use scraps_libs::error::{anyhow::Context, ScrapsResult, ScrapsError};
 use serde::Deserialize;
 use url::Url;
 

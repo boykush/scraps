@@ -1,5 +1,5 @@
+use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
 use once_cell::sync::Lazy;
-use scraps_libs::error::{anyhow::Context, ScrapsResult, ScrapsError};
 use tera::Tera;
 
 static MARKDOWN_TERA: Lazy<Tera> = Lazy::new(|| {

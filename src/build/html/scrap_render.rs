@@ -5,11 +5,9 @@ use std::{fs::File, path::PathBuf};
 use crate::build::model::html::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
+use crate::error::{anyhow::Context, ScrapsError, ScrapsResult};
 use chrono_tz::Tz;
-use scraps_libs::{
-    error::{anyhow::Context, ScrapsResult, ScrapsError},
-    model::scrap::Scrap,
-};
+use scraps_libs::model::scrap::Scrap;
 use url::Url;
 
 use crate::build::html::tera::scrap_tera;
