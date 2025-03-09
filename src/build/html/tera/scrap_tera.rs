@@ -1,7 +1,8 @@
 use crate::build::model::html::HtmlMetadata;
+use crate::error::BuildError;
+use crate::error::{anyhow::Context, ScrapsResult};
 use chrono_tz::Tz;
 use once_cell::sync::Lazy;
-use scraps_libs::error::{anyhow::Context, ScrapResult, ScrapsError};
 use tera::Tera;
 use url::Url;
 
@@ -30,8 +31,8 @@ pub fn base(
     timezone: Tz,
     metadata: &HtmlMetadata,
     template_dir: &str,
-) -> ScrapResult<(Tera, tera::Context)> {
-    let mut tera = Tera::new(template_dir).context(ScrapsError::PublicRender)?;
+) -> ScrapsResult<(Tera, tera::Context)> {
+    let mut tera = Tera::new(template_dir).context(BuildError::RenderHtml)?;
     tera.extend(&SCRAP_TERA).unwrap();
 
     let mut context = tera::Context::new();

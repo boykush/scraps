@@ -1,14 +1,14 @@
 mod build;
 mod cli;
+mod error;
 mod init;
 mod serve;
 mod tag;
 mod template;
 
 use clap::Parser;
-use scraps_libs::error::ScrapResult;
 
-fn main() -> ScrapResult<()> {
+fn main() -> error::ScrapsResult<()> {
     let cli = cli::Cli::parse();
 
     match cli.command {

@@ -4,7 +4,8 @@ use std::{fs::File, path::PathBuf};
 
 use crate::build::model::html::HtmlMetadata;
 use crate::build::model::linked_scraps_map::LinkedScrapsMap;
-use scraps_libs::error::{anyhow::Context, ScrapResult, ScrapsError};
+use crate::error::BuildError;
+use crate::error::{anyhow::Context, ScrapsResult};
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::tag::Tag;
 use url::Url;
@@ -25,9 +26,9 @@ impl TagRender {
         static_dir_path: &Path,
         public_dir_path: &Path,
         scraps: &Vec<Scrap>,
-    ) -> ScrapResult<TagRender> {
+    ) -> ScrapsResult<TagRender> {
         let public_tags_dir_path = &public_dir_path.join("scraps");
-        fs::create_dir_all(public_tags_dir_path).context(ScrapsError::FileWrite)?;
+        fs::create_dir_all(public_tags_dir_path).context(BuildError::CreateDir)?;
 
         Ok(TagRender {
             static_dir_path: static_dir_path.to_owned(),
@@ -36,7 +37,7 @@ impl TagRender {
         })
     }
 
-    pub fn run(&self, base_url: &Url, metadata: &HtmlMetadata, tag: &Tag) -> ScrapResult<()> {
+    pub fn run(&self, base_url: &Url, metadata: &HtmlMetadata, tag: &Tag) -> ScrapsResult<()> {
         let (tera, mut context) = tag_tera::base(
             base_url,
             metadata,
@@ -52,10 +53,10 @@ impl TagRender {
 
         // render html
         let file_name = &format!("{}.html", tag.title.slug);
-        let wtr = File::create(self.public_scraps_dir_path.join(file_name))
-            .context(ScrapsError::FileWrite)?;
+        let file_path = &self.public_scraps_dir_path.join(file_name);
+        let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to("__builtins/tag.html", &context, wtr)
-            .context(ScrapsError::PublicRender)
+            .context(BuildError::WriteFailure(file_path.clone()))
     }
 }
 

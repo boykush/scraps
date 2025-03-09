@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use scraps_libs::error::{anyhow::Ok, ScrapResult};
+use crate::error::{anyhow::Ok, ScrapsResult};
 
 use crate::template::markdown::markdown_tera;
 
@@ -14,9 +14,9 @@ impl ListCommand {
             templates_dir_path: templates_dir_path.to_path_buf(),
         }
     }
-    pub fn run(&self) -> ScrapResult<Vec<String>> {
+    pub fn run(&self) -> ScrapsResult<Vec<String>> {
         let (markdown_tera, _) =
-            markdown_tera::init(self.templates_dir_path.join("*.md").to_str().unwrap())?;
+            markdown_tera::base(self.templates_dir_path.join("*.md").to_str().unwrap())?;
         let template_names = markdown_tera
             .get_template_names()
             .map(|s| {

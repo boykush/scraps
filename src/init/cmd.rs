@@ -1,9 +1,7 @@
+use crate::error::{anyhow::Context, InitError, ScrapsResult};
 use std::{fs, path::PathBuf};
 
-use scraps_libs::{
-    error::{anyhow::Context, ScrapResult, ScrapsError},
-    git::GitCommand,
-};
+use scraps_libs::git::GitCommand;
 
 pub struct InitCommand<GC: GitCommand> {
     git_command: GC,
@@ -14,18 +12,21 @@ impl<GC: GitCommand> InitCommand<GC> {
         InitCommand { git_command }
     }
 
-    pub fn run(&self, project_name: &str) -> ScrapResult<()> {
+    pub fn run(&self, project_name: &str) -> ScrapsResult<()> {
         let project_dir = &PathBuf::from(format!("./{project_name}"));
         let scraps_dir = project_dir.join("scraps");
-        let config_toml_file = project_dir.join("Config.toml");
-        let gitignore_file = project_dir.join(".gitignore");
+        let config_toml_file = &project_dir.join("Config.toml");
+        let gitignore_file = &project_dir.join(".gitignore");
 
-        fs::create_dir_all(project_dir).context(ScrapsError::FileWrite)?;
-        fs::create_dir(scraps_dir).context(ScrapsError::FileWrite)?;
+        fs::create_dir_all(project_dir).context(InitError::CreateDirectory)?;
+        fs::create_dir(scraps_dir).context(InitError::CreateDirectory)?;
         fs::write(config_toml_file, include_str!("builtins/Config.toml"))
-            .context(ScrapsError::FileWrite)?;
-        fs::write(gitignore_file, "public").context(ScrapsError::FileWrite)?;
-        self.git_command.init(project_dir)
+            .context(InitError::WriteFailure(config_toml_file.clone()))?;
+        fs::write(gitignore_file, "public")
+            .context(InitError::WriteFailure(gitignore_file.clone()))?;
+        self.git_command
+            .init(project_dir)
+            .context(InitError::GitInit)
     }
 }
 

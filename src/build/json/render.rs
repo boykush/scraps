@@ -1,6 +1,7 @@
 use std::{fs::File, path::PathBuf};
 
-use scraps_libs::error::{anyhow::Context, ScrapResult, ScrapsError};
+use crate::error::BuildError;
+use crate::error::{anyhow::Context, ScrapsResult};
 use scraps_libs::model::scrap::Scrap;
 use url::Url;
 
@@ -20,7 +21,7 @@ impl SearchIndexRender {
         }
     }
 
-    pub fn run(&self, base_url: &Url, scraps: &[Scrap]) -> ScrapResult<()> {
+    pub fn run(&self, base_url: &Url, scraps: &[Scrap]) -> ScrapsResult<()> {
         let serialize_scraps = SearchIndexScrapsTera::new(scraps);
 
         Self::render_search_index_json(self, base_url, &serialize_scraps)
@@ -30,7 +31,7 @@ impl SearchIndexRender {
         &self,
         base_url: &Url,
         scraps: &SearchIndexScrapsTera,
-    ) -> ScrapResult<()> {
+    ) -> ScrapsResult<()> {
         let (tera, mut context) = search_index_tera::base(
             base_url,
             self.static_dir_path.join("*.json").to_str().unwrap(),
@@ -41,10 +42,10 @@ impl SearchIndexRender {
             "__builtins/search_index.json"
         };
         context.insert("scraps", scraps);
-        let wtr = File::create(self.public_dir_path.join("search_index.json"))
-            .context(ScrapsError::PublicRender)?;
+        let file_path = &self.public_dir_path.join("search_index.json");
+        let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to(template_name, &context, wtr)
-            .context(ScrapsError::PublicRender)
+            .context(BuildError::WriteFailure(file_path.clone()))
     }
 }
 

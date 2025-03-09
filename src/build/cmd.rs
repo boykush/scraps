@@ -4,18 +4,16 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::build::css::render::CSSRender;
+use crate::error::{
+    anyhow::{bail, Context},
+    ScrapsError, ScrapsResult,
+};
+use crate::{build::css::render::CSSRender, error::BuildError};
 use chrono_tz::Tz;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
+use scraps_libs::git::GitCommand;
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
-use scraps_libs::{
-    error::{
-        anyhow::{bail, Context},
-        ScrapResult, ScrapsError,
-    },
-    git::GitCommand,
-};
 use tracing::{span, Level};
 use url::Url;
 
@@ -59,17 +57,17 @@ impl BuildCommand {
         html_metadata: &HtmlMetadata,
         css_metadata: &CssMetadata,
         list_view_configs: &ListViewConfigs,
-    ) -> ScrapResult<usize> {
-        let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
+    ) -> ScrapsResult<usize> {
+        let span_read_scraps = span!(Level::INFO, "load_scraps").entered();
 
-        let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapsError::FileLoad)?;
+        let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapsError::ReadScraps)?;
 
         let paths = read_dir
             .map(|entry_res| {
                 let entry = entry_res?;
                 Self::to_path_by_dir_entry(&entry)
             })
-            .collect::<ScrapResult<Vec<Option<PathBuf>>>>()?
+            .collect::<ScrapsResult<Vec<Option<PathBuf>>>>()?
             .into_iter()
             .flatten()
             .collect::<Vec<PathBuf>>();
@@ -77,7 +75,7 @@ impl BuildCommand {
         let scraps_with_commited_ts = paths
             .into_par_iter()
             .map(|path| self.to_scrap_by_path(git_command, base_url, &path))
-            .collect::<ScrapResult<Vec<ScrapWithCommitedTs>>>()
+            .collect::<ScrapsResult<Vec<ScrapWithCommitedTs>>>()
             .map(|s| ScrapsWithCommitedTs::new(&s))?;
         let scraps = scraps_with_commited_ts.to_scraps();
         span_read_scraps.exit();
@@ -139,10 +137,10 @@ impl BuildCommand {
         Ok(scraps.len())
     }
 
-    fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapResult<Option<PathBuf>> {
+    fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapsResult<Option<PathBuf>> {
         if let Ok(file_type) = dir_entry.file_type() {
             if file_type.is_dir() {
-                bail!(ScrapsError::FileLoad)
+                bail!(ScrapsError::ReadScraps)
             }
         };
         if dir_entry.path().extension() == Some("md".as_ref()) {
@@ -157,16 +155,18 @@ impl BuildCommand {
         git_command: GC,
         base_url: &Url,
         path: &PathBuf,
-    ) -> ScrapResult<ScrapWithCommitedTs> {
+    ) -> ScrapsResult<ScrapWithCommitedTs> {
         let span_convert_to_scrap = span!(Level::INFO, "convert_to_scrap").entered();
         let file_prefix = path
             .file_stem()
-            .ok_or(ScrapsError::FileLoad)
+            .ok_or(ScrapsError::ReadScraps)
             .map(|o| o.to_str())
-            .and_then(|fp| fp.ok_or(ScrapsError::FileLoad))?;
-        let md_text = fs::read_to_string(path).context(ScrapsError::FileLoad)?;
+            .and_then(|fp| fp.ok_or(ScrapsError::ReadScraps))?;
+        let md_text = fs::read_to_string(path).context(ScrapsError::ReadScraps)?;
         let scrap = Scrap::new(base_url, file_prefix, &md_text);
-        let commited_ts = git_command.commited_ts(path)?;
+        let commited_ts = git_command
+            .commited_ts(path)
+            .context(BuildError::GitCommitedTs)?;
         span_convert_to_scrap.exit();
 
         Ok(ScrapWithCommitedTs::new(&scrap, &commited_ts))

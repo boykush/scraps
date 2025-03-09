@@ -1,4 +1,4 @@
-use super::error::ScrapsError;
+use core::str;
 use iso639_1::Iso639_1;
 use std::fmt;
 
@@ -6,12 +6,12 @@ use std::fmt;
 pub struct LangCode(Iso639_1);
 
 impl std::str::FromStr for LangCode {
-    type Err = ScrapsError;
+    type Err = String;
 
-    fn from_str(s: &str) -> Result<Self, ScrapsError> {
+    fn from_str(s: &str) -> Result<Self, String> {
         Iso639_1::try_from(s)
             .map(LangCode)
-            .map_err(|_| ScrapsError::FromStrErr)
+            .map_err(|e| format!("Failed to parse language code '{}': {}", s, e))
     }
 }
 

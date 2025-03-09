@@ -2,6 +2,7 @@ use std::{net::SocketAddr, path::Path};
 
 use url::Url;
 
+use crate::error::ScrapsResult;
 use crate::{
     build::{
         cmd::BuildCommand,
@@ -15,9 +16,9 @@ use crate::{
     },
     serve::cmd::ServeCommand,
 };
-use scraps_libs::{error::ScrapResult, git::GitCommandImpl};
+use scraps_libs::git::GitCommandImpl;
 
-pub fn run() -> ScrapResult<()> {
+pub fn run() -> ScrapsResult<()> {
     // set local environment
     let addr: SocketAddr = ([127, 0, 0, 1], 1112).into();
     let base_url = Url::parse(&format!("http://{}", addr))?.join("").unwrap();

@@ -1,4 +1,4 @@
-use scraps_libs::error::{anyhow::Context, ScrapResult, ScrapsError};
+use crate::error::{anyhow::Context, ScrapsError, ScrapsResult, TemplateError};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -7,7 +7,7 @@ pub struct TemplateMetadata {
 }
 
 impl TemplateMetadata {
-    pub fn new(metadata_text: &str) -> ScrapResult<TemplateMetadata> {
-        toml::from_str(metadata_text).context(ScrapsError::TemplateMetadataLoad)
+    pub fn new(metadata_text: &str) -> ScrapsResult<TemplateMetadata> {
+        toml::from_str(metadata_text).context(ScrapsError::Template(TemplateError::LoadMetadata))
     }
 }
