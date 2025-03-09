@@ -140,7 +140,7 @@ impl BuildCommand {
     fn to_path_by_dir_entry(dir_entry: &DirEntry) -> ScrapsResult<Option<PathBuf>> {
         if let Ok(file_type) = dir_entry.file_type() {
             if file_type.is_dir() {
-                bail!(ScrapsError::ReadScraps)
+                bail!(ScrapsError::ReadScrap(dir_entry.path()))
             }
         };
         if dir_entry.path().extension() == Some("md".as_ref()) {
@@ -159,10 +159,10 @@ impl BuildCommand {
         let span_convert_to_scrap = span!(Level::INFO, "convert_to_scrap").entered();
         let file_prefix = path
             .file_stem()
-            .ok_or(ScrapsError::ReadScraps)
+            .ok_or(ScrapsError::ReadScrap(path.clone()))
             .map(|o| o.to_str())
-            .and_then(|fp| fp.ok_or(ScrapsError::ReadScraps))?;
-        let md_text = fs::read_to_string(path).context(ScrapsError::ReadScraps)?;
+            .and_then(|fp| fp.ok_or(ScrapsError::ReadScrap(path.clone())))?;
+        let md_text = fs::read_to_string(path).context(ScrapsError::ReadScrap(path.clone()))?;
         let scrap = Scrap::new(base_url, file_prefix, &md_text);
         let commited_ts = git_command
             .commited_ts(path)
