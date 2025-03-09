@@ -20,6 +20,9 @@ pub enum ScrapsError {
     #[error("CLI error: {0}")]
     Cli(#[from] CliError),
 
+    #[error("Failed to read scrap: {0}")]
+    ReadScrap(PathBuf),
+
     #[error("Failed to read scraps")]
     ReadScraps,
 }

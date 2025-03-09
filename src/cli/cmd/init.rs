@@ -1,5 +1,5 @@
 use crate::error::ScrapsResult;
-use crate::init::cmd::InitCommand;
+use crate::usecase::init::cmd::InitCommand;
 use scraps_libs::git::GitCommandImpl;
 
 pub fn run(project_name: &str) -> ScrapsResult<()> {
