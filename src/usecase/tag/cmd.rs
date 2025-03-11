@@ -1,12 +1,9 @@
 use crate::{
-    error::{anyhow::Context, ScrapsError, ScrapsResult},
+    error::ScrapsResult,
     usecase::read_scraps,
 };
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
-use std::{
-    fs::{self},
-    path::PathBuf,
-};
+use std::path::PathBuf;
 
 use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
 use url::Url;
@@ -22,17 +19,7 @@ impl TagCommand {
         }
     }
     pub fn run(&self, base_url: &Url) -> ScrapsResult<(Tags, LinkedScrapsMap)> {
-        let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapsError::ReadScraps)?;
-
-        let paths = read_dir
-            .map(|entry_res| {
-                let entry = entry_res?;
-                read_scraps::to_path_by_dir_entry(&entry)
-            })
-            .collect::<ScrapsResult<Vec<Option<PathBuf>>>>()?
-            .into_iter()
-            .flatten()
-            .collect::<Vec<PathBuf>>();
+        let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
 
         let scraps = paths
             .iter()

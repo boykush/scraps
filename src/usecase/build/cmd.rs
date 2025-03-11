@@ -1,12 +1,11 @@
 use std::{
-    fs::{self},
     marker::{Send, Sync},
     path::{Path, PathBuf},
 };
 
 use crate::{error::BuildError, usecase::build::css::render::CSSRender};
 use crate::{
-    error::{anyhow::Context, ScrapsError, ScrapsResult},
+    error::{anyhow::Context, ScrapsResult},
     usecase::read_scraps,
 };
 use chrono_tz::Tz;
@@ -60,17 +59,9 @@ impl BuildCommand {
     ) -> ScrapsResult<usize> {
         let span_read_scraps = span!(Level::INFO, "load_scraps").entered();
 
-        let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapsError::ReadScraps)?;
-
-        let paths = read_dir
-            .map(|entry_res| {
-                let entry = entry_res?;
-                read_scraps::to_path_by_dir_entry(&entry)
-            })
-            .collect::<ScrapsResult<Vec<Option<PathBuf>>>>()?
-            .into_iter()
-            .flatten()
-            .collect::<Vec<PathBuf>>();
+        let paths = read_scraps::to_scrap_paths(
+            &self.scraps_dir_path,
+        )?;
 
         let scraps_with_commited_ts = paths
             .into_par_iter()
@@ -157,6 +148,7 @@ impl BuildCommand {
 #[cfg(test)]
 mod tests {
     use std::path::Path;
+    use std::fs;
 
     use crate::usecase::build::model::{color_scheme::ColorScheme, paging::Paging, sort::SortKey};
 
