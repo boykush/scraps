@@ -91,7 +91,8 @@ mod tests {
         // tag
         let tag1: Tag = "tag 1".into();
 
-        let tag1_html_path = public_dir_path.join(format!("scraps/{}.html", Slug::from(tag1.title.clone())));
+        let tag1_html_path =
+            public_dir_path.join(format!("scraps/{}.html", Slug::from(tag1.title.clone())));
 
         let render = TagRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 

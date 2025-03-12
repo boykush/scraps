@@ -102,7 +102,8 @@ mod tests {
         let scrap2 = &Scrap::new(&base_url, "scrap 2", "[[scrap1]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
-        let scrap1_html_path = public_dir_path.join(format!("scraps/{}.html", Slug::from(scrap1.title.clone())));
+        let scrap1_html_path =
+            public_dir_path.join(format!("scraps/{}.html", Slug::from(scrap1.title.clone())));
 
         let render = ScrapRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 
