@@ -62,8 +62,7 @@ impl BuildCommand {
         let paths = read_scraps::to_scrap_paths(
             &self.scraps_dir_path,
         )?;
-
-        let scraps_with_commited_ts = paths
+        let scraps_with_commited_ts = paths 
             .into_par_iter()
             .map(|path| self.to_scrap_with_commited_ts_by_path(git_command, base_url, &path))
             .collect::<ScrapsResult<Vec<ScrapWithCommitedTs>>>()
@@ -135,7 +134,7 @@ impl BuildCommand {
         path: &PathBuf,
     ) -> ScrapsResult<ScrapWithCommitedTs> {
         let span_convert_to_scrap = span!(Level::INFO, "convert_to_scrap").entered();
-        let scrap = read_scraps::to_scrap_by_path(base_url, path)?;
+        let scrap = read_scraps::to_scrap_by_path(base_url, &self.scraps_dir_path, path)?;
         let commited_ts = git_command
             .commited_ts(path)
             .context(BuildError::GitCommitedTs)?;

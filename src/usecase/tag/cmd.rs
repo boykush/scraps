@@ -23,7 +23,7 @@ impl TagCommand {
 
         let scraps = paths
             .iter()
-            .map(|path| read_scraps::to_scrap_by_path(base_url, path))
+            .map(|path| read_scraps::to_scrap_by_path(base_url, &self.scraps_dir_path, path))
             .collect::<ScrapsResult<Vec<Scrap>>>()?;
 
         let tags = Tags::new(&scraps);
@@ -66,6 +66,7 @@ mod tests {
                 let command = TagCommand::new(&scraps_dir_path);
 
                 let result = command.run(&base_url);
+                println!("{:?}", result);
                 assert!(result.is_ok());
 
                 let (tags, linked_scraps_map) = result.unwrap();
@@ -84,8 +85,8 @@ mod tests {
                 );
 
                 // test linked scraps map
-                let scrap1 = Scrap::new(&base_url, "test1", "#[[Tag1]] #[[Tag2]]");
-                let scrap2 = Scrap::new(&base_url, "test2", "#[[Tag1]] #[[Tag3]]");
+                let scrap1 = Scrap::new(&base_url, "test1",&None, "#[[Tag1]] #[[Tag2]]");
+                let scrap2 = Scrap::new(&base_url, "test2",&None, "#[[Tag1]] #[[Tag3]]");
                 assert_eq!(
                     linked_scraps_map
                         .linked_by(&tag1.title)

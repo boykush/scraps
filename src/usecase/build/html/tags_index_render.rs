@@ -99,8 +99,8 @@ mod tests {
         .as_bytes();
 
         // scraps
-        let scrap1 = &Scrap::new(&base_url, "scrap1", "[[tag1]][[tag2]]");
-        let scrap2 = &Scrap::new(&base_url, "scrap2", "[[tag1]]");
+        let scrap1 = &Scrap::new(&base_url, "scrap1", &None, "[[tag1]][[tag2]]");
+        let scrap2 = &Scrap::new(&base_url, "scrap2", &None, "[[tag1]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
         let index_html_path = public_dir_path.join("tags/index.html");

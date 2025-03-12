@@ -2,18 +2,19 @@ use url::Url;
 
 use crate::markdown;
 
-use super::title::Title;
+use super::{context::Ctx, title::Title};
 
 #[derive(PartialEq, Clone, Debug)]
 pub struct Scrap {
     pub title: Title,
+    pub ctx: Option<Ctx>,
     pub links: Vec<Title>,
     pub html_content: String,
     pub thumbnail: Option<Url>,
 }
 
 impl Scrap {
-    pub fn new(base_url: &Url, title: &str, text: &str) -> Scrap {
+    pub fn new(base_url: &Url, title: &str, ctx: &Option<&str>, text: &str) -> Scrap {
         let links = markdown::extract::link_titles(text)
             .iter()
             .map(|t| t.as_str().into())
@@ -23,6 +24,7 @@ impl Scrap {
 
         Scrap {
             title: title.into(),
+            ctx: ctx.map(|s| s.into()),
             links,
             html_content,
             thumbnail,
@@ -37,7 +39,7 @@ mod tests {
     #[test]
     fn it_new() {
         let base_url = Url::parse("http://localhost:1112/").unwrap();
-        let mut scrap = Scrap::new(&base_url, "scrap title", "[[link1]] [[link2]]");
+        let mut scrap = Scrap::new(&base_url, "scrap title", &None, "[[link1]] [[link2]]");
         assert_eq!(scrap.title, "scrap title".into());
         scrap.links.sort();
         let mut expected = ["link1".into(), "link2".into()];
