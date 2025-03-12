@@ -1,5 +1,5 @@
 use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
-use scraps_libs::model::tag::Tag;
+use scraps_libs::model::{slug::Slug, tag::Tag};
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 pub struct TagTera {
@@ -13,7 +13,7 @@ impl TagTera {
         let linked_count = linked_scraps_map.linked_by(&tag.title).len();
         TagTera {
             title: tag.title.to_string(),
-            slug: tag.title.slug.to_string(),
+            slug: Slug::from(tag.title.clone()).to_string(),
             linked_count,
         }
     }

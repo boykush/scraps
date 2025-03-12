@@ -9,6 +9,7 @@ use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::usecase::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
 use chrono_tz::Tz;
 use scraps_libs::model::scrap::Scrap;
+use scraps_libs::model::slug::Slug;
 use url::Url;
 
 use crate::usecase::build::html::tera::scrap_tera;
@@ -60,7 +61,7 @@ impl ScrapRender {
         context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
 
         // render html
-        let file_name = &format!("{}.html", &scrap_with_commited_ts.scrap().title.slug);
+        let file_name = &format!("{}.html", Slug::from(scrap_with_commited_ts.scrap().title));
         let file_path = &self.public_scraps_dir_path.join(file_name);
         let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to("__builtins/scrap.html", &context, wtr)
@@ -101,7 +102,7 @@ mod tests {
         let scrap2 = &Scrap::new(&base_url, "scrap 2", "[[scrap1]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
-        let scrap1_html_path = public_dir_path.join(format!("scraps/{}.html", scrap1.title.slug));
+        let scrap1_html_path = public_dir_path.join(format!("scraps/{}.html", Slug::from(scrap1.title.clone())));
 
         let render = ScrapRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 

@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use url::Url;
 
-use scraps_libs::model::scrap::Scrap;
+use scraps_libs::model::{scrap::Scrap, slug::Slug};
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeLinkScrap {
@@ -15,7 +15,7 @@ impl SerializeLinkScrap {
     fn new(scrap: &Scrap) -> SerializeLinkScrap {
         SerializeLinkScrap {
             title: scrap.title.to_string(),
-            slug: scrap.title.slug.to_string(),
+            slug: Slug::from(scrap.title.clone()).to_string(),
             html_content: scrap.html_content.clone(),
             thumbnail: scrap.thumbnail.clone(),
         }

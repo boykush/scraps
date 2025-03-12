@@ -7,6 +7,7 @@ use crate::error::{anyhow::Context, ScrapsResult};
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
 use scraps_libs::model::scrap::Scrap;
+use scraps_libs::model::slug::Slug;
 use scraps_libs::model::tag::Tag;
 use url::Url;
 
@@ -52,7 +53,7 @@ impl TagRender {
         context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
 
         // render html
-        let file_name = &format!("{}.html", tag.title.slug);
+        let file_name = &format!("{}.html", Slug::from(tag.title.clone()));
         let file_path = &self.public_scraps_dir_path.join(file_name);
         let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to("__builtins/tag.html", &context, wtr)
@@ -90,7 +91,7 @@ mod tests {
         // tag
         let tag1: Tag = "tag 1".into();
 
-        let tag1_html_path = public_dir_path.join(format!("scraps/{}.html", tag1.title.slug));
+        let tag1_html_path = public_dir_path.join(format!("scraps/{}.html", Slug::from(tag1.title.clone())));
 
         let render = TagRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 

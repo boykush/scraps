@@ -2,13 +2,14 @@ use std::fmt::Display;
 
 use crate::slugify;
 
+use super::title::Title;
+
 #[derive(PartialEq, Clone, Debug, Eq, Hash, Ord, PartialOrd)]
 pub struct Slug(String);
 
-impl Slug {
-    pub(super) fn new(v: &str) -> Slug {
-        let slug = slugify::by_dash(v);
-        Slug(slug)
+impl From<Title> for Slug {
+    fn from(title: Title) -> Self {
+        Slug(slugify::by_dash(&title.to_string()))
     }
 }
 

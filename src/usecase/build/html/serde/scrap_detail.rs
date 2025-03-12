@@ -1,3 +1,4 @@
+use scraps_libs::model::slug::Slug;
 use url::Url;
 
 use crate::usecase::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
@@ -17,7 +18,7 @@ impl From<&ScrapWithCommitedTs> for ScrapDetailTera {
         let commited_ts = scrap_with_commited_ts.commited_ts();
         ScrapDetailTera {
             title: scrap.title.to_string(),
-            slug: scrap.title.slug.to_string(),
+            slug: Slug::from(scrap.title.clone()).to_string(),
             html_content: scrap.html_content.clone(),
             thumbnail: scrap.thumbnail.clone(),
             commited_ts,
