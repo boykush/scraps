@@ -52,16 +52,21 @@ impl ScrapRender {
             metadata,
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
+        let scrap = &scrap_with_commited_ts.scrap();
 
         // insert to context for linked list
         let linked_scraps_map = LinkedScrapsMap::new(&self.scraps);
         context.insert("scrap", &ScrapDetailTera::from(scrap_with_commited_ts));
 
-        let linked_scraps = linked_scraps_map.linked_by(&scrap_with_commited_ts.scrap().title);
+        let linked_scraps = linked_scraps_map.linked_by(&scrap.title);
         context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
 
         // render html
-        let file_name = &format!("{}.html", Slug::from(scrap_with_commited_ts.scrap().title));
+        let file_name = match scrap.ctx.clone() {
+            Some(c) => &format!("{}.{}.html", Slug::from(scrap.title.clone()), Slug::from(c)),
+            None => &format!("{}.html", Slug::from(scrap.title.clone())),
+        };
+
         let file_path = &self.public_scraps_dir_path.join(file_name);
         let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to("__builtins/scrap.html", &context, wtr)
@@ -99,11 +104,11 @@ mod tests {
         // scraps
         let commited_ts1 = None;
         let scrap1 = &Scrap::new(&base_url, "scrap 1", &None, "# header1");
-        let scrap2 = &Scrap::new(&base_url, "scrap 2", &None, "[[scrap1]]");
+        let scrap2 = &Scrap::new(&base_url, "scrap 2", &Some("Context".into()), "[[scrap1]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
-        let scrap1_html_path =
-            public_dir_path.join(format!("scraps/{}.html", Slug::from(scrap1.title.clone())));
+        let scrap1_html_path = public_dir_path.join("scraps/scrap-1.html");
+        let scrap2_html_path = public_dir_path.join("scraps/scrap-2.context.html");
 
         let render = ScrapRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 
@@ -117,5 +122,16 @@ mod tests {
 
         let result2 = fs::read_to_string(scrap1_html_path);
         assert!(result2.is_ok());
+
+        let result3 = render.run(
+            &base_url,
+            timezone,
+            &metadata,
+            &ScrapWithCommitedTs::new(scrap2, &commited_ts1),
+        );
+        assert!(result3.is_ok());
+
+        let result4 = fs::read_to_string(scrap2_html_path);
+        assert!(result4.is_ok());
     }
 }

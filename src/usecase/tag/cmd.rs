@@ -1,7 +1,4 @@
-use crate::{
-    error::ScrapsResult,
-    usecase::read_scraps,
-};
+use crate::{error::ScrapsResult, usecase::read_scraps};
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 use std::path::PathBuf;
 
@@ -85,8 +82,8 @@ mod tests {
                 );
 
                 // test linked scraps map
-                let scrap1 = Scrap::new(&base_url, "test1",&None, "#[[Tag1]] #[[Tag2]]");
-                let scrap2 = Scrap::new(&base_url, "test2",&None, "#[[Tag1]] #[[Tag3]]");
+                let scrap1 = Scrap::new(&base_url, "test1", &None, "#[[Tag1]] #[[Tag2]]");
+                let scrap2 = Scrap::new(&base_url, "test2", &None, "#[[Tag1]] #[[Tag3]]");
                 assert_eq!(
                     linked_scraps_map
                         .linked_by(&tag1.title)

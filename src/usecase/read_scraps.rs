@@ -22,9 +22,11 @@ pub(crate) fn to_scrap_paths(dir_path: &PathBuf) -> ScrapsResult<Vec<PathBuf>> {
                         Some(ext) if ext == "md" => Ok(vec![file_path]),
                         _ => Ok(vec![]),
                     }
-                },
+                }
                 Ok(file_type) if file_type.is_dir() => to_scrap_paths(&entry.path()),
-                res => res.map(|_| vec![]).context(ScrapsError::ReadScrap(entry.path())),
+                res => res
+                    .map(|_| vec![])
+                    .context(ScrapsError::ReadScrap(entry.path())),
             }
         })
         .collect::<ScrapsResult<Vec<Vec<PathBuf>>>>()?;
@@ -32,16 +34,25 @@ pub(crate) fn to_scrap_paths(dir_path: &PathBuf) -> ScrapsResult<Vec<PathBuf>> {
     Ok(paths.into_iter().flatten().collect::<Vec<PathBuf>>())
 }
 
-pub(crate) fn to_scrap_by_path(base_url: &Url, scraps_dir_path: &Path, scrap_file_path: &PathBuf) -> ScrapsResult<Scrap> {
+pub(crate) fn to_scrap_by_path(
+    base_url: &Url,
+    scraps_dir_path: &Path,
+    scrap_file_path: &PathBuf,
+) -> ScrapsResult<Scrap> {
     let file_prefix = scrap_file_path
         .file_stem()
         .ok_or(ScrapsError::ReadScrap(scrap_file_path.clone()))
         .map(|o| o.to_str())
         .and_then(|fp| fp.ok_or(ScrapsError::ReadScrap(scrap_file_path.clone())))?;
-    let changed_directory_path = scrap_file_path.strip_prefix(scraps_dir_path).context(ScrapsError::ReadScrap(scrap_file_path.clone()))?;
-    let folder_name = changed_directory_path 
-        .parent().and_then(|s| s.to_str()).filter(|s| !s.is_empty());
-    let md_text = fs::read_to_string(scrap_file_path).context(ScrapsError::ReadScrap(scrap_file_path.clone()))?;
+    let changed_directory_path = scrap_file_path
+        .strip_prefix(scraps_dir_path)
+        .context(ScrapsError::ReadScrap(scrap_file_path.clone()))?;
+    let folder_name = changed_directory_path
+        .parent()
+        .and_then(|s| s.to_str())
+        .filter(|s| !s.is_empty());
+    let md_text = fs::read_to_string(scrap_file_path)
+        .context(ScrapsError::ReadScrap(scrap_file_path.clone()))?;
     let scrap = Scrap::new(base_url, file_prefix, &folder_name, &md_text);
 
     Ok(scrap)

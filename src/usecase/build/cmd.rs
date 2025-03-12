@@ -59,10 +59,8 @@ impl BuildCommand {
     ) -> ScrapsResult<usize> {
         let span_read_scraps = span!(Level::INFO, "load_scraps").entered();
 
-        let paths = read_scraps::to_scrap_paths(
-            &self.scraps_dir_path,
-        )?;
-        let scraps_with_commited_ts = paths 
+        let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
+        let scraps_with_commited_ts = paths
             .into_par_iter()
             .map(|path| self.to_scrap_with_commited_ts_by_path(git_command, base_url, &path))
             .collect::<ScrapsResult<Vec<ScrapWithCommitedTs>>>()
@@ -146,8 +144,8 @@ impl BuildCommand {
 
 #[cfg(test)]
 mod tests {
-    use std::path::Path;
     use std::fs;
+    use std::path::Path;
 
     use crate::usecase::build::model::{color_scheme::ColorScheme, paging::Paging, sort::SortKey};
 
