@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use scraps_libs::model::scrap::Scrap;
+use scraps_libs::model::{scrap::Scrap, slug::Slug};
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeSearchIndexScrap {
@@ -11,7 +11,7 @@ impl SerializeSearchIndexScrap {
     fn new(scrap: &Scrap) -> SerializeSearchIndexScrap {
         SerializeSearchIndexScrap {
             title: scrap.title.to_string(),
-            slug: scrap.title.slug.to_string(),
+            slug: Slug::from(scrap.title.clone()).to_string(),
         }
     }
 }

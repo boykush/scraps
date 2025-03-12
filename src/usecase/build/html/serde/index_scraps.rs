@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use scraps_libs::model::slug::Slug;
 use url::Url;
 
 use crate::usecase::build::model::{
@@ -27,7 +28,7 @@ impl SerializeIndexScrap {
         let linked_count = linked_scraps_map.linked_by(&scrap.title).len();
         SerializeIndexScrap {
             title: scrap.title.to_string(),
-            slug: scrap.title.slug.to_string(),
+            slug: Slug::from(scrap.title).to_string(),
             html_content: scrap.html_content.clone(),
             thumbnail: scrap.thumbnail.clone(),
             commited_ts,

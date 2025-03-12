@@ -1,25 +1,17 @@
 use std::fmt::Display;
 
-use super::slug::Slug;
-
 #[derive(PartialEq, Clone, Debug, Eq, Hash, Ord, PartialOrd)]
-pub struct Title {
-    v: String,
-    pub slug: Slug,
-}
+pub struct Title(String);
 
 impl From<&str> for Title {
     fn from(title: &str) -> Self {
-        Title {
-            v: title.to_string(),
-            slug: Slug::new(title),
-        }
+        Title(title.to_string())
     }
 }
 
 impl Display for Title {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.v)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -31,7 +23,6 @@ mod tests {
     #[test]
     fn it_new() {
         let title: Title = "scrap title".into();
-        assert_eq!(title.v, "scrap title".to_string());
-        assert_eq!(title.slug, Slug::new("scrap-title"));
+        assert_eq!(title.0, "scrap title".to_string());
     }
 }
