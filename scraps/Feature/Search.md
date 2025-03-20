@@ -1,5 +1,4 @@
-#[[Content]]
-
+#[[Search]]
 
 ## Search index format
 
@@ -7,7 +6,6 @@ Scraps can build a search index using the Fuse JSON schema as shown below.
 
 ```json
 [
-  
     {
       "title": "Search",
       "url": "http://127.0.0.1:1112/scraps/search.html"

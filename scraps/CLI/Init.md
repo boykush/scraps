@@ -1,4 +1,4 @@
-#[[CLI Usage]]
+#[[CLI]]
 
 ```bash
 ❯ scraps init your-scraps-project
@@ -17,4 +17,4 @@ The output result will look like this.
 └── scraps
 ```
 
-The next step is [[build command|Build]].
+The next step is [[CLI/Build|Build]].

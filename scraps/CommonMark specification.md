@@ -1,4 +1,4 @@
-#[[Content]] #[[Markdown Syntax]]
+#[[Markdown Syntax]]
 
 Scraps supports Markdown syntax according to the CommonMark specification.
 

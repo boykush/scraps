@@ -1,4 +1,4 @@
-#[[Content]] #[[Markdown Syntax]]
+#[[Markdown Syntax]]
 
 By specifying `mermaid` as the language for a code block, you can use [Mermaid](https://mermaid.js.org/intro/) diagrams.
 

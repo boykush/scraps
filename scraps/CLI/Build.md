@@ -1,4 +1,4 @@
-#[[CLI Usage]]
+#[[CLI]]
 
 ```bash
 ❯ scraps build
@@ -25,4 +25,4 @@ public
 └── main.css
 ```
 
-The next step is [[serve command]].
+The next step is [[CLI/Serve]].

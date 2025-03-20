@@ -1,4 +1,4 @@
-#[[CLI Usage]] #[[Templates]]
+#[[CLI]] #[[Templates]]
 
 ```bash
 ❯ scraps template
@@ -17,7 +17,7 @@ title = "{{ now() | date(timezone=timezone) }}"
 +++
 ```
 
- For the features available in the template, please refer to [[Templates feature]]. Sample templates is [[Scraps templates|here]]. 
+ For the features available in the template, please refer to [[Feature/Templates]]. Sample templates is [[Scraps templates|here]]. 
  
 You can check the templates added under `/templates` with the following command:
 ```bash
@@ -35,7 +35,7 @@ scraps template generate <TEMPLATE_NAME> -t <SCRAP_TITLE>
 Example:
 If metadata is specified in the template
 ```bash
-❯ scraps template generatet daily_note 
+❯ scraps template generate daily_note 
 ```
 
 The metadata will be ignored from the generated scrap.
