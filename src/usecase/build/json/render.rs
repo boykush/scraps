@@ -72,7 +72,7 @@ mod tests {
         let template_json_path = static_dir_path.join("search_index.json");
         let resource_template_json = FileResource::new(&template_json_path);
         let resource_template_json_byte =
-        "[{% for scrap in scraps %}{ \"title\": \"{{ scrap.title }}\", \"url\": \"{{ base_url}}scraps/{{ scrap.slug }}.html\" }{% if not loop.last %},{% endif %}{% endfor %}]"
+        "[{% for scrap in scraps %}{ \"title\": \"{{ scrap.title }}\", \"url\": \"{{ base_url}}scraps/{{ scrap.file_stem }}.html\" }{% if not loop.last %},{% endif %}{% endfor %}]"
         .as_bytes();
 
         // public

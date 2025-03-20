@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use scraps_libs::model::slug::Slug;
+use scraps_libs::model::file::ScrapFileStem;
 use url::Url;
 
 use crate::usecase::build::model::{
@@ -11,7 +11,7 @@ use crate::usecase::build::model::{
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeIndexScrap {
     title: String,
-    slug: String,
+    html_file_name: String,
     html_content: String,
     thumbnail: Option<Url>,
     pub commited_ts: Option<i64>,
@@ -28,9 +28,10 @@ impl SerializeIndexScrap {
         let linked_count = linked_scraps_map
             .linked_by(&scrap.title.clone().into())
             .len();
+        let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_link().clone()));
         SerializeIndexScrap {
             title: scrap.title.to_string(),
-            slug: Slug::from(scrap.title).to_string(),
+            html_file_name: html_file_name,
             html_content: scrap.html_content.clone(),
             thumbnail: scrap.thumbnail.clone(),
             commited_ts,

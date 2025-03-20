@@ -1,21 +1,22 @@
 use itertools::Itertools;
 use url::Url;
 
-use scraps_libs::model::{scrap::Scrap, slug::Slug};
+use scraps_libs::model::{file::ScrapFileStem, scrap::Scrap};
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeLinkScrap {
     title: String,
-    slug: String,
+    html_file_name: String,
     html_content: String,
     thumbnail: Option<Url>,
 }
 
 impl SerializeLinkScrap {
     fn new(scrap: &Scrap) -> SerializeLinkScrap {
+        let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_link().clone()));
         SerializeLinkScrap {
             title: scrap.title.to_string(),
-            slug: Slug::from(scrap.title.clone()).to_string(),
+            html_file_name: html_file_name,
             html_content: scrap.html_content.clone(),
             thumbnail: scrap.thumbnail.clone(),
         }

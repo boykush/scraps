@@ -1,4 +1,4 @@
-use crate::model::{file::HtmlFileName, link::ScrapLink};
+use crate::model::{file::ScrapFileStem, link::ScrapLink};
 
 use itertools::Itertools;
 use pulldown_cmark::{
@@ -30,8 +30,8 @@ pub fn to_html(text: &str, base_url: &Url) -> String {
                 end @ Event::End(TagEnd::Link),
             ) => {
                 let scrap_link = &ScrapLink::from_path_str(dest_url);
-                let file_name = HtmlFileName::from(scrap_link.clone());
-                let link = format!("{}scraps/{}", base_url, file_name);
+                let file_stem = ScrapFileStem::from(scrap_link.clone());
+                let link = format!("{}scraps/{}.html", base_url, file_stem);
                 let start_link = Event::Start(Tag::Link {
                     link_type: LinkType::WikiLink { has_pothole },
                     dest_url: link.into(),

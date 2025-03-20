@@ -2,19 +2,19 @@ use std::fmt::Display;
 
 use super::{link::ScrapLink, slug::Slug};
 
-pub struct HtmlFileName(String);
+pub struct ScrapFileStem(String);
 
-impl From<ScrapLink> for HtmlFileName {
+impl From<ScrapLink> for ScrapFileStem {
     fn from(link: ScrapLink) -> Self {
         let file_name = match link.ctx {
-            Some(ctx) => format!("{}.{}.html", Slug::from(link.title), Slug::from(ctx)),
-            None => format!("{}.html", Slug::from(link.title)),
+            Some(ctx) => format!("{}.{}", Slug::from(link.title), Slug::from(ctx)),
+            None => Slug::from(link.title).to_string(),
         };
-        HtmlFileName(file_name)
+        ScrapFileStem(file_name)
     }
 }
 
-impl Display for HtmlFileName {
+impl Display for ScrapFileStem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0)
     }
@@ -34,12 +34,12 @@ mod tests {
             ScrapLink::from(Title::from("expected slugify")),
             ScrapLink::with_ctx(&"title".into(), &"Context".into()),
         ];
-        let expected_list = ["title.html", "expected-slugify.html", "title.context.html"];
+        let expected_list = ["title", "expected-slugify", "title.context"];
         input_list
             .iter()
             .zip(expected_list.iter())
             .for_each(|(input, expected)| {
-                let file_name = HtmlFileName::from(input.clone());
+                let file_name = ScrapFileStem::from(input.clone());
                 assert_eq!(file_name.to_string(), *expected);
             });
     }

@@ -8,7 +8,7 @@ use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::usecase::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
 use chrono_tz::Tz;
-use scraps_libs::model::file::HtmlFileName;
+use scraps_libs::model::file::ScrapFileStem;
 use scraps_libs::model::scrap::Scrap;
 use url::Url;
 
@@ -61,9 +61,10 @@ impl ScrapRender {
         let linked_scraps = linked_scraps_map.linked_by(&scrap.self_link());
         context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
 
-        let file_path = &self
-            .public_scraps_dir_path
-            .join(HtmlFileName::from(scrap.self_link()).to_string());
+        let file_path = &self.public_scraps_dir_path.join(format!(
+            "{}.html",
+            ScrapFileStem::from(scrap.self_link()).to_string()
+        ));
         let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to("__builtins/scrap.html", &context, wtr)
             .context(BuildError::WriteFailure(file_path.clone()))
