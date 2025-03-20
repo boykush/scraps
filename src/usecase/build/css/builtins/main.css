@@ -92,6 +92,10 @@ div.scrap {
     box-shadow: var(--shadow-color) 0px 6px 9px 0px;
 }
 
+div.scrap .context {
+    color: var(--gray-color);
+}
+
 div.scrap .context::before {
     content: "\1F5C2";
     margin-right: 8px;
