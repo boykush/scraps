@@ -49,7 +49,7 @@ impl TagRender {
         let linked_scraps_map = LinkedScrapsMap::new(&self.scraps);
         context.insert("tag", &TagTera::new(tag, &linked_scraps_map));
 
-        let linked_scraps = linked_scraps_map.linked_by(&tag.title);
+        let linked_scraps = linked_scraps_map.linked_by(&tag.title.clone().into());
         context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
 
         // render html
@@ -85,8 +85,8 @@ mod tests {
         let public_dir_path = test_resource_path.join("public");
 
         // scraps
-        let scrap1 = &Scrap::new(&base_url, "scrap1", "[[tag1]]");
-        let scrap2 = &Scrap::new(&base_url, "scrap2", "[[tag1]][[tag2]]");
+        let scrap1 = &Scrap::new(&base_url, "scrap1", &None, "[[tag1]]");
+        let scrap2 = &Scrap::new(&base_url, "scrap2", &None, "[[tag1]][[tag2]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
         // tag
         let tag1: Tag = "tag 1".into();

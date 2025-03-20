@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use scraps_libs::model::slug::Slug;
+use scraps_libs::model::file::ScrapFileStem;
 use url::Url;
 
 use crate::usecase::build::model::{
@@ -11,7 +11,7 @@ use crate::usecase::build::model::{
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeIndexScrap {
     title: String,
-    slug: String,
+    html_file_name: String,
     html_content: String,
     thumbnail: Option<Url>,
     pub commited_ts: Option<i64>,
@@ -25,10 +25,13 @@ impl SerializeIndexScrap {
     ) -> SerializeIndexScrap {
         let scrap = scrap_with_commited_ts.scrap();
         let commited_ts = scrap_with_commited_ts.commited_ts();
-        let linked_count = linked_scraps_map.linked_by(&scrap.title).len();
+        let linked_count = linked_scraps_map
+            .linked_by(&scrap.title.clone().into())
+            .len();
+        let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_link().clone()));
         SerializeIndexScrap {
             title: scrap.title.to_string(),
-            slug: Slug::from(scrap.title).to_string(),
+            html_file_name,
             html_content: scrap.html_content.clone(),
             thumbnail: scrap.thumbnail.clone(),
             commited_ts,
@@ -79,17 +82,21 @@ mod tests {
     fn it_new_with_sort() {
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let sc1 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "title1", "[[title4]][[title2]]"),
+            &Scrap::new(&base_url, "title1", &None, "[[title4]][[title2]]"),
             &None,
         );
         let sc2 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "title2", "[[title4]][[title1]]"),
+            &Scrap::new(&base_url, "title2", &None, "[[title4]][[title1]]"),
             &Some(3),
         );
-        let sc3 =
-            ScrapWithCommitedTs::new(&Scrap::new(&base_url, "title3", "[[title4]]"), &Some(2));
-        let sc4 =
-            ScrapWithCommitedTs::new(&Scrap::new(&base_url, "title4", "[[title1]]"), &Some(1));
+        let sc3 = ScrapWithCommitedTs::new(
+            &Scrap::new(&base_url, "title3", &None, "[[title4]]"),
+            &Some(2),
+        );
+        let sc4 = ScrapWithCommitedTs::new(
+            &Scrap::new(&base_url, "title4", &None, "[[title1]]"),
+            &Some(1),
+        );
         let linked_scraps_map =
             LinkedScrapsMap::new(&vec![sc1.scrap(), sc2.scrap(), sc3.scrap(), sc4.scrap()]);
 

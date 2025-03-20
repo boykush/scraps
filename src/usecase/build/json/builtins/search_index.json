@@ -1,8 +1,8 @@
 [
   {% for scrap in scraps %}
     {
-      "title": "{{ scrap.title | addslashes }}",
-      "url": "{{ base_url }}scraps/{{ scrap.slug | addslashes }}.html"
+      "title": "{{ scrap.link_title | addslashes }}",
+      "url": "{{ base_url }}scraps/{{ scrap.file_stem | addslashes }}.html"
     }
     {% if not loop.last %},{% endif %}
   {% endfor %}

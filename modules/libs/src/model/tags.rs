@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use super::{scrap::Scrap, tag::Tag, title::Title};
+use super::{link::ScrapLink, scrap::Scrap, tag::Tag};
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct Tags(HashSet<Tag>);
@@ -16,18 +16,19 @@ impl IntoIterator for Tags {
 
 impl Tags {
     pub fn new(scraps: &[Scrap]) -> Tags {
-        let scrap_links: HashSet<Title> = scraps
+        let scrap_links: HashSet<ScrapLink> = scraps
             .iter()
             .flat_map(|scrap| scrap.links.clone())
             .collect();
-        let scrap_titles: HashSet<Title> = scraps.iter().map(|scrap| scrap.title.clone()).collect();
+        let scrap_self_links: HashSet<ScrapLink> =
+            scraps.iter().map(|scrap| scrap.self_link()).collect();
 
-        let titles: Vec<Title> = scrap_links
+        let links: Vec<ScrapLink> = scrap_links
             .into_iter()
-            .filter(|link| !scrap_titles.contains(link))
+            .filter(|link| !scrap_self_links.contains(link))
             .collect();
 
-        Tags(titles.iter().map(|t| t.clone().into()).collect())
+        Tags(links.iter().map(|l| l.clone().title.into()).collect())
     }
 }
 
@@ -40,8 +41,8 @@ mod tests {
     #[test]
     fn it_new() {
         let base_url = Url::parse("http://localhost:1112/").unwrap();
-        let scrap1 = Scrap::new(&base_url, "scrap1", "[[tag1]]");
-        let scrap2 = Scrap::new(&base_url, "scrap2", "[[scrap1]]");
+        let scrap1 = Scrap::new(&base_url, "scrap1", &None, "[[tag1]]");
+        let scrap2 = Scrap::new(&base_url, "scrap2", &None, "[[scrap1]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
         let tags = Tags::new(&scraps);

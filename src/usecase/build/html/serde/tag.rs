@@ -10,7 +10,7 @@ pub struct TagTera {
 
 impl TagTera {
     pub fn new(tag: &Tag, linked_scraps_map: &LinkedScrapsMap) -> TagTera {
-        let linked_count = linked_scraps_map.linked_by(&tag.title).len();
+        let linked_count = linked_scraps_map.linked_by(&tag.title.clone().into()).len();
         TagTera {
             title: tag.title.to_string(),
             slug: Slug::from(tag.title.clone()).to_string(),

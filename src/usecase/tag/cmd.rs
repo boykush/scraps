@@ -1,12 +1,6 @@
-use crate::{
-    error::{anyhow::Context, ScrapsError, ScrapsResult},
-    usecase::read_scraps,
-};
+use crate::{error::ScrapsResult, usecase::read_scraps};
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
-use std::{
-    fs::{self},
-    path::PathBuf,
-};
+use std::path::PathBuf;
 
 use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
 use url::Url;
@@ -22,21 +16,11 @@ impl TagCommand {
         }
     }
     pub fn run(&self, base_url: &Url) -> ScrapsResult<(Tags, LinkedScrapsMap)> {
-        let read_dir = fs::read_dir(&self.scraps_dir_path).context(ScrapsError::ReadScraps)?;
-
-        let paths = read_dir
-            .map(|entry_res| {
-                let entry = entry_res?;
-                read_scraps::to_path_by_dir_entry(&entry)
-            })
-            .collect::<ScrapsResult<Vec<Option<PathBuf>>>>()?
-            .into_iter()
-            .flatten()
-            .collect::<Vec<PathBuf>>();
+        let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
 
         let scraps = paths
             .iter()
-            .map(|path| read_scraps::to_scrap_by_path(base_url, path))
+            .map(|path| read_scraps::to_scrap_by_path(base_url, &self.scraps_dir_path, path))
             .collect::<ScrapsResult<Vec<Scrap>>>()?;
 
         let tags = Tags::new(&scraps);
@@ -79,6 +63,7 @@ mod tests {
                 let command = TagCommand::new(&scraps_dir_path);
 
                 let result = command.run(&base_url);
+                println!("{:?}", result);
                 assert!(result.is_ok());
 
                 let (tags, linked_scraps_map) = result.unwrap();
@@ -97,11 +82,11 @@ mod tests {
                 );
 
                 // test linked scraps map
-                let scrap1 = Scrap::new(&base_url, "test1", "#[[Tag1]] #[[Tag2]]");
-                let scrap2 = Scrap::new(&base_url, "test2", "#[[Tag1]] #[[Tag3]]");
+                let scrap1 = Scrap::new(&base_url, "test1", &None, "#[[Tag1]] #[[Tag2]]");
+                let scrap2 = Scrap::new(&base_url, "test2", &None, "#[[Tag1]] #[[Tag3]]");
                 assert_eq!(
                     linked_scraps_map
-                        .linked_by(&tag1.title)
+                        .linked_by(&tag1.title.clone().into())
                         .into_iter()
                         .map(|s| s.title)
                         .sorted_by_key(|t| t.to_string())
@@ -110,7 +95,7 @@ mod tests {
                 );
                 assert_eq!(
                     linked_scraps_map
-                        .linked_by(&tag2.title)
+                        .linked_by(&tag2.title.clone().into())
                         .into_iter()
                         .map(|s| s.title)
                         .collect_vec(),
@@ -118,7 +103,7 @@ mod tests {
                 );
                 assert_eq!(
                     linked_scraps_map
-                        .linked_by(&tag3.title)
+                        .linked_by(&tag3.title.clone().into())
                         .into_iter()
                         .map(|s| s.title)
                         .collect_vec(),

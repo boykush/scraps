@@ -2,7 +2,7 @@
 {% import "__builtins/macros.html" as macros %}
 
 {% block head %}
-<meta property="og:url" content="{{ base_url }}scraps/{{ scrap.slug }}.html" />
+<meta property="og:url" content="{{ base_url }}scraps/{{ scrap.html_file_name }}" />
 {% if scrap.thumbnail %}
     <meta property="og:image" content="{{ scrap.thumbnail }}" />
     <meta name="twitter:image" content="{{ scrap.thumbnail }}" />
@@ -11,6 +11,9 @@
 
 {% block main %}
     <div class="scrap">
+        {% if scrap.ctx %}
+          <h3 class="context">{{ scrap.ctx }}<span>&#47;</span></h2>
+        {% endif %}
         <h1>{{ scrap.title }}</h1>
         {% if scrap.commited_ts %}
             <p class="commited-date">

@@ -6,7 +6,7 @@ use thiserror::Error;
 
 pub type ScrapsResult<T> = anyhow::Result<T>;
 
-#[derive(Error, Debug)]
+#[derive(Error, PartialEq, Debug)]
 pub enum ScrapsError {
     #[error("Template error: {0}")]
     Template(#[from] TemplateError),
@@ -27,7 +27,7 @@ pub enum ScrapsError {
     ReadScraps,
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, PartialEq, Debug)]
 pub enum TemplateError {
     #[error("Failed to load template metadata")]
     LoadMetadata,
@@ -45,7 +45,7 @@ pub enum TemplateError {
     WriteFailure,
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, PartialEq, Debug)]
 pub enum InitError {
     #[error("Failed to initialize git repository")]
     GitInit,
@@ -57,7 +57,7 @@ pub enum InitError {
     WriteFailure(PathBuf),
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, PartialEq, Debug)]
 pub enum BuildError {
     #[error("Failed to get commited timestamp")]
     GitCommitedTs,
@@ -78,13 +78,13 @@ pub enum BuildError {
     RenderJson,
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, PartialEq, Debug)]
 pub enum ServeError {
     #[error("Failed to load file")]
     LoadFile,
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, PartialEq, Debug)]
 pub enum CliError {
     #[error("Not display data on cli")]
     Display,

@@ -1,17 +1,17 @@
 use itertools::Itertools;
-use scraps_libs::model::{scrap::Scrap, slug::Slug};
+use scraps_libs::model::{file::ScrapFileStem, scrap::Scrap};
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeSearchIndexScrap {
-    title: String,
-    slug: String,
+    link_title: String,
+    file_stem: String,
 }
 
 impl SerializeSearchIndexScrap {
     fn new(scrap: &Scrap) -> SerializeSearchIndexScrap {
         SerializeSearchIndexScrap {
-            title: scrap.title.to_string(),
-            slug: Slug::from(scrap.title.clone()).to_string(),
+            link_title: scrap.self_link().to_string(),
+            file_stem: ScrapFileStem::from(scrap.self_link()).to_string(),
         }
     }
 }

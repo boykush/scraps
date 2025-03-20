@@ -1,7 +1,7 @@
 {% macro scrap_links(scraps) %}
     <ul class="scrap-links">
         {% for scrap in scraps %}
-            <a href="{{ base_url }}scraps/{{ scrap.slug }}.html">
+            <a href="{{ base_url }}scraps/{{ scrap.html_file_name }}">
                 <li class="item">
                     <p class="title">{{ scrap.title }}</p>
                     {% if scrap.thumbnail %}

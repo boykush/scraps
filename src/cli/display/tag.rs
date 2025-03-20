@@ -23,7 +23,7 @@ impl DisplayTag {
         let url = base_url
             .join(&format!("scraps/{}.html", Slug::from(tag.title.clone())))
             .context(CliError::Display)?;
-        let linked_count = linked_scraps_map.linked_by(&tag.title).len();
+        let linked_count = linked_scraps_map.linked_by(&tag.title.clone().into()).len();
 
         Ok(DisplayTag {
             title: tag.title.to_owned(),
