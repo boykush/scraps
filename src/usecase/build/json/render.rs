@@ -72,7 +72,7 @@ mod tests {
         let template_json_path = static_dir_path.join("search_index.json");
         let resource_template_json = FileResource::new(&template_json_path);
         let resource_template_json_byte =
-        "[{% for scrap in scraps %}{ \"title\": \"{{ scrap.title }}\", \"url\": \"{{ base_url}}scraps/{{ scrap.file_stem }}.html\" }{% if not loop.last %},{% endif %}{% endfor %}]"
+        "[{% for scrap in scraps %}{ \"title\": \"{{ scrap.link_title }}\", \"url\": \"{{ base_url}}scraps/{{ scrap.file_stem }}.html\" }{% if not loop.last %},{% endif %}{% endfor %}]"
         .as_bytes();
 
         // public
@@ -80,7 +80,7 @@ mod tests {
 
         // scraps
         let sc1 = Scrap::new(&base_url, "scrap1", &None, "# header1");
-        let sc2 = Scrap::new(&base_url, "scrap2", &None, "## header2");
+        let sc2 = Scrap::new(&base_url, "scrap2", &Some("Context".into()), "## header2");
         let scraps = vec![sc1, sc2];
 
         let search_index_json_path = public_dir_path.join("search_index.json");
@@ -95,7 +95,7 @@ mod tests {
                 let result2 = fs::read_to_string(search_index_json_path).unwrap();
                 assert_eq!(
                     result2,
-                    "[{ \"title\": \"scrap1\", \"url\": \"http://localhost:1112/scraps/scrap1.html\" },{ \"title\": \"scrap2\", \"url\": \"http://localhost:1112/scraps/scrap2.html\" }]");
+                    "[{ \"title\": \"scrap1\", \"url\": \"http://localhost:1112/scraps/scrap1.html\" },{ \"title\": \"Context/scrap2\", \"url\": \"http://localhost:1112/scraps/scrap2.context.html\" }]");
             })
         })
     }

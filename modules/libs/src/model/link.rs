@@ -1,3 +1,5 @@
+use std::fmt;
+
 use super::{context::Ctx, title::Title};
 
 #[derive(PartialEq, Clone, Debug, PartialOrd, Eq, Ord, Hash)]
@@ -9,6 +11,16 @@ pub struct ScrapLink {
 impl From<Title> for ScrapLink {
     fn from(title: Title) -> Self {
         ScrapLink { title, ctx: None }
+    }
+}
+
+impl fmt::Display for ScrapLink {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::fmt::Result {
+        if let Some(ctx) = &self.ctx {
+            write!(f, "{}/{}", ctx, self.title)
+        } else {
+            write!(f, "{}", self.title)
+        }
     }
 }
 
