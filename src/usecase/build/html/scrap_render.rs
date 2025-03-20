@@ -61,10 +61,9 @@ impl ScrapRender {
         let linked_scraps = linked_scraps_map.linked_by(&scrap.self_link());
         context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
 
-        let file_path = &self.public_scraps_dir_path.join(format!(
-            "{}.html",
-            ScrapFileStem::from(scrap.self_link()).to_string()
-        ));
+        let file_path = &self
+            .public_scraps_dir_path
+            .join(format!("{}.html", ScrapFileStem::from(scrap.self_link())));
         let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to("__builtins/scrap.html", &context, wtr)
             .context(BuildError::WriteFailure(file_path.clone()))

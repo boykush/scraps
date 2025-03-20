@@ -16,7 +16,7 @@ impl SerializeLinkScrap {
         let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_link().clone()));
         SerializeLinkScrap {
             title: scrap.title.to_string(),
-            html_file_name: html_file_name,
+            html_file_name,
             html_content: scrap.html_content.clone(),
             thumbnail: scrap.thumbnail.clone(),
         }

@@ -80,7 +80,7 @@ mod tests {
 
         // scraps
         let sc1 = Scrap::new(&base_url, "scrap1", &None, "# header1");
-        let sc2 = Scrap::new(&base_url, "scrap2", &Some("Context".into()), "## header2");
+        let sc2 = Scrap::new(&base_url, "scrap2", &Some("Context"), "## header2");
         let scraps = vec![sc1, sc2];
 
         let search_index_json_path = public_dir_path.join("search_index.json");
