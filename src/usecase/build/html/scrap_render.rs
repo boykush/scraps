@@ -8,8 +8,8 @@ use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::usecase::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
 use chrono_tz::Tz;
+use scraps_libs::model::file::HtmlFileName;
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::model::slug::Slug;
 use url::Url;
 
 use crate::usecase::build::html::tera::scrap_tera;
@@ -58,16 +58,12 @@ impl ScrapRender {
         let linked_scraps_map = LinkedScrapsMap::new(&self.scraps);
         context.insert("scrap", &ScrapDetailTera::from(scrap_with_commited_ts));
 
-        let linked_scraps = linked_scraps_map.linked_by(&scrap.title);
+        let linked_scraps = linked_scraps_map.linked_by(&scrap.self_link());
         context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
 
-        // render html
-        let file_name = match scrap.ctx.clone() {
-            Some(c) => &format!("{}.{}.html", Slug::from(scrap.title.clone()), Slug::from(c)),
-            None => &format!("{}.html", Slug::from(scrap.title.clone())),
-        };
-
-        let file_path = &self.public_scraps_dir_path.join(file_name);
+        let file_path = &self
+            .public_scraps_dir_path
+            .join(HtmlFileName::from(scrap.self_link()).to_string());
         let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to("__builtins/scrap.html", &context, wtr)
             .context(BuildError::WriteFailure(file_path.clone()))
@@ -104,7 +100,7 @@ mod tests {
         // scraps
         let commited_ts1 = None;
         let scrap1 = &Scrap::new(&base_url, "scrap 1", &None, "# header1");
-        let scrap2 = &Scrap::new(&base_url, "scrap 2", &Some("Context".into()), "[[scrap1]]");
+        let scrap2 = &Scrap::new(&base_url, "scrap 2", &Some("Context"), "[[scrap1]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
         let scrap1_html_path = public_dir_path.join("scraps/scrap-1.html");

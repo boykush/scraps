@@ -86,7 +86,7 @@ mod tests {
                 let scrap2 = Scrap::new(&base_url, "test2", &None, "#[[Tag1]] #[[Tag3]]");
                 assert_eq!(
                     linked_scraps_map
-                        .linked_by(&tag1.title)
+                        .linked_by(&tag1.title.clone().into())
                         .into_iter()
                         .map(|s| s.title)
                         .sorted_by_key(|t| t.to_string())
@@ -95,7 +95,7 @@ mod tests {
                 );
                 assert_eq!(
                     linked_scraps_map
-                        .linked_by(&tag2.title)
+                        .linked_by(&tag2.title.clone().into())
                         .into_iter()
                         .map(|s| s.title)
                         .collect_vec(),
@@ -103,7 +103,7 @@ mod tests {
                 );
                 assert_eq!(
                     linked_scraps_map
-                        .linked_by(&tag3.title)
+                        .linked_by(&tag3.title.clone().into())
                         .into_iter()
                         .map(|s| s.title)
                         .collect_vec(),

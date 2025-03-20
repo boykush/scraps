@@ -49,7 +49,7 @@ impl TagRender {
         let linked_scraps_map = LinkedScrapsMap::new(&self.scraps);
         context.insert("tag", &TagTera::new(tag, &linked_scraps_map));
 
-        let linked_scraps = linked_scraps_map.linked_by(&tag.title);
+        let linked_scraps = linked_scraps_map.linked_by(&tag.title.clone().into());
         context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
 
         // render html

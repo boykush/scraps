@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug, PartialOrd, Eq, Ord, Hash)]
 pub struct Ctx(String);
 
 impl From<&str> for Ctx {

@@ -25,7 +25,9 @@ impl SerializeIndexScrap {
     ) -> SerializeIndexScrap {
         let scrap = scrap_with_commited_ts.scrap();
         let commited_ts = scrap_with_commited_ts.commited_ts();
-        let linked_count = linked_scraps_map.linked_by(&scrap.title).len();
+        let linked_count = linked_scraps_map
+            .linked_by(&scrap.title.clone().into())
+            .len();
         SerializeIndexScrap {
             title: scrap.title.to_string(),
             slug: Slug::from(scrap.title).to_string(),
