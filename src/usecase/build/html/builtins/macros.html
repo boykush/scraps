@@ -3,7 +3,16 @@
         {% for scrap in scraps %}
             <a href="{{ base_url }}scraps/{{ scrap.html_file_name }}">
                 <li class="item">
-                    <p class="title">{{ scrap.title }}</p>
+                    {% if scrap.ctx %}
+                        <div class="header">
+                            <div class="context">{{ scrap.ctx }}&#47;</div>
+                            <div class="title">{{ scrap.title }}</div>
+                        </div>
+                    {% else %}
+                        <div class="header">
+                            <div class="title">{{ scrap.title }}</div>
+                        </div>
+                    {% endif %}
                     {% if scrap.thumbnail %}
                         <div class="thumbnail">
                             <img class="thumbnail-image" alt="thumbnail" src="{{ scrap.thumbnail }}" loading="lazy" />

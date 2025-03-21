@@ -10,6 +10,7 @@ use crate::usecase::build::model::{
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeIndexScrap {
+    ctx: Option<String>,
     title: String,
     html_file_name: String,
     html_content: String,
@@ -30,6 +31,7 @@ impl SerializeIndexScrap {
             .len();
         let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_link().clone()));
         SerializeIndexScrap {
+            ctx: scrap.ctx.map(|c| c.to_string()),
             title: scrap.title.to_string(),
             html_file_name,
             html_content: scrap.html_content.clone(),

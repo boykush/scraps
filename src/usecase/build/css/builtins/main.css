@@ -246,8 +246,21 @@ ul.scrap-links li.item {
     box-shadow: var(--shadow-color) 0px 6px 9px 0px;
 }
 
-ul.scrap-links li.item p.title {
-    margin: 12px 0;
+ul.scrap-links li.item div.header {
+    margin-top: 16px;
+}
+
+ul.scrap-links li.item div.context {
+    font-size: 12px;
+    color: var(--gray-color);
+}
+
+ul.scrap-links li.item div.context::before {
+    content: "\1F5C2";
+    margin-right: 4px;
+}
+
+ul.scrap-links li.item div.title {
     font-size: 18px;
     color: var(--scrap-link-highlight-color);
 }
