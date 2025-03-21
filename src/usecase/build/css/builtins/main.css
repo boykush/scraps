@@ -247,7 +247,7 @@ ul.scrap-links li.item {
 }
 
 ul.scrap-links li.item div.header {
-    margin-top: 16px;
+    padding: 8px 0;
 }
 
 ul.scrap-links li.item div.context {
@@ -270,12 +270,12 @@ ul.scrap-links li.item div.thumbnail {
 }
 
 ul.scrap-links li.item img.thumbnail-image {
-    height: 120px;
+    flex-grow: 1;
     width: 168px;
     object-fit: contain;
 }
 
-ul.scrap-links li.item p.summary {
+ul.scrap-links li.item div.summary {
     overflow: hidden;
     display: -webkit-box;
     line-clamp: 4;

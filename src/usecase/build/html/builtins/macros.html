@@ -18,7 +18,7 @@
                             <img class="thumbnail-image" alt="thumbnail" src="{{ scrap.thumbnail }}" loading="lazy" />
                         </div>
                     {% else %}
-                        <p class="summary">{{ scrap.html_content | striptags }}</p>
+                        <div class="summary">{{ scrap.html_content | striptags }}</div>
                     {% endif %}
                 </li>
             </a>
