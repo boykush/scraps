@@ -270,7 +270,7 @@ ul.scrap-links li.item div.thumbnail {
 }
 
 ul.scrap-links li.item img.thumbnail-image {
-    flex-grow: 1;
+    max-height: 128px;
     width: 168px;
     object-fit: contain;
 }
