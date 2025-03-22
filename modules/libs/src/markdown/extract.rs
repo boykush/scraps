@@ -53,7 +53,7 @@ mod tests {
     }
 
     #[test]
-    fn it_link_titles() {
+    fn it_scrap_links() {
         let valid_links = &[
             "[[head]]",
             "[[contain space]]",
