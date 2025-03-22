@@ -26,9 +26,7 @@ impl SerializeIndexScrap {
     ) -> SerializeIndexScrap {
         let scrap = scrap_with_commited_ts.scrap();
         let commited_ts = scrap_with_commited_ts.commited_ts();
-        let linked_count = linked_scraps_map
-            .linked_by(&scrap.self_link())
-            .len();
+        let linked_count = linked_scraps_map.linked_by(&scrap.self_link()).len();
         let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_link().clone()));
         SerializeIndexScrap {
             ctx: scrap.ctx.map(|c| c.to_string()),

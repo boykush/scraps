@@ -64,7 +64,12 @@ mod tests {
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let scrap1 = Scrap::new(&base_url, "scrap1", &Some("Context"), "");
         let scrap2 = Scrap::new(&base_url, "scrap2", &Some("Context"), "[[Context/scrap1]]");
-        let scrap3 = Scrap::new(&base_url, "scrap3", &None, "[[Context/scrap1]][[Context/scrap2]]");
+        let scrap3 = Scrap::new(
+            &base_url,
+            "scrap3",
+            &None,
+            "[[Context/scrap1]][[Context/scrap2]]",
+        );
         let scraps = vec![scrap1.clone(), scrap2.clone(), scrap3.clone()];
 
         let linked_map = LinkedScrapsMap::new(&scraps);
@@ -76,9 +81,6 @@ mod tests {
             linked_map.linked_by(&ScrapLink::with_ctx(&"scrap2".into(), &"Context".into())),
             vec![scrap3.clone()]
         );
-        assert_eq!(
-            linked_map.linked_by(&Title::from("scrap3").into()),
-            vec![]
-        );
+        assert_eq!(linked_map.linked_by(&Title::from("scrap3").into()), vec![]);
     }
 }
