@@ -27,7 +27,7 @@ impl SerializeIndexScrap {
         let scrap = scrap_with_commited_ts.scrap();
         let commited_ts = scrap_with_commited_ts.commited_ts();
         let linked_count = linked_scraps_map
-            .linked_by(&scrap.title.clone().into())
+            .linked_by(&scrap.self_link())
             .len();
         let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_link().clone()));
         SerializeIndexScrap {
@@ -84,19 +84,19 @@ mod tests {
     fn it_new_with_sort() {
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let sc1 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "title1", &None, "[[title4]][[title2]]"),
+            &Scrap::new(&base_url, "title1", &None, "[[Context/title4]][[title2]]"),
             &None,
         );
         let sc2 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "title2", &None, "[[title4]][[title1]]"),
+            &Scrap::new(&base_url, "title2", &None, "[[Context/title4]][[title1]]"),
             &Some(3),
         );
         let sc3 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "title3", &None, "[[title4]]"),
+            &Scrap::new(&base_url, "title3", &None, "[[Context/title4]]"),
             &Some(2),
         );
         let sc4 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "title4", &None, "[[title1]]"),
+            &Scrap::new(&base_url, "title4", &Some("Context"), "[[title1]]"),
             &Some(1),
         );
         let linked_scraps_map =
