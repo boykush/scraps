@@ -1,5 +1,3 @@
-![](https://github.com/boykush/scraps/raw/main/assets/logo_opacity.png?raw=true)
-
 See the links for more details.
 
 1. [[Installation]] of Scraps.

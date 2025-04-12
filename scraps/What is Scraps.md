@@ -1,3 +1,5 @@
+![](https://github.com/boykush/scraps/raw/main/assets/logo_opacity.png?raw=true)
+
 Scraps is a static site generator based on Markdown files written with simple Wiki-link notation. It can be used primarily for personal or team knowledge management.
 
 # Concept
