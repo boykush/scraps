@@ -9,11 +9,11 @@ use super::tag::TagTera;
 pub struct TagsTera(Vec<TagTera>);
 
 impl TagsTera {
-    pub fn new(tags: &Tags, linked_scraps_map: &BacklinksMap) -> TagsTera {
+    pub fn new(tags: &Tags, backlinks_map: &BacklinksMap) -> TagsTera {
         let stags = tags
             .clone()
             .into_iter()
-            .map(|tag| TagTera::new(&tag, linked_scraps_map));
+            .map(|tag| TagTera::new(&tag, backlinks_map));
         let sorted = stags.sorted_by_key(|s| s.linked_count).rev();
         TagsTera(sorted.collect_vec())
     }

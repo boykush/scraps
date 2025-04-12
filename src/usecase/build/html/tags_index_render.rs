@@ -36,8 +36,8 @@ impl TagsIndexRender {
         metadata: &HtmlMetadata,
         scraps: &[Scrap],
     ) -> ScrapsResult<()> {
-        let linked_scraps_map = BacklinksMap::new(scraps);
-        let stags = &TagsTera::new(&Tags::new(scraps), &linked_scraps_map);
+        let backlinks_map = BacklinksMap::new(scraps);
+        let stags = &TagsTera::new(&Tags::new(scraps), &backlinks_map);
 
         Self::render_html(self, base_url, metadata, stags)
     }

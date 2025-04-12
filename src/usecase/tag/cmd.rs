@@ -24,9 +24,9 @@ impl TagCommand {
             .collect::<ScrapsResult<Vec<Scrap>>>()?;
 
         let tags = Tags::new(&scraps);
-        let linked_scraps_map = BacklinksMap::new(&scraps);
+        let backlinks_map = BacklinksMap::new(&scraps);
 
-        Ok((tags, linked_scraps_map))
+        Ok((tags, backlinks_map))
     }
 }
 
@@ -66,7 +66,7 @@ mod tests {
                 println!("{:?}", result);
                 assert!(result.is_ok());
 
-                let (tags, linked_scraps_map) = result.unwrap();
+                let (tags, backlinks_map) = result.unwrap();
 
                 // test tags
                 let tag1: Tag = "Tag1".into();
@@ -81,11 +81,11 @@ mod tests {
                     vec![tag1.clone(), tag2.clone(), tag3.clone(),]
                 );
 
-                // test linked scraps map
+                // test backlinks map
                 let scrap1 = Scrap::new(&base_url, "test1", &None, "#[[Tag1]] #[[Tag2]]");
                 let scrap2 = Scrap::new(&base_url, "test2", &None, "#[[Tag1]] #[[Tag3]]");
                 assert_eq!(
-                    linked_scraps_map
+                    backlinks_map
                         .get(&tag1.title.clone().into())
                         .into_iter()
                         .map(|s| s.title)
@@ -94,7 +94,7 @@ mod tests {
                     vec![scrap1.title.clone(), scrap2.title.clone()]
                 );
                 assert_eq!(
-                    linked_scraps_map
+                    backlinks_map
                         .get(&tag2.title.clone().into())
                         .into_iter()
                         .map(|s| s.title)
@@ -102,7 +102,7 @@ mod tests {
                     vec![scrap1.title.clone()]
                 );
                 assert_eq!(
-                    linked_scraps_map
+                    backlinks_map
                         .get(&tag3.title.clone().into())
                         .into_iter()
                         .map(|s| s.title)

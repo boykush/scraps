@@ -18,12 +18,12 @@ impl DisplayTag {
     pub fn new(
         tag: &Tag,
         base_url: &Url,
-        linked_scraps_map: &BacklinksMap,
+        backlinks_map: &BacklinksMap,
     ) -> ScrapsResult<DisplayTag> {
         let url = base_url
             .join(&format!("scraps/{}.html", Slug::from(tag.title.clone())))
             .context(CliError::Display)?;
-        let linked_count = linked_scraps_map.get(&tag.title.clone().into()).len();
+        let linked_count = backlinks_map.get(&tag.title.clone().into()).len();
 
         Ok(DisplayTag {
             title: tag.title.to_owned(),

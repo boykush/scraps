@@ -7,8 +7,8 @@ pub struct BacklinksMap(HashMap<ScrapLink, Vec<Scrap>>);
 
 impl BacklinksMap {
     pub fn new(scraps: &[Scrap]) -> BacklinksMap {
-        let linked_map = Self::gen_backlinks_map(scraps);
-        BacklinksMap(linked_map)
+        let backlinks_map = Self::gen_backlinks_map(scraps);
+        BacklinksMap(backlinks_map)
     }
 
     pub fn get(&self, link: &ScrapLink) -> Vec<Scrap> {

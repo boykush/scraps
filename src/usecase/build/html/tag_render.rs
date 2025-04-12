@@ -46,10 +46,10 @@ impl TagRender {
         )?;
 
         // insert to context for linked list
-        let linked_scraps_map = BacklinksMap::new(&self.scraps);
-        context.insert("tag", &TagTera::new(tag, &linked_scraps_map));
+        let backlinks_map = BacklinksMap::new(&self.scraps);
+        context.insert("tag", &TagTera::new(tag, &backlinks_map));
 
-        let linked_scraps = linked_scraps_map.get(&tag.title.clone().into());
+        let linked_scraps = backlinks_map.get(&tag.title.clone().into());
         context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
 
         // render html

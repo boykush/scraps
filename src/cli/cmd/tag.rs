@@ -21,10 +21,10 @@ pub fn run() -> ScrapsResult<()> {
         Url::parse((config.base_url.to_string() + "/").as_str()).unwrap()
     };
 
-    let (tags, linked_scraps_map) = command.run(&base_url)?;
+    let (tags, backlinks_map) = command.run(&base_url)?;
     let display_tags_result = tags
         .into_iter()
-        .map(|tag| DisplayTag::new(&tag, &base_url, &linked_scraps_map))
+        .map(|tag| DisplayTag::new(&tag, &base_url, &backlinks_map))
         .collect::<ScrapsResult<Vec<DisplayTag>>>();
 
     display_tags_result.map(|tags| {
