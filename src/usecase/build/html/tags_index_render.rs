@@ -4,8 +4,8 @@ use std::{fs::File, path::PathBuf};
 
 use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
-use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
+use crate::usecase::build::model::html::HtmlMetadata;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::tags::Tags;
 use url::Url;

@@ -39,7 +39,8 @@ impl DisplayTag {
 
 impl fmt::Display for DisplayTag {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let title_with_backlinks_count_str = format!("{}({})", self.title, self.backlinks_count).bold();
+        let title_with_backlinks_count_str =
+            format!("{}({})", self.title, self.backlinks_count).bold();
         let url_str = self.url.to_string().blue();
 
         let tag_str = vec![title_with_backlinks_count_str, url_str]
