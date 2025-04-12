@@ -5,16 +5,16 @@ use scraps_libs::model::{slug::Slug, tag::Tag};
 pub struct TagTera {
     title: String,
     slug: String,
-    pub linked_count: usize,
+    pub backlinks_count: usize,
 }
 
 impl TagTera {
     pub fn new(tag: &Tag, backlinks_map: &BacklinksMap) -> TagTera {
-        let linked_count = backlinks_map.get(&tag.title.clone().into()).len();
+        let backlinks_count = backlinks_map.get(&tag.title.clone().into()).len();
         TagTera {
             title: tag.title.to_string(),
             slug: Slug::from(tag.title.clone()).to_string(),
-            linked_count,
+            backlinks_count,
         }
     }
 }

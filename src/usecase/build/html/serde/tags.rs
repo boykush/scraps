@@ -14,7 +14,7 @@ impl TagsTera {
             .clone()
             .into_iter()
             .map(|tag| TagTera::new(&tag, backlinks_map));
-        let sorted = stags.sorted_by_key(|s| s.linked_count).rev();
+        let sorted = stags.sorted_by_key(|s| s.backlinks_count).rev();
         TagsTera(sorted.collect_vec())
     }
 }

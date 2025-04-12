@@ -16,7 +16,7 @@ struct SerializeIndexScrap {
     html_content: String,
     thumbnail: Option<Url>,
     pub commited_ts: Option<i64>,
-    pub linked_count: usize,
+    pub backlinks_count: usize,
 }
 
 impl SerializeIndexScrap {
@@ -26,7 +26,7 @@ impl SerializeIndexScrap {
     ) -> SerializeIndexScrap {
         let scrap = scrap_with_commited_ts.scrap();
         let commited_ts = scrap_with_commited_ts.commited_ts();
-        let linked_count = backlinks_map.get(&scrap.self_link()).len();
+        let backlinks_count = backlinks_map.get(&scrap.self_link()).len();
         let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_link().clone()));
         SerializeIndexScrap {
             ctx: scrap.ctx.map(|c| c.to_string()),
@@ -35,7 +35,7 @@ impl SerializeIndexScrap {
             html_content: scrap.html_content.clone(),
             thumbnail: scrap.thumbnail.clone(),
             commited_ts,
-            linked_count,
+            backlinks_count,
         }
     }
 }
@@ -55,7 +55,7 @@ impl IndexScrapsTera {
             .map(|s| SerializeIndexScrap::new(&s, backlinks_map));
         let sorted = (match sort_key {
             SortKey::CommittedDate => serialize_scraps.sorted_by_key(|s| s.commited_ts).rev(),
-            SortKey::LinkedCount => serialize_scraps.sorted_by_key(|s| s.linked_count).rev(),
+            SortKey::LinkedCount => serialize_scraps.sorted_by_key(|s| s.backlinks_count).rev(),
         })
         .collect_vec();
 

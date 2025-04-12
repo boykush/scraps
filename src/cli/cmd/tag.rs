@@ -30,7 +30,7 @@ pub fn run() -> ScrapsResult<()> {
     display_tags_result.map(|tags| {
         let sorted = tags
             .into_iter()
-            .sorted_by_key(|tag| tag.linked_count())
+            .sorted_by_key(|tag| tag.backlinks_count())
             .rev();
         for tag in sorted {
             println!("{}", tag)
