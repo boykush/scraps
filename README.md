@@ -12,15 +12,18 @@
 <a href="https://crates.io/crates/scraps"><img src="https://img.shields.io/crates/v/scraps?style=flatflat-square" /></a>
 </p>
 
-# What is the Scraps?
+# What is Scraps?
 
-Scraps is a static site generator that makes it easy to write internal links (Wiki links) in Markdown files.
+Scraps is a static site generator based on Markdown files written with simple Wiki-link notation. It can be used primarily for personal or team knowledge management.
+
+# Getting Started
 
 You can refer to the [Getting Started](https://boykush.github.io/scraps/scraps/getting-started.html) document to quickly begin using Scraps.
 
 Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 
 # Features
+
 ### Static Site
 - [x] Sorting (linked_count, committed_date)
 - [x] Tagging
