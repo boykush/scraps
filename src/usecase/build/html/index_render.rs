@@ -4,8 +4,8 @@ use std::{fs::File, path::PathBuf};
 
 use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
+use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
-use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::usecase::build::model::list_view_configs::ListViewConfigs;
 use crate::usecase::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
 use rayon::iter::IntoParallelIterator;
@@ -44,10 +44,10 @@ impl IndexRender {
         scraps_with_commited_ts: &ScrapsWithCommitedTs,
     ) -> ScrapsResult<()> {
         let scraps = &scraps_with_commited_ts.to_scraps();
-        let linked_scraps_map = LinkedScrapsMap::new(scraps);
+        let backlinks_map = BacklinksMap::new(scraps);
         let sorted_scraps = IndexScrapsTera::new_with_sort(
             scraps_with_commited_ts,
-            &linked_scraps_map,
+            &backlinks_map,
             &list_view_configs.sort_key,
         );
         let paginated = sorted_scraps
@@ -60,7 +60,7 @@ impl IndexRender {
             let pointer = PagePointer::new(page_num, last_page_num);
             (pointer, paginated_scraps)
         });
-        let stags = &TagsTera::new(&Tags::new(scraps), &linked_scraps_map);
+        let stags = &TagsTera::new(&Tags::new(scraps), &backlinks_map);
 
         paginated_with_pointer.try_for_each(|(pointer, paginated_scraps)| {
             Self::render_paginated_html(

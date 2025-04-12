@@ -31,7 +31,7 @@
         {% for tag in tags | slice(end=slice_size) %}
             <a href="{{ base_url }}scraps/{{ tag.slug }}.html">
                 <li class="item">
-                    <span class="title">{{ tag.title }}</span>&nbsp;<span>({{ tag.linked_count }})</span>
+                    <span class="title">{{ tag.title }}</span>&nbsp;<span>({{ tag.backlinks_count }})</span>
                 </li>
             </a>
         {% endfor %}

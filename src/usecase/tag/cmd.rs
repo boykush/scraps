@@ -2,7 +2,7 @@ use crate::{error::ScrapsResult, usecase::read_scraps};
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 use std::path::PathBuf;
 
-use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
+use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use url::Url;
 
 pub struct TagCommand {
@@ -15,7 +15,7 @@ impl TagCommand {
             scraps_dir_path: scraps_dir_path.to_owned(),
         }
     }
-    pub fn run(&self, base_url: &Url) -> ScrapsResult<(Tags, LinkedScrapsMap)> {
+    pub fn run(&self, base_url: &Url) -> ScrapsResult<(Tags, BacklinksMap)> {
         let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
 
         let scraps = paths
@@ -24,9 +24,9 @@ impl TagCommand {
             .collect::<ScrapsResult<Vec<Scrap>>>()?;
 
         let tags = Tags::new(&scraps);
-        let linked_scraps_map = LinkedScrapsMap::new(&scraps);
+        let backlinks_map = BacklinksMap::new(&scraps);
 
-        Ok((tags, linked_scraps_map))
+        Ok((tags, backlinks_map))
     }
 }
 
@@ -66,7 +66,7 @@ mod tests {
                 println!("{:?}", result);
                 assert!(result.is_ok());
 
-                let (tags, linked_scraps_map) = result.unwrap();
+                let (tags, backlinks_map) = result.unwrap();
 
                 // test tags
                 let tag1: Tag = "Tag1".into();
@@ -81,12 +81,12 @@ mod tests {
                     vec![tag1.clone(), tag2.clone(), tag3.clone(),]
                 );
 
-                // test linked scraps map
+                // test backlinks map
                 let scrap1 = Scrap::new(&base_url, "test1", &None, "#[[Tag1]] #[[Tag2]]");
                 let scrap2 = Scrap::new(&base_url, "test2", &None, "#[[Tag1]] #[[Tag3]]");
                 assert_eq!(
-                    linked_scraps_map
-                        .linked_by(&tag1.title.clone().into())
+                    backlinks_map
+                        .get(&tag1.title.clone().into())
                         .into_iter()
                         .map(|s| s.title)
                         .sorted_by_key(|t| t.to_string())
@@ -94,16 +94,16 @@ mod tests {
                     vec![scrap1.title.clone(), scrap2.title.clone()]
                 );
                 assert_eq!(
-                    linked_scraps_map
-                        .linked_by(&tag2.title.clone().into())
+                    backlinks_map
+                        .get(&tag2.title.clone().into())
                         .into_iter()
                         .map(|s| s.title)
                         .collect_vec(),
                     vec![scrap1.title.clone()]
                 );
                 assert_eq!(
-                    linked_scraps_map
-                        .linked_by(&tag3.title.clone().into())
+                    backlinks_map
+                        .get(&tag3.title.clone().into())
                         .into_iter()
                         .map(|s| s.title)
                         .collect_vec(),

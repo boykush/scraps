@@ -4,8 +4,8 @@ use std::{fs::File, path::PathBuf};
 
 use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
+use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
-use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
 use crate::usecase::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
 use chrono_tz::Tz;
 use scraps_libs::model::file::ScrapFileStem;
@@ -55,10 +55,10 @@ impl ScrapRender {
         let scrap = &scrap_with_commited_ts.scrap();
 
         // insert to context for linked list
-        let linked_scraps_map = LinkedScrapsMap::new(&self.scraps);
+        let backlinks_map = BacklinksMap::new(&self.scraps);
         context.insert("scrap", &ScrapDetailTera::from(scrap_with_commited_ts));
 
-        let linked_scraps = linked_scraps_map.linked_by(&scrap.self_link());
+        let linked_scraps = backlinks_map.get(&scrap.self_link());
         context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
 
         let file_path = &self
