@@ -6,7 +6,7 @@ use itertools::Itertools;
 use scraps_libs::model::{slug::Slug, tag::Tag, title::Title};
 use url::Url;
 
-use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
+use crate::usecase::build::model::backlinks_map::BacklinksMap;
 
 pub struct DisplayTag {
     title: Title,
@@ -18,12 +18,12 @@ impl DisplayTag {
     pub fn new(
         tag: &Tag,
         base_url: &Url,
-        linked_scraps_map: &LinkedScrapsMap,
+        linked_scraps_map: &BacklinksMap,
     ) -> ScrapsResult<DisplayTag> {
         let url = base_url
             .join(&format!("scraps/{}.html", Slug::from(tag.title.clone())))
             .context(CliError::Display)?;
-        let linked_count = linked_scraps_map.linked_by(&tag.title.clone().into()).len();
+        let linked_count = linked_scraps_map.get(&tag.title.clone().into()).len();
 
         Ok(DisplayTag {
             title: tag.title.to_owned(),

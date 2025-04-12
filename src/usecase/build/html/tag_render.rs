@@ -5,7 +5,7 @@ use std::{fs::File, path::PathBuf};
 use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
 use crate::usecase::build::model::html::HtmlMetadata;
-use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
+use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::slug::Slug;
 use scraps_libs::model::tag::Tag;
@@ -46,10 +46,10 @@ impl TagRender {
         )?;
 
         // insert to context for linked list
-        let linked_scraps_map = LinkedScrapsMap::new(&self.scraps);
+        let linked_scraps_map = BacklinksMap::new(&self.scraps);
         context.insert("tag", &TagTera::new(tag, &linked_scraps_map));
 
-        let linked_scraps = linked_scraps_map.linked_by(&tag.title.clone().into());
+        let linked_scraps = linked_scraps_map.get(&tag.title.clone().into());
         context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
 
         // render html

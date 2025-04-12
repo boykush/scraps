@@ -5,7 +5,7 @@ use std::{fs::File, path::PathBuf};
 use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
 use crate::usecase::build::model::html::HtmlMetadata;
-use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
+use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::list_view_configs::ListViewConfigs;
 use crate::usecase::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
 use rayon::iter::IntoParallelIterator;
@@ -44,7 +44,7 @@ impl IndexRender {
         scraps_with_commited_ts: &ScrapsWithCommitedTs,
     ) -> ScrapsResult<()> {
         let scraps = &scraps_with_commited_ts.to_scraps();
-        let linked_scraps_map = LinkedScrapsMap::new(scraps);
+        let linked_scraps_map = BacklinksMap::new(scraps);
         let sorted_scraps = IndexScrapsTera::new_with_sort(
             scraps_with_commited_ts,
             &linked_scraps_map,

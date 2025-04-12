@@ -5,7 +5,7 @@ use std::{fs::File, path::PathBuf};
 use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
 use crate::usecase::build::model::html::HtmlMetadata;
-use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
+use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::tags::Tags;
 use url::Url;
@@ -36,7 +36,7 @@ impl TagsIndexRender {
         metadata: &HtmlMetadata,
         scraps: &[Scrap],
     ) -> ScrapsResult<()> {
-        let linked_scraps_map = LinkedScrapsMap::new(scraps);
+        let linked_scraps_map = BacklinksMap::new(scraps);
         let stags = &TagsTera::new(&Tags::new(scraps), &linked_scraps_map);
 
         Self::render_html(self, base_url, metadata, stags)

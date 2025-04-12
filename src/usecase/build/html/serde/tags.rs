@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
+use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use scraps_libs::model::tags::Tags;
 
 use super::tag::TagTera;
@@ -9,7 +9,7 @@ use super::tag::TagTera;
 pub struct TagsTera(Vec<TagTera>);
 
 impl TagsTera {
-    pub fn new(tags: &Tags, linked_scraps_map: &LinkedScrapsMap) -> TagsTera {
+    pub fn new(tags: &Tags, linked_scraps_map: &BacklinksMap) -> TagsTera {
         let stags = tags
             .clone()
             .into_iter()

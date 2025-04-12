@@ -2,7 +2,7 @@ use crate::{error::ScrapsResult, usecase::read_scraps};
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 use std::path::PathBuf;
 
-use crate::usecase::build::model::linked_scraps_map::LinkedScrapsMap;
+use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use url::Url;
 
 pub struct TagCommand {
@@ -15,7 +15,7 @@ impl TagCommand {
             scraps_dir_path: scraps_dir_path.to_owned(),
         }
     }
-    pub fn run(&self, base_url: &Url) -> ScrapsResult<(Tags, LinkedScrapsMap)> {
+    pub fn run(&self, base_url: &Url) -> ScrapsResult<(Tags, BacklinksMap)> {
         let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
 
         let scraps = paths
@@ -24,7 +24,7 @@ impl TagCommand {
             .collect::<ScrapsResult<Vec<Scrap>>>()?;
 
         let tags = Tags::new(&scraps);
-        let linked_scraps_map = LinkedScrapsMap::new(&scraps);
+        let linked_scraps_map = BacklinksMap::new(&scraps);
 
         Ok((tags, linked_scraps_map))
     }
@@ -86,7 +86,7 @@ mod tests {
                 let scrap2 = Scrap::new(&base_url, "test2", &None, "#[[Tag1]] #[[Tag3]]");
                 assert_eq!(
                     linked_scraps_map
-                        .linked_by(&tag1.title.clone().into())
+                        .get(&tag1.title.clone().into())
                         .into_iter()
                         .map(|s| s.title)
                         .sorted_by_key(|t| t.to_string())
@@ -95,7 +95,7 @@ mod tests {
                 );
                 assert_eq!(
                     linked_scraps_map
-                        .linked_by(&tag2.title.clone().into())
+                        .get(&tag2.title.clone().into())
                         .into_iter()
                         .map(|s| s.title)
                         .collect_vec(),
@@ -103,7 +103,7 @@ mod tests {
                 );
                 assert_eq!(
                     linked_scraps_map
-                        .linked_by(&tag3.title.clone().into())
+                        .get(&tag3.title.clone().into())
                         .into_iter()
                         .map(|s| s.title)
                         .collect_vec(),

@@ -3,7 +3,7 @@ use scraps_libs::model::file::ScrapFileStem;
 use url::Url;
 
 use crate::usecase::build::model::{
-    linked_scraps_map::LinkedScrapsMap,
+    backlinks_map::BacklinksMap,
     scrap_with_commited_ts::{ScrapWithCommitedTs, ScrapsWithCommitedTs},
     sort::SortKey,
 };
@@ -22,11 +22,11 @@ struct SerializeIndexScrap {
 impl SerializeIndexScrap {
     pub fn new(
         scrap_with_commited_ts: &ScrapWithCommitedTs,
-        linked_scraps_map: &LinkedScrapsMap,
+        linked_scraps_map: &BacklinksMap,
     ) -> SerializeIndexScrap {
         let scrap = scrap_with_commited_ts.scrap();
         let commited_ts = scrap_with_commited_ts.commited_ts();
-        let linked_count = linked_scraps_map.linked_by(&scrap.self_link()).len();
+        let linked_count = linked_scraps_map.get(&scrap.self_link()).len();
         let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_link().clone()));
         SerializeIndexScrap {
             ctx: scrap.ctx.map(|c| c.to_string()),
@@ -46,7 +46,7 @@ pub struct IndexScrapsTera(Vec<SerializeIndexScrap>);
 impl IndexScrapsTera {
     pub fn new_with_sort(
         scraps_with_commited_ts: &ScrapsWithCommitedTs,
-        linked_scraps_map: &LinkedScrapsMap,
+        linked_scraps_map: &BacklinksMap,
         sort_key: &SortKey,
     ) -> IndexScrapsTera {
         let serialize_scraps = scraps_with_commited_ts
@@ -98,7 +98,7 @@ mod tests {
             &Some(1),
         );
         let linked_scraps_map =
-            LinkedScrapsMap::new(&vec![sc1.scrap(), sc2.scrap(), sc3.scrap(), sc4.scrap()]);
+            BacklinksMap::new(&vec![sc1.scrap(), sc2.scrap(), sc3.scrap(), sc4.scrap()]);
 
         let sscrap1 = SerializeIndexScrap::new(&sc1.clone(), &linked_scraps_map);
         let sscrap2 = SerializeIndexScrap::new(&sc2.clone(), &linked_scraps_map);
