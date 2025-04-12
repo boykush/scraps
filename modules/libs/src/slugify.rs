@@ -1,6 +1,26 @@
 pub fn by_dash(v: &str) -> String {
     let lower = v.to_lowercase();
-    lower.replace(' ', "-")
+    // Refer to RFC 3986 for URI encoding https://datatracker.ietf.org/doc/html/rfc3986#section-2.2
+    lower
+        .replace(' ', "-")
+        .replace(':', "colon")
+        .replace('/', "slash")
+        .replace('?', "question")
+        .replace('#', "hash")
+        .replace('[', "left-bracket")
+        .replace(']', "right-bracket")
+        .replace('@', "at")
+        .replace('!', "exclamation")
+        .replace('$', "dollar")
+        .replace('&', "and")
+        .replace('\'', "single-quote")
+        .replace('(', "left-parenthesis")
+        .replace(')', "right-parenthesis")
+        .replace('*', "asterisk")
+        .replace('+', "plus")
+        .replace(',', "comma")
+        .replace(';', "semicolon")
+        .replace('=', "equal")
 }
 
 #[cfg(test)]
