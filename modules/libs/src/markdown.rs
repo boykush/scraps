@@ -29,27 +29,12 @@ pub fn to_html(text: &str, base_url: &Url) -> String {
                 Event::Text(CowStr::Borrowed(text)),
                 end @ Event::End(TagEnd::Link),
             ) => {
-                let scrap_link = &ScrapLink::from_path_str(dest_url);
-                let file_stem = ScrapFileStem::from(scrap_link.clone());
-                let link = format!("{}scraps/{}.html", base_url, file_stem);
-                let start_link = Event::Start(Tag::Link {
-                    link_type: LinkType::WikiLink { has_pothole },
-                    dest_url: link.into(),
-                    title,
-                    id,
-                });
-                let replaced_text = if has_pothole {
-                    text.to_string()
-                } else {
-                    scrap_link.title.to_string()
-                };
+                let events =
+                    handle_wiki_link_events(base_url, dest_url, title, id, text, end, has_pothole);
                 (0..2).for_each(|_| {
                     parser_windows.next();
                 });
-                push_html(
-                    &mut html_buf,
-                    [start_link, Event::Text(replaced_text.into()), end].into_iter(),
-                );
+                push_html(&mut html_buf, events.into_iter());
             }
             (
                 Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(CowStr::Borrowed(language)))),
@@ -57,7 +42,7 @@ pub fn to_html(text: &str, base_url: &Url) -> String {
                 _,
             ) => push_html(
                 &mut html_buf,
-                [to_html_code_start_event(language)].into_iter(),
+                [handle_code_block_start_event(language)].into_iter(),
             ),
             (e1, _, _) => push_html(&mut html_buf, [e1].into_iter()),
         }
@@ -66,7 +51,33 @@ pub fn to_html(text: &str, base_url: &Url) -> String {
     html_buf
 }
 
-fn to_html_code_start_event(language: &str) -> Event<'_> {
+fn handle_wiki_link_events<'a>(
+    base_url: &Url,
+    dest_url: &str,
+    title: CowStr<'a>,
+    id: CowStr<'a>,
+    text: &str,
+    end: Event<'a>,
+    has_pothole: bool,
+) -> [Event<'a>; 3] {
+    let scrap_link = &ScrapLink::from_path_str(dest_url);
+    let file_stem = ScrapFileStem::from(scrap_link.clone());
+    let link = format!("{}scraps/{}.html", base_url, file_stem);
+    let start_link = Event::Start(Tag::Link {
+        link_type: LinkType::WikiLink { has_pothole },
+        dest_url: link.into(),
+        title,
+        id,
+    });
+    let replaced_text = if has_pothole {
+        text.to_string()
+    } else {
+        scrap_link.title.to_string()
+    };
+    [start_link, Event::Text(replaced_text.into()), end]
+}
+
+fn handle_code_block_start_event(language: &str) -> Event<'_> {
     if language == "mermaid" {
         Event::Html(CowStr::Borrowed(
             // Add the `mermaid`` class in addition to the existing `language-mermaid` class to target it with mermaid.js.
