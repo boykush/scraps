@@ -23,7 +23,7 @@ impl Scrap {
     pub fn new(base_url: &Url, title: &str, ctx: &Option<&str>, text: &str) -> Scrap {
         let links = markdown::extract::scrap_links(text);
         let thumbnail = markdown::extract::head_image(text);
-        let html_content = markdown::to_html(text, base_url);
+        let html_content = markdown::convert::to_html(text, base_url);
 
         Scrap {
             title: title.into(),
