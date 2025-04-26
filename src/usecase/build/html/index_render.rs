@@ -63,51 +63,42 @@ impl IndexRender {
         let stags = &TagsTera::new(&Tags::new(scraps), &backlinks_map);
 
         paginated_with_pointer.try_for_each(|(pointer, paginated_scraps)| {
-            Self::render_paginated_html(
-                self,
+            let span_render_index = span!(Level::INFO, "render_index").entered();
+            let (tera, mut context) = index_tera::base(
                 base_url,
                 metadata,
-                &list_view_configs.build_search_index,
-                &list_view_configs.sort_key.clone().into(),
-                stags,
-                &paginated_scraps,
-                &pointer,
-            )
+                self.static_dir_path.join("*.html").to_str().unwrap(),
+            )?;
+            context.insert(
+                "sort_key",
+                &SortKeyTera::from(list_view_configs.sort_key.clone()),
+            );
+            context.insert("build_search_index", &list_view_configs.build_search_index);
+            context.insert("scraps", &paginated_scraps);
+            context.insert("tags", stags);
+            context.insert("prev", &pointer.prev);
+            context.insert("next", &pointer.next);
+            Self::render_paginated_html(self, &tera, &context, &pointer)?;
+            span_render_index.exit();
+            Ok(())
         })
     }
 
     fn render_paginated_html(
         &self,
-        base_url: &Url,
-        metadata: &HtmlMetadata,
-        build_serach_index: &bool,
-        sort_key: &SortKeyTera,
-        tags: &TagsTera,
-        paginated_scraps: &IndexScrapsTera,
+        tera: &tera::Tera,
+        context: &tera::Context,
         pointer: &PagePointer,
     ) -> ScrapsResult<()> {
-        let span_render_index = span!(Level::INFO, "render_index").entered();
-        let (tera, mut context) = index_tera::base(
-            base_url,
-            metadata,
-            self.static_dir_path.join("*.html").to_str().unwrap(),
-        )?;
         let template_name = if tera.get_template_names().any(|t| t == "index.html") {
             "index.html"
         } else {
             "__builtins/index.html"
         };
-        context.insert("sort_key", sort_key);
-        context.insert("build_search_index", build_serach_index);
-        context.insert("scraps", &paginated_scraps);
-        context.insert("tags", tags);
-        context.insert("prev", &pointer.prev);
-        context.insert("next", &pointer.next);
         let file_path = &self.public_dir_path.join(pointer.current_file_name());
         let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
-        tera.render_to(template_name, &context, wtr)
+        tera.render_to(template_name, context, wtr)
             .context(BuildError::WriteFailure(file_path.clone()))?;
-        span_render_index.exit();
         Ok(())
     }
 }
