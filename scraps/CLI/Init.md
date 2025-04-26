@@ -5,16 +5,14 @@
 ❯ cd your-scraps-project
 ```
 
-This command initializes a new Scraps project.
-
-The output result will look like this.
+This command initializes a new Scraps project. It creates the following structure:
 
 ```bash
 ❯ tree -a -L 1
 .
-├── .gitignore
-├── Config.toml
-└── scraps
+├── .gitignore    # Git ignore patterns for Scraps projects
+├── Config.toml   # Project configuration file
+└── scraps       # Directory for your Markdown files
 ```
 
-The next step is [[CLI/Build|Build]].
+After initializing the project, proceed to [[CLI/Build|Build]] to generate your static site.

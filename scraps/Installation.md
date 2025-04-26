@@ -1,16 +1,15 @@
 You can find the latest version on [GitHub Releases](https://github.com/boykush/scraps/releases).
 
-## Requires
+## Requirements
 
-`git` command is required for features.
+The `git` command is required for features.
 
-
-### cargo
+### Cargo
 ```bash
 ❯ cargo install scraps
 ```
 
-### mac OS
+### macOS
 ```bash
 ❯ brew install boykush/tap/scraps
 ```

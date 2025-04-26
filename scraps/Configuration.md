@@ -30,7 +30,6 @@ build_search_index = true
 # Scraps sort key choice on index page (optional, default=committed_date, choices=committed_date or linked_count)
 sort_key = "committed_date"
 
-# Scraps pagination on index page(optional, default=no paginsation)
+# Scraps pagination on index page (optional, default=no pagination)
 paginate_by = 20
-
 ```
