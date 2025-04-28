@@ -1,3 +1,4 @@
+pub mod content;
 pub mod context;
 pub mod file;
 pub mod link;

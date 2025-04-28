@@ -19,7 +19,7 @@ impl SerializeLinkScrap {
             ctx: scrap.ctx.as_ref().map(|c| c.to_string()),
             title: scrap.title.to_string(),
             html_file_name,
-            html_content: scrap.html_content.clone(),
+            html_content: scrap.content.to_string(),
             thumbnail: scrap.thumbnail.clone(),
         }
     }

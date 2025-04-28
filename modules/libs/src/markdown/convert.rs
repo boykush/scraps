@@ -4,15 +4,19 @@ use pulldown_cmark::{
 };
 use url::Url;
 
-use crate::model::{file::ScrapFileStem, link::ScrapLink};
+use crate::model::{
+    content::{Content, ContentElement},
+    file::ScrapFileStem,
+    link::ScrapLink,
+};
 
 const PARSER_OPTION: Options = Options::all();
 
-pub fn to_html(text: &str, base_url: &Url) -> String {
-    let mut html_buf = String::new();
+pub fn to_html_content(text: &str, base_url: &Url) -> Content {
     let parser = Parser::new_ext(text, PARSER_OPTION);
     let parser_vec = parser.into_iter().collect::<Vec<_>>();
     let mut parser_windows = parser_vec.into_iter().circular_tuple_windows::<(_, _, _)>();
+    let mut content_elements = Vec::new();
 
     while let Some(events) = parser_windows.next() {
         match events {
@@ -31,21 +35,30 @@ pub fn to_html(text: &str, base_url: &Url) -> String {
                 (0..2).for_each(|_| {
                     parser_windows.next();
                 });
+                let mut html_buf = String::new();
                 push_html(&mut html_buf, events.into_iter());
+                content_elements.push(ContentElement::Raw(html_buf))
             }
             (
                 Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(CowStr::Borrowed(language)))),
                 _,
                 _,
-            ) => push_html(
-                &mut html_buf,
-                [handle_code_block_start_event(language)].into_iter(),
-            ),
-            (e1, _, _) => push_html(&mut html_buf, [e1].into_iter()),
+            ) => {
+                let mut html_buf = String::new();
+                push_html(
+                    &mut html_buf,
+                    [handle_code_block_start_event(language)].into_iter(),
+                );
+                content_elements.push(ContentElement::Raw(html_buf))
+            }
+            (e1, _, _) => {
+                let mut html_buf = String::new();
+                push_html(&mut html_buf, [e1].into_iter());
+                content_elements.push(ContentElement::Raw(html_buf))
+            }
         }
     }
-
-    html_buf
+    Content::new(content_elements)
 }
 
 fn handle_wiki_link_events<'a>(
@@ -110,7 +123,10 @@ mod tests {
             .iter()
             .zip(expected_list)
             .for_each(|(input, expected)| {
-                assert_eq!(to_html(input, &base_url), expected.to_string() + "\n")
+                assert_eq!(
+                    to_html_content(input, &base_url),
+                    Content::new(vec![ContentElement::Raw(expected.to_string() + "\n")])
+                )
             });
     }
 
@@ -136,8 +152,10 @@ mod tests {
             .zip(expected_list)
             .for_each(|(input, expected)| {
                 assert_eq!(
-                    to_html(input, &base_url),
-                    "<p>".to_string() + expected + "</p>\n"
+                    to_html_content(input, &base_url),
+                    Content::new(vec![ContentElement::Raw(
+                        "<p>".to_string() + expected + "</p>\n"
+                    )])
                 )
             });
     }

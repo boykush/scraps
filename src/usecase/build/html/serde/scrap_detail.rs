@@ -22,7 +22,7 @@ impl From<&ScrapWithCommitedTs> for ScrapDetailTera {
             ctx: scrap.ctx.as_ref().map(|ctx| ctx.to_string()),
             title: scrap.title.to_string(),
             html_file_name,
-            html_content: scrap.html_content.clone(),
+            html_content: scrap.content.to_string(),
             thumbnail: scrap.thumbnail.clone(),
             commited_ts,
         }
