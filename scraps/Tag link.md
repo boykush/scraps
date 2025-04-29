@@ -1,4 +1,4 @@
-#[[Internal link]] #[[Markdown Syntax]]
+#[[Internal Link]] #[[Markdown Syntax]]
 
 If there is no scrap with the specified title, such as #[[Markdown Syntax]], it becomes a tag.
 

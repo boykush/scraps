@@ -1,4 +1,4 @@
-#[[Markdown Syntax]]
+#[[Markdown Syntax]] #[[Internal Link]]
 
 Specifying the name of the markdown file with a notation such as `[[Link]]` will generate a wiki-like internal link.
 
