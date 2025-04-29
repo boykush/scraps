@@ -212,14 +212,16 @@ mod tests {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
                     resource_3.run(resource_bytes_3, || {
-                        let result1 = command.run(
-                            git_command,
-                            &base_url,
-                            timezone,
-                            html_metadata,
-                            css_metadata,
-                            &list_view_configs,
-                        ).unwrap();
+                        let result1 = command
+                            .run(
+                                git_command,
+                                &base_url,
+                                timezone,
+                                html_metadata,
+                                css_metadata,
+                                &list_view_configs,
+                            )
+                            .unwrap();
                         assert_eq!(result1, 2);
 
                         let result2 = fs::read_to_string(html_path_1).unwrap();
@@ -284,14 +286,16 @@ mod tests {
         resource_static_dir.run(|| {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
-                    let result1 = command.run(
-                        git_command,
-                        &base_url,
-                        timezone,
-                        html_metadata,
-                        css_metadata,
-                        &list_view_configs,
-                    ).unwrap();
+                    let result1 = command
+                        .run(
+                            git_command,
+                            &base_url,
+                            timezone,
+                            html_metadata,
+                            css_metadata,
+                            &list_view_configs,
+                        )
+                        .unwrap();
                     assert_eq!(result1, 2);
 
                     let result2 = fs::read_to_string(search_index_json_path);

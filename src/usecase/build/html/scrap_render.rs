@@ -111,22 +111,26 @@ mod tests {
 
         let render = ScrapRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
 
-        render.run(
-            &base_url,
-            timezone,
-            &metadata,
-            &ScrapWithCommitedTs::new(scrap1, &commited_ts1),
-        ).unwrap();
+        render
+            .run(
+                &base_url,
+                timezone,
+                &metadata,
+                &ScrapWithCommitedTs::new(scrap1, &commited_ts1),
+            )
+            .unwrap();
 
         let result2 = fs::read_to_string(scrap1_html_path).unwrap();
         assert!(!result2.is_empty());
 
-        render.run(
-            &base_url,
-            timezone,
-            &metadata,
-            &ScrapWithCommitedTs::new(scrap2, &commited_ts1),
-        ).unwrap();
+        render
+            .run(
+                &base_url,
+                timezone,
+                &metadata,
+                &ScrapWithCommitedTs::new(scrap2, &commited_ts1),
+            )
+            .unwrap();
 
         let result4 = fs::read_to_string(scrap2_html_path).unwrap();
         assert!(!result4.is_empty());

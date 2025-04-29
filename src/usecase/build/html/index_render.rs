@@ -157,12 +157,14 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            render.run(
-                &base_url,
-                &metadata,
-                &list_view_configs,
-                &scraps_with_commited_ts,
-            ).unwrap();
+            render
+                .run(
+                    &base_url,
+                    &metadata,
+                    &list_view_configs,
+                    &scraps_with_commited_ts,
+                )
+                .unwrap();
 
             let result1 = fs::read_to_string(index_html_path).unwrap();
             assert_eq!(
@@ -226,12 +228,14 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            render.run(
-                &base_url,
-                &metadata,
-                &list_view_configs,
-                &scraps_with_commited_ts,
-            ).unwrap();
+            render
+                .run(
+                    &base_url,
+                    &metadata,
+                    &list_view_configs,
+                    &scraps_with_commited_ts,
+                )
+                .unwrap();
 
             let result1 = fs::read_to_string(index_html_path).unwrap();
             assert_eq!(
