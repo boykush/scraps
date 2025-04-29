@@ -1,5 +1,7 @@
 use std::fmt;
 
+use url::Url;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Content {
     pub elements: Vec<ContentElement>,
@@ -23,14 +25,14 @@ impl fmt::Display for Content {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ContentElement {
     Raw(String),
-    Shortcode(String),
+    OGPCard(Url),
 }
 
 impl fmt::Display for ContentElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ContentElement::Raw(text) => write!(f, "{}", text),
-            ContentElement::Shortcode(code) => write!(f, "{}", code),
+            ContentElement::OGPCard(code) => write!(f, "{}", code),
         }
     }
 }

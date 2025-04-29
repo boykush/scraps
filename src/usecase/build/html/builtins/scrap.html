@@ -21,9 +21,8 @@
             </p>
         {% endif %}
         <div class="content">
-            {{ scrap.html_content | safe }}
+            {% for element in scrap.content.elements %}{% if element.raw %}{{ element.raw | safe }}{% endif %}{% endfor %}
         </div>
-        
     </div>
     {{ macros::scrap_links(scraps = linked_scraps) }}
 {% endblock %}
