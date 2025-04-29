@@ -2,28 +2,29 @@
 
 As an extension, GitHub-flavored Markdown is also supported. This includes features such as strikethrough, tables, and task lists.
 
-### Strikethrough:
+## Example
 
-#### Markdown
+---
 
-`~~This text is strikethrough.~~`
+### Strikethrough
 
-#### Result
-
+#### In:
+```markdown
+~~This text is strikethrough.~~
+```
+#### Out:
 ~~This text is strikethrough.~~
 
-### Task Lists:
+---
 
-#### Markdown
-
-```
+### Task Lists
+#### In:
+```markdown
 - [x] Task 1
 - [ ] Task 2
 - [ ] Task 3
 ```
-
-#### Result
-
+#### Out:
 - [x] Task 1
 - [ ] Task 2
 - [ ] Task 3
