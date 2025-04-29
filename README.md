@@ -33,6 +33,7 @@ Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 - [x] Mermaid Diagrams
 - [x] Search
 - [x] Color Scheme (Theme is the [Nord](https://www.nordtheme.com/))
+- [x] OGP Card
 ### CLI
 - [x] Build a static site
 - [x] Init scraps project
