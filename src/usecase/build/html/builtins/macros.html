@@ -44,3 +44,13 @@
         {% endif %}
     </ul>
 {% endmacro tag_links %}
+
+{% macro ogp_card(url) %}
+<div class="ogp-card" data-url="{{ url }}">
+  <img class="ogp-image" src="" alt="OGP Image" />
+  <div class="ogp-content">
+    <h3 class="ogp-title">Loading...</h3>
+    <p class="ogp-description">Fetching description...</p>
+  </div>
+</div>
+{% endmacro %}
