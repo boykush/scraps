@@ -14,7 +14,7 @@
 
 # What is Scraps?
 
-Scraps is a static site generator based on Markdown files written with simple Wiki-link notation. It can be used primarily for personal or team knowledge management.
+Scraps is a static site generator based on Markdown files written with simple Wiki-link notation, designed for personal and team knowledge management.
 
 Learn more in the [official documentation](https://boykush.github.io/scraps/scraps/what-is-scrapsquestion.html).
 
