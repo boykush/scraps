@@ -107,13 +107,11 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = TagsIndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            let result1 = render.run(&base_url, &metadata, &scraps);
+            render.run(&base_url, &metadata, &scraps).unwrap();
 
-            assert!(result1.is_ok());
-
-            let result2 = fs::read_to_string(index_html_path).unwrap();
+            let result1 = fs::read_to_string(index_html_path).unwrap();
             assert_eq!(
-                result2,
+                result1,
                 "<a href=\"./tag1.html\">tag1</a><a href=\"./tag2.html\">tag2</a>"
             );
         })

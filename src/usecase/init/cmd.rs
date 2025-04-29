@@ -43,8 +43,7 @@ mod tests {
 
         let command = InitCommand::new(git_command);
 
-        let result = command.run(project_path.to_str().unwrap());
-        assert!(result.is_ok());
+        command.run(project_path.to_str().unwrap()).unwrap();
 
         assert!(project_path.exists());
         assert!(project_path.join("scraps").exists());

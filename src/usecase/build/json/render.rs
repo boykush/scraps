@@ -88,13 +88,11 @@ mod tests {
         resource_template_json.run(resource_template_json_byte, || {
             resource_public_dir.run(|| {
                 let render = SearchIndexRender::new(&static_dir_path, &public_dir_path);
-                let result1 = render.run(&base_url, &scraps);
+                render.run(&base_url, &scraps).unwrap();
 
-                assert!(result1.is_ok());
-
-                let result2 = fs::read_to_string(search_index_json_path).unwrap();
+                let result = fs::read_to_string(search_index_json_path).unwrap();
                 assert_eq!(
-                    result2,
+                    result,
                     "[{ \"title\": \"scrap1\", \"url\": \"http://localhost:1112/scraps/scrap1.html\" },{ \"title\": \"Context/scrap2\", \"url\": \"http://localhost:1112/scraps/scrap2.context.html\" }]");
             })
         })
