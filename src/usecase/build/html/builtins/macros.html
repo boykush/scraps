@@ -47,10 +47,12 @@
 
 {% macro ogp_card(url) %}
 <div class="ogp-card" data-url="{{ url }}">
-  <img class="ogp-image" src="" alt="OGP Image" />
-  <div class="ogp-content">
-    <h3 class="ogp-title">Loading...</h3>
-    <p class="ogp-description">Fetching description...</p>
-  </div>
+    <a class="ogp-card-link" href="{{ url }}" target="_blank" rel="noopener noreferrer">
+        <img class="ogp-image" src="" alt="OGP Image" />
+        <div class="ogp-content">
+            <div class="ogp-title">Loading...</div>
+            <div class="ogp-description">Fetching description...</div>
+        </div>
+    </a>
 </div>
-{% endmacro %}
+{% endmacro ogp_card %}

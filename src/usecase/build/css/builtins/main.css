@@ -109,6 +109,45 @@ div.scrap .commited-date {
 div.scrap .content {
     margin: 32px 0;
     line-height: 1.5;
+    word-break: break-all;
+}
+
+div.scrap .content .ogp-card {
+    background-color: var(--primary-background-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-color) 0px 6px 9px 0px;
+    margin: 16px 0;
+    height: 120px;
+    overflow: hidden;
+}
+
+div.scrap .content .ogp-card .ogp-card-link {
+    display: flex;
+    flex-direction: row;
+}
+
+div.scrap .content .ogp-card .ogp-image {
+    max-width: 240px;
+    height: 100%;
+    object-fit: contain;
+    flex-grow: 1;
+}
+
+div.scrap .content .ogp-card .ogp-content {
+    padding: 12px 16px;
+    word-break: break-all;
+}
+
+div.scrap .content .ogp-card .ogp-content .ogp-title {
+    max-height: 48px;
+    overflow: hidden;
+    font-weight: bold;
+}
+
+div.scrap .content .ogp-card .ogp-content .ogp-description {
+    overflow: hidden;
+    color: var(--gray-color);
+    font-size: 12px;
 }
 
 div.scrap a {
