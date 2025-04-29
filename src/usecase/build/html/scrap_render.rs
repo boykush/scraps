@@ -117,7 +117,6 @@ mod tests {
             &metadata,
             &ScrapWithCommitedTs::new(scrap1, &commited_ts1),
         );
-        println!("result1: {:?}", result1);
         assert!(result1.is_ok());
 
         let result2 = fs::read_to_string(scrap1_html_path);

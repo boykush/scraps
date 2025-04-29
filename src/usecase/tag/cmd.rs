@@ -63,7 +63,6 @@ mod tests {
                 let command = TagCommand::new(&scraps_dir_path);
 
                 let result = command.run(&base_url);
-                println!("{:?}", result);
                 assert!(result.is_ok());
 
                 let (tags, backlinks_map) = result.unwrap();

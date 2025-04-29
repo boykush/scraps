@@ -1,5 +1,3 @@
-use std::fmt;
-
 use url::Url;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -13,26 +11,8 @@ impl Content {
     }
 }
 
-impl fmt::Display for Content {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for element in &self.elements {
-            write!(f, "{}", element)?;
-        }
-        Ok(())
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ContentElement {
     Raw(String),
     OGPCard(Url),
-}
-
-impl fmt::Display for ContentElement {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            ContentElement::Raw(text) => write!(f, "{}", text),
-            ContentElement::OGPCard(code) => write!(f, "{}", code),
-        }
-    }
 }

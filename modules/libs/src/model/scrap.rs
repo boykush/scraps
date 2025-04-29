@@ -23,13 +23,13 @@ impl Scrap {
     pub fn new(base_url: &Url, title: &str, ctx: &Option<&str>, text: &str) -> Scrap {
         let links = markdown::extract::scrap_links(text);
         let thumbnail = markdown::extract::head_image(text);
-        let html_content = markdown::convert::to_html_content(text, base_url);
+        let content = markdown::convert::to_content(text, base_url);
 
         Scrap {
             title: title.into(),
             ctx: ctx.map(|s| s.into()),
             links,
-            content: html_content,
+            content,
             thumbnail,
         }
     }
@@ -70,7 +70,8 @@ mod tests {
                     "<a href=\"http://localhost:1112/scraps/link2.html\">link2</a>".to_string()
                 ),
                 ContentElement::Raw(
-                    "<a href=\"http://localhost:1112/scraps/link3.context.html\">link3</a>".to_string()
+                    "<a href=\"http://localhost:1112/scraps/link3.context.html\">link3</a>"
+                        .to_string()
                 ),
                 ContentElement::Raw("</p>\n".to_string())
             ])

@@ -12,7 +12,7 @@ use crate::model::{
 
 const PARSER_OPTION: Options = Options::all();
 
-pub fn to_html_content(text: &str, base_url: &Url) -> Content {
+pub fn to_content(text: &str, base_url: &Url) -> Content {
     let parser = Parser::new_ext(text, PARSER_OPTION);
     let parser_vec = parser.into_iter().collect::<Vec<_>>();
     let mut parser_windows = parser_vec.into_iter().circular_tuple_windows::<(_, _, _)>();
@@ -158,7 +158,7 @@ mod tests {
             .iter()
             .zip(expected_list)
             .for_each(|(input, expected)| {
-                assert_eq!(to_html_content(input, &base_url), Content::new(expected))
+                assert_eq!(to_content(input, &base_url), Content::new(expected))
             });
     }
 
@@ -184,7 +184,7 @@ mod tests {
             .zip(expected_list)
             .for_each(|(input, expected)| {
                 assert_eq!(
-                    to_html_content(input, &base_url),
+                    to_content(input, &base_url),
                     Content::new(vec![
                         ContentElement::Raw("<p>".to_string()),
                         ContentElement::Raw(expected.to_string()),
@@ -204,7 +204,7 @@ mod tests {
             .zip(expected_list)
             .for_each(|(input, expected)| {
                 assert_eq!(
-                    to_html_content(input, &base_url),
+                    to_content(input, &base_url),
                     Content::new(vec![
                         ContentElement::Raw("<p>".to_string()),
                         ContentElement::OGPCard(Url::parse(expected).unwrap()),
