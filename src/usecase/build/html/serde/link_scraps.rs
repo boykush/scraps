@@ -3,12 +3,14 @@ use url::Url;
 
 use scraps_libs::model::{file::ScrapFileStem, scrap::Scrap};
 
+use super::content::ContentTera;
+
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeLinkScrap {
     ctx: Option<String>,
     title: String,
     html_file_name: String,
-    html_content: String,
+    content: ContentTera,
     thumbnail: Option<Url>,
 }
 
@@ -19,7 +21,7 @@ impl SerializeLinkScrap {
             ctx: scrap.ctx.as_ref().map(|c| c.to_string()),
             title: scrap.title.to_string(),
             html_file_name,
-            html_content: scrap.html_content.clone(),
+            content: scrap.content.clone().into(),
             thumbnail: scrap.thumbnail.clone(),
         }
     }

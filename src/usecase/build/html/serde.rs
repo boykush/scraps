@@ -1,3 +1,4 @@
+pub mod content;
 pub mod index_scraps;
 pub mod link_scraps;
 pub mod scrap_detail;

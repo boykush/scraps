@@ -8,12 +8,14 @@ use crate::usecase::build::model::{
     sort::SortKey,
 };
 
+use super::content::ContentTera;
+
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeIndexScrap {
     ctx: Option<String>,
     title: String,
     html_file_name: String,
-    html_content: String,
+    content: ContentTera,
     thumbnail: Option<Url>,
     pub commited_ts: Option<i64>,
     pub backlinks_count: usize,
@@ -32,7 +34,7 @@ impl SerializeIndexScrap {
             ctx: scrap.ctx.map(|c| c.to_string()),
             title: scrap.title.to_string(),
             html_file_name,
-            html_content: scrap.html_content.clone(),
+            content: scrap.content.into(),
             thumbnail: scrap.thumbnail.clone(),
             commited_ts,
             backlinks_count,

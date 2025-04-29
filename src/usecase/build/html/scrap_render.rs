@@ -56,7 +56,10 @@ impl ScrapRender {
 
         // insert to context for linked list
         let backlinks_map = BacklinksMap::new(&self.scraps);
-        context.insert("scrap", &ScrapDetailTera::from(scrap_with_commited_ts));
+        context.insert(
+            "scrap",
+            &ScrapDetailTera::from(scrap_with_commited_ts.clone()),
+        );
 
         let linked_scraps = backlinks_map.get(&scrap.self_link());
         context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));

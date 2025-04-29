@@ -18,7 +18,7 @@
                             <img class="thumbnail-image" alt="thumbnail" src="{{ scrap.thumbnail }}" loading="lazy" />
                         </div>
                     {% else %}
-                        <div class="summary">{{ scrap.html_content | striptags }}</div>
+                        <div class="summary">{% for element in scrap.content.elements %}{{ element.raw | striptags }}{% endfor %}</div>
                     {% endif %}
                 </li>
             </a>
@@ -44,3 +44,15 @@
         {% endif %}
     </ul>
 {% endmacro tag_links %}
+
+{% macro ogp_card(url) %}
+<div class="ogp-card" data-url="{{ url }}">
+    <a class="ogp-card-link" href="{{ url }}" target="_blank" rel="noopener noreferrer">
+        <img class="ogp-image" src="" alt="OGP Image" />
+        <div class="ogp-content">
+            <div class="ogp-title">Loading...</div>
+            <div class="ogp-description">Fetching description...</div>
+        </div>
+    </a>
+</div>
+{% endmacro ogp_card %}
