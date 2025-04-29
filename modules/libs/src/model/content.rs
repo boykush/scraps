@@ -14,5 +14,5 @@ impl Content {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ContentElement {
     Raw(String),
-    OGPCard(Url),
+    Autolink(Url),
 }

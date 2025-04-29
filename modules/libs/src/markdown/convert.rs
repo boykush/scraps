@@ -53,7 +53,7 @@ pub fn to_content(text: &str, base_url: &Url) -> Content {
                     parser_windows.next();
                 });
                 match Url::parse(dest_url) {
-                    Ok(url) => content_elements.push(ContentElement::OGPCard(url)),
+                    Ok(url) => content_elements.push(ContentElement::Autolink(url)),
                     Err(e) => content_elements
                         .push(ContentElement::Raw(format!("Error parsing URL: {}", e))),
                 }
@@ -207,7 +207,7 @@ mod tests {
                     to_content(input, &base_url),
                     Content::new(vec![
                         ContentElement::Raw("<p>".to_string()),
-                        ContentElement::OGPCard(Url::parse(expected).unwrap()),
+                        ContentElement::Autolink(Url::parse(expected).unwrap()),
                         ContentElement::Raw("</p>\n".to_string()),
                     ])
                 )

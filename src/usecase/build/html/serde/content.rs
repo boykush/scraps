@@ -8,7 +8,7 @@ enum SerializeContentElement {
     #[serde(rename = "raw")]
     Raw(String),
     #[serde(rename = "ogp_card")]
-    OGPCard(Url),
+    Autolink(Url),
 }
 
 #[derive(Serialize)]
