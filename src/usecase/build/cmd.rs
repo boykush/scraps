@@ -212,33 +212,35 @@ mod tests {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
                     resource_3.run(resource_bytes_3, || {
-                        let result1 = command.run(
-                            git_command,
-                            &base_url,
-                            timezone,
-                            html_metadata,
-                            css_metadata,
-                            &list_view_configs,
-                        );
-                        assert!(result1.is_ok());
+                        let result1 = command
+                            .run(
+                                git_command,
+                                &base_url,
+                                timezone,
+                                html_metadata,
+                                css_metadata,
+                                &list_view_configs,
+                            )
+                            .unwrap();
+                        assert_eq!(result1, 2);
 
-                        let result2 = fs::read_to_string(html_path_1);
-                        assert!(result2.is_ok());
+                        let result2 = fs::read_to_string(html_path_1).unwrap();
+                        assert!(!result2.is_empty());
 
-                        let result3 = fs::read_to_string(html_path_2);
-                        assert!(result3.is_ok());
+                        let result3 = fs::read_to_string(html_path_2).unwrap();
+                        assert!(!result3.is_empty());
 
                         let result4 = fs::read_to_string(not_exists_path);
                         assert!(result4.is_err());
 
-                        let result5 = fs::read_to_string(html_path_3);
-                        assert!(result5.is_ok());
+                        let result5 = fs::read_to_string(html_path_3).unwrap();
+                        assert!(!result5.is_empty());
 
-                        let result6 = fs::read_to_string(css_path);
-                        assert!(result6.is_ok());
+                        let result6 = fs::read_to_string(css_path).unwrap();
+                        assert!(!result6.is_empty());
 
-                        let result7 = fs::read_to_string(search_index_json_path);
-                        assert!(result7.is_ok());
+                        let result7 = fs::read_to_string(search_index_json_path).unwrap();
+                        assert!(!result7.is_empty());
                     })
                 })
             })
@@ -284,15 +286,17 @@ mod tests {
         resource_static_dir.run(|| {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
-                    let result1 = command.run(
-                        git_command,
-                        &base_url,
-                        timezone,
-                        html_metadata,
-                        css_metadata,
-                        &list_view_configs,
-                    );
-                    assert!(result1.is_ok());
+                    let result1 = command
+                        .run(
+                            git_command,
+                            &base_url,
+                            timezone,
+                            html_metadata,
+                            css_metadata,
+                            &list_view_configs,
+                        )
+                        .unwrap();
+                    assert_eq!(result1, 2);
 
                     let result2 = fs::read_to_string(search_index_json_path);
                     assert!(result2.is_err());

@@ -62,10 +62,9 @@ mod tests {
             resource_2.run(resource_bytes_2, || {
                 let command = TagCommand::new(&scraps_dir_path);
 
-                let result = command.run(&base_url);
-                assert!(result.is_ok());
+                let result = command.run(&base_url).unwrap();
 
-                let (tags, backlinks_map) = result.unwrap();
+                let (tags, backlinks_map) = result;
 
                 // test tags
                 let tag1: Tag = "Tag1".into();

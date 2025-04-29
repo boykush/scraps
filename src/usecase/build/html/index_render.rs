@@ -157,18 +157,18 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            let result1 = render.run(
-                &base_url,
-                &metadata,
-                &list_view_configs,
-                &scraps_with_commited_ts,
-            );
+            render
+                .run(
+                    &base_url,
+                    &metadata,
+                    &list_view_configs,
+                    &scraps_with_commited_ts,
+                )
+                .unwrap();
 
-            assert!(result1.is_ok());
-
-            let result2 = fs::read_to_string(index_html_path).unwrap();
+            let result1 = fs::read_to_string(index_html_path).unwrap();
             assert_eq!(
-                result2,
+                result1,
                 "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
             );
         })
@@ -228,24 +228,24 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            let result1 = render.run(
-                &base_url,
-                &metadata,
-                &list_view_configs,
-                &scraps_with_commited_ts,
-            );
+            render
+                .run(
+                    &base_url,
+                    &metadata,
+                    &list_view_configs,
+                    &scraps_with_commited_ts,
+                )
+                .unwrap();
 
-            assert!(result1.is_ok());
-
-            let result2 = fs::read_to_string(index_html_path).unwrap();
+            let result1 = fs::read_to_string(index_html_path).unwrap();
             assert_eq!(
-                result2,
+                result1,
                 "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
             );
 
-            let result3 = fs::read_to_string(page2_html_path).unwrap();
+            let result2 = fs::read_to_string(page2_html_path).unwrap();
             assert_eq!(
-                result3,
+                result2,
                 "true<a href=\"./scrap3.html\">scrap3</a><a href=\"./scrap4.html\">scrap4</a>"
             );
         })
