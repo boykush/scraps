@@ -21,7 +21,7 @@
             </p>
         {% endif %}
         <div class="content">
-            {% for element in scrap.content.elements %}{% if element.raw %}{{ element.raw | safe }}{% endif %}{% endfor %}
+            {% for element in scrap.content.elements %}{% if element.raw %}{{ element.raw | safe }}{% elif element.ogp_card %}{{ element.ogp_card }}{% endif %}{% endfor %}
         </div>
     </div>
     {{ macros::scrap_links(scraps = linked_scraps) }}

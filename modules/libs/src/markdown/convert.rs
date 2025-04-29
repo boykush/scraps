@@ -40,6 +40,25 @@ pub fn to_html_content(text: &str, base_url: &Url) -> Content {
                 content_elements.push(ContentElement::Raw(html_buf))
             }
             (
+                Event::Start(Tag::Link {
+                    link_type: LinkType::Autolink,
+                    dest_url: CowStr::Borrowed(dest_url),
+                    title: _,
+                    id: _,
+                }),
+                _,
+                _,
+            ) => {
+                (0..2).for_each(|_| {
+                    parser_windows.next();
+                });
+                match Url::parse(dest_url) {
+                    Ok(url) => content_elements.push(ContentElement::OGPCard(url)),
+                    Err(e) => content_elements
+                        .push(ContentElement::Raw(format!("Error parsing URL: {}", e))),
+                }
+            }
+            (
                 Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(CowStr::Borrowed(language)))),
                 _,
                 _,
@@ -113,20 +132,33 @@ mod tests {
             "```mermaid\nflowchart LR\nid\n```",
         ];
         let expected_list = [
-            "<p><code>[[quote block]]</code></p>",
-            "<pre><code>[[code block]]\n</code></pre>",
-            "<pre><code class=\"language-bash\">scraps build\n</code></pre>",
-            "<pre><code class=\"language-mermaid mermaid\">flowchart LR\nid\n</code></pre>",
+            vec![
+                ContentElement::Raw("<p>".to_string()),
+                ContentElement::Raw("<code>[[quote block]]</code>".to_string()),
+                ContentElement::Raw("</p>\n".to_string()),
+            ],
+            vec![
+                ContentElement::Raw("<pre><code>".to_string()),
+                ContentElement::Raw("[[code block]]\n".to_string()),
+                ContentElement::Raw("</code></pre>\n".to_string()),
+            ],
+            vec![
+                ContentElement::Raw("<pre><code class=\"language-bash\">".to_string()),
+                ContentElement::Raw("scraps build\n".to_string()),
+                ContentElement::Raw("</code></pre>\n".to_string()),
+            ],
+            vec![
+                ContentElement::Raw("<pre><code class=\"language-mermaid mermaid\">".to_string()),
+                ContentElement::Raw("flowchart LR\nid\n".to_string()),
+                ContentElement::Raw("</code></pre>\n".to_string()),
+            ],
         ];
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         input_list
             .iter()
             .zip(expected_list)
             .for_each(|(input, expected)| {
-                assert_eq!(
-                    to_html_content(input, &base_url),
-                    Content::new(vec![ContentElement::Raw(expected.to_string() + "\n")])
-                )
+                assert_eq!(to_html_content(input, &base_url), Content::new(expected))
             });
     }
 
@@ -153,9 +185,31 @@ mod tests {
             .for_each(|(input, expected)| {
                 assert_eq!(
                     to_html_content(input, &base_url),
-                    Content::new(vec![ContentElement::Raw(
-                        "<p>".to_string() + expected + "</p>\n"
-                    )])
+                    Content::new(vec![
+                        ContentElement::Raw("<p>".to_string()),
+                        ContentElement::Raw(expected.to_string()),
+                        ContentElement::Raw("</p>\n".to_string()),
+                    ])
+                )
+            });
+    }
+
+    #[test]
+    fn it_to_html_autolink() {
+        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let input_list = ["<https://example.com>", "<http://example.com>"];
+        let expected_list = ["https://example.com", "http://example.com"];
+        input_list
+            .iter()
+            .zip(expected_list)
+            .for_each(|(input, expected)| {
+                assert_eq!(
+                    to_html_content(input, &base_url),
+                    Content::new(vec![
+                        ContentElement::Raw("<p>".to_string()),
+                        ContentElement::OGPCard(Url::parse(expected).unwrap()),
+                        ContentElement::Raw("</p>\n".to_string()),
+                    ])
                 )
             });
     }
