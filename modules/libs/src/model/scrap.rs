@@ -37,6 +37,8 @@ impl Scrap {
 
 #[cfg(test)]
 mod tests {
+    use crate::model::content::ContentElement;
+
     use super::*;
 
     #[test]
@@ -46,7 +48,7 @@ mod tests {
             &base_url,
             "scrap title",
             &None,
-            "[[link1]] [[link2]] [[Context/link3]]",
+            "[[link1]][[link2]][[Context/link3]]",
         );
         assert_eq!(scrap.title, "scrap title".into());
         scrap.links.sort();
@@ -57,17 +59,22 @@ mod tests {
         ];
         expected.sort();
         assert_eq!(scrap.links, expected);
-        // assert_eq!(
-        //     scrap.html_content,
-        //     "<p>".to_string()
-        //         + &[
-        //             "<a href=\"http://localhost:1112/scraps/link1.html\">link1</a>",
-        //             "<a href=\"http://localhost:1112/scraps/link2.html\">link2</a>",
-        //             "<a href=\"http://localhost:1112/scraps/link3.context.html\">link3</a>",
-        //         ]
-        //         .join(" ")
-        //         + "</p>\n"
-        // );
+        assert_eq!(
+            scrap.content,
+            Content::new(vec![
+                ContentElement::Raw("<p>".to_string()),
+                ContentElement::Raw(
+                    "<a href=\"http://localhost:1112/scraps/link1.html\">link1</a>".to_string()
+                ),
+                ContentElement::Raw(
+                    "<a href=\"http://localhost:1112/scraps/link2.html\">link2</a>".to_string()
+                ),
+                ContentElement::Raw(
+                    "<a href=\"http://localhost:1112/scraps/link3.context.html\">link3</a>".to_string()
+                ),
+                ContentElement::Raw("</p>\n".to_string())
+            ])
+        );
         assert_eq!(scrap.thumbnail, None);
     }
 }
