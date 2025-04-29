@@ -17,7 +17,7 @@ title = "{{ now() | date(timezone=timezone) }}"
 +++
 ```
 
- For the features available in the template, please refer to [[Feature/Templates]]. Sample templates is [[Scraps templates|here]]. 
+ For the features available in the template, please refer to [[Feature/Templates]]. Sample templates is [[Sample templates|here]]. 
  
 You can check the templates added under `/templates` with the following command:
 ```bash

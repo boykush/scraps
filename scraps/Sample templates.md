@@ -1,6 +1,6 @@
 #[[Templates]]
 
-## Daily note
+# Daily note
 Utilizes Tera's standard [now()](https://keats.github.io/tera/docs/#now) function, [date](https://keats.github.io/tera/docs/#date) filter, and Scraps' custom `timezone` variable.
 
 ```md
@@ -9,7 +9,7 @@ title = "{{ now() | date(timezone=timezone) }}"
 +++
 ```
 
-## Arguments by environment variables
+# Arguments by environment variables
 Using the [get_env()](https://keats.github.io/tera/docs/#get-env) function, you can write templates that customize arguments at the time of CLI execution.
 
 ```
