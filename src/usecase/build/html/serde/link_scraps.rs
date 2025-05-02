@@ -1,27 +1,29 @@
 use itertools::Itertools;
 use url::Url;
 
-use scraps_libs::model::{file::ScrapFileStem, scrap::Scrap};
-
-use super::content::ContentTera;
+use scraps_libs::{
+    markdown,
+    model::{file::ScrapFileStem, scrap::Scrap},
+};
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeLinkScrap {
     ctx: Option<String>,
     title: String,
     html_file_name: String,
-    content: ContentTera,
+    html_text: String,
     thumbnail: Option<Url>,
 }
 
 impl SerializeLinkScrap {
-    fn new(scrap: &Scrap) -> SerializeLinkScrap {
+    fn new(scrap: &Scrap, base_url: &Url) -> SerializeLinkScrap {
+        let content = markdown::convert::to_content(&scrap.md_text, base_url);
         let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_link().clone()));
         SerializeLinkScrap {
             ctx: scrap.ctx.as_ref().map(|c| c.to_string()),
             title: scrap.title.to_string(),
             html_file_name,
-            content: scrap.content.clone().into(),
+            html_text: content.to_string(),
             thumbnail: scrap.thumbnail.clone(),
         }
     }
@@ -31,8 +33,11 @@ impl SerializeLinkScrap {
 pub struct LinkScrapsTera(Vec<SerializeLinkScrap>);
 
 impl LinkScrapsTera {
-    pub fn new(scraps: &[Scrap]) -> LinkScrapsTera {
-        let serialize_scraps = scraps.iter().map(SerializeLinkScrap::new).collect_vec();
+    pub fn new(scraps: &[Scrap], base_url: &Url) -> LinkScrapsTera {
+        let serialize_scraps = scraps
+            .iter()
+            .map(|s| SerializeLinkScrap::new(s, base_url))
+            .collect_vec();
 
         LinkScrapsTera(serialize_scraps)
     }

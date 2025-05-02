@@ -1,7 +1,7 @@
 use scraps_libs::model::file::ScrapFileStem;
 use url::Url;
 
-use crate::usecase::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
+use crate::usecase::build::model::scrap_detail::ScrapDetail;
 
 use super::content::ContentTera;
 
@@ -15,16 +15,17 @@ pub struct ScrapDetailTera {
     commited_ts: Option<i64>,
 }
 
-impl From<ScrapWithCommitedTs> for ScrapDetailTera {
-    fn from(scrap_with_commited_ts: ScrapWithCommitedTs) -> Self {
-        let scrap = scrap_with_commited_ts.scrap();
-        let commited_ts = scrap_with_commited_ts.commited_ts();
+impl From<ScrapDetail> for ScrapDetailTera {
+    fn from(scrap_detail: ScrapDetail) -> Self {
+        let scrap = scrap_detail.scrap();
+        let commited_ts = scrap_detail.commited_ts();
+        let content = scrap_detail.content();
         let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_link()));
         ScrapDetailTera {
             ctx: scrap.ctx.as_ref().map(|ctx| ctx.to_string()),
             title: scrap.title.to_string(),
             html_file_name,
-            content: scrap.content.into(),
+            content: content.into(),
             thumbnail: scrap.thumbnail.clone(),
             commited_ts,
         }

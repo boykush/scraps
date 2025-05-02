@@ -2,14 +2,14 @@ use url::Url;
 
 use crate::markdown;
 
-use super::{content::Content, context::Ctx, link::ScrapLink, title::Title};
+use super::{context::Ctx, link::ScrapLink, title::Title};
 
 #[derive(PartialEq, Clone, Debug)]
 pub struct Scrap {
     pub title: Title,
     pub ctx: Option<Ctx>,
     pub links: Vec<ScrapLink>,
-    pub content: Content,
+    pub md_text: String,
     pub thumbnail: Option<Url>,
 }
 
@@ -20,16 +20,15 @@ impl Scrap {
 }
 
 impl Scrap {
-    pub fn new(base_url: &Url, title: &str, ctx: &Option<&str>, text: &str) -> Scrap {
+    pub fn new(_base_url: &Url, title: &str, ctx: &Option<&str>, text: &str) -> Scrap {
         let links = markdown::extract::scrap_links(text);
         let thumbnail = markdown::extract::head_image(text);
-        let content = markdown::convert::to_content(text, base_url);
 
         Scrap {
             title: title.into(),
             ctx: ctx.map(|s| s.into()),
             links,
-            content,
+            md_text: text.to_string(),
             thumbnail,
         }
     }
@@ -37,8 +36,6 @@ impl Scrap {
 
 #[cfg(test)]
 mod tests {
-    use crate::model::content::ContentElement;
-
     use super::*;
 
     #[test]
@@ -59,23 +56,6 @@ mod tests {
         ];
         expected.sort();
         assert_eq!(scrap.links, expected);
-        assert_eq!(
-            scrap.content,
-            Content::new(vec![
-                ContentElement::Raw("<p>".to_string()),
-                ContentElement::Raw(
-                    "<a href=\"http://localhost:1112/scraps/link1.html\">link1</a>".to_string()
-                ),
-                ContentElement::Raw(
-                    "<a href=\"http://localhost:1112/scraps/link2.html\">link2</a>".to_string()
-                ),
-                ContentElement::Raw(
-                    "<a href=\"http://localhost:1112/scraps/link3.context.html\">link3</a>"
-                        .to_string()
-                ),
-                ContentElement::Raw("</p>\n".to_string())
-            ])
-        );
         assert_eq!(scrap.thumbnail, None);
     }
 }

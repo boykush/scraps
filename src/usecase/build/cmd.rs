@@ -26,7 +26,7 @@ use super::{
         css::CssMetadata,
         html::HtmlMetadata,
         list_view_configs::ListViewConfigs,
-        scrap_with_commited_ts::{ScrapWithCommitedTs, ScrapsWithCommitedTs},
+        scrap_detail::{ScrapDetail, ScrapDetails},
     },
 };
 
@@ -60,35 +60,30 @@ impl BuildCommand {
         let span_read_scraps = span!(Level::INFO, "load_scraps").entered();
 
         let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
-        let scraps_with_commited_ts = paths
+        let scrap_details = paths
             .into_par_iter()
-            .map(|path| self.to_scrap_with_commited_ts_by_path(git_command, base_url, &path))
-            .collect::<ScrapsResult<Vec<ScrapWithCommitedTs>>>()
-            .map(|s| ScrapsWithCommitedTs::new(&s))?;
-        let scraps = scraps_with_commited_ts.to_scraps();
+            .map(|path| self.to_scrap_detail_by_path(git_command, base_url, &path))
+            .collect::<ScrapsResult<Vec<ScrapDetail>>>()
+            .map(|s| ScrapDetails::new(&s))?;
+        let scraps = scrap_details.to_scraps();
         span_read_scraps.exit();
 
         // render index
         let span_render_indexes = span!(Level::INFO, "render_indexes").entered();
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
-        index_render.run(
-            base_url,
-            html_metadata,
-            list_view_configs,
-            &scraps_with_commited_ts,
-        )?;
+        index_render.run(base_url, html_metadata, list_view_configs, &scrap_details)?;
         span_render_indexes.exit();
 
         // render scraps
         let span_render_scraps = span!(Level::INFO, "render_scraps").entered();
-        scraps_with_commited_ts
+        scrap_details
             .to_vec()
             .into_par_iter()
-            .try_for_each(|scrap_with_commited_ts| {
+            .try_for_each(|scrap_detail| {
                 let _span_render_scrap = span!(Level::INFO, "render_scrap").entered();
                 let scrap_render =
                     ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-                scrap_render.run(base_url, timezone, html_metadata, &scrap_with_commited_ts)
+                scrap_render.run(base_url, timezone, html_metadata, &scrap_detail)
             })?;
         span_render_scraps.exit();
 
@@ -125,12 +120,12 @@ impl BuildCommand {
         Ok(scraps.len())
     }
 
-    fn to_scrap_with_commited_ts_by_path<GC: GitCommand + Send + Sync + Copy>(
+    fn to_scrap_detail_by_path<GC: GitCommand + Send + Sync + Copy>(
         &self,
         git_command: GC,
         base_url: &Url,
         path: &PathBuf,
-    ) -> ScrapsResult<ScrapWithCommitedTs> {
+    ) -> ScrapsResult<ScrapDetail> {
         let span_convert_to_scrap = span!(Level::INFO, "convert_to_scrap").entered();
         let scrap = read_scraps::to_scrap_by_path(base_url, &self.scraps_dir_path, path)?;
         let commited_ts = git_command
@@ -138,7 +133,7 @@ impl BuildCommand {
             .context(BuildError::GitCommitedTs)?;
         span_convert_to_scrap.exit();
 
-        Ok(ScrapWithCommitedTs::new(&scrap, &commited_ts))
+        Ok(ScrapDetail::new(&scrap, &commited_ts, base_url))
     }
 }
 

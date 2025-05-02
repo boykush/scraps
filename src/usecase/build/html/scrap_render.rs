@@ -6,7 +6,7 @@ use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
-use crate::usecase::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
+use crate::usecase::build::model::scrap_detail::ScrapDetail;
 use chrono_tz::Tz;
 use scraps_libs::model::file::ScrapFileStem;
 use scraps_libs::model::scrap::Scrap;
@@ -44,7 +44,7 @@ impl ScrapRender {
         base_url: &Url,
         timezone: Tz,
         metadata: &HtmlMetadata,
-        scrap_with_commited_ts: &ScrapWithCommitedTs,
+        scrap_detail: &ScrapDetail,
     ) -> ScrapsResult<()> {
         let (tera, mut context) = scrap_tera::base(
             base_url,
@@ -52,17 +52,17 @@ impl ScrapRender {
             metadata,
             self.static_dir_path.join("*.html").to_str().unwrap(),
         )?;
-        let scrap = &scrap_with_commited_ts.scrap();
+        let scrap = &scrap_detail.scrap();
 
         // insert to context for linked list
         let backlinks_map = BacklinksMap::new(&self.scraps);
-        context.insert(
-            "scrap",
-            &ScrapDetailTera::from(scrap_with_commited_ts.clone()),
-        );
+        context.insert("scrap", &ScrapDetailTera::from(scrap_detail.clone()));
 
         let linked_scraps = backlinks_map.get(&scrap.self_link());
-        context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
+        context.insert(
+            "linked_scraps",
+            &LinkScrapsTera::new(&linked_scraps, base_url),
+        );
 
         let file_path = &self
             .public_scraps_dir_path
@@ -86,7 +86,7 @@ mod tests {
     #[test]
     fn it_run() {
         // args
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let base_url = &Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
         let metadata = HtmlMetadata::new(
             &LangCode::default(),
@@ -113,10 +113,10 @@ mod tests {
 
         render
             .run(
-                &base_url,
+                base_url,
                 timezone,
                 &metadata,
-                &ScrapWithCommitedTs::new(scrap1, &commited_ts1),
+                &ScrapDetail::new(scrap1, &commited_ts1, base_url),
             )
             .unwrap();
 
@@ -125,10 +125,10 @@ mod tests {
 
         render
             .run(
-                &base_url,
+                base_url,
                 timezone,
                 &metadata,
-                &ScrapWithCommitedTs::new(scrap2, &commited_ts1),
+                &ScrapDetail::new(scrap2, &commited_ts1, base_url),
             )
             .unwrap();
 
