@@ -142,16 +142,10 @@ mod tests {
         .as_bytes();
 
         // scraps
-        let sc1 = ScrapDetail::new(
-            &Scrap::new(&base_url, "scrap1", &None, "# header1"),
-            &Some(1),
-            base_url,
-        );
-        let sc2 = ScrapDetail::new(
-            &Scrap::new(&base_url, "scrap2", &None, "## header2"),
-            &Some(0),
-            base_url,
-        );
+        let scrap1 = Scrap::new("scrap1", &None, "# header1");
+        let sc1 = ScrapDetail::new(&scrap1, &Some(1), base_url);
+        let scrap2 = Scrap::new("scrap2", &None, "## header2");
+        let sc2 = ScrapDetail::new(&scrap2, &Some(0), base_url);
         let scrap_details = ScrapDetails::new(&vec![sc1.to_owned(), sc2.to_owned()]);
 
         let index_html_path = public_dir_path.join("index.html");
@@ -159,7 +153,7 @@ mod tests {
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
             render
-                .run(&base_url, &metadata, &list_view_configs, &scrap_details)
+                .run(base_url, &metadata, &list_view_configs, &scrap_details)
                 .unwrap();
 
             let result1 = fs::read_to_string(index_html_path).unwrap();
@@ -196,26 +190,14 @@ mod tests {
         .as_bytes();
 
         // scraps
-        let sc1 = ScrapDetail::new(
-            &Scrap::new(&base_url, "scrap1", &None, "# header1"),
-            &Some(3),
-            base_url,
-        );
-        let sc2 = ScrapDetail::new(
-            &Scrap::new(&base_url, "scrap2", &None, "## header2"),
-            &Some(2),
-            base_url,
-        );
-        let sc3 = ScrapDetail::new(
-            &Scrap::new(&base_url, "scrap3", &None, "### header3"),
-            &Some(1),
-            base_url,
-        );
-        let sc4 = ScrapDetail::new(
-            &Scrap::new(&base_url, "scrap4", &None, "#### header4"),
-            &Some(0),
-            base_url,
-        );
+        let scrap1 = Scrap::new("scrap1", &None, "# header1");
+        let sc1 = ScrapDetail::new(&scrap1, &Some(3), base_url);
+        let scrap2 = Scrap::new("scrap2", &None, "## header2");
+        let sc2 = ScrapDetail::new(&scrap2, &Some(2), base_url);
+        let scrap3 = Scrap::new("scrap3", &None, "### header3");
+        let sc3 = ScrapDetail::new(&scrap3, &Some(1), base_url);
+        let scrap4 = Scrap::new("scrap4", &None, "#### header4");
+        let sc4 = ScrapDetail::new(&scrap4, &Some(0), base_url);
         let scrap_details = ScrapDetails::new(&vec![
             sc1.to_owned(),
             sc2.to_owned(),
@@ -229,7 +211,7 @@ mod tests {
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
             render
-                .run(&base_url, &metadata, &list_view_configs, &scrap_details)
+                .run(base_url, &metadata, &list_view_configs, &scrap_details)
                 .unwrap();
 
             let result1 = fs::read_to_string(index_html_path).unwrap();

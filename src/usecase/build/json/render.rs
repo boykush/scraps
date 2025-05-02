@@ -79,8 +79,8 @@ mod tests {
         let resource_public_dir = DirResource::new(&public_dir_path);
 
         // scraps
-        let sc1 = Scrap::new(&base_url, "scrap1", &None, "# header1");
-        let sc2 = Scrap::new(&base_url, "scrap2", &Some("Context"), "## header2");
+        let sc1 = Scrap::new("scrap1", &None, "# header1");
+        let sc2 = Scrap::new("scrap2", &Some("Context"), "## header2");
         let scraps = vec![sc1, sc2];
 
         let search_index_json_path = public_dir_path.join("search_index.json");

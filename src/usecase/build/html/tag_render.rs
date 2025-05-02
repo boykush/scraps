@@ -88,8 +88,8 @@ mod tests {
         let public_dir_path = test_resource_path.join("public");
 
         // scraps
-        let scrap1 = &Scrap::new(&base_url, "scrap1", &None, "[[tag1]]");
-        let scrap2 = &Scrap::new(&base_url, "scrap2", &None, "[[tag1]][[tag2]]");
+        let scrap1 = &Scrap::new("scrap1", &None, "[[tag1]]");
+        let scrap2 = &Scrap::new("scrap2", &None, "[[tag1]][[tag2]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
         // tag
         let tag1: Tag = "tag 1".into();

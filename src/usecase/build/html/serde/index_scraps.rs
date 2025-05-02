@@ -80,22 +80,22 @@ mod tests {
     fn it_new_with_sort() {
         let base_url = &Url::parse("http://localhost:1112/").unwrap();
         let sc1 = ScrapDetail::new(
-            &Scrap::new(&base_url, "title1", &None, "[[Context/title4]][[title2]]"),
+            &Scrap::new("title1", &None, "[[Context/title4]][[title2]]"),
             &None,
             base_url,
         );
         let sc2 = ScrapDetail::new(
-            &Scrap::new(&base_url, "title2", &None, "[[Context/title4]][[title1]]"),
+            &Scrap::new("title2", &None, "[[Context/title4]][[title1]]"),
             &Some(3),
             base_url,
         );
         let sc3 = ScrapDetail::new(
-            &Scrap::new(&base_url, "title3", &None, "[[Context/title4]]"),
+            &Scrap::new("title3", &None, "[[Context/title4]]"),
             &Some(2),
             base_url,
         );
         let sc4 = ScrapDetail::new(
-            &Scrap::new(&base_url, "title4", &Some("Context"), "[[title1]]"),
+            &Scrap::new("title4", &Some("Context"), "[[title1]]"),
             &Some(1),
             base_url,
         );

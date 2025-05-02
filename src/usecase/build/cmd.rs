@@ -127,7 +127,7 @@ impl BuildCommand {
         path: &PathBuf,
     ) -> ScrapsResult<ScrapDetail> {
         let span_convert_to_scrap = span!(Level::INFO, "convert_to_scrap").entered();
-        let scrap = read_scraps::to_scrap_by_path(base_url, &self.scraps_dir_path, path)?;
+        let scrap = read_scraps::to_scrap_by_path(&self.scraps_dir_path, path)?;
         let commited_ts = git_command
             .commited_ts(path)
             .context(BuildError::GitCommitedTs)?;

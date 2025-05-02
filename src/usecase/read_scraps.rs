@@ -5,7 +5,6 @@ use std::{
 
 use anyhow::Context;
 use scraps_libs::model::scrap::Scrap;
-use url::Url;
 
 use crate::error::{ScrapsError, ScrapsResult};
 
@@ -35,7 +34,6 @@ pub(crate) fn to_scrap_paths(dir_path: &PathBuf) -> ScrapsResult<Vec<PathBuf>> {
 }
 
 pub(crate) fn to_scrap_by_path(
-    base_url: &Url,
     scraps_dir_path: &Path,
     scrap_file_path: &PathBuf,
 ) -> ScrapsResult<Scrap> {
@@ -53,7 +51,7 @@ pub(crate) fn to_scrap_by_path(
         .filter(|s| !s.is_empty());
     let md_text = fs::read_to_string(scrap_file_path)
         .context(ScrapsError::ReadScrap(scrap_file_path.clone()))?;
-    let scrap = Scrap::new(base_url, file_prefix, &folder_name, &md_text);
+    let scrap = Scrap::new(file_prefix, &folder_name, &md_text);
 
     Ok(scrap)
 }

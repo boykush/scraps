@@ -20,7 +20,7 @@ impl Scrap {
 }
 
 impl Scrap {
-    pub fn new(_base_url: &Url, title: &str, ctx: &Option<&str>, text: &str) -> Scrap {
+    pub fn new(title: &str, ctx: &Option<&str>, text: &str) -> Scrap {
         let links = markdown::extract::scrap_links(text);
         let thumbnail = markdown::extract::head_image(text);
 
@@ -40,13 +40,7 @@ mod tests {
 
     #[test]
     fn it_new() {
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
-        let mut scrap = Scrap::new(
-            &base_url,
-            "scrap title",
-            &None,
-            "[[link1]][[link2]][[Context/link3]]",
-        );
+        let mut scrap = Scrap::new("scrap title", &None, "[[link1]][[link2]][[Context/link3]]");
         assert_eq!(scrap.title, "scrap title".into());
         scrap.links.sort();
         let mut expected = [

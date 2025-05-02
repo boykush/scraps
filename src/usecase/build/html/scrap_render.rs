@@ -102,8 +102,8 @@ mod tests {
 
         // scraps
         let commited_ts1 = None;
-        let scrap1 = &Scrap::new(&base_url, "scrap 1", &None, "# header1");
-        let scrap2 = &Scrap::new(&base_url, "scrap 2", &Some("Context"), "[[scrap1]]");
+        let scrap1 = &Scrap::new("scrap 1", &None, "# header1");
+        let scrap2 = &Scrap::new("scrap 2", &Some("Context"), "[[scrap1]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
         let scrap1_html_path = public_dir_path.join("scraps/scrap-1.html");
