@@ -4,37 +4,33 @@ use url::Url;
 
 use crate::usecase::build::model::{
     backlinks_map::BacklinksMap,
-    scrap_with_commited_ts::{ScrapWithCommitedTs, ScrapsWithCommitedTs},
+    scrap_detail::{ScrapDetail, ScrapDetails},
     sort::SortKey,
 };
-
-use super::content::ContentTera;
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeIndexScrap {
     ctx: Option<String>,
     title: String,
     html_file_name: String,
-    content: ContentTera,
+    html_text: String,
     thumbnail: Option<Url>,
     pub commited_ts: Option<i64>,
     pub backlinks_count: usize,
 }
 
 impl SerializeIndexScrap {
-    pub fn new(
-        scrap_with_commited_ts: &ScrapWithCommitedTs,
-        backlinks_map: &BacklinksMap,
-    ) -> SerializeIndexScrap {
-        let scrap = scrap_with_commited_ts.scrap();
-        let commited_ts = scrap_with_commited_ts.commited_ts();
+    pub fn new(scrap_detail: &ScrapDetail, backlinks_map: &BacklinksMap) -> SerializeIndexScrap {
+        let scrap = scrap_detail.scrap();
+        let content = scrap_detail.content();
+        let commited_ts = scrap_detail.commited_ts();
         let backlinks_count = backlinks_map.get(&scrap.self_link()).len();
         let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_link().clone()));
         SerializeIndexScrap {
             ctx: scrap.ctx.map(|c| c.to_string()),
             title: scrap.title.to_string(),
             html_file_name,
-            content: scrap.content.into(),
+            html_text: content.to_string(),
             thumbnail: scrap.thumbnail.clone(),
             commited_ts,
             backlinks_count,
@@ -47,11 +43,11 @@ pub struct IndexScrapsTera(Vec<SerializeIndexScrap>);
 
 impl IndexScrapsTera {
     pub fn new_with_sort(
-        scraps_with_commited_ts: &ScrapsWithCommitedTs,
+        scrap_details: &ScrapDetails,
         backlinks_map: &BacklinksMap,
         sort_key: &SortKey,
     ) -> IndexScrapsTera {
-        let serialize_scraps = scraps_with_commited_ts
+        let serialize_scraps = scrap_details
             .to_vec()
             .into_iter()
             .map(|s| SerializeIndexScrap::new(&s, backlinks_map));
@@ -82,22 +78,26 @@ mod tests {
 
     #[test]
     fn it_new_with_sort() {
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
-        let sc1 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "title1", &None, "[[Context/title4]][[title2]]"),
+        let base_url = &Url::parse("http://localhost:1112/").unwrap();
+        let sc1 = ScrapDetail::new(
+            &Scrap::new("title1", &None, "[[Context/title4]][[title2]]"),
             &None,
+            base_url,
         );
-        let sc2 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "title2", &None, "[[Context/title4]][[title1]]"),
+        let sc2 = ScrapDetail::new(
+            &Scrap::new("title2", &None, "[[Context/title4]][[title1]]"),
             &Some(3),
+            base_url,
         );
-        let sc3 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "title3", &None, "[[Context/title4]]"),
+        let sc3 = ScrapDetail::new(
+            &Scrap::new("title3", &None, "[[Context/title4]]"),
             &Some(2),
+            base_url,
         );
-        let sc4 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "title4", &Some("Context"), "[[title1]]"),
+        let sc4 = ScrapDetail::new(
+            &Scrap::new("title4", &Some("Context"), "[[title1]]"),
             &Some(1),
+            base_url,
         );
         let backlinks_map =
             BacklinksMap::new(&vec![sc1.scrap(), sc2.scrap(), sc3.scrap(), sc4.scrap()]);
@@ -109,7 +109,7 @@ mod tests {
 
         // Sort by commited date
         let result1 = IndexScrapsTera::new_with_sort(
-            &ScrapsWithCommitedTs::new(&vec![sc1.clone(), sc2.clone(), sc3.clone(), sc4.clone()]),
+            &ScrapDetails::new(&vec![sc1.clone(), sc2.clone(), sc3.clone(), sc4.clone()]),
             &backlinks_map,
             &SortKey::CommittedDate,
         );
@@ -126,7 +126,7 @@ mod tests {
 
         // Sort by linked count
         let result2 = IndexScrapsTera::new_with_sort(
-            &ScrapsWithCommitedTs::new(&vec![sc1.clone(), sc2.clone(), sc3.clone(), sc4.clone()]),
+            &ScrapDetails::new(&vec![sc1.clone(), sc2.clone(), sc3.clone(), sc4.clone()]),
             &backlinks_map,
             &SortKey::LinkedCount,
         );

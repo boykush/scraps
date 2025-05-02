@@ -42,8 +42,8 @@ mod tests {
     #[test]
     fn it_get() {
         let base_url = Url::parse("http://localhost:1112/").unwrap();
-        let scrap1 = Scrap::new(&base_url, "scrap1", &None, "[[tag1]]");
-        let scrap2 = Scrap::new(&base_url, "scrap2", &None, "[[scrap1]][[tag1]]");
+        let scrap1 = Scrap::new("scrap1", &None, "[[tag1]]");
+        let scrap2 = Scrap::new("scrap2", &None, "[[scrap1]][[tag1]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
         let backlinks_map = BacklinksMap::new(&scraps);
@@ -62,14 +62,9 @@ mod tests {
     #[test]
     fn it_get_with_context() {
         let base_url = Url::parse("http://localhost:1112/").unwrap();
-        let scrap1 = Scrap::new(&base_url, "scrap1", &Some("Context"), "");
-        let scrap2 = Scrap::new(&base_url, "scrap2", &Some("Context"), "[[Context/scrap1]]");
-        let scrap3 = Scrap::new(
-            &base_url,
-            "scrap3",
-            &None,
-            "[[Context/scrap1]][[Context/scrap2]]",
-        );
+        let scrap1 = Scrap::new("scrap1", &Some("Context"), "");
+        let scrap2 = Scrap::new("scrap2", &Some("Context"), "[[Context/scrap1]]");
+        let scrap3 = Scrap::new("scrap3", &None, "[[Context/scrap1]][[Context/scrap2]]");
         let scraps = vec![scrap1.clone(), scrap2.clone(), scrap3.clone()];
 
         let backlinks_map = BacklinksMap::new(&scraps);

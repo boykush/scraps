@@ -7,7 +7,7 @@ use crate::error::{anyhow::Context, ScrapsResult};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::list_view_configs::ListViewConfigs;
-use crate::usecase::build::model::scrap_with_commited_ts::ScrapsWithCommitedTs;
+use crate::usecase::build::model::scrap_detail::ScrapDetails;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use scraps_libs::model::tags::Tags;
@@ -41,12 +41,12 @@ impl IndexRender {
         base_url: &Url,
         metadata: &HtmlMetadata,
         list_view_configs: &ListViewConfigs,
-        scraps_with_commited_ts: &ScrapsWithCommitedTs,
+        scrap_details: &ScrapDetails,
     ) -> ScrapsResult<()> {
-        let scraps = &scraps_with_commited_ts.to_scraps();
+        let scraps = &scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(scraps);
         let sorted_scraps = IndexScrapsTera::new_with_sort(
-            scraps_with_commited_ts,
+            scrap_details,
             &backlinks_map,
             &list_view_configs.sort_key,
         );
@@ -110,7 +110,7 @@ mod tests {
 
     use super::*;
     use crate::usecase::build::model::paging::Paging;
-    use crate::usecase::build::model::scrap_with_commited_ts::ScrapWithCommitedTs;
+    use crate::usecase::build::model::scrap_detail::ScrapDetail;
     use crate::usecase::build::model::sort::SortKey;
     use scraps_libs::lang::LangCode;
     use scraps_libs::model::scrap::Scrap;
@@ -119,7 +119,7 @@ mod tests {
     #[test]
     fn it_run() {
         // args
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let base_url = &Url::parse("http://localhost:1112/").unwrap();
         let metadata = HtmlMetadata::new(
             &LangCode::default(),
             "Scrap",
@@ -142,28 +142,18 @@ mod tests {
         .as_bytes();
 
         // scraps
-        let sc1 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "scrap1", &None, "# header1"),
-            &Some(1),
-        );
-        let sc2 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "scrap2", &None, "## header2"),
-            &Some(0),
-        );
-        let scraps_with_commited_ts =
-            ScrapsWithCommitedTs::new(&vec![sc1.to_owned(), sc2.to_owned()]);
+        let scrap1 = Scrap::new("scrap1", &None, "# header1");
+        let sc1 = ScrapDetail::new(&scrap1, &Some(1), base_url);
+        let scrap2 = Scrap::new("scrap2", &None, "## header2");
+        let sc2 = ScrapDetail::new(&scrap2, &Some(0), base_url);
+        let scrap_details = ScrapDetails::new(&vec![sc1.to_owned(), sc2.to_owned()]);
 
         let index_html_path = public_dir_path.join("index.html");
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
             render
-                .run(
-                    &base_url,
-                    &metadata,
-                    &list_view_configs,
-                    &scraps_with_commited_ts,
-                )
+                .run(base_url, &metadata, &list_view_configs, &scrap_details)
                 .unwrap();
 
             let result1 = fs::read_to_string(index_html_path).unwrap();
@@ -177,7 +167,7 @@ mod tests {
     #[test]
     fn it_run_paging() {
         // args
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let base_url = &Url::parse("http://localhost:1112/").unwrap();
         let metadata = HtmlMetadata::new(
             &LangCode::default(),
             "Scrap",
@@ -200,23 +190,15 @@ mod tests {
         .as_bytes();
 
         // scraps
-        let sc1 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "scrap1", &None, "# header1"),
-            &Some(3),
-        );
-        let sc2 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "scrap2", &None, "## header2"),
-            &Some(2),
-        );
-        let sc3 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "scrap3", &None, "### header3"),
-            &Some(1),
-        );
-        let sc4 = ScrapWithCommitedTs::new(
-            &Scrap::new(&base_url, "scrap4", &None, "#### header4"),
-            &Some(0),
-        );
-        let scraps_with_commited_ts = ScrapsWithCommitedTs::new(&vec![
+        let scrap1 = Scrap::new("scrap1", &None, "# header1");
+        let sc1 = ScrapDetail::new(&scrap1, &Some(3), base_url);
+        let scrap2 = Scrap::new("scrap2", &None, "## header2");
+        let sc2 = ScrapDetail::new(&scrap2, &Some(2), base_url);
+        let scrap3 = Scrap::new("scrap3", &None, "### header3");
+        let sc3 = ScrapDetail::new(&scrap3, &Some(1), base_url);
+        let scrap4 = Scrap::new("scrap4", &None, "#### header4");
+        let sc4 = ScrapDetail::new(&scrap4, &Some(0), base_url);
+        let scrap_details = ScrapDetails::new(&vec![
             sc1.to_owned(),
             sc2.to_owned(),
             sc3.to_owned(),
@@ -229,12 +211,7 @@ mod tests {
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
             render
-                .run(
-                    &base_url,
-                    &metadata,
-                    &list_view_configs,
-                    &scraps_with_commited_ts,
-                )
+                .run(base_url, &metadata, &list_view_configs, &scrap_details)
                 .unwrap();
 
             let result1 = fs::read_to_string(index_html_path).unwrap();

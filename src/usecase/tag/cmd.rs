@@ -3,7 +3,6 @@ use scraps_libs::model::{scrap::Scrap, tags::Tags};
 use std::path::PathBuf;
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
-use url::Url;
 
 pub struct TagCommand {
     scraps_dir_path: PathBuf,
@@ -15,12 +14,12 @@ impl TagCommand {
             scraps_dir_path: scraps_dir_path.to_owned(),
         }
     }
-    pub fn run(&self, base_url: &Url) -> ScrapsResult<(Tags, BacklinksMap)> {
+    pub fn run(&self) -> ScrapsResult<(Tags, BacklinksMap)> {
         let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
 
         let scraps = paths
             .iter()
-            .map(|path| read_scraps::to_scrap_by_path(base_url, &self.scraps_dir_path, path))
+            .map(|path| read_scraps::to_scrap_by_path(&self.scraps_dir_path, path))
             .collect::<ScrapsResult<Vec<Scrap>>>()?;
 
         let tags = Tags::new(&scraps);
@@ -34,6 +33,7 @@ impl TagCommand {
 mod tests {
 
     use itertools::Itertools;
+    use url::Url;
 
     use super::*;
     use scraps_libs::model::tag::Tag;
@@ -62,7 +62,7 @@ mod tests {
             resource_2.run(resource_bytes_2, || {
                 let command = TagCommand::new(&scraps_dir_path);
 
-                let result = command.run(&base_url).unwrap();
+                let result = command.run().unwrap();
 
                 let (tags, backlinks_map) = result;
 
@@ -80,8 +80,8 @@ mod tests {
                 );
 
                 // test backlinks map
-                let scrap1 = Scrap::new(&base_url, "test1", &None, "#[[Tag1]] #[[Tag2]]");
-                let scrap2 = Scrap::new(&base_url, "test2", &None, "#[[Tag1]] #[[Tag3]]");
+                let scrap1 = Scrap::new("test1", &None, "#[[Tag1]] #[[Tag2]]");
+                let scrap2 = Scrap::new("test2", &None, "#[[Tag1]] #[[Tag3]]");
                 assert_eq!(
                     backlinks_map
                         .get(&tag1.title.clone().into())
