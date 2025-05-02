@@ -41,9 +41,10 @@
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
 
+        const notFoundImage = 'https://placehold.co/240x120?text=Not+found&font=noto-sans';
         const title = doc.querySelector('meta[property="og:title"]')?.content || 'No title';
         const description = doc.querySelector('meta[property="og:description"]')?.content || 'No description';
-        const image = doc.querySelector('meta[property="og:image"]')?.content || '';
+        const image = doc.querySelector('meta[property="og:image"]')?.content || notFoundImage;
 
         card.querySelector('.ogp-title').textContent = title;
         card.querySelector('.ogp-description').textContent = description;
