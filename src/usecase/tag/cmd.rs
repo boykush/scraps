@@ -33,7 +33,6 @@ impl TagCommand {
 mod tests {
 
     use itertools::Itertools;
-    use url::Url;
 
     use super::*;
     use scraps_libs::model::tag::Tag;
@@ -44,9 +43,6 @@ mod tests {
         // fields
         let test_resource_path = PathBuf::from("tests/resource/tag/cmd/it_run");
         let scraps_dir_path = test_resource_path.join("scraps");
-
-        // run args
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
 
         // scrap1
         let md_path_1 = scraps_dir_path.join("test1.md");

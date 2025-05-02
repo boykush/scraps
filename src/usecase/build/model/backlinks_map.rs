@@ -35,13 +35,11 @@ impl BacklinksMap {
 #[cfg(test)]
 mod tests {
     use scraps_libs::model::title::Title;
-    use url::Url;
 
     use super::*;
 
     #[test]
     fn it_get() {
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
         let scrap1 = Scrap::new("scrap1", &None, "[[tag1]]");
         let scrap2 = Scrap::new("scrap2", &None, "[[scrap1]][[tag1]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
@@ -61,7 +59,6 @@ mod tests {
 
     #[test]
     fn it_get_with_context() {
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
         let scrap1 = Scrap::new("scrap1", &Some("Context"), "");
         let scrap2 = Scrap::new("scrap2", &Some("Context"), "[[Context/scrap1]]");
         let scrap3 = Scrap::new("scrap3", &None, "[[Context/scrap1]][[Context/scrap2]]");
