@@ -2,17 +2,34 @@ use scraps_libs::model::content::{Content, ContentElement};
 use serde::Serialize;
 use url::Url;
 
-#[derive(Serialize)]
-#[serde(remote = "ContentElement")]
-enum SerializeContentElement {
-    #[serde(rename = "raw")]
-    Raw(String),
-    #[serde(rename = "ogp_card")]
-    Autolink(Url),
+fn serialize_content_element<S>(element: &ContentElement, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    match element {
+        ContentElement::Raw(text) => {
+            serializer.serialize_newtype_variant("ContentElement", 0, "raw", text)
+        }
+        ContentElement::Autolink(url) => serializer.serialize_newtype_variant(
+            "ContentElement",
+            1,
+            "autolink",
+            &ContentElementAutolink {
+                url: url.clone(),
+                host: url.host_str().map(|s| s.to_string()),
+            },
+        ),
+    }
 }
 
 #[derive(Serialize)]
-struct ContentElementTera(#[serde(with = "SerializeContentElement")] ContentElement);
+struct ContentElementAutolink {
+    url: Url,
+    host: Option<String>,
+}
+
+#[derive(Serialize)]
+struct ContentElementTera(#[serde(serialize_with = "serialize_content_element")] ContentElement);
 
 #[derive(Serialize)]
 #[serde(remote = "Content")]

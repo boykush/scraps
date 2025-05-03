@@ -45,9 +45,9 @@
     </ul>
 {% endmacro tag_links %}
 
-{% macro ogp_card(url) %}
-<div class="ogp-card" data-url="{{ url }}">
-    <a class="ogp-card-link" href="{{ url }}" target="_blank" rel="noopener noreferrer">
+{% macro ogp_card(autolink) %}
+<div class="ogp-card" data-url="{{ autolink.url }}" data-host="{{ autolink.host }}">
+    <a class="ogp-card-link" href="{{ autolink.url }}" target="_blank" rel="noopener noreferrer">
         <img class="ogp-image" src="" alt="OGP Image" />
         <div class="ogp-content">
             <div class="ogp-title">Loading...</div>
