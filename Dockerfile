@@ -1,4 +1,4 @@
-FROM rust:1.84
+FROM rust:1.86
 
 ARG INSTALL_VERSION
 
