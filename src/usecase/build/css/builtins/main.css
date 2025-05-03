@@ -131,7 +131,7 @@ div.scrap .content .ogp-card .ogp-image {
     height: 100%;
     object-fit: contain;
     flex-grow: 1;
-    margin: auto;
+    margin: auto 0;
 }
 
 div.scrap .content .ogp-card .ogp-content {
