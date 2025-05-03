@@ -21,7 +21,7 @@
             </p>
         {% endif %}
         <div class="content">
-            {% for element in scrap.content.elements %}{% if element.raw %}{{ element.raw | safe }}{% elif element.ogp_card %}{{ macros::ogp_card(url=element.ogp_card) }}{% endif %}{% endfor %}
+            {% for element in scrap.content.elements %}{% if element.raw %}{{ element.raw | safe }}{% elif element.autolink %}{{ macros::ogp_card(autolink=element.autolink) }}{% endif %}{% endfor %}
         </div>
     </div>
     {{ macros::scrap_links(scraps = linked_scraps) }}
@@ -44,7 +44,13 @@
         const notFoundImage = 'https://placehold.co/240x120?text=Not+found&font=noto-sans';
         const title = doc.querySelector('meta[property="og:title"]')?.content || 'No title';
         const description = doc.querySelector('meta[property="og:description"]')?.content || 'No description';
-        const image = doc.querySelector('meta[property="og:image"]')?.content || notFoundImage;
+        let image = doc.querySelector('meta[property="og:image"]')?.content || notFoundImage;
+
+        // Check if the image URL is an absolute path
+        if (image.startsWith('/')) {
+          const host = card.dataset.host;
+          image = `https://${host}/${image}`;
+        }
 
         card.querySelector('.ogp-title').textContent = title;
         card.querySelector('.ogp-description').textContent = description;
