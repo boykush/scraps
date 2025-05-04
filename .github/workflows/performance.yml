@@ -1,0 +1,76 @@
+name: Performance Test
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  performance:
+    name: Build Performance Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+      
+      - name: Clone boykush/wiki
+        run: |
+          git clone https://github.com/boykush/wiki.git
+      
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      
+      - name: Cargo build
+        run: |
+          cargo build --release
+      
+      - name: Run scraps build with timing
+        id: build
+        working-directory: ./wiki
+        run: |
+          START_TIME=$(date +%s%N)
+          ../target/release/scraps build -v
+          END_TIME=$(date +%s%N)
+          DURATION=$(( ($END_TIME - $START_TIME) / 1000000000 ))
+          MILLISECONDS=$(( ($END_TIME - $START_TIME) / 1000000 % 1000 ))
+          echo "duration=$DURATION.$MILLISECONDS" >> $GITHUB_OUTPUT
+          if (( $DURATION >= 5 )); then
+            echo "status=fail" >> $GITHUB_OUTPUT
+          else
+            echo "status=pass" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Comment PR
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const duration = parseFloat('${{ steps.build.outputs.duration }}');
+            const status = '${{ steps.build.outputs.status }}';
+            const emoji = status === 'pass' ? '✅' : '❌';
+            
+            const comment = `## Performance Test Results 🚀
+            
+            Build Time: ${duration} seconds
+            Status: ${emoji} ${status.toUpperCase()}
+            
+            Executed with: cargo run build -v
+            Repository: boykush/wiki
+            Runner: Ubuntu latest`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+      
+      - name: Check Duration
+        if: steps.build.outputs.status == 'fail'
+        run: exit 1
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
