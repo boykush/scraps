@@ -41,20 +41,25 @@
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
 
-        const notFoundImage = 'https://placehold.co/240x120?text=Not+found&font=noto-sans';
-        const title = doc.querySelector('meta[property="og:title"]')?.content || 'No title';
-        const description = doc.querySelector('meta[property="og:description"]')?.content || 'No description';
-        let image = doc.querySelector('meta[property="og:image"]')?.content || notFoundImage;
-
-        // Check if the image URL is an absolute path
-        if (image.startsWith('/')) {
-          const host = card.dataset.host;
-          image = `https://${host}/${image}`;
-        }
-
+        const title = doc.querySelector('meta[property="og:title"]')?.content ||
+          doc.querySelector('title')?.textContent ||
+          'No title';
         card.querySelector('.ogp-title').textContent = title;
+
+        const description = doc.querySelector('meta[property="og:description"]')?.content ||
+          doc.querySelector('meta[name="description"]')?.content ||
+          'No description';
         card.querySelector('.ogp-description').textContent = description;
-        card.querySelector('.ogp-image').src = image;
+
+        const image = doc.querySelector('meta[property="og:image"]')?.content;
+        if (image) {
+          const imageUrl = image.startsWith('/')
+            ? `https://${card.dataset.host}/${image}`
+            : image;
+          card.querySelector('.ogp-image').src = imageUrl;
+        } else {
+          card.querySelector('.ogp-image').remove();
+        }
       } catch (error) {
         console.error('Failed to fetch OGP data:', error);
       }
