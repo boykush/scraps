@@ -6,7 +6,7 @@ on:
 
 jobs:
   performance:
-    name: Build Performance Test
+    name: Scraps Build Performance Test
     runs-on: ubuntu-latest
     
     steps:
@@ -56,7 +56,7 @@ jobs:
             Build Time: ${duration} seconds
             Status: ${emoji} ${status.toUpperCase()}
             
-            Executed with: cargo run build -v
+            Executed with: scraps build -v
             Repository: boykush/wiki
             Runner: Ubuntu latest`;
             
