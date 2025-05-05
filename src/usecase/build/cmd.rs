@@ -131,12 +131,14 @@ impl BuildCommand {
         span_generate_css.exit();
         progress.complete_stage(&Stage::GenerateCss, &1);
 
-        // render search index json when build_search_index is true
+        // generate search index json when build_search_index is true
         if list_view_configs.build_search_index {
-            let _span_render_search_index = span!(Level::INFO, "render_search_index").entered();
+            progress.start_stage(&Stage::GenerateJson);
+            let _span_generate_json_search_index = span!(Level::INFO, "generate_json_search_index").entered();
             let search_index_render =
                 SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path);
             search_index_render.run(base_url, &scraps)?;
+            progress.complete_stage(&Stage::GenerateJson, &1);
         }
 
         Ok(scraps.len())

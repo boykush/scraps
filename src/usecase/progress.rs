@@ -3,6 +3,7 @@ pub enum Stage {
     ReadScraps,
     GenerateHtml,
     GenerateCss,
+    GenerateJson,
 }
 
 pub trait Progress {

@@ -28,6 +28,9 @@ impl Progress for ProgressImpl {
             Stage::GenerateCss => {
                 println!("→ Generating CSS files");
             }
+            Stage::GenerateJson => {
+                println!("→ Generating JSON files");
+            }
         }
     }
 
@@ -41,6 +44,9 @@ impl Progress for ProgressImpl {
             }
             Stage::GenerateCss => {
                 println!("✔️ Generated {} CSS files", count)
+            }
+            Stage::GenerateJson => {
+                println!("✔️ Generated {} JSON files", count)
             }
         }
     }
