@@ -54,4 +54,8 @@ impl ScrapDetails {
             .map(|sc| sc.scrap())
             .collect_vec()
     }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
 }

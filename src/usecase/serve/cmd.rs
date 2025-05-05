@@ -24,7 +24,7 @@ impl ServeCommand {
     #[tokio::main]
     pub async fn run(&self, addr: &SocketAddr) -> ScrapsResult<()> {
         let listener = TcpListener::bind(&addr).await?;
-        println!("\nListening on http://{addr}\n");
+        println!("\n🚀 Listening on http://{addr}\n");
 
         loop {
             let (stream, _) = listener.accept().await?;

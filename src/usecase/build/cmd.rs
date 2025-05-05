@@ -3,7 +3,13 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::{error::BuildError, usecase::build::css::render::CSSRender};
+use crate::{
+    error::BuildError,
+    usecase::{
+        build::css::render::CSSRender,
+        progress::{Progress, Stage},
+    },
+};
 use crate::{
     error::{anyhow::Context, ScrapsResult},
     usecase::read_scraps,
@@ -48,17 +54,18 @@ impl BuildCommand {
             public_dir_path: public_dir_path.to_path_buf(),
         }
     }
-    pub fn run<GC: GitCommand + Send + Sync + Copy>(
+    pub fn run<GC: GitCommand + Send + Sync + Copy, PG: Progress>(
         &self,
         git_command: GC,
+        progress: &PG,
         base_url: &Url,
         timezone: Tz,
         html_metadata: &HtmlMetadata,
         css_metadata: &CssMetadata,
         list_view_configs: &ListViewConfigs,
     ) -> ScrapsResult<usize> {
-        let span_read_scraps = span!(Level::INFO, "load_scraps").entered();
-
+        progress.start_stage(&Stage::ReadScraps);
+        let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
         let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
         let scrap_details = paths
             .into_par_iter()
@@ -67,54 +74,72 @@ impl BuildCommand {
             .map(|s| ScrapDetails::new(&s))?;
         let scraps = scrap_details.to_scraps();
         span_read_scraps.exit();
+        progress.complete_stage(&Stage::ReadScraps, &scrap_details.len());
 
-        // render index
-        let span_render_indexes = span!(Level::INFO, "render_indexes").entered();
+        // generate html
+        progress.start_stage(&Stage::GenerateHtml);
+
+        // generate html index
+        let span_generate_html_indexes = span!(Level::INFO, "generate_html_indexes").entered();
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
-        index_render.run(base_url, html_metadata, list_view_configs, &scrap_details)?;
-        span_render_indexes.exit();
+        let index_page_count =
+            index_render.run(base_url, html_metadata, list_view_configs, &scrap_details)?;
+        span_generate_html_indexes.exit();
 
-        // render scraps
-        let span_render_scraps = span!(Level::INFO, "render_scraps").entered();
+        // generate html scraps
+        let span_generate_html_scraps = span!(Level::INFO, "generate_html_scraps").entered();
         scrap_details
             .to_vec()
             .into_par_iter()
             .try_for_each(|scrap_detail| {
-                let _span_render_scrap = span!(Level::INFO, "render_scrap").entered();
+                let _span_generate_html_scrap = span!(Level::INFO, "generate_html_scrap").entered();
                 let scrap_render =
                     ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
                 scrap_render.run(base_url, timezone, html_metadata, &scrap_detail)
             })?;
-        span_render_scraps.exit();
+        span_generate_html_scraps.exit();
 
-        // render tags index
-        let span_render_tags_index = span!(Level::INFO, "render_tags_index").entered();
+        // generate html tags index
+        let span_generate_html_tags_index =
+            span!(Level::INFO, "generate_html_tags_index").entered();
         let tags_index_render = TagsIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         tags_index_render.run(base_url, html_metadata, &scraps)?;
-        span_render_tags_index.exit();
+        span_generate_html_tags_index.exit();
 
-        // render tag
-        let span_render_tags = span!(Level::INFO, "render_tags").entered();
+        // generate html tags
+        let span_generate_html_tags = span!(Level::INFO, "generate_html_tags").entered();
         let tags = Tags::new(&scraps);
-        tags.into_iter().par_bridge().try_for_each(|tag| {
-            let _span_render_tag = span!(Level::INFO, "render_tag").entered();
+        tags.clone().into_iter().par_bridge().try_for_each(|tag| {
+            let _span_render_tag = span!(Level::INFO, "generate_html_tag").entered();
             let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
             tag_render.run(base_url, html_metadata, &tag)
         })?;
-        span_render_tags.exit();
+        span_generate_html_tags.exit();
 
-        // render css
-        let span_render_css = span!(Level::INFO, "render_css").entered();
+        progress.complete_stage(&Stage::GenerateHtml, &{
+            index_page_count +
+                scrap_details.len() +
+                1 + // tags index
+                tags.len()
+        });
+
+        // generate css
+        progress.start_stage(&Stage::GenerateCss);
+        let span_generate_css = span!(Level::INFO, "generate_css").entered();
         let css_render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
         css_render.render_main(css_metadata)?;
-        span_render_css.exit();
+        span_generate_css.exit();
+        progress.complete_stage(&Stage::GenerateCss, &1);
 
-        // render search index json when build_search_index is true
+        // generate search index json when build_search_index is true
         if list_view_configs.build_search_index {
-            let _span_render_search_index = span!(Level::INFO, "render_search_index").entered();
+            progress.start_stage(&Stage::GenerateJson);
+            let _span_generate_json_search_index =
+                span!(Level::INFO, "generate_json_search_index").entered();
             let search_index_render =
                 SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path);
             search_index_render.run(base_url, &scraps)?;
+            progress.complete_stage(&Stage::GenerateJson, &1);
         }
 
         Ok(scraps.len())
@@ -143,6 +168,7 @@ mod tests {
     use std::path::Path;
 
     use crate::usecase::build::model::{color_scheme::ColorScheme, paging::Paging, sort::SortKey};
+    use crate::usecase::progress::tests::ProgressTest;
 
     use super::*;
     use scraps_libs::{
@@ -166,6 +192,7 @@ mod tests {
 
         // run args
         let git_command = GitCommandTest::new();
+        let progress = ProgressTest::new();
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
         let html_metadata = &HtmlMetadata::new(
@@ -210,6 +237,7 @@ mod tests {
                         let result1 = command
                             .run(
                                 git_command,
+                                &progress,
                                 &base_url,
                                 timezone,
                                 html_metadata,
@@ -251,6 +279,7 @@ mod tests {
 
         // run args
         let git_command = GitCommandTest::new();
+        let progress = ProgressTest::new();
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
         let html_metadata = &HtmlMetadata::new(
@@ -284,6 +313,7 @@ mod tests {
                     let result1 = command
                         .run(
                             git_command,
+                            &progress,
                             &base_url,
                             timezone,
                             html_metadata,
