@@ -2,11 +2,12 @@
 pub enum Stage {
     ReadScraps,
     GenerateHtml,
+    GenerateCss,
 }
 
 pub trait Progress {
     fn start_stage(&self, stage: &Stage);
-    fn complete_stage(&self, stage: &Stage, count: &Option<usize>);
+    fn complete_stage(&self, stage: &Stage, count: &usize);
     fn end(&self);
 }
 
@@ -25,7 +26,7 @@ pub mod tests {
             println!("Start");
         }
 
-        fn complete_stage(&self, _stage: &Stage, _count: &Option<usize>) {
+        fn complete_stage(&self, _stage: &Stage, _count: &usize) {
             println!("Complete");
         }
 

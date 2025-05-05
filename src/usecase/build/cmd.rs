@@ -74,7 +74,7 @@ impl BuildCommand {
             .map(|s| ScrapDetails::new(&s))?;
         let scraps = scrap_details.to_scraps();
         span_read_scraps.exit();
-        progress.complete_stage(&Stage::ReadScraps, &Some(scrap_details.len()));
+        progress.complete_stage(&Stage::ReadScraps, &scrap_details.len());
 
         // generate html
         progress.start_stage(&Stage::GenerateHtml);
@@ -82,7 +82,8 @@ impl BuildCommand {
         // generate html index
         let span_generate_html_indexes = span!(Level::INFO, "generate_html_indexes").entered();
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
-        let index_page_count = index_render.run(base_url, html_metadata, list_view_configs, &scrap_details)?;
+        let index_page_count =
+            index_render.run(base_url, html_metadata, list_view_configs, &scrap_details)?;
         span_generate_html_indexes.exit();
 
         // generate html scraps
@@ -99,7 +100,8 @@ impl BuildCommand {
         span_generate_html_scraps.exit();
 
         // generate html tags index
-        let span_generate_html_tags_index = span!(Level::INFO, "generate_html_tags_index").entered();
+        let span_generate_html_tags_index =
+            span!(Level::INFO, "generate_html_tags_index").entered();
         let tags_index_render = TagsIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         tags_index_render.run(base_url, html_metadata, &scraps)?;
         span_generate_html_tags_index.exit();
@@ -114,21 +116,20 @@ impl BuildCommand {
         })?;
         span_generate_html_tags.exit();
 
-        progress.complete_stage(
-            &Stage::GenerateHtml,
-            &Some(
-                index_page_count +
+        progress.complete_stage(&Stage::GenerateHtml, &{
+            index_page_count +
                 scrap_details.len() +
                 1 + // tags index
                 tags.len()
-            ),
-        );
+        });
 
-        // generate css 
-        let span_render_css = span!(Level::INFO, "generate_css").entered();
+        // generate css
+        progress.start_stage(&Stage::GenerateCss);
+        let span_generate_css = span!(Level::INFO, "generate_css").entered();
         let css_render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
         css_render.render_main(css_metadata)?;
-        span_render_css.exit();
+        span_generate_css.exit();
+        progress.complete_stage(&Stage::GenerateCss, &1);
 
         // render search index json when build_search_index is true
         if list_view_configs.build_search_index {

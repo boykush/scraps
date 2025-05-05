@@ -20,26 +20,28 @@ impl Progress for ProgressImpl {
     fn start_stage(&self, stage: &Stage) {
         match stage {
             Stage::ReadScraps => {
-                println!("{}", "→ Reading Markdown files");
-            },
+                println!("→ Reading Markdown files");
+            }
             Stage::GenerateHtml => {
                 println!("→ Generating HTML files");
-            },
+            }
+            Stage::GenerateCss => {
+                println!("→ Generating CSS files");
+            }
         }
     }
 
-    fn complete_stage(&self, stage: &Stage, count: &Option<usize>) {
+    fn complete_stage(&self, stage: &Stage, count: &usize) {
         match stage {
             Stage::ReadScraps => {
-                if let Some(count) = count {
-                    println!("✔️ Find {} Scraps", count);
-                }
-            },
+                println!("✔️ Find {} Scraps", count)
+            }
             Stage::GenerateHtml => {
-                if let Some(count) = count {
-                    println!("✔️ Generated {} HTML files", count);
-                }
-            },
+                println!("✔️ Generated {} HTML files", count)
+            }
+            Stage::GenerateCss => {
+                println!("✔️ Generated {} CSS files", count)
+            }
         }
     }
 
