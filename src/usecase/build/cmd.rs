@@ -3,7 +3,13 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::{error::BuildError, usecase::build::css::render::CSSRender};
+use crate::{
+    error::BuildError,
+    usecase::{
+        build::css::render::CSSRender,
+        progress::{Progress, Stage},
+    },
+};
 use crate::{
     error::{anyhow::Context, ScrapsResult},
     usecase::read_scraps,
@@ -48,17 +54,18 @@ impl BuildCommand {
             public_dir_path: public_dir_path.to_path_buf(),
         }
     }
-    pub fn run<GC: GitCommand + Send + Sync + Copy>(
+    pub fn run<GC: GitCommand + Send + Sync + Copy, PG: Progress>(
         &self,
         git_command: GC,
+        progress: &PG,
         base_url: &Url,
         timezone: Tz,
         html_metadata: &HtmlMetadata,
         css_metadata: &CssMetadata,
         list_view_configs: &ListViewConfigs,
     ) -> ScrapsResult<usize> {
+        progress.start_stage(&Stage::ReadScraps);
         let span_read_scraps = span!(Level::INFO, "load_scraps").entered();
-
         let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
         let scrap_details = paths
             .into_par_iter()
@@ -67,6 +74,7 @@ impl BuildCommand {
             .map(|s| ScrapDetails::new(&s))?;
         let scraps = scrap_details.to_scraps();
         span_read_scraps.exit();
+        progress.complete_stage(&Stage::ReadScraps, &Some(scrap_details.len()));
 
         // render index
         let span_render_indexes = span!(Level::INFO, "render_indexes").entered();
@@ -143,6 +151,7 @@ mod tests {
     use std::path::Path;
 
     use crate::usecase::build::model::{color_scheme::ColorScheme, paging::Paging, sort::SortKey};
+    use crate::usecase::progress::tests::ProgressTest;
 
     use super::*;
     use scraps_libs::{
@@ -166,6 +175,7 @@ mod tests {
 
         // run args
         let git_command = GitCommandTest::new();
+        let progress = ProgressTest::new();
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
         let html_metadata = &HtmlMetadata::new(
@@ -210,6 +220,7 @@ mod tests {
                         let result1 = command
                             .run(
                                 git_command,
+                                &progress,
                                 &base_url,
                                 timezone,
                                 html_metadata,
@@ -251,6 +262,7 @@ mod tests {
 
         // run args
         let git_command = GitCommandTest::new();
+        let progress = ProgressTest::new();
         let base_url = Url::parse("http://localhost:1112/").unwrap();
         let timezone = chrono_tz::UTC;
         let html_metadata = &HtmlMetadata::new(
@@ -284,6 +296,7 @@ mod tests {
                     let result1 = command
                         .run(
                             git_command,
+                            &progress,
                             &base_url,
                             timezone,
                             html_metadata,

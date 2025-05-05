@@ -1,8 +1,11 @@
+use std::time::Instant;
 use std::{net::SocketAddr, path::Path};
 
 use url::Url;
 
+use crate::cli::progress::ProgressImpl;
 use crate::error::ScrapsResult;
+use crate::usecase::progress::Progress;
 use crate::{
     cli::config::{
         color_scheme::ColorSchemeConfig, scrap_config::ScrapConfig, sort_key::SortKeyConfig,
@@ -24,11 +27,13 @@ pub fn run() -> ScrapsResult<()> {
     let base_url = Url::parse(&format!("http://{}", addr))?.join("").unwrap();
 
     // build command
-    let git_command = GitCommandImpl::new();
     let scraps_dir_path = Path::new("scraps");
     let static_dir_path = Path::new("static");
     let public_dir_path = Path::new("public");
     let build_command = BuildCommand::new(scraps_dir_path, static_dir_path, public_dir_path);
+
+    let git_command = GitCommandImpl::new();
+    let progress = ProgressImpl::init(Instant::now());
 
     let config = ScrapConfig::new()?;
     let lang_code = config
@@ -59,12 +64,14 @@ pub fn run() -> ScrapsResult<()> {
 
     let build_result = build_command.run(
         git_command,
+        &progress,
         &base_url,
         timezone,
         &html_metadata,
         &css_metadata,
         &list_view_configs,
     );
+    progress.end();
 
     // serve command
     let serve_command = ServeCommand::new(public_dir_path);

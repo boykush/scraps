@@ -1,5 +1,4 @@
 use clap_verbosity_flag::{log, Verbosity, WarnLevel};
-use colored::Colorize;
 use std::path::Path;
 use std::time::Instant;
 use tracing::{span, Level};
@@ -8,6 +7,7 @@ use url::Url;
 
 use crate::cli::config::color_scheme::ColorSchemeConfig;
 use crate::cli::config::sort_key::SortKeyConfig;
+use crate::cli::progress::ProgressImpl;
 use crate::error::ScrapsResult;
 use crate::usecase::build::cmd::BuildCommand;
 use crate::usecase::build::model::color_scheme::ColorScheme;
@@ -18,6 +18,7 @@ use crate::usecase::build::model::paging::Paging;
 use crate::usecase::build::model::sort::SortKey;
 
 use crate::cli::config::scrap_config::ScrapConfig;
+use crate::usecase::progress::Progress;
 use scraps_libs::git::GitCommandImpl;
 
 pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapsResult<()> {
@@ -35,11 +36,13 @@ pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapsResult<()> {
         .init();
     let span_run = span!(Level::INFO, "run").entered();
 
-    let git_command = GitCommandImpl::new();
     let scraps_dir_path = Path::new("scraps");
     let static_dir_path = Path::new("static");
     let public_dir_path = Path::new("public");
     let command = BuildCommand::new(scraps_dir_path, static_dir_path, public_dir_path);
+
+    let git_command = GitCommandImpl::new();
+    let progress = ProgressImpl::init(Instant::now());
 
     let config = ScrapConfig::new()?;
     // Automatically append a trailing slash to URLs
@@ -73,25 +76,17 @@ pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapsResult<()> {
     };
     let list_view_configs = ListViewConfigs::new(&build_search_index, &sort_key, &paging);
 
-    let start = Instant::now();
-    let result = command.run(
+    command.run(
         git_command,
+        &progress,
         &base_url,
         timezone,
         &html_metadata,
         &css_metadata,
         &list_view_configs,
     )?;
-    let end = start.elapsed();
-
     span_run.exit();
-    println!("-> Created {result} scraps");
-    println!(
-        "{} {}.{} {}",
-        "Done in".green(),
-        end.as_secs().to_string().green(),
-        end.subsec_millis().to_string().green(),
-        "secs".green()
-    );
+    progress.end();
+
     Ok(())
 }
