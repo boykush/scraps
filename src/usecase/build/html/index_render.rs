@@ -65,7 +65,7 @@ impl IndexRender {
         paginated_with_pointer
             .clone()
             .try_for_each(|(pointer, paginated_scraps)| {
-                let span_generate_index = span!(Level::INFO, "generate_index").entered();
+                let _span_generate_index = span!(Level::INFO, "generate_index").entered();
                 let (tera, mut context) = index_tera::base(
                     base_url,
                     metadata,
@@ -81,7 +81,6 @@ impl IndexRender {
                 context.insert("prev", &pointer.prev);
                 context.insert("next", &pointer.next);
                 Self::render_paginated_html(self, &tera, &context, &pointer)?;
-                span_generate_index.exit();
                 ScrapsResult::Ok(())
             })?;
 
