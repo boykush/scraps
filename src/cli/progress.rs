@@ -4,7 +4,6 @@ use colored::Colorize;
 
 use crate::usecase::progress::{Progress, Stage};
 
-/// 絵文字を使用した進捗表示の実装
 #[derive(Debug)]
 pub struct ProgressImpl {
     start: Instant,
@@ -22,7 +21,10 @@ impl Progress for ProgressImpl {
         match stage {
             Stage::ReadScraps => {
                 println!("{}", "→ Reading Markdown files");
-            }
+            },
+            Stage::GenerateHtml => {
+                println!("→ Generating HTML files");
+            },
         }
     }
 
@@ -30,9 +32,14 @@ impl Progress for ProgressImpl {
         match stage {
             Stage::ReadScraps => {
                 if let Some(count) = count {
-                    println!("✔ Find {} Scraps", count);
+                    println!("✔️ Find {} Scraps", count);
                 }
-            }
+            },
+            Stage::GenerateHtml => {
+                if let Some(count) = count {
+                    println!("✔️ Generated {} HTML files", count);
+                }
+            },
         }
     }
 

@@ -1,6 +1,7 @@
 #[derive(Debug)]
 pub enum Stage {
     ReadScraps,
+    GenerateHtml,
 }
 
 pub trait Progress {

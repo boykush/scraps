@@ -42,7 +42,7 @@ impl IndexRender {
         metadata: &HtmlMetadata,
         list_view_configs: &ListViewConfigs,
         scrap_details: &ScrapDetails,
-    ) -> ScrapsResult<()> {
+    ) -> ScrapsResult<usize> {
         let scraps = &scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(scraps);
         let sorted_scraps = IndexScrapsTera::new_with_sort(
@@ -62,26 +62,30 @@ impl IndexRender {
         });
         let stags = &TagsTera::new(&Tags::new(scraps), &backlinks_map);
 
-        paginated_with_pointer.try_for_each(|(pointer, paginated_scraps)| {
-            let span_render_index = span!(Level::INFO, "render_index").entered();
-            let (tera, mut context) = index_tera::base(
-                base_url,
-                metadata,
-                self.static_dir_path.join("*.html").to_str().unwrap(),
-            )?;
-            context.insert(
-                "sort_key",
-                &SortKeyTera::from(list_view_configs.sort_key.clone()),
-            );
-            context.insert("build_search_index", &list_view_configs.build_search_index);
-            context.insert("scraps", &paginated_scraps);
-            context.insert("tags", stags);
-            context.insert("prev", &pointer.prev);
-            context.insert("next", &pointer.next);
-            Self::render_paginated_html(self, &tera, &context, &pointer)?;
-            span_render_index.exit();
-            Ok(())
-        })
+        paginated_with_pointer
+            .clone()
+            .try_for_each(|(pointer, paginated_scraps)| {
+                let span_generate_index = span!(Level::INFO, "generate_index").entered();
+                let (tera, mut context) = index_tera::base(
+                    base_url,
+                    metadata,
+                    self.static_dir_path.join("*.html").to_str().unwrap(),
+                )?;
+                context.insert(
+                    "sort_key",
+                    &SortKeyTera::from(list_view_configs.sort_key.clone()),
+                );
+                context.insert("build_search_index", &list_view_configs.build_search_index);
+                context.insert("scraps", &paginated_scraps);
+                context.insert("tags", stags);
+                context.insert("prev", &pointer.prev);
+                context.insert("next", &pointer.next);
+                Self::render_paginated_html(self, &tera, &context, &pointer)?;
+                span_generate_index.exit();
+                ScrapsResult::Ok(())
+            })?;
+
+        Ok(paginated_with_pointer.len())
     }
 
     fn render_paginated_html(

@@ -65,7 +65,7 @@ impl BuildCommand {
         list_view_configs: &ListViewConfigs,
     ) -> ScrapsResult<usize> {
         progress.start_stage(&Stage::ReadScraps);
-        let span_read_scraps = span!(Level::INFO, "load_scraps").entered();
+        let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
         let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
         let scrap_details = paths
             .into_par_iter()
@@ -76,43 +76,56 @@ impl BuildCommand {
         span_read_scraps.exit();
         progress.complete_stage(&Stage::ReadScraps, &Some(scrap_details.len()));
 
-        // render index
-        let span_render_indexes = span!(Level::INFO, "render_indexes").entered();
-        let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
-        index_render.run(base_url, html_metadata, list_view_configs, &scrap_details)?;
-        span_render_indexes.exit();
+        // generate html
+        progress.start_stage(&Stage::GenerateHtml);
 
-        // render scraps
-        let span_render_scraps = span!(Level::INFO, "render_scraps").entered();
+        // generate html index
+        let span_generate_html_indexes = span!(Level::INFO, "generate_html_indexes").entered();
+        let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
+        let index_page_count = index_render.run(base_url, html_metadata, list_view_configs, &scrap_details)?;
+        span_generate_html_indexes.exit();
+
+        // generate html scraps
+        let span_generate_html_scraps = span!(Level::INFO, "generate_html_scraps").entered();
         scrap_details
             .to_vec()
             .into_par_iter()
             .try_for_each(|scrap_detail| {
-                let _span_render_scrap = span!(Level::INFO, "render_scrap").entered();
+                let _span_generate_html_scrap = span!(Level::INFO, "generate_html_scrap").entered();
                 let scrap_render =
                     ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
                 scrap_render.run(base_url, timezone, html_metadata, &scrap_detail)
             })?;
-        span_render_scraps.exit();
+        span_generate_html_scraps.exit();
 
-        // render tags index
-        let span_render_tags_index = span!(Level::INFO, "render_tags_index").entered();
+        // generate html tags index
+        let span_generate_html_tags_index = span!(Level::INFO, "generate_html_tags_index").entered();
         let tags_index_render = TagsIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         tags_index_render.run(base_url, html_metadata, &scraps)?;
-        span_render_tags_index.exit();
+        span_generate_html_tags_index.exit();
 
-        // render tag
-        let span_render_tags = span!(Level::INFO, "render_tags").entered();
+        // generate html tags
+        let span_generate_html_tags = span!(Level::INFO, "generate_html_tags").entered();
         let tags = Tags::new(&scraps);
-        tags.into_iter().par_bridge().try_for_each(|tag| {
-            let _span_render_tag = span!(Level::INFO, "render_tag").entered();
+        tags.clone().into_iter().par_bridge().try_for_each(|tag| {
+            let _span_render_tag = span!(Level::INFO, "generate_html_tag").entered();
             let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
             tag_render.run(base_url, html_metadata, &tag)
         })?;
-        span_render_tags.exit();
+        span_generate_html_tags.exit();
 
-        // render css
-        let span_render_css = span!(Level::INFO, "render_css").entered();
+        progress.complete_stage(
+            &Stage::GenerateHtml,
+            &Some(
+                index_page_count +
+                scrap_details.len() +
+                1 + // tags index
+                tags.len()
+            ),
+        );
+
+        // generate css 
+        let span_render_css = span!(Level::INFO, "generate_css").entered();
         let css_render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
         css_render.render_main(css_metadata)?;
         span_render_css.exit();

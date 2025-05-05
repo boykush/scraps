@@ -38,7 +38,7 @@ impl SerializeIndexScrap {
     }
 }
 
-#[derive(serde::Serialize, PartialEq, Debug)]
+#[derive(serde::Serialize, PartialEq, Debug, Clone)]
 pub struct IndexScrapsTera(Vec<SerializeIndexScrap>);
 
 impl IndexScrapsTera {
