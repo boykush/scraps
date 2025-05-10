@@ -38,16 +38,18 @@
   <!-- For search scraps -->
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
   <script type="module">
-    import search_index from './search_index.json' with { type: "json" };
-    const fuseOptions = {
-      minMatchCharLength: 3,
-      keys: ["title"]
-    };
-    const fuse = new Fuse(search_index, fuseOptions);
-    const search = function (query, numResults) {
-      return fuse.search(query).slice(0, numResults).map(result => [result.item.title, result.item.url]);
-    };
-    window.search = search;
+    fetch('./search_index.json')
+      .then(response => response.json())
+      .then(data => {
+        const fuseOptions = {
+          minMatchCharLength: 3,
+          keys: ["title"]
+        };
+        const fuse = new Fuse(data, fuseOptions);
+        window.search = function (query, numResults) {
+          return fuse.search(query).slice(0, numResults).map(result => [result.item.title, result.item.url]);
+        };
+      })
   </script>
   <script>
     function doSearch() {
