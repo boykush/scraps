@@ -17,6 +17,6 @@ test('search scraps', async ({ page }) => {
   await page.keyboard.press('Enter');
 
   // Expect the search results to contain "What is Scraps?".
-  const searchResults = await page.locator('[id="search-results"]').innerHTML();
+  const searchResults = await page.locator('[id="search-results"]').textContent();
   expect(searchResults).toContain('What is Scraps?');
 });
