@@ -1,7 +1,7 @@
 name: Playwright Tests
 on:
   push:
-    branches: [ main, introduce-playwright ]
+    branches: [ main ]
 jobs:
   test:
     timeout-minutes: 60
