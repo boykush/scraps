@@ -1,0 +1,25 @@
+{
+  "name": "scraps",
+  "version": "1.0.0",
+  "description": "<h1 align=\"center\">   <br>   <img src=\"https://github.com/boykush/scraps/blob/main/assets/logo_opacity.png?raw=true\" alt=\"logo\" width=\"200\">   <br>   Scraps   <br>   <br> </h1>",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/boykush/scraps.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/boykush/scraps/issues"
+  },
+  "homepage": "https://github.com/boykush/scraps#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@types/node": "^22.15.17"
+  }
+}

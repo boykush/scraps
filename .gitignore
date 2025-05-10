@@ -2,3 +2,9 @@ target
 public
 Cargo.lock
 tests/resource
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/playwright/.cache/
