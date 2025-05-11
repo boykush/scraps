@@ -23,7 +23,7 @@
     --text-color: light-dark(var(--nord3), var(--nord6));
     --horizontal-rule-color: var(--nord5);
     --shadow-color: light-dark(rgba(184, 194, 215, 0.3), rgba(15, 17, 21, 0.3));
-    --gray-color: #7b88a1;
+    --gray-color: light-dark(rgb(123, 136, 161) ,rgb(171, 185, 207));
 
     --scrap-link-highlight-color: var(--nord8);
 }
