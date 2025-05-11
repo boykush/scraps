@@ -1,7 +1,7 @@
-name: Playwright Tests
+name: Playwright Test
 on:
   push:
-    branches: [ main ]
+    branches: [ main, move-playwright-files ]
 jobs:
   test:
     timeout-minutes: 60
@@ -12,8 +12,11 @@ jobs:
       with:
         node-version: lts/*
     - name: Install dependencies
+      working-directory: ./tests/e2e
       run: npm ci
     - name: Install Playwright Browsers
+      working-directory: ./tests/e2e
       run: npx playwright install --with-deps
     - name: Run Playwright tests
+      working-directory: ./tests/e2e
       run: npx playwright test
