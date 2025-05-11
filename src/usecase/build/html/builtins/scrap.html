@@ -27,6 +27,13 @@
     {{ macros::scrap_links(scraps = linked_scraps) }}
 {% endblock %}
 {% block script %}
+<!-- Code syntax highlight -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+<!-- Mermaid -->
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+</script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const ogpCards = document.querySelectorAll('.ogp-card');
