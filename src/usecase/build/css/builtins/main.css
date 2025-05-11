@@ -276,7 +276,7 @@ ul.scrap-links {
     justify-content: center;
 }
 
-ul.scrap-links li.item {
+ul.scrap-links li.item a {
     display: flex;
     flex-direction: column;
     background-color: var(--secondary-background-color);
@@ -331,6 +331,9 @@ ul.tag-links {
 ul.tag-links li.item {
     display: inline;
     margin-right: 8px;
+}
+
+ul.tag-links li.item a {
     color: var(--scrap-link-highlight-color);
 }
 

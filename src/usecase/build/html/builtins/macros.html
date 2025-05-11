@@ -1,8 +1,8 @@
 {% macro scrap_links(scraps) %}
     <ul class="scrap-links">
         {% for scrap in scraps %}
-            <a href="{{ base_url }}scraps/{{ scrap.html_file_name }}">
-                <li class="item">
+            <li class="item">
+                <a href="{{ base_url }}scraps/{{ scrap.html_file_name }}">
                     {% if scrap.ctx %}
                         <div class="header">
                             <div class="context">{{ scrap.ctx }}&#47;</div>
@@ -20,8 +20,8 @@
                     {% else %}
                         <div class="summary">{{ scrap.html_text | striptags }}</div>
                     {% endif %}
-                </li>
-            </a>
+                </a>
+            </li>
         {% endfor %}
     </ul>
 {% endmacro scrap_links %}
@@ -29,18 +29,18 @@
 {% macro tag_links(tags, slice_size=100) %}
     <ul class="tag-links">
         {% for tag in tags | slice(end=slice_size) %}
-            <a href="{{ base_url }}scraps/{{ tag.slug }}.html">
-                <li class="item">
+            <li class="item">
+                <a href="{{ base_url }}scraps/{{ tag.slug }}.html">
                     <span class="title">{{ tag.title }}</span>&nbsp;<span>({{ tag.backlinks_count }})</span>
-                </li>
-            </a>
+                </a>
+            </li>
         {% endfor %}
         {% if tags | length > slice_size %}
-            <a href="{{ base_url }}tags/">
-                <li class="item">
+            <li class="item">
+                <a href="{{ base_url }}tags/">
                     <span class="more-link">More...</span>
-                </li>
-            </a>
+                </a>
+            </li>
         {% endif %}
     </ul>
 {% endmacro tag_links %}
