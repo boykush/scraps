@@ -25,7 +25,7 @@
     --shadow-color: light-dark(rgba(184, 194, 215, 0.3), rgba(15, 17, 21, 0.3));
     --gray-color: light-dark(rgb(123, 136, 161) ,rgb(171, 185, 207));
 
-    --scrap-link-highlight-color: var(--nord8);
+    --link-highlight-color: var(--nord8);
 }
 
 /* html tag */
@@ -82,6 +82,10 @@ footer {
     font-size: 12.8px;
     color: var(--gray-color);
     margin-bottom: 32px;
+}
+
+footer a {
+    color: var(--link-highlight-color);
 }
 
 /* scrap */
@@ -153,7 +157,7 @@ div.scrap .content .ogp-card .ogp-content .ogp-description {
 
 div.scrap a {
     text-decoration: none;
-    color: var(--scrap-link-highlight-color);
+    color: var(--link-highlight-color);
 }
 
 div.scrap a:hover {
@@ -224,7 +228,7 @@ div.index div.search-block li {
 }
 
 div.index div.search-block li:hover {
-    background-color: var(--scrap-link-highlight-color);
+    background-color: var(--link-highlight-color);
 }
 
 /** tags block **/
@@ -302,7 +306,7 @@ ul.scrap-links li.item div.context::before {
 
 ul.scrap-links li.item div.title {
     font-size: 18px;
-    color: var(--scrap-link-highlight-color);
+    color: var(--link-highlight-color);
 }
 
 ul.scrap-links li.item div.thumbnail {
@@ -335,7 +339,7 @@ ul.tag-links li.item {
 }
 
 ul.tag-links li.item a {
-    color: var(--scrap-link-highlight-color);
+    color: var(--link-highlight-color);
 }
 
 ul.tag-links li.item span.title {
@@ -348,6 +352,6 @@ ul.tag-links li.item span.title::before {
 }
 
 ul.tag-links li.item span.more-link {
-    color: var(--scrap-link-highlight-color);
+    color: var(--link-highlight-color);
     margin-right: 8px;
 }
