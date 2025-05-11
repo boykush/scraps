@@ -329,8 +329,9 @@ ul.tag-links {
 }
 
 ul.tag-links li.item {
-    display: inline;
+    display: inline-block;
     margin-right: 8px;
+    margin-bottom: 8px;
 }
 
 ul.tag-links li.item a {
