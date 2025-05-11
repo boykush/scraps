@@ -4,7 +4,6 @@ Cargo.lock
 tests/resource
 
 # Playwright
-node_modules/
-/test-results/
-/playwright-report/
-/playwright/.cache/
+/tests/e2e/node_modules
+/tests/e2e/playwright-report
+/tests/e2e/test-results
