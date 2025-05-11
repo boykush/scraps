@@ -1,7 +1,7 @@
 name: Playwright Test
 on:
   push:
-    branches: [ main, move-playwright-files ]
+    branches: [ main ]
 jobs:
   test:
     timeout-minutes: 60
