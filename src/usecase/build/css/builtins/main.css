@@ -23,9 +23,9 @@
     --text-color: light-dark(var(--nord3), var(--nord6));
     --horizontal-rule-color: var(--nord5);
     --shadow-color: light-dark(rgba(184, 194, 215, 0.3), rgba(15, 17, 21, 0.3));
-    --gray-color: #7b88a1;
+    --gray-color: light-dark(rgb(123, 136, 161) ,rgb(171, 185, 207));
 
-    --scrap-link-highlight-color: var(--nord8);
+    --link-highlight-color: var(--nord8);
 }
 
 /* html tag */
@@ -82,6 +82,10 @@ footer {
     font-size: 12.8px;
     color: var(--gray-color);
     margin-bottom: 32px;
+}
+
+footer a {
+    color: var(--link-highlight-color);
 }
 
 /* scrap */
@@ -153,7 +157,7 @@ div.scrap .content .ogp-card .ogp-content .ogp-description {
 
 div.scrap a {
     text-decoration: none;
-    color: var(--scrap-link-highlight-color);
+    color: var(--link-highlight-color);
 }
 
 div.scrap a:hover {
@@ -224,7 +228,7 @@ div.index div.search-block li {
 }
 
 div.index div.search-block li:hover {
-    background-color: var(--scrap-link-highlight-color);
+    background-color: var(--link-highlight-color);
 }
 
 /** tags block **/
@@ -276,7 +280,7 @@ ul.scrap-links {
     justify-content: center;
 }
 
-ul.scrap-links li.item {
+ul.scrap-links li.item a {
     display: flex;
     flex-direction: column;
     background-color: var(--secondary-background-color);
@@ -302,7 +306,7 @@ ul.scrap-links li.item div.context::before {
 
 ul.scrap-links li.item div.title {
     font-size: 18px;
-    color: var(--scrap-link-highlight-color);
+    color: var(--link-highlight-color);
 }
 
 ul.scrap-links li.item div.thumbnail {
@@ -329,9 +333,13 @@ ul.tag-links {
 }
 
 ul.tag-links li.item {
-    display: inline;
+    display: inline-block;
     margin-right: 8px;
-    color: var(--scrap-link-highlight-color);
+    margin-bottom: 8px;
+}
+
+ul.tag-links li.item a {
+    color: var(--link-highlight-color);
 }
 
 ul.tag-links li.item span.title {
@@ -344,6 +352,6 @@ ul.tag-links li.item span.title::before {
 }
 
 ul.tag-links li.item span.more-link {
-    color: var(--scrap-link-highlight-color);
+    color: var(--link-highlight-color);
     margin-right: 8px;
 }
