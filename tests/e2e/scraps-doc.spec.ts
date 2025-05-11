@@ -31,6 +31,7 @@ test('fetch OGP data', async ({ page }) => {
   // Wait for OGP data to be loaded (max 5 seconds)
   await expect(async () => {
     const titleText = await ogpCard.locator('.ogp-title').textContent();
+    expect(titleText).not.toBeNull();
     expect(titleText).not.toBe('Loading...');
   }).toPass({
     timeout: 5000,
