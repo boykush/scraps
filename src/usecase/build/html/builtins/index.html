@@ -2,7 +2,13 @@
 {% import "__builtins/macros.html" as macros %}
 
 {% block main %}
-    <div class="index">
+    <div class="index"> 
+        {% if readme_content %}
+          <div class="readme-block">
+            {{ readme_content | safe }}
+            <hr>
+          </div>
+        {% endif %}
         {% if build_search_index == true %}
           <div class="search-block">
               <span class="icon" />

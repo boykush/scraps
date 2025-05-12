@@ -3,6 +3,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use std::fs;
+
 use crate::{
     error::BuildError,
     usecase::{
@@ -17,8 +19,7 @@ use crate::{
 use chrono_tz::Tz;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
-use scraps_libs::git::GitCommand;
-use scraps_libs::model::tags::Tags;
+use scraps_libs::{git::GitCommand, markdown, model::tags::Tags};
 use tracing::{span, Level};
 use url::Url;
 
@@ -81,9 +82,25 @@ impl BuildCommand {
 
         // generate html index
         let span_generate_html_indexes = span!(Level::INFO, "generate_html_indexes").entered();
+        // Read README.md if it exists
+        let readme_content = {
+            let readme_path = self.scraps_dir_path.join("README.md");
+            if readme_path.exists() {
+                let md_text = fs::read_to_string(&readme_path).context(BuildError::ReadReadMe)?;
+                Some(markdown::convert::to_content(&md_text, base_url))
+            } else {
+                None
+            }
+        };
+
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
-        let index_page_count =
-            index_render.run(base_url, html_metadata, list_view_configs, &scrap_details)?;
+        let index_page_count = index_render.run(
+            base_url,
+            html_metadata,
+            list_view_configs,
+            &scrap_details,
+            &readme_content,
+        )?;
         span_generate_html_indexes.exit();
 
         // generate html scraps

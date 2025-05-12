@@ -175,6 +175,17 @@ div.tag h1.title::before {
 }
 
 /* index */
+/** readme block **/
+div.index div.readme-block {
+    padding: 0 40px;
+}
+div.index div.readme-block a {
+    color: var(--link-highlight-color);
+}
+div.index div.readme-block hr {
+    margin: 64px 0;
+}
+
 /** search block **/
 div.index div.search-block {
     margin-bottom: 32px;
