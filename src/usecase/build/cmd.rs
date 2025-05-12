@@ -66,6 +66,7 @@ impl BuildCommand {
         list_view_configs: &ListViewConfigs,
     ) -> ScrapsResult<usize> {
         progress.start_stage(&Stage::ReadScraps);
+
         let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
         let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
         let scrap_details = paths
@@ -76,6 +77,9 @@ impl BuildCommand {
         let scraps = scrap_details.to_scraps();
         span_read_scraps.exit();
         progress.complete_stage(&Stage::ReadScraps, &scrap_details.len());
+
+        // create public directory
+        fs::create_dir_all(&self.public_dir_path).context(BuildError::CreateDir)?;
 
         // generate html
         progress.start_stage(&Stage::GenerateHtml);

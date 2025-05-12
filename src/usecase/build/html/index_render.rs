@@ -1,4 +1,3 @@
-use std::fs;
 use std::path::Path;
 use std::{fs::File, path::PathBuf};
 
@@ -28,8 +27,6 @@ pub struct IndexRender {
 
 impl IndexRender {
     pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> ScrapsResult<IndexRender> {
-        fs::create_dir_all(public_dir_path).context(BuildError::CreateDir)?;
-
         Ok(IndexRender {
             static_dir_path: static_dir_path.to_path_buf(),
             public_dir_path: public_dir_path.to_path_buf(),
