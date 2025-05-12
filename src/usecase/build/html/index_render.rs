@@ -7,8 +7,6 @@ use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::list_view_configs::ListViewConfigs;
 use crate::usecase::build::model::scrap_detail::ScrapDetails;
-use rayon::iter::IntoParallelIterator;
-use rayon::prelude::*;
 use scraps_libs::model::{content::Content, tags::Tags};
 use tracing::{span, Level};
 use url::Url;
@@ -48,48 +46,97 @@ impl IndexRender {
             &backlinks_map,
             &list_view_configs.sort_key,
         );
-        let paginated = sorted_scraps
-            .chunks(list_view_configs.paging.size_with(scraps))
-            .into_par_iter()
-            .enumerate();
-        let last_page_num = paginated.len();
-        let paginated_with_pointer = paginated.map(|(idx, paginated_scraps)| {
-            let page_num = idx + 1;
-            let pointer = PagePointer::new(page_num, last_page_num);
-            (pointer, paginated_scraps)
-        });
         let stags = &TagsTera::new(&Tags::new(scraps), &backlinks_map);
+        // setup tera
+        let (tera, base_context) = {
+            let (tera, mut context) = index_tera::base(
+                base_url,
+                metadata,
+                self.static_dir_path.join("*.html").to_str().unwrap(),
+            )?;
+            context.insert(
+                "sort_key",
+                &SortKeyTera::from(list_view_configs.sort_key.clone()),
+            );
+            context.insert("build_search_index", &list_view_configs.build_search_index);
+            (tera, context)
+        };
 
-        paginated_with_pointer
-            .clone()
-            .try_for_each(|(pointer, paginated_scraps)| {
-                let _span_generate_index = span!(Level::INFO, "generate_index").entered();
-                let (tera, mut context) = index_tera::base(
-                    base_url,
-                    metadata,
-                    self.static_dir_path.join("*.html").to_str().unwrap(),
-                )?;
-                context.insert(
-                    "sort_key",
-                    &SortKeyTera::from(list_view_configs.sort_key.clone()),
+        // chunks by config
+        let chunks = sorted_scraps.chunks(list_view_configs.paging.size_with(scraps));
+        let total_pages = chunks.len();
+
+        // generate index
+        let index_scraps = chunks.first();
+        if let Some(first_scraps) = index_scraps {
+            let _span_generate_index = span!(Level::INFO, "generate_index").entered();
+            let (context, page_pointer) = Self::prepare_index_context(
+                &base_context,
+                first_scraps,
+                stags,
+                total_pages,
+                readme_content,
+            );
+            self.render_html(&tera, &context, &page_pointer)?;
+        }
+
+        // generate paginated
+        chunks
+            .iter()
+            .skip(1)
+            .enumerate()
+            .try_for_each(|(idx, page_scraps)| {
+                let _span_generate_paginated = span!(Level::INFO, "generate_paginated").entered();
+                let page_num = idx + 2;
+                let (context, page_pointer) = Self::prepare_paginated_context(
+                    &base_context,
+                    page_scraps,
+                    stags,
+                    page_num,
+                    total_pages,
                 );
-                context.insert("build_search_index", &list_view_configs.build_search_index);
-                context.insert("scraps", &paginated_scraps);
-                context.insert("tags", stags);
-                context.insert("prev", &pointer.prev);
-                context.insert("next", &pointer.next);
-                if let Some(readme) = readme_content {
-                    context.insert("readme_content", &readme.to_string());
-                }
-
-                Self::render_paginated_html(self, &tera, &context, &pointer)?;
+                self.render_html(&tera, &context, &page_pointer)?;
                 ScrapsResult::Ok(())
             })?;
 
-        Ok(paginated_with_pointer.len())
+        Ok(total_pages)
     }
 
-    fn render_paginated_html(
+    fn prepare_index_context(
+        base_context: &tera::Context,
+        scraps: &IndexScrapsTera,
+        stags: &TagsTera,
+        total_pages: usize,
+        readme_content: &Option<Content>,
+    ) -> (tera::Context, PagePointer) {
+        let pointer = PagePointer::new_index(total_pages);
+        let mut context = base_context.clone();
+        context.insert("scraps", &scraps);
+        context.insert("tags", stags);
+        context.insert("next", &pointer.next);
+        if let Some(readme) = readme_content {
+            context.insert("readme_content", &readme.to_string());
+        }
+        (context, pointer)
+    }
+
+    fn prepare_paginated_context(
+        base_context: &tera::Context,
+        scraps: &IndexScrapsTera,
+        stags: &TagsTera,
+        page_num: usize,
+        total_pages: usize,
+    ) -> (tera::Context, PagePointer) {
+        let pointer = PagePointer::new_paginated(page_num, total_pages);
+        let mut context = base_context.clone();
+        context.insert("scraps", &scraps);
+        context.insert("tags", stags);
+        context.insert("prev", &pointer.prev);
+        context.insert("next", &pointer.next);
+        (context, pointer)
+    }
+
+    fn render_html(
         &self,
         tera: &tera::Tera,
         context: &tera::Context,
@@ -110,6 +157,7 @@ impl IndexRender {
 
 #[cfg(test)]
 mod tests {
+    use scraps_libs::model::content::ContentElement;
     use std::fs;
     use url::Url;
 
@@ -143,7 +191,7 @@ mod tests {
         let template_html_path = static_dir_path.join("index.html");
         let resource_template_html = FileResource::new(&template_html_path);
         let resource_template_html_byte =
-        "{{ build_search_index }}{% for scrap in scraps %}<a href=\"./{{ scrap.title }}.html\">{{ scrap.title }}</a>{% endfor %}"
+        "{{ build_search_index }}{{ readme_content }}{% for scrap in scraps %}<a href=\"./{{ scrap.title }}.html\">{{ scrap.title }}</a>{% endfor %}"
         .as_bytes();
 
         // scraps
@@ -157,8 +205,9 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            // テスト用のREADME.mdの内容なし
-            let readme_content: Option<Content> = None;
+            let readme_content: Option<Content> = Some(Content::new(vec![ContentElement::Raw(
+                "README".to_string(),
+            )]));
             render
                 .run(
                     base_url,
@@ -169,10 +218,10 @@ mod tests {
                 )
                 .unwrap();
 
-            let result1 = fs::read_to_string(index_html_path).unwrap();
+            let result = fs::read_to_string(index_html_path).unwrap();
             assert_eq!(
-                result1,
-                "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
+                result,
+                "trueREADME<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
             );
         })
     }
@@ -223,7 +272,6 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            // テスト用のREADME.mdの内容なし
             let readme_content: Option<Content> = None;
             render
                 .run(
@@ -235,15 +283,15 @@ mod tests {
                 )
                 .unwrap();
 
-            let result1 = fs::read_to_string(index_html_path).unwrap();
+            let index_result = fs::read_to_string(index_html_path).unwrap();
             assert_eq!(
-                result1,
+                index_result,
                 "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
             );
 
-            let result2 = fs::read_to_string(page2_html_path).unwrap();
+            let page2_result = fs::read_to_string(page2_html_path).unwrap();
             assert_eq!(
-                result2,
+                page2_result,
                 "true<a href=\"./scrap3.html\">scrap3</a><a href=\"./scrap4.html\">scrap4</a>"
             );
         })
