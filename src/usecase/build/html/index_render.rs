@@ -10,7 +10,7 @@ use crate::usecase::build::model::list_view_configs::ListViewConfigs;
 use crate::usecase::build::model::scrap_detail::ScrapDetails;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
-use scraps_libs::model::tags::Tags;
+use scraps_libs::model::{content::Content, tags::Tags};
 use tracing::{span, Level};
 use url::Url;
 
@@ -42,6 +42,7 @@ impl IndexRender {
         metadata: &HtmlMetadata,
         list_view_configs: &ListViewConfigs,
         scrap_details: &ScrapDetails,
+        readme_content: &Option<Content>,
     ) -> ScrapsResult<usize> {
         let scraps = &scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(scraps);
@@ -80,6 +81,10 @@ impl IndexRender {
                 context.insert("tags", stags);
                 context.insert("prev", &pointer.prev);
                 context.insert("next", &pointer.next);
+                if let Some(readme) = readme_content {
+                    context.insert("readme_content", &readme.to_string());
+                }
+
                 Self::render_paginated_html(self, &tera, &context, &pointer)?;
                 ScrapsResult::Ok(())
             })?;
@@ -155,8 +160,16 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
+            // テスト用のREADME.mdの内容なし
+            let readme_content: Option<Content> = None;
             render
-                .run(base_url, &metadata, &list_view_configs, &scrap_details)
+                .run(
+                    base_url,
+                    &metadata,
+                    &list_view_configs,
+                    &scrap_details,
+                    &readme_content,
+                )
                 .unwrap();
 
             let result1 = fs::read_to_string(index_html_path).unwrap();
@@ -213,8 +226,16 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
+            // テスト用のREADME.mdの内容なし
+            let readme_content: Option<Content> = None;
             render
-                .run(base_url, &metadata, &list_view_configs, &scrap_details)
+                .run(
+                    base_url,
+                    &metadata,
+                    &list_view_configs,
+                    &scrap_details,
+                    &readme_content,
+                )
                 .unwrap();
 
             let result1 = fs::read_to_string(index_html_path).unwrap();
