@@ -68,11 +68,29 @@ impl BuildCommand {
         progress.start_stage(&Stage::ReadScraps);
         let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
         let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
-        let scrap_details = paths
+
+        // Separate README.md and other scraps
+        let readme_path = self.scraps_dir_path.join("README.md");
+        let (readme_paths, scrap_paths): (Vec<_>, Vec<_>) =
+            paths.into_iter().partition(|path| path == &readme_path);
+
+        // Process README content
+        let readme_path = readme_paths.first();
+        let readme_content = match readme_path {
+            Some(path) => {
+                let readme_str = fs::read_to_string(path).context(BuildError::ReadREADMEFile)?;
+                Some(markdown::convert::to_content(&readme_str, base_url))
+            }
+            None => None,
+        };
+
+        // Process other scraps in parallel
+        let scrap_details = scrap_paths
             .into_par_iter()
             .map(|path| self.to_scrap_detail_by_path(git_command, base_url, &path))
             .collect::<ScrapsResult<Vec<ScrapDetail>>>()
             .map(|s| ScrapDetails::new(&s))?;
+
         let scraps = scrap_details.to_scraps();
         span_read_scraps.exit();
         progress.complete_stage(&Stage::ReadScraps, &scrap_details.len());
@@ -82,17 +100,6 @@ impl BuildCommand {
 
         // generate html index
         let span_generate_html_indexes = span!(Level::INFO, "generate_html_indexes").entered();
-        // Read README.md if it exists
-        let readme_content = {
-            let readme_path = self.scraps_dir_path.join("README.md");
-            if readme_path.exists() {
-                let md_text =
-                    fs::read_to_string(&readme_path).context(BuildError::ReadREADMEFile)?;
-                Some(markdown::convert::to_content(&md_text, base_url))
-            } else {
-                None
-            }
-        };
 
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         let index_page_count = index_render.run(
@@ -240,6 +247,12 @@ mod tests {
         let resource_3 = FileResource::new(&not_md_path);
         let resource_bytes_3 = concat!("# header1\n", "## header2\n",).as_bytes();
 
+        // README.md
+        let readme_path = command.scraps_dir_path.join("README.md");
+        let readme_html_path = command.public_dir_path.join("README.html");
+        let resource_4 = FileResource::new(&readme_path);
+        let resource_bytes_4 = concat!("# README\n").as_bytes();
+
         // static
         let resource_static_dir = DirResource::new(&command.static_dir_path);
 
@@ -252,36 +265,41 @@ mod tests {
             resource_1.run(resource_bytes_1, || {
                 resource_2.run(resource_bytes_2, || {
                     resource_3.run(resource_bytes_3, || {
-                        let result1 = command
-                            .run(
-                                git_command,
-                                &progress,
-                                &base_url,
-                                timezone,
-                                html_metadata,
-                                css_metadata,
-                                &list_view_configs,
-                            )
-                            .unwrap();
-                        assert_eq!(result1, 2);
+                        resource_4.run(resource_bytes_4, || {
+                            let result1 = command
+                                .run(
+                                    git_command,
+                                    &progress,
+                                    &base_url,
+                                    timezone,
+                                    html_metadata,
+                                    css_metadata,
+                                    &list_view_configs,
+                                )
+                                .unwrap();
+                            assert_eq!(result1, 2);
 
-                        let result2 = fs::read_to_string(html_path_1).unwrap();
-                        assert!(!result2.is_empty());
+                            let result2 = fs::read_to_string(html_path_1).unwrap();
+                            assert!(!result2.is_empty());
 
-                        let result3 = fs::read_to_string(html_path_2).unwrap();
-                        assert!(!result3.is_empty());
+                            let result3 = fs::read_to_string(html_path_2).unwrap();
+                            assert!(!result3.is_empty());
 
-                        let result4 = fs::read_to_string(not_exists_path);
-                        assert!(result4.is_err());
+                            let result4 = fs::read_to_string(not_exists_path);
+                            assert!(result4.is_err());
 
-                        let result5 = fs::read_to_string(html_path_3).unwrap();
-                        assert!(!result5.is_empty());
+                            let result5 = fs::read_to_string(readme_html_path);
+                            assert!(result5.is_err());
 
-                        let result6 = fs::read_to_string(css_path).unwrap();
-                        assert!(!result6.is_empty());
+                            let result6 = fs::read_to_string(html_path_3).unwrap();
+                            assert!(!result6.is_empty());
 
-                        let result7 = fs::read_to_string(search_index_json_path).unwrap();
-                        assert!(!result7.is_empty());
+                            let result7 = fs::read_to_string(css_path).unwrap();
+                            assert!(!result7.is_empty());
+
+                            let result8 = fs::read_to_string(search_index_json_path).unwrap();
+                            assert!(!result8.is_empty());
+                        })
                     })
                 })
             })
