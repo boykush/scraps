@@ -1,10 +1,13 @@
 import { test, expect } from '@playwright/test';
 
-test('has title', async ({ page }) => {
+test('get home', async ({ page }) => {
   await page.goto('/');
 
   // Expect a title "to contain" a substring.
   await expect(page).toHaveTitle(/Scraps Doc/);
+
+  const readme_content = await page.locator('[class="readme-block"]').textContent();
+  expect(readme_content).toContain('What is Scraps?');
 });
 
 test('search scraps', async ({ page }) => {
