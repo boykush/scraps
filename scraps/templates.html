@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <!-- Page title -->
+        
+            <title>Scraps Doc</title>
+            <meta property="og:title" content="Scraps Doc" />
+            <meta name="twitter:title" content="Scraps Doc" />
+        
+        <!-- Page description -->
+        
+            <meta name="description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta property="og:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta name="twitter:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+        
+        <!-- Page favicon -->
+        
+            <link rel="icon" type="image/png" href="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;logo.png?raw=true" />
+        
+        <!-- Rubik font -->
+        <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">
+        <!-- Noto Sans JP font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+        <!-- Style sheet -->
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;main.css">
+        
+        
+    </head>
+    <body>
+        <header>
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;">
+                <h1>Scraps Doc</h1>
+            </a>
+        </header>
+        <main>
+            
+    <div class="tag">
+        <h1 class="title">Templates</h1>
+    </div>
+    
+    <ul class="scrap-links">
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/template.cli.html">
+                    
+                        <div class="header">
+                            <div class="context">CLI&#47;</div>
+                            <div class="title">Template</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#CLI #Templates
+❯ scraps template
+
+This command generates the scrap file from the template of the Markdown files under the &#x2F;templates directory.
+Step1. Prepare a template
+First, prepare a template file written in Markdown. The title of the template file will be the template name.
+The simplest example is a template that generates a daily note for today’s date. The title of the generated scrap can be specified with TOML metadata.
++++
+title = &quot;{{ now() | date(timezone=timezone) }}&quot;
++++
+
+For the features available in the template, please refer to Templates. Sample templates is here.
+You can check the templates added under &#x2F;templates with the following command:
+❯ scraps template list
+daily_note
+
+Step2. Generate a Scrap from the Template
+Specify the template name to generate a scrap. If the scrap title is not specified in the template metadata, the title option -t is required when executing the generate command.
+scraps template generate &amp;lt;TEMPLATE_NAME&amp;gt; -t &amp;lt;SCRAP_TITLE&amp;gt;
+
+Example:
+If metadata is specified in the template
+❯ scraps template generate daily_note 
+
+The metadata will be ignored from the generated scrap.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/sample-templates.html">
+                    
+                        <div class="header">
+                            <div class="title">Sample templates</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Templates
+Daily note
+Utilizes Tera’s standard now() function, date filter, and Scraps’ custom timezone variable.
++++
+title = &quot;{{ now() | date(timezone=timezone) }}&quot;
++++
+
+Arguments by environment variables
+Using the get_env() function, you can write templates that customize arguments at the time of CLI execution.
++++
+title = &quot;[Book] {{ get_env(name=&quot;TITLE&quot;, default=&quot;&quot;) }}&quot;
++++
+
+![cover]({{ get_env(name=&quot;COVER&quot;, default=&quot;&quot;) }})
+
+When execute generate
+TITLE=&quot;Test-Driven Development By Example&quot; COVER=&quot;https:&#x2F;&#x2F;m.media-amazon.com&#x2F;images&#x2F;I&#x2F;71I1GcjT-IL._SY522_.jpg&quot; scraps template generate book
+
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/templates.feature.html">
+                    
+                        <div class="header">
+                            <div class="context">Feature&#47;</div>
+                            <div class="title">Templates</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Templates
+The template feature can be used by preparing Markdown files as templates under the templates&#x2F; directory, and it is implemented based on Tera, a template engine written in Rust.
+In templare feature of Scraps, you can mainly use Tera syntax and built-in functions.
+For more details, please refer to the Tera documentation.
+Scraps extension
+In addition to Tera’s syntax and built-ins, custom extensions can be implemented. Here are the custom extensions currently available in Scraps.
+Variables
+timezone
+You can use the timezone specified in Config.toml.
+{{ timezone }}
+
+As an example, use it as the timezone argument in the date filter.
+{{ now() | date(timezone=timezone) }}
+
+Please submit your extension requests to the Issue.
+Others
+For samples of templates using Tera, please refer to Sample templates.
+</div>
+                    
+                </a>
+            </li>
+        
+    </ul>
+
+
+        </main>
+        <footer>
+            Generated by <a href="https://github.com/boykush/scraps" target="_blank" rel="noopener noreferrer">Scraps</a>
+        </footer> 
+        <!-- Code syntax highlight -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!-- Code syntax highlight theme -->
+        <link href="https://unpkg.com/nord-highlightjs@0.1.0/dist/nord.css" rel="stylesheet" type="text/css" />
+        <!-- Mermaid -->
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.6.0/+esm'
+        </script>
+        
+         
+    </body>
+</html>
