@@ -161,7 +161,6 @@ impl IndexRender {
 
 #[cfg(test)]
 mod tests {
-    use scraps_libs::model::content::ContentElement;
     use std::fs;
     use url::Url;
 
@@ -195,7 +194,7 @@ mod tests {
         let template_html_path = static_dir_path.join("index.html");
         let resource_template_html = FileResource::new(&template_html_path);
         let resource_template_html_byte =
-        "{{ build_search_index }}{{ readme_content }}{% for scrap in scraps %}<a href=\"./{{ scrap.title }}.html\">{{ scrap.title }}</a>{% endfor %}"
+        "{{ build_search_index }}{% for scrap in scraps %}<a href=\"./{{ scrap.title }}.html\">{{ scrap.title }}</a>{% endfor %}"
         .as_bytes();
 
         // scraps
@@ -209,23 +208,20 @@ mod tests {
 
         resource_template_html.run(resource_template_html_byte, || {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            let readme_content: Option<Content> = Some(Content::new(vec![ContentElement::Raw(
-                "README".to_string(),
-            )]));
             render
                 .run(
                     base_url,
                     &metadata,
                     &list_view_configs,
                     &scrap_details,
-                    &readme_content,
+                    &None,
                 )
                 .unwrap();
 
             let result = fs::read_to_string(index_html_path).unwrap();
             assert_eq!(
                 result,
-                "trueREADME<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
+                "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
             );
         })
     }

@@ -27,15 +27,6 @@
     {{ macros::scrap_links(scraps = linked_scraps) }}
 {% endblock %}
 {% block script %}
-<!-- Code syntax highlight -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
-<script>hljs.highlightAll();</script>
-<!-- Code syntax highlight theme -->
-<link href="https://unpkg.com/nord-highlightjs@0.1.0/dist/nord.css" rel="stylesheet" type="text/css" />
-<!-- Mermaid -->
-<script type="module">
-  import mermaid from 'https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.5.0/mermaid.min.js';
-</script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const ogpCards = document.querySelectorAll('.ogp-card');
