@@ -15,6 +15,7 @@ use url::Url;
 use crate::usecase::build::html::tera::index_tera;
 
 use super::page_pointer::PagePointer;
+use super::serde::content::ContentTera;
 use super::serde::index_scraps::IndexScrapsTera;
 use super::serde::sort::SortKeyTera;
 use super::serde::tags::TagsTera;
@@ -118,7 +119,7 @@ impl IndexRender {
         context.insert("tags", stags);
         context.insert("next", &pointer.next);
         if let Some(readme) = readme_content {
-            context.insert("readme_content", &readme.to_string());
+            context.insert("readme_content", &ContentTera::from(readme.clone()));
         }
         (context, pointer)
     }

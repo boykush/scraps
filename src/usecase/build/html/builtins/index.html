@@ -5,7 +5,7 @@
     <div class="index"> 
         {% if readme_content %}
           <div class="readme-block">
-            {{ readme_content | safe }}
+            {% for element in readme_content.elements %}{% if element.raw %}{{ element.raw | safe }}{% elif element.autolink %}<a href="{{ element.autolink.url }}">{{ element.autolink.url }}</a>{% endif %}{% endfor %}
             <hr>
           </div>
         {% endif %}
