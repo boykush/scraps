@@ -68,11 +68,29 @@ impl BuildCommand {
         progress.start_stage(&Stage::ReadScraps);
         let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
         let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
-        let scrap_details = paths
+
+        // Separate README.md and other scraps
+        let readme_path = self.scraps_dir_path.join("README.md");
+        let (readme_paths, scrap_paths): (Vec<_>, Vec<_>) =
+            paths.into_iter().partition(|path| path == &readme_path);
+
+        // Process README content
+        let readme_path = readme_paths.first();
+        let readme_content = match readme_path {
+            Some(path) => {
+                let readme_str = fs::read_to_string(path).context(BuildError::ReadREADMEFile)?;
+                Some(markdown::convert::to_content(&readme_str, base_url))
+            }
+            None => None,
+        };
+
+        // Process other scraps in parallel
+        let scrap_details = scrap_paths
             .into_par_iter()
             .map(|path| self.to_scrap_detail_by_path(git_command, base_url, &path))
             .collect::<ScrapsResult<Vec<ScrapDetail>>>()
             .map(|s| ScrapDetails::new(&s))?;
+
         let scraps = scrap_details.to_scraps();
         span_read_scraps.exit();
         progress.complete_stage(&Stage::ReadScraps, &scrap_details.len());
@@ -82,17 +100,6 @@ impl BuildCommand {
 
         // generate html index
         let span_generate_html_indexes = span!(Level::INFO, "generate_html_indexes").entered();
-        // Read README.md if it exists
-        let readme_content = {
-            let readme_path = self.scraps_dir_path.join("README.md");
-            if readme_path.exists() {
-                let md_text =
-                    fs::read_to_string(&readme_path).context(BuildError::ReadREADMEFile)?;
-                Some(markdown::convert::to_content(&md_text, base_url))
-            } else {
-                None
-            }
-        };
 
         let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         let index_page_count = index_render.run(
