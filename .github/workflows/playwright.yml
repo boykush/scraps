@@ -2,12 +2,21 @@ name: Playwright Test
 on:
   push:
     branches: [ main ]
+
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Setup Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+    - name: Pre build
+      run: |
+        cargo build
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
