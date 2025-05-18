@@ -5,24 +5,32 @@ pub struct PagePointer {
 }
 
 impl PagePointer {
-    pub fn new(page_num: usize, last_page_num: usize) -> PagePointer {
-        let prev = match page_num {
-            1 => None,
-            2 => Some("./".to_string()),
-            n => Some(Self::format_html(n - 1)),
-        };
-        let current = match page_num {
-            1 => "./".to_string(),
-            n => Self::format_html(n),
-        };
-        let next = match page_num {
-            n if n == last_page_num => None,
-            n => Some(Self::format_html(n + 1)),
-        };
+    pub fn new_index(total_pages: usize) -> PagePointer {
         PagePointer {
-            prev,
-            current,
-            next,
+            prev: None,
+            current: "./".to_string(),
+            next: if total_pages > 1 {
+                Some("./2.html".to_string())
+            } else {
+                None
+            },
+        }
+    }
+
+    pub fn new_paginated(page_num: usize, total_pages: usize) -> PagePointer {
+        debug_assert!(page_num >= 2, "page_num must be >= 2");
+        PagePointer {
+            prev: Some(if page_num == 2 {
+                "./".to_string()
+            } else {
+                Self::format_html(page_num - 1)
+            }),
+            current: Self::format_html(page_num),
+            next: if page_num == total_pages {
+                None
+            } else {
+                Some(Self::format_html(page_num + 1))
+            },
         }
     }
 
@@ -48,22 +56,44 @@ mod tests {
     use super::PagePointer;
 
     #[test]
-    fn it_new_prev() {
-        assert_eq!(PagePointer::new(1, 1).prev, None);
-        assert_eq!(PagePointer::new(2, 2).prev, Some("./".to_string()));
-        assert_eq!(PagePointer::new(3, 3).prev, Some("./2.html".to_string()));
+    fn test_new_index() {
+        // one page
+        let pointer = PagePointer::new_index(1);
+        assert_eq!(pointer.prev, None);
+        assert_eq!(pointer.current, "./".to_string());
+        assert_eq!(pointer.next, None);
+
+        // multiple pages
+        let pointer = PagePointer::new_index(2);
+        assert_eq!(pointer.prev, None);
+        assert_eq!(pointer.current, "./".to_string());
+        assert_eq!(pointer.next, Some("./2.html".to_string()));
     }
 
     #[test]
-    fn it_new_current() {
-        assert_eq!(PagePointer::new(1, 1).current, "./".to_string());
-        assert_eq!(PagePointer::new(2, 2).current, "./2.html".to_string());
+    fn test_new_paginated() {
+        // number of pages is 2. the last page
+        let pointer = PagePointer::new_paginated(2, 2);
+        assert_eq!(pointer.prev, Some("./".to_string()));
+        assert_eq!(pointer.current, "./2.html".to_string());
+        assert_eq!(pointer.next, None);
+
+        // number of pages is 2. not the last page
+        let pointer = PagePointer::new_paginated(2, 3);
+        assert_eq!(pointer.prev, Some("./".to_string()));
+        assert_eq!(pointer.current, "./2.html".to_string());
+        assert_eq!(pointer.next, Some("./3.html".to_string()));
+
+        // number of pages is 3
+        let pointer = PagePointer::new_paginated(3, 3);
+        assert_eq!(pointer.prev, Some("./2.html".to_string()));
+        assert_eq!(pointer.current, "./3.html".to_string());
+        assert_eq!(pointer.next, None);
     }
 
     #[test]
-    fn it_new_next() {
-        assert_eq!(PagePointer::new(1, 1).next, None);
-        assert_eq!(PagePointer::new(1, 2).next, Some("./2.html".to_string()));
-        assert_eq!(PagePointer::new(2, 2).next, None);
+    #[should_panic(expected = "page_num must be >= 2")]
+    fn test_new_paginated_invalid_page() {
+        PagePointer::new_paginated(1, 2);
     }
 }

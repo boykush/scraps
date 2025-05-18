@@ -2,7 +2,13 @@
 {% import "__builtins/macros.html" as macros %}
 
 {% block main %}
-    <div class="index">
+    <div class="index"> 
+        {% if readme_content %}
+          <div class="readme-block">
+            {% for element in readme_content.elements %}{% if element.raw %}{{ element.raw | safe }}{% elif element.autolink %}<a href="{{ element.autolink.url }}">{{ element.autolink.url }}</a>{% endif %}{% endfor %}
+            <hr>
+          </div>
+        {% endif %}
         {% if build_search_index == true %}
           <div class="search-block">
               <span class="icon" />
