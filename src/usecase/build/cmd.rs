@@ -86,7 +86,8 @@ impl BuildCommand {
         let readme_content = {
             let readme_path = self.scraps_dir_path.join("README.md");
             if readme_path.exists() {
-                let md_text = fs::read_to_string(&readme_path).context(BuildError::ReadReadMe)?;
+                let md_text =
+                    fs::read_to_string(&readme_path).context(BuildError::ReadREADMEFile)?;
                 Some(markdown::convert::to_content(&md_text, base_url))
             } else {
                 None
