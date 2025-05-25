@@ -3,6 +3,11 @@ name: Performance Test
 on:
   pull_request:
     types: [opened, synchronize]
+    paths-ignore:
+      - 'scraps/**'
+      - 'assets/**'
+      - 'LICENSE.md'
+      - 'README.md'
 
 jobs:
   performance:
