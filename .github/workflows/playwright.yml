@@ -5,6 +5,7 @@ on:
     paths-ignore:
       - 'scraps/**'
       - 'assets/**'
+      - 'CONTRIBUTING.md'
       - 'LICENSE.md'
       - 'README.md'
 
