@@ -199,7 +199,7 @@ mod tests {
     use scraps_libs::{
         git::tests::GitCommandTest,
         lang::LangCode,
-        tests::{DirResource, FileResource},
+        tests::TestResources,
     };
 
     fn setup_command(test_resource_path: &Path) -> BuildCommand {
@@ -232,78 +232,71 @@ mod tests {
         // scrap1
         let md_path_1 = command.scraps_dir_path.join("test1.md");
         let html_path_1 = command.public_dir_path.join("scraps/test1.html");
-        let resource_1 = FileResource::new(&md_path_1);
         let resource_bytes_1 = concat!("# header1\n", "## header2\n",).as_bytes();
 
         // scrap2
         let md_path_2 = command.scraps_dir_path.join("test2.md");
         let html_path_2 = command.public_dir_path.join("scraps/test2.html");
-        let resource_2 = FileResource::new(&md_path_2);
         let resource_bytes_2 = concat!("[[test1]]\n").as_bytes();
 
         // excluded not markdown file
         let not_md_path = command.scraps_dir_path.join("test3.txt");
         let not_exists_path = command.public_dir_path.join("scraps/test3.html");
-        let resource_3 = FileResource::new(&not_md_path);
         let resource_bytes_3 = concat!("# header1\n", "## header2\n",).as_bytes();
 
         // README.md
         let readme_path = command.scraps_dir_path.join("README.md");
         let readme_html_path = command.public_dir_path.join("README.html");
-        let resource_4 = FileResource::new(&readme_path);
         let resource_bytes_4 = concat!("# README\n").as_bytes();
-
-        // static
-        let resource_static_dir = DirResource::new(&command.static_dir_path);
 
         // public
         let html_path_3 = command.public_dir_path.join("index.html");
         let css_path = command.public_dir_path.join("main.css");
         let search_index_json_path = command.public_dir_path.join("search_index.json");
 
-        resource_static_dir.run(|| {
-            resource_1.run(resource_bytes_1, || {
-                resource_2.run(resource_bytes_2, || {
-                    resource_3.run(resource_bytes_3, || {
-                        resource_4.run(resource_bytes_4, || {
-                            let result1 = command
-                                .run(
-                                    git_command,
-                                    &progress,
-                                    &base_url,
-                                    timezone,
-                                    html_metadata,
-                                    css_metadata,
-                                    &list_view_configs,
-                                )
-                                .unwrap();
-                            assert_eq!(result1, 2);
+        let mut test_resources = TestResources::new();
+        test_resources
+            .add_dir(&command.static_dir_path)
+            .add_file(&md_path_1, resource_bytes_1)
+            .add_file(&md_path_2, resource_bytes_2)
+            .add_file(&not_md_path, resource_bytes_3)
+            .add_file(&readme_path, resource_bytes_4);
+            
+        test_resources.run(|| {
+            let result1 = command
+                .run(
+                    git_command,
+                    &progress,
+                    &base_url,
+                    timezone,
+                    html_metadata,
+                    css_metadata,
+                    &list_view_configs,
+                )
+                .unwrap();
+            assert_eq!(result1, 2);
 
-                            let result2 = fs::read_to_string(html_path_1).unwrap();
-                            assert!(!result2.is_empty());
+            let result2 = fs::read_to_string(html_path_1).unwrap();
+            assert!(!result2.is_empty());
 
-                            let result3 = fs::read_to_string(html_path_2).unwrap();
-                            assert!(!result3.is_empty());
+            let result3 = fs::read_to_string(html_path_2).unwrap();
+            assert!(!result3.is_empty());
 
-                            let result4 = fs::read_to_string(not_exists_path);
-                            assert!(result4.is_err());
+            let result4 = fs::read_to_string(not_exists_path);
+            assert!(result4.is_err());
 
-                            let result5 = fs::read_to_string(readme_html_path);
-                            assert!(result5.is_err());
+            let result5 = fs::read_to_string(readme_html_path);
+            assert!(result5.is_err());
 
-                            let result6 = fs::read_to_string(html_path_3).unwrap();
-                            assert!(!result6.is_empty());
+            let result6 = fs::read_to_string(html_path_3).unwrap();
+            assert!(!result6.is_empty());
 
-                            let result7 = fs::read_to_string(css_path).unwrap();
-                            assert!(!result7.is_empty());
+            let result7 = fs::read_to_string(css_path).unwrap();
+            assert!(!result7.is_empty());
 
-                            let result8 = fs::read_to_string(search_index_json_path).unwrap();
-                            assert!(!result8.is_empty());
-                        })
-                    })
-                })
-            })
-        })
+            let result8 = fs::read_to_string(search_index_json_path).unwrap();
+            assert!(!result8.is_empty());
+        });
     }
 
     #[test]
@@ -329,40 +322,37 @@ mod tests {
 
         // scrap1
         let md_path_1 = command.scraps_dir_path.join("test1.md");
-        let resource_1 = FileResource::new(&md_path_1);
         let resource_bytes_1 = concat!("# header1\n", "## header2\n",).as_bytes();
 
         // scrap2
         let md_path_2 = command.scraps_dir_path.join("test2.md");
-        let resource_2 = FileResource::new(&md_path_2);
         let resource_bytes_2 = concat!("[[test1]]\n").as_bytes();
-
-        // static
-        let resource_static_dir = DirResource::new(&command.static_dir_path);
 
         // public
         let search_index_json_path = command.public_dir_path.join("search_index.json");
 
-        resource_static_dir.run(|| {
-            resource_1.run(resource_bytes_1, || {
-                resource_2.run(resource_bytes_2, || {
-                    let result1 = command
-                        .run(
-                            git_command,
-                            &progress,
-                            &base_url,
-                            timezone,
-                            html_metadata,
-                            css_metadata,
-                            &list_view_configs,
-                        )
-                        .unwrap();
-                    assert_eq!(result1, 2);
+        let mut test_resources = TestResources::new();
+        test_resources
+            .add_dir(&command.static_dir_path)
+            .add_file(&md_path_1, resource_bytes_1)
+            .add_file(&md_path_2, resource_bytes_2);
+            
+        test_resources.run(|| {
+            let result1 = command
+                .run(
+                    git_command,
+                    &progress,
+                    &base_url,
+                    timezone,
+                    html_metadata,
+                    css_metadata,
+                    &list_view_configs,
+                )
+                .unwrap();
+            assert_eq!(result1, 2);
 
-                    let result2 = fs::read_to_string(search_index_json_path);
-                    assert!(result2.is_err());
-                })
-            })
-        })
+            let result2 = fs::read_to_string(search_index_json_path);
+            assert!(result2.is_err());
+        });
     }
 }

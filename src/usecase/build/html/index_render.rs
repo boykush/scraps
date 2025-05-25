@@ -170,7 +170,7 @@ mod tests {
     use crate::usecase::build::model::sort::SortKey;
     use scraps_libs::lang::LangCode;
     use scraps_libs::model::scrap::Scrap;
-    use scraps_libs::tests::FileResource;
+    use scraps_libs::tests::TestResources;
 
     #[test]
     fn it_run() {
@@ -192,7 +192,7 @@ mod tests {
 
         // static
         let template_html_path = static_dir_path.join("index.html");
-        let resource_template_html = FileResource::new(&template_html_path);
+
         let resource_template_html_byte =
         "{{ build_search_index }}{% for scrap in scraps %}<a href=\"./{{ scrap.title }}.html\">{{ scrap.title }}</a>{% endfor %}"
         .as_bytes();
@@ -206,7 +206,11 @@ mod tests {
 
         let index_html_path = public_dir_path.join("index.html");
 
-        resource_template_html.run(resource_template_html_byte, || {
+        let mut test_resources = TestResources::new();
+        test_resources
+            .add_file(&template_html_path, resource_template_html_byte);
+            
+        test_resources.run(|| {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
             render
                 .run(
@@ -223,7 +227,7 @@ mod tests {
                 result,
                 "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
             );
-        })
+        });
     }
 
     #[test]
@@ -246,7 +250,7 @@ mod tests {
 
         // static
         let template_html_path = static_dir_path.join("index.html");
-        let resource_template_html = FileResource::new(&template_html_path);
+
         let resource_template_html_byte =
         "{{ build_search_index }}{% for scrap in scraps %}<a href=\"./{{ scrap.title }}.html\">{{ scrap.title }}</a>{% endfor %}"
         .as_bytes();
@@ -270,7 +274,11 @@ mod tests {
         let index_html_path = public_dir_path.join("index.html");
         let page2_html_path = public_dir_path.join("2.html");
 
-        resource_template_html.run(resource_template_html_byte, || {
+        let mut test_resources = TestResources::new();
+        test_resources
+            .add_file(&template_html_path, resource_template_html_byte);
+            
+        test_resources.run(|| {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
             let readme_content: Option<Content> = None;
             render
@@ -294,6 +302,6 @@ mod tests {
                 page2_result,
                 "true<a href=\"./scrap3.html\">scrap3</a><a href=\"./scrap4.html\">scrap4</a>"
             );
-        })
+        });
     }
 }

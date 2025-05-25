@@ -32,7 +32,7 @@ impl GenerateCommand {
 
 #[cfg(test)]
 mod tests {
-    use scraps_libs::tests::{DirResource, FileResource};
+    use scraps_libs::tests::TestResources;
 
     use super::*;
     use std::fs;
@@ -51,26 +51,29 @@ mod tests {
 
         // template
         let template_md_path = templates_dir_path.join(format!("{}.md", template_name));
-        let resource_template_md = FileResource::new(&template_md_path);
+
 
         // scraps
-        let resource_scraps_dir = DirResource::new(&scraps_dir_path);
+
         let scraps_md_path = scraps_dir_path.join("test_title.md");
 
         let template_bytes =
             "+++\ntitle = \"test_title\"\n+++\n\n{{ \"2019-09-19T15:00:00.000Z\" | date(timezone=timezone) }}".as_bytes();
-        resource_scraps_dir.run(|| {
-            resource_template_md.run(template_bytes, || {
-                // run
-                let command = GenerateCommand::new(&scraps_dir_path, &templates_dir_path);
-                command
-                    .run(template_name, template_title, &timezone)
-                    .unwrap();
+        let mut test_resources = TestResources::new();
+        test_resources
+            .add_dir(&scraps_dir_path)
+            .add_file(&template_md_path, template_bytes);
+            
+        test_resources.run(|| {
+            // run
+            let command = GenerateCommand::new(&scraps_dir_path, &templates_dir_path);
+            command
+                .run(template_name, template_title, &timezone)
+                .unwrap();
 
-                // assert
-                let result = fs::read_to_string(scraps_md_path);
-                assert_eq!(result.unwrap(), "\n2019-09-20")
-            });
+            // assert
+            let result = fs::read_to_string(scraps_md_path);
+            assert_eq!(result.unwrap(), "\n2019-09-20")
         });
     }
 
@@ -88,27 +91,30 @@ mod tests {
 
         // template
         let template_md_path = templates_dir_path.join(format!("{}.md", template_name));
-        let resource_template_md = FileResource::new(&template_md_path);
+
 
         // scraps
-        let resource_scraps_dir = DirResource::new(&scraps_dir_path);
+
         let scraps_md_path =
             scraps_dir_path.join(format!("{}.md", template_title.as_ref().unwrap()));
 
         let template_bytes =
             "+++\ntitle = \"test_title\"\n+++\n\n{{ \"2019-09-19T15:00:00.000Z\" | date(timezone=timezone) }}".as_bytes();
-        resource_scraps_dir.run(|| {
-            resource_template_md.run(template_bytes, || {
-                // run
-                let command = GenerateCommand::new(&scraps_dir_path, &templates_dir_path);
-                command
-                    .run(template_name, template_title, &timezone)
-                    .unwrap();
+        let mut test_resources = TestResources::new();
+        test_resources
+            .add_dir(&scraps_dir_path)
+            .add_file(&template_md_path, template_bytes);
+            
+        test_resources.run(|| {
+            // run
+            let command = GenerateCommand::new(&scraps_dir_path, &templates_dir_path);
+            command
+                .run(template_name, template_title, &timezone)
+                .unwrap();
 
-                // assert
-                let result = fs::read_to_string(scraps_md_path);
-                assert_eq!(result.unwrap(), "\n2019-09-20")
-            });
+            // assert
+            let result = fs::read_to_string(scraps_md_path);
+            assert_eq!(result.unwrap(), "\n2019-09-20")
         });
     }
 }
