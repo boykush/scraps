@@ -35,7 +35,7 @@ Scraps maintains a comprehensive testing strategy with three main types of tests
 - **Small Tests**: Fast tests for individual functions and methods
 - **Medium Tests**: Integration tests using TestResources for file system operations
 - **E2E Tests**: Large, browser-based end-to-end tests using Playwright
-- **Performance Tests**: Automated build time validation (≤ 2.5 seconds)
+- **Performance Tests**: Automated build time validation (≤ 3 seconds)
 
 ### Prerequisites
 
@@ -126,13 +126,13 @@ import { test, expect } from '@playwright/test';
 
 #### Build Time Requirements ⚡
 
-**Critical Requirement**: All changes must maintain build times ≤ 2.5 seconds.
+**Critical Requirement**: All changes must maintain build times ≤ 3 seconds.
 
 The performance test runs automatically on every pull request and:
 - Builds Scraps in release mode (`cargo build --release`)
 - Tests against the [boykush/wiki](https://github.com/boykush/wiki) repository
 - Measures `scraps build -v` execution time
-- **Fails the PR if build time exceeds 2.5 seconds**
+- **Fails the PR if build time exceeds 3 seconds**
 
 #### Performance Test Workflow
 

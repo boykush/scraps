@@ -2,6 +2,12 @@ name: Playwright Test
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'scraps/**'
+      - 'assets/**'
+      - 'CONTRIBUTING.md'
+      - 'LICENSE.md'
+      - 'README.md'
 
 jobs:
   test:
