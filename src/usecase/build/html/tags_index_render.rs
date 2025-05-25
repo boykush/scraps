@@ -68,12 +68,11 @@ impl TagsIndexRender {
 
 #[cfg(test)]
 mod tests {
-    use scraps_libs::lang::LangCode;
+    use scraps_libs::{lang::LangCode, tests::TestResources};
     use std::fs;
     use url::Url;
 
     use super::*;
-    use scraps_libs::tests::FileResource;
 
     #[test]
     fn it_run() {
@@ -93,7 +92,6 @@ mod tests {
 
         // static
         let template_html_path = static_dir_path.join("tags_index.html");
-        let resource_template_html = FileResource::new(&template_html_path);
         let resource_template_html_byte =
         "{% for tag in tags %}<a href=\"./{{ tag.title }}.html\">{{ tag.title }}</a>{% endfor %}"
         .as_bytes();
@@ -105,7 +103,10 @@ mod tests {
 
         let index_html_path = public_dir_path.join("tags/index.html");
 
-        resource_template_html.run(resource_template_html_byte, || {
+        let mut test_resources = TestResources::new();
+        test_resources.add_file(&template_html_path, resource_template_html_byte);
+
+        test_resources.run(|| {
             let render = TagsIndexRender::new(&static_dir_path, &public_dir_path).unwrap();
             render.run(&base_url, &metadata, &scraps).unwrap();
 

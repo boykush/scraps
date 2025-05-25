@@ -56,7 +56,7 @@ mod tests {
 
     use super::*;
     use scraps_libs::model::scrap::Scrap;
-    use scraps_libs::tests::{DirResource, FileResource};
+    use scraps_libs::tests::TestResources;
 
     #[test]
     fn it_run() {
@@ -70,13 +70,9 @@ mod tests {
 
         // static
         let template_json_path = static_dir_path.join("search_index.json");
-        let resource_template_json = FileResource::new(&template_json_path);
         let resource_template_json_byte =
         "[{% for scrap in scraps %}{ \"title\": \"{{ scrap.link_title }}\", \"url\": \"{{ base_url}}scraps/{{ scrap.file_stem }}.html\" }{% if not loop.last %},{% endif %}{% endfor %}]"
         .as_bytes();
-
-        // public
-        let resource_public_dir = DirResource::new(&public_dir_path);
 
         // scraps
         let sc1 = Scrap::new("scrap1", &None, "# header1");
@@ -85,16 +81,19 @@ mod tests {
 
         let search_index_json_path = public_dir_path.join("search_index.json");
 
-        resource_template_json.run(resource_template_json_byte, || {
-            resource_public_dir.run(|| {
-                let render = SearchIndexRender::new(&static_dir_path, &public_dir_path);
-                render.run(&base_url, &scraps).unwrap();
+        let mut test_resources = TestResources::new();
+        test_resources
+            .add_file(&template_json_path, resource_template_json_byte)
+            .add_dir(&public_dir_path);
 
-                let result = fs::read_to_string(search_index_json_path).unwrap();
-                assert_eq!(
-                    result,
-                    "[{ \"title\": \"scrap1\", \"url\": \"http://localhost:1112/scraps/scrap1.html\" },{ \"title\": \"Context/scrap2\", \"url\": \"http://localhost:1112/scraps/scrap2.context.html\" }]");
-            })
-        })
+        test_resources.run(|| {
+            let render = SearchIndexRender::new(&static_dir_path, &public_dir_path);
+            render.run(&base_url, &scraps).unwrap();
+
+            let result = fs::read_to_string(search_index_json_path).unwrap();
+            assert_eq!(
+                result,
+                "[{ \"title\": \"scrap1\", \"url\": \"http://localhost:1112/scraps/scrap1.html\" },{ \"title\": \"Context/scrap2\", \"url\": \"http://localhost:1112/scraps/scrap2.context.html\" }]");
+        });
     }
 }

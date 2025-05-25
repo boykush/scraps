@@ -39,7 +39,7 @@ impl CSSRender {
 
 #[cfg(test)]
 mod tests {
-    use scraps_libs::tests::{DirResource, FileResource};
+    use scraps_libs::tests::TestResources;
 
     use crate::usecase::build::model::color_scheme::ColorScheme;
 
@@ -57,21 +57,20 @@ mod tests {
 
         // static
         let template_css_path = static_dir_path.join("main.css");
-        let resource_template_css = FileResource::new(&template_css_path);
         let resource_template_css_byte = ":root { color-scheme: {{ color_scheme }};}".as_bytes();
 
-        // public
-        let resource_public_dir = DirResource::new(&public_dir_path);
+        let mut test_resources = TestResources::new();
+        test_resources
+            .add_file(&template_css_path, resource_template_css_byte)
+            .add_dir(&public_dir_path);
 
-        resource_template_css.run(resource_template_css_byte, || {
-            resource_public_dir.run(|| {
-                // run
-                let render = CSSRender::new(&static_dir_path, &public_dir_path);
-                render.render_main(css_metadata).unwrap();
+        test_resources.run(|| {
+            // run
+            let render = CSSRender::new(&static_dir_path, &public_dir_path);
+            render.render_main(css_metadata).unwrap();
 
-                let result = fs::read_to_string(public_dir_path.join("main.css")).unwrap();
-                assert_eq!(result, ":root { color-scheme: light dark;}");
-            })
-        })
+            let result = fs::read_to_string(public_dir_path.join("main.css")).unwrap();
+            assert_eq!(result, ":root { color-scheme: light dark;}");
+        });
     }
 }
