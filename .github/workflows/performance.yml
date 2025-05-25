@@ -37,7 +37,7 @@ jobs:
           DURATION=$(( ($END_TIME - $START_TIME) / 1000000000 ))
           MILLISECONDS=$(( ($END_TIME - $START_TIME) / 1000000 % 1000 ))
           echo "duration=$DURATION.$MILLISECONDS" >> $GITHUB_OUTPUT
-          if (( $DURATION >= 5 )); then
+          if (( $DURATION >= 2.5 )); then
             echo "status=fail" >> $GITHUB_OUTPUT
           else
             echo "status=pass" >> $GITHUB_OUTPUT
