@@ -1,6 +1,31 @@
 # Contributing to Scraps
 
-Thank you for your interest in contributing to Scraps! This document provides guidelines and information for contributors.
+Welcome to the Scraps community! 🎉
+
+Thank you for your interest in contributing to Scraps - a static site generator designed for personal and team knowledge management. We appreciate all contributions, whether they're bug reports, feature requests, documentation improvements, or code changes.
+
+## Ways to Contribute
+
+There are many ways you can help improve Scraps:
+
+### 🐛 Report Bugs
+Found a bug? Please use our [Bug Report Template](https://github.com/boykush/scraps/issues/new?assignees=&labels=bug&projects=&template=bug-report-template.md&title=) to report it. Make sure to:
+- Add a `context:` label to help us categorize the issue
+- Include your Scraps version (`scraps -V`)
+- Provide clear reproduction steps
+
+### 💡 Suggest Features
+Have an idea for a new feature? We'd love to hear it! Use our [Enhancement Feature Template](https://github.com/boykush/scraps/issues/new?assignees=&labels=enhancement&projects=&template=enhancement-feature-template.md&title=) to:
+- Add a `context:` label for proper categorization
+- Describe your idea and requirements clearly
+- Explain how it would benefit the community
+
+### 📖 Improve Documentation
+Help us make Scraps more accessible by:
+- Improving existing documentation in the `scraps/` directory
+- Fixing typos or unclear explanations
+
+---
 
 ## Testing Guidelines
 
