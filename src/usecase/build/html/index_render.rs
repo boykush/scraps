@@ -207,9 +207,8 @@ mod tests {
         let index_html_path = public_dir_path.join("index.html");
 
         let mut test_resources = TestResources::new();
-        test_resources
-            .add_file(&template_html_path, resource_template_html_byte);
-            
+        test_resources.add_file(&template_html_path, resource_template_html_byte);
+
         test_resources.run(|| {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
             render
@@ -275,9 +274,8 @@ mod tests {
         let page2_html_path = public_dir_path.join("2.html");
 
         let mut test_resources = TestResources::new();
-        test_resources
-            .add_file(&template_html_path, resource_template_html_byte);
-            
+        test_resources.add_file(&template_html_path, resource_template_html_byte);
+
         test_resources.run(|| {
             let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
             let readme_content: Option<Content> = None;

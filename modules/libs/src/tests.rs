@@ -7,22 +7,13 @@ pub trait TestResource {
     fn teardown(&self);
 }
 
-pub struct FileResource {
+struct FileResource {
     path: PathBuf,
     parent: Option<PathBuf>,
     content: Vec<u8>,
 }
 
 impl FileResource {
-    pub fn new(path: &PathBuf) -> Self {
-        let parent = path.parent().map(|p| p.to_owned());
-        FileResource {
-            path: path.to_owned(),
-            parent,
-            content: Vec::new(),
-        }
-    }
-
     pub fn with_content(path: &PathBuf, content: &[u8]) -> Self {
         let parent = path.parent().map(|p| p.to_owned());
         FileResource {
@@ -30,16 +21,6 @@ impl FileResource {
             parent,
             content: content.to_vec(),
         }
-    }
-
-    pub fn run<F>(&self, init_bytes: &[u8], b: F)
-    where
-        F: FnOnce(),
-    {
-        let mut file = self.open();
-        file.write_all(init_bytes).unwrap();
-        b();
-        self.close();
     }
 
     fn open(&self) -> File {
@@ -69,7 +50,7 @@ impl TestResource for FileResource {
     }
 }
 
-pub struct DirResource {
+struct DirResource {
     path: PathBuf,
 }
 
@@ -78,15 +59,6 @@ impl DirResource {
         DirResource {
             path: path.to_owned(),
         }
-    }
-
-    pub fn run<F>(&self, b: F)
-    where
-        F: FnOnce(),
-    {
-        self.open();
-        b();
-        self.close();
     }
 
     fn open(&self) {
@@ -114,40 +86,34 @@ pub struct TestResources {
 
 impl TestResources {
     pub fn new() -> Self {
-        TestResources { resources: Vec::new() }
+        TestResources {
+            resources: Vec::new(),
+        }
     }
-    
+
     pub fn add_file(&mut self, path: &PathBuf, content: &[u8]) -> &mut Self {
-        self.resources.push(Box::new(FileResource::with_content(path, content)));
+        self.resources
+            .push(Box::new(FileResource::with_content(path, content)));
         self
     }
-    
+
     pub fn add_dir(&mut self, path: &PathBuf) -> &mut Self {
         self.resources.push(Box::new(DirResource::new(path)));
         self
     }
-    
-    pub fn run<F>(&self, test_fn: F) where F: FnOnce() {
+
+    pub fn run<F>(&self, test_fn: F)
+    where
+        F: FnOnce(),
+    {
         for resource in &self.resources {
             resource.setup();
         }
-        
+
         test_fn();
-        
+
         for resource in self.resources.iter().rev() {
             resource.teardown();
         }
     }
-}
-
-#[macro_export]
-macro_rules! with_test_resources {
-    (files: [$(($path:expr, $content:expr)),*], dirs: [$(($dir:expr)),*], || $body:block) => {
-        {
-            let mut resources = $crate::tests::TestResources::new();
-            $(resources.add_file($path, $content);)*
-            $(resources.add_dir($dir);)*
-            resources.run(|| $body);
-        }
-    };
 }

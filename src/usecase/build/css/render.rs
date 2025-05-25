@@ -63,7 +63,7 @@ mod tests {
         test_resources
             .add_file(&template_css_path, resource_template_css_byte)
             .add_dir(&public_dir_path);
-            
+
         test_resources.run(|| {
             // run
             let render = CSSRender::new(&static_dir_path, &public_dir_path);

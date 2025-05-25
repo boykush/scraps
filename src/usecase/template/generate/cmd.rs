@@ -52,7 +52,6 @@ mod tests {
         // template
         let template_md_path = templates_dir_path.join(format!("{}.md", template_name));
 
-
         // scraps
 
         let scraps_md_path = scraps_dir_path.join("test_title.md");
@@ -63,7 +62,7 @@ mod tests {
         test_resources
             .add_dir(&scraps_dir_path)
             .add_file(&template_md_path, template_bytes);
-            
+
         test_resources.run(|| {
             // run
             let command = GenerateCommand::new(&scraps_dir_path, &templates_dir_path);
@@ -92,7 +91,6 @@ mod tests {
         // template
         let template_md_path = templates_dir_path.join(format!("{}.md", template_name));
 
-
         // scraps
 
         let scraps_md_path =
@@ -104,7 +102,7 @@ mod tests {
         test_resources
             .add_dir(&scraps_dir_path)
             .add_file(&template_md_path, template_bytes);
-            
+
         test_resources.run(|| {
             // run
             let command = GenerateCommand::new(&scraps_dir_path, &templates_dir_path);

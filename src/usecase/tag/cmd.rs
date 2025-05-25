@@ -56,7 +56,7 @@ mod tests {
         test_resources
             .add_file(&md_path_1, resource_bytes_1)
             .add_file(&md_path_2, resource_bytes_2);
-            
+
         test_resources.run(|| {
             let command = TagCommand::new(&scraps_dir_path);
 

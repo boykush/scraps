@@ -85,7 +85,7 @@ mod tests {
         test_resources
             .add_file(&template_json_path, resource_template_json_byte)
             .add_dir(&public_dir_path);
-            
+
         test_resources.run(|| {
             let render = SearchIndexRender::new(&static_dir_path, &public_dir_path);
             render.run(&base_url, &scraps).unwrap();

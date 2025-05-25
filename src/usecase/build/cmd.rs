@@ -196,11 +196,7 @@ mod tests {
     use crate::usecase::progress::tests::ProgressTest;
 
     use super::*;
-    use scraps_libs::{
-        git::tests::GitCommandTest,
-        lang::LangCode,
-        tests::TestResources,
-    };
+    use scraps_libs::{git::tests::GitCommandTest, lang::LangCode, tests::TestResources};
 
     fn setup_command(test_resource_path: &Path) -> BuildCommand {
         let scraps_dir_path = test_resource_path.join("scraps");
@@ -261,7 +257,7 @@ mod tests {
             .add_file(&md_path_2, resource_bytes_2)
             .add_file(&not_md_path, resource_bytes_3)
             .add_file(&readme_path, resource_bytes_4);
-            
+
         test_resources.run(|| {
             let result1 = command
                 .run(
@@ -336,7 +332,7 @@ mod tests {
             .add_dir(&command.static_dir_path)
             .add_file(&md_path_1, resource_bytes_1)
             .add_file(&md_path_2, resource_bytes_2);
-            
+
         test_resources.run(|| {
             let result1 = command
                 .run(
