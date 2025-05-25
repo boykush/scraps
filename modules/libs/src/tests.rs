@@ -104,16 +104,22 @@ impl TestResources {
 
     pub fn run<F>(&self, test_fn: F)
     where
-        F: FnOnce(),
+        F: FnOnce() + std::panic::UnwindSafe,
     {
         for resource in &self.resources {
             resource.setup();
         }
 
-        test_fn();
+        let result = std::panic::catch_unwind(|| {
+            test_fn();
+        });
 
         for resource in self.resources.iter().rev() {
             resource.teardown();
+        }
+
+        if let Err(err) = result {
+            std::panic::resume_unwind(err);
         }
     }
 }
