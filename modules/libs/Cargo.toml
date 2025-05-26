@@ -17,6 +17,7 @@ url.workspace = true
 itertools.workspace = true
 pulldown-cmark.workspace = true
 iso639-1.workspace = true
+once_cell.workspace = true
 
 [features]
 error = []
