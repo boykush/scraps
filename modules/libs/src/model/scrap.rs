@@ -1,4 +1,3 @@
-use once_cell::sync::OnceCell;
 use url::Url;
 
 use crate::markdown;
@@ -9,7 +8,6 @@ use super::{context::Ctx, link::ScrapLink, title::Title};
 pub struct Scrap {
     pub title: Title,
     pub ctx: Option<Ctx>,
-    links: OnceCell<Vec<ScrapLink>>,
     pub md_text: String,
     pub thumbnail: Option<Url>,
 }
@@ -19,9 +17,8 @@ impl Scrap {
         ScrapLink::new(&self.title, &self.ctx)
     }
 
-    pub fn links(&self) -> &Vec<ScrapLink> {
-        self.links
-            .get_or_init(|| markdown::extract::scrap_links(&self.md_text))
+    pub fn links(&self) -> Vec<ScrapLink> {
+        markdown::extract::scrap_links(&self.md_text)
     }
 }
 
@@ -32,7 +29,6 @@ impl Scrap {
         Scrap {
             title: title.into(),
             ctx: ctx.map(|s| s.into()),
-            links: OnceCell::new(),
             md_text: text.to_string(),
             thumbnail,
         }
@@ -47,7 +43,7 @@ mod tests {
     fn it_new() {
         let scrap = Scrap::new("scrap title", &None, "[[link1]][[link2]][[Context/link3]]");
         assert_eq!(scrap.title, "scrap title".into());
-        let mut links = scrap.links().clone();
+        let mut links = scrap.links();
         links.sort();
         let mut expected = [
             Title::from("link1").into(),
