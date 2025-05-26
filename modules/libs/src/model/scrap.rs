@@ -1,5 +1,5 @@
-use url::Url;
 use once_cell::sync::OnceCell;
+use url::Url;
 
 use crate::markdown;
 
@@ -18,9 +18,10 @@ impl Scrap {
     pub fn self_link(&self) -> ScrapLink {
         ScrapLink::new(&self.title, &self.ctx)
     }
-    
+
     pub fn links(&self) -> &Vec<ScrapLink> {
-        self.links.get_or_init(|| markdown::extract::scrap_links(&self.md_text))
+        self.links
+            .get_or_init(|| markdown::extract::scrap_links(&self.md_text))
     }
 }
 

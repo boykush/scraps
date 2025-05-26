@@ -21,10 +21,14 @@ impl BacklinksMap {
             .fold(
                 HashMap::new(),
                 |acc1: HashMap<ScrapLink, Vec<Scrap>>, scrap| {
-                    scrap.to_owned().links().iter().fold(acc1, |mut acc2, link| {
-                        acc2.entry(link.clone()).or_default().push(scrap.to_owned());
-                        acc2
-                    })
+                    scrap
+                        .to_owned()
+                        .links()
+                        .iter()
+                        .fold(acc1, |mut acc2, link| {
+                            acc2.entry(link.clone()).or_default().push(scrap.to_owned());
+                            acc2
+                        })
                 },
             )
             .into_iter()
