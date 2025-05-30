@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <!-- Page title -->
+        
+            <title>Scraps Doc</title>
+            <meta property="og:title" content="Scraps Doc" />
+            <meta name="twitter:title" content="Scraps Doc" />
+        
+        <!-- Page description -->
+        
+            <meta name="description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta property="og:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta name="twitter:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+        
+        <!-- Page favicon -->
+        
+            <link rel="icon" type="image/png" href="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;logo.png?raw=true" />
+        
+        <!-- Rubik font -->
+        <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">
+        <!-- Noto Sans JP font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+        <!-- Style sheet -->
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;main.css">
+        
+        
+    </head>
+    <body>
+        <header>
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;">
+                <h1>Scraps Doc</h1>
+            </a>
+        </header>
+        <main>
+            
+    <div class="index"> 
+        
+        
+          <div class="search-block">
+              <span class="icon" />
+              <input
+                type="text"
+                id="search-input"
+                onkeyup="doSearch()"
+                placeholder="Search by title..."
+                />
+              <ul id="search-results"></ul>
+          </div>
+        
+        <div class="tags-block">
+            
+    <ul class="tag-links">
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/markdown-syntax.html">
+                    <span class="title">Markdown Syntax</span>&nbsp;<span>(9)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/cli.html">
+                    <span class="title">CLI</span>&nbsp;<span>(5)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/internal-link.html">
+                    <span class="title">Internal Link</span>&nbsp;<span>(5)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/templates.html">
+                    <span class="title">Templates</span>&nbsp;<span>(3)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/text-editor.html">
+                    <span class="title">Text Editor</span>&nbsp;<span>(1)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/search.html">
+                    <span class="title">Search</span>&nbsp;<span>(1)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/appearance.html">
+                    <span class="title">Appearance</span>&nbsp;<span>(1)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/deployment.html">
+                    <span class="title">Deployment</span>&nbsp;<span>(1)</span>
+                </a>
+            </li>
+        
+        
+    </ul>
+
+        </div>
+        <div class="links-block">
+            <p class="sort-key">Sort by - committed date</p>
+            
+    <ul class="scrap-links">
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/search.feature.html">
+                    
+                        <div class="header">
+                            <div class="context">Feature&#47;</div>
+                            <div class="title">Search</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Search
+Search index format
+Scraps can build a search index using the Fuse JSON schema as shown below.
+[
+    {
+      &quot;title&quot;: &quot;Search&quot;,
+      &quot;url&quot;: &quot;http:&#x2F;&#x2F;127.0.0.1:1112&#x2F;scraps&#x2F;search.html&quot;
+    },
+    {
+      &quot;title&quot;: &quot;Overview&quot;,
+      &quot;url&quot;: &quot;http:&#x2F;&#x2F;127.0.0.1:1112&#x2F;scraps&#x2F;overview.html&quot;
+    },
+    ...
+]
+
+Search libraries
+Scraps content perform searches with fuse.js using an index.
+We are considering WASM solutions like tinysearch for future performance improvements in our deployment environment.
+Configuration
+If you are not using the search function, please modify your Config.toml as follows. See here for Configuration page.
+# Build a search index with the Fuse JSON and display search UI (optional, default=true, choices=true or false)
+build_search_index = false
+
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/tag.cli.html">
+                    
+                        <div class="header">
+                            <div class="context">CLI&#47;</div>
+                            <div class="title">Tag</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#CLI
+❯ scraps tag
+
+You can debug tag lists.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/color-scheme.html">
+                    
+                        <div class="header">
+                            <div class="title">Color Scheme</div>
+                        </div>
+                    
+                    
+                        <div class="thumbnail">
+                            <img class="thumbnail-image" alt="thumbnail" src="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;light_mode.png?raw=true" loading="lazy" />
+                        </div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/github-pages.html">
+                    
+                        <div class="header">
+                            <div class="title">GitHub Pages</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Deployment
+Custom actions are available to deploy Scraps to Github Pages.
+scraps-deploy-action
+YAML file
+Prepare a yaml file under .github&#x2F;workflows&#x2F; like this
+name: Build and deploy GH Pages
+on: push
+  branches:
+      - main
+    paths:
+      - &#x27;scraps&#x2F;**&#x27;
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions&#x2F;checkout@v3
+        with:
+          fetch-depth: 0 # For scraps git commited date
+      - name: build_and_deploy
+        uses: boykush&#x2F;scraps-deploy-action@v2
+        env:
+          # Target branch
+          PAGES_BRANCH: gh-pages
+          # Provide personal access token
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+GitHub settings
+Set up GitHub Pages for the repository.
+Build and deployment parameter as follows.
+
+Source: Deploy from a branch
+Branch: gh-pages
+
+</div>
+                    
+                </a>
+            </li>
+        
+    </ul>
+
+        </div>
+        <div class="paging-arrows">
+            
+                <a class="prev" href=".&#x2F;2.html">prev</a>
+            
+            
+        </div>
+    </div>
+
+        </main>
+        <footer>
+            Generated by <a href="https://github.com/boykush/scraps" target="_blank" rel="noopener noreferrer">Scraps</a>
+        </footer> 
+        <!-- Code syntax highlight -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!-- Code syntax highlight theme -->
+        <link href="https://unpkg.com/nord-highlightjs@0.1.0/dist/nord.css" rel="stylesheet" type="text/css" />
+        <!-- Mermaid -->
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.6.0/+esm'
+        </script>
+        
+  
+  <!-- For search scraps -->
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+  <script type="module">
+    fetch('./search_index.json')
+      .then(response => response.json())
+      .then(data => {
+        const fuseOptions = {
+          minMatchCharLength: 3,
+          keys: ["title"]
+        };
+        const fuse = new Fuse(data, fuseOptions);
+        window.search = function (query, numResults) {
+          return fuse.search(query).slice(0, numResults).map(result => [result.item.title, result.item.url]);
+        };
+      })
+  </script>
+  <script>
+    function doSearch() {
+      let value = document.getElementById("search-input").value;
+      console.log(`Search query: ${value}`);
+
+      // Retrieve 5 results
+      const results = search(value, 5);
+
+      console.log(`Results: ${results}`);
+
+      let ul = document.getElementById("search-results");
+      ul.innerHTML = "";
+
+      results.forEach((result, index) => {
+        var li = document.createElement("li");
+
+        let [title, url] = result;
+        console.log(`Title: ${title}, URL: ${url}`);
+        let elemlink = document.createElement('a');
+        elemlink.innerHTML = title;
+        elemlink.setAttribute('href', url);
+        li.appendChild(elemlink);
+        li.style.top = `${(index * 30) - 16}px`;
+        ul.appendChild(li);
+      })
+    }
+  </script>
+  
+ 
+    </body>
+</html>
