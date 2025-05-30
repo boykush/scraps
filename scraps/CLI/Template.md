@@ -4,38 +4,55 @@
 ❯ scraps template
 ```
 
-This command generates the scrap file from the template of the Markdown files under the `/templates` directory.
+This command generates scrap files from Markdown templates located in the `/templates` directory.
 
-## Step1. Prepare a template
+## Commands
 
-First, prepare a template file written in Markdown. The title of the template file will be the template name.
+### List Templates
 
-The simplest example is a template that generates a daily note for today's date. The title of the generated scrap can be specified with TOML metadata.
-```markdown
-+++
-title = "{{ now() | date(timezone=timezone) }}"
-+++
-```
-
- For the features available in the template, please refer to [[Feature/Templates]]. Sample templates is [[Sample templates|here]]. 
- 
-You can check the templates added under `/templates` with the following command:
 ```bash
 ❯ scraps template list
+```
+
+Lists all available templates in the `/templates` directory.
+
+**Example output:**
+```
 daily_note
+book
+meeting
+project
 ```
 
-## Step2. Generate a Scrap from the Template
-Specify the template name to generate a scrap. If the scrap title is not specified in the template metadata, the title option `-t` is required when executing the generate command.
+### Generate Scrap from Template
 
 ```bash
-scraps template generate <TEMPLATE_NAME> -t <SCRAP_TITLE>
+❯ scraps template generate <TEMPLATE_NAME> [OPTIONS]
 ```
 
-Example:
-If metadata is specified in the template
+Generates a scrap file from the specified template.
+
+**Options:**
+- `-t, --title <TITLE>`: Specify the scrap title (required if not specified in template metadata)
+
+**Examples:**
+
+With metadata-specified title:
 ```bash
-❯ scraps template generate daily_note 
+❯ scraps template generate daily_note
 ```
 
-The metadata will be ignored from the generated scrap.
+With command-line title:
+```bash
+❯ scraps template generate meeting -t "Weekly Standup"
+```
+
+With environment variables:
+```bash
+❯ TITLE="My Book Review" scraps template generate book
+```
+
+## References
+
+- Template features and syntax: [[Feature/Templates]]
+- Template samples: [[Sample templates]]

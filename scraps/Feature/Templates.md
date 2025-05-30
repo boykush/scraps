@@ -1,30 +1,31 @@
 #[[Templates]]
 
-The template feature can be used by preparing Markdown files as templates under the `templates/` directory, and it is implemented based on [Tera](https://github.com/Keats/tera), a template engine written in Rust.
+Generate scrap files from predefined Markdown templates for efficient content creation.
 
-In templare feature of Scraps, you can mainly use Tera syntax and [built-in functions](https://keats.github.io/tera/docs/#built-in-functions).
+## Basic Usage
 
-For more details, please refer to the [Tera documentation](https://keats.github.io/tera/docs/).
+1. Create template files in `/templates` directory
+2. Run generate scrap on [[CLI/Template|command-line]]
 
-## Scraps extension
+## Template Syntax
 
-In addition to Tera's syntax and built-ins, custom extensions can be implemented. Here are the custom extensions currently available in Scraps.
+Templates use [Tera](https://keats.github.io/tera) template engine with TOML metadata:
 
-### Variables
+```markdown
++++
+title = "{{ now() | date(timezone=timezone) }}"
++++
 
-#### timezone
-You can use the `timezone` specified in `Config.toml`.
-
-```
-{{ timezone }}
-```
-
-As an example, use it as the `timezone` argument in the [date](https://keats.github.io/tera/docs/#date) filter.
-```
-{{ now() | date(timezone=timezone) }}
+# Content goes here
 ```
 
-Please submit your extension requests to the [Issue](https://github.com/boykush/scraps/issues/new?template=enhancement-feature-template.md).
+## Available Variables
 
-## Others
-For samples of templates using Tera, please refer to [[Sample templates]].
+- `timezone` - Access Config.toml timezone setting
+- All [Tera built-in functions](https://keats.github.io/tera/docs/#built-in-functions)
+
+## Examples
+
+See [[Sample templates]] for ready-to-use templates.
+
+For CLI commands, see [[CLI/Template]].
