@@ -1,4 +1,9 @@
 [workspace]
+members = [
+    "modules/libs",
+    "modules/libs/lang",
+    "."
+]
 [workspace.package]
 edition = "2021"
 authors = ["boykush <boykush315@gmail.com>"]
@@ -12,6 +17,9 @@ rust-version = "1.86"
 [workspace.dependencies.scraps_libs]
 version = "0.23.1"
 path = "modules/libs"
+[workspace.dependencies.scraps_lang]
+version = "0.1.0"
+path = "modules/libs/lang"
 [workspace.dependencies]
 anyhow = "1.0.98"
 thiserror = "2.0.12"
@@ -58,7 +66,8 @@ exclude = [
 [dependencies]
 # sub crates
 scraps_libs.workspace = true
-scraps_libs.features = ["git", "lang", "markdown", "model" , "slugify"]
+scraps_libs.features = ["git", "markdown", "model" , "slugify"]
+scraps_lang.workspace = true
 #external crates
 url.workspace = true
 itertools.workspace = true

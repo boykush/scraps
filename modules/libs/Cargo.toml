@@ -16,13 +16,11 @@ thiserror.workspace = true
 url.workspace = true
 itertools.workspace = true
 pulldown-cmark.workspace = true
-iso639-1.workspace = true
 
 [features]
 error = []
 git = []
 git_test = []
-lang = []
 markdown = []
 model = []
 slugify = []
