@@ -58,7 +58,7 @@ exclude = [
 # sub crates
 scraps_libs.workspace = true
 scraps_libs.features = ["git", "markdown", "model" , "slugify"]
-scraps_lang = { git = "https://github.com/boykush/scraps.git", branch = "main" }
+scraps_lang = { git = "https://github.com/boykush/scraps.git", rev = "f2171d1a8b161396dc8db7937bf41bf85598a635" }
 #external crates
 url.workspace = true
 itertools.workspace = true
