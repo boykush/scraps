@@ -68,7 +68,8 @@ impl TagsIndexRender {
 
 #[cfg(test)]
 mod tests {
-    use scraps_libs::{lang::LangCode, tests::TestResources};
+    use scraps_lang::LangCode;
+    use scraps_libs::{tests::TestResources};
     use std::fs;
     use url::Url;
 

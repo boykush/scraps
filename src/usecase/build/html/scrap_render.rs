@@ -76,10 +76,10 @@ impl ScrapRender {
 #[cfg(test)]
 mod tests {
     use std::fs;
+    use scraps_lang::LangCode;
     use url::Url;
 
     use crate::usecase::build::model::html::HtmlMetadata;
-    use scraps_libs::lang::LangCode;
 
     use super::*;
 

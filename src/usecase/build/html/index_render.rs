@@ -162,13 +162,13 @@ impl IndexRender {
 #[cfg(test)]
 mod tests {
     use std::fs;
+    use scraps_lang::LangCode;
     use url::Url;
 
     use super::*;
     use crate::usecase::build::model::paging::Paging;
     use crate::usecase::build::model::scrap_detail::ScrapDetail;
     use crate::usecase::build::model::sort::SortKey;
-    use scraps_libs::lang::LangCode;
     use scraps_libs::model::scrap::Scrap;
     use scraps_libs::tests::TestResources;
 

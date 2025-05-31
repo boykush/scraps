@@ -66,7 +66,7 @@ impl TagRender {
 
 #[cfg(test)]
 mod tests {
-    use scraps_libs::lang::LangCode;
+    use scraps_lang::LangCode;
     use url::Url;
 
     use super::*;

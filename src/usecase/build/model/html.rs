@@ -1,4 +1,4 @@
-use scraps_libs::lang::LangCode;
+use scraps_lang::LangCode;
 use url::Url;
 
 #[derive(Clone)]
