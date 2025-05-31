@@ -75,8 +75,8 @@ impl ScrapRender {
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
     use scraps_lang::LangCode;
+    use std::fs;
     use url::Url;
 
     use crate::usecase::build::model::html::HtmlMetadata;

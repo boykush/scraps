@@ -161,8 +161,8 @@ impl IndexRender {
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
     use scraps_lang::LangCode;
+    use std::fs;
     use url::Url;
 
     use super::*;
