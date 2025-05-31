@@ -1,4 +1,8 @@
 [workspace]
+members = [
+    "modules/libs",
+    "."
+]
 [workspace.package]
 edition = "2021"
 authors = ["boykush <boykush315@gmail.com>"]
