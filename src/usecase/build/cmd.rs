@@ -196,8 +196,7 @@ mod tests {
     use crate::usecase::progress::tests::ProgressTest;
 
     use super::*;
-    use scraps_lang::LangCode;
-    use scraps_libs::{git::tests::GitCommandTest, tests::TestResources};
+    use scraps_libs::{git::tests::GitCommandTest, lang::LangCode, tests::TestResources};
 
     fn setup_command(test_resource_path: &Path) -> BuildCommand {
         let scraps_dir_path = test_resource_path.join("scraps");

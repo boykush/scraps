@@ -1,5 +1,7 @@
 #[cfg(feature = "git")]
 pub mod git;
+#[cfg(feature = "lang")]
+pub mod lang;
 #[cfg(feature = "markdown")]
 pub mod markdown;
 #[cfg(feature = "model")]

@@ -1,7 +1,0 @@
-[package]
-name = "scraps_lang"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-iso639-1.workspace = true

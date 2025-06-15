@@ -1,4 +1,4 @@
-use scraps_lang::LangCode;
+use scraps_libs::lang::LangCode;
 use serde::de::{self, Deserialize, Deserializer};
 use std::str::FromStr;
 
