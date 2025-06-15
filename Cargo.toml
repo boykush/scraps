@@ -10,7 +10,7 @@ repository = "https://github.com/boykush/scraps"
 documentation = "https://boykush.github.io/scraps"
 rust-version = "1.86"
 [workspace.dependencies.scraps_libs]
-version = "0.23.4"
+version = "0.23.5"
 path = "modules/libs"
 [workspace.dependencies]
 anyhow = "1.0.98"
