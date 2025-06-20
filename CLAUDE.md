@@ -1,8 +1,16 @@
-# Contributing to Scraps
+# Scraps - Development Guide
 
-Welcome to the Scraps community! 🎉
+Welcome to the Scraps development community! 🎉
 
-Thank you for your interest in contributing to Scraps - a static site generator designed for personal and team knowledge management. We appreciate all contributions, whether they're bug reports, feature requests, documentation improvements, or code changes.
+Scraps is a static site generator based on Markdown files written with simple Wiki-link notation, designed for personal and team knowledge management.
+
+## Quick Links
+
+- **Official Documentation:** https://boykush.github.io/scraps/
+- **Repository:** https://github.com/boykush/scraps
+- **Deep Wiki:** https://deepwiki.com/boykush/scraps
+- **Sample Site (Japanese):** https://boykush.github.io/wiki/
+- **Crates.io:** https://crates.io/crates/scraps
 
 ## Ways to Contribute
 
