@@ -1,6 +1,6 @@
-use std::{fs, path::PathBuf};
+use std::path::PathBuf;
 
-use crate::error::{anyhow::Context, BuildError, ScrapsResult};
+use crate::error::ScrapsResult;
 use crate::service::search::{
     render::SearchIndexRender, serde::search_index_scraps::SearchIndexScrapsTera,
 };
@@ -9,17 +9,12 @@ use url::Url;
 
 pub struct SearchCommand {
     scraps_dir_path: PathBuf,
-    public_dir_path: PathBuf,
 }
 
 impl SearchCommand {
-    pub fn new(
-        scraps_dir_path: &PathBuf,
-        public_dir_path: &PathBuf,
-    ) -> SearchCommand {
+    pub fn new(scraps_dir_path: &PathBuf) -> SearchCommand {
         SearchCommand {
             scraps_dir_path: scraps_dir_path.to_owned(),
-            public_dir_path: public_dir_path.to_owned(),
         }
     }
 
@@ -30,23 +25,10 @@ impl SearchCommand {
     }
 
     fn get_or_generate_search_data(&self, base_url: &Url) -> ScrapsResult<Vec<SearchIndexItem>> {
-        let search_index_path = self.public_dir_path.join("search_index.json");
-
-        if search_index_path.exists() {
-            // Load from existing JSON file
-            Self::load_search_data_from_json(&search_index_path)
-        } else {
-            // Generate search data dynamically
-            self.generate_search_data(base_url)
-        }
+        // Always generate search data dynamically for latest results
+        self.generate_search_data(base_url)
     }
 
-    fn load_search_data_from_json(json_path: &PathBuf) -> ScrapsResult<Vec<SearchIndexItem>> {
-        let json_content = fs::read_to_string(json_path).context(BuildError::ReadREADMEFile)?;
-        let items: Vec<SearchIndexItem> =
-            serde_json::from_str(&json_content).context(BuildError::ReadREADMEFile)?;
-        Ok(items)
-    }
 
     fn generate_search_data(&self, base_url: &Url) -> ScrapsResult<Vec<SearchIndexItem>> {
         // Load scraps from directory
@@ -145,7 +127,7 @@ mod tests {
             .add_dir(&public_dir_path);
 
         test_resources.run(|| {
-            let command = SearchCommand::new(&scraps_dir_path, &public_dir_path);
+            let command = SearchCommand::new(&scraps_dir_path);
             let base_url = Url::parse("http://localhost:1112/").unwrap();
 
             let results = command.run(&base_url, "test").unwrap();

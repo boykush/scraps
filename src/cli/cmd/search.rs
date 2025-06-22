@@ -8,7 +8,6 @@ use crate::usecase::search::cmd::SearchCommand;
 
 pub fn run(query: &str) -> ScrapsResult<()> {
     let scraps_dir_path = PathBuf::from("scraps");
-    let public_dir_path = PathBuf::from("public");
 
     let config = ScrapConfig::new()?;
     // Automatically append a trailing slash to URLs
@@ -18,7 +17,7 @@ pub fn run(query: &str) -> ScrapsResult<()> {
         Url::parse((config.base_url.to_string() + "/").as_str()).unwrap()
     };
 
-    let search_command = SearchCommand::new(&scraps_dir_path, &public_dir_path);
+    let search_command = SearchCommand::new(&scraps_dir_path);
     let results = search_command.run(&base_url, query)?;
 
     if results.is_empty() {
