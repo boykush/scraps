@@ -30,40 +30,13 @@ For comprehensive development guidelines, testing procedures, and contribution r
 ### 4. Quality Checks
 Before committing any code, run the following checks in order (based on CI configuration):
 
-#### Build Check
-```bash
-cargo build --verbose --workspace
-```
-
-#### Test Execution
-```bash
-cargo test --verbose --workspace
-```
-
-#### Code Formatting (Check Mode)
-```bash
-cargo fmt --all -- --check
-```
-
-#### Linting
-```bash
-cargo clippy --all-targets --all-features
-```
-
-All checks must pass before proceeding to commit. These commands mirror the CI environment to ensure consistency.
-
-### 5. Commit
-- Create a descriptive commit message for the completed TODO
-- Follow conventional commit format when possible
-- Example: `feat: implement search functionality for tags`
-
-## ✅ Quality Checklist per TODO
-
 Before each commit, ensure:
 - [ ] Code builds successfully (`cargo build --verbose --workspace`)
 - [ ] All tests pass (`cargo test --verbose --workspace`)
 - [ ] Code is properly formatted (`cargo fmt --all -- --check`)
 - [ ] No clippy warnings (`cargo clippy --all-targets --all-features`)
-- [ ] Functionality works as expected
-- [ ] Code follows project conventions
-- [ ] Performance requirements maintained (build time ≤ 3 seconds)
+
+### 5. Commit
+- Create a descriptive commit message for the completed TODO
+- Follow conventional commit format when possible
+- Example: `feat: implement search functionality for tags`
