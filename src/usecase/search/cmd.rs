@@ -50,15 +50,10 @@ impl SearchCommand {
         data: &SearchIndexScrapsTera,
         base_url: &Url,
     ) -> Vec<SearchIndexItem> {
-        // Convert SearchIndexScrapsTera to SearchIndexItem via JSON serialization
-        // since direct field access is not available with current implementation
-        let json_str = serde_json::to_string(data).unwrap();
-        let scrap_items: Vec<SearchIndexScrapItem> = serde_json::from_str(&json_str).unwrap();
-
-        scrap_items
-            .into_iter()
+        data.items()
+            .iter()
             .map(|item| SearchIndexItem {
-                title: item.link_title,
+                title: item.link_title.clone(),
                 url: format!("{}scraps/{}.html", base_url, item.file_stem),
             })
             .collect()
@@ -84,11 +79,6 @@ pub struct SearchIndexItem {
     pub url: String,
 }
 
-#[derive(Debug, Clone, serde::Deserialize)]
-struct SearchIndexScrapItem {
-    link_title: String,
-    file_stem: String,
-}
 
 #[derive(Debug, Clone)]
 pub struct SearchResult {

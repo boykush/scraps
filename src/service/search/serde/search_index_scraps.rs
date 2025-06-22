@@ -2,9 +2,9 @@ use itertools::Itertools;
 use scraps_libs::model::{file::ScrapFileStem, scrap::Scrap};
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
-struct SerializeSearchIndexScrap {
-    link_title: String,
-    file_stem: String,
+pub struct SerializeSearchIndexScrap {
+    pub link_title: String,
+    pub file_stem: String,
 }
 
 impl SerializeSearchIndexScrap {
@@ -24,5 +24,9 @@ impl SearchIndexScrapsTera {
         let serialize_scraps = scraps.iter().map(SerializeSearchIndexScrap::new);
 
         SearchIndexScrapsTera(serialize_scraps.collect_vec())
+    }
+    
+    pub fn items(&self) -> &Vec<SerializeSearchIndexScrap> {
+        &self.0
     }
 }
