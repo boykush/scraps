@@ -20,7 +20,7 @@ impl SearchCommand {
 
     pub fn run(&self, base_url: &Url, query: &str) -> ScrapsResult<Vec<SearchResult>> {
         Self::build_search_index(self, base_url)?;
-        let results = Self::perform_search(&self, query);
+        let results = Self::perform_search(self, query);
         Ok(results)
     }
 
@@ -33,7 +33,7 @@ impl SearchCommand {
             .collect::<ScrapsResult<Vec<Scrap>>>()?;
 
         // Render search index JSON
-        SearchIndexRender::new(&self.scraps_dir_path, &self.public_dir_path).run(base_url, &scraps)
+        SearchIndexRender::new(&self.scraps_dir_path, &self.public_dir_path)?.run(base_url, &scraps)
     }
 
     fn perform_search(&self, query: &str) -> Vec<SearchResult> {

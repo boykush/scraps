@@ -162,7 +162,7 @@ impl BuildCommand {
             let _span_generate_json_search_index =
                 span!(Level::INFO, "generate_json_search_index").entered();
             let search_index_render =
-                SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path);
+                SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
             search_index_render.run(base_url, &scraps)?;
             progress.complete_stage(&Stage::GenerateJson, &1);
         }
