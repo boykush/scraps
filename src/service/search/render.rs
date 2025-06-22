@@ -14,7 +14,10 @@ pub struct SearchIndexRender {
 }
 
 impl SearchIndexRender {
-    pub fn new(static_dir_path: &PathBuf, public_dir_path: &PathBuf) -> ScrapsResult<SearchIndexRender> {
+    pub fn new(
+        static_dir_path: &PathBuf,
+        public_dir_path: &PathBuf,
+    ) -> ScrapsResult<SearchIndexRender> {
         std::fs::create_dir_all(public_dir_path).context(BuildError::CreateDir)?;
 
         Ok(SearchIndexRender {
