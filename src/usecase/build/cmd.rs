@@ -28,7 +28,6 @@ use super::{
         index_render::IndexRender, scrap_render::ScrapRender, tag_render::TagRender,
         tags_index_render::TagsIndexRender,
     },
-    json::render::SearchIndexRender,
     model::{
         css::CssMetadata,
         html::HtmlMetadata,
@@ -36,6 +35,7 @@ use super::{
         scrap_detail::{ScrapDetail, ScrapDetails},
     },
 };
+use crate::service::search::render::SearchIndexRender;
 
 pub struct BuildCommand {
     scraps_dir_path: PathBuf,
