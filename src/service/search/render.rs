@@ -14,11 +14,16 @@ pub struct SearchIndexRender {
 }
 
 impl SearchIndexRender {
-    pub fn new(static_dir_path: &PathBuf, public_dir_path: &PathBuf) -> SearchIndexRender {
-        SearchIndexRender {
+    pub fn new(
+        static_dir_path: &PathBuf,
+        public_dir_path: &PathBuf,
+    ) -> ScrapsResult<SearchIndexRender> {
+        std::fs::create_dir_all(public_dir_path).context(BuildError::CreateDir)?;
+
+        Ok(SearchIndexRender {
             static_dir_path: static_dir_path.to_owned(),
             public_dir_path: public_dir_path.to_owned(),
-        }
+        })
     }
 
     pub fn run(&self, base_url: &Url, scraps: &[Scrap]) -> ScrapsResult<()> {
@@ -87,7 +92,7 @@ mod tests {
             .add_dir(&public_dir_path);
 
         test_resources.run(|| {
-            let render = SearchIndexRender::new(&static_dir_path, &public_dir_path);
+            let render = SearchIndexRender::new(&static_dir_path, &public_dir_path).unwrap();
             render.run(&base_url, &scraps).unwrap();
 
             let result = fs::read_to_string(search_index_json_path).unwrap();

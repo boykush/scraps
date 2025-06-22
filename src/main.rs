@@ -1,5 +1,6 @@
 mod cli;
 mod error;
+mod service;
 mod usecase;
 
 use clap::Parser;
@@ -11,6 +12,7 @@ fn main() -> error::ScrapsResult<()> {
         cli::SubCommands::Init { project_name } => cli::cmd::init::run(&project_name),
         cli::SubCommands::Build { verbose } => cli::cmd::build::run(verbose),
         cli::SubCommands::Serve => cli::cmd::serve::run(),
+        cli::SubCommands::Search { query } => cli::cmd::search::run(&query),
         cli::SubCommands::Tag => cli::cmd::tag::run(),
         cli::SubCommands::Template {
             template_command: template_commands,

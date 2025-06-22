@@ -2,7 +2,7 @@ use itertools::Itertools;
 use scraps_libs::model::{file::ScrapFileStem, scrap::Scrap};
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
-struct SerializeSearchIndexScrap {
+pub struct SerializeSearchIndexScrap {
     link_title: String,
     file_stem: String,
 }

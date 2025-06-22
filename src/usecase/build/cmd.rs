@@ -28,7 +28,6 @@ use super::{
         index_render::IndexRender, scrap_render::ScrapRender, tag_render::TagRender,
         tags_index_render::TagsIndexRender,
     },
-    json::render::SearchIndexRender,
     model::{
         css::CssMetadata,
         html::HtmlMetadata,
@@ -36,6 +35,7 @@ use super::{
         scrap_detail::{ScrapDetail, ScrapDetails},
     },
 };
+use crate::service::search::render::SearchIndexRender;
 
 pub struct BuildCommand {
     scraps_dir_path: PathBuf,
@@ -162,7 +162,7 @@ impl BuildCommand {
             let _span_generate_json_search_index =
                 span!(Level::INFO, "generate_json_search_index").entered();
             let search_index_render =
-                SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path);
+                SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
             search_index_render.run(base_url, &scraps)?;
             progress.complete_stage(&Stage::GenerateJson, &1);
         }
