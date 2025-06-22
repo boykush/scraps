@@ -9,19 +9,16 @@ use url::Url;
 
 pub struct SearchCommand {
     scraps_dir_path: PathBuf,
-    static_dir_path: PathBuf,
     public_dir_path: PathBuf,
 }
 
 impl SearchCommand {
     pub fn new(
         scraps_dir_path: &PathBuf,
-        static_dir_path: &PathBuf,
         public_dir_path: &PathBuf,
     ) -> SearchCommand {
         SearchCommand {
             scraps_dir_path: scraps_dir_path.to_owned(),
-            static_dir_path: static_dir_path.to_owned(),
             public_dir_path: public_dir_path.to_owned(),
         }
     }
@@ -148,7 +145,7 @@ mod tests {
             .add_dir(&public_dir_path);
 
         test_resources.run(|| {
-            let command = SearchCommand::new(&scraps_dir_path, &static_dir_path, &public_dir_path);
+            let command = SearchCommand::new(&scraps_dir_path, &public_dir_path);
             let base_url = Url::parse("http://localhost:1112/").unwrap();
 
             let results = command.run(&base_url, "test").unwrap();
