@@ -28,6 +28,9 @@ pub enum SubCommands {
     #[command(about = "Serve the site with build scraps")]
     Serve,
 
+    #[command(about = "Search scraps")]
+    Search { query: String },
+
     #[command(about = "List a tags")]
     Tag,
 
