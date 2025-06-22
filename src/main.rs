@@ -1,5 +1,6 @@
 mod cli;
 mod error;
+mod service;
 mod usecase;
 
 use clap::Parser;
