@@ -1,36 +1,30 @@
 use std::path::PathBuf;
 
 use crate::error::ScrapsResult;
-use crate::service::search::{
-    render::SearchIndexRender, serde::search_index_scraps::SearchIndexScrapsTera,
-};
+use crate::service::search::render::SearchIndexRender;
 use scraps_libs::model::scrap::Scrap;
 use url::Url;
 
 pub struct SearchCommand {
     scraps_dir_path: PathBuf,
+    public_dir_path: PathBuf,
 }
 
 impl SearchCommand {
-    pub fn new(scraps_dir_path: &PathBuf) -> SearchCommand {
+    pub fn new(scraps_dir_path: &PathBuf, public_dir_path: &PathBuf) -> SearchCommand {
         SearchCommand {
             scraps_dir_path: scraps_dir_path.to_owned(),
+            public_dir_path: public_dir_path.to_owned(),
         }
     }
 
     pub fn run(&self, base_url: &Url, query: &str) -> ScrapsResult<Vec<SearchResult>> {
-        let search_data = self.get_or_generate_search_data(base_url)?;
-        let results = Self::perform_search(&search_data, query);
+        Self::build_search_index(self, base_url)?;
+        let results = Self::perform_search(&self, query);
         Ok(results)
     }
 
-    fn get_or_generate_search_data(&self, base_url: &Url) -> ScrapsResult<Vec<SearchIndexItem>> {
-        // Always generate search data dynamically for latest results
-        self.generate_search_data(base_url)
-    }
-
-
-    fn generate_search_data(&self, base_url: &Url) -> ScrapsResult<Vec<SearchIndexItem>> {
+    fn build_search_index(&self, base_url: &Url) -> ScrapsResult<()> {
         // Load scraps from directory
         let scrap_paths = crate::usecase::read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
         let scraps = scrap_paths
@@ -38,28 +32,16 @@ impl SearchCommand {
             .map(|path| crate::usecase::read_scraps::to_scrap_by_path(&self.scraps_dir_path, &path))
             .collect::<ScrapsResult<Vec<Scrap>>>()?;
 
-        // Generate search data using SearchIndexRender
-        let search_data = SearchIndexRender::generate_search_data(&scraps);
-
-        // Convert to internal format
-        let items = Self::convert_to_search_items(&search_data, base_url);
-        Ok(items)
+        // Render search index JSON
+        SearchIndexRender::new(&self.scraps_dir_path, &self.public_dir_path).run(base_url, &scraps)
     }
 
-    fn convert_to_search_items(
-        data: &SearchIndexScrapsTera,
-        base_url: &Url,
-    ) -> Vec<SearchIndexItem> {
-        data.items()
-            .iter()
-            .map(|item| SearchIndexItem {
-                title: item.link_title.clone(),
-                url: format!("{}scraps/{}.html", base_url, item.file_stem),
-            })
-            .collect()
-    }
+    fn perform_search(&self, query: &str) -> Vec<SearchResult> {
+        let search_index_path = self.public_dir_path.join("search_index.json");
 
-    fn perform_search(items: &[SearchIndexItem], query: &str) -> Vec<SearchResult> {
+        let indexed_str = std::fs::read_to_string(&search_index_path).unwrap();
+        let items: Vec<SearchIndexItem> = serde_json::from_str(&indexed_str).unwrap();
+
         let query_lower = query.to_lowercase();
 
         items
@@ -78,7 +60,6 @@ pub struct SearchIndexItem {
     pub title: String,
     pub url: String,
 }
-
 
 #[derive(Debug, Clone)]
 pub struct SearchResult {
@@ -117,7 +98,7 @@ mod tests {
             .add_dir(&public_dir_path);
 
         test_resources.run(|| {
-            let command = SearchCommand::new(&scraps_dir_path);
+            let command = SearchCommand::new(&scraps_dir_path, &public_dir_path);
             let base_url = Url::parse("http://localhost:1112/").unwrap();
 
             let results = command.run(&base_url, "test").unwrap();

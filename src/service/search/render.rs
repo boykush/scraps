@@ -27,10 +27,6 @@ impl SearchIndexRender {
         Self::render_search_index_json(self, base_url, &serialize_scraps)
     }
 
-    pub fn generate_search_data(scraps: &[Scrap]) -> SearchIndexScrapsTera {
-        SearchIndexScrapsTera::new(scraps)
-    }
-
     fn render_search_index_json(
         &self,
         base_url: &Url,
