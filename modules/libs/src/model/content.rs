@@ -78,25 +78,12 @@ mod tests {
     }
 
     #[test]
-    fn test_content_element_raw_display() {
-        let element = ContentElement::Raw("Test text".to_string());
-        assert_eq!(format!("{}", element), "Test text");
-    }
-
-    #[test]
-    fn test_content_element_raw_display_special_chars() {
-        let element = ContentElement::Raw("Hello\nWorld\t!".to_string());
-        assert_eq!(format!("{}", element), "Hello\nWorld\t!");
-    }
-
-    #[test]
-    fn test_content_element_raw_display_unicode() {
-        let element = ContentElement::Raw("こんにちは世界".to_string());
-        assert_eq!(format!("{}", element), "こんにちは世界");
-    }
-
-    #[test]
-    fn test_content_element_autolink_display() {
+    fn test_content_element_display() {
+        // Test Raw element with special chars and Unicode
+        let element = ContentElement::Raw("Hello\nWorld\t! こんにちは".to_string());
+        assert_eq!(format!("{}", element), "Hello\nWorld\t! こんにちは");
+        
+        // Test Autolink element
         let url = Url::parse("https://example.com").unwrap();
         let element = ContentElement::Autolink(url);
         assert_eq!(format!("{}", element), "https://example.com/");
