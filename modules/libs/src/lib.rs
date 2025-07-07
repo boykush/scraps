@@ -6,6 +6,8 @@ pub mod lang;
 pub mod markdown;
 #[cfg(feature = "model")]
 pub mod model;
+#[cfg(feature = "search")]
+pub mod search;
 #[cfg(feature = "slugify")]
 pub mod slugify;
 #[cfg(feature = "test_supports")]
