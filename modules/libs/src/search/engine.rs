@@ -12,11 +12,6 @@ impl SimpleStringSearchEngine {
     }
 }
 
-impl Default for SimpleStringSearchEngine {
-    fn default() -> Self {
-        Self::new()
-    }
-}
 
 impl SearchEngine for SimpleStringSearchEngine {
     fn search(&self, items: &[SearchIndexItem], query: &str) -> Vec<SearchResult> {
@@ -55,13 +50,6 @@ mod tests {
         assert_eq!(results.len(), 2);
     }
 
-    #[test]
-    fn test_simple_string_search_engine_default() {
-        let engine = SimpleStringSearchEngine::default();
-        let items = create_test_items();
-        let results = engine.search(&items, "test");
-        assert_eq!(results.len(), 2);
-    }
 
     #[test]
     fn test_search_case_insensitive() {
