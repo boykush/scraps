@@ -9,6 +9,7 @@ on:
       - 'CONTRIBUTING.md'
       - 'LICENSE.md'
       - 'README.md'
+      - 'CLAUDE.md'
 
 jobs:
   performance:
