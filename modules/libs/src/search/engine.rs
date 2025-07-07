@@ -84,7 +84,7 @@ mod tests {
         let items = create_test_items();
         
         let results = engine.search(&items, "doc");
-        assert_eq!(results.len(), 2); // "Test Document" and "Documentation"
+        assert_eq!(results.len(), 3); // "Test Document", "Another Document", and "Documentation"
     }
 
     #[test]
