@@ -45,10 +45,8 @@ impl SearchCommand {
         let items: Vec<SearchIndexItem> = serde_json::from_str(&indexed_str).unwrap();
 
         // Convert to lib types
-        let lib_items: Vec<scraps_libs::search::result::SearchIndexItem> = items
-            .into_iter()
-            .map(|item| item.into_lib_type())
-            .collect();
+        let lib_items: Vec<scraps_libs::search::result::SearchIndexItem> =
+            items.into_iter().map(|item| item.into_lib_type()).collect();
 
         let engine = SimpleStringSearchEngine::new();
         engine.search(&lib_items, query)
@@ -63,7 +61,9 @@ struct SerdeSearchIndexItem {
 }
 
 #[derive(Debug, Clone, serde::Deserialize)]
-struct SearchIndexItem(#[serde(with = "SerdeSearchIndexItem")] scraps_libs::search::result::SearchIndexItem);
+struct SearchIndexItem(
+    #[serde(with = "SerdeSearchIndexItem")] scraps_libs::search::result::SearchIndexItem,
+);
 
 impl SearchIndexItem {
     fn into_lib_type(self) -> scraps_libs::search::result::SearchIndexItem {
