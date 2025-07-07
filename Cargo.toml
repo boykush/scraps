@@ -3,14 +3,14 @@
 edition = "2021"
 authors = ["boykush <boykush315@gmail.com>"]
 license = "MIT"
-version = "0.24.1"
+version = "0.24.0"
 description = "Scraps is a static site generator based on Markdown files written with simple Wiki-link notation, designed for personal and team knowledge management."
 homepage = "https://boykush.github.io/scraps"
 repository = "https://github.com/boykush/scraps"
 documentation = "https://boykush.github.io/scraps"
 rust-version = "1.87"
 [workspace.dependencies.scraps_libs]
-version = "0.24.0"
+version = "0.24.1"
 path = "modules/libs"
 [workspace.dependencies]
 anyhow = "1.0.98"
