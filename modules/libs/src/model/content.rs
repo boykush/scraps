@@ -74,7 +74,10 @@ mod tests {
             ContentElement::Raw(" for more info".to_string()),
         ];
         let content = Content::new(elements);
-        assert_eq!(format!("{}", content), "Visit https://example.com/ for more info");
+        assert_eq!(
+            format!("{}", content),
+            "Visit https://example.com/ for more info"
+        );
     }
 
     #[test]
@@ -82,7 +85,7 @@ mod tests {
         // Test Raw element with special chars and Unicode
         let element = ContentElement::Raw("Hello\nWorld\t! こんにちは".to_string());
         assert_eq!(format!("{}", element), "Hello\nWorld\t! こんにちは");
-        
+
         // Test Autolink element
         let url = Url::parse("https://example.com").unwrap();
         let element = ContentElement::Autolink(url);

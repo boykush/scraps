@@ -3,7 +3,7 @@ pub fn by_dash(v: &str) -> String {
     if trimmed.is_empty() {
         return String::new();
     }
-    
+
     let lower = trimmed.to_lowercase();
     // Refer to RFC 3986 for URI encoding https://datatracker.ietf.org/doc/html/rfc3986#section-2.2
     let with_replacements = lower
@@ -25,13 +25,13 @@ pub fn by_dash(v: &str) -> String {
         .replace(',', " comma ")
         .replace(';', " semicolon ")
         .replace('=', " equal ");
-    
+
     // Replace multiple spaces with single space, then replace space with dash
     let normalized_spaces = with_replacements
         .split_whitespace()
         .collect::<Vec<&str>>()
         .join("-");
-    
+
     // Clean up multiple consecutive dashes that might result from adjacent special chars
     normalized_spaces
         .split('-')
@@ -88,6 +88,9 @@ mod tests {
     #[test]
     fn test_by_dash_consecutive_special_chars() {
         // "Hello!!  @@World" -> "hello-exclamation-exclamation-at-at-world"
-        assert_eq!(by_dash("Hello!!  @@World"), "hello-exclamation-exclamation-at-at-world");
+        assert_eq!(
+            by_dash("Hello!!  @@World"),
+            "hello-exclamation-exclamation-at-at-world"
+        );
     }
 }

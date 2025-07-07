@@ -44,15 +44,21 @@ mod tests {
     fn test_from_str_invalid_language_codes() {
         let result = "invalid".parse::<LangCode>();
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Failed to parse language code 'invalid'"));
+        assert!(result
+            .unwrap_err()
+            .contains("Failed to parse language code 'invalid'"));
 
         let result = "zz".parse::<LangCode>();
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Failed to parse language code 'zz'"));
+        assert!(result
+            .unwrap_err()
+            .contains("Failed to parse language code 'zz'"));
 
         let result = "".parse::<LangCode>();
         assert!(result.is_err());
-        assert!(result.unwrap_err().contains("Failed to parse language code ''"));
+        assert!(result
+            .unwrap_err()
+            .contains("Failed to parse language code ''"));
     }
 
     #[test]
