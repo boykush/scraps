@@ -13,6 +13,7 @@ For comprehensive development guidelines, testing procedures, and contribution r
 - Create a clear roadmap for implementation
 
 ### 2. Implementation Setup (Branch Creation)
+- **IMPORTANT**: Never work directly on the main branch. Always create a feature branch first.
 - Create a new feature branch with descriptive naming:
   ```bash
   git checkout -b feature/your-feature-name

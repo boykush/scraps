@@ -9,6 +9,13 @@
         "cargo"
       ],
       "enabled": true
+    },
+    {
+      "matchManagers": [
+        "github-actions",
+        "dockerfile"
+      ],
+      "stabilityDays": 7
     }
   ]
 }
