@@ -3,7 +3,8 @@ use std::path::PathBuf;
 use crate::error::ScrapsResult;
 use crate::service::search::render::SearchIndexRender;
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::search::engine::{SearchEngine, SimpleStringSearchEngine};
+use scraps_libs::search::engine::SearchEngine;
+use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
 use scraps_libs::search::result::SearchResult;
 use url::Url;
 
@@ -48,7 +49,7 @@ impl SearchCommand {
         let lib_items: Vec<scraps_libs::search::result::SearchIndexItem> =
             items.into_iter().map(|item| item.into_lib_type()).collect();
 
-        let engine = SimpleStringSearchEngine::new();
+        let engine = FuzzySearchEngine::new();
         engine.search(&lib_items, query)
     }
 }
