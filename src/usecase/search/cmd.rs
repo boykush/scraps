@@ -21,9 +21,9 @@ impl SearchCommand {
         }
     }
 
-    pub fn run(&self, base_url: &Url, query: &str) -> ScrapsResult<Vec<SearchResult>> {
+    pub fn run(&self, base_url: &Url, query: &str, num: usize) -> ScrapsResult<Vec<SearchResult>> {
         Self::build_search_index(self, base_url)?;
-        let results = Self::perform_search(self, query);
+        let results = Self::perform_search(self, query, num);
         Ok(results)
     }
 
@@ -39,7 +39,7 @@ impl SearchCommand {
         SearchIndexRender::new(&self.scraps_dir_path, &self.public_dir_path)?.run(base_url, &scraps)
     }
 
-    fn perform_search(&self, query: &str) -> Vec<SearchResult> {
+    fn perform_search(&self, query: &str, num: usize) -> Vec<SearchResult> {
         let search_index_path = self.public_dir_path.join("search_index.json");
 
         let indexed_str = std::fs::read_to_string(&search_index_path).unwrap();
@@ -50,7 +50,7 @@ impl SearchCommand {
             items.into_iter().map(|item| item.into_lib_type()).collect();
 
         let engine = FuzzySearchEngine::new();
-        engine.search(&lib_items, query)
+        engine.search(&lib_items, query, num)
     }
 }
 
@@ -106,7 +106,7 @@ mod tests {
             let command = SearchCommand::new(&scraps_dir_path, &public_dir_path);
             let base_url = Url::parse("http://localhost:1112/").unwrap();
 
-            let results = command.run(&base_url, "test").unwrap();
+            let results = command.run(&base_url, "test", 100).unwrap();
 
             // Should find documents containing "test"
             assert!(!results.is_empty());

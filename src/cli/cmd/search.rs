@@ -6,7 +6,7 @@ use crate::cli::config::scrap_config::ScrapConfig;
 use crate::error::ScrapsResult;
 use crate::usecase::search::cmd::SearchCommand;
 
-pub fn run(query: &str) -> ScrapsResult<()> {
+pub fn run(query: &str, num: usize) -> ScrapsResult<()> {
     let scraps_dir_path = PathBuf::from("scraps");
     let public_dir_path = PathBuf::from("public");
 
@@ -19,7 +19,7 @@ pub fn run(query: &str) -> ScrapsResult<()> {
     };
 
     let search_command = SearchCommand::new(&scraps_dir_path, &public_dir_path);
-    let results = search_command.run(&base_url, query)?;
+    let results = search_command.run(&base_url, query, num)?;
 
     if results.is_empty() {
         println!("No results found for query: {}", query);

@@ -35,11 +35,11 @@ impl FuzzySearchEngine {
 }
 
 impl SearchEngine for FuzzySearchEngine {
-    fn search(&self, items: &[SearchIndexItem], query: &str) -> Vec<SearchResult> {
+    fn search(&self, items: &[SearchIndexItem], query: &str, num: usize) -> Vec<SearchResult> {
         if query.is_empty() {
             return items
                 .iter()
-                .take(100)
+                .take(num)
                 .map(|item| SearchResult::new(&item.title, &item.url))
                 .collect();
         }
@@ -57,6 +57,7 @@ impl SearchEngine for FuzzySearchEngine {
 
         results_with_scores
             .into_iter()
+            .take(num)
             .map(|(result, _)| result)
             .collect()
     }
@@ -81,7 +82,7 @@ mod tests {
     fn test_fuzzy_search_engine_new() {
         let engine = FuzzySearchEngine::new();
         let items = create_test_items();
-        let results = engine.search(&items, "test");
+        let results = engine.search(&items, "test", 100);
 
         assert!(!results.is_empty());
         assert!(results.len() <= items.len());
@@ -91,7 +92,7 @@ mod tests {
     fn test_fuzzy_search_exact_match() {
         let engine = FuzzySearchEngine::new();
         let items = create_test_items();
-        let results = engine.search(&items, "Test Document");
+        let results = engine.search(&items, "Test Document", 100);
 
         assert!(!results.is_empty());
         assert_eq!(results[0].title, "Test Document");
@@ -103,10 +104,10 @@ mod tests {
         let items = create_test_items();
 
         // Test with smaller typos that are more likely to match
-        let results = engine.search(&items, "tes");
+        let results = engine.search(&items, "tes", 100);
         assert!(!results.is_empty());
 
-        let results = engine.search(&items, "doc");
+        let results = engine.search(&items, "doc", 100);
         assert!(!results.is_empty());
     }
 
@@ -115,10 +116,10 @@ mod tests {
         let engine = FuzzySearchEngine::new();
         let items = create_test_items();
 
-        let results = engine.search(&items, "doc");
+        let results = engine.search(&items, "doc", 100);
         assert!(!results.is_empty());
 
-        let results = engine.search(&items, "fram");
+        let results = engine.search(&items, "fram", 100);
         assert!(!results.is_empty());
     }
 
@@ -127,7 +128,7 @@ mod tests {
         let engine = FuzzySearchEngine::new();
         let items = create_test_items();
 
-        let results = engine.search(&items, "test");
+        let results = engine.search(&items, "test", 100);
         assert!(!results.is_empty());
 
         let titles: Vec<&str> = results.iter().map(|r| r.title.as_str()).collect();
@@ -139,7 +140,7 @@ mod tests {
         let engine = FuzzySearchEngine::new();
         let items = create_test_items();
 
-        let results = engine.search(&items, "");
+        let results = engine.search(&items, "", 100);
         assert_eq!(results.len(), items.len());
     }
 
@@ -148,7 +149,7 @@ mod tests {
         let engine = FuzzySearchEngine::new();
         let items = create_test_items();
 
-        let results = engine.search(&items, "xyzzyx");
+        let results = engine.search(&items, "xyzzyx", 100);
         assert_eq!(results.len(), 0);
     }
 
@@ -158,9 +159,9 @@ mod tests {
         let items = create_test_items();
 
         // Test with exact matches first
-        let results1 = engine.search(&items, "test");
-        let results2 = engine.search(&items, "Test");
-        let results3 = engine.search(&items, "doc");
+        let results1 = engine.search(&items, "test", 100);
+        let results2 = engine.search(&items, "Test", 100);
+        let results3 = engine.search(&items, "doc", 100);
 
         // These should all return results since SkimMatcherV2 is case-insensitive by default
         assert!(!results1.is_empty());
@@ -174,11 +175,11 @@ mod tests {
         let items = create_test_items();
 
         // Test with exact case matches
-        let results = engine.search(&items, "Test");
+        let results = engine.search(&items, "Test", 100);
         assert!(!results.is_empty());
 
         // Even case sensitive should find some matches
-        let results = engine.search(&items, "Document");
+        let results = engine.search(&items, "Document", 100);
         assert!(!results.is_empty());
     }
 
@@ -187,7 +188,7 @@ mod tests {
         let engine = FuzzySearchEngine::new();
         let items = vec![];
 
-        let results = engine.search(&items, "test");
+        let results = engine.search(&items, "test", 100);
         assert_eq!(results.len(), 0);
     }
 
@@ -202,8 +203,55 @@ mod tests {
             ));
         }
 
-        let results = engine.search(&items, "");
+        let results = engine.search(&items, "", 100);
         assert_eq!(results.len(), 100);
+    }
+
+    #[test]
+    fn test_fuzzy_search_with_custom_num() {
+        let engine = FuzzySearchEngine::new();
+        let mut items = Vec::new();
+        for i in 0..10 {
+            items.push(SearchIndexItem::new(
+                &format!("Test Document {}", i),
+                &format!("http://example.com/test{}", i),
+            ));
+        }
+
+        // Test with num=5
+        let results = engine.search(&items, "test", 5);
+        assert_eq!(results.len(), 5);
+
+        // Test with num=3
+        let results = engine.search(&items, "test", 3);
+        assert_eq!(results.len(), 3);
+
+        // Test with num=0
+        let results = engine.search(&items, "test", 0);
+        assert_eq!(results.len(), 0);
+    }
+
+    #[test]
+    fn test_fuzzy_search_num_larger_than_available() {
+        let engine = FuzzySearchEngine::new();
+        let items = create_test_items(); // 6 items
+
+        let results = engine.search(&items, "test", 10);
+        // All items contain "test" in some form, so this should return all matching items
+        assert!(results.len() <= 6);
+        assert!(!results.is_empty());
+    }
+
+    #[test]
+    fn test_fuzzy_search_empty_query_with_custom_num() {
+        let engine = FuzzySearchEngine::new();
+        let items = create_test_items(); // 6 items
+
+        let results = engine.search(&items, "", 3);
+        assert_eq!(results.len(), 3);
+
+        let results = engine.search(&items, "", 10);
+        assert_eq!(results.len(), 6); // All items returned
     }
 
     #[test]
@@ -211,7 +259,7 @@ mod tests {
         let engine = FuzzySearchEngine::new();
         let items = create_test_items();
 
-        let results = engine.search(&items, "test");
+        let results = engine.search(&items, "test", 100);
         assert!(!results.is_empty());
 
         for result in results {
