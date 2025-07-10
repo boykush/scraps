@@ -206,7 +206,6 @@ mod tests {
         assert_eq!(results.len(), 100);
     }
 
-
     #[test]
     fn test_fuzzy_search_results_content() {
         let engine = FuzzySearchEngine::new();

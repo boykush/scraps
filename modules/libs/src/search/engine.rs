@@ -154,5 +154,4 @@ mod tests {
         let results = engine.search(&items, "");
         assert_eq!(results.len(), 100);
     }
-
 }
