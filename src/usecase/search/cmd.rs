@@ -3,6 +3,9 @@ use std::path::PathBuf;
 use crate::error::ScrapsResult;
 use crate::service::search::render::SearchIndexRender;
 use scraps_libs::model::scrap::Scrap;
+use scraps_libs::search::engine::SearchEngine;
+use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
+use scraps_libs::search::result::SearchResult;
 use url::Url;
 
 pub struct SearchCommand {
@@ -42,29 +45,31 @@ impl SearchCommand {
         let indexed_str = std::fs::read_to_string(&search_index_path).unwrap();
         let items: Vec<SearchIndexItem> = serde_json::from_str(&indexed_str).unwrap();
 
-        let query_lower = query.to_lowercase();
+        // Convert to lib types
+        let lib_items: Vec<scraps_libs::search::result::SearchIndexItem> =
+            items.into_iter().map(|item| item.into_lib_type()).collect();
 
-        items
-            .iter()
-            .filter(|item| item.title.to_lowercase().contains(&query_lower))
-            .map(|item| SearchResult {
-                title: item.title.clone(),
-                url: item.url.clone(),
-            })
-            .collect()
+        let engine = FuzzySearchEngine::new();
+        engine.search(&lib_items, query)
     }
 }
 
-#[derive(Debug, Clone, serde::Deserialize)]
-pub struct SearchIndexItem {
-    pub title: String,
-    pub url: String,
+#[derive(serde::Deserialize)]
+#[serde(remote = "scraps_libs::search::result::SearchIndexItem")]
+struct SerdeSearchIndexItem {
+    title: String,
+    url: String,
 }
 
-#[derive(Debug, Clone)]
-pub struct SearchResult {
-    pub title: String,
-    pub url: String,
+#[derive(Debug, Clone, serde::Deserialize)]
+struct SearchIndexItem(
+    #[serde(with = "SerdeSearchIndexItem")] scraps_libs::search::result::SearchIndexItem,
+);
+
+impl SearchIndexItem {
+    fn into_lib_type(self) -> scraps_libs::search::result::SearchIndexItem {
+        self.0
+    }
 }
 
 #[cfg(test)]

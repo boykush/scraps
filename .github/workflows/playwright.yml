@@ -8,6 +8,7 @@ on:
       - 'CONTRIBUTING.md'
       - 'LICENSE.md'
       - 'README.md'
+      - 'CLAUDE.md'
 
 jobs:
   test:
@@ -16,10 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Setup Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        override: true
+      uses: dtolnay/rust-toolchain@stable
     - name: Pre build
       run: |
         cargo build

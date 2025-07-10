@@ -9,6 +9,7 @@ on:
       - 'CONTRIBUTING.md'
       - 'LICENSE.md'
       - 'README.md'
+      - 'CLAUDE.md'
 
 jobs:
   performance:
@@ -24,10 +25,7 @@ jobs:
           git clone https://github.com/boykush/wiki.git
       
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
+        uses: dtolnay/rust-toolchain@stable
       
       - name: Cargo build
         run: |
