@@ -12,7 +12,9 @@ fn main() -> error::ScrapsResult<()> {
         cli::SubCommands::Init { project_name } => cli::cmd::init::run(&project_name),
         cli::SubCommands::Build { verbose } => cli::cmd::build::run(verbose),
         cli::SubCommands::Serve => cli::cmd::serve::run(),
-        cli::SubCommands::Search { query, num } => cli::cmd::search::run(&query, num.unwrap_or(100)),
+        cli::SubCommands::Search { query, num } => {
+            cli::cmd::search::run(&query, num.unwrap_or(100))
+        }
         cli::SubCommands::Tag => cli::cmd::tag::run(),
         cli::SubCommands::Template {
             template_command: template_commands,
