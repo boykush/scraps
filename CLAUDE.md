@@ -27,6 +27,11 @@ For comprehensive development guidelines, testing procedures, and contribution r
 - Focus on completing one TODO at a time
 - Write clean, maintainable code following Rust best practices
 - Use Claude Code's TODO functionality to track progress
+- **TDD Approach**: For new features, follow Test-Driven Development:
+  1. **Red Phase**: Write failing tests first
+  2. **Green Phase**: Implement minimal code to make tests pass
+  3. **Refactor Phase**: Improve code quality while keeping tests green
+  4. Commit after each phase with descriptive messages
 
 ### 4. Quality Checks
 Before committing any code, run the following checks in order (based on CI configuration):
