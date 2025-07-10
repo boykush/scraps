@@ -15,7 +15,11 @@ impl SimpleStringSearchEngine {
 impl SearchEngine for SimpleStringSearchEngine {
     fn search(&self, items: &[SearchIndexItem], query: &str) -> Vec<SearchResult> {
         if query.is_empty() {
-            return Vec::new();
+            return items
+                .iter()
+                .take(100)
+                .map(|item| SearchResult::new(&item.title, &item.url))
+                .collect();
         }
 
         let query_lower = query.to_lowercase();
@@ -88,7 +92,7 @@ mod tests {
         let items = create_test_items();
 
         let results = engine.search(&items, "");
-        assert_eq!(results.len(), 0);
+        assert_eq!(results.len(), items.len());
     }
 
     #[test]
@@ -134,5 +138,20 @@ mod tests {
 
         let results = engine.search(&items, "test_");
         assert_eq!(results.len(), 1);
+    }
+
+    #[test]
+    fn test_search_empty_query_limit() {
+        let engine = SimpleStringSearchEngine::new();
+        let mut items = Vec::new();
+        for i in 0..101 {
+            items.push(SearchIndexItem::new(
+                &format!("Document {}", i),
+                &format!("http://example.com/doc{}", i),
+            ));
+        }
+
+        let results = engine.search(&items, "");
+        assert_eq!(results.len(), 100);
     }
 }

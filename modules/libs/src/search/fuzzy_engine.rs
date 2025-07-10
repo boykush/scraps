@@ -37,7 +37,11 @@ impl FuzzySearchEngine {
 impl SearchEngine for FuzzySearchEngine {
     fn search(&self, items: &[SearchIndexItem], query: &str) -> Vec<SearchResult> {
         if query.is_empty() {
-            return Vec::new();
+            return items
+                .iter()
+                .take(100)
+                .map(|item| SearchResult::new(&item.title, &item.url))
+                .collect();
         }
 
         let mut results_with_scores: Vec<(SearchResult, i64)> = items
@@ -136,7 +140,7 @@ mod tests {
         let items = create_test_items();
 
         let results = engine.search(&items, "");
-        assert_eq!(results.len(), 0);
+        assert_eq!(results.len(), items.len());
     }
 
     #[test]
@@ -185,6 +189,21 @@ mod tests {
 
         let results = engine.search(&items, "test");
         assert_eq!(results.len(), 0);
+    }
+
+    #[test]
+    fn test_fuzzy_search_empty_query_limit() {
+        let engine = FuzzySearchEngine::new();
+        let mut items = Vec::new();
+        for i in 0..101 {
+            items.push(SearchIndexItem::new(
+                &format!("Document {}", i),
+                &format!("http://example.com/doc{}", i),
+            ));
+        }
+
+        let results = engine.search(&items, "");
+        assert_eq!(results.len(), 100);
     }
 
     #[test]
