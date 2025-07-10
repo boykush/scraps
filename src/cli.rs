@@ -29,7 +29,15 @@ pub enum SubCommands {
     Serve,
 
     #[command(about = "Search scraps")]
-    Search { query: String },
+    Search {
+        query: String,
+        #[arg(
+            short = 'n',
+            long,
+            help = "Maximum number of results to return (default: 100)"
+        )]
+        num: Option<usize>,
+    },
 
     #[command(about = "List a tags")]
     Tag,

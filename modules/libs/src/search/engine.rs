@@ -1,7 +1,7 @@
 use super::result::{SearchIndexItem, SearchResult};
 
 pub trait SearchEngine {
-    fn search(&self, items: &[SearchIndexItem], query: &str) -> Vec<SearchResult>;
+    fn search(&self, items: &[SearchIndexItem], query: &str, num: usize) -> Vec<SearchResult>;
 }
 
 pub struct SimpleStringSearchEngine;
@@ -13,11 +13,11 @@ impl SimpleStringSearchEngine {
 }
 
 impl SearchEngine for SimpleStringSearchEngine {
-    fn search(&self, items: &[SearchIndexItem], query: &str) -> Vec<SearchResult> {
+    fn search(&self, items: &[SearchIndexItem], query: &str, num: usize) -> Vec<SearchResult> {
         if query.is_empty() {
             return items
                 .iter()
-                .take(100)
+                .take(num)
                 .map(|item| SearchResult::new(&item.title, &item.url))
                 .collect();
         }
@@ -27,6 +27,7 @@ impl SearchEngine for SimpleStringSearchEngine {
         items
             .iter()
             .filter(|item| item.title.to_lowercase().contains(&query_lower))
+            .take(num)
             .map(|item| SearchResult::new(&item.title, &item.url))
             .collect()
     }
@@ -49,7 +50,7 @@ mod tests {
     fn test_simple_string_search_engine_new() {
         let engine = SimpleStringSearchEngine::new();
         let items = create_test_items();
-        let results = engine.search(&items, "test");
+        let results = engine.search(&items, "test", 100);
         assert_eq!(results.len(), 2);
     }
 
@@ -58,13 +59,13 @@ mod tests {
         let engine = SimpleStringSearchEngine::new();
         let items = create_test_items();
 
-        let results = engine.search(&items, "TEST");
+        let results = engine.search(&items, "TEST", 100);
         assert_eq!(results.len(), 2);
 
-        let results = engine.search(&items, "test");
+        let results = engine.search(&items, "test", 100);
         assert_eq!(results.len(), 2);
 
-        let results = engine.search(&items, "Test");
+        let results = engine.search(&items, "Test", 100);
         assert_eq!(results.len(), 2);
     }
 
@@ -73,7 +74,7 @@ mod tests {
         let engine = SimpleStringSearchEngine::new();
         let items = create_test_items();
 
-        let results = engine.search(&items, "doc");
+        let results = engine.search(&items, "doc", 100);
         assert_eq!(results.len(), 3); // "Test Document", "Another Document", and "Documentation"
     }
 
@@ -82,7 +83,7 @@ mod tests {
         let engine = SimpleStringSearchEngine::new();
         let items = create_test_items();
 
-        let results = engine.search(&items, "nonexistent");
+        let results = engine.search(&items, "nonexistent", 100);
         assert_eq!(results.len(), 0);
     }
 
@@ -91,7 +92,7 @@ mod tests {
         let engine = SimpleStringSearchEngine::new();
         let items = create_test_items();
 
-        let results = engine.search(&items, "");
+        let results = engine.search(&items, "", 100);
         assert_eq!(results.len(), items.len());
     }
 
@@ -100,7 +101,7 @@ mod tests {
         let engine = SimpleStringSearchEngine::new();
         let items = vec![];
 
-        let results = engine.search(&items, "test");
+        let results = engine.search(&items, "test", 100);
         assert_eq!(results.len(), 0);
     }
 
@@ -109,7 +110,7 @@ mod tests {
         let engine = SimpleStringSearchEngine::new();
         let items = create_test_items();
 
-        let results = engine.search(&items, "test");
+        let results = engine.search(&items, "test", 100);
         assert_eq!(results.len(), 2);
 
         let titles: Vec<&str> = results.iter().map(|r| r.title.as_str()).collect();
@@ -130,13 +131,13 @@ mod tests {
             SearchIndexItem::new("Test Document", "http://example.com/test3"),
         ];
 
-        let results = engine.search(&items, "test");
+        let results = engine.search(&items, "test", 100);
         assert_eq!(results.len(), 3);
 
-        let results = engine.search(&items, "test-");
+        let results = engine.search(&items, "test-", 100);
         assert_eq!(results.len(), 1);
 
-        let results = engine.search(&items, "test_");
+        let results = engine.search(&items, "test_", 100);
         assert_eq!(results.len(), 1);
     }
 
@@ -151,7 +152,52 @@ mod tests {
             ));
         }
 
-        let results = engine.search(&items, "");
+        let results = engine.search(&items, "", 100);
         assert_eq!(results.len(), 100);
+    }
+
+    #[test]
+    fn test_search_with_custom_num() {
+        let engine = SimpleStringSearchEngine::new();
+        let mut items = Vec::new();
+        for i in 0..10 {
+            items.push(SearchIndexItem::new(
+                &format!("Test Document {}", i),
+                &format!("http://example.com/test{}", i),
+            ));
+        }
+
+        // Test with num=5
+        let results = engine.search(&items, "test", 5);
+        assert_eq!(results.len(), 5);
+
+        // Test with num=3
+        let results = engine.search(&items, "test", 3);
+        assert_eq!(results.len(), 3);
+
+        // Test with num=0
+        let results = engine.search(&items, "test", 0);
+        assert_eq!(results.len(), 0);
+    }
+
+    #[test]
+    fn test_search_num_larger_than_available() {
+        let engine = SimpleStringSearchEngine::new();
+        let items = create_test_items(); // 4 items
+
+        let results = engine.search(&items, "test", 10);
+        assert_eq!(results.len(), 2); // Only 2 items match "test"
+    }
+
+    #[test]
+    fn test_search_empty_query_with_custom_num() {
+        let engine = SimpleStringSearchEngine::new();
+        let items = create_test_items(); // 4 items
+
+        let results = engine.search(&items, "", 2);
+        assert_eq!(results.len(), 2);
+
+        let results = engine.search(&items, "", 10);
+        assert_eq!(results.len(), 4); // All items returned
     }
 }
