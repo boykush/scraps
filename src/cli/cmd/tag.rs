@@ -1,19 +1,21 @@
-use std::path::PathBuf;
+use std::path::Path;
 
 use itertools::Itertools;
 use url::Url;
 
 use crate::cli::display::tag::DisplayTag;
+use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 
 use crate::cli::config::scrap_config::ScrapConfig;
 use crate::usecase::tag::cmd::TagCommand;
 
-pub fn run() -> ScrapsResult<()> {
-    let scraps_dir_path = PathBuf::from("scraps");
+pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
+    let path_resolver = PathResolver::new(project_path)?;
+    let scraps_dir_path = path_resolver.scraps_dir();
     let command = TagCommand::new(&scraps_dir_path);
 
-    let config = ScrapConfig::new()?;
+    let config = ScrapConfig::from_path(project_path)?;
     // Automatically append a trailing slash to URLs
     let base_url = if config.base_url.path().ends_with('/') {
         config.base_url

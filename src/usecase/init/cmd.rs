@@ -1,5 +1,8 @@
 use crate::error::{anyhow::Context, InitError, ScrapsResult};
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use scraps_libs::git::GitCommand;
 
@@ -12,8 +15,7 @@ impl<GC: GitCommand> InitCommand<GC> {
         InitCommand { git_command }
     }
 
-    pub fn run(&self, project_name: &str) -> ScrapsResult<()> {
-        let project_dir = &PathBuf::from(format!("./{project_name}"));
+    pub fn run(&self, project_dir: &Path) -> ScrapsResult<()> {
         let scraps_dir = project_dir.join("scraps");
         let config_toml_file = &project_dir.join("Config.toml");
         let gitignore_file = &project_dir.join(".gitignore");
@@ -43,7 +45,7 @@ mod tests {
 
         let command = InitCommand::new(git_command);
 
-        command.run(project_path.to_str().unwrap()).unwrap();
+        command.run(&project_path).unwrap();
 
         assert!(project_path.exists());
         assert!(project_path.join("scraps").exists());

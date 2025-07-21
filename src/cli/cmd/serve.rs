@@ -3,6 +3,7 @@ use std::{net::SocketAddr, path::Path};
 
 use url::Url;
 
+use crate::cli::path_resolver::PathResolver;
 use crate::cli::progress::ProgressImpl;
 use crate::error::ScrapsResult;
 use crate::usecase::progress::Progress;
@@ -21,21 +22,22 @@ use crate::{
 };
 use scraps_libs::git::GitCommandImpl;
 
-pub fn run() -> ScrapsResult<()> {
+pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     // set local environment
     let addr: SocketAddr = ([127, 0, 0, 1], 1112).into();
     let base_url = Url::parse(&format!("http://{}", addr))?.join("").unwrap();
 
-    // build command
-    let scraps_dir_path = Path::new("scraps");
-    let static_dir_path = Path::new("static");
-    let public_dir_path = Path::new("public");
-    let build_command = BuildCommand::new(scraps_dir_path, static_dir_path, public_dir_path);
+    // resolve paths
+    let path_resolver = PathResolver::new(project_path)?;
+    let scraps_dir_path = path_resolver.scraps_dir();
+    let static_dir_path = path_resolver.static_dir();
+    let public_dir_path = path_resolver.public_dir();
+    let build_command = BuildCommand::new(&scraps_dir_path, &static_dir_path, &public_dir_path);
 
     let git_command = GitCommandImpl::new();
     let progress = ProgressImpl::init(Instant::now());
 
-    let config = ScrapConfig::new()?;
+    let config = ScrapConfig::from_path(project_path)?;
     let lang_code = config
         .lang_code
         .map(|c| c.into_lang_code())
@@ -74,7 +76,7 @@ pub fn run() -> ScrapsResult<()> {
     progress.end();
 
     // serve command
-    let serve_command = ServeCommand::new(public_dir_path);
+    let serve_command = ServeCommand::new(&public_dir_path);
     let serve_result = serve_command.run(&addr);
 
     // merge result

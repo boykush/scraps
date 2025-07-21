@@ -1,15 +1,25 @@
 use clap::{Args, Parser, Subcommand};
 use clap_verbosity_flag::{Verbosity, WarnLevel};
 use scraps_libs::model::title::Title;
+use std::path::PathBuf;
 
 pub mod cmd;
 mod config;
 mod display;
+pub mod path_resolver;
 mod progress;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 pub struct Cli {
+    #[arg(
+        short = 'p',
+        long = "path",
+        global = true,
+        help = "Specify the project directory path"
+    )]
+    pub path: Option<PathBuf>,
+
     #[command(subcommand)]
     pub command: SubCommands,
 }

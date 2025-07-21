@@ -1,16 +1,18 @@
-use std::path::PathBuf;
+use std::path::Path;
 
 use url::Url;
 
 use crate::cli::config::scrap_config::ScrapConfig;
+use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 use crate::usecase::search::cmd::SearchCommand;
 
-pub fn run(query: &str, num: usize) -> ScrapsResult<()> {
-    let scraps_dir_path = PathBuf::from("scraps");
-    let public_dir_path = PathBuf::from("public");
+pub fn run(query: &str, num: usize, project_path: Option<&Path>) -> ScrapsResult<()> {
+    let path_resolver = PathResolver::new(project_path)?;
+    let scraps_dir_path = path_resolver.scraps_dir();
+    let public_dir_path = path_resolver.public_dir();
 
-    let config = ScrapConfig::new()?;
+    let config = ScrapConfig::from_path(project_path)?;
     // Automatically append a trailing slash to URLs
     let base_url = if config.base_url.path().ends_with('/') {
         config.base_url
