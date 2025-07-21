@@ -17,7 +17,7 @@ fn main() -> error::ScrapsResult<()> {
         cli::SubCommands::Search { query, num } => {
             cli::cmd::search::run(&query, num.unwrap_or(100), cli.path.as_deref())
         }
-        cli::SubCommands::Tag => cli::cmd::tag::run(),
+        cli::SubCommands::Tag => cli::cmd::tag::run(cli.path.as_deref()),
         cli::SubCommands::Template {
             template_command: template_commands,
         } => match template_commands {
