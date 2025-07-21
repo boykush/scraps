@@ -5,6 +5,7 @@ use scraps_libs::model::title::Title;
 pub mod cmd;
 mod config;
 mod display;
+pub mod path_resolver;
 mod progress;
 
 #[derive(Parser)]
