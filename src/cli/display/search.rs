@@ -1,7 +1,6 @@
 use std::fmt;
 
 use colored::Colorize;
-use itertools::Itertools;
 use scraps_libs::search::result::SearchResult;
 
 pub struct DisplaySearch {
@@ -23,11 +22,7 @@ impl fmt::Display for DisplaySearch {
         let title_str = self.title.bold();
         let url_str = self.url.blue();
 
-        let search_str = vec![title_str, url_str]
-            .into_iter()
-            .map(|c| c.to_string())
-            .collect_vec()
-            .join(" ");
+        let search_str = format!("{title_str} {url_str}");
 
         write!(f, "{search_str}")
     }
