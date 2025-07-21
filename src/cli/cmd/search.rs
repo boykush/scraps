@@ -3,6 +3,7 @@ use std::path::Path;
 use url::Url;
 
 use crate::cli::config::scrap_config::ScrapConfig;
+use crate::cli::display::search::DisplaySearch;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 use crate::usecase::search::cmd::SearchCommand;
@@ -27,7 +28,8 @@ pub fn run(query: &str, num: usize, project_path: Option<&Path>) -> ScrapsResult
         println!("No results found for query: {query}");
     } else {
         for result in results {
-            println!("{} {}", result.title, result.url);
+            let display_search = DisplaySearch::new(&result);
+            println!("{display_search}");
         }
     }
 
