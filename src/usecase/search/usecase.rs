@@ -21,7 +21,12 @@ impl SearchUsecase {
         }
     }
 
-    pub fn run(&self, base_url: &Url, query: &str, num: usize) -> ScrapsResult<Vec<SearchResult>> {
+    pub fn execute(
+        &self,
+        base_url: &Url,
+        query: &str,
+        num: usize,
+    ) -> ScrapsResult<Vec<SearchResult>> {
         Self::build_search_index(self, base_url)?;
         let results = Self::perform_search(self, query, num);
         Ok(results)
@@ -106,7 +111,7 @@ mod tests {
             let usecase = SearchUsecase::new(&scraps_dir_path, &public_dir_path);
             let base_url = Url::parse("http://localhost:1112/").unwrap();
 
-            let results = usecase.run(&base_url, "test", 100).unwrap();
+            let results = usecase.execute(&base_url, "test", 100).unwrap();
 
             // Should find documents containing "test"
             assert!(!results.is_empty());

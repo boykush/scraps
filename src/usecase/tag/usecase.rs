@@ -14,7 +14,7 @@ impl TagUsecase {
             scraps_dir_path: scraps_dir_path.to_owned(),
         }
     }
-    pub fn run(&self) -> ScrapsResult<(Tags, BacklinksMap)> {
+    pub fn execute(&self) -> ScrapsResult<(Tags, BacklinksMap)> {
         let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
 
         let scraps = paths
@@ -60,7 +60,7 @@ mod tests {
         test_resources.run(|| {
             let usecase = TagUsecase::new(&scraps_dir_path);
 
-            let result = usecase.run().unwrap();
+            let result = usecase.execute().unwrap();
 
             let (tags, backlinks_map) = result;
 

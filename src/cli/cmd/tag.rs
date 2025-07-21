@@ -23,7 +23,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
         Url::parse((config.base_url.to_string() + "/").as_str()).unwrap()
     };
 
-    let (tags, backlinks_map) = usecase.run()?;
+    let (tags, backlinks_map) = usecase.execute()?;
     let display_tags_result = tags
         .into_iter()
         .map(|tag| DisplayTag::new(&tag, &base_url, &backlinks_map))

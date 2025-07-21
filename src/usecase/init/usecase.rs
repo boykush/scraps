@@ -12,7 +12,7 @@ impl<GC: GitCommand> InitUsecase<GC> {
         InitUsecase { git_command }
     }
 
-    pub fn run(&self, project_dir: &Path) -> ScrapsResult<()> {
+    pub fn execute(&self, project_dir: &Path) -> ScrapsResult<()> {
         let scraps_dir = project_dir.join("scraps");
         let config_toml_file = &project_dir.join("Config.toml");
         let gitignore_file = &project_dir.join(".gitignore");
@@ -43,7 +43,7 @@ mod tests {
 
         let usecase = InitUsecase::new(git_command);
 
-        usecase.run(&project_path).unwrap();
+        usecase.execute(&project_path).unwrap();
 
         assert!(project_path.exists());
         assert!(project_path.join("scraps").exists());

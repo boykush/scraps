@@ -22,7 +22,7 @@ impl ServeUsecase {
     }
 
     #[tokio::main]
-    pub async fn run(&self, addr: &SocketAddr) -> ScrapsResult<()> {
+    pub async fn execute(&self, addr: &SocketAddr) -> ScrapsResult<()> {
         let listener = TcpListener::bind(&addr).await?;
         println!("\n🚀 Listening on http://{addr}\n");
 

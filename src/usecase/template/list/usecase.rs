@@ -14,7 +14,7 @@ impl ListUsecase {
             templates_dir_path: templates_dir_path.to_path_buf(),
         }
     }
-    pub fn run(&self) -> ScrapsResult<Vec<String>> {
+    pub fn execute(&self) -> ScrapsResult<Vec<String>> {
         let (markdown_tera, _) =
             markdown_tera::base(self.templates_dir_path.join("*.md").to_str().unwrap())?;
         let template_names = markdown_tera

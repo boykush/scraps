@@ -10,7 +10,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let templates_dir_path = path_resolver.templates_dir();
 
     let usecase = ListUsecase::new(&templates_dir_path);
-    let template_names = usecase.run()?;
+    let template_names = usecase.execute()?;
 
     for template_name in template_names {
         println!("{template_name}");

@@ -18,7 +18,7 @@ impl GenerateUsecase {
             templates_dir_path: templates_dir_path.to_path_buf(),
         }
     }
-    pub fn run(
+    pub fn execute(
         &self,
         template_name: &str,
         input_scrap_title: &Option<Title>,
@@ -67,7 +67,7 @@ mod tests {
             // run
             let usecase = GenerateUsecase::new(&scraps_dir_path, &templates_dir_path);
             usecase
-                .run(template_name, template_title, &timezone)
+                .execute(template_name, template_title, &timezone)
                 .unwrap();
 
             // assert
@@ -107,7 +107,7 @@ mod tests {
             // run
             let usecase = GenerateUsecase::new(&scraps_dir_path, &templates_dir_path);
             usecase
-                .run(template_name, template_title, &timezone)
+                .execute(template_name, template_title, &timezone)
                 .unwrap();
 
             // assert

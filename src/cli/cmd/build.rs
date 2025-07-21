@@ -78,7 +78,7 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
     };
     let list_view_configs = ListViewConfigs::new(&build_search_index, &sort_key, &paging);
 
-    usecase.run(
+    usecase.execute(
         git_command,
         &progress,
         &base_url,

@@ -64,7 +64,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let list_view_configs =
         list_view_configs::ListViewConfigs::new(&build_search_index, &sort_key, &paging);
 
-    let build_result = build_usecase.run(
+    let build_result = build_usecase.execute(
         git_command,
         &progress,
         &base_url,
@@ -77,7 +77,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
 
     // serve command
     let serve_usecase = ServeUsecase::new(&public_dir_path);
-    let serve_result = serve_usecase.run(&addr);
+    let serve_result = serve_usecase.execute(&addr);
 
     // merge result
     build_result.and(serve_result)

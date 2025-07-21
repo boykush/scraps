@@ -55,7 +55,7 @@ impl BuildUsecase {
             public_dir_path: public_dir_path.to_path_buf(),
         }
     }
-    pub fn run<GC: GitCommand + Send + Sync + Copy, PG: Progress>(
+    pub fn execute<GC: GitCommand + Send + Sync + Copy, PG: Progress>(
         &self,
         git_command: GC,
         progress: &PG,
@@ -260,7 +260,7 @@ mod tests {
 
         test_resources.run(|| {
             let result1 = usecase
-                .run(
+                .execute(
                     git_command,
                     &progress,
                     &base_url,
@@ -335,7 +335,7 @@ mod tests {
 
         test_resources.run(|| {
             let result1 = usecase
-                .run(
+                .execute(
                     git_command,
                     &progress,
                     &base_url,

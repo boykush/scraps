@@ -21,7 +21,7 @@ pub fn run(
 
     let config = ScrapConfig::from_path(project_path)?;
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
-    usecase.run(template_name, scrap_title, &timezone)?;
+    usecase.execute(template_name, scrap_title, &timezone)?;
 
     Ok(())
 }
