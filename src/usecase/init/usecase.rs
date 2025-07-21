@@ -3,13 +3,13 @@ use std::{fs, path::Path};
 
 use scraps_libs::git::GitCommand;
 
-pub struct InitCommand<GC: GitCommand> {
+pub struct InitUsecase<GC: GitCommand> {
     git_command: GC,
 }
 
-impl<GC: GitCommand> InitCommand<GC> {
-    pub fn new(git_command: GC) -> InitCommand<GC> {
-        InitCommand { git_command }
+impl<GC: GitCommand> InitUsecase<GC> {
+    pub fn new(git_command: GC) -> InitUsecase<GC> {
+        InitUsecase { git_command }
     }
 
     pub fn run(&self, project_dir: &Path) -> ScrapsResult<()> {
@@ -41,9 +41,9 @@ mod tests {
         let git_command = GitCommandImpl::new();
         let project_path = PathBuf::from("tests/resource/init/cmd/it_run");
 
-        let command = InitCommand::new(git_command);
+        let usecase = InitUsecase::new(git_command);
 
-        command.run(&project_path).unwrap();
+        usecase.run(&project_path).unwrap();
 
         assert!(project_path.exists());
         assert!(project_path.join("scraps").exists());

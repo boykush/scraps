@@ -8,14 +8,14 @@ use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
 use scraps_libs::search::result::SearchResult;
 use url::Url;
 
-pub struct SearchCommand {
+pub struct SearchUsecase {
     scraps_dir_path: PathBuf,
     public_dir_path: PathBuf,
 }
 
-impl SearchCommand {
-    pub fn new(scraps_dir_path: &PathBuf, public_dir_path: &PathBuf) -> SearchCommand {
-        SearchCommand {
+impl SearchUsecase {
+    pub fn new(scraps_dir_path: &PathBuf, public_dir_path: &PathBuf) -> SearchUsecase {
+        SearchUsecase {
             scraps_dir_path: scraps_dir_path.to_owned(),
             public_dir_path: public_dir_path.to_owned(),
         }
@@ -103,10 +103,10 @@ mod tests {
             .add_dir(&public_dir_path);
 
         test_resources.run(|| {
-            let command = SearchCommand::new(&scraps_dir_path, &public_dir_path);
+            let usecase = SearchUsecase::new(&scraps_dir_path, &public_dir_path);
             let base_url = Url::parse("http://localhost:1112/").unwrap();
 
-            let results = command.run(&base_url, "test", 100).unwrap();
+            let results = usecase.run(&base_url, "test", 100).unwrap();
 
             // Should find documents containing "test"
             assert!(!results.is_empty());

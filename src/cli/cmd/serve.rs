@@ -12,13 +12,13 @@ use crate::{
         color_scheme::ColorSchemeConfig, scrap_config::ScrapConfig, sort_key::SortKeyConfig,
     },
     usecase::build::{
-        cmd::BuildCommand,
         model::{
             color_scheme::ColorScheme, css::CssMetadata, html::HtmlMetadata, list_view_configs,
             paging::Paging, sort::SortKey,
         },
+        usecase::BuildUsecase,
     },
-    usecase::serve::cmd::ServeCommand,
+    usecase::serve::usecase::ServeUsecase,
 };
 use scraps_libs::git::GitCommandImpl;
 
@@ -32,7 +32,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let scraps_dir_path = path_resolver.scraps_dir();
     let static_dir_path = path_resolver.static_dir();
     let public_dir_path = path_resolver.public_dir();
-    let build_command = BuildCommand::new(&scraps_dir_path, &static_dir_path, &public_dir_path);
+    let build_usecase = BuildUsecase::new(&scraps_dir_path, &static_dir_path, &public_dir_path);
 
     let git_command = GitCommandImpl::new();
     let progress = ProgressImpl::init(Instant::now());
@@ -64,7 +64,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let list_view_configs =
         list_view_configs::ListViewConfigs::new(&build_search_index, &sort_key, &paging);
 
-    let build_result = build_command.run(
+    let build_result = build_usecase.run(
         git_command,
         &progress,
         &base_url,
@@ -76,8 +76,8 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     progress.end();
 
     // serve command
-    let serve_command = ServeCommand::new(&public_dir_path);
-    let serve_result = serve_command.run(&addr);
+    let serve_usecase = ServeUsecase::new(&public_dir_path);
+    let serve_result = serve_usecase.run(&addr);
 
     // merge result
     build_result.and(serve_result)

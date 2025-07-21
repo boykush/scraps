@@ -9,13 +9,13 @@ use crate::cli::config::color_scheme::ColorSchemeConfig;
 use crate::cli::config::sort_key::SortKeyConfig;
 use crate::cli::progress::ProgressImpl;
 use crate::error::ScrapsResult;
-use crate::usecase::build::cmd::BuildCommand;
 use crate::usecase::build::model::color_scheme::ColorScheme;
 use crate::usecase::build::model::css::CssMetadata;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::list_view_configs::ListViewConfigs;
 use crate::usecase::build::model::paging::Paging;
 use crate::usecase::build::model::sort::SortKey;
+use crate::usecase::build::usecase::BuildUsecase;
 
 use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::path_resolver::PathResolver;
@@ -41,7 +41,7 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
     let scraps_dir_path = path_resolver.scraps_dir();
     let static_dir_path = path_resolver.static_dir();
     let public_dir_path = path_resolver.public_dir();
-    let command = BuildCommand::new(&scraps_dir_path, &static_dir_path, &public_dir_path);
+    let usecase = BuildUsecase::new(&scraps_dir_path, &static_dir_path, &public_dir_path);
 
     let git_command = GitCommandImpl::new();
     let progress = ProgressImpl::init(Instant::now());
@@ -78,7 +78,7 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
     };
     let list_view_configs = ListViewConfigs::new(&build_search_index, &sort_key, &paging);
 
-    command.run(
+    usecase.run(
         git_command,
         &progress,
         &base_url,

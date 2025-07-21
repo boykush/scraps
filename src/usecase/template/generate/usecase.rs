@@ -6,14 +6,14 @@ use scraps_libs::model::title::Title;
 
 use crate::usecase::template::markdown::render::MarkdownRender;
 
-pub struct GenerateCommand {
+pub struct GenerateUsecase {
     scraps_dir_path: PathBuf,
     templates_dir_path: PathBuf,
 }
 
-impl GenerateCommand {
-    pub fn new(scraps_dir_path: &Path, templates_dir_path: &Path) -> GenerateCommand {
-        GenerateCommand {
+impl GenerateUsecase {
+    pub fn new(scraps_dir_path: &Path, templates_dir_path: &Path) -> GenerateUsecase {
+        GenerateUsecase {
             scraps_dir_path: scraps_dir_path.to_path_buf(),
             templates_dir_path: templates_dir_path.to_path_buf(),
         }
@@ -65,8 +65,8 @@ mod tests {
 
         test_resources.run(|| {
             // run
-            let command = GenerateCommand::new(&scraps_dir_path, &templates_dir_path);
-            command
+            let usecase = GenerateUsecase::new(&scraps_dir_path, &templates_dir_path);
+            usecase
                 .run(template_name, template_title, &timezone)
                 .unwrap();
 
@@ -105,8 +105,8 @@ mod tests {
 
         test_resources.run(|| {
             // run
-            let command = GenerateCommand::new(&scraps_dir_path, &templates_dir_path);
-            command
+            let usecase = GenerateUsecase::new(&scraps_dir_path, &templates_dir_path);
+            usecase
                 .run(template_name, template_title, &timezone)
                 .unwrap();
 

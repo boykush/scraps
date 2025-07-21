@@ -4,13 +4,13 @@ use crate::error::{anyhow::Ok, ScrapsResult};
 
 use crate::usecase::template::markdown::markdown_tera;
 
-pub struct ListCommand {
+pub struct ListUsecase {
     templates_dir_path: PathBuf,
 }
 
-impl ListCommand {
-    pub fn new(templates_dir_path: &Path) -> ListCommand {
-        ListCommand {
+impl ListUsecase {
+    pub fn new(templates_dir_path: &Path) -> ListUsecase {
+        ListUsecase {
             templates_dir_path: templates_dir_path.to_path_buf(),
         }
     }
