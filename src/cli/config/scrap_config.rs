@@ -1,7 +1,9 @@
+use crate::cli::path_resolver::PathResolver;
 use crate::error::{anyhow::Context, CliError, ScrapsResult};
 use chrono_tz::Tz;
 use config::Config;
 use serde::Deserialize;
+use std::path::Path;
 use url::Url;
 
 use super::{color_scheme::ColorSchemeConfig, lang::LangCodeConfig, sort_key::SortKeyConfig};
@@ -26,6 +28,20 @@ impl ScrapConfig {
             .add_source(config::File::with_name("Config.toml"))
             .build()
             .context(CliError::ConfigLoad)?;
+        config
+            .try_deserialize::<ScrapConfig>()
+            .context(CliError::ConfigLoad)
+    }
+
+    pub fn from_path(project_path: Option<&Path>) -> ScrapsResult<ScrapConfig> {
+        let path_resolver = PathResolver::new(project_path)?;
+        let config_path = path_resolver.config_path();
+
+        let config = Config::builder()
+            .add_source(config::File::from(config_path))
+            .build()
+            .context(CliError::ConfigLoad)?;
+
         config
             .try_deserialize::<ScrapConfig>()
             .context(CliError::ConfigLoad)
