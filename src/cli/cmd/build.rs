@@ -18,6 +18,7 @@ use crate::usecase::build::model::paging::Paging;
 use crate::usecase::build::model::sort::SortKey;
 
 use crate::cli::config::scrap_config::ScrapConfig;
+use crate::cli::path_resolver::PathResolver;
 use crate::usecase::progress::Progress;
 use scraps_libs::git::GitCommandImpl;
 
@@ -36,10 +37,11 @@ pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapsResult<()> {
         .init();
     let span_run = span!(Level::INFO, "run").entered();
 
-    let scraps_dir_path = Path::new("scraps");
-    let static_dir_path = Path::new("static");
-    let public_dir_path = Path::new("public");
-    let command = BuildCommand::new(scraps_dir_path, static_dir_path, public_dir_path);
+    let path_resolver = PathResolver::new(None)?;
+    let scraps_dir_path = path_resolver.scraps_dir();
+    let static_dir_path = path_resolver.static_dir();
+    let public_dir_path = path_resolver.public_dir();
+    let command = BuildCommand::new(&scraps_dir_path, &static_dir_path, &public_dir_path);
 
     let git_command = GitCommandImpl::new();
     let progress = ProgressImpl::init(Instant::now());

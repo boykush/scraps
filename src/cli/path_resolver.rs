@@ -28,7 +28,10 @@ impl PathResolver {
                 }
 
                 if !absolute_path.is_dir() {
-                    return Err(anyhow!("Path is not a directory: {}", absolute_path.display()));
+                    return Err(anyhow!(
+                        "Path is not a directory: {}",
+                        absolute_path.display()
+                    ));
                 }
 
                 absolute_path
