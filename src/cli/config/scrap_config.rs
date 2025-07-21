@@ -23,16 +23,6 @@ pub struct ScrapConfig {
 }
 
 impl ScrapConfig {
-    pub fn new() -> ScrapsResult<ScrapConfig> {
-        let config = Config::builder()
-            .add_source(config::File::with_name("Config.toml"))
-            .build()
-            .context(CliError::ConfigLoad)?;
-        config
-            .try_deserialize::<ScrapConfig>()
-            .context(CliError::ConfigLoad)
-    }
-
     pub fn from_path(project_path: Option<&Path>) -> ScrapsResult<ScrapConfig> {
         let path_resolver = PathResolver::new(project_path)?;
         let config_path = path_resolver.config_path();
