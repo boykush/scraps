@@ -37,16 +37,16 @@ impl Progress for ProgressImpl {
     fn complete_stage(&self, stage: &Stage, count: &usize) {
         match stage {
             Stage::ReadScraps => {
-                println!("✔️ Find {} Scraps", count)
+                println!("✔️ Find {count} Scraps")
             }
             Stage::GenerateHtml => {
-                println!("✔️ Generated {} HTML files", count)
+                println!("✔️ Generated {count} HTML files")
             }
             Stage::GenerateCss => {
-                println!("✔️ Generated {} CSS files", count)
+                println!("✔️ Generated {count} CSS files")
             }
             Stage::GenerateJson => {
-                println!("✔️ Generated {} JSON files", count)
+                println!("✔️ Generated {count} JSON files")
             }
         }
     }

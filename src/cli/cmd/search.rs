@@ -24,7 +24,7 @@ pub fn run(query: &str, num: usize, project_path: Option<&Path>) -> ScrapsResult
     let results = search_command.run(&base_url, query, num)?;
 
     if results.is_empty() {
-        println!("No results found for query: {}", query);
+        println!("No results found for query: {query}");
     } else {
         for result in results {
             println!("{} {}", result.title, result.url);

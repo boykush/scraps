@@ -49,6 +49,6 @@ impl fmt::Display for DisplayTag {
             .collect_vec()
             .join(" ");
 
-        write!(f, "{}", tag_str)
+        write!(f, "{tag_str}")
     }
 }

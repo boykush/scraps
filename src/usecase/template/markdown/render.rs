@@ -33,7 +33,7 @@ impl MarkdownRender {
     ) -> ScrapsResult<()> {
         let (tera, mut context) =
             markdown_tera::base(self.templates_dir_path.join("*.md").to_str().unwrap())?;
-        let template_file_name = format!("{}.md", template_name);
+        let template_file_name = format!("{template_name}.md");
         let template = if tera.get_template_names().any(|t| t == template_file_name) {
             Ok(template_file_name.as_str())
         } else {
@@ -58,7 +58,7 @@ impl MarkdownRender {
                     .map(|t| Ok(t.title))
                     .unwrap_or(Err(TemplateError::RequiredTitle))
             })?;
-        let scrap_file_name = format!("{}.md", scrap_title);
+        let scrap_file_name = format!("{scrap_title}.md");
         let ignored_metadata_text = frontmatter::ignore_metadata(&markdown_text);
 
         let mut wtr = File::create(self.scraps_dir_path.join(&scrap_file_name))
