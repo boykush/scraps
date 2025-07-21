@@ -1,8 +1,5 @@
 use crate::error::{anyhow::Context, InitError, ScrapsResult};
-use std::{
-    fs,
-    path::{Path, PathBuf},
-};
+use std::{fs, path::Path};
 
 use scraps_libs::git::GitCommand;
 
@@ -35,6 +32,7 @@ impl<GC: GitCommand> InitCommand<GC> {
 #[cfg(test)]
 mod tests {
     use scraps_libs::git::GitCommandImpl;
+    use std::path::PathBuf;
 
     use super::*;
 

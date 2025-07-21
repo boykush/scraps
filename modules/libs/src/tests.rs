@@ -84,6 +84,12 @@ pub struct TestResources {
     resources: Vec<Box<dyn TestResource>>,
 }
 
+impl Default for TestResources {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TestResources {
     pub fn new() -> Self {
         TestResources {

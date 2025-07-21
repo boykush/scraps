@@ -16,7 +16,7 @@ impl Content {
 impl fmt::Display for Content {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for element in &self.elements {
-            write!(f, "{}", element)?;
+            write!(f, "{element}")?;
         }
         Ok(())
     }
@@ -31,8 +31,8 @@ pub enum ContentElement {
 impl fmt::Display for ContentElement {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ContentElement::Raw(text) => write!(f, "{}", text),
-            ContentElement::Autolink(url) => write!(f, "{}", url),
+            ContentElement::Raw(text) => write!(f, "{text}"),
+            ContentElement::Autolink(url) => write!(f, "{url}"),
         }
     }
 }

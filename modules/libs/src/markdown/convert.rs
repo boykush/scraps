@@ -55,7 +55,7 @@ pub fn to_content(text: &str, base_url: &Url) -> Content {
                 match Url::parse(dest_url) {
                     Ok(url) => content_elements.push(ContentElement::Autolink(url)),
                     Err(e) => content_elements
-                        .push(ContentElement::Raw(format!("Error parsing URL: {}", e))),
+                        .push(ContentElement::Raw(format!("Error parsing URL: {e}"))),
                 }
             }
             (
@@ -91,7 +91,7 @@ fn handle_wiki_link_events<'a>(
 ) -> [Event<'a>; 3] {
     let scrap_link = &ScrapLink::from_path_str(dest_url);
     let file_stem = ScrapFileStem::from(scrap_link.clone());
-    let link = format!("{}scraps/{}.html", base_url, file_stem);
+    let link = format!("{base_url}scraps/{file_stem}.html");
     let start_link = Event::Start(Tag::Link {
         link_type: LinkType::WikiLink { has_pothole },
         dest_url: link.into(),

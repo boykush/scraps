@@ -11,7 +11,7 @@ impl std::str::FromStr for LangCode {
     fn from_str(s: &str) -> Result<Self, String> {
         Iso639_1::try_from(s)
             .map(LangCode)
-            .map_err(|e| format!("Failed to parse language code '{}': {}", s, e))
+            .map_err(|e| format!("Failed to parse language code '{s}': {e}"))
     }
 }
 

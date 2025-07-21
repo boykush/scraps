@@ -35,7 +35,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
             .sorted_by_key(|tag| tag.backlinks_count())
             .rev();
         for tag in sorted {
-            println!("{}", tag)
+            println!("{tag}")
         }
     })
 }

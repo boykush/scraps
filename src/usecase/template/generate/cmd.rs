@@ -50,7 +50,7 @@ mod tests {
         let timezone = chrono_tz::Asia::Tokyo;
 
         // template
-        let template_md_path = templates_dir_path.join(format!("{}.md", template_name));
+        let template_md_path = templates_dir_path.join(format!("{template_name}.md"));
 
         // scraps
 
@@ -89,7 +89,7 @@ mod tests {
         let timezone = chrono_tz::Asia::Tokyo;
 
         // template
-        let template_md_path = templates_dir_path.join(format!("{}.md", template_name));
+        let template_md_path = templates_dir_path.join(format!("{template_name}.md"));
 
         // scraps
 

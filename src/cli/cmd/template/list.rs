@@ -13,7 +13,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let template_names = command.run()?;
 
     for template_name in template_names {
-        println!("{}", template_name);
+        println!("{template_name}");
     }
 
     Ok(())
