@@ -1,8 +1,5 @@
 use crate::error::{anyhow::Context, InitError, ScrapsResult};
-use std::{
-    fs,
-    path::Path,
-};
+use std::{fs, path::Path};
 
 use scraps_libs::git::GitCommand;
 
