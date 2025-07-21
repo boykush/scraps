@@ -4,17 +4,17 @@ use std::path::PathBuf;
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 
-pub struct TagCommand {
+pub struct TagUsecase {
     scraps_dir_path: PathBuf,
 }
 
-impl TagCommand {
-    pub fn new(scraps_dir_path: &PathBuf) -> TagCommand {
-        TagCommand {
+impl TagUsecase {
+    pub fn new(scraps_dir_path: &PathBuf) -> TagUsecase {
+        TagUsecase {
             scraps_dir_path: scraps_dir_path.to_owned(),
         }
     }
-    pub fn run(&self) -> ScrapsResult<(Tags, BacklinksMap)> {
+    pub fn execute(&self) -> ScrapsResult<(Tags, BacklinksMap)> {
         let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
 
         let scraps = paths
@@ -58,9 +58,9 @@ mod tests {
             .add_file(&md_path_2, resource_bytes_2);
 
         test_resources.run(|| {
-            let command = TagCommand::new(&scraps_dir_path);
+            let usecase = TagUsecase::new(&scraps_dir_path);
 
-            let result = command.run().unwrap();
+            let result = usecase.execute().unwrap();
 
             let (tags, backlinks_map) = result;
 

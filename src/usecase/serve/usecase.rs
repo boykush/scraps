@@ -10,19 +10,19 @@ use tokio::net::TcpListener;
 
 use crate::error::ScrapsResult;
 
-pub struct ServeCommand {
+pub struct ServeUsecase {
     public_dir_path: PathBuf,
 }
 
-impl ServeCommand {
-    pub fn new(public_dir_path: &Path) -> ServeCommand {
-        ServeCommand {
+impl ServeUsecase {
+    pub fn new(public_dir_path: &Path) -> ServeUsecase {
+        ServeUsecase {
             public_dir_path: public_dir_path.to_path_buf(),
         }
     }
 
     #[tokio::main]
-    pub async fn run(&self, addr: &SocketAddr) -> ScrapsResult<()> {
+    pub async fn execute(&self, addr: &SocketAddr) -> ScrapsResult<()> {
         let listener = TcpListener::bind(&addr).await?;
         println!("\n🚀 Listening on http://{addr}\n");
 

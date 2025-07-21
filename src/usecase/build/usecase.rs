@@ -37,25 +37,25 @@ use super::{
 };
 use crate::service::search::render::SearchIndexRender;
 
-pub struct BuildCommand {
+pub struct BuildUsecase {
     scraps_dir_path: PathBuf,
     static_dir_path: PathBuf,
     public_dir_path: PathBuf,
 }
 
-impl BuildCommand {
+impl BuildUsecase {
     pub fn new(
         scraps_dir_path: &Path,
         static_dir_path: &Path,
         public_dir_path: &Path,
-    ) -> BuildCommand {
-        BuildCommand {
+    ) -> BuildUsecase {
+        BuildUsecase {
             scraps_dir_path: scraps_dir_path.to_path_buf(),
             static_dir_path: static_dir_path.to_path_buf(),
             public_dir_path: public_dir_path.to_path_buf(),
         }
     }
-    pub fn run<GC: GitCommand + Send + Sync + Copy, PG: Progress>(
+    pub fn execute<GC: GitCommand + Send + Sync + Copy, PG: Progress>(
         &self,
         git_command: GC,
         progress: &PG,
@@ -198,18 +198,18 @@ mod tests {
     use super::*;
     use scraps_libs::{git::tests::GitCommandTest, lang::LangCode, tests::TestResources};
 
-    fn setup_command(test_resource_path: &Path) -> BuildCommand {
+    fn setup_usecase(test_resource_path: &Path) -> BuildUsecase {
         let scraps_dir_path = test_resource_path.join("scraps");
         let static_dir_path = test_resource_path.join("static");
         let public_dir_path = test_resource_path.join("public");
-        BuildCommand::new(&scraps_dir_path, &static_dir_path, &public_dir_path)
+        BuildUsecase::new(&scraps_dir_path, &static_dir_path, &public_dir_path)
     }
 
     #[test]
     fn it_run() {
         // fields
         let test_resource_path = PathBuf::from("tests/resource/build/cmd/it_run");
-        let command = setup_command(&test_resource_path);
+        let usecase = setup_usecase(&test_resource_path);
 
         // run args
         let git_command = GitCommandTest::new();
@@ -226,41 +226,41 @@ mod tests {
         let list_view_configs = ListViewConfigs::new(&true, &SortKey::LinkedCount, &Paging::Not);
 
         // scrap1
-        let md_path_1 = command.scraps_dir_path.join("test1.md");
-        let html_path_1 = command.public_dir_path.join("scraps/test1.html");
+        let md_path_1 = usecase.scraps_dir_path.join("test1.md");
+        let html_path_1 = usecase.public_dir_path.join("scraps/test1.html");
         let resource_bytes_1 = concat!("# header1\n", "## header2\n",).as_bytes();
 
         // scrap2
-        let md_path_2 = command.scraps_dir_path.join("test2.md");
-        let html_path_2 = command.public_dir_path.join("scraps/test2.html");
+        let md_path_2 = usecase.scraps_dir_path.join("test2.md");
+        let html_path_2 = usecase.public_dir_path.join("scraps/test2.html");
         let resource_bytes_2 = concat!("[[test1]]\n").as_bytes();
 
         // excluded not markdown file
-        let not_md_path = command.scraps_dir_path.join("test3.txt");
-        let not_exists_path = command.public_dir_path.join("scraps/test3.html");
+        let not_md_path = usecase.scraps_dir_path.join("test3.txt");
+        let not_exists_path = usecase.public_dir_path.join("scraps/test3.html");
         let resource_bytes_3 = concat!("# header1\n", "## header2\n",).as_bytes();
 
         // README.md
-        let readme_path = command.scraps_dir_path.join("README.md");
-        let readme_html_path = command.public_dir_path.join("README.html");
+        let readme_path = usecase.scraps_dir_path.join("README.md");
+        let readme_html_path = usecase.public_dir_path.join("README.html");
         let resource_bytes_4 = concat!("# README\n").as_bytes();
 
         // public
-        let html_path_3 = command.public_dir_path.join("index.html");
-        let css_path = command.public_dir_path.join("main.css");
-        let search_index_json_path = command.public_dir_path.join("search_index.json");
+        let html_path_3 = usecase.public_dir_path.join("index.html");
+        let css_path = usecase.public_dir_path.join("main.css");
+        let search_index_json_path = usecase.public_dir_path.join("search_index.json");
 
         let mut test_resources = TestResources::new();
         test_resources
-            .add_dir(&command.static_dir_path)
+            .add_dir(&usecase.static_dir_path)
             .add_file(&md_path_1, resource_bytes_1)
             .add_file(&md_path_2, resource_bytes_2)
             .add_file(&not_md_path, resource_bytes_3)
             .add_file(&readme_path, resource_bytes_4);
 
         test_resources.run(|| {
-            let result1 = command
-                .run(
+            let result1 = usecase
+                .execute(
                     git_command,
                     &progress,
                     &base_url,
@@ -300,7 +300,7 @@ mod tests {
         // fields
         let test_resource_path =
             PathBuf::from("tests/resource/build/cmd/it_run_when_build_search_index_is_false");
-        let command = setup_command(&test_resource_path);
+        let usecase = setup_usecase(&test_resource_path);
 
         // run args
         let git_command = GitCommandTest::new();
@@ -317,25 +317,25 @@ mod tests {
         let list_view_configs = ListViewConfigs::new(&false, &SortKey::LinkedCount, &Paging::Not);
 
         // scrap1
-        let md_path_1 = command.scraps_dir_path.join("test1.md");
+        let md_path_1 = usecase.scraps_dir_path.join("test1.md");
         let resource_bytes_1 = concat!("# header1\n", "## header2\n",).as_bytes();
 
         // scrap2
-        let md_path_2 = command.scraps_dir_path.join("test2.md");
+        let md_path_2 = usecase.scraps_dir_path.join("test2.md");
         let resource_bytes_2 = concat!("[[test1]]\n").as_bytes();
 
         // public
-        let search_index_json_path = command.public_dir_path.join("search_index.json");
+        let search_index_json_path = usecase.public_dir_path.join("search_index.json");
 
         let mut test_resources = TestResources::new();
         test_resources
-            .add_dir(&command.static_dir_path)
+            .add_dir(&usecase.static_dir_path)
             .add_file(&md_path_1, resource_bytes_1)
             .add_file(&md_path_2, resource_bytes_2);
 
         test_resources.run(|| {
-            let result1 = command
-                .run(
+            let result1 = usecase
+                .execute(
                     git_command,
                     &progress,
                     &base_url,
