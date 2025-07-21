@@ -10,7 +10,7 @@ fn main() -> error::ScrapsResult<()> {
 
     match cli.command {
         cli::SubCommands::Init { project_name } => cli::cmd::init::run(&project_name),
-        cli::SubCommands::Build { verbose } => cli::cmd::build::run(verbose),
+        cli::SubCommands::Build { verbose } => cli::cmd::build::run(verbose, cli.path.as_deref()),
         cli::SubCommands::Serve => cli::cmd::serve::run(),
         cli::SubCommands::Search { query, num } => {
             cli::cmd::search::run(&query, num.unwrap_or(100))

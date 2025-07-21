@@ -22,7 +22,7 @@ use crate::cli::path_resolver::PathResolver;
 use crate::usecase::progress::Progress;
 use scraps_libs::git::GitCommandImpl;
 
-pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapsResult<()> {
+pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> ScrapsResult<()> {
     let log_level = match verbose.log_level() {
         Some(log::Level::Error) => Level::ERROR,
         Some(log::Level::Warn) => Level::WARN,
@@ -37,7 +37,7 @@ pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapsResult<()> {
         .init();
     let span_run = span!(Level::INFO, "run").entered();
 
-    let path_resolver = PathResolver::new(None)?;
+    let path_resolver = PathResolver::new(project_path)?;
     let scraps_dir_path = path_resolver.scraps_dir();
     let static_dir_path = path_resolver.static_dir();
     let public_dir_path = path_resolver.public_dir();
@@ -46,7 +46,7 @@ pub fn run(verbose: Verbosity<WarnLevel>) -> ScrapsResult<()> {
     let git_command = GitCommandImpl::new();
     let progress = ProgressImpl::init(Instant::now());
 
-    let config = ScrapConfig::new()?;
+    let config = ScrapConfig::from_path(project_path)?;
     // Automatically append a trailing slash to URLs
     let base_url = if config.base_url.path().ends_with('/') {
         config.base_url
