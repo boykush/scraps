@@ -16,7 +16,7 @@ thiserror.workspace = true
 url.workspace = true
 itertools.workspace = true
 pulldown-cmark.workspace = true
-iso639-1.workspace = true
+iso639_enum.workspace = true
 fuzzy-matcher = { version = "0.3", optional = true }
 
 [features]

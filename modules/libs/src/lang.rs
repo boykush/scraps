@@ -1,29 +1,29 @@
 use core::str;
-use iso639_1::Iso639_1;
+use iso639_enum::{Language, IsoCompat};
 use std::fmt;
 
 #[derive(Debug, Clone)]
-pub struct LangCode(Iso639_1);
+pub struct LangCode(Language);
 
 impl std::str::FromStr for LangCode {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, String> {
-        Iso639_1::try_from(s)
+        Language::from_iso639_1(s)
             .map(LangCode)
-            .map_err(|e| format!("Failed to parse language code '{s}': {e}"))
+            .map_err(|_| format!("Failed to parse language code '{s}': invalid iso639-1 code"))
     }
 }
 
 impl fmt::Display for LangCode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0.name())
+        write!(f, "{}", self.0.iso639_1().unwrap_or("unknown"))
     }
 }
 
 impl Default for LangCode {
     fn default() -> Self {
-        LangCode(Iso639_1::En)
+        LangCode(Language::Eng)  // English
     }
 }
 
@@ -63,10 +63,10 @@ mod tests {
 
     #[test]
     fn test_display_formatting() {
-        let lang = LangCode(Iso639_1::En);
+        let lang = LangCode(Language::Eng);
         assert_eq!(format!("{}", lang), "en");
 
-        let lang = LangCode(Iso639_1::Ja);
+        let lang = LangCode(Language::Jpn);
         assert_eq!(format!("{}", lang), "ja");
     }
 }
