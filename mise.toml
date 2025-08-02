@@ -1,2 +1,12 @@
 [tools]
 rust = "1.88"
+"cargo:cargo-tarpaulin" = "latest"
+
+[tasks.coverage]
+description = "Run code coverage analysis with tarpaulin"
+run = "mise exec cargo:cargo-tarpaulin -- cargo tarpaulin --verbose --all-features --workspace --timeout 120 --exclude-files 'target/*' --exclude-files '*/build.rs'"
+
+[tasks.coverage-html]
+description = "Generate HTML coverage report"
+run = "mise exec cargo:cargo-tarpaulin -- cargo tarpaulin --verbose --all-features --workspace --timeout 120 --out html"
+
