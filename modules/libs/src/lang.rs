@@ -17,7 +17,7 @@ impl std::str::FromStr for LangCode {
 
 impl fmt::Display for LangCode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0.iso639_1().unwrap_or("unknown"))
+        write!(f, "{}", self.0.iso639_1().unwrap_or_else(|| self.0.name()))
     }
 }
 
