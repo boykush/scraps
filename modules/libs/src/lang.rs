@@ -1,5 +1,5 @@
 use core::str;
-use iso639_enum::{Language, IsoCompat};
+use iso639_enum::{IsoCompat, Language};
 use std::fmt;
 
 #[derive(Debug, Clone)]
@@ -23,7 +23,7 @@ impl fmt::Display for LangCode {
 
 impl Default for LangCode {
     fn default() -> Self {
-        LangCode(Language::Eng)  // English
+        LangCode(Language::Eng) // English
     }
 }
 
