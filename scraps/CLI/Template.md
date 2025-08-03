@@ -32,23 +32,19 @@ project
 
 Generates a scrap file from the specified template.
 
-**Options:**
-- `-t, --title <TITLE>`: Specify the scrap title (required if not specified in template metadata)
+## Examples
 
-**Examples:**
-
-With metadata-specified title:
 ```bash
+# List available templates
+❯ scraps template list
+
+# Generate from template with metadata-specified title
 ❯ scraps template generate daily_note
-```
 
-With command-line title:
-```bash
+# Generate with command-line title
 ❯ scraps template generate meeting -t "Weekly Standup"
-```
 
-With environment variables:
-```bash
+# Generate with environment variables
 ❯ TITLE="My Book Review" scraps template generate book
 ```
 
