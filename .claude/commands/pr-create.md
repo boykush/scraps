@@ -14,6 +14,7 @@ Create a pull request for the current branch using the following workflow:
    - Follow the format specified in @.github/pull_request_template.md
 
 3. **Create the pull request**:
+   - Push current branch to remote if needed
    - Use `gh pr create` with generated content and base branch main
    - Handle additional arguments: $ARGUMENTS
 
