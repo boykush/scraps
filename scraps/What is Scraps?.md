@@ -15,7 +15,7 @@ Scraps bridges the gap between informal knowledge sharing and production documen
 - **Developer Experience**: [[Language Server Protocol]] support and familiar tooling reduce documentation friction
 
 ## 2. Single Source of Truth Approach  
-Information is organized into atomic "Scrap" units following the DRY principle - write once, reference everywhere. Context functionality provides appropriate scope while wiki-links ensure consistency across your entire knowledge base, preventing inconsistencies.
+Information is organized into atomic "Scrap" units following the DRY principle - write once, reference everywhere. [[Context link|Context]] functionality provides appropriate scope while wiki-links ensure consistency across your entire knowledge base.
 
 ## 3. Simple Writing Experience
 Markdown files with simple Wiki-link notation enable intuitive knowledge expression. [[Tag link|Tags]] are represented as `[[Tag1]]` for non-existent titles.
