@@ -1,11 +1,48 @@
 ## Setup
 
-Begin with [[Installation]] of Scraps, then [[CLI/Init]] a new project and customize the [[Configuration]] to match your preferences.
+1. **Install Scraps**
+   - Follow the [[Installation]] guide to install Scraps on your system
+
+2. **Initialize Project**
+   - Create a new Scraps project using [[CLI/Init]]:
+     ```bash
+     ❯ scraps init my-knowledge-base
+     ❯ cd my-knowledge-base
+     ```
+
+3. **Configure Project**
+   - Customize the [[Configuration]] in `Config.toml`
+   - Set your site title, base URL, and other preferences
 
 ## Content Creation
 
-Write Markdown files in the `/scraps` directory using [[CommonMark specification]] and [[GitHub-flavored Markdown]]. Enhance your content with [[Mermaid]] diagrams, [[Autolink]] functionality, and [[Internal Link]] connections between documents.
+1. **Write Markdown Files**
+   - Create Markdown files in the `/scraps` directory
+   - Use [[CommonMark specification]] and [[GitHub-flavored Markdown]]
 
-## Build and Deploy
+2. **Add Internal Links**
+   - Connect documents using [[Internal Link]] syntax:
+     - `[[Page Name]]` for simple links
+     - `[[Page Name|Custom Text]]` for custom link text
 
-Use [[CLI/Build]] to generate static site files, [[CLI/Serve]] for local preview and debugging, then deploy to platforms like [[GitHub Pages]].
+3. **Enhance Content**
+   - Add [[Mermaid]] diagrams for visual representations
+   - Use [[Autolink]] functionality for external links
+   - Organize with [[Context link|context folders]] when needed
+
+## Build and Preview
+
+1. **Generate Site**
+   - Use [[CLI/Build]] to generate static site files:
+     ```bash
+     ❯ scraps build
+     ```
+
+2. **Preview Locally**
+   - Use [[CLI/Serve]] for local preview and debugging:
+     ```bash
+     ❯ scraps serve
+     ```
+
+3. **Deploy**
+   - Deploy to platforms like [[GitHub Pages]] when ready
