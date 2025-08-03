@@ -26,7 +26,7 @@ We are considering WASM solutions like [tinysearch](https://endler.dev/2019/tiny
 
 ## Configuration
 
-If you are not using the search function, please modify your `Config.toml` as follows. See here for [[Configuration]] page.
+If you are not using the search function, please modify your `Config.toml` as follows. See the [[Configuration]] page for details.
 
 ```toml
 # Build a search index with the Fuse JSON and display search UI (optional, default=true, choices=true or false)

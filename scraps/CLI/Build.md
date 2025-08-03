@@ -6,22 +6,23 @@
 
 This command processes Markdown files from the `/scraps` directory and generates a static website.
 
-#### Source Structure
+**Source Structure**
 ```bash
 ❯ tree scraps
 scraps
 ├── Getting Started.md
-└── What is Scraps?.md
+└── Documentation.md
 ```
 
-#### Generated Files
+**Generated Files**
+
 The command generates the following files in the `public` directory:
 ```bash
 ❯ tree public
 public
 ├── index.html      # Main page with scrap list
 ├── getting-started.html
-├── what-is-scraps.html
+├── documentation.html
 ├── main.css       # Styling for the site
 └── search.json    # Search index (if enabled)
 ```
