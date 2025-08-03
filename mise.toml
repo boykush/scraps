@@ -1,7 +1,12 @@
 [tools]
 rust = "1.88"
+node = "22"
 "cargo:cargo-tarpaulin" = "latest"
 
 [tasks.coverage]
 description = "Run code coverage analysis with tarpaulin"
 run = "mise exec cargo:cargo-tarpaulin -- cargo tarpaulin --verbose --all-features --workspace --timeout 120 --exclude-files 'target/*'"
+
+[tasks.e2e]
+description = "Run E2E tests with Playwright"
+run = "cd tests/e2e && npm install && npx playwright test"

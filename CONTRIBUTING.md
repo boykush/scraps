@@ -45,13 +45,28 @@ Scraps maintains a comprehensive testing strategy with three main types of tests
 - **E2E Tests**: Large, browser-based end-to-end tests using Playwright
 - **Performance Tests**: Automated build time validation (≤ 3 seconds)
 
-### Prerequisites
+## Development Environment Setup
 
-Before running tests, ensure you have the following installed:
+The easiest way to set up your development environment is using [mise](https://mise.jdx.dev/):
 
-- **Rust** (latest stable version)
+```bash
+# Navigate to the project directory
+cd scraps
+
+# Install all required tools and dependencies
+mise install
+```
+
+This will automatically install the correct versions of:
+- **Rust** (stable version)
 - **Node.js** (for E2E tests)
-- **Git** (for cloning test repositories)
+- Any other tools specified in the project configuration
+
+---
+
+### Prerequisites for Testing
+
+Before running tests, ensure you have the development environment set up as described above.
 
 ### Small Tests and Medium Tests
 
@@ -93,21 +108,11 @@ mod tests {
 
 ### E2E Tests
 
-#### Setup
-
-```bash
-# Navigate to E2E test directory
-cd tests/e2e
-
-# Install dependencies
-npm install
-```
-
 #### Running E2E Tests
 
 ```bash
 # Run all E2E tests
-npx playwright test
+mise run e2e
 ```
 
 #### E2E Test Configuration
