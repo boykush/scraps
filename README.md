@@ -9,14 +9,14 @@
 
 <p align="center">
 <a href="https://boykush.github.io/scraps/"><img alt="Scraps" src="https://img.shields.io/badge/scraps-document?label=document&link=https%3A%2F%2Fboykush.github.io%2Fscraps%2F"></a>
-<a href="https://crates.io/crates/scraps"><img src="https://img.shields.io/crates/v/scraps?style=flatflat-square" /></a>
+<a href="https://crates.io/crates/scraps"><img src="https://img.shields.io/crates/v/scraps?style=flat-square" /></a>
 </p>
 
 # What is Scraps?
 
 Scraps is a static site generator that brings developer-friendly workflows to documentation, using Markdown files with simple Wiki-link notation.
 
-Learn more in the [official documentation](https://boykush.github.io/scraps/scraps/what-is-scrapsquestion.html).
+Learn more in the [official documentation](https://boykush.github.io/scraps/).
 
 # Getting Started
 
@@ -38,6 +38,7 @@ Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 - [x] Build a static site
 - [x] Init scraps project
 - [x] Serve on localhost
+- [x] Search scraps content
 - [x] List a tags
 - [x] Template to generate the scrap
 ### Deploy
