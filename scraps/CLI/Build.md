@@ -28,4 +28,17 @@ public
 
 Each Markdown file is converted to a slugified HTML file. Additional files like `index.html` and `main.css` are generated to create a complete static website.
 
+## Examples
+
+```bash
+# Basic build
+❯ scraps build
+
+# Build with verbose output
+❯ scraps build --verbose
+
+# Build from specific directory
+❯ scraps build --path /path/to/project
+```
+
 After building, use [[CLI/Serve]] to preview your site locally.
