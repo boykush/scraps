@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Cargo Publish Libs
         run: cargo publish --manifest-path modules/libs/Cargo.toml
         env:
