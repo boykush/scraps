@@ -1,7 +1,5 @@
 [tools]
-rust = "1.88"
-node = "22"
-"cargo:cargo-tarpaulin" = "latest"
+"rust" = { version = "1.88", profile = "default" }
 
 [tasks.coverage]
 description = "Run code coverage analysis with tarpaulin"
