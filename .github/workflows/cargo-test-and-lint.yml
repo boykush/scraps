@@ -31,6 +31,8 @@ jobs:
     steps:
     - uses: actions/checkout@v5
     - uses: jdx/mise-action@v2
+      with:
+        cache: false
     - name: Build
       run: cargo build --verbose --workspace
     - name: Run tests
