@@ -57,6 +57,12 @@ pub enum SubCommands {
         #[command(subcommand)]
         template_command: TemplateSubCommands,
     },
+
+    #[command(about = "MCP server commands")]
+    Mcp {
+        #[command(subcommand)]
+        mcp_command: McpSubCommands,
+    },
 }
 
 #[derive(Subcommand)]
@@ -69,6 +75,12 @@ pub enum TemplateSubCommands {
 
     #[command(about = "List templates")]
     List,
+}
+
+#[derive(Subcommand)]
+pub enum McpSubCommands {
+    #[command(about = "Start MCP server with stdio transport")]
+    Serve,
 }
 
 #[derive(Args, Clone)]

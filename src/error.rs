@@ -20,6 +20,9 @@ pub enum ScrapsError {
     #[error("CLI error: {0}")]
     Cli(#[from] CliError),
 
+    #[error("MCP error: {0}")]
+    Mcp(#[from] McpError),
+
     #[error("Failed to read scrap: {0}")]
     ReadScrap(PathBuf),
 
@@ -94,4 +97,19 @@ pub enum CliError {
 
     #[error("Failed when load config")]
     ConfigLoad,
+}
+
+#[derive(Error, PartialEq, Debug)]
+pub enum McpError {
+    #[error("Failed to initialize MCP server")]
+    ServerInitialization,
+
+    #[error("Failed to setup tracing for MCP server: {0}")]
+    TracingSetup(String),
+
+    #[error("MCP service error: {0}")]
+    ServiceError(String),
+
+    #[error("Failed to create tokio runtime: {0}")]
+    RuntimeCreation(String),
 }
