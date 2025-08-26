@@ -17,13 +17,14 @@ jobs:
     steps:
     - uses: actions/checkout@v5
     - name: Setup Rust
-      uses: dtolnay/rust-toolchain@stable
+      uses: jdx/mise-action@v2
     - name: Pre build
       run: |
         cargo build
-    - uses: actions/setup-node@v4
+    - name: Setup Node.js
+      uses: jdx/mise-action@v2
       with:
-        node-version: lts/*
+        working_directory: ./tests/e2e
     - name: Install dependencies
       working-directory: ./tests/e2e
       run: npm ci
