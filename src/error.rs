@@ -101,9 +101,6 @@ pub enum CliError {
 
 #[derive(Error, PartialEq, Debug)]
 pub enum McpError {
-    #[error("Failed to initialize MCP server")]
-    ServerInitialization,
-
     #[error("Failed to setup tracing for MCP server: {0}")]
     TracingSetup(String),
 
