@@ -15,7 +15,7 @@ pub fn run(query: &str, num: usize, project_path: Option<&Path>) -> ScrapsResult
     let base_url = config.base_url.into_base_url();
 
     let search_usecase = SearchUsecase::new(&scraps_dir_path, &public_dir_path);
-    let results = search_usecase.execute(base_url.as_url(), query, num)?;
+    let results = search_usecase.execute(&base_url, query, num)?;
 
     if results.is_empty() {
         println!("No results found for query: {query}");

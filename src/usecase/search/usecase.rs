@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use crate::error::ScrapsResult;
 use crate::service::search::render::SearchIndexRender;
+use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::search::engine::SearchEngine;
 use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
@@ -23,11 +24,11 @@ impl SearchUsecase {
 
     pub fn execute(
         &self,
-        base_url: &Url,
+        base_url: &BaseUrl,
         query: &str,
         num: usize,
     ) -> ScrapsResult<Vec<SearchResult>> {
-        Self::build_search_index(self, base_url)?;
+        Self::build_search_index(self, base_url.as_url())?;
         let results = Self::perform_search(self, query, num);
         Ok(results)
     }
@@ -109,7 +110,8 @@ mod tests {
 
         test_resources.run(|| {
             let usecase = SearchUsecase::new(&scraps_dir_path, &public_dir_path);
-            let base_url = Url::parse("http://localhost:1112/").unwrap();
+            let url = Url::parse("http://localhost:1112/").unwrap();
+            let base_url = BaseUrl::new(url).unwrap();
 
             let results = usecase.execute(&base_url, "test", 100).unwrap();
 

@@ -9,19 +9,19 @@ use rmcp::model::{CallToolResult, Content, ServerCapabilities, ServerInfo};
 use rmcp::schemars::JsonSchema;
 use rmcp::service::RequestContext;
 use rmcp::{tool, tool_handler, tool_router, ErrorData, RoleServer};
+use scraps_libs::model::base_url::BaseUrl;
 use serde::Deserialize;
 use serde_json::json;
-use url::Url;
 
 pub struct ScrapsServer {
     tool_router: ToolRouter<ScrapsServer>,
     scraps_dir: PathBuf,
     public_dir: PathBuf,
-    base_url: Url,
+    base_url: BaseUrl,
 }
 
 impl ScrapsServer {
-    pub fn new(scraps_dir: PathBuf, public_dir: PathBuf, base_url: Url) -> Self {
+    pub fn new(scraps_dir: PathBuf, public_dir: PathBuf, base_url: BaseUrl) -> Self {
         Self {
             tool_router: Self::tool_router(),
             scraps_dir,

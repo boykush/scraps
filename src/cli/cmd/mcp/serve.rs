@@ -34,7 +34,7 @@ pub async fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
 
     let base_url = config.base_url.into_base_url();
 
-    let service = ScrapsServer::new(scraps_dir, public_dir, base_url.into_url())
+    let service = ScrapsServer::new(scraps_dir, public_dir, base_url)
         .serve((stdin(), stdout()))
         .await
         .inspect_err(|e| {
