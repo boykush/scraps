@@ -7,10 +7,10 @@ use crate::{
     error::{McpError, ScrapsResult},
 };
 use rmcp::ServiceExt;
+use scraps_libs::model::base_url::BaseUrl;
 use tokio::io::{stdin, stdout};
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
-use url::Url;
 
 pub async fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     // Initialize tracing
@@ -33,17 +33,10 @@ pub async fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let config = ScrapConfig::from_path(project_path)
         .map_err(|e| McpError::ServiceError(format!("Failed to load config: {e}")))?;
 
-    // Automatically append a trailing slash to URLs
-    let base_url = if config.base_url.path().ends_with('/') {
-        config.base_url
-    } else {
-        config
-            .base_url
-            .join("/")
-            .map_err(|e| McpError::ServiceError(format!("Invalid base URL: {e}")))?
-    };
+    let base_url = BaseUrl::new(config.base_url)
+        .map_err(|e| McpError::ServiceError(format!("Invalid base URL: {e}")))?;
 
-    let service = ScrapsServer::new(scraps_dir, public_dir, base_url)
+    let service = ScrapsServer::new(scraps_dir, public_dir, base_url.into_url())
         .serve((stdin(), stdout()))
         .await
         .inspect_err(|e| {

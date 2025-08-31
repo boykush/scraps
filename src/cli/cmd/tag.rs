@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use itertools::Itertools;
-use url::Url;
+use scraps_libs::model::base_url::BaseUrl;
 
 use crate::cli::display::tag::DisplayTag;
 use crate::cli::path_resolver::PathResolver;
@@ -16,17 +16,12 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let usecase = TagUsecase::new(&scraps_dir_path);
 
     let config = ScrapConfig::from_path(project_path)?;
-    // Automatically append a trailing slash to URLs
-    let base_url = if config.base_url.path().ends_with('/') {
-        config.base_url
-    } else {
-        config.base_url.join("/").unwrap()
-    };
+    let base_url = BaseUrl::new(config.base_url).unwrap();
 
     let (tags, backlinks_map) = usecase.execute()?;
     let display_tags_result = tags
         .into_iter()
-        .map(|tag| DisplayTag::new(&tag, &base_url, &backlinks_map))
+        .map(|tag| DisplayTag::new(&tag, base_url.as_url(), &backlinks_map))
         .collect::<ScrapsResult<Vec<DisplayTag>>>();
 
     display_tags_result.map(|tags| {

@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use url::Url;
+use scraps_libs::model::base_url::BaseUrl;
 
 use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::display::search::DisplaySearch;
@@ -14,15 +14,10 @@ pub fn run(query: &str, num: usize, project_path: Option<&Path>) -> ScrapsResult
     let public_dir_path = path_resolver.public_dir();
 
     let config = ScrapConfig::from_path(project_path)?;
-    // Automatically append a trailing slash to URLs
-    let base_url = if config.base_url.path().ends_with('/') {
-        config.base_url
-    } else {
-        config.base_url.join("/").unwrap()
-    };
+    let base_url = BaseUrl::new(config.base_url).unwrap();
 
     let search_usecase = SearchUsecase::new(&scraps_dir_path, &public_dir_path);
-    let results = search_usecase.execute(&base_url, query, num)?;
+    let results = search_usecase.execute(base_url.as_url(), query, num)?;
 
     if results.is_empty() {
         println!("No results found for query: {query}");

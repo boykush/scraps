@@ -1,9 +1,9 @@
 use clap_verbosity_flag::{log, Verbosity, WarnLevel};
+use scraps_libs::model::base_url::BaseUrl;
 use std::path::Path;
 use std::time::Instant;
 use tracing::{span, Level};
 use tracing_subscriber::fmt::format::FmtSpan;
-use url::Url;
 
 use crate::cli::config::color_scheme::ColorSchemeConfig;
 use crate::cli::config::sort_key::SortKeyConfig;
@@ -47,12 +47,7 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
     let progress = ProgressImpl::init(Instant::now());
 
     let config = ScrapConfig::from_path(project_path)?;
-    // Automatically append a trailing slash to URLs
-    let base_url = if config.base_url.path().ends_with('/') {
-        config.base_url
-    } else {
-        config.base_url.join("/").unwrap()
-    };
+    let base_url = BaseUrl::new(config.base_url).unwrap();
     let lang_code = config
         .lang_code
         .map(|c| c.into_lang_code())
@@ -81,7 +76,7 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
     usecase.execute(
         git_command,
         &progress,
-        &base_url,
+        base_url.as_url(),
         timezone,
         &html_metadata,
         &css_metadata,
