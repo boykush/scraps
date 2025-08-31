@@ -51,7 +51,7 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
     let base_url = if config.base_url.path().ends_with('/') {
         config.base_url
     } else {
-        Url::parse((config.base_url.to_string() + "/").as_str()).unwrap()
+        config.base_url.join("/").unwrap()
     };
     let lang_code = config
         .lang_code

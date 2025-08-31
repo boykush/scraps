@@ -37,7 +37,9 @@ pub async fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let base_url = if config.base_url.path().ends_with('/') {
         config.base_url
     } else {
-        Url::parse((config.base_url.to_string() + "/").as_str())
+        config
+            .base_url
+            .join("/")
             .map_err(|e| McpError::ServiceError(format!("Invalid base URL: {e}")))?
     };
 

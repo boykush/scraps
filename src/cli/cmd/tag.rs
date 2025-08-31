@@ -20,7 +20,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let base_url = if config.base_url.path().ends_with('/') {
         config.base_url
     } else {
-        Url::parse((config.base_url.to_string() + "/").as_str()).unwrap()
+        config.base_url.join("/").unwrap()
     };
 
     let (tags, backlinks_map) = usecase.execute()?;

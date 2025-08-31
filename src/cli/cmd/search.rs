@@ -18,7 +18,7 @@ pub fn run(query: &str, num: usize, project_path: Option<&Path>) -> ScrapsResult
     let base_url = if config.base_url.path().ends_with('/') {
         config.base_url
     } else {
-        Url::parse((config.base_url.to_string() + "/").as_str()).unwrap()
+        config.base_url.join("/").unwrap()
     };
 
     let search_usecase = SearchUsecase::new(&scraps_dir_path, &public_dir_path);
