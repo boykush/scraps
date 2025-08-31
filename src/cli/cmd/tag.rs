@@ -1,7 +1,6 @@
 use std::path::Path;
 
 use itertools::Itertools;
-use scraps_libs::model::base_url::BaseUrl;
 
 use crate::cli::display::tag::DisplayTag;
 use crate::cli::path_resolver::PathResolver;
@@ -16,7 +15,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let usecase = TagUsecase::new(&scraps_dir_path);
 
     let config = ScrapConfig::from_path(project_path)?;
-    let base_url = BaseUrl::new(config.base_url).unwrap();
+    let base_url = config.base_url.into_base_url();
 
     let (tags, backlinks_map) = usecase.execute()?;
     let display_tags_result = tags

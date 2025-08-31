@@ -20,7 +20,7 @@ impl BaseUrl {
         let normalized = if url.path().ends_with('/') {
             url
         } else {
-            url.join("/")?
+            Url::parse((url.to_string() + "/").as_str())?
         };
         Ok(Self(normalized))
     }
