@@ -4,6 +4,7 @@ mod service;
 mod usecase;
 
 use clap::Parser;
+use error::McpError;
 
 fn main() -> error::ScrapsResult<()> {
     let cli = cli::Cli::parse();
@@ -27,6 +28,13 @@ fn main() -> error::ScrapsResult<()> {
                 cli.path.as_deref(),
             ),
             cli::TemplateSubCommands::List => cli::cmd::template::list::run(cli.path.as_deref()),
+        },
+        cli::SubCommands::Mcp { mcp_command } => match mcp_command {
+            cli::McpSubCommands::Serve => {
+                let runtime = tokio::runtime::Runtime::new()
+                    .map_err(|e| McpError::RuntimeCreation(e.to_string()))?;
+                runtime.block_on(cli::cmd::mcp::serve::run(cli.path.as_deref()))
+            }
         },
     }
 }

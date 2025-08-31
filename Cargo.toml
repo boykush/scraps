@@ -37,6 +37,8 @@ percent-encoding = "2.3.1"
 tracing = "0.1.0"
 tracing-subscriber = "0.3.0"
 clap-verbosity-flag = "3.0.0"
+rmcp = { version = "0.6.0", features = ["server"] }
+schemars = "1.0.4"
 
 [package]
 edition.workspace = true
@@ -83,6 +85,8 @@ percent-encoding.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 clap-verbosity-flag.workspace = true
+rmcp.workspace = true
+schemars.workspace = true
 
 [dev-dependencies]
 scraps_libs.workspace = true
