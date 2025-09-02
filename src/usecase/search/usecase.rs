@@ -1,8 +1,8 @@
 use std::path::PathBuf;
 
 use crate::error::ScrapsResult;
-use crate::service::search::render::SearchIndexRender;
 use scraps_libs::model::base_url::BaseUrl;
+use scraps_libs::model::file::ScrapFileStem;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::search::engine::SearchEngine;
 use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
@@ -10,14 +10,12 @@ use scraps_libs::search::result::SearchResult;
 
 pub struct SearchUsecase {
     scraps_dir_path: PathBuf,
-    public_dir_path: PathBuf,
 }
 
 impl SearchUsecase {
-    pub fn new(scraps_dir_path: &PathBuf, public_dir_path: &PathBuf) -> SearchUsecase {
+    pub fn new(scraps_dir_path: &PathBuf) -> SearchUsecase {
         SearchUsecase {
             scraps_dir_path: scraps_dir_path.to_owned(),
-            public_dir_path: public_dir_path.to_owned(),
         }
     }
 
@@ -27,53 +25,26 @@ impl SearchUsecase {
         query: &str,
         num: usize,
     ) -> ScrapsResult<Vec<SearchResult>> {
-        Self::build_search_index(self, base_url)?;
-        let results = Self::perform_search(self, query, num);
-        Ok(results)
-    }
-
-    fn build_search_index(&self, base_url: &BaseUrl) -> ScrapsResult<()> {
-        // Load scraps from directory
+        // Load scraps from directory directly
         let scrap_paths = crate::usecase::read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
         let scraps = scrap_paths
             .into_iter()
             .map(|path| crate::usecase::read_scraps::to_scrap_by_path(&self.scraps_dir_path, &path))
             .collect::<ScrapsResult<Vec<Scrap>>>()?;
 
-        // Render search index JSON
-        SearchIndexRender::new(&self.scraps_dir_path, &self.public_dir_path)?.run(base_url, &scraps)
-    }
+        // Create search index items in memory
+        let lib_items: Vec<scraps_libs::search::result::SearchIndexItem> = scraps
+            .into_iter()
+            .map(|scrap| {
+                let file_stem = ScrapFileStem::from(scrap.self_link().clone());
+                let url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
+                scraps_libs::search::result::SearchIndexItem::new(&scrap.title.to_string(), &url)
+            })
+            .collect();
 
-    fn perform_search(&self, query: &str, num: usize) -> Vec<SearchResult> {
-        let search_index_path = self.public_dir_path.join("search_index.json");
-
-        let indexed_str = std::fs::read_to_string(&search_index_path).unwrap();
-        let items: Vec<SearchIndexItem> = serde_json::from_str(&indexed_str).unwrap();
-
-        // Convert to lib types
-        let lib_items: Vec<scraps_libs::search::result::SearchIndexItem> =
-            items.into_iter().map(|item| item.into_lib_type()).collect();
-
+        // Perform search
         let engine = FuzzySearchEngine::new();
-        engine.search(&lib_items, query, num)
-    }
-}
-
-#[derive(serde::Deserialize)]
-#[serde(remote = "scraps_libs::search::result::SearchIndexItem")]
-struct SerdeSearchIndexItem {
-    title: String,
-    url: String,
-}
-
-#[derive(Debug, Clone, serde::Deserialize)]
-struct SearchIndexItem(
-    #[serde(with = "SerdeSearchIndexItem")] scraps_libs::search::result::SearchIndexItem,
-);
-
-impl SearchIndexItem {
-    fn into_lib_type(self) -> scraps_libs::search::result::SearchIndexItem {
-        self.0
+        Ok(engine.search(&lib_items, query, num))
     }
 }
 
@@ -89,7 +60,6 @@ mod tests {
         let test_resource_path = PathBuf::from("tests/resource/search/cmd/it_run");
         let scraps_dir_path = test_resource_path.join("scraps");
         let static_dir_path = test_resource_path.join("static");
-        let public_dir_path = test_resource_path.join("public");
 
         // scrap1
         let md_path_1 = scraps_dir_path.join("test1.md");
@@ -104,11 +74,10 @@ mod tests {
         test_resources
             .add_file(&md_path_1, resource_bytes_1)
             .add_file(&md_path_2, resource_bytes_2)
-            .add_dir(&static_dir_path)
-            .add_dir(&public_dir_path);
+            .add_dir(&static_dir_path);
 
         test_resources.run(|| {
-            let usecase = SearchUsecase::new(&scraps_dir_path, &public_dir_path);
+            let usecase = SearchUsecase::new(&scraps_dir_path);
             let url = Url::parse("http://localhost:1112/").unwrap();
             let base_url = BaseUrl::new(url).unwrap();
 

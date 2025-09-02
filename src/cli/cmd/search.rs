@@ -9,12 +9,11 @@ use crate::usecase::search::usecase::SearchUsecase;
 pub fn run(query: &str, num: usize, project_path: Option<&Path>) -> ScrapsResult<()> {
     let path_resolver = PathResolver::new(project_path)?;
     let scraps_dir_path = path_resolver.scraps_dir();
-    let public_dir_path = path_resolver.public_dir();
 
     let config = ScrapConfig::from_path(project_path)?;
     let base_url = config.base_url.into_base_url();
 
-    let search_usecase = SearchUsecase::new(&scraps_dir_path, &public_dir_path);
+    let search_usecase = SearchUsecase::new(&scraps_dir_path);
     let results = search_usecase.execute(&base_url, query, num)?;
 
     if results.is_empty() {
