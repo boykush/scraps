@@ -31,7 +31,7 @@ pub fn base(
     tera.extend(&TAG_TERA).unwrap();
 
     let mut context = tera::Context::new();
-    context.insert("base_url", base_url.as_url());
+    context.insert("base_url", &base_url.as_url());
     context.insert("lang_code", &metadata.lang_code().to_string());
     context.insert("title", &metadata.title());
     context.insert("description", &metadata.description());
