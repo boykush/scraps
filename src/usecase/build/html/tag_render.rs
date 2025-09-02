@@ -67,6 +67,7 @@ impl TagRender {
 #[cfg(test)]
 mod tests {
     use scraps_libs::lang::LangCode;
+    use scraps_libs::model::base_url::BaseUrl;
     use url::Url;
 
     use super::*;
@@ -74,7 +75,7 @@ mod tests {
     #[test]
     fn it_run() {
         // args
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let metadata = HtmlMetadata::new(
             &LangCode::default(),
             "Scrap",

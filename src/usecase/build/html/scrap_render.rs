@@ -80,13 +80,14 @@ mod tests {
 
     use crate::usecase::build::model::html::HtmlMetadata;
     use scraps_libs::lang::LangCode;
+    use scraps_libs::model::base_url::BaseUrl;
 
     use super::*;
 
     #[test]
     fn it_run() {
         // args
-        let base_url = &Url::parse("http://localhost:1112/").unwrap();
+        let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let timezone = chrono_tz::UTC;
         let metadata = HtmlMetadata::new(
             &LangCode::default(),

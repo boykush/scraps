@@ -68,7 +68,7 @@ impl TagsIndexRender {
 
 #[cfg(test)]
 mod tests {
-    use scraps_libs::{lang::LangCode, tests::TestResources};
+    use scraps_libs::{lang::LangCode, model::base_url::BaseUrl, tests::TestResources};
     use std::fs;
     use url::Url;
 
@@ -77,7 +77,7 @@ mod tests {
     #[test]
     fn it_run() {
         // args
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let metadata = HtmlMetadata::new(
             &LangCode::default(),
             "Scrap",

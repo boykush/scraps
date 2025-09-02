@@ -72,13 +72,13 @@ impl IndexScrapsTera {
 mod tests {
     use url::Url;
 
-    use scraps_libs::model::scrap::Scrap;
+    use scraps_libs::model::{base_url::BaseUrl, scrap::Scrap};
 
     use super::*;
 
     #[test]
     fn it_new_with_sort() {
-        let base_url = &Url::parse("http://localhost:1112/").unwrap();
+        let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let sc1 = ScrapDetail::new(
             &Scrap::new("title1", &None, "[[Context/title4]][[title2]]"),
             &None,
