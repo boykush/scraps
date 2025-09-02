@@ -25,7 +25,7 @@ jobs:
           git clone https://github.com/boykush/wiki.git
       
       - name: Setup Rust
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v3
 
       - name: Cargo build
         run: |
