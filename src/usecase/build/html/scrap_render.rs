@@ -8,9 +8,9 @@ use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::scrap_detail::ScrapDetail;
 use chrono_tz::Tz;
+use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::file::ScrapFileStem;
 use scraps_libs::model::scrap::Scrap;
-use url::Url;
 
 use crate::usecase::build::html::tera::scrap_tera;
 
@@ -41,7 +41,7 @@ impl ScrapRender {
 
     pub fn run(
         &self,
-        base_url: &Url,
+        base_url: &BaseUrl,
         timezone: Tz,
         metadata: &HtmlMetadata,
         scrap_detail: &ScrapDetail,

@@ -6,9 +6,9 @@ use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
+use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::tags::Tags;
-use url::Url;
 
 use crate::usecase::build::html::tera::tags_index_tera;
 
@@ -32,7 +32,7 @@ impl TagsIndexRender {
 
     pub fn run(
         &self,
-        base_url: &Url,
+        base_url: &BaseUrl,
         metadata: &HtmlMetadata,
         scraps: &[Scrap],
     ) -> ScrapsResult<()> {
@@ -44,7 +44,7 @@ impl TagsIndexRender {
 
     fn render_html(
         &self,
-        base_url: &Url,
+        base_url: &BaseUrl,
         metadata: &HtmlMetadata,
         tags: &TagsTera,
     ) -> ScrapsResult<()> {

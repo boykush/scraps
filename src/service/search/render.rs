@@ -2,8 +2,8 @@ use std::{fs::File, path::PathBuf};
 
 use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
+use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::scrap::Scrap;
-use url::Url;
 
 use super::search_index_tera;
 use super::serde::search_index_scraps::SearchIndexScrapsTera;
@@ -26,7 +26,7 @@ impl SearchIndexRender {
         })
     }
 
-    pub fn run(&self, base_url: &Url, scraps: &[Scrap]) -> ScrapsResult<()> {
+    pub fn run(&self, base_url: &BaseUrl, scraps: &[Scrap]) -> ScrapsResult<()> {
         let serialize_scraps = SearchIndexScrapsTera::new(scraps);
 
         Self::render_search_index_json(self, base_url, &serialize_scraps)
@@ -34,7 +34,7 @@ impl SearchIndexRender {
 
     fn render_search_index_json(
         &self,
-        base_url: &Url,
+        base_url: &BaseUrl,
         scraps: &SearchIndexScrapsTera,
     ) -> ScrapsResult<()> {
         let (tera, mut context) = search_index_tera::base(
@@ -66,7 +66,7 @@ mod tests {
     #[test]
     fn it_run() {
         // args
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
 
         let test_resource_path =
             PathBuf::from("tests/resource/build/json/render/it_render_search_index_json");

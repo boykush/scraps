@@ -2,9 +2,8 @@ use itertools::Itertools;
 
 use scraps_libs::{
     markdown,
-    model::{content::Content, scrap::Scrap},
+    model::{base_url::BaseUrl, content::Content, scrap::Scrap},
 };
-use url::Url;
 
 #[derive(Clone)]
 pub struct ScrapDetail {
@@ -14,7 +13,7 @@ pub struct ScrapDetail {
 }
 
 impl ScrapDetail {
-    pub fn new(scrap: &Scrap, commited_ts: &Option<i64>, base_url: &Url) -> ScrapDetail {
+    pub fn new(scrap: &Scrap, commited_ts: &Option<i64>, base_url: &BaseUrl) -> ScrapDetail {
         let content = markdown::convert::to_content(&scrap.md_text, base_url);
         ScrapDetail {
             v: scrap.to_owned(),

@@ -7,7 +7,6 @@ use scraps_libs::model::scrap::Scrap;
 use scraps_libs::search::engine::SearchEngine;
 use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
 use scraps_libs::search::result::SearchResult;
-use url::Url;
 
 pub struct SearchUsecase {
     scraps_dir_path: PathBuf,
@@ -28,12 +27,12 @@ impl SearchUsecase {
         query: &str,
         num: usize,
     ) -> ScrapsResult<Vec<SearchResult>> {
-        Self::build_search_index(self, base_url.as_url())?;
+        Self::build_search_index(self, base_url)?;
         let results = Self::perform_search(self, query, num);
         Ok(results)
     }
 
-    fn build_search_index(&self, base_url: &Url) -> ScrapsResult<()> {
+    fn build_search_index(&self, base_url: &BaseUrl) -> ScrapsResult<()> {
         // Load scraps from directory
         let scrap_paths = crate::usecase::read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
         let scraps = scrap_paths

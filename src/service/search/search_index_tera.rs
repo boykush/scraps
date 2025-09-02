@@ -1,7 +1,7 @@
 use crate::error::{anyhow::Context, BuildError, ScrapsResult};
 use once_cell::sync::Lazy;
+use scraps_libs::model::base_url::BaseUrl;
 use tera::Tera;
-use url::Url;
 
 static SEARCH_INDEX_TERA: Lazy<Tera> = Lazy::new(|| {
     let mut tera = Tera::default();
@@ -13,12 +13,12 @@ static SEARCH_INDEX_TERA: Lazy<Tera> = Lazy::new(|| {
     tera
 });
 
-pub fn base(base_url: &Url, template_dir: &str) -> ScrapsResult<(Tera, tera::Context)> {
+pub fn base(base_url: &BaseUrl, template_dir: &str) -> ScrapsResult<(Tera, tera::Context)> {
     let mut tera = Tera::new(template_dir).context(BuildError::RenderJson)?;
     tera.extend(&SEARCH_INDEX_TERA).unwrap();
 
     let mut context = tera::Context::new();
-    context.insert("base_url", &base_url);
+    context.insert("base_url", base_url.as_url());
 
     Ok((tera, context))
 }

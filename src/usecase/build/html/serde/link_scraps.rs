@@ -3,7 +3,7 @@ use url::Url;
 
 use scraps_libs::{
     markdown,
-    model::{file::ScrapFileStem, scrap::Scrap},
+    model::{base_url::BaseUrl, file::ScrapFileStem, scrap::Scrap},
 };
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
@@ -16,7 +16,7 @@ struct SerializeLinkScrap {
 }
 
 impl SerializeLinkScrap {
-    fn new(scrap: &Scrap, base_url: &Url) -> SerializeLinkScrap {
+    fn new(scrap: &Scrap, base_url: &BaseUrl) -> SerializeLinkScrap {
         let content = markdown::convert::to_content(&scrap.md_text, base_url);
         let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_link().clone()));
         SerializeLinkScrap {
@@ -33,7 +33,7 @@ impl SerializeLinkScrap {
 pub struct LinkScrapsTera(Vec<SerializeLinkScrap>);
 
 impl LinkScrapsTera {
-    pub fn new(scraps: &[Scrap], base_url: &Url) -> LinkScrapsTera {
+    pub fn new(scraps: &[Scrap], base_url: &BaseUrl) -> LinkScrapsTera {
         let serialize_scraps = scraps
             .iter()
             .map(|s| SerializeLinkScrap::new(s, base_url))

@@ -75,7 +75,7 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
     usecase.execute(
         git_command,
         &progress,
-        base_url.as_url(),
+        &base_url,
         timezone,
         &html_metadata,
         &css_metadata,

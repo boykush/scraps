@@ -19,9 +19,12 @@ use crate::{
 use chrono_tz::Tz;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
-use scraps_libs::{git::GitCommand, markdown, model::tags::Tags};
+use scraps_libs::{
+    git::GitCommand,
+    markdown,
+    model::{base_url::BaseUrl, tags::Tags},
+};
 use tracing::{span, Level};
-use url::Url;
 
 use super::{
     html::{
@@ -59,7 +62,7 @@ impl BuildUsecase {
         &self,
         git_command: GC,
         progress: &PG,
-        base_url: &Url,
+        base_url: &BaseUrl,
         timezone: Tz,
         html_metadata: &HtmlMetadata,
         css_metadata: &CssMetadata,
@@ -173,7 +176,7 @@ impl BuildUsecase {
     fn to_scrap_detail_by_path<GC: GitCommand + Send + Sync + Copy>(
         &self,
         git_command: GC,
-        base_url: &Url,
+        base_url: &BaseUrl,
         path: &PathBuf,
     ) -> ScrapsResult<ScrapDetail> {
         let span_convert_to_scrap = span!(Level::INFO, "convert_to_scrap").entered();
@@ -197,6 +200,7 @@ mod tests {
 
     use super::*;
     use scraps_libs::{git::tests::GitCommandTest, lang::LangCode, tests::TestResources};
+    use url::Url;
 
     fn setup_usecase(test_resource_path: &Path) -> BuildUsecase {
         let scraps_dir_path = test_resource_path.join("scraps");
@@ -214,7 +218,7 @@ mod tests {
         // run args
         let git_command = GitCommandTest::new();
         let progress = ProgressTest::new();
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let timezone = chrono_tz::UTC;
         let html_metadata = &HtmlMetadata::new(
             &LangCode::default(),
@@ -305,7 +309,7 @@ mod tests {
         // run args
         let git_command = GitCommandTest::new();
         let progress = ProgressTest::new();
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let timezone = chrono_tz::UTC;
         let html_metadata = &HtmlMetadata::new(
             &LangCode::default(),
