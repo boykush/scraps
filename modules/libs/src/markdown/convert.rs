@@ -5,6 +5,7 @@ use pulldown_cmark::{
 use url::Url;
 
 use crate::model::{
+    base_url::BaseUrl,
     content::{Content, ContentElement},
     file::ScrapFileStem,
     link::ScrapLink,
@@ -12,7 +13,7 @@ use crate::model::{
 
 const PARSER_OPTION: Options = Options::all();
 
-pub fn to_content(text: &str, base_url: &Url) -> Content {
+pub fn to_content(text: &str, base_url: &BaseUrl) -> Content {
     let parser = Parser::new_ext(text, PARSER_OPTION);
     let parser_vec = parser.into_iter().collect::<Vec<_>>();
     let mut parser_windows = parser_vec.into_iter().circular_tuple_windows::<(_, _, _)>();
@@ -30,8 +31,15 @@ pub fn to_content(text: &str, base_url: &Url) -> Content {
                 Event::Text(CowStr::Borrowed(text)),
                 end @ Event::End(TagEnd::Link),
             ) => {
-                let events =
-                    handle_wiki_link_events(base_url, dest_url, title, id, text, end, has_pothole);
+                let events = handle_wiki_link_events(
+                    base_url.as_url(),
+                    dest_url,
+                    title,
+                    id,
+                    text,
+                    end,
+                    has_pothole,
+                );
                 (0..2).for_each(|_| {
                     parser_windows.next();
                 });
@@ -153,7 +161,7 @@ mod tests {
                 ContentElement::Raw("</code></pre>\n".to_string()),
             ],
         ];
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         input_list
             .iter()
             .zip(expected_list)
@@ -164,7 +172,7 @@ mod tests {
 
     #[test]
     fn it_to_html_link() {
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let input_list = [
             "[[link]]",
             "[[link|display]]",
@@ -196,7 +204,7 @@ mod tests {
 
     #[test]
     fn it_to_html_autolink() {
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let input_list = ["<https://example.com>", "<http://example.com>"];
         let expected_list = ["https://example.com", "http://example.com"];
         input_list

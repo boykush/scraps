@@ -3,8 +3,8 @@ use crate::error::{anyhow::Context, ScrapsResult};
 use crate::usecase::build::model::html::HtmlMetadata;
 use chrono_tz::Tz;
 use once_cell::sync::Lazy;
+use scraps_libs::model::base_url::BaseUrl;
 use tera::Tera;
-use url::Url;
 
 static SCRAP_TERA: Lazy<Tera> = Lazy::new(|| {
     let mut tera = Tera::default();
@@ -27,7 +27,7 @@ static SCRAP_TERA: Lazy<Tera> = Lazy::new(|| {
 });
 
 pub fn base(
-    base_url: &Url,
+    base_url: &BaseUrl,
     timezone: Tz,
     metadata: &HtmlMetadata,
     template_dir: &str,
@@ -36,7 +36,7 @@ pub fn base(
     tera.extend(&SCRAP_TERA).unwrap();
 
     let mut context = tera::Context::new();
-    context.insert("base_url", &base_url);
+    context.insert("base_url", &base_url.as_url());
     context.insert("lang_code", &metadata.lang_code().to_string());
     context.insert("timezone", &timezone);
     context.insert("title", &metadata.title());

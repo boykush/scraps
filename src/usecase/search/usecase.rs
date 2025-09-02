@@ -2,11 +2,11 @@ use std::path::PathBuf;
 
 use crate::error::ScrapsResult;
 use crate::service::search::render::SearchIndexRender;
+use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::search::engine::SearchEngine;
 use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
 use scraps_libs::search::result::SearchResult;
-use url::Url;
 
 pub struct SearchUsecase {
     scraps_dir_path: PathBuf,
@@ -23,7 +23,7 @@ impl SearchUsecase {
 
     pub fn execute(
         &self,
-        base_url: &Url,
+        base_url: &BaseUrl,
         query: &str,
         num: usize,
     ) -> ScrapsResult<Vec<SearchResult>> {
@@ -32,7 +32,7 @@ impl SearchUsecase {
         Ok(results)
     }
 
-    fn build_search_index(&self, base_url: &Url) -> ScrapsResult<()> {
+    fn build_search_index(&self, base_url: &BaseUrl) -> ScrapsResult<()> {
         // Load scraps from directory
         let scrap_paths = crate::usecase::read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
         let scraps = scrap_paths
@@ -109,7 +109,8 @@ mod tests {
 
         test_resources.run(|| {
             let usecase = SearchUsecase::new(&scraps_dir_path, &public_dir_path);
-            let base_url = Url::parse("http://localhost:1112/").unwrap();
+            let url = Url::parse("http://localhost:1112/").unwrap();
+            let base_url = BaseUrl::new(url).unwrap();
 
             let results = usecase.execute(&base_url, "test", 100).unwrap();
 

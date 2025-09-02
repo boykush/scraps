@@ -1,6 +1,7 @@
 use std::time::Instant;
 use std::{net::SocketAddr, path::Path};
 
+use scraps_libs::model::base_url::BaseUrl;
 use url::Url;
 
 use crate::cli::path_resolver::PathResolver;
@@ -25,7 +26,7 @@ use scraps_libs::git::GitCommandImpl;
 pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     // set local environment
     let addr: SocketAddr = ([127, 0, 0, 1], 1112).into();
-    let base_url = Url::parse(&format!("http://{addr}"))?.join("").unwrap();
+    let base_url = BaseUrl::new(Url::parse(&format!("http://{addr}"))?.join("").unwrap()).unwrap();
 
     // resolve paths
     let path_resolver = PathResolver::new(project_path)?;

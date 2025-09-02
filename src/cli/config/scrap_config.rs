@@ -6,11 +6,14 @@ use serde::Deserialize;
 use std::path::Path;
 use url::Url;
 
-use super::{color_scheme::ColorSchemeConfig, lang::LangCodeConfig, sort_key::SortKeyConfig};
+use super::{
+    base_url::BaseUrlConfig, color_scheme::ColorSchemeConfig, lang::LangCodeConfig,
+    sort_key::SortKeyConfig,
+};
 
 #[derive(Debug, Deserialize)]
 pub struct ScrapConfig {
-    pub base_url: Url,
+    pub base_url: BaseUrlConfig,
     pub lang_code: Option<LangCodeConfig>,
     pub title: String,
     pub description: Option<String>,

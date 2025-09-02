@@ -6,10 +6,10 @@ use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
+use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::slug::Slug;
 use scraps_libs::model::tag::Tag;
-use url::Url;
 
 use crate::usecase::build::html::tera::tag_tera;
 
@@ -38,7 +38,7 @@ impl TagRender {
         })
     }
 
-    pub fn run(&self, base_url: &Url, metadata: &HtmlMetadata, tag: &Tag) -> ScrapsResult<()> {
+    pub fn run(&self, base_url: &BaseUrl, metadata: &HtmlMetadata, tag: &Tag) -> ScrapsResult<()> {
         let (tera, mut context) = tag_tera::base(
             base_url,
             metadata,
@@ -67,6 +67,7 @@ impl TagRender {
 #[cfg(test)]
 mod tests {
     use scraps_libs::lang::LangCode;
+    use scraps_libs::model::base_url::BaseUrl;
     use url::Url;
 
     use super::*;
@@ -74,7 +75,7 @@ mod tests {
     #[test]
     fn it_run() {
         // args
-        let base_url = Url::parse("http://localhost:1112/").unwrap();
+        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let metadata = HtmlMetadata::new(
             &LangCode::default(),
             "Scrap",

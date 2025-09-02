@@ -8,9 +8,8 @@ use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::list_view_configs::ListViewConfigs;
 use crate::usecase::build::model::scrap_detail::ScrapDetails;
-use scraps_libs::model::{content::Content, tags::Tags};
+use scraps_libs::model::{base_url::BaseUrl, content::Content, tags::Tags};
 use tracing::{span, Level};
-use url::Url;
 
 use crate::usecase::build::html::tera::index_tera;
 
@@ -37,7 +36,7 @@ impl IndexRender {
 
     pub fn run(
         &self,
-        base_url: &Url,
+        base_url: &BaseUrl,
         metadata: &HtmlMetadata,
         list_view_configs: &ListViewConfigs,
         scrap_details: &ScrapDetails,
@@ -175,7 +174,7 @@ mod tests {
     #[test]
     fn it_run() {
         // args
-        let base_url = &Url::parse("http://localhost:1112/").unwrap();
+        let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let metadata = HtmlMetadata::new(
             &LangCode::default(),
             "Scrap",
@@ -232,7 +231,7 @@ mod tests {
     #[test]
     fn it_run_paging() {
         // args
-        let base_url = &Url::parse("http://localhost:1112/").unwrap();
+        let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let metadata = HtmlMetadata::new(
             &LangCode::default(),
             "Scrap",

@@ -1,7 +1,6 @@
 use std::path::Path;
 
 use itertools::Itertools;
-use url::Url;
 
 use crate::cli::display::tag::DisplayTag;
 use crate::cli::path_resolver::PathResolver;
@@ -16,12 +15,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let usecase = TagUsecase::new(&scraps_dir_path);
 
     let config = ScrapConfig::from_path(project_path)?;
-    // Automatically append a trailing slash to URLs
-    let base_url = if config.base_url.path().ends_with('/') {
-        config.base_url
-    } else {
-        Url::parse((config.base_url.to_string() + "/").as_str()).unwrap()
-    };
+    let base_url = config.base_url.into_base_url();
 
     let (tags, backlinks_map) = usecase.execute()?;
     let display_tags_result = tags

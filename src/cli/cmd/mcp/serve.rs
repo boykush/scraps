@@ -10,7 +10,6 @@ use rmcp::ServiceExt;
 use tokio::io::{stdin, stdout};
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
-use url::Url;
 
 pub async fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     // Initialize tracing
@@ -33,13 +32,7 @@ pub async fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let config = ScrapConfig::from_path(project_path)
         .map_err(|e| McpError::ServiceError(format!("Failed to load config: {e}")))?;
 
-    // Automatically append a trailing slash to URLs
-    let base_url = if config.base_url.path().ends_with('/') {
-        config.base_url
-    } else {
-        Url::parse((config.base_url.to_string() + "/").as_str())
-            .map_err(|e| McpError::ServiceError(format!("Invalid base URL: {e}")))?
-    };
+    let base_url = config.base_url.into_base_url();
 
     let service = ScrapsServer::new(scraps_dir, public_dir, base_url)
         .serve((stdin(), stdout()))

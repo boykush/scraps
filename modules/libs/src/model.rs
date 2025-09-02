@@ -1,3 +1,4 @@
+pub mod base_url;
 pub mod content;
 pub mod context;
 pub mod file;
