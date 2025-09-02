@@ -3,7 +3,7 @@ use std::fmt;
 use crate::error::{anyhow::Context, CliError, ScrapsResult};
 use colored::Colorize;
 use itertools::Itertools;
-use scraps_libs::model::{slug::Slug, tag::Tag, title::Title};
+use scraps_libs::model::{base_url::BaseUrl, slug::Slug, tag::Tag, title::Title};
 use url::Url;
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
@@ -17,10 +17,11 @@ pub struct DisplayTag {
 impl DisplayTag {
     pub fn new(
         tag: &Tag,
-        base_url: &Url,
+        base_url: &BaseUrl,
         backlinks_map: &BacklinksMap,
     ) -> ScrapsResult<DisplayTag> {
         let url = base_url
+            .as_url()
             .join(&format!("scraps/{}.html", Slug::from(tag.title.clone())))
             .context(CliError::Display)?;
         let backlinks_count = backlinks_map.get(&tag.title.clone().into()).len();

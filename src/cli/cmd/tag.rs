@@ -20,7 +20,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let (tags, backlinks_map) = usecase.execute()?;
     let display_tags_result = tags
         .into_iter()
-        .map(|tag| DisplayTag::new(&tag, base_url.as_url(), &backlinks_map))
+        .map(|tag| DisplayTag::new(&tag, &base_url, &backlinks_map))
         .collect::<ScrapsResult<Vec<DisplayTag>>>();
 
     display_tags_result.map(|tags| {
