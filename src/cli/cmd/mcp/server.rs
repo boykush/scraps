@@ -1,8 +1,8 @@
-use std::future::Future;
 use std::path::PathBuf;
 
 use crate::usecase::search::usecase::SearchUsecase;
-use rmcp::handler::server::tool::{Parameters, ToolRouter};
+use rmcp::handler::server::tool::ToolRouter;
+use rmcp::handler::server::wrapper::Parameters;
 use rmcp::handler::server::ServerHandler;
 use rmcp::model::ErrorCode;
 use rmcp::model::{CallToolResult, Content, ServerCapabilities, ServerInfo};
