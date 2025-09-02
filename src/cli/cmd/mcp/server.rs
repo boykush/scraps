@@ -16,16 +16,14 @@ use serde_json::json;
 pub struct ScrapsServer {
     tool_router: ToolRouter<ScrapsServer>,
     scraps_dir: PathBuf,
-    public_dir: PathBuf,
     base_url: BaseUrl,
 }
 
 impl ScrapsServer {
-    pub fn new(scraps_dir: PathBuf, public_dir: PathBuf, base_url: BaseUrl) -> Self {
+    pub fn new(scraps_dir: PathBuf, base_url: BaseUrl) -> Self {
         Self {
             tool_router: Self::tool_router(),
             scraps_dir,
-            public_dir,
             base_url,
         }
     }
@@ -49,7 +47,7 @@ impl ScrapsServer {
         Parameters(request): Parameters<SearchRequest>,
     ) -> Result<CallToolResult, ErrorData> {
         // Create search usecase
-        let search_usecase = SearchUsecase::new(&self.scraps_dir, &self.public_dir);
+        let search_usecase = SearchUsecase::new(&self.scraps_dir);
 
         // Execute search
         let num = request.num.unwrap_or(100);

@@ -26,7 +26,6 @@ pub async fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
         .map_err(|e| McpError::ServiceError(format!("Failed to resolve paths: {e}")))?;
 
     let scraps_dir = path_resolver.scraps_dir();
-    let public_dir = path_resolver.public_dir();
 
     // Load config to get base_url
     let config = ScrapConfig::from_path(project_path)
@@ -34,7 +33,7 @@ pub async fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
 
     let base_url = config.base_url.into_base_url();
 
-    let service = ScrapsServer::new(scraps_dir, public_dir, base_url)
+    let service = ScrapsServer::new(scraps_dir, base_url)
         .serve((stdin(), stdout()))
         .await
         .inspect_err(|e| {
