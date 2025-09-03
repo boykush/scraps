@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 use crate::error::ScrapsResult;
@@ -6,7 +7,12 @@ use scraps_libs::model::file::ScrapFileStem;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::search::engine::SearchEngine;
 use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
-use scraps_libs::search::result::SearchResult;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SearchResultWithUrl {
+    pub title: String,
+    pub url: String,
+}
 
 pub struct SearchUsecase {
     scraps_dir_path: PathBuf,
@@ -24,7 +30,7 @@ impl SearchUsecase {
         base_url: &BaseUrl,
         query: &str,
         num: usize,
-    ) -> ScrapsResult<Vec<SearchResult>> {
+    ) -> ScrapsResult<Vec<SearchResultWithUrl>> {
         // Load scraps from directory directly
         let scrap_paths = crate::usecase::read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
         let scraps = scrap_paths
@@ -32,19 +38,39 @@ impl SearchUsecase {
             .map(|path| crate::usecase::read_scraps::to_scrap_by_path(&self.scraps_dir_path, &path))
             .collect::<ScrapsResult<Vec<Scrap>>>()?;
 
-        // Create search index items in memory
-        let lib_items: Vec<scraps_libs::search::result::SearchIndexItem> = scraps
+        // Create title-to-scrap mapping for efficient lookup
+        let scrap_map: HashMap<String, &Scrap> = scraps
+            .iter()
+            .map(|scrap| (scrap.title.to_string(), scrap))
+            .collect();
+
+        // Create search items in memory
+        let lib_items: Vec<scraps_libs::search::result::SearchItem> = scraps
+            .iter()
+            .map(|scrap| scraps_libs::search::result::SearchItem::new(&scrap.title.to_string()))
+            .collect();
+
+        // Perform search and add URLs to results
+        let engine = FuzzySearchEngine::new();
+        let search_results = engine.search(&lib_items, query, num);
+
+        // Convert to final results with URLs using HashMap lookup
+        let results_with_urls: Vec<SearchResultWithUrl> = search_results
             .into_iter()
-            .map(|scrap| {
-                let file_stem = ScrapFileStem::from(scrap.self_link().clone());
-                let url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
-                scraps_libs::search::result::SearchIndexItem::new(&scrap.title.to_string(), &url)
+            .filter_map(|result| {
+                // Find the corresponding scrap by title using HashMap
+                scrap_map.get(&result.title).map(|scrap| {
+                    let file_stem = ScrapFileStem::from(scrap.self_link().clone());
+                    let url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
+                    SearchResultWithUrl {
+                        title: result.title,
+                        url,
+                    }
+                })
             })
             .collect();
 
-        // Perform search
-        let engine = FuzzySearchEngine::new();
-        Ok(engine.search(&lib_items, query, num))
+        Ok(results_with_urls)
     }
 }
 
@@ -86,6 +112,8 @@ mod tests {
             // Should find documents containing "test"
             assert!(!results.is_empty());
             assert!(results.iter().any(|r| r.title.contains("test")));
+            // Verify URLs are present
+            assert!(results.iter().all(|r| !r.url.is_empty()));
         });
     }
 }

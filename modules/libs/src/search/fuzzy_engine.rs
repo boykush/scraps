@@ -2,7 +2,7 @@ use fuzzy_matcher::skim::SkimMatcherV2;
 use fuzzy_matcher::FuzzyMatcher;
 
 use super::engine::SearchEngine;
-use super::result::{SearchIndexItem, SearchResult};
+use super::result::SearchItem;
 
 pub struct FuzzySearchEngine {
     matcher: SkimMatcherV2,
@@ -35,21 +35,21 @@ impl FuzzySearchEngine {
 }
 
 impl SearchEngine for FuzzySearchEngine {
-    fn search(&self, items: &[SearchIndexItem], query: &str, num: usize) -> Vec<SearchResult> {
+    fn search(&self, items: &[SearchItem], query: &str, num: usize) -> Vec<SearchItem> {
         if query.is_empty() {
             return items
                 .iter()
                 .take(num)
-                .map(|item| SearchResult::new(&item.title, &item.url))
+                .map(|item| SearchItem::new(&item.title))
                 .collect();
         }
 
-        let mut results_with_scores: Vec<(SearchResult, i64)> = items
+        let mut results_with_scores: Vec<(SearchItem, i64)> = items
             .iter()
             .filter_map(|item| {
                 self.matcher
                     .fuzzy_match(&item.title, query)
-                    .map(|score| (SearchResult::new(&item.title, &item.url), score))
+                    .map(|score| (SearchItem::new(&item.title), score))
             })
             .collect();
 
@@ -67,14 +67,14 @@ impl SearchEngine for FuzzySearchEngine {
 mod tests {
     use super::*;
 
-    fn create_test_items() -> Vec<SearchIndexItem> {
+    fn create_test_items() -> Vec<SearchItem> {
         vec![
-            SearchIndexItem::new("Test Document", "http://example.com/test"),
-            SearchIndexItem::new("Another Document", "http://example.com/another"),
-            SearchIndexItem::new("Sample Test", "http://example.com/sample"),
-            SearchIndexItem::new("Documentation", "http://example.com/doc"),
-            SearchIndexItem::new("Testing Framework", "http://example.com/testing"),
-            SearchIndexItem::new("Test Suite", "http://example.com/suite"),
+            SearchItem::new("Test Document"),
+            SearchItem::new("Another Document"),
+            SearchItem::new("Sample Test"),
+            SearchItem::new("Documentation"),
+            SearchItem::new("Testing Framework"),
+            SearchItem::new("Test Suite"),
         ]
     }
 
@@ -197,10 +197,7 @@ mod tests {
         let engine = FuzzySearchEngine::new();
         let mut items = Vec::new();
         for i in 0..101 {
-            items.push(SearchIndexItem::new(
-                &format!("Document {}", i),
-                &format!("http://example.com/doc{}", i),
-            ));
+            items.push(SearchItem::new(&format!("Document {}", i)));
         }
 
         let results = engine.search(&items, "", 100);
@@ -212,10 +209,7 @@ mod tests {
         let engine = FuzzySearchEngine::new();
         let mut items = Vec::new();
         for i in 0..10 {
-            items.push(SearchIndexItem::new(
-                &format!("Test Document {}", i),
-                &format!("http://example.com/test{}", i),
-            ));
+            items.push(SearchItem::new(&format!("Test Document {}", i)));
         }
 
         // Test with num=5
@@ -264,8 +258,6 @@ mod tests {
 
         for result in results {
             assert!(!result.title.is_empty());
-            assert!(!result.url.is_empty());
-            assert!(result.url.starts_with("http://"));
         }
     }
 }
