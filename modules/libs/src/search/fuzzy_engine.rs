@@ -2,7 +2,7 @@ use fuzzy_matcher::skim::SkimMatcherV2;
 use fuzzy_matcher::FuzzyMatcher;
 
 use super::engine::SearchEngine;
-use super::result::{SearchIndexItem, SearchResult};
+use super::result::SearchItem;
 
 pub struct FuzzySearchEngine {
     matcher: SkimMatcherV2,
@@ -35,21 +35,21 @@ impl FuzzySearchEngine {
 }
 
 impl SearchEngine for FuzzySearchEngine {
-    fn search(&self, items: &[SearchIndexItem], query: &str, num: usize) -> Vec<SearchResult> {
+    fn search(&self, items: &[SearchItem], query: &str, num: usize) -> Vec<SearchItem> {
         if query.is_empty() {
             return items
                 .iter()
                 .take(num)
-                .map(|item| SearchResult::new(&item.title))
+                .map(|item| SearchItem::new(&item.title))
                 .collect();
         }
 
-        let mut results_with_scores: Vec<(SearchResult, i64)> = items
+        let mut results_with_scores: Vec<(SearchItem, i64)> = items
             .iter()
             .filter_map(|item| {
                 self.matcher
                     .fuzzy_match(&item.title, query)
-                    .map(|score| (SearchResult::new(&item.title), score))
+                    .map(|score| (SearchItem::new(&item.title), score))
             })
             .collect();
 
@@ -67,14 +67,14 @@ impl SearchEngine for FuzzySearchEngine {
 mod tests {
     use super::*;
 
-    fn create_test_items() -> Vec<SearchIndexItem> {
+    fn create_test_items() -> Vec<SearchItem> {
         vec![
-            SearchIndexItem::new("Test Document"),
-            SearchIndexItem::new("Another Document"),
-            SearchIndexItem::new("Sample Test"),
-            SearchIndexItem::new("Documentation"),
-            SearchIndexItem::new("Testing Framework"),
-            SearchIndexItem::new("Test Suite"),
+            SearchItem::new("Test Document"),
+            SearchItem::new("Another Document"),
+            SearchItem::new("Sample Test"),
+            SearchItem::new("Documentation"),
+            SearchItem::new("Testing Framework"),
+            SearchItem::new("Test Suite"),
         ]
     }
 
@@ -197,7 +197,7 @@ mod tests {
         let engine = FuzzySearchEngine::new();
         let mut items = Vec::new();
         for i in 0..101 {
-            items.push(SearchIndexItem::new(&format!("Document {}", i)));
+            items.push(SearchItem::new(&format!("Document {}", i)));
         }
 
         let results = engine.search(&items, "", 100);
@@ -209,7 +209,7 @@ mod tests {
         let engine = FuzzySearchEngine::new();
         let mut items = Vec::new();
         for i in 0..10 {
-            items.push(SearchIndexItem::new(&format!("Test Document {}", i)));
+            items.push(SearchItem::new(&format!("Test Document {}", i)));
         }
 
         // Test with num=5

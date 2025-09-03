@@ -37,12 +37,10 @@ impl SearchUsecase {
             .map(|path| crate::usecase::read_scraps::to_scrap_by_path(&self.scraps_dir_path, &path))
             .collect::<ScrapsResult<Vec<Scrap>>>()?;
 
-        // Create search index items in memory
-        let lib_items: Vec<scraps_libs::search::result::SearchIndexItem> = scraps
+        // Create search items in memory
+        let lib_items: Vec<scraps_libs::search::result::SearchItem> = scraps
             .iter()
-            .map(|scrap| {
-                scraps_libs::search::result::SearchIndexItem::new(&scrap.title.to_string())
-            })
+            .map(|scrap| scraps_libs::search::result::SearchItem::new(&scrap.title.to_string()))
             .collect();
 
         // Perform search and add URLs to results
@@ -52,15 +50,19 @@ impl SearchUsecase {
         // Convert to final results with URLs
         let results_with_urls: Vec<SearchResultWithUrl> = search_results
             .into_iter()
-            .enumerate()
-            .map(|(index, _result)| {
-                let scrap = &scraps[index];
-                let file_stem = ScrapFileStem::from(scrap.self_link().clone());
-                let url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
-                SearchResultWithUrl {
-                    title: scrap.title.to_string(),
-                    url,
-                }
+            .filter_map(|result| {
+                // Find the corresponding scrap by title
+                scraps
+                    .iter()
+                    .find(|scrap| scrap.title.to_string() == result.title)
+                    .map(|scrap| {
+                        let file_stem = ScrapFileStem::from(scrap.self_link().clone());
+                        let url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
+                        SearchResultWithUrl {
+                            title: result.title,
+                            url,
+                        }
+                    })
             })
             .collect();
 
