@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 use crate::error::ScrapsResult;
@@ -37,6 +38,12 @@ impl SearchUsecase {
             .map(|path| crate::usecase::read_scraps::to_scrap_by_path(&self.scraps_dir_path, &path))
             .collect::<ScrapsResult<Vec<Scrap>>>()?;
 
+        // Create title-to-scrap mapping for efficient lookup
+        let scrap_map: HashMap<String, &Scrap> = scraps
+            .iter()
+            .map(|scrap| (scrap.title.to_string(), scrap))
+            .collect();
+
         // Create search items in memory
         let lib_items: Vec<scraps_libs::search::result::SearchItem> = scraps
             .iter()
@@ -47,22 +54,19 @@ impl SearchUsecase {
         let engine = FuzzySearchEngine::new();
         let search_results = engine.search(&lib_items, query, num);
 
-        // Convert to final results with URLs
+        // Convert to final results with URLs using HashMap lookup
         let results_with_urls: Vec<SearchResultWithUrl> = search_results
             .into_iter()
             .filter_map(|result| {
-                // Find the corresponding scrap by title
-                scraps
-                    .iter()
-                    .find(|scrap| scrap.title.to_string() == result.title)
-                    .map(|scrap| {
-                        let file_stem = ScrapFileStem::from(scrap.self_link().clone());
-                        let url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
-                        SearchResultWithUrl {
-                            title: result.title,
-                            url,
-                        }
-                    })
+                // Find the corresponding scrap by title using HashMap
+                scrap_map.get(&result.title).map(|scrap| {
+                    let file_stem = ScrapFileStem::from(scrap.self_link().clone());
+                    let url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
+                    SearchResultWithUrl {
+                        title: result.title,
+                        url,
+                    }
+                })
             })
             .collect();
 
