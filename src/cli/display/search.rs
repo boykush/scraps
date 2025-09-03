@@ -1,7 +1,7 @@
 use std::fmt;
 
+use crate::usecase::search::usecase::SearchResultWithUrl;
 use colored::Colorize;
-use scraps_libs::search::result::SearchResult;
 
 pub struct DisplaySearch {
     title: String,
@@ -9,7 +9,7 @@ pub struct DisplaySearch {
 }
 
 impl DisplaySearch {
-    pub fn new(search_result: &SearchResult) -> Self {
+    pub fn new(search_result: &SearchResultWithUrl) -> Self {
         DisplaySearch {
             title: search_result.title.clone(),
             url: search_result.url.clone(),

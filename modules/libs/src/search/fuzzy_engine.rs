@@ -40,7 +40,7 @@ impl SearchEngine for FuzzySearchEngine {
             return items
                 .iter()
                 .take(num)
-                .map(|item| SearchResult::new(&item.title, &item.url))
+                .map(|item| SearchResult::new(&item.title))
                 .collect();
         }
 
@@ -49,7 +49,7 @@ impl SearchEngine for FuzzySearchEngine {
             .filter_map(|item| {
                 self.matcher
                     .fuzzy_match(&item.title, query)
-                    .map(|score| (SearchResult::new(&item.title, &item.url), score))
+                    .map(|score| (SearchResult::new(&item.title), score))
             })
             .collect();
 
@@ -69,12 +69,12 @@ mod tests {
 
     fn create_test_items() -> Vec<SearchIndexItem> {
         vec![
-            SearchIndexItem::new("Test Document", "http://example.com/test"),
-            SearchIndexItem::new("Another Document", "http://example.com/another"),
-            SearchIndexItem::new("Sample Test", "http://example.com/sample"),
-            SearchIndexItem::new("Documentation", "http://example.com/doc"),
-            SearchIndexItem::new("Testing Framework", "http://example.com/testing"),
-            SearchIndexItem::new("Test Suite", "http://example.com/suite"),
+            SearchIndexItem::new("Test Document"),
+            SearchIndexItem::new("Another Document"),
+            SearchIndexItem::new("Sample Test"),
+            SearchIndexItem::new("Documentation"),
+            SearchIndexItem::new("Testing Framework"),
+            SearchIndexItem::new("Test Suite"),
         ]
     }
 
@@ -197,10 +197,7 @@ mod tests {
         let engine = FuzzySearchEngine::new();
         let mut items = Vec::new();
         for i in 0..101 {
-            items.push(SearchIndexItem::new(
-                &format!("Document {}", i),
-                &format!("http://example.com/doc{}", i),
-            ));
+            items.push(SearchIndexItem::new(&format!("Document {}", i)));
         }
 
         let results = engine.search(&items, "", 100);
@@ -212,10 +209,7 @@ mod tests {
         let engine = FuzzySearchEngine::new();
         let mut items = Vec::new();
         for i in 0..10 {
-            items.push(SearchIndexItem::new(
-                &format!("Test Document {}", i),
-                &format!("http://example.com/test{}", i),
-            ));
+            items.push(SearchIndexItem::new(&format!("Test Document {}", i)));
         }
 
         // Test with num=5
@@ -264,8 +258,6 @@ mod tests {
 
         for result in results {
             assert!(!result.title.is_empty());
-            assert!(!result.url.is_empty());
-            assert!(result.url.starts_with("http://"));
         }
     }
 }
