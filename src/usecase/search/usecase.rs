@@ -9,9 +9,10 @@ use scraps_libs::search::engine::SearchEngine;
 use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct SearchResultWithUrl {
+pub struct SearchResult {
     pub title: String,
     pub url: String,
+    pub md_text: String,
 }
 
 pub struct SearchUsecase {
@@ -30,7 +31,7 @@ impl SearchUsecase {
         base_url: &BaseUrl,
         query: &str,
         num: usize,
-    ) -> ScrapsResult<Vec<SearchResultWithUrl>> {
+    ) -> ScrapsResult<Vec<SearchResult>> {
         // Load scraps from directory directly
         let scrap_paths = crate::usecase::read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
         let scraps = scrap_paths
@@ -55,22 +56,23 @@ impl SearchUsecase {
         let search_results = engine.search(&lib_items, query, num);
 
         // Convert to final results with URLs using HashMap lookup
-        let results_with_urls: Vec<SearchResultWithUrl> = search_results
+        let results: Vec<SearchResult> = search_results
             .into_iter()
             .filter_map(|result| {
                 // Find the corresponding scrap by title using HashMap
                 scrap_map.get(&result.title).map(|scrap| {
                     let file_stem = ScrapFileStem::from(scrap.self_link().clone());
                     let url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
-                    SearchResultWithUrl {
+                    SearchResult {
                         title: result.title,
                         url,
+                        md_text: scrap.md_text.clone(),
                     }
                 })
             })
             .collect();
 
-        Ok(results_with_urls)
+        Ok(results)
     }
 }
 
@@ -114,6 +116,8 @@ mod tests {
             assert!(results.iter().any(|r| r.title.contains("test")));
             // Verify URLs are present
             assert!(results.iter().all(|r| !r.url.is_empty()));
+            // Verify md_text is present
+            assert!(results.iter().all(|r| !r.md_text.is_empty()));
         });
     }
 }
