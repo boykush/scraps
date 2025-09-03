@@ -41,7 +41,7 @@ struct SearchRequest {
 #[tool_router]
 impl ScrapsServer {
     #[tool(description = "Search scraps")]
-    async fn search(
+    async fn search_scraps(
         &self,
         _context: RequestContext<RoleServer>,
         Parameters(request): Parameters<SearchRequest>,
