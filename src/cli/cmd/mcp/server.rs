@@ -61,7 +61,8 @@ impl ScrapsServer {
             .map(|result| {
                 json!({
                     "title": result.title,
-                    "url": result.url
+                    "url": result.url,
+                    "md_text": result.md_text
                 })
             })
             .collect::<Vec<_>>();
