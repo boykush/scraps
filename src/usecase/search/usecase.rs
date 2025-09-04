@@ -48,7 +48,9 @@ impl SearchUsecase {
         // Create search items in memory
         let lib_items: Vec<scraps_libs::search::result::SearchItem> = scraps
             .iter()
-            .map(|scrap| scraps_libs::search::result::SearchItem::new(&scrap.self_link().to_string()))
+            .map(|scrap| {
+                scraps_libs::search::result::SearchItem::new(&scrap.self_link().to_string())
+            })
             .collect();
 
         // Perform search and add URLs to results
