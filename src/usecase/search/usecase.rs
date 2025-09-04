@@ -42,13 +42,13 @@ impl SearchUsecase {
         // Create title-to-scrap mapping for efficient lookup
         let scrap_map: HashMap<String, &Scrap> = scraps
             .iter()
-            .map(|scrap| (scrap.title.to_string(), scrap))
+            .map(|scrap| (scrap.self_link().to_string(), scrap))
             .collect();
 
         // Create search items in memory
         let lib_items: Vec<scraps_libs::search::result::SearchItem> = scraps
             .iter()
-            .map(|scrap| scraps_libs::search::result::SearchItem::new(&scrap.title.to_string()))
+            .map(|scrap| scraps_libs::search::result::SearchItem::new(&scrap.self_link().to_string()))
             .collect();
 
         // Perform search and add URLs to results
@@ -159,9 +159,6 @@ mod tests {
                 This indicates the HashMap is overwriting duplicate titles.",
                 results.len()
             );
-
-            // Verify both results have the same title
-            assert!(results.iter().all(|r| r.title == "duplicate"));
 
             // Verify URLs are different (pointing to different files)
             let urls: std::collections::HashSet<String> =
