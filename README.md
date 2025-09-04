@@ -41,6 +41,10 @@ Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 - [x] Search scraps content
 - [x] List a tags
 - [x] Template to generate the scrap
+- [x] MCP server for AI assistant integration
+### MCP Server
+- [x] search_scraps
+- [x] list_tags
 ### Deploy
 - [x] GitHub Pages
 

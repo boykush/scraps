@@ -46,3 +46,7 @@
 
 3. **Deploy**
    - Deploy to platforms like [[GitHub Pages]] when ready
+
+## AI Integration
+
+- **MCP Server**: Enable AI assistant integration using [[MCP Server]] for intelligent search and content assistance
