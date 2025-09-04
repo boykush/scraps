@@ -40,7 +40,6 @@ pub async fn search_scraps(
         .map(|result| {
             json!({
                 "title": result.title,
-                "url": result.url,
                 "md_text": result.md_text
             })
         })
