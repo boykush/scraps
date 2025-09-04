@@ -1,10 +1,10 @@
 use std::path::Path;
 
 use crate::{
-    cli::cmd::mcp::server::ScrapsServer,
     cli::config::scrap_config::ScrapConfig,
     cli::path_resolver::PathResolver,
     error::{McpError, ScrapsResult},
+    mcp::server::ScrapsServer,
 };
 use rmcp::ServiceExt;
 use tokio::io::{stdin, stdout};

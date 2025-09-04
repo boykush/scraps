@@ -1,5 +1,6 @@
 mod cli;
 mod error;
+mod mcp;
 mod service;
 mod usecase;
 
