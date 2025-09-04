@@ -66,7 +66,7 @@ impl DirResource {
     }
 
     fn close(&self) {
-        fs::remove_dir_all(&self.path).unwrap()
+        fs::remove_dir_all(&self.path).unwrap_or(())
     }
 }
 

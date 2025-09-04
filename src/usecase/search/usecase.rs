@@ -42,13 +42,15 @@ impl SearchUsecase {
         // Create title-to-scrap mapping for efficient lookup
         let scrap_map: HashMap<String, &Scrap> = scraps
             .iter()
-            .map(|scrap| (scrap.title.to_string(), scrap))
+            .map(|scrap| (scrap.self_link().to_string(), scrap))
             .collect();
 
         // Create search items in memory
         let lib_items: Vec<scraps_libs::search::result::SearchItem> = scraps
             .iter()
-            .map(|scrap| scraps_libs::search::result::SearchItem::new(&scrap.title.to_string()))
+            .map(|scrap| {
+                scraps_libs::search::result::SearchItem::new(&scrap.self_link().to_string())
+            })
             .collect();
 
         // Perform search and add URLs to results
@@ -118,6 +120,62 @@ mod tests {
             assert!(results.iter().all(|r| !r.url.is_empty()));
             // Verify md_text is present
             assert!(results.iter().all(|r| !r.md_text.is_empty()));
+        });
+    }
+
+    #[test]
+    fn it_handles_duplicate_titles() {
+        // fields
+        let test_resource_path =
+            PathBuf::from("tests/resource/search/cmd/it_handles_duplicate_titles");
+        let scraps_dir_path = test_resource_path.join("scraps");
+        let static_dir_path = test_resource_path.join("static");
+
+        // Two scraps with the same title but different contexts (ctx/ and root)
+        let ctx_dir = scraps_dir_path.join("ctx");
+        let md_path_1 = ctx_dir.join("duplicate.md"); // ctx/duplicate.md
+        let resource_bytes_1 = concat!("# Duplicate\n", "Content in ctx directory.").as_bytes();
+
+        let md_path_2 = scraps_dir_path.join("duplicate.md"); // duplicate.md
+        let resource_bytes_2 = concat!("# Duplicate\n", "Content in root directory.").as_bytes();
+
+        let mut test_resources = TestResources::new();
+        test_resources
+            .add_dir(&ctx_dir)
+            .add_file(&md_path_1, resource_bytes_1)
+            .add_file(&md_path_2, resource_bytes_2)
+            .add_dir(&static_dir_path);
+
+        test_resources.run(|| {
+            let usecase = SearchUsecase::new(&scraps_dir_path);
+            let url = Url::parse("http://localhost:1112/").unwrap();
+            let base_url = BaseUrl::new(url).unwrap();
+
+            let results = usecase.execute(&base_url, "duplicate", 100).unwrap();
+
+            // Should find both scraps with the same title but different contexts
+            assert_eq!(
+                results.len(),
+                2,
+                "Expected 2 results for duplicate titles with different contexts, got {}. \
+                This indicates the HashMap is overwriting duplicate titles.",
+                results.len()
+            );
+
+            // Verify URLs are different (pointing to different files)
+            let urls: std::collections::HashSet<String> =
+                results.iter().map(|r| r.url.clone()).collect();
+            assert_eq!(urls.len(), 2, "Expected 2 unique URLs, got {}", urls.len());
+
+            // Verify content is different
+            let md_texts: std::collections::HashSet<String> =
+                results.iter().map(|r| r.md_text.clone()).collect();
+            assert_eq!(
+                md_texts.len(),
+                2,
+                "Expected 2 unique content texts, got {}",
+                md_texts.len()
+            );
         });
     }
 }
