@@ -1,14 +1,16 @@
 use std::fmt::Display;
 
-use super::{key::ScrapKey, slug::Slug};
+use super::{context::Ctx, key::ScrapKey, slug::Slug, title::Title};
 
 pub struct ScrapFileStem(String);
 
 impl From<ScrapKey> for ScrapFileStem {
     fn from(key: ScrapKey) -> Self {
-        let file_name = match key.ctx {
-            Some(ctx) => format!("{}.{}", Slug::from(key.title), Slug::from(ctx)),
-            None => Slug::from(key.title).to_string(),
+        let title: Title = key.title().clone();
+        let ctx: Option<Ctx> = key.ctx().clone();
+        let file_name = match ctx {
+            Some(ctx) => format!("{}.{}", Slug::from(title), Slug::from(ctx)),
+            None => Slug::from(title).to_string(),
         };
         ScrapFileStem(file_name)
     }

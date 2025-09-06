@@ -109,7 +109,7 @@ fn handle_wiki_link_events<'a>(
     let replaced_text = if has_pothole {
         text.to_string()
     } else {
-        scrap_link.title.to_string()
+        scrap_link.title().to_string()
     };
     [start_link, Event::Text(replaced_text.into()), end]
 }

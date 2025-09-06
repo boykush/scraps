@@ -28,7 +28,7 @@ impl Tags {
             .filter(|key| !scrap_self_keys.contains(key))
             .collect();
 
-        Tags(links.iter().map(|l| l.clone().title.into()).collect())
+        Tags(links.iter().map(|l| l.title().clone().into()).collect())
     }
 
     pub fn len(&self) -> usize {
