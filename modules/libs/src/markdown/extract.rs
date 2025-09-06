@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use pulldown_cmark::{CowStr, Event, LinkType, Options, Parser, Tag};
 use url::Url;
 
-use crate::model::link::ScrapLink;
+use crate::model::key::ScrapKey;
 
 const PARSER_OPTION: Options = Options::all();
 
@@ -20,7 +20,7 @@ pub fn head_image(text: &str) -> Option<Url> {
     })
 }
 
-pub fn scrap_links(text: &str) -> Vec<ScrapLink> {
+pub fn scrap_links(text: &str) -> Vec<ScrapKey> {
     let parser = Parser::new_ext(text, PARSER_OPTION);
 
     let links = parser.flat_map(|event| match event {
@@ -29,11 +29,11 @@ pub fn scrap_links(text: &str) -> Vec<ScrapLink> {
             dest_url: CowStr::Borrowed(dest_url),
             title: _,
             id: _,
-        }) => Some(ScrapLink::from_path_str(dest_url)),
+        }) => Some(ScrapKey::from_path_str(dest_url)),
         _ => None,
     });
 
-    let hashed: HashSet<ScrapLink> = links.into_iter().collect();
+    let hashed: HashSet<ScrapKey> = links.into_iter().collect();
     hashed.into_iter().collect()
 }
 
@@ -67,15 +67,15 @@ mod tests {
         ]
         .join("\n");
         let mut result1 = scrap_links(valid_links);
-        let mut expected1: Vec<ScrapLink> = [
+        let mut expected1: Vec<ScrapKey> = [
             Title::from("head").into(),
             Title::from("contain space").into(),
             Title::from("last").into(),
             Title::from("duplicate").into(),
             Title::from("Domain Driven Design").into(),
             Title::from("Test-driven development").into(),
-            ScrapLink::with_ctx(&"Test-driven development".into(), &"Book".into()),
-            ScrapLink::with_ctx(&"Eric Evans".into(), &"Person".into()),
+            ScrapKey::with_ctx(&"Test-driven development".into(), &"Book".into()),
+            ScrapKey::with_ctx(&"Eric Evans".into(), &"Person".into()),
         ]
         .to_vec();
         result1.sort();
@@ -94,6 +94,6 @@ mod tests {
         .join("\n");
         let result2 = scrap_links(invalid_links);
 
-        assert_eq!(result2, Vec::<ScrapLink>::new());
+        assert_eq!(result2, Vec::<ScrapKey>::new());
     }
 }
