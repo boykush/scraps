@@ -6,8 +6,8 @@ pub struct ScrapFileStem(String);
 
 impl From<ScrapKey> for ScrapFileStem {
     fn from(key: ScrapKey) -> Self {
-        let title: Title = key.title().clone();
-        let ctx: Option<Ctx> = key.ctx().clone();
+        let title: Title = Title::from(&key);
+        let ctx: Option<Ctx> = Option::<Ctx>::from(&key);
         let file_name = match ctx {
             Some(ctx) => format!("{}.{}", Slug::from(title), Slug::from(ctx)),
             None => Slug::from(title).to_string(),
