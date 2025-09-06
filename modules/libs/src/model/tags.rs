@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use super::{link::ScrapLink, scrap::Scrap, tag::Tag};
+use super::{key::ScrapKey, scrap::Scrap, tag::Tag};
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct Tags(HashSet<Tag>);
@@ -16,16 +16,16 @@ impl IntoIterator for Tags {
 
 impl Tags {
     pub fn new(scraps: &[Scrap]) -> Tags {
-        let scrap_links: HashSet<ScrapLink> = scraps
+        let scrap_links: HashSet<ScrapKey> = scraps
             .iter()
             .flat_map(|scrap| scrap.links.clone())
             .collect();
-        let scrap_self_links: HashSet<ScrapLink> =
-            scraps.iter().map(|scrap| scrap.self_link()).collect();
+        let scrap_self_keys: HashSet<ScrapKey> =
+            scraps.iter().map(|scrap| scrap.self_key()).collect();
 
-        let links: Vec<ScrapLink> = scrap_links
+        let links: Vec<ScrapKey> = scrap_links
             .into_iter()
-            .filter(|link| !scrap_self_links.contains(link))
+            .filter(|key| !scrap_self_keys.contains(key))
             .collect();
 
         Tags(links.iter().map(|l| l.clone().title.into()).collect())

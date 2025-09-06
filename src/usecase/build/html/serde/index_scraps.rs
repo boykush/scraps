@@ -24,8 +24,8 @@ impl SerializeIndexScrap {
         let scrap = scrap_detail.scrap();
         let content = scrap_detail.content();
         let commited_ts = scrap_detail.commited_ts();
-        let backlinks_count = backlinks_map.get(&scrap.self_link()).len();
-        let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_link().clone()));
+        let backlinks_count = backlinks_map.get(&scrap.self_key()).len();
+        let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_key().clone()));
         SerializeIndexScrap {
             ctx: scrap.ctx.map(|c| c.to_string()),
             title: scrap.title.to_string(),

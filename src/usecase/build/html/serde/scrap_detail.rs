@@ -20,7 +20,7 @@ impl From<ScrapDetail> for ScrapDetailTera {
         let scrap = scrap_detail.scrap();
         let commited_ts = scrap_detail.commited_ts();
         let content = scrap_detail.content();
-        let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_link()));
+        let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_key()));
         ScrapDetailTera {
             ctx: scrap.ctx.as_ref().map(|ctx| ctx.to_string()),
             title: scrap.title.to_string(),

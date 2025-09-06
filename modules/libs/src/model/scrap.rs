@@ -2,20 +2,20 @@ use url::Url;
 
 use crate::markdown;
 
-use super::{context::Ctx, link::ScrapLink, title::Title};
+use super::{context::Ctx, key::ScrapKey, title::Title};
 
 #[derive(PartialEq, Clone, Debug)]
 pub struct Scrap {
     pub title: Title,
     pub ctx: Option<Ctx>,
-    pub links: Vec<ScrapLink>,
+    pub links: Vec<ScrapKey>,
     pub md_text: String,
     pub thumbnail: Option<Url>,
 }
 
 impl Scrap {
-    pub fn self_link(&self) -> ScrapLink {
-        ScrapLink::new(&self.title, &self.ctx)
+    pub fn self_key(&self) -> ScrapKey {
+        ScrapKey::new(&self.title, &self.ctx)
     }
 }
 
@@ -46,7 +46,7 @@ mod tests {
         let mut expected = [
             Title::from("link1").into(),
             Title::from("link2").into(),
-            ScrapLink::with_ctx(&"link3".into(), &"Context".into()),
+            ScrapKey::with_ctx(&"link3".into(), &"Context".into()),
         ];
         expected.sort();
         assert_eq!(scrap.links, expected);

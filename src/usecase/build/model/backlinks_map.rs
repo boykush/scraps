@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
-use scraps_libs::model::{link::ScrapLink, scrap::Scrap};
+use scraps_libs::model::{key::ScrapKey, scrap::Scrap};
 
 #[derive(PartialEq, Debug)]
-pub struct BacklinksMap(HashMap<ScrapLink, Vec<Scrap>>);
+pub struct BacklinksMap(HashMap<ScrapKey, Vec<Scrap>>);
 
 impl BacklinksMap {
     pub fn new(scraps: &[Scrap]) -> BacklinksMap {
@@ -11,24 +11,24 @@ impl BacklinksMap {
         BacklinksMap(backlinks_map)
     }
 
-    pub fn get(&self, link: &ScrapLink) -> Vec<Scrap> {
-        self.0.get(link).map_or_else(Vec::new, Vec::clone)
+    pub fn get(&self, key: &ScrapKey) -> Vec<Scrap> {
+        self.0.get(key).map_or_else(Vec::new, Vec::clone)
     }
 
-    fn gen_backlinks_map(scraps: &[Scrap]) -> HashMap<ScrapLink, Vec<Scrap>> {
+    fn gen_backlinks_map(scraps: &[Scrap]) -> HashMap<ScrapKey, Vec<Scrap>> {
         scraps
             .iter()
             .fold(
                 HashMap::new(),
-                |acc1: HashMap<ScrapLink, Vec<Scrap>>, scrap| {
-                    scrap.to_owned().links.iter().fold(acc1, |mut acc2, link| {
-                        acc2.entry(link.clone()).or_default().push(scrap.to_owned());
+                |acc1: HashMap<ScrapKey, Vec<Scrap>>, scrap| {
+                    scrap.to_owned().links.iter().fold(acc1, |mut acc2, key| {
+                        acc2.entry(key.clone()).or_default().push(scrap.to_owned());
                         acc2
                     })
                 },
             )
             .into_iter()
-            .collect::<HashMap<ScrapLink, Vec<Scrap>>>()
+            .collect::<HashMap<ScrapKey, Vec<Scrap>>>()
     }
 }
 
@@ -66,11 +66,11 @@ mod tests {
 
         let backlinks_map = BacklinksMap::new(&scraps);
         assert_eq!(
-            backlinks_map.get(&ScrapLink::with_ctx(&"scrap1".into(), &"Context".into())),
+            backlinks_map.get(&ScrapKey::with_ctx(&"scrap1".into(), &"Context".into())),
             vec![scrap2.clone(), scrap3.clone()]
         );
         assert_eq!(
-            backlinks_map.get(&ScrapLink::with_ctx(&"scrap2".into(), &"Context".into())),
+            backlinks_map.get(&ScrapKey::with_ctx(&"scrap2".into(), &"Context".into())),
             vec![scrap3.clone()]
         );
         assert_eq!(backlinks_map.get(&Title::from("scrap3").into()), vec![]);

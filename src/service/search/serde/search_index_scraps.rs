@@ -10,8 +10,8 @@ pub struct SerializeSearchIndexScrap {
 impl SerializeSearchIndexScrap {
     fn new(scrap: &Scrap) -> SerializeSearchIndexScrap {
         SerializeSearchIndexScrap {
-            link_title: scrap.self_link().to_string(),
-            file_stem: ScrapFileStem::from(scrap.self_link()).to_string(),
+            link_title: scrap.self_key().to_string(),
+            file_stem: ScrapFileStem::from(scrap.self_key()).to_string(),
         }
     }
 }

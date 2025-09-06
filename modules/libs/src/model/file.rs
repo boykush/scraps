@@ -1,14 +1,14 @@
 use std::fmt::Display;
 
-use super::{link::ScrapLink, slug::Slug};
+use super::{key::ScrapKey, slug::Slug};
 
 pub struct ScrapFileStem(String);
 
-impl From<ScrapLink> for ScrapFileStem {
-    fn from(link: ScrapLink) -> Self {
-        let file_name = match link.ctx {
-            Some(ctx) => format!("{}.{}", Slug::from(link.title), Slug::from(ctx)),
-            None => Slug::from(link.title).to_string(),
+impl From<ScrapKey> for ScrapFileStem {
+    fn from(key: ScrapKey) -> Self {
+        let file_name = match key.ctx {
+            Some(ctx) => format!("{}.{}", Slug::from(key.title), Slug::from(ctx)),
+            None => Slug::from(key.title).to_string(),
         };
         ScrapFileStem(file_name)
     }
@@ -30,9 +30,9 @@ mod tests {
     #[test]
     fn it_from_scrap_link() {
         let input_list = [
-            ScrapLink::from(Title::from("title")),
-            ScrapLink::from(Title::from("expected slugify")),
-            ScrapLink::with_ctx(&"title".into(), &"Context".into()),
+            ScrapKey::from(Title::from("title")),
+            ScrapKey::from(Title::from("expected slugify")),
+            ScrapKey::with_ctx(&"title".into(), &"Context".into()),
         ];
         let expected_list = ["title", "expected-slugify", "title.context"];
         input_list

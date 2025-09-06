@@ -8,7 +8,7 @@ use crate::model::{
     base_url::BaseUrl,
     content::{Content, ContentElement},
     file::ScrapFileStem,
-    link::ScrapLink,
+    key::ScrapKey,
 };
 
 const PARSER_OPTION: Options = Options::all();
@@ -97,7 +97,7 @@ fn handle_wiki_link_events<'a>(
     end: Event<'a>,
     has_pothole: bool,
 ) -> [Event<'a>; 3] {
-    let scrap_link = &ScrapLink::from_path_str(dest_url);
+    let scrap_link = &ScrapKey::from_path_str(dest_url);
     let file_stem = ScrapFileStem::from(scrap_link.clone());
     let link = format!("{base_url}scraps/{file_stem}.html");
     let start_link = Event::Start(Tag::Link {
