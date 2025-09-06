@@ -9,6 +9,7 @@ use crate::model::{
     content::{Content, ContentElement},
     file::ScrapFileStem,
     key::ScrapKey,
+    title::Title,
 };
 
 const PARSER_OPTION: Options = Options::all();
@@ -109,7 +110,7 @@ fn handle_wiki_link_events<'a>(
     let replaced_text = if has_pothole {
         text.to_string()
     } else {
-        scrap_link.title.to_string()
+        Title::from(scrap_link).to_string()
     };
     [start_link, Event::Text(replaced_text.into()), end]
 }

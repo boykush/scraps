@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use super::{key::ScrapKey, scrap::Scrap, tag::Tag};
+use super::{key::ScrapKey, scrap::Scrap, tag::Tag, title::Title};
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct Tags(HashSet<Tag>);
@@ -28,7 +28,7 @@ impl Tags {
             .filter(|key| !scrap_self_keys.contains(key))
             .collect();
 
-        Tags(links.iter().map(|l| l.clone().title.into()).collect())
+        Tags(links.iter().map(|l| Title::from(l).into()).collect())
     }
 
     pub fn len(&self) -> usize {
