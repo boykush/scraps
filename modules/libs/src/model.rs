@@ -2,7 +2,7 @@ pub mod base_url;
 pub mod content;
 pub mod context;
 pub mod file;
-pub mod link;
+pub mod key;
 pub mod scrap;
 pub mod slug;
 pub mod tag;
