@@ -14,7 +14,7 @@ pub struct Scrap {
 }
 
 impl Scrap {
-    pub fn self_link(&self) -> ScrapKey {
+    pub fn self_key(&self) -> ScrapKey {
         ScrapKey::new(&self.title, &self.ctx)
     }
 }

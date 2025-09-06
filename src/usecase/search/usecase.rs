@@ -42,14 +42,14 @@ impl SearchUsecase {
         // Create title-to-scrap mapping for efficient lookup
         let scrap_map: HashMap<String, &Scrap> = scraps
             .iter()
-            .map(|scrap| (scrap.self_link().to_string(), scrap))
+            .map(|scrap| (scrap.self_key().to_string(), scrap))
             .collect();
 
         // Create search items in memory
         let lib_items: Vec<scraps_libs::search::result::SearchItem> = scraps
             .iter()
             .map(|scrap| {
-                scraps_libs::search::result::SearchItem::new(&scrap.self_link().to_string())
+                scraps_libs::search::result::SearchItem::new(&scrap.self_key().to_string())
             })
             .collect();
 
@@ -63,7 +63,7 @@ impl SearchUsecase {
             .filter_map(|result| {
                 // Find the corresponding scrap by title using HashMap
                 scrap_map.get(&result.title).map(|scrap| {
-                    let file_stem = ScrapFileStem::from(scrap.self_link().clone());
+                    let file_stem = ScrapFileStem::from(scrap.self_key().clone());
                     let url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
                     SearchResult {
                         title: result.title,

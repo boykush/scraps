@@ -20,12 +20,12 @@ impl Tags {
             .iter()
             .flat_map(|scrap| scrap.links.clone())
             .collect();
-        let scrap_self_links: HashSet<ScrapKey> =
-            scraps.iter().map(|scrap| scrap.self_link()).collect();
+        let scrap_self_keys: HashSet<ScrapKey> =
+            scraps.iter().map(|scrap| scrap.self_key()).collect();
 
         let links: Vec<ScrapKey> = scrap_links
             .into_iter()
-            .filter(|key| !scrap_self_links.contains(key))
+            .filter(|key| !scrap_self_keys.contains(key))
             .collect();
 
         Tags(links.iter().map(|l| l.clone().title.into()).collect())
