@@ -3,14 +3,17 @@ use std::path::PathBuf;
 
 use crate::error::ScrapsResult;
 use scraps_libs::model::base_url::BaseUrl;
+use scraps_libs::model::context::Ctx;
 use scraps_libs::model::file::ScrapFileStem;
 use scraps_libs::model::scrap::Scrap;
+use scraps_libs::model::title::Title;
 use scraps_libs::search::engine::SearchEngine;
 use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SearchResult {
-    pub title: String,
+    pub title: Title,
+    pub ctx: Option<Ctx>,
     pub url: String,
     pub md_text: String,
 }
@@ -65,8 +68,14 @@ impl SearchUsecase {
                 scrap_map.get(&result.title).map(|scrap| {
                     let file_stem = ScrapFileStem::from(scrap.self_key().clone());
                     let url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
+
+                    let scrap_key = &scrap.self_key();
+                    let title: Title = scrap_key.into();
+                    let ctx: Option<Ctx> = scrap_key.into();
+
                     SearchResult {
-                        title: result.title,
+                        title,
+                        ctx,
                         url,
                         md_text: scrap.md_text.clone(),
                     }
@@ -115,7 +124,7 @@ mod tests {
 
             // Should find documents containing "test"
             assert!(!results.is_empty());
-            assert!(results.iter().any(|r| r.title.contains("test")));
+            assert!(results.iter().any(|r| r.title.to_string().contains("test")));
             // Verify URLs are present
             assert!(results.iter().all(|r| !r.url.is_empty()));
             // Verify md_text is present
@@ -175,6 +184,46 @@ mod tests {
                 2,
                 "Expected 2 unique content texts, got {}",
                 md_texts.len()
+            );
+
+            // Verify ctx field separation works correctly
+            // One result should have ctx: Some("ctx"), the other should have ctx: None
+            let ctx_values: std::collections::HashSet<Option<String>> = results
+                .iter()
+                .map(|r| r.ctx.as_ref().map(|c| c.to_string()))
+                .collect();
+            assert_eq!(
+                ctx_values.len(),
+                2,
+                "Expected 2 different ctx values (Some and None), got {:?}",
+                ctx_values
+            );
+
+            // Verify that one result has ctx "ctx" and the other has None
+            assert!(
+                ctx_values.contains(&Some("ctx".to_string())),
+                "Expected one result to have ctx 'ctx', but found {:?}",
+                ctx_values
+            );
+            assert!(
+                ctx_values.contains(&None),
+                "Expected one result to have ctx None, but found {:?}",
+                ctx_values
+            );
+
+            // Verify that both results have the same title "Duplicate"
+            let titles: std::collections::HashSet<String> =
+                results.iter().map(|r| r.title.to_string()).collect();
+            assert_eq!(
+                titles.len(),
+                1,
+                "Expected all results to have the same title 'Duplicate', but got {:?}",
+                titles
+            );
+            assert!(
+                titles.contains("duplicate"),
+                "Expected title to be 'duplicate', but got {:?}",
+                titles
             );
         });
     }

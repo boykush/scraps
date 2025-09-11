@@ -11,7 +11,7 @@ pub struct DisplaySearch {
 impl DisplaySearch {
     pub fn new(search_result: &SearchResult) -> Self {
         DisplaySearch {
-            title: search_result.title.clone(),
+            title: search_result.title.to_string(),
             url: search_result.url.clone(),
         }
     }
