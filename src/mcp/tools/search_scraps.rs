@@ -39,7 +39,10 @@ pub async fn search_scraps(
         .into_iter()
         .map(|result| {
             let mut json_obj = serde_json::Map::new();
-            json_obj.insert("title".to_string(), serde_json::Value::String(result.title.to_string()));
+            json_obj.insert(
+                "title".to_string(),
+                serde_json::Value::String(result.title.to_string()),
+            );
             json_obj.insert(
                 "ctx".to_string(),
                 result
