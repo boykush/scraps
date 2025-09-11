@@ -3,14 +3,17 @@ use std::path::PathBuf;
 
 use crate::error::ScrapsResult;
 use scraps_libs::model::base_url::BaseUrl;
+use scraps_libs::model::context::Ctx;
 use scraps_libs::model::file::ScrapFileStem;
 use scraps_libs::model::scrap::Scrap;
+use scraps_libs::model::title::Title;
 use scraps_libs::search::engine::SearchEngine;
 use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SearchResult {
-    pub title: String,
+    pub title: Title,
+    pub ctx: Option<Ctx>,
     pub url: String,
     pub md_text: String,
 }
@@ -65,8 +68,14 @@ impl SearchUsecase {
                 scrap_map.get(&result.title).map(|scrap| {
                     let file_stem = ScrapFileStem::from(scrap.self_key().clone());
                     let url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
+
+                    let scrap_key = &scrap.self_key();
+                    let title: Title = scrap_key.into();
+                    let ctx: Option<Ctx> = scrap_key.into();
+
                     SearchResult {
-                        title: result.title,
+                        title,
+                        ctx,
                         url,
                         md_text: scrap.md_text.clone(),
                     }
