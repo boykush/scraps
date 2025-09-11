@@ -6,8 +6,7 @@ use rmcp::schemars::JsonSchema;
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer};
 use scraps_libs::model::base_url::BaseUrl;
-use serde::Deserialize;
-use serde_json::json;
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 #[derive(Debug, Deserialize, JsonSchema)]
@@ -17,6 +16,19 @@ pub struct SearchRequest {
     pub query: String,
     /// Maximum number of results to return (default: 100)
     pub num: Option<usize>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct SearchResultResponse {
+    pub title: String,
+    pub ctx: Option<String>,
+    pub md_text: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct SearchResponse {
+    pub results: Vec<SearchResultResponse>,
+    pub count: usize,
 }
 
 pub async fn search_scraps(
@@ -34,36 +46,29 @@ pub async fn search_scraps(
         .execute(base_url, &request.query, num)
         .map_err(|e| ErrorData::new(ErrorCode(-32004), format!("Search failed: {e}"), None))?;
 
-    // Convert results to JSON
-    let results_json = results
+    // Convert results to structured response
+    let search_results: Vec<SearchResultResponse> = results
         .into_iter()
-        .map(|result| {
-            let mut json_obj = serde_json::Map::new();
-            json_obj.insert(
-                "title".to_string(),
-                serde_json::Value::String(result.title.to_string()),
-            );
-            json_obj.insert(
-                "ctx".to_string(),
-                result
-                    .ctx
-                    .map(|c| serde_json::Value::String(c.to_string()))
-                    .unwrap_or(serde_json::Value::Null),
-            );
-            json_obj.insert(
-                "md_text".to_string(),
-                serde_json::Value::String(result.md_text),
-            );
-            serde_json::Value::Object(json_obj)
+        .map(|result| SearchResultResponse {
+            title: result.title.to_string(),
+            ctx: result.ctx.map(|c| c.to_string()),
+            md_text: result.md_text,
         })
-        .collect::<Vec<_>>();
+        .collect();
 
-    let response = json!({
-        "results": results_json,
-        "count": results_json.len(),
-    });
+    let count = search_results.len();
+    let response = SearchResponse {
+        results: search_results,
+        count,
+    };
 
     Ok(CallToolResult::success(vec![Content::text(
-        response.to_string(),
+        serde_json::to_string(&response).map_err(|e| {
+            ErrorData::new(
+                ErrorCode(-32005),
+                format!("JSON serialization failed: {e}"),
+                None,
+            )
+        })?,
     )]))
 }
