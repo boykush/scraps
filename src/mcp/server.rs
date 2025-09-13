@@ -29,7 +29,9 @@ impl ScrapsServer {
 
 #[tool_router]
 impl ScrapsServer {
-    #[tool(description = "Search scraps")]
+    #[tool(
+        description = "Search for scraps by title and context (ctx) using fuzzy matching. Returns matching scraps with their titles, contexts, and full content."
+    )]
     async fn search_scraps(
         &self,
         context: RequestContext<RoleServer>,
@@ -38,7 +40,9 @@ impl ScrapsServer {
         search_scraps(&self.scraps_dir, &self.base_url, context, parameters).await
     }
 
-    #[tool(description = "Get scrap links")]
+    #[tool(
+        description = "Get outbound wiki links from a specific scrap. Returns all scraps that the specified scrap links to, with their full content."
+    )]
     async fn get_scrap_links(
         &self,
         context: RequestContext<RoleServer>,
@@ -47,7 +51,9 @@ impl ScrapsServer {
         get_scrap_links(&self.scraps_dir, &self.base_url, context, parameters).await
     }
 
-    #[tool(description = "List tags")]
+    #[tool(
+        description = "List all available tags used across scraps in the documentation site. Useful for discovering content categories and topics."
+    )]
     async fn list_tags(
         &self,
         context: RequestContext<RoleServer>,
