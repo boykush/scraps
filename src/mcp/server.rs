@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use super::tools::get_scrap_links::{get_scrap_links, GetScrapLinksRequest};
 use super::tools::list_tags::list_tags;
 use super::tools::search_scraps::{search_scraps, SearchRequest};
 use rmcp::handler::server::tool::ToolRouter;
@@ -35,6 +36,15 @@ impl ScrapsServer {
         parameters: Parameters<SearchRequest>,
     ) -> Result<CallToolResult, ErrorData> {
         search_scraps(&self.scraps_dir, &self.base_url, context, parameters).await
+    }
+
+    #[tool(description = "Get scrap links")]
+    async fn get_scrap_links(
+        &self,
+        context: RequestContext<RoleServer>,
+        parameters: Parameters<GetScrapLinksRequest>,
+    ) -> Result<CallToolResult, ErrorData> {
+        get_scrap_links(&self.scraps_dir, &self.base_url, context, parameters).await
     }
 
     #[tool(description = "List tags")]

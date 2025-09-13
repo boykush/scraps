@@ -1,5 +1,5 @@
 use crate::mcp::json::scrap::ScrapJson;
-use crate::usecase::search::usecase::SearchUsecase;
+use crate::usecase::scrap::get_links::usecase::GetScrapLinksUsecase;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
 use rmcp::model::{CallToolResult, Content};
@@ -12,33 +12,44 @@ use std::path::PathBuf;
 
 #[derive(Debug, Deserialize, JsonSchema)]
 #[schemars(deny_unknown_fields)]
-pub struct SearchRequest {
-    /// Query string to search for
-    pub query: String,
-    /// Maximum number of results to return (default: 100)
-    pub num: Option<usize>,
+pub struct GetScrapLinksRequest {
+    /// Title of the scrap to get links for
+    pub title: String,
+    /// Optional context if the scrap has one
+    pub ctx: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
-pub struct SearchResponse {
+pub struct GetScrapLinksResponse {
     pub results: Vec<ScrapJson>,
     pub count: usize,
 }
 
-pub async fn search_scraps(
+pub async fn get_scrap_links(
     scraps_dir: &PathBuf,
     base_url: &BaseUrl,
     _context: RequestContext<RoleServer>,
-    Parameters(request): Parameters<SearchRequest>,
+    Parameters(request): Parameters<GetScrapLinksRequest>,
 ) -> Result<CallToolResult, ErrorData> {
-    // Create search usecase
-    let search_usecase = SearchUsecase::new(scraps_dir);
+    // Create get scrap links usecase
+    let get_links_usecase = GetScrapLinksUsecase::new(scraps_dir);
 
-    // Execute search
-    let num = request.num.unwrap_or(100);
-    let results = search_usecase
-        .execute(base_url, &request.query, num)
-        .map_err(|e| ErrorData::new(ErrorCode(-32004), format!("Search failed: {e}"), None))?;
+    // Execute get links
+    let title = scraps_libs::model::title::Title::from(request.title.as_str());
+    let ctx = request
+        .ctx
+        .as_ref()
+        .map(|c| scraps_libs::model::context::Ctx::from(c.as_str()));
+
+    let results = get_links_usecase
+        .execute(base_url, &title, &ctx)
+        .map_err(|e| {
+            ErrorData::new(
+                ErrorCode(-32004),
+                format!("Get scrap links failed: {e}"),
+                None,
+            )
+        })?;
 
     // Convert results to structured response
     let scrap_jsons: Vec<ScrapJson> = results
@@ -51,7 +62,7 @@ pub async fn search_scraps(
         .collect();
 
     let count = scrap_jsons.len();
-    let response = SearchResponse {
+    let response = GetScrapLinksResponse {
         results: scrap_jsons,
         count,
     };
