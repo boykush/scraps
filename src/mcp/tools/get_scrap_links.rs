@@ -1,4 +1,4 @@
-use crate::mcp::tools::search_scraps::SearchResultResponse;
+use crate::mcp::json::scrap::ScrapJson;
 use crate::usecase::scrap::get_links::usecase::GetScrapLinksUsecase;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
@@ -21,7 +21,7 @@ pub struct GetScrapLinksRequest {
 
 #[derive(Debug, Serialize)]
 pub struct GetScrapLinksResponse {
-    pub results: Vec<SearchResultResponse>,
+    pub results: Vec<ScrapJson>,
     pub count: usize,
 }
 
@@ -52,18 +52,18 @@ pub async fn get_scrap_links(
         })?;
 
     // Convert results to structured response
-    let link_results: Vec<SearchResultResponse> = results
+    let scrap_jsons: Vec<ScrapJson> = results
         .into_iter()
-        .map(|result| SearchResultResponse {
+        .map(|result| ScrapJson {
             title: result.title.to_string(),
             ctx: result.ctx.map(|c| c.to_string()),
             md_text: result.md_text,
         })
         .collect();
 
-    let count = link_results.len();
+    let count = scrap_jsons.len();
     let response = GetScrapLinksResponse {
-        results: link_results,
+        results: scrap_jsons,
         count,
     };
 
