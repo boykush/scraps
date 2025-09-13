@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
-use super::tools::get_scrap_links::{get_scrap_links, GetScrapLinksRequest};
 use super::tools::list_tags::list_tags;
+use super::tools::lookup_scrap_links::{lookup_scrap_links, LookupScrapLinksRequest};
 use super::tools::search_scraps::{search_scraps, SearchRequest};
 use rmcp::handler::server::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
@@ -41,14 +41,14 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Get outbound wiki links from a specific scrap. Returns all scraps that the specified scrap links to, with their full content."
+        description = "Lookup outbound wiki links from a specific scrap. Returns all scraps that the specified scrap links to, with their full content."
     )]
-    async fn get_scrap_links(
+    async fn lookup_scrap_links(
         &self,
         context: RequestContext<RoleServer>,
-        parameters: Parameters<GetScrapLinksRequest>,
+        parameters: Parameters<LookupScrapLinksRequest>,
     ) -> Result<CallToolResult, ErrorData> {
-        get_scrap_links(&self.scraps_dir, &self.base_url, context, parameters).await
+        lookup_scrap_links(&self.scraps_dir, &self.base_url, context, parameters).await
     }
 
     #[tool(
