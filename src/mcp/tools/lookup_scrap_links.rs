@@ -6,7 +6,6 @@ use rmcp::model::{CallToolResult, Content};
 use rmcp::schemars::JsonSchema;
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer};
-use scraps_libs::model::base_url::BaseUrl;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -27,7 +26,6 @@ pub struct LookupScrapLinksResponse {
 
 pub async fn lookup_scrap_links(
     scraps_dir: &PathBuf,
-    base_url: &BaseUrl,
     _context: RequestContext<RoleServer>,
     Parameters(request): Parameters<LookupScrapLinksRequest>,
 ) -> Result<CallToolResult, ErrorData> {
@@ -41,15 +39,13 @@ pub async fn lookup_scrap_links(
         .as_ref()
         .map(|c| scraps_libs::model::context::Ctx::from(c.as_str()));
 
-    let results = get_links_usecase
-        .execute(base_url, &title, &ctx)
-        .map_err(|e| {
-            ErrorData::new(
-                ErrorCode(-32004),
-                format!("Get scrap links failed: {e}"),
-                None,
-            )
-        })?;
+    let results = get_links_usecase.execute(&title, &ctx).map_err(|e| {
+        ErrorData::new(
+            ErrorCode(-32004),
+            format!("Get scrap links failed: {e}"),
+            None,
+        )
+    })?;
 
     // Convert results to structured response
     let scrap_jsons: Vec<ScrapJson> = results

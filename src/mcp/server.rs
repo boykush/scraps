@@ -49,7 +49,7 @@ impl ScrapsServer {
         context: RequestContext<RoleServer>,
         parameters: Parameters<LookupScrapLinksRequest>,
     ) -> Result<CallToolResult, ErrorData> {
-        lookup_scrap_links(&self.scraps_dir, &self.base_url, context, parameters).await
+        lookup_scrap_links(&self.scraps_dir, context, parameters).await
     }
 
     #[tool(
@@ -60,7 +60,7 @@ impl ScrapsServer {
         context: RequestContext<RoleServer>,
         parameters: Parameters<LookupScrapBacklinksRequest>,
     ) -> Result<CallToolResult, ErrorData> {
-        lookup_scrap_backlinks(&self.scraps_dir, &self.base_url, context, parameters).await
+        lookup_scrap_backlinks(&self.scraps_dir, context, parameters).await
     }
 
     #[tool(
