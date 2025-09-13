@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use super::tools::list_tags::list_tags;
 use super::tools::lookup_scrap_backlinks::{lookup_scrap_backlinks, LookupScrapBacklinksRequest};
 use super::tools::lookup_scrap_links::{lookup_scrap_links, LookupScrapLinksRequest};
+use super::tools::lookup_tag_backlinks::{lookup_tag_backlinks, LookupTagBacklinksRequest};
 use super::tools::search_scraps::{search_scraps, SearchRequest};
 use rmcp::handler::server::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
@@ -71,6 +72,17 @@ impl ScrapsServer {
         context: RequestContext<RoleServer>,
     ) -> Result<CallToolResult, ErrorData> {
         list_tags(&self.scraps_dir, context).await
+    }
+
+    #[tool(
+        description = "Lookup inbound references (backlinks) to a specific tag. Returns all scraps that reference the specified tag, with their full content."
+    )]
+    async fn lookup_tag_backlinks(
+        &self,
+        context: RequestContext<RoleServer>,
+        parameters: Parameters<LookupTagBacklinksRequest>,
+    ) -> Result<CallToolResult, ErrorData> {
+        lookup_tag_backlinks(&self.scraps_dir, context, parameters).await
     }
 }
 
