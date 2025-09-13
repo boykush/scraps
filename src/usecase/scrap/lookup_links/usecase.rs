@@ -1,13 +1,18 @@
 use crate::error::ScrapsResult;
-use crate::usecase::search::usecase::SearchResult;
-use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::context::Ctx;
-use scraps_libs::model::file::ScrapFileStem;
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::title::Title;
 use std::collections::HashMap;
 use std::path::PathBuf;
+
+/// Result for scrap links lookup operation
+#[derive(Debug, Clone, PartialEq)]
+pub struct LookupScrapLinksResult {
+    pub title: Title,
+    pub ctx: Option<Ctx>,
+    pub md_text: String,
+}
 
 pub struct LookupScrapLinksUsecase {
     scraps_dir_path: PathBuf,
@@ -22,10 +27,9 @@ impl LookupScrapLinksUsecase {
 
     pub fn execute(
         &self,
-        base_url: &BaseUrl,
         title: &Title,
         ctx: &Option<Ctx>,
-    ) -> ScrapsResult<Vec<SearchResult>> {
+    ) -> ScrapsResult<Vec<LookupScrapLinksResult>> {
         // Load all scraps from directory
         let scrap_paths = crate::usecase::read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
         let scraps = scrap_paths
@@ -54,25 +58,20 @@ impl LookupScrapLinksUsecase {
             .map(|scrap| (scrap.self_key(), scrap))
             .collect();
 
-        // Convert each link to SearchResult
-        let results: Vec<SearchResult> = target_scrap
+        // Convert each link to LookupScrapLinksResult
+        let results: Vec<LookupScrapLinksResult> = target_scrap
             .links
             .iter()
             .filter_map(|link_key| {
                 // Find the linked scrap
                 scrap_map.get(link_key).map(|linked_scrap| {
-                    // Generate URL for the linked scrap
-                    let file_stem = ScrapFileStem::from(linked_scrap.self_key().clone());
-                    let url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
-
                     let scrap_key = &linked_scrap.self_key();
                     let title: Title = scrap_key.into();
                     let ctx: Option<Ctx> = scrap_key.into();
 
-                    SearchResult {
+                    LookupScrapLinksResult {
                         title,
                         ctx,
-                        url,
                         md_text: linked_scrap.md_text.clone(),
                     }
                 })
@@ -88,7 +87,6 @@ mod tests {
     use super::*;
     use scraps_libs::tests::TestResources;
     use std::path::PathBuf;
-    use url::Url;
 
     #[test]
     fn test_lookup_scrap_links_success() {
@@ -112,11 +110,9 @@ mod tests {
 
         resources.run(|| {
             let usecase = LookupScrapLinksUsecase::new(&scraps_dir_path);
-            let url = Url::parse("http://localhost:3000/").unwrap();
-            let base_url = BaseUrl::new(url).unwrap();
 
             let results = usecase
-                .execute(&base_url, &Title::from("scrap1"), &None)
+                .execute(&Title::from("scrap1"), &None)
                 .expect("Should succeed");
 
             assert_eq!(results.len(), 2);
@@ -125,12 +121,6 @@ mod tests {
             let titles: Vec<String> = results.iter().map(|r| r.title.to_string()).collect();
             assert!(titles.contains(&"scrap2".to_string()));
             assert!(titles.contains(&"scrap3".to_string()));
-
-            // Check URL format
-            for result in &results {
-                assert!(result.url.starts_with("http://localhost:3000/scraps/"));
-                assert!(result.url.ends_with(".html"));
-            }
         });
     }
 
@@ -152,15 +142,9 @@ mod tests {
 
         resources.run(|| {
             let usecase = LookupScrapLinksUsecase::new(&scraps_dir_path);
-            let url = Url::parse("http://localhost:3000/").unwrap();
-            let base_url = BaseUrl::new(url).unwrap();
 
             let results = usecase
-                .execute(
-                    &base_url,
-                    &Title::from("scrap1"),
-                    &Some(Ctx::from("Context")),
-                )
+                .execute(&Title::from("scrap1"), &Some(Ctx::from("Context")))
                 .expect("Should succeed");
 
             assert_eq!(results.len(), 1);
@@ -183,10 +167,8 @@ mod tests {
 
         resources.run(|| {
             let usecase = LookupScrapLinksUsecase::new(&scraps_dir_path);
-            let url = Url::parse("http://localhost:3000/").unwrap();
-            let base_url = BaseUrl::new(url).unwrap();
 
-            let result = usecase.execute(&base_url, &Title::from("Nonexistent Scrap"), &None);
+            let result = usecase.execute(&Title::from("Nonexistent Scrap"), &None);
 
             assert!(result.is_err());
             assert!(result.unwrap_err().to_string().contains("Scrap not found"));
@@ -208,11 +190,9 @@ mod tests {
 
         resources.run(|| {
             let usecase = LookupScrapLinksUsecase::new(&scraps_dir_path);
-            let url = Url::parse("http://localhost:3000/").unwrap();
-            let base_url = BaseUrl::new(url).unwrap();
 
             let results = usecase
-                .execute(&base_url, &Title::from("scrap1"), &None)
+                .execute(&Title::from("scrap1"), &None)
                 .expect("Should succeed");
 
             assert_eq!(results.len(), 0);
