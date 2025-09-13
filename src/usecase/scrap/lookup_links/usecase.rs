@@ -9,13 +9,13 @@ use scraps_libs::model::title::Title;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-pub struct GetScrapLinksUsecase {
+pub struct LookupScrapLinksUsecase {
     scraps_dir_path: PathBuf,
 }
 
-impl GetScrapLinksUsecase {
-    pub fn new(scraps_dir_path: &PathBuf) -> GetScrapLinksUsecase {
-        GetScrapLinksUsecase {
+impl LookupScrapLinksUsecase {
+    pub fn new(scraps_dir_path: &PathBuf) -> LookupScrapLinksUsecase {
+        LookupScrapLinksUsecase {
             scraps_dir_path: scraps_dir_path.to_owned(),
         }
     }
@@ -91,9 +91,9 @@ mod tests {
     use url::Url;
 
     #[test]
-    fn test_get_scrap_links_success() {
+    fn test_lookup_scrap_links_success() {
         let test_resource_path =
-            PathBuf::from("tests/resource/scrap/get_links/test_get_scrap_links_success");
+            PathBuf::from("tests/resource/scrap/lookup_links/test_lookup_scrap_links_success");
         let scraps_dir_path = test_resource_path.join("scraps");
 
         let md_path_1 = scraps_dir_path.join("scrap1.md");
@@ -111,7 +111,7 @@ mod tests {
             .add_file(&md_path_3, b"# Scrap 3\n\nContent of scrap 3.");
 
         resources.run(|| {
-            let usecase = GetScrapLinksUsecase::new(&scraps_dir_path);
+            let usecase = LookupScrapLinksUsecase::new(&scraps_dir_path);
             let url = Url::parse("http://localhost:3000/").unwrap();
             let base_url = BaseUrl::new(url).unwrap();
 
@@ -135,9 +135,9 @@ mod tests {
     }
 
     #[test]
-    fn test_get_scrap_links_with_context() {
+    fn test_lookup_scrap_links_with_context() {
         let test_resource_path =
-            PathBuf::from("tests/resource/scrap/get_links/test_get_scrap_links_with_context");
+            PathBuf::from("tests/resource/scrap/lookup_links/test_lookup_scrap_links_with_context");
         let scraps_dir_path = test_resource_path.join("scraps");
         let context_dir_path = scraps_dir_path.join("Context");
 
@@ -151,7 +151,7 @@ mod tests {
             .add_file(&md_path_2, b"# Scrap 2\n\nContent of scrap 2.");
 
         resources.run(|| {
-            let usecase = GetScrapLinksUsecase::new(&scraps_dir_path);
+            let usecase = LookupScrapLinksUsecase::new(&scraps_dir_path);
             let url = Url::parse("http://localhost:3000/").unwrap();
             let base_url = BaseUrl::new(url).unwrap();
 
@@ -169,9 +169,9 @@ mod tests {
     }
 
     #[test]
-    fn test_get_scrap_links_not_found() {
+    fn test_lookup_scrap_links_not_found() {
         let test_resource_path =
-            PathBuf::from("tests/resource/scrap/get_links/test_get_scrap_links_not_found");
+            PathBuf::from("tests/resource/scrap/lookup_links/test_lookup_scrap_links_not_found");
         let scraps_dir_path = test_resource_path.join("scraps");
 
         let md_path_1 = scraps_dir_path.join("scrap1.md");
@@ -182,7 +182,7 @@ mod tests {
             .add_file(&md_path_1, b"# Scrap 1\n\nContent.");
 
         resources.run(|| {
-            let usecase = GetScrapLinksUsecase::new(&scraps_dir_path);
+            let usecase = LookupScrapLinksUsecase::new(&scraps_dir_path);
             let url = Url::parse("http://localhost:3000/").unwrap();
             let base_url = BaseUrl::new(url).unwrap();
 
@@ -194,9 +194,9 @@ mod tests {
     }
 
     #[test]
-    fn test_get_scrap_links_no_links() {
+    fn test_lookup_scrap_links_no_links() {
         let test_resource_path =
-            PathBuf::from("tests/resource/scrap/get_links/test_get_scrap_links_no_links");
+            PathBuf::from("tests/resource/scrap/lookup_links/test_lookup_scrap_links_no_links");
         let scraps_dir_path = test_resource_path.join("scraps");
 
         let md_path_1 = scraps_dir_path.join("scrap1.md");
@@ -207,7 +207,7 @@ mod tests {
             .add_file(&md_path_1, b"# Scrap 1\n\nThis scrap has no links.");
 
         resources.run(|| {
-            let usecase = GetScrapLinksUsecase::new(&scraps_dir_path);
+            let usecase = LookupScrapLinksUsecase::new(&scraps_dir_path);
             let url = Url::parse("http://localhost:3000/").unwrap();
             let base_url = BaseUrl::new(url).unwrap();
 

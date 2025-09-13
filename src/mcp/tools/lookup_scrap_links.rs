@@ -1,5 +1,5 @@
 use crate::mcp::json::scrap::ScrapJson;
-use crate::usecase::scrap::get_links::usecase::GetScrapLinksUsecase;
+use crate::usecase::scrap::lookup_links::usecase::LookupScrapLinksUsecase;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
 use rmcp::model::{CallToolResult, Content};
@@ -12,7 +12,7 @@ use std::path::PathBuf;
 
 #[derive(Debug, Deserialize, JsonSchema)]
 #[schemars(deny_unknown_fields)]
-pub struct GetScrapLinksRequest {
+pub struct LookupScrapLinksRequest {
     /// Title of the scrap to get links for
     pub title: String,
     /// Optional context if the scrap has one
@@ -20,19 +20,19 @@ pub struct GetScrapLinksRequest {
 }
 
 #[derive(Debug, Serialize)]
-pub struct GetScrapLinksResponse {
+pub struct LookupScrapLinksResponse {
     pub results: Vec<ScrapJson>,
     pub count: usize,
 }
 
-pub async fn get_scrap_links(
+pub async fn lookup_scrap_links(
     scraps_dir: &PathBuf,
     base_url: &BaseUrl,
     _context: RequestContext<RoleServer>,
-    Parameters(request): Parameters<GetScrapLinksRequest>,
+    Parameters(request): Parameters<LookupScrapLinksRequest>,
 ) -> Result<CallToolResult, ErrorData> {
     // Create get scrap links usecase
-    let get_links_usecase = GetScrapLinksUsecase::new(scraps_dir);
+    let get_links_usecase = LookupScrapLinksUsecase::new(scraps_dir);
 
     // Execute get links
     let title = scraps_libs::model::title::Title::from(request.title.as_str());
@@ -62,7 +62,7 @@ pub async fn get_scrap_links(
         .collect();
 
     let count = scrap_jsons.len();
-    let response = GetScrapLinksResponse {
+    let response = LookupScrapLinksResponse {
         results: scrap_jsons,
         count,
     };
