@@ -1,4 +1,4 @@
-use crate::usecase::tag::usecase::TagUsecase;
+use crate::usecase::tag::list::usecase::TagUsecase;
 use rmcp::model::ErrorCode;
 use rmcp::model::{CallToolResult, Content};
 use rmcp::service::RequestContext;

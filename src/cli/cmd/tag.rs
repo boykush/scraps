@@ -7,7 +7,7 @@ use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 
 use crate::cli::config::scrap_config::ScrapConfig;
-use crate::usecase::tag::usecase::TagUsecase;
+use crate::usecase::tag::list::usecase::TagUsecase;
 
 pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let path_resolver = PathResolver::new(project_path)?;
