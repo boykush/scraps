@@ -7,12 +7,12 @@ use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 
 use crate::cli::config::scrap_config::ScrapConfig;
-use crate::usecase::tag::list::usecase::TagUsecase;
+use crate::usecase::tag::list::usecase::ListTagUsecase;
 
 pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let path_resolver = PathResolver::new(project_path)?;
     let scraps_dir_path = path_resolver.scraps_dir();
-    let usecase = TagUsecase::new(&scraps_dir_path);
+    let usecase = ListTagUsecase::new(&scraps_dir_path);
 
     let config = ScrapConfig::from_path(project_path)?;
     let base_url = config.base_url.into_base_url();
