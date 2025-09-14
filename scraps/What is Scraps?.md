@@ -1,21 +1,39 @@
 ![](https://github.com/boykush/scraps/raw/main/assets/logo_opacity.png?raw=true)
 
-Scraps is a static site generator that brings developer-friendly workflows to documentation, using Markdown files with simple Wiki-link notation.
+Scraps is a portable CLI knowledge hub for managing interconnected Markdown documentation with Wiki-link notation.
 
-# Concept
-Scraps is built on three core concepts:
+## Built for Docs as Code
 
-## 1. Built for [Docs as Code](https://www.writethedocs.org/guide/docs-as-code/)
-
-Scraps bridges the gap between informal knowledge sharing and production documentation:
+Scraps is built on the foundation of [Docs as Code](https://www.writethedocs.org/guide/docs-as-code/) principles:
 
 - **Version Control Native**: Documentation evolves with your codebase through Git workflows
-- **Review-Friendly**: Markdown + Git enables proper documentation review processes  
-- **Automated Deployment**: CLI automation enables seamless CI/CD integration from [[GitHub Pages]] to any static hosting
-- **Developer Experience**: [[Language Server Protocol]] support and familiar tooling reduce documentation friction
+- **Review-Driven Quality**: Markdown + Git enables proper documentation review processes
+- **Documentation as Code**: Same standards, processes, and tooling as software development
+- **Developer Experience**:
+  - CLI-first workflow: all functionality accessible through single command-line tool
+  - Seamless integration with existing tools (e.g., editors via [[Language Server Protocol]], [[GitHub Pages]] deployment, [[MCP Server]] for AI assistants)
 
-## 2. Single Source of Truth Approach  
-Information is organized into atomic "Scrap" units following the DRY principle - write once, reference everywhere. [[Context link|Context]] functionality provides appropriate scope while wiki-links ensure consistency across your entire knowledge base.
+## Core Capabilities
 
-## 3. Simple Writing Experience
-Markdown files with simple Wiki-link notation enable intuitive knowledge expression. [[Tag link|Tags]] are represented as `[[Tag1]]` for non-existent titles.
+Built on this foundation, Scraps provides three core capabilities:
+
+### 1. Knowledge-First Architecture
+
+Information is organized into atomic, interconnected units following the DRY principle.
+
+- Single source of truth with `[[WikiLink]]` and [[Context link|Context]] functionality
+- [[Tag link|Tags]] for knowledge categorization
+
+### 2. Knowledge Visualization
+
+Transform your knowledge structure into discoverable, navigable experiences.
+
+- Wiki-links become interconnected web experiences
+- Static sites with search and pagination for knowledge exploration
+
+### 3. Knowledge Externalization
+
+Make your knowledge accessible beyond traditional documentation boundaries.
+
+- [[MCP Server]] functionality for AI assistants
+- API-like access for external tool integration

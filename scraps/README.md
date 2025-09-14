@@ -1,6 +1,6 @@
 # What is Scraps?
 
-Scraps is a static site generator that brings developer-friendly workflows to documentation, using Markdown files with simple Wiki-link notation.
+Scraps is a portable CLI knowledge hub for managing interconnected Markdown documentation with Wiki-link notation.
 
 More details in [[What is Scraps?|here]].
 
