@@ -1,6 +1,5 @@
 target
 public
-Cargo.lock
 tests/resource
 
 # Playwright
