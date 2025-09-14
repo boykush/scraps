@@ -45,6 +45,9 @@ Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 ### MCP Server
 - [x] search_scraps
 - [x] list_tags
+- [x] lookup_scrap_links
+- [x] lookup_scrap_backlinks
+- [x] lookup_tag_backlinks
 ### Deploy
 - [x] GitHub Pages
 

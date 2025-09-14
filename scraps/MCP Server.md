@@ -14,3 +14,6 @@ Replace `~/path/to/your/scraps/project/` with the actual path to your Scraps pro
 
 - **search_scraps**: Search through your Scraps content with natural language queries
 - **list_tags**: List all available tags in your Scraps repository
+- **lookup_scrap_links**: Find outbound wiki links from a specific scrap
+- **lookup_scrap_backlinks**: Find scraps that link to a specific scrap
+- **lookup_tag_backlinks**: Find all scraps that reference a specific tag
