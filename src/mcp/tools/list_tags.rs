@@ -1,4 +1,4 @@
-use crate::usecase::tag::usecase::TagUsecase;
+use crate::usecase::tag::list::usecase::ListTagUsecase;
 use rmcp::model::ErrorCode;
 use rmcp::model::{CallToolResult, Content};
 use rmcp::service::RequestContext;
@@ -11,7 +11,7 @@ pub async fn list_tags(
     _context: RequestContext<RoleServer>,
 ) -> Result<CallToolResult, ErrorData> {
     // Create tag usecase
-    let tag_usecase = TagUsecase::new(scraps_dir);
+    let tag_usecase = ListTagUsecase::new(scraps_dir);
 
     // Execute tag listing
     let (tags, backlinks_map) = tag_usecase
