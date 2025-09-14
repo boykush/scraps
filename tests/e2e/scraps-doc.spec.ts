@@ -45,7 +45,7 @@ test('fetch OGP data', async ({ page }) => {
   const description = await ogpCard.locator('.ogp-description').textContent();
   
   expect(title).toContain('GitHub - boykush/scraps');
-  expect(description).toContain('Scraps is a static site generator');
+  expect(description).toContain('Scraps is a portable CLI knowledge hub');
 
   // Verify image is loaded
   const image = ogpCard.locator('.ogp-image');
