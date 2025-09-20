@@ -190,7 +190,9 @@ mod tests {
             .add_file(&md_path_1, b"# Scrap 1\n\nThis links to [[actual_tag]].")
             .add_file(&md_path_2, b"# Scrap 2\n\nThis links to [[actual_scrap]].")
             .add_file(
-                &md_path_3, b"# Actual Scrap\n\nThis is a regular scrap, not a tag.");
+                &md_path_3,
+                b"# Actual Scrap\n\nThis is a regular scrap, not a tag.",
+            );
 
         resources.run(|| {
             let usecase = LookupTagBacklinksUsecase::new(&scraps_dir_path);
@@ -201,14 +203,22 @@ mod tests {
                 .execute(&Title::from("actual_scrap"))
                 .expect("Should succeed");
 
-            assert_eq!(results.len(), 0, "Should return empty results for non-tag titles");
+            assert_eq!(
+                results.len(),
+                0,
+                "Should return empty results for non-tag titles"
+            );
 
             // Verify that actual tags still work
             let tag_results = usecase
                 .execute(&Title::from("actual_tag"))
                 .expect("Should succeed");
 
-            assert_eq!(tag_results.len(), 1, "Should return results for actual tags");
+            assert_eq!(
+                tag_results.len(),
+                1,
+                "Should return results for actual tags"
+            );
             assert_eq!(tag_results[0].title.to_string(), "scrap1");
         });
     }
