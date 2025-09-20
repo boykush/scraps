@@ -1772,12 +1772,10 @@ dependencies = [
 name = "scraps_libs"
 version = "0.26.1"
 dependencies = [
- "anyhow",
  "fuzzy-matcher",
  "iso639_enum",
  "itertools",
  "pulldown-cmark",
- "thiserror",
  "url",
 ]
 
