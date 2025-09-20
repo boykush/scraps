@@ -16,7 +16,7 @@
         "github-actions",
         "dockerfile"
       ],
-      "stabilityDays": 7
+      "minimumReleaseAge": "7 days"
     }
   ]
 }
