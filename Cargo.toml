@@ -14,7 +14,7 @@ version = "0.26.1"
 path = "modules/libs"
 [workspace.dependencies]
 anyhow = "=1.0.100"
-thiserror = "=2.0.12"
+thiserror = "=2.0.16"
 url = { version = "=2.5.4", features = ["serde"] }
 itertools = "=0.14.0"
 pulldown-cmark = "=0.13.0"
