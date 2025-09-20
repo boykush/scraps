@@ -2,6 +2,8 @@ use crate::error::ScrapsResult;
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::scrap::Scrap;
+use scraps_libs::model::tag::Tag;
+use scraps_libs::model::tags::Tags;
 use scraps_libs::model::title::Title;
 use std::path::PathBuf;
 
@@ -31,6 +33,15 @@ impl LookupTagBacklinksUsecase {
             .into_iter()
             .map(|path| crate::usecase::read_scraps::to_scrap_by_path(&self.scraps_dir_path, &path))
             .collect::<ScrapsResult<Vec<Scrap>>>()?;
+
+        // Get valid tags and check if the requested title is actually a tag
+        let valid_tags = Tags::new(&scraps);
+        let requested_tag: Tag = tag_title.clone().into();
+
+        // If the requested title is not a valid tag, return empty results
+        if !valid_tags.into_iter().any(|tag| tag == requested_tag) {
+            return Ok(Vec::new());
+        }
 
         // Create tag key (tags don't have contexts, so we use ScrapKey::from)
         let tag_key = tag_title.clone().into();
@@ -159,6 +170,56 @@ mod tests {
                 .expect("Should succeed");
 
             assert_eq!(results.len(), 0);
+        });
+    }
+
+    #[test]
+    fn test_lookup_tag_backlinks_invalid_tag() {
+        let test_resource_path = PathBuf::from(
+            "tests/resource/tag/lookup_backlinks/test_lookup_tag_backlinks_invalid_tag",
+        );
+        let scraps_dir_path = test_resource_path.join("scraps");
+
+        let md_path_1 = scraps_dir_path.join("scrap1.md");
+        let md_path_2 = scraps_dir_path.join("scrap2.md");
+        let md_path_3 = scraps_dir_path.join("actual_scrap.md");
+
+        let mut resources = TestResources::new();
+        resources
+            .add_dir(&scraps_dir_path)
+            .add_file(&md_path_1, b"# Scrap 1\n\nThis links to [[actual_tag]].")
+            .add_file(&md_path_2, b"# Scrap 2\n\nThis links to [[actual_scrap]].")
+            .add_file(
+                &md_path_3,
+                b"# Actual Scrap\n\nThis is a regular scrap, not a tag.",
+            );
+
+        resources.run(|| {
+            let usecase = LookupTagBacklinksUsecase::new(&scraps_dir_path);
+
+            // Request backlinks for "actual_scrap" - this is a scrap title, not a tag
+            // Even though scrap2 links to it, it should return empty because it's not a tag
+            let results = usecase
+                .execute(&Title::from("actual_scrap"))
+                .expect("Should succeed");
+
+            assert_eq!(
+                results.len(),
+                0,
+                "Should return empty results for non-tag titles"
+            );
+
+            // Verify that actual tags still work
+            let tag_results = usecase
+                .execute(&Title::from("actual_tag"))
+                .expect("Should succeed");
+
+            assert_eq!(
+                tag_results.len(),
+                1,
+                "Should return results for actual tags"
+            );
+            assert_eq!(tag_results[0].title.to_string(), "scrap1");
         });
     }
 
