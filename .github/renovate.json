@@ -8,7 +8,8 @@
       "matchManagers": [
         "cargo"
       ],
-      "enabled": true
+      "enabled": true,
+      "rangeStrategy": "widen"
     },
     {
       "matchManagers": [
