@@ -9,7 +9,7 @@
         "cargo"
       ],
       "enabled": true,
-      "rangeStrategy": "widen"
+      "rangeStrategy": "pin"
     },
     {
       "matchManagers": [
