@@ -11,12 +11,10 @@ documentation.workspace = true
 rust-version.workspace = true
 
 [dependencies]
-anyhow.workspace = true
-thiserror.workspace = true
 url.workspace = true
 itertools.workspace = true
-pulldown-cmark.workspace = true
-iso639_enum.workspace = true
+pulldown-cmark = "=0.13.0"
+iso639_enum = "=0.6.0"
 fuzzy-matcher = { version = "=0.3.7", optional = true }
 
 [features]

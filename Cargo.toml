@@ -17,11 +17,9 @@ anyhow = "=1.0.100"
 thiserror = "=2.0.16"
 url = { version = "=2.5.7", features = ["serde"] }
 itertools = "=0.14.0"
-pulldown-cmark = "=0.13.0"
 serde = { version = "=1.0.225", features = ["derive"] }
 serde_json = "=1.0.145"
 toml = "=0.9.7"
-iso639_enum = "=0.6.0"
 rayon = "=1.11.0"
 clap = { version = "=4.5.48", features = ["derive"] }
 config = { version = "=0.15.16", features = ["toml"] }
