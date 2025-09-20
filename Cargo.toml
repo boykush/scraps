@@ -24,7 +24,7 @@ toml = "=0.9.0"
 iso639_enum = "=0.6.0"
 rayon = "=1.11.0"
 clap = { version = "=4.5.48", features = ["derive"] }
-config = { version = "=0.15.11", features = ["toml"] }
+config = { version = "=0.15.16", features = ["toml"] }
 tera = "=1.20.0"
 once_cell = "=1.21.3"
 chrono-tz = { version = "=0.10.4", features = ["serde"] }
