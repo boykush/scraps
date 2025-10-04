@@ -8,9 +8,10 @@ Custom actions are available to deploy Scraps to Github Pages.
 Prepare a yaml file under `.github/workflows/` like this
 
 ```yaml
-name: Build and deploy GH Pages
-on: push
-  branches:
+name: Deploy scraps github pages
+on: 
+  push:
+    branches:
       - main
     paths:
       - 'scraps/**'
@@ -19,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0 # For scraps git commited date
       - name: build_and_deploy
@@ -27,7 +28,6 @@ jobs:
         env:
           # Target branch
           PAGES_BRANCH: gh-pages
-          # Provide personal access token
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
