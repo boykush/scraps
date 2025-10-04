@@ -1,5 +1,5 @@
 [tools]
-"rust" = { version = "1.89.0", profile = "default" }
+"rust" = { version = "1.90.0", profile = "default" }
 
 [tasks.coverage]
 description = "Run code coverage analysis with tarpaulin"
