@@ -1,5 +1,23 @@
 Configuration is managed by `Config.toml` in the Scraps project.
 
+## Quick Setup Guide
+
+To get started with your Scraps site, you need to edit at least two required fields in your `Config.toml` file:
+
+### Step 1: Edit base_url
+Replace the placeholder URL with your actual site URL:
+```toml
+base_url = "https://yourusername.github.io/your-repository/"
+```
+
+### Step 2: Set your site title
+Add your desired site title:
+```toml
+title = "My Knowledge Base"
+```
+
+## Configuration Variables
+
 Only the `base_url` and `title` variables are required. Everything else is optional. All configuration variables used by Scraps and their default values are listed below.
 
 ```toml:Config.toml
@@ -32,33 +50,4 @@ sort_key = "committed_date"
 
 # Scraps pagination on index page (optional, default=no pagination)
 paginate_by = 20
-```
-
-## Common Configuration Examples
-
-**Personal Knowledge Base**
-```toml
-base_url = "https://your-username.github.io/knowledge-base/"
-title = "My Knowledge Base"
-description = "Personal notes and documentation"
-sort_key = "committed_date"
-paginate_by = 50
-```
-
-**Team Documentation**
-```toml
-base_url = "https://company.github.io/docs/"
-title = "Team Documentation"
-description = "Internal team knowledge and processes"
-lang_code = "en"
-timezone = "America/New_York"
-sort_key = "linked_count"
-color_scheme = "only_light"
-```
-
-**Minimal Setup**
-```toml
-base_url = "https://my-site.com/"
-title = "Simple Docs"
-build_search_index = false
 ```

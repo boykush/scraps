@@ -11,8 +11,13 @@
      ```
 
 3. **Configure Project**
-   - Customize the [[Configuration]] in `Config.toml`
-   - Set your site title, base URL, and other preferences
+   - Open `Config.toml` in your project directory
+   - Edit the required fields:
+     ```toml
+     base_url = "https://yourusername.github.io/your-repository/"
+     title = "My Knowledge Base"
+     ```
+   - Customize other [[Configuration]] options as needed
 
 ## Content Creation
 
