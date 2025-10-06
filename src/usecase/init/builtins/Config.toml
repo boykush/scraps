@@ -4,7 +4,7 @@ base_url = "https://username.github.io/repository-name/"
 # The site title
 title = ""
 
-# The scraps directory path (optional, default=scraps)
+# The scraps directory path relative to this Config.toml (optional, default=scraps)
 # scraps_dir = "scraps"
 
 # The site language (compliant with iso639-1, default=en)
