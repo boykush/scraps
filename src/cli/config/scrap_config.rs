@@ -14,9 +14,9 @@ use super::{
 #[derive(Debug, Deserialize)]
 pub struct ScrapConfig {
     pub base_url: BaseUrlConfig,
-    pub lang_code: Option<LangCodeConfig>,
-    pub scraps_dir: Option<PathBuf>,
     pub title: String,
+    pub scraps_dir: Option<PathBuf>,
+    pub lang_code: Option<LangCodeConfig>,
     pub description: Option<String>,
     pub favicon: Option<Url>,
     pub timezone: Option<Tz>,
