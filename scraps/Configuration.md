@@ -27,6 +27,9 @@ base_url = "https://username.github.io/repository-name/"
 # The site title
 title = ""
 
+# The scraps directory path relative to this Config.toml (optional, default=scraps)
+scraps_dir = "scraps"
+
 # The site language (compliant with iso639-1, default=en)
 lang_code = "en"
 
@@ -48,6 +51,6 @@ build_search_index = true
 # Scraps sort key choice on index page (optional, default=committed_date, choices=committed_date or linked_count)
 sort_key = "committed_date"
 
-# Scraps pagination on index page (optional, default=no pagination)
+# Scraps pagination on index page(optional, default=no pagination)
 paginate_by = 20
 ```
