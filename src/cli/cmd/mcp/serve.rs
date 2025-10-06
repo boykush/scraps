@@ -25,11 +25,11 @@ pub async fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let path_resolver = PathResolver::new(project_path)
         .map_err(|e| McpError::ServiceError(format!("Failed to resolve paths: {e}")))?;
 
-    let scraps_dir = path_resolver.scraps_dir();
-
     // Load config to get base_url
     let config = ScrapConfig::from_path(project_path)
         .map_err(|e| McpError::ServiceError(format!("Failed to load config: {e}")))?;
+
+    let scraps_dir = path_resolver.scraps_dir(&config);
 
     let base_url = config.base_url.into_base_url();
 

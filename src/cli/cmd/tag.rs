@@ -11,10 +11,10 @@ use crate::usecase::tag::list::usecase::ListTagUsecase;
 
 pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let path_resolver = PathResolver::new(project_path)?;
-    let scraps_dir_path = path_resolver.scraps_dir();
+    let config = ScrapConfig::from_path(project_path)?;
+    let scraps_dir_path = path_resolver.scraps_dir(&config);
     let usecase = ListTagUsecase::new(&scraps_dir_path);
 
-    let config = ScrapConfig::from_path(project_path)?;
     let base_url = config.base_url.into_base_url();
 
     let (tags, backlinks_map) = usecase.execute()?;

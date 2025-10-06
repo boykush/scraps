@@ -3,7 +3,7 @@ use crate::error::{anyhow::Context, CliError, ScrapsResult};
 use chrono_tz::Tz;
 use config::Config;
 use serde::Deserialize;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use url::Url;
 
 use super::{
@@ -14,8 +14,9 @@ use super::{
 #[derive(Debug, Deserialize)]
 pub struct ScrapConfig {
     pub base_url: BaseUrlConfig,
-    pub lang_code: Option<LangCodeConfig>,
     pub title: String,
+    pub scraps_dir: Option<PathBuf>,
+    pub lang_code: Option<LangCodeConfig>,
     pub description: Option<String>,
     pub favicon: Option<Url>,
     pub timezone: Option<Tz>,

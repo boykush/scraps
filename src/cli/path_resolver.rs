@@ -1,3 +1,4 @@
+use crate::cli::config::scrap_config::ScrapConfig;
 use crate::error::ScrapsResult;
 use anyhow::anyhow;
 use std::env;
@@ -43,8 +44,11 @@ impl PathResolver {
     }
 
     /// Get the scraps directory path
-    pub fn scraps_dir(&self) -> PathBuf {
-        self.project_root.join("scraps")
+    pub fn scraps_dir(&self, config: &ScrapConfig) -> PathBuf {
+        match &config.scraps_dir {
+            Some(dir) => self.project_root.join(dir),
+            None => self.project_root.join("scraps"),
+        }
     }
 
     /// Get the static directory path
@@ -111,16 +115,50 @@ mod tests {
     }
 
     #[test]
-    fn test_scraps_dir_path() {
+    fn test_scraps_dir_path_default() {
         let mut resources = TestResources::new();
         let test_project_dir = PathBuf::from("test_project_scraps");
         resources.add_dir(&test_project_dir);
+        resources.add_file(
+            &test_project_dir.join("Config.toml"),
+            br#"
+title = "Test"
+base_url = "http://example.com/"
+"#,
+        );
 
         resources.run(|| {
             let absolute_test_dir = env::current_dir().unwrap().join(&test_project_dir);
             let resolver = PathResolver::new(Some(&absolute_test_dir)).unwrap();
-            let scraps_dir = resolver.scraps_dir();
+            let config = ScrapConfig::from_path(Some(&absolute_test_dir)).unwrap();
+
+            let scraps_dir = resolver.scraps_dir(&config);
             assert_eq!(scraps_dir.file_name().unwrap(), "scraps");
+            assert!(scraps_dir.starts_with(&absolute_test_dir));
+        });
+    }
+
+    #[test]
+    fn test_scraps_dir_path_custom() {
+        let mut resources = TestResources::new();
+        let test_project_dir = PathBuf::from("test_project_scraps_custom");
+        resources.add_dir(&test_project_dir);
+        resources.add_file(
+            &test_project_dir.join("Config.toml"),
+            br#"
+title = "Test"
+base_url = "http://example.com/"
+scraps_dir = "custom_docs"
+"#,
+        );
+
+        resources.run(|| {
+            let absolute_test_dir = env::current_dir().unwrap().join(&test_project_dir);
+            let resolver = PathResolver::new(Some(&absolute_test_dir)).unwrap();
+            let config = ScrapConfig::from_path(Some(&absolute_test_dir)).unwrap();
+
+            let scraps_dir = resolver.scraps_dir(&config);
+            assert_eq!(scraps_dir.file_name().unwrap(), "custom_docs");
             assert!(scraps_dir.starts_with(&absolute_test_dir));
         });
     }

@@ -37,15 +37,14 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
     let span_run = span!(Level::INFO, "run").entered();
 
     let path_resolver = PathResolver::new(project_path)?;
-    let scraps_dir_path = path_resolver.scraps_dir();
+    let config = ScrapConfig::from_path(project_path)?;
+    let scraps_dir_path = path_resolver.scraps_dir(&config);
     let static_dir_path = path_resolver.static_dir();
     let public_dir_path = path_resolver.public_dir();
     let usecase = BuildUsecase::new(&scraps_dir_path, &static_dir_path, &public_dir_path);
 
     let git_command = GitCommandImpl::new();
     let progress = ProgressImpl::init(Instant::now());
-
-    let config = ScrapConfig::from_path(project_path)?;
     let base_url = config.base_url.into_base_url();
     let lang_code = config
         .lang_code
