@@ -14,12 +14,11 @@ pub fn run(
     project_path: Option<&Path>,
 ) -> ScrapsResult<()> {
     let path_resolver = PathResolver::new(project_path)?;
+    let config = ScrapConfig::from_path(project_path)?;
     let templates_dir_path = path_resolver.templates_dir();
-    let scraps_dir_path = path_resolver.scraps_dir();
+    let scraps_dir_path = path_resolver.scraps_dir(&config);
 
     let usecase = GenerateUsecase::new(&scraps_dir_path, &templates_dir_path);
-
-    let config = ScrapConfig::from_path(project_path)?;
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
     usecase.execute(template_name, scrap_title, &timezone)?;
 
