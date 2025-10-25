@@ -15,21 +15,21 @@
 <a href="https://github.com/boykush/scraps"><img alt="GitHub Stars" src="https://img.shields.io/github/stars/boykush/scraps?style=social"></a>
 </p>
 
-# What is Scraps?
+# 📚 What is Scraps?
 
 Scraps is a portable CLI knowledge hub for managing interconnected Markdown documentation with Wiki-link notation.
 
 Learn more in the [official documentation](https://boykush.github.io/scraps/).
 
-# Getting Started
+# 🚀 Getting Started
 
 You can refer to the [Getting Started](https://boykush.github.io/scraps/scraps/getting-started.html) document to quickly begin using Scraps.
 
 Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 
-# Features
+# ✨ Features
 
-### Static Site
+### 🌐 Static Site
 - [x] Sorting (linked_count, committed_date)
 - [x] Tagging
 - [x] Pagination
@@ -37,7 +37,7 @@ Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 - [x] Search
 - [x] Color Scheme (Theme is the [Nord](https://www.nordtheme.com/))
 - [x] OGP Card
-### CLI
+### 💻 CLI
 - [x] Build a static site
 - [x] Init scraps project
 - [x] Serve on localhost
@@ -45,18 +45,18 @@ Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 - [x] List a tags
 - [x] Template to generate the scrap
 - [x] MCP server for AI assistant integration
-### MCP Server
+### 🤖 MCP Server
 - [x] search_scraps
 - [x] list_tags
 - [x] lookup_scrap_links
 - [x] lookup_scrap_backlinks
 - [x] lookup_tag_backlinks
-### Deploy
+### 🚢 Deploy
 - [x] GitHub Pages
 
 For any feature requests, please feel free to create an [Enhancement feature issue](https://github.com/boykush/scraps/issues/new?assignees=&labels=enhancement&projects=&template=enhancement-feature-template.md&title=).
 
-# Screenshots
+# 📸 Screenshots
 
 ### Generated Static Site
 <img src="https://github.com/boykush/scraps/blob/main/assets/dark_mode.png?raw=true" alt="Static Site Dark Mode" width="800">
@@ -68,7 +68,7 @@ For any feature requests, please feel free to create an [Enhancement feature iss
 <img src="https://github.com/boykush/scraps/blob/main/assets/light_mode.png?raw=true" alt="Static Site Light Mode" width="800">
 </details>
 
-# Contributing
+# 🤝 Contributing
 
 We welcome contributions! 🎉
 
@@ -83,7 +83,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on how to contrib
 
 By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
 
-# License
+# 📄 License
 
 MIT
 
