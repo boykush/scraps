@@ -1,8 +1,8 @@
 [
   {% for scrap in scraps %}
     {
-      "title": "{{ scrap.link_title | addslashes }}",
-      "url": "{{ base_url }}scraps/{{ scrap.file_stem | addslashes }}.html"
+      "title": {{ scrap.link_title | json_encode() }},
+      "url": {{ base_url ~ "scraps/" ~ scrap.file_stem ~ ".html" | json_encode() }}
     }
     {% if not loop.last %},{% endif %}
   {% endfor %}
