@@ -4,6 +4,10 @@ Welcome to the Scraps development community! 🎉
 
 Scraps is a static site generator that brings developer-friendly workflows to documentation, using Markdown files with simple Wiki-link notation.
 
+## Code of Conduct
+
+This project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
+
 ## Quick Links
 
 - **Official Documentation:** https://boykush.github.io/scraps/
