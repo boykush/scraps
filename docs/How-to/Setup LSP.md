@@ -18,4 +18,4 @@ tags_in_codeblocks = false
 references_in_codeblocks = false
 ```
 
-We are considering a feature to generate the LSP configuration file during the [[CLI/Init|init command]].
+We are considering a feature to generate the LSP configuration file during the [[Reference/Init|init command]].

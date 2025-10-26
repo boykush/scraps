@@ -50,5 +50,5 @@ Generates a scrap file from the specified template.
 
 ## References
 
-- Template features and syntax: [[Feature/Templates]]
-- Template samples: [[Sample templates]]
+- Template features and syntax: [[Explanation/Template System]]
+- Template samples: [[How-to/Use Templates]]

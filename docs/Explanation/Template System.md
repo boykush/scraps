@@ -5,7 +5,7 @@ Generate scrap files from predefined Markdown templates for efficient content cr
 ## Basic Usage
 
 1. Create template files in `/templates` directory
-2. Run generate scrap on [[CLI/Template|command-line]]
+2. Run generate scrap on [[Reference/Template|command-line]]
 
 ## Template Syntax
 
@@ -26,6 +26,6 @@ title = "{{ now() | date(timezone=timezone) }}"
 
 ## Examples
 
-See [[Sample templates]] for ready-to-use templates.
+See [[How-to/Use Templates]] for ready-to-use templates.
 
-For CLI commands, see [[CLI/Template]].
+For CLI commands, see [[Reference/Template]].

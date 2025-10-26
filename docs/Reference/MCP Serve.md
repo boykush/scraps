@@ -19,4 +19,4 @@ This command starts an MCP (Model Context Protocol) server that enables AI assis
 
 The MCP server provides tools for AI assistants to search through your content and list available tags, enabling intelligent assistance with your documentation.
 
-For more details, see [[MCP Server]].
+For more details, see [[How-to/Integrate with AI Assistants]].

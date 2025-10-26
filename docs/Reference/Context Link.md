@@ -11,7 +11,7 @@ scraps
     └── Service.md
 ```
 
-Links to Scrap with different contexts can be specified like `[[DDD/Service]]`, `[[Kubernetes/Service]]`. You can also combine them with [[Alias link]] such as `[[Kubernetes/Service|Kubernetes Service]]`.
+Links to Scrap with different contexts can be specified like `[[DDD/Service]]`, `[[Kubernetes/Service]]`. You can also combine them with [[Reference/Alias Link|Alias link]] such as `[[Kubernetes/Service|Kubernetes Service]]`.
 
 The context is also displayed on the Scrap detail page in the static site.
 
