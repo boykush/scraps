@@ -1,20 +1,8 @@
+#[[Configuration]]
+
 Configuration is managed by `Config.toml` in the Scraps project.
 
-## Quick Setup Guide
-
-To get started with your Scraps site, you need to edit at least two required fields in your `Config.toml` file:
-
-### Step 1: Edit base_url
-Replace the placeholder URL with your actual site URL:
-```toml
-base_url = "https://yourusername.github.io/your-repository/"
-```
-
-### Step 2: Set your site title
-Add your desired site title:
-```toml
-title = "My Knowledge Base"
-```
+See [[Tutorial/Configure Project]] for a quick setup guide.
 
 ## Configuration Variables
 

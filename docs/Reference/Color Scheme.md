@@ -1,4 +1,4 @@
-#[[Appearance]]
+#[[Theming]]
 
 Scraps defaults to either light mode or dark mode depending on the user's OS settings.
 

@@ -1,4 +1,4 @@
-#[[Markdown Syntax]]
+#[[Markdown]]
 
 In Scraps, when you write using Markdown's autolink syntax, it automatically fetches OGP data and displays it as a card.
 

@@ -1,4 +1,4 @@
-#[[Internal Link]] #[[Markdown Syntax]]
+#[[Wiki-Links]] #[[Markdown]]
 
 Internal links allow you to use different display text as aliases.
 

@@ -1,4 +1,4 @@
-#[[Internal Link]] #[[Markdown Syntax]]
+#[[Wiki-Links]] #[[Markdown]]
 
 In cases where the same term exists in different contexts and Scrap titles would overlap, you can use the context feature by separating them with folders. For example:
 

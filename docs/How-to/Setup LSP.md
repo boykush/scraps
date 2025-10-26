@@ -1,4 +1,4 @@
-#[[Text Editor]]
+#[[Integration]]
 
 Currently, the most recommended LSP for editing Scraps is [markdown-oxide](https://github.com/Feel-ix-343/markdown-oxide).
 
