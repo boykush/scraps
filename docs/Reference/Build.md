@@ -42,4 +42,4 @@ Each Markdown file is converted to a slugified HTML file. Additional files like 
 ❯ scraps build --path /path/to/project
 ```
 
-After building, use [[CLI/Serve]] to preview your site locally.
+After building, use [[Reference/Serve]] to preview your site locally.

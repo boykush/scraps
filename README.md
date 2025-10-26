@@ -23,7 +23,7 @@ Learn more in the [official documentation](https://boykush.github.io/scraps/).
 
 # 🚀 Getting Started
 
-You can refer to the [Getting Started](https://boykush.github.io/scraps/scraps/getting-started.html) document to quickly begin using Scraps.
+You can refer to the [Getting Started](https://boykush.github.io/scraps/scraps/getting-started.tutorial.html) document to quickly begin using Scraps.
 
 Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 

@@ -1,3 +1,5 @@
+#[[Integration]]
+
 Scraps includes comprehensive Model Context Protocol server functionality, enabling AI assistants like Claude Code to directly interact with your Scraps knowledge base.
 
 ## Quick Start with Claude Code

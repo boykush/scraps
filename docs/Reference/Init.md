@@ -25,4 +25,4 @@ This command initializes a new Scraps project. It creates the following structur
 ❯ scraps init docs --path /path/to/workspace
 ```
 
-After initializing the project, proceed to [[CLI/Build|Build]] to generate your static site.
+After initializing the project, proceed to [[Reference/Build|Build]] to generate your static site.

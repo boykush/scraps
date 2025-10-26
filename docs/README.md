@@ -1,11 +1,14 @@
-# What is Scraps?
-
 Scraps is a portable CLI knowledge hub for managing interconnected Markdown documentation with Wiki-link notation.
 
-More details in [[What is Scraps?|here]].
+Learn more: [[Explanation/What is Scraps?]]
 
-# Getting Started
+## Documentation
 
-You can refer to the [[Getting Started]] document to quickly begin using Scraps.
+This documentation follows the [Diátaxis](https://diataxis.fr/) framework:
 
-Sample page in Japanese is [here](https://boykush.github.io/wiki/).
+- **Tutorials** - Learn Scraps: [[Tutorial/Getting Started]]
+- **How-to Guides** - Solve problems: [[How-to/Deploy to GitHub Pages]], [[How-to/Setup LSP]], [[How-to/Use Templates]]
+- **Reference** - Look up details: [[Reference/Build]], [[Reference/Configuration]], [[Reference/Normal Link]]
+- **Explanation** - Understand concepts: [[Explanation/What is Scraps?]], [[Explanation/Search Architecture]]
+
+Browse by topic: #[[CLI]] #[[Wiki-Links]] #[[Markdown]]

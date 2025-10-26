@@ -1,4 +1,4 @@
-#[[Markdown Syntax]]
+#[[Markdown]]
 
 As an extension, GitHub-flavored Markdown is also supported. This includes features such as strikethrough, tables, and task lists.
 
