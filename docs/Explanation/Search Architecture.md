@@ -1,4 +1,4 @@
-#[[Search]]
+#[[Static Site]]
 
 ## Search index format
 
