@@ -16,12 +16,12 @@ Analyze a GitHub Release and propose documentation updates for the Scraps projec
 
 2. **Analyze current documentation**:
    - Read `/README.md` to understand current feature list and description
-   - Search scraps directory for relevant documentation files:
-     - `scraps/What is Scraps?.md` - Core concept and capabilities
-     - `scraps/Getting Started.md` - Getting started guide
-     - `scraps/Configuration.md` - Configuration documentation
-     - `scraps/Feature/*.md` - Feature-specific documentation
-     - `scraps/CLI/*.md` - CLI command documentation
+   - Search docs directory for relevant documentation files:
+     - `docs/What is Scraps?.md` - Core concept and capabilities
+     - `docs/Getting Started.md` - Getting started guide
+     - `docs/Configuration.md` - Configuration documentation
+     - `docs/Feature/*.md` - Feature-specific documentation
+     - `docs/CLI/*.md` - CLI command documentation
    - Use `Grep` and `Read` to identify sections that may need updates
 
 3. **Generate update proposals**:
@@ -35,12 +35,12 @@ Analyze a GitHub Release and propose documentation updates for the Scraps projec
    Common update patterns:
    - **New features**:
      - Add to `/README.md` Features section if user-facing
-     - Create or update relevant `scraps/Feature/*.md` documentation
-     - Update `scraps/Configuration.md` if new config options added
-     - Update relevant `scraps/CLI/*.md` if CLI commands affected
+     - Create or update relevant `docs/Feature/*.md` documentation
+     - Update `docs/Configuration.md` if new config options added
+     - Update relevant `docs/CLI/*.md` if CLI commands affected
    - **Configuration changes**:
-     - Update `scraps/Configuration.md` with new options and examples
-     - Update `scraps/Getting Started.md` if it affects initial setup
+     - Update `docs/Configuration.md` with new options and examples
+     - Update `docs/Getting Started.md` if it affects initial setup
 
 4. **Present proposals to user**:
    - Show proposed changes grouped by file

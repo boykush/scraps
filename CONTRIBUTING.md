@@ -34,7 +34,7 @@ Have an idea for a new feature? We'd love to hear it! Use our [Enhancement Featu
 
 ### 📖 Improve Documentation
 Help us make Scraps more accessible by:
-- Improving existing documentation in the `scraps/` directory
+- Improving existing documentation in the `docs/` directory
 - Fixing typos or unclear explanations
 
 ---

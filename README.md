@@ -78,7 +78,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on how to contrib
 
 - 🐛 [Report bugs](https://github.com/boykush/scraps/issues/new?template=bug-report-template.md)
 - 💡 [Request features](https://github.com/boykush/scraps/issues/new?template=enhancement-feature-template.md)
-- 📖 [Improve documentation](https://github.com/boykush/scraps/tree/main/scraps)
+- 📖 [Improve documentation](https://github.com/boykush/scraps/tree/main/docs)
 - 🔧 Submit pull requests
 
 By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
