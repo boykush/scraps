@@ -25,7 +25,7 @@ test('search scraps', async ({ page }) => {
 });
 
 test('fetch OGP data', async ({ page }) => {
-  await page.goto('/scraps/autolink.html');
+  await page.goto('/scraps/autolink.reference.html');
 
   // Wait for OGP card to be present
   const ogpCard = page.locator('.ogp-card').first();
