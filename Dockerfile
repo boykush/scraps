@@ -1,5 +1,5 @@
 # Multi-stage build for smaller final image
-FROM rust:1.90-slim-bookworm AS builder
+FROM rust:1.91-slim-bookworm AS builder
 
 ARG INSTALL_VERSION
 
