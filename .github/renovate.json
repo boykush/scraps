@@ -20,8 +20,8 @@
     },
     {
       "groupName": "Rust toolchain",
-      "matchDatasources": ["docker", "mise"],
-      "matchPackagePatterns": ["^rust$"]
+      "matchManagers": ["dockerfile", "mise"],
+      "matchPackageNames": ["rust"]
     }
   ]
 }
