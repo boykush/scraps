@@ -17,6 +17,11 @@
         "dockerfile"
       ],
       "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "Rust toolchain",
+      "matchDatasources": ["docker", "mise"],
+      "matchPackagePatterns": ["^rust$"]
     }
   ]
 }
