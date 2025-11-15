@@ -64,7 +64,28 @@ mise install
 This will automatically install the correct versions of:
 - **Rust** (stable version)
 - **Node.js** (for E2E tests)
+- **hk** (git hook manager)
+- **pkl** (configuration language)
 - Any other tools specified in the project configuration
+
+### Git Pre-commit Hooks
+
+This project uses [hk](https://hk.jdx.dev/) for managing git hooks. Pre-commit hooks are automatically installed when you run `mise install`.
+
+The pre-commit hook runs quality checks on staged files:
+- **Rust files (*.rs)**: Runs `mise run cargo:quality` which includes:
+  - Build verification
+  - All tests
+  - Code formatting check (rustfmt)
+  - Linter checks (clippy)
+- **PKL files (*.pkl)**: Validates configuration syntax
+
+If any check fails, the commit will be blocked. Fix the issues and try again.
+
+To manually run the pre-commit checks:
+```bash
+mise exec -- hk run pre-commit
+```
 
 ---
 

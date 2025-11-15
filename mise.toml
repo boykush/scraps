@@ -1,5 +1,13 @@
+[settings]
+experimental = true
+
 [tools]
 "rust" = { version = "1.90.0", profile = "default" }
+"hk" = "latest"
+"pkl" = "latest"
+
+[hooks]
+postinstall = "hk install --mise"
 
 [tasks."cargo:build"]
 description = "Build the project with cargo"

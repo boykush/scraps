@@ -61,6 +61,8 @@ To automatically fix formatting issues:
 mise run cargo:fmt-fix
 ```
 
+**Note**: Pre-commit hooks are automatically set up via hk and will run these quality checks when you commit. If any check fails, the commit will be blocked.
+
 ### 5. Commit
 
 - Create a descriptive commit message for the completed TODO

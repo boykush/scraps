@@ -1,0 +1,26 @@
+amends "package://github.com/jdx/hk/releases/download/v1.20.0/hk@1.20.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.20.0/hk@1.20.0#/Builtins.pkl"
+
+local linters = new Mapping<String, Step> {
+    // Rust quality checks (fmt, clippy, test, build)
+    ["cargo_quality"] = new Step {
+        glob = "*.rs"
+        workspace_indicator = "Cargo.toml"
+        check = "mise run cargo:quality"
+        exclusive = true
+    }
+
+    // PKL configuration validation
+    ["pkl"] {
+        glob = "*.pkl"
+        check = "pkl eval {{files}} >/dev/null"
+    }
+}
+
+hooks {
+    ["pre-commit"] {
+        fix = false   // run checks only, don't auto-fix
+        stash = "git" // stashes unstaged changes while running checks
+        steps = linters
+    }
+}
