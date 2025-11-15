@@ -5,6 +5,7 @@ experimental = true
 "rust" = { version = "1.90.0", profile = "default" }
 "hk" = "latest"
 "pkl" = "latest"
+"cargo:scraps" = "0.27.2"
 
 [hooks]
 postinstall = "hk install --mise"
