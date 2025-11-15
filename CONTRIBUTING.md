@@ -116,7 +116,7 @@ mod tests {
 
 ```bash
 # Run all E2E tests
-mise run e2e
+mise run e2e:test
 ```
 
 #### E2E Test Configuration
