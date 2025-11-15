@@ -19,8 +19,7 @@ jobs:
     - name: Setup Rust
       uses: jdx/mise-action@v3
     - name: Pre build
-      run: |
-        cargo build
+      run: mise run cargo:build
     - name: Setup Node.js
       uses: jdx/mise-action@v3
       with:
