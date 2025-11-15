@@ -5,6 +5,7 @@ experimental = true
 "rust" = { version = "1.90.0", profile = "default" }
 "hk" = "latest"
 "pkl" = "latest"
+"cargo:scraps" = "0.27.2"
 
 [hooks]
 postinstall = "hk install --mise"
@@ -41,3 +42,11 @@ run = "mise exec cargo:cargo-tarpaulin -- cargo tarpaulin --verbose --all-featur
 [tasks."e2e:test"]
 description = "Run E2E tests with Playwright"
 run = "cd tests/e2e && npm install && npx playwright test"
+
+[tasks."docs:build"]
+description = "Build documentation with scraps"
+run = "scraps build"
+
+[tasks."docs:serve"]
+description = "Serve documentation locally with scraps"
+run = "scraps serve"
