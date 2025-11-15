@@ -78,7 +78,7 @@ Before running tests, ensure you have the development environment set up as desc
 
 ```bash
 # Run all workspace tests
-cargo test --workspace
+mise run cargo:test
 ```
 
 #### Writing Medium Tests

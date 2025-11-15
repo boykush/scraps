@@ -1,6 +1,31 @@
 [tools]
 "rust" = { version = "1.90.0", profile = "default" }
 
+[tasks."cargo:build"]
+description = "Build the project with cargo"
+run = "cargo build --verbose --workspace"
+
+[tasks."cargo:test"]
+description = "Run all tests with cargo"
+run = "cargo test --verbose --workspace"
+
+[tasks."cargo:fmt"]
+description = "Check code formatting with rustfmt"
+run = "cargo fmt --all -- --check"
+
+[tasks."cargo:fmt-fix"]
+description = "Fix code formatting with rustfmt"
+run = "cargo fmt --all"
+
+[tasks."cargo:clippy"]
+description = "Run clippy linter"
+run = "cargo clippy --all-targets --all-features"
+
+[tasks."cargo:check"]
+description = "Run pre-commit quality checks (build, test, fmt, clippy)"
+depends = ["cargo:build", "cargo:test", "cargo:fmt", "cargo:clippy"]
+run = "echo '✅ All quality checks passed!'"
+
 [tasks.coverage]
 description = "Run code coverage analysis with tarpaulin"
 run = "mise exec cargo:cargo-tarpaulin -- cargo tarpaulin --verbose --all-features --workspace --timeout 120 --exclude-files 'target/*'"
