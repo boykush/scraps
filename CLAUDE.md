@@ -45,7 +45,7 @@ Before committing any code, run the following checks in order (based on CI confi
 You can run all quality checks at once:
 
 ```bash
-mise run cargo:check
+mise run cargo:quality
 ```
 
 Or run individual checks:

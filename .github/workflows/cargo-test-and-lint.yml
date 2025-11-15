@@ -34,5 +34,5 @@ jobs:
       with:
         cache: false
     - name: Run quality checks
-      run: mise run cargo:check
+      run: mise run cargo:quality
       # Runs cargo:build, cargo:test, cargo:fmt, cargo:clippy in parallel

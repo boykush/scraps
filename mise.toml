@@ -21,7 +21,7 @@ run = "cargo fmt --all"
 description = "Run clippy linter"
 run = "cargo clippy --all-targets --all-features"
 
-[tasks."cargo:check"]
+[tasks."cargo:quality"]
 description = "Run pre-commit quality checks (build, test, fmt, clippy)"
 depends = ["cargo:build", "cargo:test", "cargo:fmt", "cargo:clippy"]
 run = "echo '✅ All quality checks passed!'"
