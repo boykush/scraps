@@ -1,4 +1,4 @@
-![](https://github.com/boykush/scraps/raw/main/assets/logo_opacity.png?raw=true)
+![Scraps Logo](https://github.com/boykush/scraps/raw/main/assets/logo_opacity.png?raw=true)
 
 Scraps is a portable CLI knowledge hub for managing interconnected Markdown documentation with Wiki-link notation.
 

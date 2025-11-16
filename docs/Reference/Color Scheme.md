@@ -11,8 +11,8 @@ color_scheme = "os_setting"
 
 ## Light mode
 
-![](https://github.com/boykush/scraps/blob/main/assets/light_mode.png?raw=true)
+![Light mode screenshot](https://github.com/boykush/scraps/blob/main/assets/light_mode.png?raw=true)
 
 ## Dark mode
 
-![](https://github.com/boykush/scraps/blob/main/assets/dark_mode.png?raw=true)
+![Dark mode screenshot](https://github.com/boykush/scraps/blob/main/assets/dark_mode.png?raw=true)
