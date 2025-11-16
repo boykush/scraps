@@ -8,13 +8,13 @@ As an extension, GitHub-flavored Markdown is also supported. This includes featu
 
 ### Strikethrough
 
-#### In
+**In:**
 
 ```markdown
 ~~This text is strikethrough.~~
 ```
 
-#### Out
+**Out:**
 
 ~~This text is strikethrough.~~
 
@@ -22,7 +22,7 @@ As an extension, GitHub-flavored Markdown is also supported. This includes featu
 
 ### Task Lists
 
-#### In
+**In:**
 
 ```markdown
 - [x] Task 1
@@ -30,7 +30,7 @@ As an extension, GitHub-flavored Markdown is also supported. This includes featu
 - [ ] Task 3
 ```
 
-#### Out
+**Out:**
 
 - [x] Task 1
 - [ ] Task 2
