@@ -18,7 +18,7 @@ Lists all available templates in the `/templates` directory.
 
 **Example output:**
 
-```
+```bash
 daily_note
 book
 meeting
