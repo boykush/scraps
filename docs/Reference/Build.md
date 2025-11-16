@@ -6,7 +6,7 @@
 
 This command processes Markdown files from the `/scraps` directory and generates a static website.
 
-**Source Structure**
+## Source Structure
 
 ```bash
 ❯ tree scraps
@@ -15,7 +15,7 @@ scraps
 └── Documentation.md
 ```
 
-**Generated Files**
+## Generated Files
 
 The command generates the following files in the `public` directory:
 
