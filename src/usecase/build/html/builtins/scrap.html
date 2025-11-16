@@ -14,7 +14,7 @@
         {% if scrap.ctx %}
           <h3 class="context">{{ scrap.ctx }}<span>&#47;</span></h2>
         {% endif %}
-        <h1>{{ scrap.title }}</h1>
+        <h1 class="title">{{ scrap.title }}</h1>
         {% if scrap.commited_ts %}
             <p class="commited-date">
                 commited date: {{ scrap.commited_ts | date(format="%Y-%m-%d", timezone=timezone) }}

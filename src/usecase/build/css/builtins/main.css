@@ -105,6 +105,10 @@ div.scrap .context::before {
     margin-right: 8px;
 }
 
+div.scrap h1.title {
+    font-size: 36px;
+}
+
 div.scrap .commited-date {
     font-size: 12.8px;
     color: var(--gray-color);
