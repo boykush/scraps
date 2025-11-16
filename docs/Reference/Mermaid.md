@@ -6,7 +6,7 @@ By specifying `mermaid` as the language for a code block, you can use [Mermaid](
 
 ---
 
-#### In
+### In
 
 <pre><code>
 ```mermaid
@@ -17,7 +17,7 @@ graph LR
 ```
 </code></pre>
 
-#### Out
+### Out
 
 ```mermaid
 graph LR

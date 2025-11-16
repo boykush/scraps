@@ -6,12 +6,12 @@ In Scraps, when you write using Markdown's autolink syntax, it automatically fet
 
 ---
 
-#### In
+### In
 
 ```markdown
 <https://github.com/boykush/scraps>
 ```
 
-#### Out
+### Out
 
 <https://github.com/boykush/scraps>
