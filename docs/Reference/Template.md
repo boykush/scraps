@@ -17,7 +17,8 @@ This command generates scrap files from Markdown templates located in the `/temp
 Lists all available templates in the `/templates` directory.
 
 **Example output:**
-```
+
+```bash
 daily_note
 book
 meeting

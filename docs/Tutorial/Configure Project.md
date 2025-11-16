@@ -3,6 +3,7 @@ To get started with your Scraps site, you need to edit at least two required fie
 ## Step 1: Edit base_url
 
 Replace the placeholder URL with your actual site URL:
+
 ```toml
 base_url = "https://yourusername.github.io/your-repository/"
 ```
@@ -10,6 +11,7 @@ base_url = "https://yourusername.github.io/your-repository/"
 ## Step 2: Set your site title
 
 Add your desired site title:
+
 ```toml
 title = "My Knowledge Base"
 ```

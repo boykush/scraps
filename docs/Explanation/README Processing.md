@@ -11,9 +11,12 @@ URLs will be displayed as normal links.
 
 ---
 
-#### In:
+**In:**
+
 ```markdown
 <https://example.com>
 ```
-#### Out:
+
+**Out:**
+
 <a href="https://example.com">https://example.com</a>

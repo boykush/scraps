@@ -1,0 +1,16 @@
+{
+  // MD018: no-missing-space-atx - No space after hash on atx style heading
+  // Disabled to allow Wiki-link syntax (#[[tag]]) without space after hash
+  // Reference: https://github.com/DavidAnson/markdownlint/blob/main/doc/md018.md
+  "MD018": false,
+
+  // MD033: no-inline-html - Inline HTML
+  // Disabled to allow inline HTML in documentation examples
+  // Reference: https://github.com/DavidAnson/markdownlint/blob/main/doc/md033.md
+  "MD033": false,
+
+  // MD041: first-line-heading - First line in a file should be a top-level heading
+  // Disabled to allow tags/Wiki-links before first heading
+  // Reference: https://github.com/DavidAnson/markdownlint/blob/main/doc/md041.md
+  "MD041": false
+}

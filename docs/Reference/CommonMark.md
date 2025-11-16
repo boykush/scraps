@@ -10,15 +10,21 @@ Please refer to the documentation of the pulldown-cmark library used internally 
 
 ---
 
-#### In:
+**In:**
+
 ```markdown
 # Heading 1
 ## Heading 2
 ### Heading 3
 #### Heading 4
 ```
-#### Out:
+
+**Out:**
+
 # Heading 1
+
 ## Heading 2
+
 ### Heading 3
+
 #### Heading 4

@@ -5,6 +5,7 @@ Custom actions are available to deploy Scraps to Github Pages.
 [scraps-deploy-action](https://github.com/boykush/scraps-deploy-action)
 
 ### YAML file
+
 Prepare a yaml file under `.github/workflows/` like this
 
 ```yaml
@@ -32,8 +33,10 @@ jobs:
 ```
 
 ### GitHub settings
+
 Set up GitHub Pages for the repository.
 
 `Build and deployment` parameter as follows.
+
 - Source: `Deploy from a branch`
 - Branch: `gh-pages`

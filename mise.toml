@@ -6,6 +6,7 @@ experimental = true
 "hk" = "latest"
 "pkl" = "latest"
 "cargo:scraps" = "0.27.2"
+"npm:markdownlint-cli2" = "latest"
 
 [hooks]
 postinstall = "hk install --mise"
@@ -51,3 +52,11 @@ run = "scraps build"
 [tasks."docs:serve"]
 description = "Serve documentation locally with scraps"
 run = "scraps serve"
+
+[tasks."docs:lint"]
+description = "Lint markdown files in docs directory with markdownlint-cli2"
+run = "markdownlint-cli2 'docs/**/*.md'"
+
+[tasks."docs:lint-fix"]
+description = "Auto-fix markdown files in docs directory with markdownlint-cli2"
+run = "markdownlint-cli2 --fix 'docs/**/*.md'"

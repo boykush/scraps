@@ -5,6 +5,7 @@
 
 2. **Initialize Project**
    - Create a new Scraps project using [[Reference/Init]]:
+
      ```bash
      ❯ scraps init my-knowledge-base
      ❯ cd my-knowledge-base
@@ -33,12 +34,14 @@
 
 1. **Generate Site**
    - Use [[Reference/Build]] to generate static site files:
+
      ```bash
      ❯ scraps build
      ```
 
 2. **Preview Locally**
    - Use [[Reference/Serve]] for local preview and debugging:
+
      ```bash
      ❯ scraps serve
      ```

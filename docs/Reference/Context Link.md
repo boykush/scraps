@@ -16,6 +16,8 @@ Links to Scrap with different contexts can be specified like `[[DDD/Service]]`, 
 The context is also displayed on the Scrap detail page in the static site.
 
 ## Not Recommended
+
 Scraps aims for simple knowledge management, so overuse of folders should be avoided. Use folders (Context) only in cases such as:
+
 - When duplicate Scrap titles occur across different contexts
 - When a Scrap has a strong association with a specific context
