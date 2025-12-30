@@ -1,0 +1,18 @@
+{
+  "name": "scraps-writer",
+  "version": "1.0.0",
+  "description": "AI agent for creating Scraps documentation with intelligent tag selection and backlink suggestions",
+  "author": {
+    "name": "boykush",
+    "email": "boykush315@gmail.com"
+  },
+  "homepage": "https://boykush.github.io/scraps",
+  "repository": "https://github.com/boykush/scraps",
+  "agents": [
+    {
+      "name": "scraps-writer",
+      "description": "Create Scraps documentation with Wiki-links and appropriate tags",
+      "prompt": "../agent.md"
+    }
+  ]
+}
