@@ -6,12 +6,16 @@
   },
   "metadata": {
     "description": "Claude Code plugins for Scraps - MCP server integration for interconnected Markdown documentation",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "plugins": [
     {
       "name": "mcp-server",
       "source": "./plugins/mcp-server"
+    },
+    {
+      "name": "scraps-writer",
+      "source": "./plugins/scraps-writer"
     }
   ]
 }
