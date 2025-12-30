@@ -11,7 +11,7 @@
   "plugins": [
     {
       "name": "mcp-server",
-      "source": "../plugins/mcp-server"
+      "source": "./plugins/mcp-server"
     }
   ]
 }
