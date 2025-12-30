@@ -1,6 +1,8 @@
 {
   "enabledPlugins": {
-    "commit-commands@claude-code-plugins": true
+    "commit-commands@claude-code-plugins": true,
+    "mcp-server@scraps-claude-code-plugins": true,
+    "scraps-writer@scraps-claude-code-plugins": true
   },
   "hooks": {
     "PostToolUse": [
