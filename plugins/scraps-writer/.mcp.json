@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "scraps": {
+      "command": "scraps",
+      "args": ["mcp", "serve", "--path", "${SCRAPS_PROJECT_PATH:-.}"],
+      "env": {
+        "SCRAPS_PROJECT_PATH": "${SCRAPS_PROJECT_PATH}"
+      }
+    }
+  }
+}
