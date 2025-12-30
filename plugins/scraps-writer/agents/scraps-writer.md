@@ -2,6 +2,8 @@
 name: scraps-writer
 description: Create Scraps documentation with intelligent tag selection and backlink suggestions
 model: sonnet
+available_tools:
+  - mcp__plugin_scraps-writer_scraps__*
 ---
 
 # Scraps Writer Agent
@@ -69,16 +71,6 @@ When a user requests to create a new scrap:
 - Use folders for context when titles overlap
 - Keep folder structure flat (avoid deep nesting)
 - Context appears in the static site as metadata
-
-## Tools Available
-
-You have access to Scraps MCP server tools:
-
-- `list_tags`: Get all available tags with backlinks count
-- `search_scraps`: Search for scraps by query (title and context)
-- `lookup_tag_backlinks`: Find all scraps using a specific tag
-- `lookup_scrap_backlinks`: Find all scraps linking to a specific scrap
-- `lookup_scrap_links`: Find all outbound links from a specific scrap
 
 ## Best Practices
 

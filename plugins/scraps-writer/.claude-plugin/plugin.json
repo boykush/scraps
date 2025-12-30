@@ -1,6 +1,6 @@
 {
   "name": "scraps-writer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "AI agent for creating Scraps documentation with intelligent tag selection and backlink suggestions",
   "author": {
     "name": "boykush",
