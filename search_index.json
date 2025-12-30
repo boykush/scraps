@@ -1,0 +1,183 @@
+[
+  
+    {
+      "title": "Reference/Init",
+      "url": "https://boykush.github.io/scraps/scraps/init.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/Autolink",
+      "url": "https://boykush.github.io/scraps/scraps/autolink.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/Alias Link",
+      "url": "https://boykush.github.io/scraps/scraps/alias-link.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/Search",
+      "url": "https://boykush.github.io/scraps/scraps/search.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/Build",
+      "url": "https://boykush.github.io/scraps/scraps/build.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/MCP Tools",
+      "url": "https://boykush.github.io/scraps/scraps/mcp-tools.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/Configuration",
+      "url": "https://boykush.github.io/scraps/scraps/configuration.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/GitHub-flavored Markdown",
+      "url": "https://boykush.github.io/scraps/scraps/github-flavored-markdown.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/Color Scheme",
+      "url": "https://boykush.github.io/scraps/scraps/color-scheme.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/Context Link",
+      "url": "https://boykush.github.io/scraps/scraps/context-link.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/Normal Link",
+      "url": "https://boykush.github.io/scraps/scraps/normal-link.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/CommonMark",
+      "url": "https://boykush.github.io/scraps/scraps/commonmark.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/Tag",
+      "url": "https://boykush.github.io/scraps/scraps/tag.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/Tag Link",
+      "url": "https://boykush.github.io/scraps/scraps/tag-link.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/MCP Serve",
+      "url": "https://boykush.github.io/scraps/scraps/mcp-serve.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/Mermaid",
+      "url": "https://boykush.github.io/scraps/scraps/mermaid.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/Serve",
+      "url": "https://boykush.github.io/scraps/scraps/serve.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Reference/Template",
+      "url": "https://boykush.github.io/scraps/scraps/template.reference.html"
+    }
+    ,
+  
+    {
+      "title": "Explanation/Search Architecture",
+      "url": "https://boykush.github.io/scraps/scraps/search-architecture.explanation.html"
+    }
+    ,
+  
+    {
+      "title": "Explanation/Template System",
+      "url": "https://boykush.github.io/scraps/scraps/template-system.explanation.html"
+    }
+    ,
+  
+    {
+      "title": "Explanation/What is Scraps?",
+      "url": "https://boykush.github.io/scraps/scraps/what-is-scraps-question.explanation.html"
+    }
+    ,
+  
+    {
+      "title": "Explanation/README Processing",
+      "url": "https://boykush.github.io/scraps/scraps/readme-processing.explanation.html"
+    }
+    ,
+  
+    {
+      "title": "Tutorial/Installation",
+      "url": "https://boykush.github.io/scraps/scraps/installation.tutorial.html"
+    }
+    ,
+  
+    {
+      "title": "Tutorial/Getting Started",
+      "url": "https://boykush.github.io/scraps/scraps/getting-started.tutorial.html"
+    }
+    ,
+  
+    {
+      "title": "Tutorial/Configure Project",
+      "url": "https://boykush.github.io/scraps/scraps/configure-project.tutorial.html"
+    }
+    ,
+  
+    {
+      "title": "How-to/Deploy to GitHub Pages",
+      "url": "https://boykush.github.io/scraps/scraps/deploy-to-github-pages.how-to.html"
+    }
+    ,
+  
+    {
+      "title": "How-to/Setup LSP",
+      "url": "https://boykush.github.io/scraps/scraps/setup-lsp.how-to.html"
+    }
+    ,
+  
+    {
+      "title": "How-to/Integrate with AI Assistants",
+      "url": "https://boykush.github.io/scraps/scraps/integrate-with-ai-assistants.how-to.html"
+    }
+    ,
+  
+    {
+      "title": "How-to/Use Templates",
+      "url": "https://boykush.github.io/scraps/scraps/use-templates.how-to.html"
+    }
+    ,
+  
+    {
+      "title": "How-to/Install Claude Code Plugin",
+      "url": "https://boykush.github.io/scraps/scraps/install-claude-code-plugin.how-to.html"
+    }
+    
+  
+]
