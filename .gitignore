@@ -7,8 +7,5 @@ tests/resource
 /tests/e2e/playwright-report
 /tests/e2e/test-results
 
-# mcp
-.mcp.json
-
 # serena
 .serena
