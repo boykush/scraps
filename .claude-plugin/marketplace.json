@@ -11,14 +11,7 @@
   "plugins": [
     {
       "name": "mcp-server",
-      "source": "../plugins/mcp-server",
-      "description": "MCP (Model Context Protocol) server for Scraps knowledge base integration",
-      "version": "1.0.0",
-      "author": {
-        "name": "boykush"
-      },
-      "license": "MIT",
-      "strict": false
+      "source": "../plugins/mcp-server"
     }
   ]
 }
