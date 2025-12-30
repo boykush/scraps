@@ -1,23 +1,24 @@
 {
-  "$schema": "https://marketplace.anthropic.com/schema/v1",
   "name": "scraps-claude-code-plugins",
-  "version": "1.0.0",
-  "description": "Claude Code plugins for Scraps - MCP server integration for interconnected Markdown documentation",
   "owner": {
     "name": "boykush",
     "email": "boykush315@gmail.com"
   },
+  "metadata": {
+    "description": "Claude Code plugins for Scraps - MCP server integration for interconnected Markdown documentation",
+    "version": "1.0.0"
+  },
   "plugins": [
     {
       "name": "mcp-server",
+      "source": "plugins/mcp-server",
       "description": "MCP (Model Context Protocol) server for Scraps knowledge base integration",
       "version": "1.0.0",
       "author": {
-        "name": "boykush",
-        "email": "boykush315@gmail.com"
+        "name": "boykush"
       },
-      "source": "plugins/mcp-server",
-      "category": "integration"
+      "license": "MIT",
+      "strict": false
     }
   ]
 }
