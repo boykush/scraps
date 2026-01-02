@@ -27,11 +27,11 @@ impl SerializeIndexScrap {
         let backlinks_count = backlinks_map.get(&scrap.self_key()).len();
         let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_key().clone()));
         SerializeIndexScrap {
-            ctx: scrap.ctx.map(|c| c.to_string()),
-            title: scrap.title.to_string(),
+            ctx: scrap.ctx().as_ref().map(|c| c.to_string()),
+            title: scrap.title().to_string(),
             html_file_name,
             html_text: content.to_string(),
-            thumbnail: scrap.thumbnail.clone(),
+            thumbnail: scrap.thumbnail(),
             commited_ts,
             backlinks_count,
         }

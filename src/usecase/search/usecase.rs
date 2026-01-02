@@ -77,7 +77,7 @@ impl SearchUsecase {
                         title,
                         ctx,
                         url,
-                        md_text: scrap.md_text.clone(),
+                        md_text: scrap.md_text().to_string(),
                     }
                 })
             })

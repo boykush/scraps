@@ -10,10 +10,10 @@ pub struct TagTera {
 
 impl TagTera {
     pub fn new(tag: &Tag, backlinks_map: &BacklinksMap) -> TagTera {
-        let backlinks_count = backlinks_map.get(&tag.title.clone().into()).len();
+        let backlinks_count = backlinks_map.get(&tag.title().clone().into()).len();
         TagTera {
-            title: tag.title.to_string(),
-            slug: Slug::from(tag.title.clone()).to_string(),
+            title: tag.title().to_string(),
+            slug: Slug::from(tag.title().clone()).to_string(),
             backlinks_count,
         }
     }

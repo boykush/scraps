@@ -22,12 +22,12 @@ impl DisplayTag {
     ) -> ScrapsResult<DisplayTag> {
         let url = base_url
             .as_url()
-            .join(&format!("scraps/{}.html", Slug::from(tag.title.clone())))
+            .join(&format!("scraps/{}.html", Slug::from(tag.title().clone())))
             .context(CliError::Display)?;
-        let backlinks_count = backlinks_map.get(&tag.title.clone().into()).len();
+        let backlinks_count = backlinks_map.get(&tag.title().clone().into()).len();
 
         Ok(DisplayTag {
-            title: tag.title.to_owned(),
+            title: tag.title().to_owned(),
             url,
             backlinks_count,
         })

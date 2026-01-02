@@ -6,16 +6,36 @@ use super::{context::Ctx, key::ScrapKey, title::Title};
 
 #[derive(PartialEq, Clone, Debug)]
 pub struct Scrap {
-    pub title: Title,
-    pub ctx: Option<Ctx>,
-    pub links: Vec<ScrapKey>,
-    pub md_text: String,
-    pub thumbnail: Option<Url>,
+    title: Title,
+    ctx: Option<Ctx>,
+    links: Vec<ScrapKey>,
+    md_text: String,
+    thumbnail: Option<Url>,
 }
 
 impl Scrap {
     pub fn self_key(&self) -> ScrapKey {
         ScrapKey::new(&self.title, &self.ctx)
+    }
+
+    pub fn title(&self) -> &Title {
+        &self.title
+    }
+
+    pub fn ctx(&self) -> &Option<Ctx> {
+        &self.ctx
+    }
+
+    pub fn links(&self) -> &[ScrapKey] {
+        &self.links
+    }
+
+    pub fn md_text(&self) -> &str {
+        &self.md_text
+    }
+
+    pub fn thumbnail(&self) -> Option<Url> {
+        self.thumbnail.clone()
     }
 }
 
@@ -40,16 +60,20 @@ mod tests {
 
     #[test]
     fn it_new() {
-        let mut scrap = Scrap::new("scrap title", &None, "[[link1]][[link2]][[Context/link3]]");
-        assert_eq!(scrap.title, "scrap title".into());
-        scrap.links.sort();
+        let scrap = Scrap::new("scrap title", &None, "[[link1]][[link2]][[Context/link3]]");
+        assert_eq!(scrap.title(), &"scrap title".into());
+
+        let mut actual_links = scrap.links().to_vec();
+        actual_links.sort();
+
         let mut expected = [
             Title::from("link1").into(),
             Title::from("link2").into(),
             ScrapKey::with_ctx(&"link3".into(), &"Context".into()),
         ];
         expected.sort();
-        assert_eq!(scrap.links, expected);
-        assert_eq!(scrap.thumbnail, None);
+
+        assert_eq!(actual_links, expected);
+        assert_eq!(scrap.thumbnail(), None);
     }
 }
