@@ -22,9 +22,9 @@ pub async fn list_tags(
     let mut tags_with_backlinks: Vec<_> = tags
         .into_iter()
         .map(|tag| {
-            let backlinks_count = backlinks_map.get(&tag.title.clone().into()).len();
+            let backlinks_count = backlinks_map.get(&tag.title().clone().into()).len();
             json!({
-                "title": tag.title.to_string(),
+                "title": tag.title().to_string(),
                 "backlinks_count": backlinks_count
             })
         })

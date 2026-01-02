@@ -72,7 +72,7 @@ mod tests {
             assert_eq!(
                 tags.clone()
                     .into_iter()
-                    .sorted_by_key(|t| t.title.to_string())
+                    .sorted_by_key(|t| t.title().to_string())
                     .collect_vec(),
                 vec![tag1.clone(), tag2.clone(), tag3.clone(),]
             );
@@ -82,28 +82,28 @@ mod tests {
             let scrap2 = Scrap::new("test2", &None, "#[[Tag1]] #[[Tag3]]");
             assert_eq!(
                 backlinks_map
-                    .get(&tag1.title.clone().into())
+                    .get(&tag1.title().clone().into())
                     .into_iter()
-                    .map(|s| s.title)
+                    .map(|s| s.title().clone())
                     .sorted_by_key(|t| t.to_string())
                     .collect_vec(),
-                vec![scrap1.title.clone(), scrap2.title.clone()]
+                vec![scrap1.title().clone(), scrap2.title().clone()]
             );
             assert_eq!(
                 backlinks_map
-                    .get(&tag2.title.clone().into())
+                    .get(&tag2.title().clone().into())
                     .into_iter()
-                    .map(|s| s.title)
+                    .map(|s| s.title().clone())
                     .collect_vec(),
-                vec![scrap1.title.clone()]
+                vec![scrap1.title().clone()]
             );
             assert_eq!(
                 backlinks_map
-                    .get(&tag3.title.clone().into())
+                    .get(&tag3.title().clone().into())
                     .into_iter()
-                    .map(|s| s.title)
+                    .map(|s| s.title().clone())
                     .collect_vec(),
-                vec![scrap2.title.clone()]
+                vec![scrap2.title().clone()]
             );
         });
     }

@@ -21,7 +21,7 @@ impl BacklinksMap {
             .fold(
                 HashMap::new(),
                 |acc1: HashMap<ScrapKey, Vec<Scrap>>, scrap| {
-                    scrap.to_owned().links.iter().fold(acc1, |mut acc2, key| {
+                    scrap.links().iter().fold(acc1, |mut acc2, key| {
                         acc2.entry(key.clone()).or_default().push(scrap.to_owned());
                         acc2
                     })

@@ -22,11 +22,11 @@ impl From<ScrapDetail> for ScrapDetailTera {
         let content = scrap_detail.content();
         let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_key()));
         ScrapDetailTera {
-            ctx: scrap.ctx.as_ref().map(|ctx| ctx.to_string()),
-            title: scrap.title.to_string(),
+            ctx: scrap.ctx().as_ref().map(|ctx| ctx.to_string()),
+            title: scrap.title().to_string(),
             html_file_name,
             content: content.into(),
-            thumbnail: scrap.thumbnail.clone(),
+            thumbnail: scrap.thumbnail(),
             commited_ts,
         }
     }

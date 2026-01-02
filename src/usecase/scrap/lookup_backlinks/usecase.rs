@@ -67,7 +67,7 @@ impl LookupScrapBacklinksUsecase {
                 LookupScrapBacklinksResult {
                     title,
                     ctx,
-                    md_text: linking_scrap.md_text.clone(),
+                    md_text: linking_scrap.md_text().to_string(),
                 }
             })
             .collect();

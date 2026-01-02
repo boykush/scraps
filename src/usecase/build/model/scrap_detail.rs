@@ -14,7 +14,7 @@ pub struct ScrapDetail {
 
 impl ScrapDetail {
     pub fn new(scrap: &Scrap, commited_ts: &Option<i64>, base_url: &BaseUrl) -> ScrapDetail {
-        let content = markdown::convert::to_content(&scrap.md_text, base_url);
+        let content = markdown::convert::to_content(scrap.md_text(), base_url);
         ScrapDetail {
             v: scrap.to_owned(),
             content: content.to_owned(),

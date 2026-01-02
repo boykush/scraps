@@ -2,7 +2,13 @@ use super::title::Title;
 
 #[derive(Eq, Hash, PartialEq, Debug, Clone)]
 pub struct Tag {
-    pub title: Title,
+    title: Title,
+}
+
+impl Tag {
+    pub fn title(&self) -> &Title {
+        &self.title
+    }
 }
 
 impl From<Title> for Tag {

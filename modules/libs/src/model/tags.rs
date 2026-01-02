@@ -18,7 +18,7 @@ impl Tags {
     pub fn new(scraps: &[Scrap]) -> Tags {
         let scrap_links: HashSet<ScrapKey> = scraps
             .iter()
-            .flat_map(|scrap| scrap.links.clone())
+            .flat_map(|scrap| scrap.links().to_vec())
             .collect();
         let scrap_self_keys: HashSet<ScrapKey> =
             scraps.iter().map(|scrap| scrap.self_key()).collect();

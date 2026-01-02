@@ -60,7 +60,7 @@ impl LookupScrapLinksUsecase {
 
         // Convert each link to LookupScrapLinksResult
         let results: Vec<LookupScrapLinksResult> = target_scrap
-            .links
+            .links()
             .iter()
             .filter_map(|link_key| {
                 // Find the linked scrap
@@ -72,7 +72,7 @@ impl LookupScrapLinksUsecase {
                     LookupScrapLinksResult {
                         title,
                         ctx,
-                        md_text: linked_scrap.md_text.clone(),
+                        md_text: linked_scrap.md_text().to_string(),
                     }
                 })
             })
