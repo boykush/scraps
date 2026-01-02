@@ -2,7 +2,8 @@
   "enabledPlugins": {
     "commit-commands@claude-code-plugins": true,
     "mcp-server@scraps-claude-code-plugins": true,
-    "scraps-writer@scraps-claude-code-plugins": true
+    "scraps-writer@scraps-claude-code-plugins": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
   },
   "hooks": {
     "PostToolUse": [
