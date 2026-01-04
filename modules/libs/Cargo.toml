@@ -17,6 +17,9 @@ pulldown-cmark = "=0.13.0"
 iso639_enum = "=0.6.0"
 fuzzy-matcher = { version = "=0.3.7", optional = true }
 
+[dev-dependencies]
+rstest.workspace = true
+
 [features]
 error = []
 git = []

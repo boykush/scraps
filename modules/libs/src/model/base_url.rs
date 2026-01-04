@@ -33,36 +33,17 @@ impl BaseUrl {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
 
-    #[test]
-    fn test_new_with_trailing_slash() {
-        let url = Url::parse("https://example.com/").unwrap();
-        let expected = url.clone();
+    #[rstest]
+    #[case::with_trailing_slash("https://example.com/", "https://example.com/")]
+    #[case::without_trailing_slash("https://example.com", "https://example.com/")]
+    #[case::path_with_trailing("https://example.com/path/", "https://example.com/path/")]
+    #[case::path_without_trailing("https://example.com/path", "https://example.com/path/")]
+    fn test_base_url_normalization(#[case] input: &str, #[case] expected: &str) {
+        let url = Url::parse(input).unwrap();
         let base_url = BaseUrl::new(url).unwrap();
-        assert_eq!(base_url.as_url(), &expected);
-    }
-
-    #[test]
-    fn test_new_without_trailing_slash() {
-        let url = Url::parse("https://example.com").unwrap();
-        let base_url = BaseUrl::new(url).unwrap();
-        let expected = Url::parse("https://example.com/").unwrap();
-        assert_eq!(base_url.as_url(), &expected);
-    }
-
-    #[test]
-    fn test_new_with_path_and_trailing_slash() {
-        let url = Url::parse("https://example.com/path/").unwrap();
-        let expected = url.clone();
-        let base_url = BaseUrl::new(url).unwrap();
-        assert_eq!(base_url.as_url(), &expected);
-    }
-
-    #[test]
-    fn test_new_with_path_without_trailing_slash() {
-        let url = Url::parse("https://example.com/path").unwrap();
-        let base_url = BaseUrl::new(url).unwrap();
-        let expected = Url::parse("https://example.com/path/").unwrap();
-        assert_eq!(base_url.as_url(), &expected);
+        let expected_url = Url::parse(expected).unwrap();
+        assert_eq!(base_url.as_url(), &expected_url);
     }
 }
