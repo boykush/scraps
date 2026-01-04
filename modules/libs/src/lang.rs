@@ -30,43 +30,33 @@ impl Default for LangCode {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
 
-    #[test]
-    fn test_from_str_valid_language_codes() {
-        let lang = "en".parse::<LangCode>().unwrap();
-        assert_eq!(lang.to_string(), "en");
-
-        let lang = "ja".parse::<LangCode>().unwrap();
-        assert_eq!(lang.to_string(), "ja");
+    #[rstest]
+    #[case::english("en", "en")]
+    #[case::japanese("ja", "ja")]
+    fn test_from_str_valid_language_codes(#[case] input: &str, #[case] expected: &str) {
+        let lang = input.parse::<LangCode>().unwrap();
+        assert_eq!(lang.to_string(), expected);
     }
 
-    #[test]
-    fn test_from_str_invalid_language_codes() {
-        let result = "invalid".parse::<LangCode>();
+    #[rstest]
+    #[case::invalid_name("invalid")]
+    #[case::invalid_code("zz")]
+    #[case::empty("")]
+    fn test_from_str_invalid_language_codes(#[case] input: &str) {
+        let result = input.parse::<LangCode>();
         assert!(result.is_err());
         assert!(result
             .unwrap_err()
-            .contains("Failed to parse language code 'invalid'"));
-
-        let result = "zz".parse::<LangCode>();
-        assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .contains("Failed to parse language code 'zz'"));
-
-        let result = "".parse::<LangCode>();
-        assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .contains("Failed to parse language code ''"));
+            .contains(&format!("Failed to parse language code '{}'", input)));
     }
 
-    #[test]
-    fn test_display_formatting() {
-        let lang = LangCode(Language::Eng);
-        assert_eq!(format!("{}", lang), "en");
-
-        let lang = LangCode(Language::Jpn);
-        assert_eq!(format!("{}", lang), "ja");
+    #[rstest]
+    #[case::english(Language::Eng, "en")]
+    #[case::japanese(Language::Jpn, "ja")]
+    fn test_display_formatting(#[case] lang: Language, #[case] expected: &str) {
+        let lang_code = LangCode(lang);
+        assert_eq!(format!("{}", lang_code), expected);
     }
 }

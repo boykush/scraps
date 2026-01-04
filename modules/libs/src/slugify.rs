@@ -43,54 +43,25 @@ pub fn by_dash(v: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
 
-    #[test]
-    fn it_by_dash() {
-        assert_eq!(by_dash("LOWER"), "lower".to_string());
-        assert_eq!(by_dash("space space"), "space-space".to_string());
-        assert_eq!(by_dash("LOWER space"), "lower-space".to_string());
-        assert_eq!(by_dash("日本語です"), "日本語です".to_string());
-        assert_eq!(by_dash("exists-slugify"), "exists-slugify".to_string());
-    }
-
-    #[test]
-    fn test_by_dash_multiple_spaces() {
-        assert_eq!(by_dash("Multiple   Spaces   Here"), "multiple-spaces-here");
-    }
-
-    #[test]
-    fn test_by_dash_leading_trailing_spaces() {
-        assert_eq!(by_dash("  Leading and Trailing  "), "leading-and-trailing");
-    }
-
-    #[test]
-    fn test_by_dash_special_chars_with_spaces() {
-        assert_eq!(by_dash("Hello, World!"), "hello-comma-world-exclamation");
-    }
-
-    #[test]
-    fn test_by_dash_mixed_special_chars() {
-        // "Hello/Context@Test" -> "hello-slash-context-at-test"
-        // But current implementation produces: "hello-slash-context-at-test"
-        assert_eq!(by_dash("Hello/Context@Test"), "hello-slash-context-at-test");
-    }
-
-    #[test]
-    fn test_by_dash_empty_string() {
-        assert_eq!(by_dash(""), "");
-    }
-
-    #[test]
-    fn test_by_dash_only_spaces() {
-        assert_eq!(by_dash("   "), "");
-    }
-
-    #[test]
-    fn test_by_dash_consecutive_special_chars() {
-        // "Hello!!  @@World" -> "hello-exclamation-exclamation-at-at-world"
-        assert_eq!(
-            by_dash("Hello!!  @@World"),
-            "hello-exclamation-exclamation-at-at-world"
-        );
+    #[rstest]
+    #[case::lowercase("LOWER", "lower")]
+    #[case::spaces("space space", "space-space")]
+    #[case::lowercase_and_spaces("LOWER space", "lower-space")]
+    #[case::japanese("日本語です", "日本語です")]
+    #[case::existing_slugify("exists-slugify", "exists-slugify")]
+    #[case::multiple_spaces("Multiple   Spaces   Here", "multiple-spaces-here")]
+    #[case::leading_trailing_spaces("  Leading and Trailing  ", "leading-and-trailing")]
+    #[case::special_chars_with_spaces("Hello, World!", "hello-comma-world-exclamation")]
+    #[case::mixed_special_chars("Hello/Context@Test", "hello-slash-context-at-test")]
+    #[case::empty("", "")]
+    #[case::only_spaces("   ", "")]
+    #[case::consecutive_special_chars(
+        "Hello!!  @@World",
+        "hello-exclamation-exclamation-at-at-world"
+    )]
+    fn test_by_dash(#[case] input: &str, #[case] expected: &str) {
+        assert_eq!(by_dash(input), expected);
     }
 }
