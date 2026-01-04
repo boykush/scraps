@@ -33,23 +33,23 @@ mod tests {
     use rstest::rstest;
 
     #[rstest]
-    #[case::english("en", "en")]
-    #[case::japanese("ja", "ja")]
-    fn test_from_str_valid_language_codes(#[case] input: &str, #[case] expected: &str) {
-        let lang = input.parse::<LangCode>().unwrap();
-        assert_eq!(lang.to_string(), expected);
-    }
-
-    #[rstest]
-    #[case::invalid_name("invalid")]
-    #[case::invalid_code("zz")]
-    #[case::empty("")]
-    fn test_from_str_invalid_language_codes(#[case] input: &str) {
+    #[case::english("en", Ok("en"))]
+    #[case::japanese("ja", Ok("ja"))]
+    #[case::invalid_name("invalid", Err("Failed to parse language code 'invalid'"))]
+    #[case::invalid_code("zz", Err("Failed to parse language code 'zz'"))]
+    #[case::empty("", Err("Failed to parse language code ''"))]
+    fn test_from_str(#[case] input: &str, #[case] expected: Result<&str, &str>) {
         let result = input.parse::<LangCode>();
-        assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .contains(&format!("Failed to parse language code '{}'", input)));
+        match expected {
+            Ok(expected_str) => {
+                let lang = result.unwrap();
+                assert_eq!(lang.to_string(), expected_str);
+            }
+            Err(expected_err) => {
+                assert!(result.is_err());
+                assert!(result.unwrap_err().contains(expected_err));
+            }
+        }
     }
 
     #[rstest]
