@@ -31,16 +31,17 @@ impl<GC: GitCommand> InitUsecase<GC> {
 
 #[cfg(test)]
 mod tests {
+    use crate::test_fixtures::SimpleTempDir;
     use scraps_libs::git::GitCommandImpl;
-    use std::path::PathBuf;
 
     use super::*;
 
     #[test]
     fn it_run() {
-        let git_command = GitCommandImpl::new();
-        let project_path = PathBuf::from("tests/resource/init/cmd/it_run");
+        let temp_dir = SimpleTempDir::new();
+        let project_path = temp_dir.path.join("project");
 
+        let git_command = GitCommandImpl::new();
         let usecase = InitUsecase::new(git_command);
 
         usecase.execute(&project_path).unwrap();
@@ -51,6 +52,6 @@ mod tests {
         assert!(project_path.join(".gitignore").exists());
         assert!(project_path.join(".git").exists());
 
-        fs::remove_dir_all(&project_path).unwrap()
+        // No manual cleanup needed - SimpleTempDir automatically cleans up
     }
 }

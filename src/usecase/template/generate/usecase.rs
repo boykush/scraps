@@ -32,17 +32,14 @@ impl GenerateUsecase {
 
 #[cfg(test)]
 mod tests {
-    use scraps_libs::tests::TestResources;
+    use crate::test_fixtures::TempScrapProject;
 
     use super::*;
     use std::fs;
 
     #[test]
     fn it_run_has_not_input_template_title() {
-        let test_resource_path =
-            PathBuf::from("tests/resource/generate/cmd/it_run_has_not_input_template_title");
-        let scraps_dir_path = test_resource_path.join("scraps");
-        let templates_dir_path = test_resource_path.join("templates");
+        let project = TempScrapProject::new();
 
         // run args
         let template_name = "it_render_from_template";
@@ -50,38 +47,24 @@ mod tests {
         let timezone = chrono_tz::Asia::Tokyo;
 
         // template
-        let template_md_path = templates_dir_path.join(format!("{template_name}.md"));
-
-        // scraps
-
-        let scraps_md_path = scraps_dir_path.join("test_title.md");
-
         let template_bytes =
             "+++\ntitle = \"test_title\"\n+++\n\n{{ \"2019-09-19T15:00:00.000Z\" | date(timezone=timezone) }}".as_bytes();
-        let mut test_resources = TestResources::new();
-        test_resources
-            .add_dir(&scraps_dir_path)
-            .add_file(&template_md_path, template_bytes);
+        project.add_template(&format!("{template_name}.md"), template_bytes);
 
-        test_resources.run(|| {
-            // run
-            let usecase = GenerateUsecase::new(&scraps_dir_path, &templates_dir_path);
-            usecase
-                .execute(template_name, template_title, &timezone)
-                .unwrap();
+        // run
+        let usecase = GenerateUsecase::new(&project.scraps_dir, &project.templates_dir);
+        usecase
+            .execute(template_name, template_title, &timezone)
+            .unwrap();
 
-            // assert
-            let result = fs::read_to_string(scraps_md_path);
-            assert_eq!(result.unwrap(), "\n2019-09-20")
-        });
+        // assert
+        let result = fs::read_to_string(project.scrap_path("test_title.md"));
+        assert_eq!(result.unwrap(), "\n2019-09-20")
     }
 
     #[test]
     fn it_run_has_input_template_title() {
-        let test_resource_path =
-            PathBuf::from("tests/resource/generate/cmd/it_run_has_input_template_title");
-        let scraps_dir_path = test_resource_path.join("scraps");
-        let templates_dir_path = test_resource_path.join("templates");
+        let project = TempScrapProject::new();
 
         // run args
         let template_name = "it_render_from_template";
@@ -89,30 +72,19 @@ mod tests {
         let timezone = chrono_tz::Asia::Tokyo;
 
         // template
-        let template_md_path = templates_dir_path.join(format!("{template_name}.md"));
-
-        // scraps
-
-        let scraps_md_path =
-            scraps_dir_path.join(format!("{}.md", template_title.as_ref().unwrap()));
-
         let template_bytes =
             "+++\ntitle = \"test_title\"\n+++\n\n{{ \"2019-09-19T15:00:00.000Z\" | date(timezone=timezone) }}".as_bytes();
-        let mut test_resources = TestResources::new();
-        test_resources
-            .add_dir(&scraps_dir_path)
-            .add_file(&template_md_path, template_bytes);
+        project.add_template(&format!("{template_name}.md"), template_bytes);
 
-        test_resources.run(|| {
-            // run
-            let usecase = GenerateUsecase::new(&scraps_dir_path, &templates_dir_path);
-            usecase
-                .execute(template_name, template_title, &timezone)
-                .unwrap();
+        // run
+        let usecase = GenerateUsecase::new(&project.scraps_dir, &project.templates_dir);
+        usecase
+            .execute(template_name, template_title, &timezone)
+            .unwrap();
 
-            // assert
-            let result = fs::read_to_string(scraps_md_path);
-            assert_eq!(result.unwrap(), "\n2019-09-20")
-        });
+        // assert
+        let scraps_md_path = format!("{}.md", template_title.as_ref().unwrap());
+        let result = fs::read_to_string(project.scrap_path(&scraps_md_path));
+        assert_eq!(result.unwrap(), "\n2019-09-20")
     }
 }

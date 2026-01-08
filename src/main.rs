@@ -4,6 +4,9 @@ mod mcp;
 mod service;
 mod usecase;
 
+#[cfg(test)]
+mod test_fixtures;
+
 use clap::Parser;
 use error::McpError;
 
