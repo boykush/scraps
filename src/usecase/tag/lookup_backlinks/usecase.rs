@@ -73,174 +73,132 @@ impl LookupTagBacklinksUsecase {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use scraps_libs::tests::TestResources;
-    use std::path::PathBuf;
+    use crate::test_fixtures::TempScrapProject;
 
     #[test]
     fn test_lookup_tag_backlinks_success() {
-        let test_resource_path =
-            PathBuf::from("tests/resource/tag/lookup_backlinks/test_lookup_tag_backlinks_success");
-        let scraps_dir_path = test_resource_path.join("scraps");
+        let project = TempScrapProject::new();
 
-        let md_path_1 = scraps_dir_path.join("scrap1.md");
-        let md_path_2 = scraps_dir_path.join("scrap2.md");
-        let md_path_3 = scraps_dir_path.join("scrap3.md");
+        project
+            .add_scrap("scrap1.md", b"# Scrap 1\n\nThis links to [[test_tag]].")
+            .add_scrap(
+                "scrap2.md",
+                b"# Scrap 2\n\nThis also links to [[test_tag]].",
+            )
+            .add_scrap("scrap3.md", b"# Scrap 3\n\nThis links to [[other_tag]].");
 
-        let mut resources = TestResources::new();
-        resources
-            .add_dir(&scraps_dir_path)
-            .add_file(&md_path_1, b"# Scrap 1\n\nThis links to [[test_tag]].")
-            .add_file(&md_path_2, b"# Scrap 2\n\nThis also links to [[test_tag]].")
-            .add_file(&md_path_3, b"# Scrap 3\n\nThis links to [[other_tag]].");
+        let usecase = LookupTagBacklinksUsecase::new(&project.scraps_dir);
 
-        resources.run(|| {
-            let usecase = LookupTagBacklinksUsecase::new(&scraps_dir_path);
+        let results = usecase
+            .execute(&Title::from("test_tag"))
+            .expect("Should succeed");
 
-            let results = usecase
-                .execute(&Title::from("test_tag"))
-                .expect("Should succeed");
+        assert_eq!(results.len(), 2);
 
-            assert_eq!(results.len(), 2);
-
-            // Check that we got the expected linking scraps
-            let titles: Vec<String> = results.iter().map(|r| r.title.to_string()).collect();
-            assert!(titles.contains(&"scrap1".to_string()));
-            assert!(titles.contains(&"scrap2".to_string()));
-            assert!(!titles.contains(&"scrap3".to_string()));
-        });
+        // Check that we got the expected linking scraps
+        let titles: Vec<String> = results.iter().map(|r| r.title.to_string()).collect();
+        assert!(titles.contains(&"scrap1".to_string()));
+        assert!(titles.contains(&"scrap2".to_string()));
+        assert!(!titles.contains(&"scrap3".to_string()));
     }
 
     #[test]
     fn test_lookup_tag_backlinks_with_context_scraps() {
-        let test_resource_path = PathBuf::from(
-            "tests/resource/tag/lookup_backlinks/test_lookup_tag_backlinks_with_context_scraps",
-        );
-        let scraps_dir_path = test_resource_path.join("scraps");
-        let context_dir_path = scraps_dir_path.join("Context");
+        let project = TempScrapProject::new();
 
-        let md_path_1 = scraps_dir_path.join("scrap1.md");
-        let md_path_2 = context_dir_path.join("scrap2.md");
+        project
+            .add_scrap("scrap1.md", b"# Scrap 1\n\nThis links to [[test_tag]].")
+            .add_scrap_with_context(
+                "Context",
+                "scrap2.md",
+                b"# Scrap 2\n\nThis also links to [[test_tag]].",
+            );
 
-        let mut resources = TestResources::new();
-        resources
-            .add_dir(&context_dir_path)
-            .add_file(&md_path_1, b"# Scrap 1\n\nThis links to [[test_tag]].")
-            .add_file(&md_path_2, b"# Scrap 2\n\nThis also links to [[test_tag]].");
+        let usecase = LookupTagBacklinksUsecase::new(&project.scraps_dir);
 
-        resources.run(|| {
-            let usecase = LookupTagBacklinksUsecase::new(&scraps_dir_path);
+        let results = usecase
+            .execute(&Title::from("test_tag"))
+            .expect("Should succeed");
 
-            let results = usecase
-                .execute(&Title::from("test_tag"))
-                .expect("Should succeed");
+        assert_eq!(results.len(), 2);
 
-            assert_eq!(results.len(), 2);
+        // Check that we got scraps from both root and context directory
+        let scrap_keys: Vec<(String, Option<String>)> = results
+            .iter()
+            .map(|r| (r.title.to_string(), r.ctx.as_ref().map(|c| c.to_string())))
+            .collect();
 
-            // Check that we got scraps from both root and context directory
-            let scrap_keys: Vec<(String, Option<String>)> = results
-                .iter()
-                .map(|r| (r.title.to_string(), r.ctx.as_ref().map(|c| c.to_string())))
-                .collect();
-
-            assert!(scrap_keys.contains(&("scrap1".to_string(), None)));
-            assert!(scrap_keys.contains(&("scrap2".to_string(), Some("Context".to_string()))));
-        });
+        assert!(scrap_keys.contains(&("scrap1".to_string(), None)));
+        assert!(scrap_keys.contains(&("scrap2".to_string(), Some("Context".to_string()))));
     }
 
     #[test]
     fn test_lookup_tag_backlinks_no_backlinks() {
-        let test_resource_path = PathBuf::from(
-            "tests/resource/tag/lookup_backlinks/test_lookup_tag_backlinks_no_backlinks",
-        );
-        let scraps_dir_path = test_resource_path.join("scraps");
+        let project = TempScrapProject::new();
 
-        let md_path_1 = scraps_dir_path.join("scrap1.md");
-
-        let mut resources = TestResources::new();
-        resources.add_dir(&scraps_dir_path).add_file(
-            &md_path_1,
+        project.add_scrap(
+            "scrap1.md",
             b"# Scrap 1\n\nThis scrap doesn't reference any tags.",
         );
 
-        resources.run(|| {
-            let usecase = LookupTagBacklinksUsecase::new(&scraps_dir_path);
+        let usecase = LookupTagBacklinksUsecase::new(&project.scraps_dir);
 
-            let results = usecase
-                .execute(&Title::from("nonexistent_tag"))
-                .expect("Should succeed");
+        let results = usecase
+            .execute(&Title::from("nonexistent_tag"))
+            .expect("Should succeed");
 
-            assert_eq!(results.len(), 0);
-        });
+        assert_eq!(results.len(), 0);
     }
 
     #[test]
     fn test_lookup_tag_backlinks_invalid_tag() {
-        let test_resource_path = PathBuf::from(
-            "tests/resource/tag/lookup_backlinks/test_lookup_tag_backlinks_invalid_tag",
-        );
-        let scraps_dir_path = test_resource_path.join("scraps");
+        let project = TempScrapProject::new();
 
-        let md_path_1 = scraps_dir_path.join("scrap1.md");
-        let md_path_2 = scraps_dir_path.join("scrap2.md");
-        let md_path_3 = scraps_dir_path.join("actual_scrap.md");
-
-        let mut resources = TestResources::new();
-        resources
-            .add_dir(&scraps_dir_path)
-            .add_file(&md_path_1, b"# Scrap 1\n\nThis links to [[actual_tag]].")
-            .add_file(&md_path_2, b"# Scrap 2\n\nThis links to [[actual_scrap]].")
-            .add_file(
-                &md_path_3,
+        project
+            .add_scrap("scrap1.md", b"# Scrap 1\n\nThis links to [[actual_tag]].")
+            .add_scrap("scrap2.md", b"# Scrap 2\n\nThis links to [[actual_scrap]].")
+            .add_scrap(
+                "actual_scrap.md",
                 b"# Actual Scrap\n\nThis is a regular scrap, not a tag.",
             );
 
-        resources.run(|| {
-            let usecase = LookupTagBacklinksUsecase::new(&scraps_dir_path);
+        let usecase = LookupTagBacklinksUsecase::new(&project.scraps_dir);
 
-            // Request backlinks for "actual_scrap" - this is a scrap title, not a tag
-            // Even though scrap2 links to it, it should return empty because it's not a tag
-            let results = usecase
-                .execute(&Title::from("actual_scrap"))
-                .expect("Should succeed");
+        // Request backlinks for "actual_scrap" - this is a scrap title, not a tag
+        // Even though scrap2 links to it, it should return empty because it's not a tag
+        let results = usecase
+            .execute(&Title::from("actual_scrap"))
+            .expect("Should succeed");
 
-            assert_eq!(
-                results.len(),
-                0,
-                "Should return empty results for non-tag titles"
-            );
+        assert_eq!(
+            results.len(),
+            0,
+            "Should return empty results for non-tag titles"
+        );
 
-            // Verify that actual tags still work
-            let tag_results = usecase
-                .execute(&Title::from("actual_tag"))
-                .expect("Should succeed");
+        // Verify that actual tags still work
+        let tag_results = usecase
+            .execute(&Title::from("actual_tag"))
+            .expect("Should succeed");
 
-            assert_eq!(
-                tag_results.len(),
-                1,
-                "Should return results for actual tags"
-            );
-            assert_eq!(tag_results[0].title.to_string(), "scrap1");
-        });
+        assert_eq!(
+            tag_results.len(),
+            1,
+            "Should return results for actual tags"
+        );
+        assert_eq!(tag_results[0].title.to_string(), "scrap1");
     }
 
     #[test]
     fn test_lookup_tag_backlinks_empty_scraps_directory() {
-        let test_resource_path = PathBuf::from(
-            "tests/resource/tag/lookup_backlinks/test_lookup_tag_backlinks_empty_scraps_directory",
-        );
-        let scraps_dir_path = test_resource_path.join("scraps");
+        let project = TempScrapProject::new();
 
-        let mut resources = TestResources::new();
-        resources.add_dir(&scraps_dir_path);
+        let usecase = LookupTagBacklinksUsecase::new(&project.scraps_dir);
 
-        resources.run(|| {
-            let usecase = LookupTagBacklinksUsecase::new(&scraps_dir_path);
+        let results = usecase
+            .execute(&Title::from("any_tag"))
+            .expect("Should succeed");
 
-            let results = usecase
-                .execute(&Title::from("any_tag"))
-                .expect("Should succeed");
-
-            assert_eq!(results.len(), 0);
-        });
+        assert_eq!(results.len(), 0);
     }
 }

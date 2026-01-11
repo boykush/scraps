@@ -1,6 +1,5 @@
 target
 public
-tests/resource
 
 # Playwright
 /tests/e2e/node_modules

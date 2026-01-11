@@ -45,7 +45,8 @@ Help us make Scraps more accessible by:
 
 Scraps maintains a comprehensive testing strategy with three main types of tests:
 - **Small Tests**: Fast tests for individual functions and methods
-- **Medium Tests**: Integration tests using TestResources for file system operations
+- **Medium Tests**: Integration tests using tempfile + rstest fixtures for file
+  system operations
 - **E2E Tests**: Large, browser-based end-to-end tests using Playwright
 - **Performance Tests**: Automated build time validation (≤ 3 seconds)
 
@@ -104,32 +105,37 @@ mise run cargo:test
 
 #### Writing Medium Tests
 
-Scraps uses a custom test helper system located in `modules/libs/src/tests.rs`. Here's how to write effective unit tests:
+Scraps uses tempfile + rstest fixtures for integration tests. The fixtures are
+defined in `src/test_fixtures.rs` and provide automatic cleanup:
 
 ```rust
 #[cfg(test)]
 mod tests {
     use super::*;
-    use scraps_libs::tests::TestResources;
-    use std::path::PathBuf;
+    use crate::test_fixtures::TempScrapProject;
 
     #[test]
     fn test_functionality() {
-        let mut resources = TestResources::new();
-        
-        // Setup test files and directories
-        resources
-            .add_file(&PathBuf::from("test.md"), b"# Test Content")
-            .add_dir(&PathBuf::from("output"));
-        
-        // Run test with automatic cleanup
-        resources.run(|| {
-            // Your test logic here
-            assert_eq!(expected, actual);
-        });
+        let project = TempScrapProject::new();
+
+        // Setup test files using builder pattern
+        project
+            .add_scrap("test.md", b"# Test Content")
+            .add_static_file("index.html", b"<html></html>");
+
+        // Your test logic here
+        assert_eq!(expected, actual);
+
+        // Automatic cleanup when project goes out of scope
     }
 }
 ```
+
+**Available Fixtures:**
+
+- `TempScrapProject`: Full project structure (scraps_dir, static_dir,
+  public_dir, templates_dir)
+- `SimpleTempDir`: Single temporary directory for simple tests
 
 ### E2E Tests
 

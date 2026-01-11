@@ -89,142 +89,115 @@ impl SearchUsecase {
 
 #[cfg(test)]
 mod tests {
+    use crate::test_fixtures::TempScrapProject;
+
     use super::*;
-    use scraps_libs::tests::TestResources;
     use url::Url;
 
     #[test]
     fn it_run() {
-        // fields
-        let test_resource_path = PathBuf::from("tests/resource/search/cmd/it_run");
-        let scraps_dir_path = test_resource_path.join("scraps");
-        let static_dir_path = test_resource_path.join("static");
+        let project = TempScrapProject::new();
 
-        // scrap1
-        let md_path_1 = scraps_dir_path.join("test1.md");
-        let resource_bytes_1 =
-            concat!("# Test Document 1\n", "This is a test document.",).as_bytes();
+        project
+            .add_scrap("test1.md", b"# Test Document 1\nThis is a test document.")
+            .add_scrap("test2.md", b"# Another Document\nAnother test content.");
 
-        // scrap2
-        let md_path_2 = scraps_dir_path.join("test2.md");
-        let resource_bytes_2 = concat!("# Another Document\n", "Another test content.").as_bytes();
+        let usecase = SearchUsecase::new(&project.scraps_dir);
+        let url = Url::parse("http://localhost:1112/").unwrap();
+        let base_url = BaseUrl::new(url).unwrap();
 
-        let mut test_resources = TestResources::new();
-        test_resources
-            .add_file(&md_path_1, resource_bytes_1)
-            .add_file(&md_path_2, resource_bytes_2)
-            .add_dir(&static_dir_path);
+        let results = usecase.execute(&base_url, "test", 100).unwrap();
 
-        test_resources.run(|| {
-            let usecase = SearchUsecase::new(&scraps_dir_path);
-            let url = Url::parse("http://localhost:1112/").unwrap();
-            let base_url = BaseUrl::new(url).unwrap();
-
-            let results = usecase.execute(&base_url, "test", 100).unwrap();
-
-            // Should find documents containing "test"
-            assert!(!results.is_empty());
-            assert!(results.iter().any(|r| r.title.to_string().contains("test")));
-            // Verify URLs are present
-            assert!(results.iter().all(|r| !r.url.is_empty()));
-            // Verify md_text is present
-            assert!(results.iter().all(|r| !r.md_text.is_empty()));
-        });
+        // Should find documents containing "test"
+        assert!(!results.is_empty());
+        assert!(results.iter().any(|r| r.title.to_string().contains("test")));
+        // Verify URLs are present
+        assert!(results.iter().all(|r| !r.url.is_empty()));
+        // Verify md_text is present
+        assert!(results.iter().all(|r| !r.md_text.is_empty()));
     }
 
     #[test]
     fn it_handles_duplicate_titles() {
-        // fields
-        let test_resource_path =
-            PathBuf::from("tests/resource/search/cmd/it_handles_duplicate_titles");
-        let scraps_dir_path = test_resource_path.join("scraps");
-        let static_dir_path = test_resource_path.join("static");
+        let project = TempScrapProject::new();
 
         // Two scraps with the same title but different contexts (ctx/ and root)
-        let ctx_dir = scraps_dir_path.join("ctx");
-        let md_path_1 = ctx_dir.join("duplicate.md"); // ctx/duplicate.md
-        let resource_bytes_1 = concat!("# Duplicate\n", "Content in ctx directory.").as_bytes();
+        project
+            .add_scrap_with_context(
+                "ctx",
+                "duplicate.md",
+                b"# Duplicate\nContent in ctx directory.",
+            )
+            .add_scrap("duplicate.md", b"# Duplicate\nContent in root directory.");
 
-        let md_path_2 = scraps_dir_path.join("duplicate.md"); // duplicate.md
-        let resource_bytes_2 = concat!("# Duplicate\n", "Content in root directory.").as_bytes();
+        let usecase = SearchUsecase::new(&project.scraps_dir);
+        let url = Url::parse("http://localhost:1112/").unwrap();
+        let base_url = BaseUrl::new(url).unwrap();
 
-        let mut test_resources = TestResources::new();
-        test_resources
-            .add_dir(&ctx_dir)
-            .add_file(&md_path_1, resource_bytes_1)
-            .add_file(&md_path_2, resource_bytes_2)
-            .add_dir(&static_dir_path);
+        let results = usecase.execute(&base_url, "duplicate", 100).unwrap();
 
-        test_resources.run(|| {
-            let usecase = SearchUsecase::new(&scraps_dir_path);
-            let url = Url::parse("http://localhost:1112/").unwrap();
-            let base_url = BaseUrl::new(url).unwrap();
+        // Should find both scraps with the same title but different contexts
+        assert_eq!(
+            results.len(),
+            2,
+            "Expected 2 results for duplicate titles with different contexts, got {}. \
+            This indicates the HashMap is overwriting duplicate titles.",
+            results.len()
+        );
 
-            let results = usecase.execute(&base_url, "duplicate", 100).unwrap();
+        // Verify URLs are different (pointing to different files)
+        let urls: std::collections::HashSet<String> =
+            results.iter().map(|r| r.url.clone()).collect();
+        assert_eq!(urls.len(), 2, "Expected 2 unique URLs, got {}", urls.len());
 
-            // Should find both scraps with the same title but different contexts
-            assert_eq!(
-                results.len(),
-                2,
-                "Expected 2 results for duplicate titles with different contexts, got {}. \
-                This indicates the HashMap is overwriting duplicate titles.",
-                results.len()
-            );
+        // Verify content is different
+        let md_texts: std::collections::HashSet<String> =
+            results.iter().map(|r| r.md_text.clone()).collect();
+        assert_eq!(
+            md_texts.len(),
+            2,
+            "Expected 2 unique content texts, got {}",
+            md_texts.len()
+        );
 
-            // Verify URLs are different (pointing to different files)
-            let urls: std::collections::HashSet<String> =
-                results.iter().map(|r| r.url.clone()).collect();
-            assert_eq!(urls.len(), 2, "Expected 2 unique URLs, got {}", urls.len());
+        // Verify ctx field separation works correctly
+        // One result should have ctx: Some("ctx"), the other should have ctx: None
+        let ctx_values: std::collections::HashSet<Option<String>> = results
+            .iter()
+            .map(|r| r.ctx.as_ref().map(|c| c.to_string()))
+            .collect();
+        assert_eq!(
+            ctx_values.len(),
+            2,
+            "Expected 2 different ctx values (Some and None), got {:?}",
+            ctx_values
+        );
 
-            // Verify content is different
-            let md_texts: std::collections::HashSet<String> =
-                results.iter().map(|r| r.md_text.clone()).collect();
-            assert_eq!(
-                md_texts.len(),
-                2,
-                "Expected 2 unique content texts, got {}",
-                md_texts.len()
-            );
+        // Verify that one result has ctx "ctx" and the other has None
+        assert!(
+            ctx_values.contains(&Some("ctx".to_string())),
+            "Expected one result to have ctx 'ctx', but found {:?}",
+            ctx_values
+        );
+        assert!(
+            ctx_values.contains(&None),
+            "Expected one result to have ctx None, but found {:?}",
+            ctx_values
+        );
 
-            // Verify ctx field separation works correctly
-            // One result should have ctx: Some("ctx"), the other should have ctx: None
-            let ctx_values: std::collections::HashSet<Option<String>> = results
-                .iter()
-                .map(|r| r.ctx.as_ref().map(|c| c.to_string()))
-                .collect();
-            assert_eq!(
-                ctx_values.len(),
-                2,
-                "Expected 2 different ctx values (Some and None), got {:?}",
-                ctx_values
-            );
-
-            // Verify that one result has ctx "ctx" and the other has None
-            assert!(
-                ctx_values.contains(&Some("ctx".to_string())),
-                "Expected one result to have ctx 'ctx', but found {:?}",
-                ctx_values
-            );
-            assert!(
-                ctx_values.contains(&None),
-                "Expected one result to have ctx None, but found {:?}",
-                ctx_values
-            );
-
-            // Verify that both results have the same title "Duplicate"
-            let titles: std::collections::HashSet<String> =
-                results.iter().map(|r| r.title.to_string()).collect();
-            assert_eq!(
-                titles.len(),
-                1,
-                "Expected all results to have the same title 'Duplicate', but got {:?}",
-                titles
-            );
-            assert!(
-                titles.contains("duplicate"),
-                "Expected title to be 'duplicate', but got {:?}",
-                titles
-            );
-        });
+        // Verify that both results have the same title "Duplicate"
+        let titles: std::collections::HashSet<String> =
+            results.iter().map(|r| r.title.to_string()).collect();
+        assert_eq!(
+            titles.len(),
+            1,
+            "Expected all results to have the same title 'Duplicate', but got {:?}",
+            titles
+        );
+        assert!(
+            titles.contains("duplicate"),
+            "Expected title to be 'duplicate', but got {:?}",
+            titles
+        );
     }
 }

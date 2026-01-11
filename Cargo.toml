@@ -38,6 +38,7 @@ clap-verbosity-flag = "=3.0.4"
 rmcp = { version = "=0.12.0", features = ["server"] }
 schemars = "=1.2.0"
 rstest = "=0.26.1"
+tempfile = "=3.14.0"
 
 [package]
 edition.workspace = true
@@ -89,5 +90,6 @@ schemars.workspace = true
 
 [dev-dependencies]
 scraps_libs.workspace = true
-scraps_libs.features = ["git_test", "test_supports"]
+scraps_libs.features = ["git_test"]
 rstest.workspace = true
+tempfile.workspace = true

@@ -193,29 +193,42 @@ impl BuildUsecase {
 #[cfg(test)]
 mod tests {
     use std::fs;
-    use std::path::Path;
 
+    use crate::test_fixtures::TempScrapProject;
     use crate::usecase::build::model::{color_scheme::ColorScheme, paging::Paging, sort::SortKey};
     use crate::usecase::progress::tests::ProgressTest;
 
     use super::*;
-    use scraps_libs::{git::tests::GitCommandTest, lang::LangCode, tests::TestResources};
+    use scraps_libs::{git::tests::GitCommandTest, lang::LangCode};
     use url::Url;
-
-    fn setup_usecase(test_resource_path: &Path) -> BuildUsecase {
-        let scraps_dir_path = test_resource_path.join("scraps");
-        let static_dir_path = test_resource_path.join("static");
-        let public_dir_path = test_resource_path.join("public");
-        BuildUsecase::new(&scraps_dir_path, &static_dir_path, &public_dir_path)
-    }
 
     #[test]
     fn it_run() {
-        // fields
-        let test_resource_path = PathBuf::from("tests/resource/build/cmd/it_run");
-        let usecase = setup_usecase(&test_resource_path);
+        let project = TempScrapProject::new();
 
-        // run args
+        // Create scraps
+        project
+            .add_scrap(
+                "test1.md",
+                concat!("# header1\n", "## header2\n",).as_bytes(),
+            )
+            .add_scrap("test2.md", "[[test1]]\n".as_bytes());
+
+        // Add non-markdown file (should be excluded)
+        std::fs::write(
+            project.scraps_dir.join("test3.txt"),
+            concat!("# header1\n", "## header2\n",).as_bytes(),
+        )
+        .unwrap();
+
+        // Add README.md (should not generate README.html)
+        std::fs::write(
+            project.scraps_dir.join("README.md"),
+            "# README\n".as_bytes(),
+        )
+        .unwrap();
+
+        // Run build
         let git_command = GitCommandTest::new();
         let progress = ProgressTest::new();
         let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
@@ -229,84 +242,66 @@ mod tests {
         let css_metadata = &CssMetadata::new(&ColorScheme::OsSetting);
         let list_view_configs = ListViewConfigs::new(&true, &SortKey::LinkedCount, &Paging::Not);
 
-        // scrap1
-        let md_path_1 = usecase.scraps_dir_path.join("test1.md");
-        let html_path_1 = usecase.public_dir_path.join("scraps/test1.html");
-        let resource_bytes_1 = concat!("# header1\n", "## header2\n",).as_bytes();
+        let usecase = BuildUsecase::new(
+            &project.scraps_dir,
+            &project.static_dir,
+            &project.public_dir,
+        );
+        let result1 = usecase
+            .execute(
+                git_command,
+                &progress,
+                &base_url,
+                timezone,
+                html_metadata,
+                css_metadata,
+                &list_view_configs,
+            )
+            .unwrap();
+        assert_eq!(result1, 2);
 
-        // scrap2
-        let md_path_2 = usecase.scraps_dir_path.join("test2.md");
-        let html_path_2 = usecase.public_dir_path.join("scraps/test2.html");
-        let resource_bytes_2 = concat!("[[test1]]\n").as_bytes();
+        // Verify scrap1 HTML generated
+        let result2 = fs::read_to_string(project.public_dir.join("scraps/test1.html")).unwrap();
+        assert!(!result2.is_empty());
 
-        // excluded not markdown file
-        let not_md_path = usecase.scraps_dir_path.join("test3.txt");
-        let not_exists_path = usecase.public_dir_path.join("scraps/test3.html");
-        let resource_bytes_3 = concat!("# header1\n", "## header2\n",).as_bytes();
+        // Verify scrap2 HTML generated
+        let result3 = fs::read_to_string(project.public_dir.join("scraps/test2.html")).unwrap();
+        assert!(!result3.is_empty());
 
-        // README.md
-        let readme_path = usecase.scraps_dir_path.join("README.md");
-        let readme_html_path = usecase.public_dir_path.join("README.html");
-        let resource_bytes_4 = concat!("# README\n").as_bytes();
+        // Verify non-markdown file excluded
+        let result4 = fs::read_to_string(project.public_dir.join("scraps/test3.html"));
+        assert!(result4.is_err());
 
-        // public
-        let html_path_3 = usecase.public_dir_path.join("index.html");
-        let css_path = usecase.public_dir_path.join("main.css");
-        let search_index_json_path = usecase.public_dir_path.join("search_index.json");
+        // Verify README.html not generated
+        let result5 = fs::read_to_string(project.public_dir.join("README.html"));
+        assert!(result5.is_err());
 
-        let mut test_resources = TestResources::new();
-        test_resources
-            .add_dir(&usecase.static_dir_path)
-            .add_file(&md_path_1, resource_bytes_1)
-            .add_file(&md_path_2, resource_bytes_2)
-            .add_file(&not_md_path, resource_bytes_3)
-            .add_file(&readme_path, resource_bytes_4);
+        // Verify index.html generated
+        let result6 = fs::read_to_string(project.public_dir.join("index.html")).unwrap();
+        assert!(!result6.is_empty());
 
-        test_resources.run(|| {
-            let result1 = usecase
-                .execute(
-                    git_command,
-                    &progress,
-                    &base_url,
-                    timezone,
-                    html_metadata,
-                    css_metadata,
-                    &list_view_configs,
-                )
-                .unwrap();
-            assert_eq!(result1, 2);
+        // Verify CSS generated
+        let result7 = fs::read_to_string(project.public_dir.join("main.css")).unwrap();
+        assert!(!result7.is_empty());
 
-            let result2 = fs::read_to_string(html_path_1).unwrap();
-            assert!(!result2.is_empty());
-
-            let result3 = fs::read_to_string(html_path_2).unwrap();
-            assert!(!result3.is_empty());
-
-            let result4 = fs::read_to_string(not_exists_path);
-            assert!(result4.is_err());
-
-            let result5 = fs::read_to_string(readme_html_path);
-            assert!(result5.is_err());
-
-            let result6 = fs::read_to_string(html_path_3).unwrap();
-            assert!(!result6.is_empty());
-
-            let result7 = fs::read_to_string(css_path).unwrap();
-            assert!(!result7.is_empty());
-
-            let result8 = fs::read_to_string(search_index_json_path).unwrap();
-            assert!(!result8.is_empty());
-        });
+        // Verify search index JSON generated
+        let result8 = fs::read_to_string(project.public_dir.join("search_index.json")).unwrap();
+        assert!(!result8.is_empty());
     }
 
     #[test]
     fn it_run_when_build_search_index_is_false() {
-        // fields
-        let test_resource_path =
-            PathBuf::from("tests/resource/build/cmd/it_run_when_build_search_index_is_false");
-        let usecase = setup_usecase(&test_resource_path);
+        let project = TempScrapProject::new();
 
-        // run args
+        // Create scraps
+        project
+            .add_scrap(
+                "test1.md",
+                concat!("# header1\n", "## header2\n",).as_bytes(),
+            )
+            .add_scrap("test2.md", "[[test1]]\n".as_bytes());
+
+        // Run build with search index disabled
         let git_command = GitCommandTest::new();
         let progress = ProgressTest::new();
         let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
@@ -320,39 +315,26 @@ mod tests {
         let css_metadata = &CssMetadata::new(&ColorScheme::OsSetting);
         let list_view_configs = ListViewConfigs::new(&false, &SortKey::LinkedCount, &Paging::Not);
 
-        // scrap1
-        let md_path_1 = usecase.scraps_dir_path.join("test1.md");
-        let resource_bytes_1 = concat!("# header1\n", "## header2\n",).as_bytes();
+        let usecase = BuildUsecase::new(
+            &project.scraps_dir,
+            &project.static_dir,
+            &project.public_dir,
+        );
+        let result1 = usecase
+            .execute(
+                git_command,
+                &progress,
+                &base_url,
+                timezone,
+                html_metadata,
+                css_metadata,
+                &list_view_configs,
+            )
+            .unwrap();
+        assert_eq!(result1, 2);
 
-        // scrap2
-        let md_path_2 = usecase.scraps_dir_path.join("test2.md");
-        let resource_bytes_2 = concat!("[[test1]]\n").as_bytes();
-
-        // public
-        let search_index_json_path = usecase.public_dir_path.join("search_index.json");
-
-        let mut test_resources = TestResources::new();
-        test_resources
-            .add_dir(&usecase.static_dir_path)
-            .add_file(&md_path_1, resource_bytes_1)
-            .add_file(&md_path_2, resource_bytes_2);
-
-        test_resources.run(|| {
-            let result1 = usecase
-                .execute(
-                    git_command,
-                    &progress,
-                    &base_url,
-                    timezone,
-                    html_metadata,
-                    css_metadata,
-                    &list_view_configs,
-                )
-                .unwrap();
-            assert_eq!(result1, 2);
-
-            let result2 = fs::read_to_string(search_index_json_path);
-            assert!(result2.is_err());
-        });
+        // Verify search index JSON not generated
+        let result2 = fs::read_to_string(project.public_dir.join("search_index.json"));
+        assert!(result2.is_err());
     }
 }

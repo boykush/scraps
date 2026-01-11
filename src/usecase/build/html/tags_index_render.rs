@@ -68,7 +68,8 @@ impl TagsIndexRender {
 
 #[cfg(test)]
 mod tests {
-    use scraps_libs::{lang::LangCode, model::base_url::BaseUrl, tests::TestResources};
+    use crate::test_fixtures::TempScrapProject;
+    use scraps_libs::{lang::LangCode, model::base_url::BaseUrl};
     use std::fs;
     use url::Url;
 
@@ -76,7 +77,14 @@ mod tests {
 
     #[test]
     fn it_run() {
-        // args
+        let project = TempScrapProject::new();
+
+        // Add static tags_index.html template
+        project.add_static_file(
+            "tags_index.html",
+            b"{% for tag in tags %}<a href=\"./{{ tag.title }}.html\">{{ tag.title }}</a>{% endfor %}"
+        );
+
         let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let metadata = HtmlMetadata::new(
             &LangCode::default(),
@@ -85,36 +93,18 @@ mod tests {
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
 
-        let test_resource_path =
-            PathBuf::from("tests/resource/build/html/render/it_render_tags_index_html_1");
-        let static_dir_path = test_resource_path.join("static");
-        let public_dir_path = test_resource_path.join("public");
-
-        // static
-        let template_html_path = static_dir_path.join("tags_index.html");
-        let resource_template_html_byte =
-        "{% for tag in tags %}<a href=\"./{{ tag.title }}.html\">{{ tag.title }}</a>{% endfor %}"
-        .as_bytes();
-
         // scraps
         let scrap1 = Scrap::new("scrap1", &None, "[[tag1]][[tag2]]");
         let scrap2 = Scrap::new("scrap2", &None, "[[tag1]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
-        let index_html_path = public_dir_path.join("tags/index.html");
+        let render = TagsIndexRender::new(&project.static_dir, &project.public_dir).unwrap();
+        render.run(&base_url, &metadata, &scraps).unwrap();
 
-        let mut test_resources = TestResources::new();
-        test_resources.add_file(&template_html_path, resource_template_html_byte);
-
-        test_resources.run(|| {
-            let render = TagsIndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            render.run(&base_url, &metadata, &scraps).unwrap();
-
-            let result1 = fs::read_to_string(index_html_path).unwrap();
-            assert_eq!(
-                result1,
-                "<a href=\"./tag1.html\">tag1</a><a href=\"./tag2.html\">tag2</a>"
-            );
-        })
+        let result1 = fs::read_to_string(project.public_dir.join("tags/index.html")).unwrap();
+        assert_eq!(
+            result1,
+            "<a href=\"./tag1.html\">tag1</a><a href=\"./tag2.html\">tag2</a>"
+        );
     }
 }

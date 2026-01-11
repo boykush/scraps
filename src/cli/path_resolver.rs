@@ -80,7 +80,7 @@ impl PathResolver {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use scraps_libs::tests::TestResources;
+    use crate::test_fixtures::SimpleTempDir;
     use std::env;
 
     #[test]
@@ -93,18 +93,15 @@ mod tests {
 
     #[test]
     fn test_new_with_specified_path() {
-        let mut resources = TestResources::new();
-        let test_project_dir = PathBuf::from("test_project_new");
-        resources.add_dir(&test_project_dir);
+        let temp_dir = SimpleTempDir::new();
+        temp_dir.add_dir("test_project_new");
 
-        resources.run(|| {
-            let absolute_test_dir = env::current_dir().unwrap().join(&test_project_dir);
-            let resolver = PathResolver::new(Some(&absolute_test_dir)).unwrap();
-            assert_eq!(
-                resolver.project_root().file_name().unwrap(),
-                "test_project_new"
-            );
-        });
+        let test_project_path = temp_dir.path.join("test_project_new");
+        let resolver = PathResolver::new(Some(&test_project_path)).unwrap();
+        assert_eq!(
+            resolver.project_root().file_name().unwrap(),
+            "test_project_new"
+        );
     }
 
     #[test]
@@ -116,35 +113,29 @@ mod tests {
 
     #[test]
     fn test_scraps_dir_path_default() {
-        let mut resources = TestResources::new();
-        let test_project_dir = PathBuf::from("test_project_scraps");
-        resources.add_dir(&test_project_dir);
-        resources.add_file(
-            &test_project_dir.join("Config.toml"),
+        let temp_dir = SimpleTempDir::new();
+        temp_dir.add_dir("test_project_scraps").add_file(
+            "test_project_scraps/Config.toml",
             br#"
 title = "Test"
 base_url = "http://example.com/"
 "#,
         );
 
-        resources.run(|| {
-            let absolute_test_dir = env::current_dir().unwrap().join(&test_project_dir);
-            let resolver = PathResolver::new(Some(&absolute_test_dir)).unwrap();
-            let config = ScrapConfig::from_path(Some(&absolute_test_dir)).unwrap();
+        let test_project_path = temp_dir.path.join("test_project_scraps");
+        let resolver = PathResolver::new(Some(&test_project_path)).unwrap();
+        let config = ScrapConfig::from_path(Some(&test_project_path)).unwrap();
 
-            let scraps_dir = resolver.scraps_dir(&config);
-            assert_eq!(scraps_dir.file_name().unwrap(), "scraps");
-            assert!(scraps_dir.starts_with(&absolute_test_dir));
-        });
+        let scraps_dir = resolver.scraps_dir(&config);
+        assert_eq!(scraps_dir.file_name().unwrap(), "scraps");
+        assert!(scraps_dir.starts_with(&test_project_path));
     }
 
     #[test]
     fn test_scraps_dir_path_custom() {
-        let mut resources = TestResources::new();
-        let test_project_dir = PathBuf::from("test_project_scraps_custom");
-        resources.add_dir(&test_project_dir);
-        resources.add_file(
-            &test_project_dir.join("Config.toml"),
+        let temp_dir = SimpleTempDir::new();
+        temp_dir.add_dir("test_project_scraps_custom").add_file(
+            "test_project_scraps_custom/Config.toml",
             br#"
 title = "Test"
 base_url = "http://example.com/"
@@ -152,74 +143,60 @@ scraps_dir = "custom_docs"
 "#,
         );
 
-        resources.run(|| {
-            let absolute_test_dir = env::current_dir().unwrap().join(&test_project_dir);
-            let resolver = PathResolver::new(Some(&absolute_test_dir)).unwrap();
-            let config = ScrapConfig::from_path(Some(&absolute_test_dir)).unwrap();
+        let test_project_path = temp_dir.path.join("test_project_scraps_custom");
+        let resolver = PathResolver::new(Some(&test_project_path)).unwrap();
+        let config = ScrapConfig::from_path(Some(&test_project_path)).unwrap();
 
-            let scraps_dir = resolver.scraps_dir(&config);
-            assert_eq!(scraps_dir.file_name().unwrap(), "custom_docs");
-            assert!(scraps_dir.starts_with(&absolute_test_dir));
-        });
+        let scraps_dir = resolver.scraps_dir(&config);
+        assert_eq!(scraps_dir.file_name().unwrap(), "custom_docs");
+        assert!(scraps_dir.starts_with(&test_project_path));
     }
 
     #[test]
     fn test_static_dir_path() {
-        let mut resources = TestResources::new();
-        let test_project_dir = PathBuf::from("test_project_static");
-        resources.add_dir(&test_project_dir);
+        let temp_dir = SimpleTempDir::new();
+        temp_dir.add_dir("test_project_static");
 
-        resources.run(|| {
-            let absolute_test_dir = env::current_dir().unwrap().join(&test_project_dir);
-            let resolver = PathResolver::new(Some(&absolute_test_dir)).unwrap();
-            let static_dir = resolver.static_dir();
-            assert_eq!(static_dir.file_name().unwrap(), "static");
-            assert!(static_dir.starts_with(&absolute_test_dir));
-        });
+        let test_project_path = temp_dir.path.join("test_project_static");
+        let resolver = PathResolver::new(Some(&test_project_path)).unwrap();
+        let static_dir = resolver.static_dir();
+        assert_eq!(static_dir.file_name().unwrap(), "static");
+        assert!(static_dir.starts_with(&test_project_path));
     }
 
     #[test]
     fn test_public_dir_path() {
-        let mut resources = TestResources::new();
-        let test_project_dir = PathBuf::from("test_project_public");
-        resources.add_dir(&test_project_dir);
+        let temp_dir = SimpleTempDir::new();
+        temp_dir.add_dir("test_project_public");
 
-        resources.run(|| {
-            let absolute_test_dir = env::current_dir().unwrap().join(&test_project_dir);
-            let resolver = PathResolver::new(Some(&absolute_test_dir)).unwrap();
-            let public_dir = resolver.public_dir();
-            assert_eq!(public_dir.file_name().unwrap(), "public");
-            assert!(public_dir.starts_with(&absolute_test_dir));
-        });
+        let test_project_path = temp_dir.path.join("test_project_public");
+        let resolver = PathResolver::new(Some(&test_project_path)).unwrap();
+        let public_dir = resolver.public_dir();
+        assert_eq!(public_dir.file_name().unwrap(), "public");
+        assert!(public_dir.starts_with(&test_project_path));
     }
 
     #[test]
     fn test_templates_dir_path() {
-        let mut resources = TestResources::new();
-        let test_project_dir = PathBuf::from("test_project_templates");
-        resources.add_dir(&test_project_dir);
+        let temp_dir = SimpleTempDir::new();
+        temp_dir.add_dir("test_project_templates");
 
-        resources.run(|| {
-            let absolute_test_dir = env::current_dir().unwrap().join(&test_project_dir);
-            let resolver = PathResolver::new(Some(&absolute_test_dir)).unwrap();
-            let templates_dir = resolver.templates_dir();
-            assert_eq!(templates_dir.file_name().unwrap(), "templates");
-            assert!(templates_dir.starts_with(&absolute_test_dir));
-        });
+        let test_project_path = temp_dir.path.join("test_project_templates");
+        let resolver = PathResolver::new(Some(&test_project_path)).unwrap();
+        let templates_dir = resolver.templates_dir();
+        assert_eq!(templates_dir.file_name().unwrap(), "templates");
+        assert!(templates_dir.starts_with(&test_project_path));
     }
 
     #[test]
     fn test_config_path() {
-        let mut resources = TestResources::new();
-        let test_project_dir = PathBuf::from("test_project_config");
-        resources.add_dir(&test_project_dir);
+        let temp_dir = SimpleTempDir::new();
+        temp_dir.add_dir("test_project_config");
 
-        resources.run(|| {
-            let absolute_test_dir = env::current_dir().unwrap().join(&test_project_dir);
-            let resolver = PathResolver::new(Some(&absolute_test_dir)).unwrap();
-            let config_path = resolver.config_path();
-            assert_eq!(config_path.file_name().unwrap(), "Config.toml");
-            assert!(config_path.starts_with(&absolute_test_dir));
-        });
+        let test_project_path = temp_dir.path.join("test_project_config");
+        let resolver = PathResolver::new(Some(&test_project_path)).unwrap();
+        let config_path = resolver.config_path();
+        assert_eq!(config_path.file_name().unwrap(), "Config.toml");
+        assert!(config_path.starts_with(&test_project_path));
     }
 }

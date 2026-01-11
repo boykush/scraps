@@ -10,5 +10,3 @@ pub mod model;
 pub mod search;
 #[cfg(feature = "slugify")]
 pub mod slugify;
-#[cfg(feature = "test_supports")]
-pub mod tests;
