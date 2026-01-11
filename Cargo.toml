@@ -90,6 +90,6 @@ schemars.workspace = true
 
 [dev-dependencies]
 scraps_libs.workspace = true
-scraps_libs.features = ["git_test", "test_supports"]
+scraps_libs.features = ["git_test"]
 rstest.workspace = true
 tempfile.workspace = true
