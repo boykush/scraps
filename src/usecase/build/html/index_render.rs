@@ -160,6 +160,7 @@ impl IndexRender {
 
 #[cfg(test)]
 mod tests {
+    use crate::test_fixtures::TempScrapProject;
     use std::fs;
     use url::Url;
 
@@ -169,11 +170,17 @@ mod tests {
     use crate::usecase::build::model::sort::SortKey;
     use scraps_libs::lang::LangCode;
     use scraps_libs::model::scrap::Scrap;
-    use scraps_libs::tests::TestResources;
 
     #[test]
     fn it_run() {
-        // args
+        let project = TempScrapProject::new();
+
+        // Add static index.html template
+        project.add_static_file(
+            "index.html",
+            b"{{ build_search_index }}{% for scrap in scraps %}<a href=\"./{{ scrap.title }}.html\">{{ scrap.title }}</a>{% endfor %}"
+        );
+
         let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let metadata = HtmlMetadata::new(
             &LangCode::default(),
@@ -183,18 +190,6 @@ mod tests {
         );
         let list_view_configs =
             ListViewConfigs::new(&true, &SortKey::CommittedDate, &Paging::By(2));
-
-        let test_resource_path =
-            PathBuf::from("tests/resource/build/html/render/it_render_index_html_1");
-        let static_dir_path = test_resource_path.join("static");
-        let public_dir_path = test_resource_path.join("public");
-
-        // static
-        let template_html_path = static_dir_path.join("index.html");
-
-        let resource_template_html_byte =
-        "{{ build_search_index }}{% for scrap in scraps %}<a href=\"./{{ scrap.title }}.html\">{{ scrap.title }}</a>{% endfor %}"
-        .as_bytes();
 
         // scraps
         let scrap1 = Scrap::new("scrap1", &None, "# header1");
@@ -203,34 +198,34 @@ mod tests {
         let sc2 = ScrapDetail::new(&scrap2, &Some(0), base_url);
         let scrap_details = ScrapDetails::new(&vec![sc1.to_owned(), sc2.to_owned()]);
 
-        let index_html_path = public_dir_path.join("index.html");
+        let render = IndexRender::new(&project.static_dir, &project.public_dir).unwrap();
+        render
+            .run(
+                base_url,
+                &metadata,
+                &list_view_configs,
+                &scrap_details,
+                &None,
+            )
+            .unwrap();
 
-        let mut test_resources = TestResources::new();
-        test_resources.add_file(&template_html_path, resource_template_html_byte);
-
-        test_resources.run(|| {
-            let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            render
-                .run(
-                    base_url,
-                    &metadata,
-                    &list_view_configs,
-                    &scrap_details,
-                    &None,
-                )
-                .unwrap();
-
-            let result = fs::read_to_string(index_html_path).unwrap();
-            assert_eq!(
-                result,
-                "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
-            );
-        });
+        let result = fs::read_to_string(project.public_dir.join("index.html")).unwrap();
+        assert_eq!(
+            result,
+            "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
+        );
     }
 
     #[test]
     fn it_run_paging() {
-        // args
+        let project = TempScrapProject::new();
+
+        // Add static index.html template
+        project.add_static_file(
+            "index.html",
+            b"{{ build_search_index }}{% for scrap in scraps %}<a href=\"./{{ scrap.title }}.html\">{{ scrap.title }}</a>{% endfor %}"
+        );
+
         let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let metadata = HtmlMetadata::new(
             &LangCode::default(),
@@ -240,18 +235,6 @@ mod tests {
         );
         let list_view_configs =
             ListViewConfigs::new(&true, &SortKey::CommittedDate, &Paging::By(2));
-
-        let test_resource_path =
-            PathBuf::from("tests/resource/build/html/render/it_render_index_html_2");
-        let static_dir_path = test_resource_path.join("static");
-        let public_dir_path = test_resource_path.join("public");
-
-        // static
-        let template_html_path = static_dir_path.join("index.html");
-
-        let resource_template_html_byte =
-        "{{ build_search_index }}{% for scrap in scraps %}<a href=\"./{{ scrap.title }}.html\">{{ scrap.title }}</a>{% endfor %}"
-        .as_bytes();
 
         // scraps
         let scrap1 = Scrap::new("scrap1", &None, "# header1");
@@ -269,36 +252,28 @@ mod tests {
             sc4.to_owned(),
         ]);
 
-        let index_html_path = public_dir_path.join("index.html");
-        let page2_html_path = public_dir_path.join("2.html");
+        let render = IndexRender::new(&project.static_dir, &project.public_dir).unwrap();
+        let readme_content: Option<Content> = None;
+        render
+            .run(
+                base_url,
+                &metadata,
+                &list_view_configs,
+                &scrap_details,
+                &readme_content,
+            )
+            .unwrap();
 
-        let mut test_resources = TestResources::new();
-        test_resources.add_file(&template_html_path, resource_template_html_byte);
+        let index_result = fs::read_to_string(project.public_dir.join("index.html")).unwrap();
+        assert_eq!(
+            index_result,
+            "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
+        );
 
-        test_resources.run(|| {
-            let render = IndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            let readme_content: Option<Content> = None;
-            render
-                .run(
-                    base_url,
-                    &metadata,
-                    &list_view_configs,
-                    &scrap_details,
-                    &readme_content,
-                )
-                .unwrap();
-
-            let index_result = fs::read_to_string(index_html_path).unwrap();
-            assert_eq!(
-                index_result,
-                "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
-            );
-
-            let page2_result = fs::read_to_string(page2_html_path).unwrap();
-            assert_eq!(
-                page2_result,
-                "true<a href=\"./scrap3.html\">scrap3</a><a href=\"./scrap4.html\">scrap4</a>"
-            );
-        });
+        let page2_result = fs::read_to_string(project.public_dir.join("2.html")).unwrap();
+        assert_eq!(
+            page2_result,
+            "true<a href=\"./scrap3.html\">scrap3</a><a href=\"./scrap4.html\">scrap4</a>"
+        );
     }
 }
