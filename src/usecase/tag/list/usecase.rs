@@ -31,80 +31,66 @@ impl ListTagUsecase {
 
 #[cfg(test)]
 mod tests {
-
+    use crate::test_fixtures::TempScrapProject;
     use itertools::Itertools;
 
     use super::*;
     use scraps_libs::model::tag::Tag;
-    use scraps_libs::tests::TestResources;
 
     #[test]
     fn it_run() {
-        // fields
-        let test_resource_path = PathBuf::from("tests/resource/tag/cmd/it_run");
-        let scraps_dir_path = test_resource_path.join("scraps");
+        let project = TempScrapProject::new();
 
-        // scrap1
-        let md_path_1 = scraps_dir_path.join("test1.md");
-        let resource_bytes_1 = concat!("#[[Tag1]] #[[Tag2]]",).as_bytes();
+        project
+            .add_scrap("test1.md", b"#[[Tag1]] #[[Tag2]]")
+            .add_scrap("test2.md", b"#[[Tag1]] #[[Tag3]]");
 
-        // scrap2
-        let md_path_2 = scraps_dir_path.join("test2.md");
-        let resource_bytes_2 = concat!("#[[Tag1]] #[[Tag3]]").as_bytes();
+        let usecase = ListTagUsecase::new(&project.scraps_dir);
 
-        let mut test_resources = TestResources::new();
-        test_resources
-            .add_file(&md_path_1, resource_bytes_1)
-            .add_file(&md_path_2, resource_bytes_2);
+        let result = usecase.execute().unwrap();
 
-        test_resources.run(|| {
-            let usecase = ListTagUsecase::new(&scraps_dir_path);
+        let (tags, backlinks_map) = result;
 
-            let result = usecase.execute().unwrap();
+        // test tags
+        let tag1: Tag = "Tag1".into();
+        let tag2: Tag = "Tag2".into();
+        let tag3: Tag = "Tag3".into();
+        assert_eq!(tags.clone().into_iter().len(), 3);
+        assert_eq!(
+            tags.clone()
+                .into_iter()
+                .sorted_by_key(|t| t.title().to_string())
+                .collect_vec(),
+            vec![tag1.clone(), tag2.clone(), tag3.clone(),]
+        );
 
-            let (tags, backlinks_map) = result;
-
-            // test tags
-            let tag1: Tag = "Tag1".into();
-            let tag2: Tag = "Tag2".into();
-            let tag3: Tag = "Tag3".into();
-            assert_eq!(tags.clone().into_iter().len(), 3);
-            assert_eq!(
-                tags.clone()
-                    .into_iter()
-                    .sorted_by_key(|t| t.title().to_string())
-                    .collect_vec(),
-                vec![tag1.clone(), tag2.clone(), tag3.clone(),]
-            );
-
-            // test backlinks map
-            let scrap1 = Scrap::new("test1", &None, "#[[Tag1]] #[[Tag2]]");
-            let scrap2 = Scrap::new("test2", &None, "#[[Tag1]] #[[Tag3]]");
-            assert_eq!(
-                backlinks_map
-                    .get(&tag1.title().clone().into())
-                    .into_iter()
-                    .map(|s| s.title().clone())
-                    .sorted_by_key(|t| t.to_string())
-                    .collect_vec(),
-                vec![scrap1.title().clone(), scrap2.title().clone()]
-            );
-            assert_eq!(
-                backlinks_map
-                    .get(&tag2.title().clone().into())
-                    .into_iter()
-                    .map(|s| s.title().clone())
-                    .collect_vec(),
-                vec![scrap1.title().clone()]
-            );
-            assert_eq!(
-                backlinks_map
-                    .get(&tag3.title().clone().into())
-                    .into_iter()
-                    .map(|s| s.title().clone())
-                    .collect_vec(),
-                vec![scrap2.title().clone()]
-            );
-        });
+        // test backlinks map
+        let scrap1 = Scrap::new("test1", &None, "#[[Tag1]] #[[Tag2]]");
+        let scrap2 = Scrap::new("test2", &None, "#[[Tag1]] #[[Tag3]]");
+        assert_eq!(
+            backlinks_map
+                .get(&tag1.title().clone().into())
+                .into_iter()
+                .map(|s| s.title().clone())
+                .sorted_by_key(|t| t.to_string())
+                .collect_vec(),
+            vec![scrap1.title().clone(), scrap2.title().clone()]
+        );
+        assert_eq!(
+            backlinks_map
+                .get(&tag2.title().clone().into())
+                .into_iter()
+                .map(|s| s.title().clone())
+                .collect_vec(),
+            vec![scrap1.title().clone()]
+        );
+        assert_eq!(
+            backlinks_map
+                .get(&tag3.title().clone().into())
+                .into_iter()
+                .map(|s| s.title().clone())
+                .collect_vec(),
+            vec![scrap2.title().clone()]
+        );
     }
 }
