@@ -56,49 +56,36 @@ impl SearchIndexRender {
 
 #[cfg(test)]
 mod tests {
+    use crate::test_fixtures::TempScrapProject;
     use std::fs;
     use url::Url;
 
     use super::*;
     use scraps_libs::model::scrap::Scrap;
-    use scraps_libs::tests::TestResources;
 
     #[test]
     fn it_run() {
-        // args
+        let project = TempScrapProject::new();
+
+        // Add static search_index.json template
+        project.add_static_file(
+            "search_index.json",
+            b"[{% for scrap in scraps %}{ \"title\": \"{{ scrap.link_title }}\", \"url\": \"{{ base_url}}scraps/{{ scrap.file_stem }}.html\" }{% if not loop.last %},{% endif %}{% endfor %}]"
+        );
+
         let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
 
-        let test_resource_path =
-            PathBuf::from("tests/resource/build/json/render/it_render_search_index_json");
-        let static_dir_path = test_resource_path.join("static");
-        let public_dir_path = test_resource_path.join("public");
-
-        // static
-        let template_json_path = static_dir_path.join("search_index.json");
-        let resource_template_json_byte =
-        "[{% for scrap in scraps %}{ \"title\": \"{{ scrap.link_title }}\", \"url\": \"{{ base_url}}scraps/{{ scrap.file_stem }}.html\" }{% if not loop.last %},{% endif %}{% endfor %}]"
-        .as_bytes();
-
-        // scraps
+        // Create scraps
         let sc1 = Scrap::new("scrap1", &None, "# header1");
         let sc2 = Scrap::new("scrap2", &Some("Context"), "## header2");
         let scraps = vec![sc1, sc2];
 
-        let search_index_json_path = public_dir_path.join("search_index.json");
+        let render = SearchIndexRender::new(&project.static_dir, &project.public_dir).unwrap();
+        render.run(&base_url, &scraps).unwrap();
 
-        let mut test_resources = TestResources::new();
-        test_resources
-            .add_file(&template_json_path, resource_template_json_byte)
-            .add_dir(&public_dir_path);
-
-        test_resources.run(|| {
-            let render = SearchIndexRender::new(&static_dir_path, &public_dir_path).unwrap();
-            render.run(&base_url, &scraps).unwrap();
-
-            let result = fs::read_to_string(search_index_json_path).unwrap();
-            assert_eq!(
-                result,
-                "[{ \"title\": \"scrap1\", \"url\": \"http://localhost:1112/scraps/scrap1.html\" },{ \"title\": \"Context/scrap2\", \"url\": \"http://localhost:1112/scraps/scrap2.context.html\" }]");
-        });
+        let result = fs::read_to_string(project.public_dir.join("search_index.json")).unwrap();
+        assert_eq!(
+            result,
+            "[{ \"title\": \"scrap1\", \"url\": \"http://localhost:1112/scraps/scrap1.html\" },{ \"title\": \"Context/scrap2\", \"url\": \"http://localhost:1112/scraps/scrap2.context.html\" }]");
     }
 }
