@@ -58,7 +58,7 @@ mod tests {
         let render = CSSRender::new(&project.static_dir, &project.public_dir);
         render.render_main(css_metadata).unwrap();
 
-        let result = fs::read_to_string(project.public_dir.join("main.css")).unwrap();
+        let result = fs::read_to_string(project.public_path("main.css")).unwrap();
         assert_eq!(result, ":root { color-scheme: light dark;}");
     }
 }

@@ -261,31 +261,31 @@ mod tests {
         assert_eq!(result1, 2);
 
         // Verify scrap1 HTML generated
-        let result2 = fs::read_to_string(project.public_dir.join("scraps/test1.html")).unwrap();
+        let result2 = fs::read_to_string(project.public_path("scraps/test1.html")).unwrap();
         assert!(!result2.is_empty());
 
         // Verify scrap2 HTML generated
-        let result3 = fs::read_to_string(project.public_dir.join("scraps/test2.html")).unwrap();
+        let result3 = fs::read_to_string(project.public_path("scraps/test2.html")).unwrap();
         assert!(!result3.is_empty());
 
         // Verify non-markdown file excluded
-        let result4 = fs::read_to_string(project.public_dir.join("scraps/test3.html"));
+        let result4 = fs::read_to_string(project.public_path("scraps/test3.html"));
         assert!(result4.is_err());
 
         // Verify README.html not generated
-        let result5 = fs::read_to_string(project.public_dir.join("README.html"));
+        let result5 = fs::read_to_string(project.public_path("README.html"));
         assert!(result5.is_err());
 
         // Verify index.html generated
-        let result6 = fs::read_to_string(project.public_dir.join("index.html")).unwrap();
+        let result6 = fs::read_to_string(project.public_path("index.html")).unwrap();
         assert!(!result6.is_empty());
 
         // Verify CSS generated
-        let result7 = fs::read_to_string(project.public_dir.join("main.css")).unwrap();
+        let result7 = fs::read_to_string(project.public_path("main.css")).unwrap();
         assert!(!result7.is_empty());
 
         // Verify search index JSON generated
-        let result8 = fs::read_to_string(project.public_dir.join("search_index.json")).unwrap();
+        let result8 = fs::read_to_string(project.public_path("search_index.json")).unwrap();
         assert!(!result8.is_empty());
     }
 
@@ -334,7 +334,7 @@ mod tests {
         assert_eq!(result1, 2);
 
         // Verify search index JSON not generated
-        let result2 = fs::read_to_string(project.public_dir.join("search_index.json"));
+        let result2 = fs::read_to_string(project.public_path("search_index.json"));
         assert!(result2.is_err());
     }
 }

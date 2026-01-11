@@ -209,7 +209,7 @@ mod tests {
             )
             .unwrap();
 
-        let result = fs::read_to_string(project.public_dir.join("index.html")).unwrap();
+        let result = fs::read_to_string(project.public_path("index.html")).unwrap();
         assert_eq!(
             result,
             "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
@@ -264,13 +264,13 @@ mod tests {
             )
             .unwrap();
 
-        let index_result = fs::read_to_string(project.public_dir.join("index.html")).unwrap();
+        let index_result = fs::read_to_string(project.public_path("index.html")).unwrap();
         assert_eq!(
             index_result,
             "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
         );
 
-        let page2_result = fs::read_to_string(project.public_dir.join("2.html")).unwrap();
+        let page2_result = fs::read_to_string(project.public_path("2.html")).unwrap();
         assert_eq!(
             page2_result,
             "true<a href=\"./scrap3.html\">scrap3</a><a href=\"./scrap4.html\">scrap4</a>"

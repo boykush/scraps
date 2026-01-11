@@ -101,7 +101,7 @@ mod tests {
         let render = TagsIndexRender::new(&project.static_dir, &project.public_dir).unwrap();
         render.run(&base_url, &metadata, &scraps).unwrap();
 
-        let result1 = fs::read_to_string(project.public_dir.join("tags/index.html")).unwrap();
+        let result1 = fs::read_to_string(project.public_path("tags/index.html")).unwrap();
         assert_eq!(
             result1,
             "<a href=\"./tag1.html\">tag1</a><a href=\"./tag2.html\">tag2</a>"

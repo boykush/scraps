@@ -83,7 +83,7 @@ mod tests {
         let render = SearchIndexRender::new(&project.static_dir, &project.public_dir).unwrap();
         render.run(&base_url, &scraps).unwrap();
 
-        let result = fs::read_to_string(project.public_dir.join("search_index.json")).unwrap();
+        let result = fs::read_to_string(project.public_path("search_index.json")).unwrap();
         assert_eq!(
             result,
             "[{ \"title\": \"scrap1\", \"url\": \"http://localhost:1112/scraps/scrap1.html\" },{ \"title\": \"Context/scrap2\", \"url\": \"http://localhost:1112/scraps/scrap2.context.html\" }]");
