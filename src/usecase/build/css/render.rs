@@ -39,8 +39,7 @@ impl CSSRender {
 
 #[cfg(test)]
 mod tests {
-    use scraps_libs::tests::TestResources;
-
+    use crate::test_fixtures::TempScrapProject;
     use crate::usecase::build::model::color_scheme::ColorScheme;
 
     use super::*;
@@ -48,29 +47,18 @@ mod tests {
 
     #[test]
     fn test_render_main() {
-        // args
+        let project = TempScrapProject::new();
+
+        // Add static CSS template
+        project.add_static_file("main.css", b":root { color-scheme: {{ color_scheme }};}");
+
         let css_metadata = &CssMetadata::new(&ColorScheme::OsSetting);
 
-        let test_resource_path = PathBuf::from("tests/resource/build/css/render/it_render_main");
-        let static_dir_path = test_resource_path.join("static");
-        let public_dir_path = PathBuf::from("public");
+        // Run render
+        let render = CSSRender::new(&project.static_dir, &project.public_dir);
+        render.render_main(css_metadata).unwrap();
 
-        // static
-        let template_css_path = static_dir_path.join("main.css");
-        let resource_template_css_byte = ":root { color-scheme: {{ color_scheme }};}".as_bytes();
-
-        let mut test_resources = TestResources::new();
-        test_resources
-            .add_file(&template_css_path, resource_template_css_byte)
-            .add_dir(&public_dir_path);
-
-        test_resources.run(|| {
-            // run
-            let render = CSSRender::new(&static_dir_path, &public_dir_path);
-            render.render_main(css_metadata).unwrap();
-
-            let result = fs::read_to_string(public_dir_path.join("main.css")).unwrap();
-            assert_eq!(result, ":root { color-scheme: light dark;}");
-        });
+        let result = fs::read_to_string(project.public_dir.join("main.css")).unwrap();
+        assert_eq!(result, ":root { color-scheme: light dark;}");
     }
 }
