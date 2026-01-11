@@ -100,7 +100,7 @@ mod tests {
             base_url,
         );
         let backlinks_map =
-            BacklinksMap::new(&vec![sc1.scrap(), sc2.scrap(), sc3.scrap(), sc4.scrap()]);
+            BacklinksMap::new(&[sc1.scrap(), sc2.scrap(), sc3.scrap(), sc4.scrap()]);
 
         let sscrap1 = SerializeIndexScrap::new(&sc1.clone(), &backlinks_map);
         let sscrap2 = SerializeIndexScrap::new(&sc2.clone(), &backlinks_map);
