@@ -5,6 +5,3 @@ public
 /tests/e2e/node_modules
 /tests/e2e/playwright-report
 /tests/e2e/test-results
-
-# serena
-.serena
