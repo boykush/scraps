@@ -1,4 +1,5 @@
-To get started with your Scraps site, you need to edit at least two required fields in your `Config.toml` file.
+To use Scraps as a static site generator (SSG), you need to configure the
+`base_url` and `title` fields in your `Config.toml` file.
 
 ## Step 1: Edit base_url
 
@@ -18,6 +19,9 @@ title = "My Knowledge Base"
 
 ## Optional Configuration
 
-Only the `base_url` and `title` variables are required. Everything else is optional.
+The `base_url` and `title` variables are required when using Scraps as a static
+site generator (SSG). Other commands like `tag`, `mcp`, and `template` can work
+without these fields. All other configuration variables are optional.
 
-See [[Reference/Configuration]] for all available configuration variables and their default values.
+See [[Reference/Configuration]] for all available configuration variables and
+their default values.
