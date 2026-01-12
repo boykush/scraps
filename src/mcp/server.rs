@@ -11,20 +11,17 @@ use rmcp::handler::server::ServerHandler;
 use rmcp::model::{CallToolResult, ServerCapabilities, ServerInfo};
 use rmcp::service::RequestContext;
 use rmcp::{tool, tool_handler, tool_router, ErrorData, RoleServer};
-use scraps_libs::model::base_url::BaseUrl;
 
 pub struct ScrapsServer {
     tool_router: ToolRouter<ScrapsServer>,
     scraps_dir: PathBuf,
-    base_url: BaseUrl,
 }
 
 impl ScrapsServer {
-    pub fn new(scraps_dir: PathBuf, base_url: BaseUrl) -> Self {
+    pub fn new(scraps_dir: PathBuf) -> Self {
         Self {
             tool_router: Self::tool_router(),
             scraps_dir,
-            base_url,
         }
     }
 }
@@ -39,7 +36,7 @@ impl ScrapsServer {
         context: RequestContext<RoleServer>,
         parameters: Parameters<SearchRequest>,
     ) -> Result<CallToolResult, ErrorData> {
-        search_scraps(&self.scraps_dir, &self.base_url, context, parameters).await
+        search_scraps(&self.scraps_dir, context, parameters).await
     }
 
     #[tool(

@@ -14,7 +14,7 @@ use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
 pub struct SearchResult {
     pub title: Title,
     pub ctx: Option<Ctx>,
-    pub url: String,
+    pub url: Option<String>,
     pub md_text: String,
 }
 
@@ -31,7 +31,7 @@ impl SearchUsecase {
 
     pub fn execute(
         &self,
-        base_url: &BaseUrl,
+        base_url: Option<&BaseUrl>,
         query: &str,
         num: usize,
     ) -> ScrapsResult<Vec<SearchResult>> {
@@ -66,8 +66,10 @@ impl SearchUsecase {
             .filter_map(|result| {
                 // Find the corresponding scrap by title using HashMap
                 scrap_map.get(&result.title).map(|scrap| {
-                    let file_stem = ScrapFileStem::from(scrap.self_key().clone());
-                    let url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
+                    let url = base_url.map(|base_url| {
+                        let file_stem = ScrapFileStem::from(scrap.self_key().clone());
+                        format!("{}scraps/{}.html", base_url.as_url(), file_stem)
+                    });
 
                     let scrap_key = &scrap.self_key();
                     let title: Title = scrap_key.into();
@@ -106,13 +108,15 @@ mod tests {
         let url = Url::parse("http://localhost:1112/").unwrap();
         let base_url = BaseUrl::new(url).unwrap();
 
-        let results = usecase.execute(&base_url, "test", 100).unwrap();
+        let results = usecase.execute(Some(&base_url), "test", 100).unwrap();
 
         // Should find documents containing "test"
         assert!(!results.is_empty());
         assert!(results.iter().any(|r| r.title.to_string().contains("test")));
-        // Verify URLs are present
-        assert!(results.iter().all(|r| !r.url.is_empty()));
+        // Verify URLs are present when base_url is provided
+        assert!(results
+            .iter()
+            .all(|r| r.url.is_some() && !r.url.as_ref().unwrap().is_empty()));
         // Verify md_text is present
         assert!(results.iter().all(|r| !r.md_text.is_empty()));
     }
@@ -134,7 +138,7 @@ mod tests {
         let url = Url::parse("http://localhost:1112/").unwrap();
         let base_url = BaseUrl::new(url).unwrap();
 
-        let results = usecase.execute(&base_url, "duplicate", 100).unwrap();
+        let results = usecase.execute(Some(&base_url), "duplicate", 100).unwrap();
 
         // Should find both scraps with the same title but different contexts
         assert_eq!(
@@ -146,7 +150,7 @@ mod tests {
         );
 
         // Verify URLs are different (pointing to different files)
-        let urls: std::collections::HashSet<String> =
+        let urls: std::collections::HashSet<Option<String>> =
             results.iter().map(|r| r.url.clone()).collect();
         assert_eq!(urls.len(), 2, "Expected 2 unique URLs, got {}", urls.len());
 

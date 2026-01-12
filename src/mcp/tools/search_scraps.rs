@@ -6,7 +6,6 @@ use rmcp::model::{CallToolResult, Content};
 use rmcp::schemars::JsonSchema;
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer};
-use scraps_libs::model::base_url::BaseUrl;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -27,17 +26,16 @@ pub struct SearchResponse {
 
 pub async fn search_scraps(
     scraps_dir: &PathBuf,
-    base_url: &BaseUrl,
     _context: RequestContext<RoleServer>,
     Parameters(request): Parameters<SearchRequest>,
 ) -> Result<CallToolResult, ErrorData> {
     // Create search usecase
     let search_usecase = SearchUsecase::new(scraps_dir);
 
-    // Execute search
+    // Execute search without base_url (MCP server doesn't need URLs)
     let num = request.num.unwrap_or(100);
     let results = search_usecase
-        .execute(base_url, &request.query, num)
+        .execute(None, &request.query, num)
         .map_err(|e| ErrorData::new(ErrorCode(-32004), format!("Search failed: {e}"), None))?;
 
     // Convert results to structured response
