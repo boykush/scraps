@@ -1,7 +1,7 @@
 use url::Url;
 
 /// A wrapper around URL that ensures proper trailing slash normalization
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BaseUrl(Url);
 
 impl BaseUrl {

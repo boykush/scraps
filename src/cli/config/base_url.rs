@@ -2,7 +2,7 @@ use scraps_libs::model::base_url::BaseUrl;
 use serde::de::{self, Deserialize, Deserializer};
 use url::Url;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BaseUrlConfig(BaseUrl);
 
 impl<'de> Deserialize<'de> for BaseUrlConfig {
