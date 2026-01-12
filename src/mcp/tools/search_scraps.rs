@@ -32,10 +32,10 @@ pub async fn search_scraps(
     // Create search usecase
     let search_usecase = SearchUsecase::new(scraps_dir);
 
-    // Execute search without base_url (MCP server doesn't need URLs)
+    // Execute search
     let num = request.num.unwrap_or(100);
     let results = search_usecase
-        .execute(None, &request.query, num)
+        .execute(&request.query, num)
         .map_err(|e| ErrorData::new(ErrorCode(-32004), format!("Search failed: {e}"), None))?;
 
     // Convert results to structured response

@@ -11,16 +11,23 @@ pub fn run(query: &str, num: usize, project_path: Option<&Path>) -> ScrapsResult
     let config = ScrapConfig::from_path(project_path)?;
     let scraps_dir_path = path_resolver.scraps_dir(&config);
 
-    let base_url = config.base_url.into_base_url();
-
     let search_usecase = SearchUsecase::new(&scraps_dir_path);
-    let results = search_usecase.execute(Some(&base_url), query, num)?;
+    let results = search_usecase.execute(query, num)?;
 
     if results.is_empty() {
         println!("No results found for query: {query}");
     } else {
         for result in results {
-            let display_search = DisplaySearch::new(&result);
+            // Construct file path from title and ctx
+            let file_path = if let Some(ctx) = &result.ctx {
+                scraps_dir_path
+                    .join(ctx.to_string())
+                    .join(format!("{}.md", result.title))
+            } else {
+                scraps_dir_path.join(format!("{}.md", result.title))
+            };
+
+            let display_search = DisplaySearch::new_with_file_path(&result, &file_path);
             println!("{display_search}");
         }
     }
