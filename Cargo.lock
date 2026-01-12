@@ -1820,7 +1820,7 @@ dependencies = [
 
 [[package]]
 name = "scraps_libs"
-version = "0.28.0"
+version = "0.28.1"
 dependencies = [
  "fuzzy-matcher",
  "iso639_enum",
