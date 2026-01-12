@@ -38,17 +38,6 @@ pub enum SubCommands {
     #[command(about = "Serve the site with build scraps")]
     Serve,
 
-    #[command(about = "Search scraps")]
-    Search {
-        query: String,
-        #[arg(
-            short = 'n',
-            long,
-            help = "Maximum number of results to return (default: 100)"
-        )]
-        num: Option<usize>,
-    },
-
     #[command(about = "List a tags")]
     Tag,
 

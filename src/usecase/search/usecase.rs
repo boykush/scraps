@@ -2,9 +2,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 
 use crate::error::ScrapsResult;
-use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::context::Ctx;
-use scraps_libs::model::file::ScrapFileStem;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::title::Title;
 use scraps_libs::search::engine::SearchEngine;
@@ -14,7 +12,6 @@ use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
 pub struct SearchResult {
     pub title: Title,
     pub ctx: Option<Ctx>,
-    pub url: Option<String>,
     pub md_text: String,
 }
 
@@ -29,12 +26,7 @@ impl SearchUsecase {
         }
     }
 
-    pub fn execute(
-        &self,
-        base_url: Option<&BaseUrl>,
-        query: &str,
-        num: usize,
-    ) -> ScrapsResult<Vec<SearchResult>> {
+    pub fn execute(&self, query: &str, num: usize) -> ScrapsResult<Vec<SearchResult>> {
         // Load scraps from directory directly
         let scrap_paths = crate::usecase::read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
         let scraps = scrap_paths
@@ -56,21 +48,16 @@ impl SearchUsecase {
             })
             .collect();
 
-        // Perform search and add URLs to results
+        // Perform search
         let engine = FuzzySearchEngine::new();
         let search_results = engine.search(&lib_items, query, num);
 
-        // Convert to final results with URLs using HashMap lookup
+        // Convert to final results using HashMap lookup
         let results: Vec<SearchResult> = search_results
             .into_iter()
             .filter_map(|result| {
                 // Find the corresponding scrap by title using HashMap
                 scrap_map.get(&result.title).map(|scrap| {
-                    let url = base_url.map(|base_url| {
-                        let file_stem = ScrapFileStem::from(scrap.self_key().clone());
-                        format!("{}scraps/{}.html", base_url.as_url(), file_stem)
-                    });
-
                     let scrap_key = &scrap.self_key();
                     let title: Title = scrap_key.into();
                     let ctx: Option<Ctx> = scrap_key.into();
@@ -78,7 +65,6 @@ impl SearchUsecase {
                     SearchResult {
                         title,
                         ctx,
-                        url,
                         md_text: scrap.md_text().to_string(),
                     }
                 })
@@ -94,7 +80,6 @@ mod tests {
     use crate::test_fixtures::TempScrapProject;
 
     use super::*;
-    use url::Url;
 
     #[test]
     fn it_run() {
@@ -105,18 +90,12 @@ mod tests {
             .add_scrap("test2.md", b"# Another Document\nAnother test content.");
 
         let usecase = SearchUsecase::new(&project.scraps_dir);
-        let url = Url::parse("http://localhost:1112/").unwrap();
-        let base_url = BaseUrl::new(url).unwrap();
 
-        let results = usecase.execute(Some(&base_url), "test", 100).unwrap();
+        let results = usecase.execute("test", 100).unwrap();
 
         // Should find documents containing "test"
         assert!(!results.is_empty());
         assert!(results.iter().any(|r| r.title.to_string().contains("test")));
-        // Verify URLs are present when base_url is provided
-        assert!(results
-            .iter()
-            .all(|r| r.url.is_some() && !r.url.as_ref().unwrap().is_empty()));
         // Verify md_text is present
         assert!(results.iter().all(|r| !r.md_text.is_empty()));
     }
@@ -135,10 +114,8 @@ mod tests {
             .add_scrap("duplicate.md", b"# Duplicate\nContent in root directory.");
 
         let usecase = SearchUsecase::new(&project.scraps_dir);
-        let url = Url::parse("http://localhost:1112/").unwrap();
-        let base_url = BaseUrl::new(url).unwrap();
 
-        let results = usecase.execute(Some(&base_url), "duplicate", 100).unwrap();
+        let results = usecase.execute("duplicate", 100).unwrap();
 
         // Should find both scraps with the same title but different contexts
         assert_eq!(
@@ -148,11 +125,6 @@ mod tests {
             This indicates the HashMap is overwriting duplicate titles.",
             results.len()
         );
-
-        // Verify URLs are different (pointing to different files)
-        let urls: std::collections::HashSet<Option<String>> =
-            results.iter().map(|r| r.url.clone()).collect();
-        assert_eq!(urls.len(), 2, "Expected 2 unique URLs, got {}", urls.len());
 
         // Verify content is different
         let md_texts: std::collections::HashSet<String> =
