@@ -38,17 +38,13 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
 
     let git_command = GitCommandImpl::new();
     let progress = ProgressImpl::init(Instant::now());
+    let title = config.require_title()?;
     let lang_code = config
         .lang_code
         .map(|c| c.into_lang_code())
         .unwrap_or_default();
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
-    let html_metadata = HtmlMetadata::new(
-        &lang_code,
-        &config.title,
-        &config.description,
-        &config.favicon,
-    );
+    let html_metadata = HtmlMetadata::new(&lang_code, &title, &config.description, &config.favicon);
     let css_metadata = CssMetadata::new(&config.color_scheme.map_or_else(
         || ColorScheme::OsSetting,
         ColorSchemeConfig::into_color_scheme,

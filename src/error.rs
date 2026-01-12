@@ -97,6 +97,9 @@ pub enum CliError {
 
     #[error("Failed when load config")]
     ConfigLoad,
+
+    #[error("Missing required configuration field '{field}' in Config.toml. Please add '{field} = \"your-value\"' to your Config.toml file.")]
+    MissingRequiredConfig { field: String },
 }
 
 #[derive(Error, PartialEq, Debug)]
