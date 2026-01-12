@@ -15,7 +15,7 @@ jobs:
         with:
           fetch-depth: 0 # For scraps git commited date
       - name: build_and_deploy
-        uses: boykush/scraps-deploy-action@fdcd6b2def03fa5e5a0b7b203a9c9fc69bbe1f6a # v2.1
+        uses: boykush/scraps-deploy-action@7fd5a9ceeb34b46fd42ca20df8723297b9d659e9 # v2.2
         env:
           # Target branch
           PAGES_BRANCH: gh-pages
