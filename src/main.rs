@@ -19,9 +19,6 @@ fn main() -> error::ScrapsResult<()> {
         }
         cli::SubCommands::Build { verbose } => cli::cmd::build::run(verbose, cli.path.as_deref()),
         cli::SubCommands::Serve => cli::cmd::serve::run(cli.path.as_deref()),
-        cli::SubCommands::Search { query, num } => {
-            cli::cmd::search::run(&query, num.unwrap_or(100), cli.path.as_deref())
-        }
         cli::SubCommands::Tag => cli::cmd::tag::run(cli.path.as_deref()),
         cli::SubCommands::Template {
             template_command: template_commands,
