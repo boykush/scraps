@@ -1,3 +1,5 @@
+This guide covers using Scraps as a static site generator (SSG).
+
 ## Setup
 
 1. **Install Scraps**

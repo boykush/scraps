@@ -6,13 +6,16 @@ See [[Tutorial/Configure Project]] for a quick setup guide.
 
 ## Configuration Variables
 
-Only the `base_url` and `title` variables are required. Everything else is optional. All configuration variables used by Scraps and their default values are listed below.
+The `base_url` and `title` variables are required when using Scraps as a static
+site generator (SSG). Other commands like `tag`, `mcp`, and `template` can work
+without these fields. All configuration variables used by Scraps and their
+default values are listed below.
 
 ```toml:Config.toml
-# The site base url
+# The site base url (required for SSG)
 base_url = "https://username.github.io/repository-name/"
 
-# The site title
+# The site title (required for SSG)
 title = ""
 
 # The scraps directory path relative to this Config.toml (optional, default=scraps)
