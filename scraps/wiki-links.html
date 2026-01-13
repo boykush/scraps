@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <!-- Page title -->
+        
+            <title>Scraps Doc</title>
+            <meta property="og:title" content="Scraps Doc" />
+            <meta name="twitter:title" content="Scraps Doc" />
+        
+        <!-- Page description -->
+        
+            <meta name="description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta property="og:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta name="twitter:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+        
+        <!-- Page favicon -->
+        
+            <link rel="icon" type="image/png" href="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;logo.png?raw=true" />
+        
+        <!-- Rubik font -->
+        <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">
+        <!-- Noto Sans JP font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+        <!-- Style sheet -->
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;main.css">
+        
+        
+    </head>
+    <body>
+        <header>
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;">
+                <h1>Scraps Doc</h1>
+            </a>
+        </header>
+        <main>
+            
+    <div class="tag">
+        <h1 class="title">Wiki-Links</h1>
+    </div>
+    
+    <ul class="scrap-links">
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/alias-link.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Alias Link</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Wiki-Links #Markdown
+Internal links allow you to use different display text as aliases.
+Writing [[Markdown|here]] creates a link that displays as here but links to the “Markdown” page.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/context-link.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Context Link</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Wiki-Links #Markdown
+In cases where the same term exists in different contexts and Scrap titles would overlap, you can use the context feature by separating them with folders. For example:
+❯ tree scraps
+scraps
+├── DDD
+│   └── Service.md
+└── Kubernetes
+    └── Service.md
+
+Links to Scrap with different contexts can be specified like [[DDD&#x2F;Service]], [[Kubernetes&#x2F;Service]]. You can also combine them with Alias link such as [[Kubernetes&#x2F;Service|Kubernetes Service]].
+The context is also displayed on the Scrap detail page in the static site.
+Not Recommended
+Scraps aims for simple knowledge management, so overuse of folders should be avoided. Use folders (Context) only in cases such as:
+
+When duplicate Scrap titles occur across different contexts
+When a Scrap has a strong association with a specific context
+
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/normal-link.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Normal Link</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Wiki-Links #Markdown
+Specifying the name of the markdown file with a notation such as [[Link]] will generate a wiki-like internal link.
+For example, if you have the following set of files.
+❯ tree scraps
+scraps
+├── Overview.md
+└── Usage.md
+
+Fill in the file name in the scraps directory in Overview.md as follows to generate the link.
+See [[Usage]] for detail.
+
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/tag-link.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Tag Link</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Wiki-Links #Markdown
+If there is no scrap with the specified title, such as #Markdown, it becomes a tag.
+Tags are displayed on the index page. Each tag links to a page that lists all scraps using that tag.
+</div>
+                    
+                </a>
+            </li>
+        
+    </ul>
+
+
+        </main>
+        <footer>
+            Generated by <a href="https://github.com/boykush/scraps" target="_blank" rel="noopener noreferrer">Scraps</a>
+        </footer> 
+        <!-- Code syntax highlight -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!-- Code syntax highlight theme -->
+        <link href="https://unpkg.com/nord-highlightjs@0.1.0/dist/nord.css" rel="stylesheet" type="text/css" />
+        <!-- Mermaid -->
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.6.0/+esm'
+        </script>
+        
+         
+    </body>
+</html>

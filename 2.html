@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <!-- Page title -->
+        
+            <title>Scraps Doc</title>
+            <meta property="og:title" content="Scraps Doc" />
+            <meta name="twitter:title" content="Scraps Doc" />
+        
+        <!-- Page description -->
+        
+            <meta name="description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta property="og:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta name="twitter:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+        
+        <!-- Page favicon -->
+        
+            <link rel="icon" type="image/png" href="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;logo.png?raw=true" />
+        
+        <!-- Rubik font -->
+        <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">
+        <!-- Noto Sans JP font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+        <!-- Style sheet -->
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;main.css">
+        
+        
+    </head>
+    <body>
+        <header>
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;">
+                <h1>Scraps Doc</h1>
+            </a>
+        </header>
+        <main>
+            
+    <div class="index"> 
+        
+        
+          <div class="search-block">
+              <span class="icon" />
+              <input
+                type="text"
+                id="search-input"
+                onkeyup="doSearch()"
+                placeholder="Search by title..."
+                />
+              <ul id="search-results"></ul>
+          </div>
+        
+        <div class="tags-block">
+            
+    <ul class="tag-links">
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/markdown.html">
+                    <span class="title">Markdown</span>&nbsp;<span>(9)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/cli.html">
+                    <span class="title">CLI</span>&nbsp;<span>(7)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/wiki-links.html">
+                    <span class="title">Wiki-Links</span>&nbsp;<span>(4)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/integration.html">
+                    <span class="title">Integration</span>&nbsp;<span>(4)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/configuration.html">
+                    <span class="title">Configuration</span>&nbsp;<span>(3)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/templates.html">
+                    <span class="title">Templates</span>&nbsp;<span>(3)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/static-site.html">
+                    <span class="title">Static Site</span>&nbsp;<span>(2)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/deployment.html">
+                    <span class="title">Deployment</span>&nbsp;<span>(1)</span>
+                </a>
+            </li>
+        
+        
+    </ul>
+
+        </div>
+        <div class="links-block">
+            <p class="sort-key">Sort by - committed date</p>
+            
+    <ul class="scrap-links">
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/readme-processing.explanation.html">
+                    
+                        <div class="header">
+                            <div class="context">Explanation&#47;</div>
+                            <div class="title">README Processing</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Markdown
+In Scraps, the scraps&#x2F;README.md file is automatically converted to HTML and included in the static site’s top page ( public&#x2F;index.html ).
+For Markdown syntax, please refer to CommonMark.
+Limitations
+When using autolink syntax in scraps&#x2F;README.md, the OGP card described in Autolink will not be displayed.
+URLs will be displayed as normal links.
+
+In:
+&amp;lt;https:&#x2F;&#x2F;example.com&amp;gt;
+
+Out:
+https:&#x2F;&#x2F;example.com
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/mermaid.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Mermaid</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Markdown
+By specifying mermaid as the language for a code block, you can use Mermaid diagrams.
+Example
+
+In:
+
+```mermaid
+graph LR
+    A --- B
+    B--&gt;C[fa:fa-ban forbidden]
+    B--&gt;D(fa:fa-spinner);
+```
+
+Out:
+graph LR
+    A --- B
+    B--&amp;gt;C[fa:fa-ban forbidden]
+    B--&amp;gt;D(fa:fa-spinner);
+
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/commonmark.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">CommonMark</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Markdown
+Scraps supports Markdown syntax according to the CommonMark specification.
+Please refer to the documentation of the pulldown-cmark library used internally for more details.
+CommonMark specification - pulldown-cmark guide
+Example
+
+In:
+# Heading 1
+## Heading 2
+### Heading 3
+#### Heading 4
+
+Out:
+Heading 1
+Heading 2
+Heading 3
+Heading 4
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/github-flavored-markdown.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">GitHub-flavored Markdown</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Markdown
+As an extension, GitHub-flavored Markdown is also supported. This includes features such as strikethrough, tables, and task lists.
+Example
+
+Strikethrough
+In:
+~~This text is strikethrough.~~
+
+Out:
+This text is strikethrough.
+
+Task Lists
+In:
+- [x] Task 1
+- [ ] Task 2
+- [ ] Task 3
+
+Out:
+
+
+Task 1
+
+Task 2
+
+Task 3
+
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/autolink.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Autolink</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Markdown
+In Scraps, when you write using Markdown’s autolink syntax, it automatically fetches OGP data and displays it as a card.
+Example
+
+In:
+&amp;lt;https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&amp;gt;
+
+Out:
+https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/what-is-scraps-question.explanation.html">
+                    
+                        <div class="header">
+                            <div class="context">Explanation&#47;</div>
+                            <div class="title">What is Scraps?</div>
+                        </div>
+                    
+                    
+                        <div class="thumbnail">
+                            <img class="thumbnail-image" alt="thumbnail" src="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;raw&#x2F;main&#x2F;assets&#x2F;logo_opacity.png?raw=true" loading="lazy" />
+                        </div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/use-templates.how-to.html">
+                    
+                        <div class="header">
+                            <div class="context">How-to&#47;</div>
+                            <div class="title">Use Templates</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Templates
+This document provides practical template samples that you can use immediately. Each sample includes detailed explanations and complete workflow examples.
+Daily Note
+Creates a daily note with today’s date as the title. This template utilizes Tera’s standard now() function, date filter, and Scraps’ custom timezone variable.
+Template file: &#x2F;templates&#x2F;daily_note.md
++++
+title = &quot;{{ now() | date(timezone=timezone) }}&quot;
++++
+
+# Daily Notes
+
+## Today&#x27;s Tasks
+- [ ] 
+
+Usage:
+scraps template generate daily_note
+
+This generates a scrap with the current date as title (e.g., “2024-01-15”).
+Arguments by Environment Variables
+Using the get_env() function, you can write templates that customize arguments at the time of CLI execution.
+Template file: &#x2F;templates&#x2F;book.md
++++
+title = &quot;[Book] {{ get_env(name=&quot;TITLE&quot;, default=&quot;&quot;) }}&quot;
++++
+
+![cover]({{ get_env(name=&quot;COVER&quot;, default=&quot;&quot;) }})
+
+Usage:
+TITLE=&quot;Test-Driven Development By Example&quot; COVER=&quot;https:&#x2F;&#x2F;m.media-amazon.com&#x2F;images&#x2F;I&#x2F;71I1GcjT-IL._SY522_.jpg&quot; scraps template generate book
+
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/setup-lsp.how-to.html">
+                    
+                        <div class="header">
+                            <div class="context">How-to&#47;</div>
+                            <div class="title">Setup LSP</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Integration
+Currently, the most recommended LSP for editing Scraps is markdown-oxide.
+markdown-oxide supports the following editing environments:
+
+Neovim
+VSCode
+Zed
+Helix
+
+To match the current features provided by Scraps, place the following configuration file .moxide.toml under the scraps&#x2F; directory and open the scraps&#x2F; directory directly for a comfortable editing experience.
+heading_completions = false
+title_headings = false
+tags_in_codeblocks = false
+references_in_codeblocks = false
+
+We are considering a feature to generate the LSP configuration file during the init command.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/installation.tutorial.html">
+                    
+                        <div class="header">
+                            <div class="context">Tutorial&#47;</div>
+                            <div class="title">Installation</div>
+                        </div>
+                    
+                    
+                        <div class="summary">You can find the latest version on GitHub Releases.
+Requirements
+The git command is required for features.
+Cargo
+❯ cargo install scraps
+
+macOS
+❯ brew install boykush&#x2F;tap&#x2F;scraps
+
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/template-system.explanation.html">
+                    
+                        <div class="header">
+                            <div class="context">Explanation&#47;</div>
+                            <div class="title">Template System</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Templates
+Generate scrap files from predefined Markdown templates for efficient content creation.
+Basic Usage
+
+Create template files in &#x2F;templates directory
+Run generate scrap on command-line
+
+Template Syntax
+Templates use Tera template engine with TOML metadata:
++++
+title = &quot;{{ now() | date(timezone=timezone) }}&quot;
++++
+
+# Content goes here
+
+Available Variables
+
+timezone - Access Config.toml timezone setting
+All Tera built-in functions
+
+Examples
+See Use Templates for ready-to-use templates.
+For CLI commands, see Template.
+</div>
+                    
+                </a>
+            </li>
+        
+    </ul>
+
+        </div>
+        <div class="paging-arrows">
+            
+                <a class="prev" href=".&#x2F;">prev</a>
+            
+            
+                <a class="next" href=".&#x2F;3.html">next</a>
+            
+        </div>
+    </div>
+
+        </main>
+        <footer>
+            Generated by <a href="https://github.com/boykush/scraps" target="_blank" rel="noopener noreferrer">Scraps</a>
+        </footer> 
+        <!-- Code syntax highlight -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!-- Code syntax highlight theme -->
+        <link href="https://unpkg.com/nord-highlightjs@0.1.0/dist/nord.css" rel="stylesheet" type="text/css" />
+        <!-- Mermaid -->
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.6.0/+esm'
+        </script>
+        
+  
+  <!-- For search scraps -->
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+  <script type="module">
+    fetch('./search_index.json')
+      .then(response => response.json())
+      .then(data => {
+        const fuseOptions = {
+          minMatchCharLength: 3,
+          keys: ["title"]
+        };
+        const fuse = new Fuse(data, fuseOptions);
+        window.search = function (query, numResults) {
+          return fuse.search(query).slice(0, numResults).map(result => [result.item.title, result.item.url]);
+        };
+      })
+  </script>
+  <script>
+    function doSearch() {
+      let value = document.getElementById("search-input").value;
+      console.log(`Search query: ${value}`);
+
+      // Retrieve 5 results
+      const results = search(value, 5);
+
+      console.log(`Results: ${results}`);
+
+      let ul = document.getElementById("search-results");
+      ul.innerHTML = "";
+
+      results.forEach((result, index) => {
+        var li = document.createElement("li");
+
+        let [title, url] = result;
+        console.log(`Title: ${title}, URL: ${url}`);
+        let elemlink = document.createElement('a');
+        elemlink.innerHTML = title;
+        elemlink.setAttribute('href', url);
+        li.appendChild(elemlink);
+        li.style.top = `${(index * 30) - 16}px`;
+        ul.appendChild(li);
+      })
+    }
+  </script>
+  
+ 
+    </body>
+</html>
