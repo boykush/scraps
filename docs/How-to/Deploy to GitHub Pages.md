@@ -2,7 +2,8 @@
 
 Custom actions are available to deploy Scraps to Github Pages.
 
-[scraps-deploy-action](https://github.com/boykush/scraps-deploy-action)
+- Repository: [scraps-deploy-action](https://github.com/boykush/scraps-deploy-action)
+- Marketplace: [Scraps Deploy to Pages](https://github.com/marketplace/actions/scraps-deploy-to-pages)
 
 ### YAML file
 
@@ -10,7 +11,7 @@ Prepare a yaml file under `.github/workflows/` like this
 
 ```yaml
 name: Deploy scraps github pages
-on: 
+on:
   push:
     branches:
       - main
@@ -21,15 +22,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # For scraps git commited date
       - name: build_and_deploy
-        uses: boykush/scraps-deploy-action@v2
-        env:
-          # Target branch
-          PAGES_BRANCH: gh-pages
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: boykush/scraps-deploy-action@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pages-branch: gh-pages
 ```
 
 ### GitHub settings
