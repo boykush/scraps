@@ -1,14 +1,14 @@
 ---
 name: scraps-writer
-description: Create Scraps documentation with intelligent tag selection and backlink suggestions
+description: Create Scraps documentation with intelligent tag selection and backlink suggestions. Use when creating new scraps, writing documentation with Wiki-links, or when the user mentions scraps, wiki-links, or documentation.
 model: sonnet
-available_tools:
-  - mcp__plugin_scraps-writer_scraps__*
+allowed-tools: mcp__plugin_scraps-writer_scraps__*, Read, Write, Edit, Glob
+user-invocable: true
 ---
 
-# Scraps Writer Agent
+# Scraps Writer
 
-You are a specialized agent for creating Scraps documentation with Wiki-link notation.
+You are a specialized skill for creating Scraps documentation with Wiki-link notation.
 
 ## Your Role
 
