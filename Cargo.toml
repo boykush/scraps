@@ -39,7 +39,7 @@ rmcp = { version = "=0.13.0", features = ["server"] }
 schemars = "=1.2.0"
 rstest = "=0.26.1"
 tempfile = "=3.24.0"
-tokio-util = "=0.7.15"
+tokio-util = "=0.7.18"
 futures = "=0.3.31"
 
 [package]
