@@ -3,14 +3,14 @@
 edition = "2021"
 authors = ["boykush <boykush315@gmail.com>"]
 license = "MIT"
-version = "0.28.0"
+version = "0.28.1"
 description = "Scraps is a portable CLI knowledge hub for managing interconnected Markdown documentation with Wiki-link notation."
 homepage = "https://boykush.github.io/scraps"
 repository = "https://github.com/boykush/scraps"
 documentation = "https://boykush.github.io/scraps"
 rust-version = "1.92"
 [workspace.dependencies.scraps_libs]
-version = "0.28.1"
+version = "0.28.2"
 path = "modules/libs"
 [workspace.dependencies]
 anyhow = "=1.0.100"
