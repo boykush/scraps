@@ -99,3 +99,35 @@ jobs:
         # This step uses the identity token to provision an ephemeral certificate
         # against the sigstore community Fulcio instance.
         run: echo "${{ steps.meta.outputs.tags }}" | xargs -I {} cosign sign --yes {}@${{ steps.build-and-push.outputs.digest }}
+
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
+
+  update-deploy-action:
+    name: Update deploy action
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout deploy action repo
+        uses: actions/checkout@v6
+        with:
+          repository: boykush/scraps-deploy-action
+          token: ${{ secrets.DEPLOY_COMMITTER_TOKEN }}
+
+      - name: Update Dockerfile
+        run: |
+          sed -i "s|FROM ghcr.io/boykush/scraps:.*|FROM ghcr.io/boykush/scraps:${{ needs.build.outputs.version }}|" Dockerfile
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.DEPLOY_COMMITTER_TOKEN }}
+          commit-message: "chore: update scraps image to ${{ needs.build.outputs.version }}"
+          title: "Update scraps image to ${{ needs.build.outputs.version }}"
+          body: |
+            Updates the Docker image version to the latest release.
+
+            - Image: `ghcr.io/boykush/scraps:${{ needs.build.outputs.version }}`
+            - Release: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}
+          branch: update/scraps-${{ needs.build.outputs.version }}
+          base: main
