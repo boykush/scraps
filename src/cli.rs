@@ -16,6 +16,7 @@ pub struct Cli {
         short = 'p',
         long = "path",
         global = true,
+        env = "SCRAPS_PROJECT_PATH",
         help = "Specify the project directory path"
     )]
     pub path: Option<PathBuf>,
