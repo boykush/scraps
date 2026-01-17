@@ -3,6 +3,7 @@
   "extends": [
     "config:recommended"
   ],
+  "minimumReleaseAge": "1 day",
   "packageRules": [
     {
       "matchManagers": [
@@ -10,13 +11,6 @@
       ],
       "enabled": true,
       "rangeStrategy": "pin"
-    },
-    {
-      "matchManagers": [
-        "github-actions",
-        "dockerfile"
-      ],
-      "minimumReleaseAge": "7 days"
     },
     {
       "groupName": "Rust toolchain",
