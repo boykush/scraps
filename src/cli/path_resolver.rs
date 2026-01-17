@@ -80,7 +80,8 @@ impl PathResolver {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_fixtures::SimpleTempDir;
+    use crate::test_fixtures::{simple_temp_dir, SimpleTempDir};
+    use rstest::rstest;
     use std::env;
 
     #[test]
@@ -91,9 +92,8 @@ mod tests {
         assert_eq!(resolver.project_root(), expected_root.as_path());
     }
 
-    #[test]
-    fn test_new_with_specified_path() {
-        let temp_dir = SimpleTempDir::new();
+    #[rstest]
+    fn test_new_with_specified_path(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
         temp_dir.add_dir("test_project_new");
 
         let test_project_path = temp_dir.path.join("test_project_new");
@@ -111,9 +111,8 @@ mod tests {
         assert!(result.is_err());
     }
 
-    #[test]
-    fn test_scraps_dir_path_default() {
-        let temp_dir = SimpleTempDir::new();
+    #[rstest]
+    fn test_scraps_dir_path_default(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
         temp_dir.add_dir("test_project_scraps").add_file(
             "test_project_scraps/Config.toml",
             br#"
@@ -131,9 +130,8 @@ base_url = "http://example.com/"
         assert!(scraps_dir.starts_with(&test_project_path));
     }
 
-    #[test]
-    fn test_scraps_dir_path_custom() {
-        let temp_dir = SimpleTempDir::new();
+    #[rstest]
+    fn test_scraps_dir_path_custom(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
         temp_dir.add_dir("test_project_scraps_custom").add_file(
             "test_project_scraps_custom/Config.toml",
             br#"
@@ -152,9 +150,8 @@ scraps_dir = "custom_docs"
         assert!(scraps_dir.starts_with(&test_project_path));
     }
 
-    #[test]
-    fn test_static_dir_path() {
-        let temp_dir = SimpleTempDir::new();
+    #[rstest]
+    fn test_static_dir_path(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
         temp_dir.add_dir("test_project_static");
 
         let test_project_path = temp_dir.path.join("test_project_static");
@@ -164,9 +161,8 @@ scraps_dir = "custom_docs"
         assert!(static_dir.starts_with(&test_project_path));
     }
 
-    #[test]
-    fn test_public_dir_path() {
-        let temp_dir = SimpleTempDir::new();
+    #[rstest]
+    fn test_public_dir_path(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
         temp_dir.add_dir("test_project_public");
 
         let test_project_path = temp_dir.path.join("test_project_public");
@@ -176,9 +172,8 @@ scraps_dir = "custom_docs"
         assert!(public_dir.starts_with(&test_project_path));
     }
 
-    #[test]
-    fn test_templates_dir_path() {
-        let temp_dir = SimpleTempDir::new();
+    #[rstest]
+    fn test_templates_dir_path(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
         temp_dir.add_dir("test_project_templates");
 
         let test_project_path = temp_dir.path.join("test_project_templates");
@@ -188,9 +183,8 @@ scraps_dir = "custom_docs"
         assert!(templates_dir.starts_with(&test_project_path));
     }
 
-    #[test]
-    fn test_config_path() {
-        let temp_dir = SimpleTempDir::new();
+    #[rstest]
+    fn test_config_path(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
         temp_dir.add_dir("test_project_config");
 
         let test_project_path = temp_dir.path.join("test_project_config");

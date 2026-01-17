@@ -79,12 +79,11 @@ impl LookupScrapBacklinksUsecase {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_fixtures::TempScrapProject;
+    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use rstest::rstest;
 
-    #[test]
-    fn test_lookup_scrap_backlinks_success() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn test_lookup_scrap_backlinks_success(#[from(temp_scrap_project)] project: TempScrapProject) {
         project
             .add_scrap("scrap1.md", b"# Scrap 1\n\nThis links to [[target_scrap]].")
             .add_scrap(
@@ -110,10 +109,10 @@ mod tests {
         assert!(titles.contains(&"scrap2".to_string()));
     }
 
-    #[test]
-    fn test_lookup_scrap_backlinks_with_context() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn test_lookup_scrap_backlinks_with_context(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
         project
             .add_scrap(
                 "scrap1.md",
@@ -135,10 +134,10 @@ mod tests {
         assert_eq!(results[0].title.to_string(), "scrap1");
     }
 
-    #[test]
-    fn test_lookup_scrap_backlinks_not_found() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn test_lookup_scrap_backlinks_not_found(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
         project.add_scrap("scrap1.md", b"# Scrap 1\n\nContent.");
 
         let usecase = LookupScrapBacklinksUsecase::new(&project.scraps_dir);
@@ -149,10 +148,10 @@ mod tests {
         assert!(result.unwrap_err().to_string().contains("Scrap not found"));
     }
 
-    #[test]
-    fn test_lookup_scrap_backlinks_no_backlinks() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn test_lookup_scrap_backlinks_no_backlinks(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
         project.add_scrap(
             "target_scrap.md",
             b"# Target Scrap\n\nThis scrap has no backlinks.",

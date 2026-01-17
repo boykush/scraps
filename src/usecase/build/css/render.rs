@@ -39,16 +39,15 @@ impl CSSRender {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_fixtures::TempScrapProject;
+    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
     use crate::usecase::build::model::color_scheme::ColorScheme;
+    use rstest::rstest;
 
     use super::*;
     use std::fs;
 
-    #[test]
-    fn test_render_main() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn test_render_main(#[from(temp_scrap_project)] project: TempScrapProject) {
         // Add static CSS template
         project.add_static_file("main.css", b":root { color-scheme: {{ color_scheme }};}");
 

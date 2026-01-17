@@ -160,7 +160,8 @@ impl IndexRender {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_fixtures::TempScrapProject;
+    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use rstest::rstest;
     use std::fs;
     use url::Url;
 
@@ -171,10 +172,8 @@ mod tests {
     use scraps_libs::lang::LangCode;
     use scraps_libs::model::scrap::Scrap;
 
-    #[test]
-    fn it_run() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn it_run(#[from(temp_scrap_project)] project: TempScrapProject) {
         // Add static index.html template
         project.add_static_file(
             "index.html",
@@ -216,10 +215,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn it_run_paging() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn it_run_paging(#[from(temp_scrap_project)] project: TempScrapProject) {
         // Add static index.html template
         project.add_static_file(
             "index.html",

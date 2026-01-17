@@ -73,12 +73,11 @@ impl LookupTagBacklinksUsecase {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_fixtures::TempScrapProject;
+    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use rstest::rstest;
 
-    #[test]
-    fn test_lookup_tag_backlinks_success() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn test_lookup_tag_backlinks_success(#[from(temp_scrap_project)] project: TempScrapProject) {
         project
             .add_scrap("scrap1.md", b"# Scrap 1\n\nThis links to [[test_tag]].")
             .add_scrap(
@@ -102,10 +101,10 @@ mod tests {
         assert!(!titles.contains(&"scrap3".to_string()));
     }
 
-    #[test]
-    fn test_lookup_tag_backlinks_with_context_scraps() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn test_lookup_tag_backlinks_with_context_scraps(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
         project
             .add_scrap("scrap1.md", b"# Scrap 1\n\nThis links to [[test_tag]].")
             .add_scrap_with_context(
@@ -132,10 +131,10 @@ mod tests {
         assert!(scrap_keys.contains(&("scrap2".to_string(), Some("Context".to_string()))));
     }
 
-    #[test]
-    fn test_lookup_tag_backlinks_no_backlinks() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn test_lookup_tag_backlinks_no_backlinks(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
         project.add_scrap(
             "scrap1.md",
             b"# Scrap 1\n\nThis scrap doesn't reference any tags.",
@@ -150,10 +149,10 @@ mod tests {
         assert_eq!(results.len(), 0);
     }
 
-    #[test]
-    fn test_lookup_tag_backlinks_invalid_tag() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn test_lookup_tag_backlinks_invalid_tag(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
         project
             .add_scrap("scrap1.md", b"# Scrap 1\n\nThis links to [[actual_tag]].")
             .add_scrap("scrap2.md", b"# Scrap 2\n\nThis links to [[actual_scrap]].")
@@ -189,10 +188,10 @@ mod tests {
         assert_eq!(tag_results[0].title.to_string(), "scrap1");
     }
 
-    #[test]
-    fn test_lookup_tag_backlinks_empty_scraps_directory() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn test_lookup_tag_backlinks_empty_scraps_directory(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
         let usecase = LookupTagBacklinksUsecase::new(&project.scraps_dir);
 
         let results = usecase

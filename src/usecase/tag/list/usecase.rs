@@ -31,16 +31,15 @@ impl ListTagUsecase {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_fixtures::TempScrapProject;
+    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
     use itertools::Itertools;
+    use rstest::rstest;
 
     use super::*;
     use scraps_libs::model::tag::Tag;
 
-    #[test]
-    fn it_run() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn it_run(#[from(temp_scrap_project)] project: TempScrapProject) {
         project
             .add_scrap("test1.md", b"#[[Tag1]] #[[Tag2]]")
             .add_scrap("test2.md", b"#[[Tag1]] #[[Tag3]]");

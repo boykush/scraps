@@ -85,12 +85,11 @@ impl LookupScrapLinksUsecase {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_fixtures::TempScrapProject;
+    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use rstest::rstest;
 
-    #[test]
-    fn test_lookup_scrap_links_success() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn test_lookup_scrap_links_success(#[from(temp_scrap_project)] project: TempScrapProject) {
         project
             .add_scrap(
                 "scrap1.md",
@@ -113,10 +112,8 @@ mod tests {
         assert!(titles.contains(&"scrap3".to_string()));
     }
 
-    #[test]
-    fn test_lookup_scrap_links_with_context() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn test_lookup_scrap_links_with_context(#[from(temp_scrap_project)] project: TempScrapProject) {
         project
             .add_scrap_with_context(
                 "Context",
@@ -135,10 +132,8 @@ mod tests {
         assert_eq!(results[0].title.to_string(), "scrap2");
     }
 
-    #[test]
-    fn test_lookup_scrap_links_not_found() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn test_lookup_scrap_links_not_found(#[from(temp_scrap_project)] project: TempScrapProject) {
         project.add_scrap("scrap1.md", b"# Scrap 1\n\nContent.");
 
         let usecase = LookupScrapLinksUsecase::new(&project.scraps_dir);
@@ -149,10 +144,8 @@ mod tests {
         assert!(result.unwrap_err().to_string().contains("Scrap not found"));
     }
 
-    #[test]
-    fn test_lookup_scrap_links_no_links() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn test_lookup_scrap_links_no_links(#[from(temp_scrap_project)] project: TempScrapProject) {
         project.add_scrap("scrap1.md", b"# Scrap 1\n\nThis scrap has no links.");
 
         let usecase = LookupScrapLinksUsecase::new(&project.scraps_dir);

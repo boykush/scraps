@@ -194,18 +194,17 @@ impl BuildUsecase {
 mod tests {
     use std::fs;
 
-    use crate::test_fixtures::TempScrapProject;
+    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
     use crate::usecase::build::model::{color_scheme::ColorScheme, paging::Paging, sort::SortKey};
     use crate::usecase::progress::tests::ProgressTest;
+    use rstest::rstest;
 
     use super::*;
     use scraps_libs::{git::tests::GitCommandTest, lang::LangCode};
     use url::Url;
 
-    #[test]
-    fn it_run() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn it_run(#[from(temp_scrap_project)] project: TempScrapProject) {
         // Create scraps
         project
             .add_scrap(
@@ -289,10 +288,10 @@ mod tests {
         assert!(!result8.is_empty());
     }
 
-    #[test]
-    fn it_run_when_build_search_index_is_false() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn it_run_when_build_search_index_is_false(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
         // Create scraps
         project
             .add_scrap(

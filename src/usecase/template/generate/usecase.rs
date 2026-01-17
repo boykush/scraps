@@ -32,15 +32,14 @@ impl GenerateUsecase {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_fixtures::TempScrapProject;
+    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use rstest::rstest;
 
     use super::*;
     use std::fs;
 
-    #[test]
-    fn it_run_has_not_input_template_title() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn it_run_has_not_input_template_title(#[from(temp_scrap_project)] project: TempScrapProject) {
         // run args
         let template_name = "it_render_from_template";
         let template_title = &None;
@@ -62,10 +61,8 @@ mod tests {
         assert_eq!(result.unwrap(), "\n2019-09-20")
     }
 
-    #[test]
-    fn it_run_has_input_template_title() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn it_run_has_input_template_title(#[from(temp_scrap_project)] project: TempScrapProject) {
         // run args
         let template_name = "it_render_from_template";
         let template_title = &Some("override_title".into());
