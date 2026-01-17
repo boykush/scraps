@@ -39,6 +39,8 @@ rmcp = { version = "=0.13.0", features = ["server"] }
 schemars = "=1.2.0"
 rstest = "=0.26.1"
 tempfile = "=3.24.0"
+tokio-util = "=0.7.15"
+futures = "=0.3.31"
 
 [package]
 edition.workspace = true
@@ -94,3 +96,6 @@ scraps_libs.workspace = true
 scraps_libs.features = ["git_test"]
 rstest.workspace = true
 tempfile.workspace = true
+rmcp = { workspace = true, features = ["client", "server", "transport-async-rw"] }
+tokio-util.workspace = true
+futures.workspace = true
