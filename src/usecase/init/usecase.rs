@@ -31,14 +31,14 @@ impl<GC: GitCommand> InitUsecase<GC> {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_fixtures::SimpleTempDir;
+    use crate::test_fixtures::{simple_temp_dir, SimpleTempDir};
+    use rstest::rstest;
     use scraps_libs::git::GitCommandImpl;
 
     use super::*;
 
-    #[test]
-    fn it_run() {
-        let temp_dir = SimpleTempDir::new();
+    #[rstest]
+    fn it_run(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
         let project_path = temp_dir.path.join("project");
 
         let git_command = GitCommandImpl::new();

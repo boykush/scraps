@@ -56,17 +56,16 @@ impl SearchIndexRender {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_fixtures::TempScrapProject;
+    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use rstest::rstest;
     use std::fs;
     use url::Url;
 
     use super::*;
     use scraps_libs::model::scrap::Scrap;
 
-    #[test]
-    fn it_run() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn it_run(#[from(temp_scrap_project)] project: TempScrapProject) {
         // Add static search_index.json template
         project.add_static_file(
             "search_index.json",

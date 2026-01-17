@@ -77,14 +77,13 @@ impl SearchUsecase {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_fixtures::TempScrapProject;
+    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use rstest::rstest;
 
     use super::*;
 
-    #[test]
-    fn it_run() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn it_run(#[from(temp_scrap_project)] project: TempScrapProject) {
         project
             .add_scrap("test1.md", b"# Test Document 1\nThis is a test document.")
             .add_scrap("test2.md", b"# Another Document\nAnother test content.");
@@ -100,10 +99,8 @@ mod tests {
         assert!(results.iter().all(|r| !r.md_text.is_empty()));
     }
 
-    #[test]
-    fn it_handles_duplicate_titles() {
-        let project = TempScrapProject::new();
-
+    #[rstest]
+    fn it_handles_duplicate_titles(#[from(temp_scrap_project)] project: TempScrapProject) {
         // Two scraps with the same title but different contexts (ctx/ and root)
         project
             .add_scrap_with_context(
