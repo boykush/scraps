@@ -1,4 +1,5 @@
 mod cli;
+mod constants;
 mod error;
 mod mcp;
 mod service;

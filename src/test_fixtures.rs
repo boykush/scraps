@@ -3,6 +3,7 @@
 //! This module provides composable test fixtures that create temporary
 //! directory structures with automatic cleanup.
 
+use crate::constants::CONFIG_FILE_NAME;
 use rstest::fixture;
 use std::fs;
 use std::path::PathBuf;
@@ -102,7 +103,7 @@ impl TempScrapProject {
         self
     }
 
-    /// Add a Config.toml file to the project root
+    /// Add config file to the project root
     ///
     /// # Arguments
     /// * `content` - TOML configuration content as bytes
@@ -112,7 +113,7 @@ impl TempScrapProject {
     /// project.add_config(b"scraps_dir = \"docs\"\n\n[ssg]\nbase_url = \"https://example.com/\"\ntitle = \"Test\"");
     /// ```
     pub fn add_config(&self, content: &[u8]) -> &Self {
-        let config_path = self.project_root.join("Config.toml");
+        let config_path = self.project_root.join(CONFIG_FILE_NAME);
         fs::write(&config_path, content).expect("Failed to write config file");
         self
     }
@@ -302,7 +303,7 @@ mod tests {
         let project = TempScrapProject::new();
         project.add_config(b"[ssg]\nbase_url = \"https://example.com/\"\ntitle = \"Test\"");
 
-        let config_path = project.project_root.join("Config.toml");
+        let config_path = project.project_root.join(CONFIG_FILE_NAME);
         assert!(config_path.exists());
     }
 
