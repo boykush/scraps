@@ -1,5 +1,5 @@
 To use Scraps as a static site generator (SSG), you need to configure the
-`base_url` and `title` fields in your `Config.toml` file.
+`base_url` and `title` fields in your `.scraps.toml` file.
 
 ## Step 1: Edit base_url
 

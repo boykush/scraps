@@ -67,7 +67,7 @@ When a user requests to create a new scrap:
 
 ### File Organization
 
-- Scraps directory is configurable in `Config.toml`
+- Scraps directory is configurable in `.scraps.toml`
 - Use folders for context when titles overlap
 - Keep folder structure flat (avoid deep nesting)
 - Context appears in the static site as metadata

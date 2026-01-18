@@ -115,7 +115,7 @@ mod tests {
     #[rstest]
     fn test_scraps_dir_path_default(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
         temp_dir.add_dir("test_project_scraps").add_file(
-            "test_project_scraps/Config.toml",
+            "test_project_scraps/.scraps.toml",
             br#"
 [ssg]
 title = "Test"
@@ -135,7 +135,7 @@ base_url = "http://example.com/"
     #[rstest]
     fn test_scraps_dir_path_custom(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
         temp_dir.add_dir("test_project_scraps_custom").add_file(
-            "test_project_scraps_custom/Config.toml",
+            "test_project_scraps_custom/.scraps.toml",
             br#"
 scraps_dir = "custom_docs"
 

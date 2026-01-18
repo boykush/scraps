@@ -99,11 +99,11 @@ pub enum CliError {
     ConfigLoad,
 
     #[error(
-        "Invalid Config.toml format. See: https://boykush.github.io/scraps/Reference/Configuration"
+        "Invalid .scraps.toml format. See: https://boykush.github.io/scraps/Reference/Configuration"
     )]
     InvalidConfigFormat,
 
-    #[error("Missing [ssg] section in Config.toml. This section is required for build and serve commands. See: https://boykush.github.io/scraps/Reference/Configuration")]
+    #[error("Missing [ssg] section in .scraps.toml. This section is required for build and serve commands. See: https://boykush.github.io/scraps/Reference/Configuration")]
     MissingSsgSection,
 }
 

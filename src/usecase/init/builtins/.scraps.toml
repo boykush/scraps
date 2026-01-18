@@ -1,4 +1,4 @@
-# The scraps directory path relative to this Config.toml (optional, default=scraps)
+# The scraps directory path relative to this .scraps.toml (optional, default=scraps)
 # scraps_dir = "scraps"
 
 # The site timezone (optional, default=UTC)

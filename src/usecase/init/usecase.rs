@@ -20,7 +20,7 @@ impl<GC: GitCommand> InitUsecase<GC> {
 
         fs::create_dir_all(project_dir).context(InitError::CreateDirectory)?;
         fs::create_dir(scraps_dir).context(InitError::CreateDirectory)?;
-        fs::write(config_toml_file, include_str!("builtins/Config.toml"))
+        fs::write(config_toml_file, include_str!("builtins/.scraps.toml"))
             .context(InitError::WriteFailure(config_toml_file.clone()))?;
         fs::write(gitignore_file, "public")
             .context(InitError::WriteFailure(gitignore_file.clone()))?;

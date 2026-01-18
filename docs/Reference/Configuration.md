@@ -1,6 +1,6 @@
 #[[Configuration]]
 
-Configuration is managed by `Config.toml` in the Scraps project.
+Configuration is managed by `.scraps.toml` in the Scraps project.
 
 See [[Tutorial/Configure Project]] for a quick setup guide.
 
@@ -20,8 +20,8 @@ Within the `[ssg]` section, `base_url` and `title` are required fields.
 
 All configuration variables used by Scraps and their default values are listed below.
 
-```toml:Config.toml
-# The scraps directory path relative to this Config.toml (optional, default=scraps)
+```toml:.scraps.toml
+# The scraps directory path relative to this .scraps.toml (optional, default=scraps)
 scraps_dir = "scraps"
 
 # The site timezone (optional, default=UTC)

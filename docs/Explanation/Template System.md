@@ -21,7 +21,7 @@ title = "{{ now() | date(timezone=timezone) }}"
 
 ## Available Variables
 
-- `timezone` - Access Config.toml timezone setting
+- `timezone` - Access .scraps.toml timezone setting
 - All [Tera built-in functions](https://keats.github.io/tera/docs/#built-in-functions)
 
 ## Examples
