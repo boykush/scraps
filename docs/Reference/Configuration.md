@@ -2,8 +2,6 @@
 
 Configuration is managed by `.scraps.toml` in the Scraps project.
 
-See [[Tutorial/Configure Project]] for a quick setup guide.
-
 ## Configuration Structure
 
 The configuration file has two sections:
