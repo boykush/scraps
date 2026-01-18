@@ -31,6 +31,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     // resolve paths
     let path_resolver = PathResolver::new(project_path)?;
     let config = ScrapConfig::from_path(project_path)?;
+    let ssg = config.require_ssg()?;
     let scraps_dir_path = path_resolver.scraps_dir(&config);
     let static_dir_path = path_resolver.static_dir();
     let public_dir_path = path_resolver.public_dir();
@@ -38,22 +39,24 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
 
     let git_command = GitCommandImpl::new();
     let progress = ProgressImpl::init(Instant::now());
-    let title = config.require_title()?;
-    let lang_code = config
+    let title = &ssg.title;
+    let lang_code = ssg
         .lang_code
+        .clone()
         .map(|c| c.into_lang_code())
         .unwrap_or_default();
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
-    let html_metadata = HtmlMetadata::new(&lang_code, &title, &config.description, &config.favicon);
-    let css_metadata = CssMetadata::new(&config.color_scheme.map_or_else(
+    let html_metadata = HtmlMetadata::new(&lang_code, title, &ssg.description, &ssg.favicon);
+    let css_metadata = CssMetadata::new(&ssg.color_scheme.clone().map_or_else(
         || ColorScheme::OsSetting,
         ColorSchemeConfig::into_color_scheme,
     ));
-    let build_search_index = config.build_search_index.unwrap_or(true);
-    let sort_key = config
+    let build_search_index = ssg.build_search_index.unwrap_or(true);
+    let sort_key = ssg
         .sort_key
+        .clone()
         .map_or_else(|| SortKey::CommittedDate, SortKeyConfig::into_sort_key);
-    let paging = match config.paginate_by {
+    let paging = match ssg.paginate_by {
         None => Paging::Not,
         Some(u) => Paging::By(u),
     };

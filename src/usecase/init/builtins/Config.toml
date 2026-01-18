@@ -1,11 +1,17 @@
-# The site base url (required for build and serve commands)
-# base_url = "https://username.github.io/repository-name/"
-
-# The site title (required for build and serve commands)
-# title = "My Site"
-
 # The scraps directory path relative to this Config.toml (optional, default=scraps)
 # scraps_dir = "scraps"
+
+# The site timezone (optional, default=UTC)
+# timezone = "UTC"
+
+# SSG (Static Site Generator) configuration section
+# This section is required for build and serve commands
+[ssg]
+# The site base url (required)
+base_url = "https://username.github.io/repository-name/"
+
+# The site title (required)
+title = "My Site"
 
 # The site language (compliant with iso639-1, default=en)
 # lang_code = "en"
@@ -15,9 +21,6 @@
 
 # The site favicon in the form of png file URL (optional)
 # favicon = ""
-
-# The site timezone (optional, default=UTC)
-# timezone = "UTC"
 
 # The site color scheme (optional, default=os_setting, choices=os_setting or only_light or only_dark)
 # color_scheme = "os_setting"

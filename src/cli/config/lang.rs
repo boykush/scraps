@@ -2,7 +2,7 @@ use scraps_libs::lang::LangCode;
 use serde::de::{self, Deserialize, Deserializer};
 use std::str::FromStr;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LangCodeConfig(LangCode);
 
 impl<'de> Deserialize<'de> for LangCodeConfig {

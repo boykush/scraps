@@ -109,7 +109,7 @@ impl TempScrapProject {
     ///
     /// # Example
     /// ```no_run
-    /// project.add_config(b"base_url = \"https://example.com\"");
+    /// project.add_config(b"scraps_dir = \"docs\"\n\n[ssg]\nbase_url = \"https://example.com/\"\ntitle = \"Test\"");
     /// ```
     pub fn add_config(&self, content: &[u8]) -> &Self {
         let config_path = self.project_root.join("Config.toml");
@@ -300,7 +300,7 @@ mod tests {
     #[test]
     fn test_temp_scrap_project_add_config() {
         let project = TempScrapProject::new();
-        project.add_config(b"base_url = \"https://example.com\"");
+        project.add_config(b"[ssg]\nbase_url = \"https://example.com/\"\ntitle = \"Test\"");
 
         let config_path = project.project_root.join("Config.toml");
         assert!(config_path.exists());

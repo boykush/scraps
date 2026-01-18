@@ -12,19 +12,33 @@ use super::{
     sort_key::SortKeyConfig,
 };
 
+/// SSG-specific configuration (site generation settings)
 #[derive(Debug, Deserialize)]
-pub struct ScrapConfig {
-    pub base_url: Option<BaseUrlConfig>,
-    pub title: Option<String>,
-    pub scraps_dir: Option<PathBuf>,
+pub struct SsgConfig {
+    pub base_url: BaseUrlConfig,
+    pub title: String,
     pub lang_code: Option<LangCodeConfig>,
     pub description: Option<String>,
     pub favicon: Option<Url>,
-    pub timezone: Option<Tz>,
     pub build_search_index: Option<bool>,
     pub sort_key: Option<SortKeyConfig>,
     pub paginate_by: Option<usize>,
     pub color_scheme: Option<ColorSchemeConfig>,
+}
+
+impl SsgConfig {
+    /// Gets base_url as BaseUrl
+    pub fn base_url(&self) -> BaseUrl {
+        self.base_url.clone().into_base_url()
+    }
+}
+
+/// Main configuration struct
+#[derive(Debug, Deserialize)]
+pub struct ScrapConfig {
+    pub scraps_dir: Option<PathBuf>,
+    pub timezone: Option<Tz>,
+    pub ssg: Option<SsgConfig>,
 }
 
 impl ScrapConfig {
@@ -39,38 +53,18 @@ impl ScrapConfig {
 
         config
             .try_deserialize::<ScrapConfig>()
-            .context(CliError::ConfigLoad)
+            .context(CliError::InvalidConfigFormat)
     }
 
-    /// Validates that title is present and non-empty
-    pub fn require_title(&self) -> ScrapsResult<String> {
-        self.title
-            .as_deref()
-            .filter(|s| !s.trim().is_empty())
-            .map(|s| s.to_string())
-            .ok_or_else(|| {
-                CliError::MissingRequiredConfig {
-                    field: "title".to_string(),
-                }
-                .into()
-            })
-    }
-
-    /// Validates that base_url is present
-    pub fn require_base_url(&self) -> ScrapsResult<BaseUrl> {
-        self.base_url
+    /// Requires SSG section to be present (for build/serve commands)
+    pub fn require_ssg(&self) -> ScrapsResult<&SsgConfig> {
+        self.ssg
             .as_ref()
-            .ok_or_else(|| {
-                CliError::MissingRequiredConfig {
-                    field: "base_url".to_string(),
-                }
-                .into()
-            })
-            .map(|config| config.clone().into_base_url())
+            .ok_or_else(|| CliError::MissingSsgSection.into())
     }
 
-    /// Gets optional base_url if present
+    /// Gets optional base_url if ssg section is present
     pub fn get_base_url(&self) -> Option<BaseUrl> {
-        self.base_url.as_ref().map(|c| c.clone().into_base_url())
+        self.ssg.as_ref().map(|s| s.base_url())
     }
 }

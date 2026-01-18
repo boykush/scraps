@@ -9,7 +9,7 @@ pub enum SerdeSortKey {
     LinkedCount,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct SortKeyConfig(#[serde(with = "SerdeSortKey")] SortKey);
 
 impl SortKeyConfig {

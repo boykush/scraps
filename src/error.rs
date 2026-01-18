@@ -98,8 +98,13 @@ pub enum CliError {
     #[error("Failed when load config")]
     ConfigLoad,
 
-    #[error("Missing required configuration field '{field}' in Config.toml. Please add '{field} = \"your-value\"' to your Config.toml file.")]
-    MissingRequiredConfig { field: String },
+    #[error(
+        "Invalid Config.toml format. See: https://boykush.github.io/scraps/Reference/Configuration"
+    )]
+    InvalidConfigFormat,
+
+    #[error("Missing [ssg] section in Config.toml. This section is required for build and serve commands. See: https://boykush.github.io/scraps/Reference/Configuration")]
+    MissingSsgSection,
 }
 
 #[derive(Error, PartialEq, Debug)]
