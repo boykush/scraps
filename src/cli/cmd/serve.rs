@@ -45,7 +45,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
         .clone()
         .map(|c| c.into_lang_code())
         .unwrap_or_default();
-    let timezone = ssg.timezone.unwrap_or(chrono_tz::UTC);
+    let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
     let html_metadata = HtmlMetadata::new(&lang_code, title, &ssg.description, &ssg.favicon);
     let css_metadata = CssMetadata::new(&ssg.color_scheme.clone().map_or_else(
         || ColorScheme::OsSetting,

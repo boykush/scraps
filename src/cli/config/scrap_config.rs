@@ -20,7 +20,6 @@ pub struct SsgConfig {
     pub lang_code: Option<LangCodeConfig>,
     pub description: Option<String>,
     pub favicon: Option<Url>,
-    pub timezone: Option<Tz>,
     pub build_search_index: Option<bool>,
     pub sort_key: Option<SortKeyConfig>,
     pub paginate_by: Option<usize>,
@@ -38,6 +37,7 @@ impl SsgConfig {
 #[derive(Debug, Deserialize)]
 pub struct ScrapConfig {
     pub scraps_dir: Option<PathBuf>,
+    pub timezone: Option<Tz>,
     pub ssg: Option<SsgConfig>,
 }
 

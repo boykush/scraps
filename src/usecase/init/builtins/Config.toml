@@ -1,6 +1,9 @@
 # The scraps directory path relative to this Config.toml (optional, default=scraps)
 # scraps_dir = "scraps"
 
+# The site timezone (optional, default=UTC)
+# timezone = "UTC"
+
 # SSG (Static Site Generator) configuration section
 # This section is required for build and serve commands
 [ssg]
@@ -18,9 +21,6 @@ title = "My Site"
 
 # The site favicon in the form of png file URL (optional)
 # favicon = ""
-
-# The site timezone (optional, default=UTC)
-# timezone = "UTC"
 
 # The site color scheme (optional, default=os_setting, choices=os_setting or only_light or only_dark)
 # color_scheme = "os_setting"

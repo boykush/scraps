@@ -8,8 +8,7 @@ See [[Tutorial/Configure Project]] for a quick setup guide.
 
 The configuration file has two sections:
 
-- **Root level**: Contains `scraps_dir` for specifying the documentation
-  directory
+- **Root level**: Contains `scraps_dir` and `timezone` for general settings
 - **[ssg] section**: Contains all static site generator settings
 
 The `[ssg]` section is required for `build` and `serve` commands. Other commands
@@ -24,6 +23,9 @@ All configuration variables used by Scraps and their default values are listed b
 ```toml:Config.toml
 # The scraps directory path relative to this Config.toml (optional, default=scraps)
 scraps_dir = "scraps"
+
+# The site timezone (optional, default=UTC)
+timezone = "UTC"
 
 # SSG (Static Site Generator) configuration section
 # This section is required for build and serve commands
@@ -42,9 +44,6 @@ description = ""
 
 # The site favicon in the form of png file URL (optional)
 favicon = ""
-
-# The site timezone (optional, default=UTC)
-timezone = "UTC"
 
 # The site color scheme
 # (optional, default=os_setting, choices=os_setting or only_light or only_dark)
