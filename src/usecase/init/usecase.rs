@@ -1,3 +1,4 @@
+use crate::constants::CONFIG_FILE_NAME;
 use crate::error::{anyhow::Context, InitError, ScrapsResult};
 use std::{fs, path::Path};
 
@@ -14,7 +15,7 @@ impl<GC: GitCommand> InitUsecase<GC> {
 
     pub fn execute(&self, project_dir: &Path) -> ScrapsResult<()> {
         let scraps_dir = project_dir.join("scraps");
-        let config_toml_file = &project_dir.join("Config.toml");
+        let config_toml_file = &project_dir.join(CONFIG_FILE_NAME);
         let gitignore_file = &project_dir.join(".gitignore");
 
         fs::create_dir_all(project_dir).context(InitError::CreateDirectory)?;
@@ -48,7 +49,7 @@ mod tests {
 
         assert!(project_path.exists());
         assert!(project_path.join("scraps").exists());
-        assert!(project_path.join("Config.toml").exists());
+        assert!(project_path.join(CONFIG_FILE_NAME).exists());
         assert!(project_path.join(".gitignore").exists());
         assert!(project_path.join(".git").exists());
 

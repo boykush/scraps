@@ -1,4 +1,5 @@
 use crate::cli::config::scrap_config::ScrapConfig;
+use crate::constants::CONFIG_FILE_NAME;
 use crate::error::ScrapsResult;
 use anyhow::anyhow;
 use std::env;
@@ -66,9 +67,9 @@ impl PathResolver {
         self.project_root.join("templates")
     }
 
-    /// Get the config file path (Config.toml)
+    /// Get the config file path
     pub fn config_path(&self) -> PathBuf {
-        self.project_root.join("Config.toml")
+        self.project_root.join(CONFIG_FILE_NAME)
     }
 
     /// Get the project root directory
@@ -193,7 +194,7 @@ base_url = "http://example.com/"
         let test_project_path = temp_dir.path.join("test_project_config");
         let resolver = PathResolver::new(Some(&test_project_path)).unwrap();
         let config_path = resolver.config_path();
-        assert_eq!(config_path.file_name().unwrap(), "Config.toml");
+        assert_eq!(config_path.file_name().unwrap(), CONFIG_FILE_NAME);
         assert!(config_path.starts_with(&test_project_path));
     }
 }
