@@ -14,7 +14,7 @@ This guide covers using Scraps as a static site generator (SSG).
      ```
 
 3. **Configure Project**
-   - Follow [[Tutorial/Configure Project]] to set up your `.scraps.toml`
+   - Follow [[Reference/Configuration]] to set up your `.scraps.toml`
 
 ## Content Creation
 
