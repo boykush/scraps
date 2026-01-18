@@ -95,7 +95,7 @@ pub enum CliError {
     #[error("Not display data on cli")]
     Display,
 
-    #[error("Failed when load config")]
+    #[error("Failed to load .scraps.toml. See: https://boykush.github.io/scraps/Reference/Configuration")]
     ConfigLoad,
 
     #[error(
