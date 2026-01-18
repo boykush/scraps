@@ -116,6 +116,7 @@ mod tests {
         temp_dir.add_dir("test_project_scraps").add_file(
             "test_project_scraps/Config.toml",
             br#"
+[ssg]
 title = "Test"
 base_url = "http://example.com/"
 "#,
@@ -135,9 +136,11 @@ base_url = "http://example.com/"
         temp_dir.add_dir("test_project_scraps_custom").add_file(
             "test_project_scraps_custom/Config.toml",
             br#"
+scraps_dir = "custom_docs"
+
+[ssg]
 title = "Test"
 base_url = "http://example.com/"
-scraps_dir = "custom_docs"
 "#,
         );
 

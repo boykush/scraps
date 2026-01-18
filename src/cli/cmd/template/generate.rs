@@ -19,7 +19,11 @@ pub fn run(
     let scraps_dir_path = path_resolver.scraps_dir(&config);
 
     let usecase = GenerateUsecase::new(&scraps_dir_path, &templates_dir_path);
-    let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
+    let timezone = config
+        .ssg
+        .as_ref()
+        .and_then(|s| s.timezone)
+        .unwrap_or(chrono_tz::UTC);
     usecase.execute(template_name, scrap_title, &timezone)?;
 
     Ok(())

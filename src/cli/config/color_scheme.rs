@@ -10,7 +10,7 @@ pub enum SerdeColorScheme {
     OnlyDark,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ColorSchemeConfig(#[serde(with = "SerdeColorScheme")] ColorScheme);
 
 impl ColorSchemeConfig {
