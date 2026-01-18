@@ -44,7 +44,7 @@ Create a GitHub Release for the Scraps project using the following workflow:
      ### ✨ Features
      - feat: add configurable scraps directory support (#123)
 
-       Users can now customize the scraps directory location via Config.toml.
+       Users can now customize the scraps directory location via .scraps.toml.
        This allows for better project organization and flexibility in documentation structure.
 
      ### 🐛 Bug Fixes

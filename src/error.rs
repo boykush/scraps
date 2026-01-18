@@ -95,15 +95,15 @@ pub enum CliError {
     #[error("Not display data on cli")]
     Display,
 
-    #[error("Failed when load config")]
+    #[error("Failed to load .scraps.toml. See: https://boykush.github.io/scraps/scraps/configuration.reference.html")]
     ConfigLoad,
 
     #[error(
-        "Invalid Config.toml format. See: https://boykush.github.io/scraps/Reference/Configuration"
+        "Invalid .scraps.toml format. See: https://boykush.github.io/scraps/scraps/configuration.reference.html"
     )]
     InvalidConfigFormat,
 
-    #[error("Missing [ssg] section in Config.toml. This section is required for build and serve commands. See: https://boykush.github.io/scraps/Reference/Configuration")]
+    #[error("Missing [ssg] section in .scraps.toml. This section is required for build and serve commands. See: https://boykush.github.io/scraps/scraps/configuration.reference.html")]
     MissingSsgSection,
 }
 

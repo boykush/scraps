@@ -10,7 +10,7 @@ This command initializes a new Scraps project. It creates the following structur
 ❯ tree -a -L 1
 .
 ├── .gitignore    # Git ignore patterns for Scraps projects
-├── Config.toml   # Project configuration file
+├── .scraps.toml  # Project configuration file
 └── scraps       # Directory for your Markdown files
 ```
 
