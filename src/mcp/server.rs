@@ -29,7 +29,7 @@ impl ScrapsServer {
 #[tool_router]
 impl ScrapsServer {
     #[tool(
-        description = "Search for scraps by title and context (ctx) using fuzzy matching. Returns matching scraps with their titles, contexts, and full content."
+        description = "Search for scraps using fuzzy matching against title and body content. Space-separated keywords use AND logic (all must match). Returns matching scraps with titles, contexts, and full content."
     )]
     async fn search_scraps(
         &self,
