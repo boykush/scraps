@@ -37,11 +37,7 @@ impl FuzzySearchEngine {
 impl SearchEngine for FuzzySearchEngine {
     fn search(&self, items: &[SearchItem], query: &str, num: usize) -> Vec<SearchItem> {
         if query.is_empty() {
-            return items
-                .iter()
-                .take(num)
-                .map(|item| SearchItem::new(&item.title))
-                .collect();
+            return items.iter().take(num).cloned().collect();
         }
 
         // Split query by whitespace for AND search (fzf-compatible)
@@ -50,15 +46,15 @@ impl SearchEngine for FuzzySearchEngine {
         let mut results_with_scores: Vec<(SearchItem, i64)> = items
             .iter()
             .filter_map(|item| {
-                // AND search: all keywords must match
+                // AND search: all keywords must match against search_text
                 let scores: Vec<i64> = keywords
                     .iter()
-                    .filter_map(|kw| self.matcher.fuzzy_match(&item.title, kw))
+                    .filter_map(|kw| self.matcher.fuzzy_match(&item.search_text, kw))
                     .collect();
 
                 // Only include if all keywords matched
                 if scores.len() == keywords.len() {
-                    Some((SearchItem::new(&item.title), scores.iter().sum()))
+                    Some((item.clone(), scores.iter().sum()))
                 } else {
                     None
                 }
@@ -83,12 +79,12 @@ mod tests {
     #[fixture]
     fn search_items() -> Vec<SearchItem> {
         vec![
-            SearchItem::new("Test Document"),
-            SearchItem::new("Another Document"),
-            SearchItem::new("Sample Test"),
-            SearchItem::new("Documentation"),
-            SearchItem::new("Testing Framework"),
-            SearchItem::new("Test Suite"),
+            SearchItem::new("Test Document", ""),
+            SearchItem::new("Another Document", ""),
+            SearchItem::new("Sample Test", ""),
+            SearchItem::new("Documentation", ""),
+            SearchItem::new("Testing Framework", ""),
+            SearchItem::new("Test Suite", ""),
         ]
     }
 
@@ -202,7 +198,7 @@ mod tests {
         let engine = FuzzySearchEngine::new();
         let mut items = Vec::new();
         for i in 0..101 {
-            items.push(SearchItem::new(&format!("Document {}", i)));
+            items.push(SearchItem::new(&format!("Document {}", i), ""));
         }
 
         let results = engine.search(&items, "", 100);
@@ -214,7 +210,7 @@ mod tests {
         let engine = FuzzySearchEngine::new();
         let mut items = Vec::new();
         for i in 0..10 {
-            items.push(SearchItem::new(&format!("Test Document {}", i)));
+            items.push(SearchItem::new(&format!("Test Document {}", i), ""));
         }
 
         // Test with num=5
@@ -269,9 +265,9 @@ mod tests {
     fn test_and_search_non_consecutive_keywords() {
         let engine = FuzzySearchEngine::new();
         let items = vec![
-            SearchItem::new("Rust hoge Programming"),
-            SearchItem::new("Rust Programming"),
-            SearchItem::new("Python Language"),
+            SearchItem::new("Rust hoge Programming", ""),
+            SearchItem::new("Rust Programming", ""),
+            SearchItem::new("Python Language", ""),
         ];
 
         let results = engine.search(&items, "Rust Programming", 100);
@@ -290,9 +286,9 @@ mod tests {
     fn test_and_search_reversed_keyword_order() {
         let engine = FuzzySearchEngine::new();
         let items = vec![
-            SearchItem::new("Rust Programming"),
-            SearchItem::new("Programming Rust"),
-            SearchItem::new("Python Language"),
+            SearchItem::new("Rust Programming", ""),
+            SearchItem::new("Programming Rust", ""),
+            SearchItem::new("Python Language", ""),
         ];
 
         let results = engine.search(&items, "Programming Rust", 100);
@@ -303,5 +299,20 @@ mod tests {
         let titles: Vec<&str> = results.iter().map(|r| r.title.as_str()).collect();
         assert!(titles.contains(&"Rust Programming"));
         assert!(titles.contains(&"Programming Rust"));
+    }
+
+    /// Test: search matches body content
+    #[test]
+    fn test_search_matches_body_content() {
+        let engine = FuzzySearchEngine::new();
+        let items = vec![
+            SearchItem::new("Document A", "contains uniquekeyword here"),
+            SearchItem::new("Document B", "no match"),
+        ];
+
+        let results = engine.search(&items, "uniquekeyword", 100);
+
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].title, "Document A");
     }
 }

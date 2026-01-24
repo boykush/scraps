@@ -40,11 +40,14 @@ impl SearchUsecase {
             .map(|scrap| (scrap.self_key().to_string(), scrap))
             .collect();
 
-        // Create search items in memory
+        // Create search items in memory (title + body for search)
         let lib_items: Vec<scraps_libs::search::result::SearchItem> = scraps
             .iter()
             .map(|scrap| {
-                scraps_libs::search::result::SearchItem::new(&scrap.self_key().to_string())
+                scraps_libs::search::result::SearchItem::new(
+                    &scrap.self_key().to_string(),
+                    scrap.md_text(),
+                )
             })
             .collect();
 
@@ -172,5 +175,22 @@ mod tests {
             "Expected title to be 'duplicate', but got {:?}",
             titles
         );
+    }
+
+    /// Test: search matches body content, not just title
+    #[rstest]
+    fn it_searches_body_content(#[from(temp_scrap_project)] project: TempScrapProject) {
+        project.add_scrap(
+            "mydoc.md",
+            b"# mydoc\n\nThis body contains uniquekeyword here.",
+        );
+
+        let usecase = SearchUsecase::new(&project.scraps_dir);
+
+        // Search by body-only keyword - should match
+        let results = usecase.execute("uniquekeyword", 100).unwrap();
+
+        assert_eq!(results.len(), 1, "Body keyword should match scrap");
+        assert_eq!(results[0].title.to_string(), "mydoc");
     }
 }
