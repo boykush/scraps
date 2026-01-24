@@ -1,86 +1,60 @@
 ---
 name: scraps-writer
-description: Create Scraps documentation with intelligent tag selection and backlink suggestions. Use when creating new scraps, writing documentation with Wiki-links, or when the user mentions scraps, wiki-links, or documentation.
-model: sonnet
+description: Knowledge base for Scraps documentation conventions including Wiki-link syntax, Markdown features, and MCP tools usage.
 allowed-tools: mcp__plugin_scraps-writer_scraps__*, Read, Write, Edit, Glob
-user-invocable: true
+user-invocable: false
 argument-hint: [max-lines]
 ---
 
 # Scraps Writer
 
-You are a specialized skill for creating Scraps documentation with Wiki-link notation.
+Knowledge base for creating Scraps documentation with Wiki-link notation.
 
 ## Options
 
-- **max-lines**: `$ARGUMENTS` (optional) - Maximum number of lines for the generated scrap. If not specified, use reasonable length based on content.
+- **max-lines**: `$ARGUMENTS` (optional) - Maximum number of lines for the generated scrap.
 
-## Your Role
+## MCP Tools Usage
 
-Help users create high-quality Markdown documentation scraps that:
+- `list_tags` → Identify tags for a scrap. Returns all tags sorted by backlinks count.
+- `search_scraps` → Find related scraps by keyword with fuzzy matching.
+- `lookup_tag_backlinks` → Check which scraps are using a specific tag.
+- `lookup_scrap_links` → Get all scraps that a scrap links to.
+- `lookup_scrap_backlinks` → Get all scraps that link to a scrap.
 
-- Follow Scraps conventions (CommonMark, GitHub-flavored Markdown, Wiki-links)
-- Use appropriate tags from the existing knowledge base
-- Connect well with existing scraps through backlinks
+## Wiki-Link Syntax
 
-## Workflow
+### Normal Link
 
-When a user requests to create a new scrap:
+`[[Page Name]]` - Links to an existing scrap with the specified title.
 
-1. **Understand the Request**
-   - Ask clarifying questions if the topic or content type is unclear
-   - Identify the context (folder) if applicable
-   - Understand the target audience and purpose
+### Alias Link
 
-2. **Research Existing Tags**
-   - Use `list_tags` to get available tags
-   - Analyze which tags are most relevant to the topic
-   - Consider tag backlinks count to understand their importance in the
-     knowledge base
+`[[Page Name|Display Text]]` - Links to a scrap with custom display text.
 
-3. **Search Related Scraps**
-   - Use `search_scraps` to find related content
-   - Use `lookup_tag_backlinks` for specific tags
-   - Identify scraps that should link to the new scrap
+### Context Link
 
-4. **Generate the Scrap**
-   - Create well-structured Markdown content
-   - Add appropriate tags using `#[[Tag]]` notation
-   - Include Wiki-links to related scraps using `[[Title]]` or `[[Context/Title]]`
-   - Organize content with clear headings and sections
+`[[Context/Page Name]]` - Links to a scrap in a specific context folder.
 
-5. **Suggest Backlinks**
-   - Provide a list of existing scraps that should add links to this new scrap
-   - Explain why each backlink makes sense
-   - Format suggestions clearly for easy implementation
+### Tag
 
-## Scraps Conventions
+`#[[Tag Name]]` - Creates a tag when no scrap with that title exists. Tags group scraps by category and generate an index page listing all scraps using that tag.
 
-### Wiki-Link Syntax
-
-- Normal link: `[[Page Name]]` - See [Normal Link](https://boykush.github.io/scraps/scraps/normal-link.reference.html)
-- Alias link: `[[Page Name|Display Text]]` - See [Alias Link](https://boykush.github.io/scraps/scraps/alias-link.reference.html)
-- Context link: `[[Context/Page Name]]` - See [Context Link](https://boykush.github.io/scraps/scraps/context-link.reference.html)
-- Tag: `#[[Tag Name]]` - See [Tag Link](https://boykush.github.io/scraps/scraps/tag-link.reference.html)
-
-### Markdown Features
+## Markdown Features
 
 - CommonMark specification
 - GitHub-flavored Markdown (tables, task lists, strikethrough)
 - Mermaid diagrams with `mermaid` code blocks
 - Autolinks for OGP cards: `<https://example.com>`
 
-### File Organization
+## File Organization
 
 - Scraps directory is configurable in `.scraps.toml`
 - Use folders for context when titles overlap
 - Keep folder structure flat (avoid deep nesting)
-- Context appears in the static site as metadata
 
 ## Best Practices
 
-- Always research and prefer existing tags over creating new ones
+- Prefer existing tags over creating new ones
 - Keep content focused and concise
-- Follow the single-responsibility principle for scraps
-- Ensure context folders are used only when necessary
-- Adapt to the user's project style and conventions
+- Follow single-responsibility principle for scraps
