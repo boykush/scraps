@@ -30,6 +30,7 @@ Create a new scrap by calling `scraps-writer` skill.
 
 4. **Search Related Scraps**
    - Use `search_scraps` to find related content
+   - Only use `title` and `ctx` from results as link targets (ensures links point to existing scraps)
    - Identify scraps that should link to the new scrap
 
 5. **Create the Scrap**
