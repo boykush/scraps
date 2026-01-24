@@ -24,6 +24,18 @@ test('search scraps', async ({ page }) => {
   expect(searchResults).toContain('What is Scraps?');
 });
 
+test('CDN libraries are loaded', async ({ page }) => {
+  await page.goto('/');
+
+  // Verify highlight.js is loaded
+  const hljsLoaded = await page.evaluate(() => typeof (window as any).hljs !== 'undefined');
+  expect(hljsLoaded).toBe(true);
+
+  // Verify Fuse.js is loaded
+  const fuseLoaded = await page.evaluate(() => typeof (window as any).Fuse !== 'undefined');
+  expect(fuseLoaded).toBe(true);
+});
+
 test('fetch OGP data', async ({ page }) => {
   await page.goto('/scraps/autolink.reference.html');
 

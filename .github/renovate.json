@@ -16,6 +16,21 @@
       "groupName": "Rust toolchain",
       "matchManagers": ["dockerfile", "mise"],
       "matchPackageNames": ["rust"]
+    },
+    {
+      "groupName": "CDN dependencies",
+      "matchManagers": ["regex"],
+      "matchPackageNames": ["highlight.js", "mermaid", "nord-highlightjs", "fuse.js"]
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["src/usecase/build/html/cdn_versions\\.rs$"],
+      "matchStrings": [
+        "\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\",\\s*// renovate: datasource=npm depName=(?<depName>[^\\s]+)"
+      ],
+      "datasourceTemplate": "npm"
     }
   ]
 }

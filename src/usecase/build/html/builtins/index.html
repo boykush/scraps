@@ -42,7 +42,7 @@
 {% block script %}
   {% if build_search_index == true %}
   <!-- For search scraps -->
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@{{ cdn.fusejs }}"></script>
   <script type="module">
     fetch('./search_index.json')
       .then(response => response.json())
