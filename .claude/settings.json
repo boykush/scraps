@@ -1,4 +1,5 @@
 {
+  "language": "English",
   "enabledPlugins": {
     "commit-commands@claude-code-plugins": true,
     "mcp-server@scraps-claude-code-plugins": true,
