@@ -27,6 +27,7 @@ Summarize a web article and create a scrap by calling `scraps-writer` skill.
 
 3. **Search Related Scraps**
    - Use `search_scraps` to find related content
+   - Only use `title` and `ctx` from results as link targets (ensures links point to existing scraps)
 
 4. **Create the Scrap**
    - Call `scraps-writer` skill with max-lines argument
