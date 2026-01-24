@@ -1,3 +1,4 @@
+mod cdn_versions;
 pub mod index_render;
 mod page_pointer;
 pub mod scrap_render;

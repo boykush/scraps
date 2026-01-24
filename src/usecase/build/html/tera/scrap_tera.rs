@@ -1,5 +1,6 @@
 use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
+use crate::usecase::build::html::cdn_versions::CDN_VERSIONS;
 use crate::usecase::build::model::html::HtmlMetadata;
 use chrono_tz::Tz;
 use once_cell::sync::Lazy;
@@ -42,6 +43,7 @@ pub fn base(
     context.insert("title", &metadata.title());
     context.insert("description", &metadata.description());
     context.insert("favicon", &metadata.favicon());
+    context.insert("cdn", &CDN_VERSIONS);
 
     Ok((tera, context))
 }
