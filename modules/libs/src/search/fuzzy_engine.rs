@@ -44,12 +44,24 @@ impl SearchEngine for FuzzySearchEngine {
                 .collect();
         }
 
+        // Split query by whitespace for AND search (fzf-compatible)
+        let keywords: Vec<&str> = query.split_whitespace().collect();
+
         let mut results_with_scores: Vec<(SearchItem, i64)> = items
             .iter()
             .filter_map(|item| {
-                self.matcher
-                    .fuzzy_match(&item.title, query)
-                    .map(|score| (SearchItem::new(&item.title), score))
+                // AND search: all keywords must match
+                let scores: Vec<i64> = keywords
+                    .iter()
+                    .filter_map(|kw| self.matcher.fuzzy_match(&item.title, kw))
+                    .collect();
+
+                // Only include if all keywords matched
+                if scores.len() == keywords.len() {
+                    Some((SearchItem::new(&item.title), scores.iter().sum()))
+                } else {
+                    None
+                }
             })
             .collect();
 
@@ -249,5 +261,47 @@ mod tests {
         for result in results {
             assert!(!result.title.is_empty());
         }
+    }
+
+    /// Test: AND search matches non-consecutive keywords (fzf-compatible)
+    /// Query "Rust Programming" should match "Rust hoge Programming"
+    #[test]
+    fn test_and_search_non_consecutive_keywords() {
+        let engine = FuzzySearchEngine::new();
+        let items = vec![
+            SearchItem::new("Rust hoge Programming"),
+            SearchItem::new("Rust Programming"),
+            SearchItem::new("Python Language"),
+        ];
+
+        let results = engine.search(&items, "Rust Programming", 100);
+
+        // Both "Rust hoge Programming" and "Rust Programming" should match
+        assert_eq!(results.len(), 2);
+
+        let titles: Vec<&str> = results.iter().map(|r| r.title.as_str()).collect();
+        assert!(titles.contains(&"Rust Programming"));
+        assert!(titles.contains(&"Rust hoge Programming"));
+    }
+
+    /// Test: AND search matches reversed keyword order (fzf-compatible)
+    /// Query "Programming Rust" should match "Rust Programming"
+    #[test]
+    fn test_and_search_reversed_keyword_order() {
+        let engine = FuzzySearchEngine::new();
+        let items = vec![
+            SearchItem::new("Rust Programming"),
+            SearchItem::new("Programming Rust"),
+            SearchItem::new("Python Language"),
+        ];
+
+        let results = engine.search(&items, "Programming Rust", 100);
+
+        // Both should match regardless of keyword order
+        assert_eq!(results.len(), 2);
+
+        let titles: Vec<&str> = results.iter().map(|r| r.title.as_str()).collect();
+        assert!(titles.contains(&"Rust Programming"));
+        assert!(titles.contains(&"Programming Rust"));
     }
 }
