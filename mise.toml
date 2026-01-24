@@ -5,7 +5,7 @@ experimental = true
 "rust" = { version = "1.92.0", profile = "default" }
 "hk" = "latest"
 "pkl" = "latest"
-"cargo:scraps" = "0.29.0"
+"cargo:scraps" = "0.30.0"
 "npm:markdownlint-cli2" = "latest"
 
 [hooks]
