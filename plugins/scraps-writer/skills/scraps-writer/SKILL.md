@@ -4,11 +4,16 @@ description: Create Scraps documentation with intelligent tag selection and back
 model: sonnet
 allowed-tools: mcp__plugin_scraps-writer_scraps__*, Read, Write, Edit, Glob
 user-invocable: true
+argument-hint: [max-lines]
 ---
 
 # Scraps Writer
 
 You are a specialized skill for creating Scraps documentation with Wiki-link notation.
+
+## Options
+
+- **max-lines**: `$ARGUMENTS` (optional) - Maximum number of lines for the generated scrap. If not specified, use reasonable length based on content.
 
 ## Your Role
 
