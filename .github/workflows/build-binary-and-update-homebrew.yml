@@ -37,27 +37,89 @@ jobs:
           target: ${{ matrix.target }}
           # (required) GitHub token for uploading assets to GitHub Releases.
           token: ${{ secrets.GITHUB_TOKEN }}
-  
+
   update-homebrew:
-    name: Update homebrew
+    name: Update homebrew formula
     needs: build
     runs-on: ubuntu-latest
+    if: ${{ !contains(github.ref, '-') }} # skip prereleases
     steps:
       - name: Extract version
-        id: extract-version
+        id: version
         run: |
-          echo "tag-name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-      - uses: mislav/bump-homebrew-formula-action@v2
-        if: ${{ !contains(github.ref, '-') }} # skip prereleases
-        with:
-          formula-name: scraps
-          formula-path: Formula/scraps.rb
-          homebrew-tap: boykush/homebrew-tap
-          base-branch: main
-          download-url: https://github.com/boykush/scraps/releases/download/${{ steps.extract-version.outputs.tag-name }}/scraps-aarch64-apple-darwin.tar.gz
-          commit-message: |
-            {{formulaName}} {{version}}
-  
-            Created by https://github.com/mislav/bump-homebrew-formula-action
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Calculate SHA256 for each platform
+        id: sha256
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          BASE_URL="https://github.com/boykush/scraps/releases/download/v${VERSION}"
+
+          calc_sha256() {
+            curl -sL "$1" | sha256sum | cut -d ' ' -f 1
+          }
+
+          echo "macos_arm=$(calc_sha256 ${BASE_URL}/scraps-aarch64-apple-darwin.tar.gz)" >> $GITHUB_OUTPUT
+          echo "macos_intel=$(calc_sha256 ${BASE_URL}/scraps-x86_64-apple-darwin.tar.gz)" >> $GITHUB_OUTPUT
+          echo "linux_arm=$(calc_sha256 ${BASE_URL}/scraps-aarch64-unknown-linux-gnu.tar.gz)" >> $GITHUB_OUTPUT
+          echo "linux_intel=$(calc_sha256 ${BASE_URL}/scraps-x86_64-unknown-linux-gnu.tar.gz)" >> $GITHUB_OUTPUT
+
+      - name: Generate formula
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          SHA256_MACOS_ARM: ${{ steps.sha256.outputs.macos_arm }}
+          SHA256_MACOS_INTEL: ${{ steps.sha256.outputs.macos_intel }}
+          SHA256_LINUX_ARM: ${{ steps.sha256.outputs.linux_arm }}
+          SHA256_LINUX_INTEL: ${{ steps.sha256.outputs.linux_intel }}
+        run: |
+          cat > scraps.rb << EOF
+          class Scraps < Formula
+            desc "A static site generator that builds a wiki from markdown files"
+            homepage "https://boykush.github.io/scraps"
+            license "MIT"
+            version "${VERSION}"
+
+            on_macos do
+              on_arm do
+                url "https://github.com/boykush/scraps/releases/download/v${VERSION}/scraps-aarch64-apple-darwin.tar.gz"
+                sha256 "${SHA256_MACOS_ARM}"
+              end
+              on_intel do
+                url "https://github.com/boykush/scraps/releases/download/v${VERSION}/scraps-x86_64-apple-darwin.tar.gz"
+                sha256 "${SHA256_MACOS_INTEL}"
+              end
+            end
+
+            on_linux do
+              on_arm do
+                url "https://github.com/boykush/scraps/releases/download/v${VERSION}/scraps-aarch64-unknown-linux-gnu.tar.gz"
+                sha256 "${SHA256_LINUX_ARM}"
+              end
+              on_intel do
+                url "https://github.com/boykush/scraps/releases/download/v${VERSION}/scraps-x86_64-unknown-linux-gnu.tar.gz"
+                sha256 "${SHA256_LINUX_INTEL}"
+              end
+            end
+
+            def install
+              bin.install "scraps"
+            end
+          end
+          EOF
+          sed -i 's/^          //' scraps.rb
+
+      - name: Push to homebrew-tap
         env:
           COMMITTER_TOKEN: ${{ secrets.HOMEBREW_COMMITTER_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git clone https://x-access-token:${COMMITTER_TOKEN}@github.com/boykush/homebrew-tap.git
+          cd homebrew-tap
+          cp ../scraps.rb Formula/scraps.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/scraps.rb
+          git commit -m "scraps ${VERSION}"
+          git push
