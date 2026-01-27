@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <!-- Page title -->
+        
+            <title>Scraps Doc</title>
+            <meta property="og:title" content="Scraps Doc" />
+            <meta name="twitter:title" content="Scraps Doc" />
+        
+        <!-- Page description -->
+        
+            <meta name="description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta property="og:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta name="twitter:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+        
+        <!-- Page favicon -->
+        
+            <link rel="icon" type="image/png" href="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;logo.png?raw=true" />
+        
+        <!-- Rubik font -->
+        <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">
+        <!-- Noto Sans JP font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+        <!-- Style sheet -->
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;main.css">
+        
+        
+    </head>
+    <body>
+        <header>
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;">
+                <h1>Scraps Doc</h1>
+            </a>
+        </header>
+        <main>
+            
+    <div class="tag">
+        <h1 class="title">CLI</h1>
+    </div>
+    
+    <ul class="scrap-links">
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/init.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Init</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#CLI
+❯ scraps init &amp;lt;PROJECT_NAME&amp;gt;
+
+This command initializes a new Scraps project. It creates the following structure:
+❯ tree -a -L 1
+.
+├── .gitignore    # Git ignore patterns for Scraps projects
+├── .scraps.toml  # Project configuration file
+└── scraps       # Directory for your Markdown files
+
+Examples
+# Initialize new project
+❯ scraps init my-knowledge-base
+❯ cd my-knowledge-base
+
+# Initialize with specific path
+❯ scraps init docs --path &#x2F;path&#x2F;to&#x2F;workspace
+
+After initializing the project, proceed to Build to generate your static site.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/build.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Build</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#CLI
+❯ scraps build
+
+This command processes Markdown files from the &#x2F;scraps directory and generates a static website.
+Source Structure
+❯ tree scraps
+scraps
+├── Getting Started.md
+└── Documentation.md
+
+Generated Files
+The command generates the following files in the public directory:
+❯ tree public
+public
+├── index.html      # Main page with scrap list
+├── getting-started.html
+├── documentation.html
+├── main.css       # Styling for the site
+└── search.json    # Search index (if enabled)
+
+Each Markdown file is converted to a slugified HTML file. Additional files like index.html and main.css are generated to create a complete static website.
+Examples
+# Basic build
+❯ scraps build
+
+# Build with verbose output
+❯ scraps build --verbose
+
+# Build from specific directory
+❯ scraps build --path &#x2F;path&#x2F;to&#x2F;project
+
+After building, use Serve to preview your site locally.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/tag.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Tag</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#CLI
+❯ scraps tag
+
+This command lists all tags found in your Scraps content, helping you understand the tag distribution across your knowledge base.
+Examples
+# List all tags
+❯ scraps tag
+
+# List tags from specific directory
+❯ scraps tag --path &#x2F;path&#x2F;to&#x2F;project
+
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/mcp-serve.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">MCP Serve</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#CLI
+❯ scraps mcp serve
+
+This command starts an MCP (Model Context Protocol) server that enables AI assistants like Claude Code to directly interact with your Scraps knowledge base.
+Examples
+# Basic MCP server
+❯ scraps mcp serve
+
+# Serve from specific directory  
+❯ scraps mcp serve --path &#x2F;path&#x2F;to&#x2F;project
+
+
+The MCP server provides tools for AI assistants to search through your content and list available tags, enabling intelligent assistance with your documentation.
+For more details, see Integrate with AI Assistants.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/serve.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Serve</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#CLI
+❯ scraps serve
+
+This command starts a local development server to preview your static site. The server automatically serves the files from the public directory at http:&#x2F;&#x2F;127.0.0.1:1112.
+Examples
+# Basic serve
+❯ scraps serve
+
+# Serve from specific directory
+❯ scraps serve --path &#x2F;path&#x2F;to&#x2F;project
+
+Use this command to check how your site looks and functions before deployment.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/template.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Template</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#CLI #Templates
+❯ scraps template
+
+This command generates scrap files from Markdown templates located in the &#x2F;templates directory.
+Commands
+List Templates
+❯ scraps template list
+
+Lists all available templates in the &#x2F;templates directory.
+Example output:
+daily_note
+book
+meeting
+project
+
+Generate Scrap from Template
+❯ scraps template generate &amp;lt;TEMPLATE_NAME&amp;gt; [OPTIONS]
+
+Generates a scrap file from the specified template.
+Examples
+# List available templates
+❯ scraps template list
+
+# Generate from template with metadata-specified title
+❯ scraps template generate daily_note
+
+# Generate with command-line title
+❯ scraps template generate meeting -t &quot;Weekly Standup&quot;
+
+# Generate with environment variables
+❯ TITLE=&quot;My Book Review&quot; scraps template generate book
+
+References
+
+Template features and syntax: Template System
+Template samples: Use Templates
+
+</div>
+                    
+                </a>
+            </li>
+        
+    </ul>
+
+
+        </main>
+        <footer>
+            Generated by <a href="https://github.com/boykush/scraps" target="_blank" rel="noopener noreferrer">Scraps</a>
+        </footer> 
+        <!-- Code syntax highlight -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!-- Code syntax highlight theme -->
+        <link href="https://unpkg.com/nord-highlightjs@0.2.0/dist/nord.css" rel="stylesheet" type="text/css" />
+        <!-- Mermaid -->
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.12.2/+esm'
+        </script>
+        
+         
+    </body>
+</html>
