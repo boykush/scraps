@@ -9,6 +9,26 @@ use rmcp::{ErrorData, RoleServer};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
+/// Search logic for combining multiple keywords
+#[derive(Debug, Clone, Copy, Default, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum SearchLogic {
+    /// All keywords must match
+    And,
+    /// Any keyword can match (default)
+    #[default]
+    Or,
+}
+
+impl From<SearchLogic> for scraps_libs::search::engine::SearchLogic {
+    fn from(logic: SearchLogic) -> Self {
+        match logic {
+            SearchLogic::And => scraps_libs::search::engine::SearchLogic::And,
+            SearchLogic::Or => scraps_libs::search::engine::SearchLogic::Or,
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct SearchRequest {
@@ -16,6 +36,8 @@ pub struct SearchRequest {
     pub query: String,
     /// Maximum number of results to return (default: 100)
     pub num: Option<usize>,
+    /// Search logic: "and" (default, all keywords must match) or "or" (any keyword matches)
+    pub logic: Option<SearchLogic>,
 }
 
 #[derive(Debug, Serialize)]
@@ -34,8 +56,9 @@ pub async fn search_scraps(
 
     // Execute search
     let num = request.num.unwrap_or(100);
+    let logic = request.logic.unwrap_or_default().into();
     let results = search_usecase
-        .execute(&request.query, num)
+        .execute(&request.query, num, logic)
         .map_err(|e| ErrorData::new(ErrorCode(-32004), format!("Search failed: {e}"), None))?;
 
     // Convert results to structured response
