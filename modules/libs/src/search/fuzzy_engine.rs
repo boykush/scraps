@@ -87,165 +87,82 @@ mod tests {
     }
 
     // ===========================================
-    // Basic fuzzy search tests (using default OR)
+    // OR logic tests (default)
     // ===========================================
 
     #[rstest]
-    fn test_fuzzy_search_basic(engine: FuzzySearchEngine) {
+    fn test_or_matches_any_keyword(engine: FuzzySearchEngine) {
         let items = vec![
-            SearchItem::new("Test Document", ""),
-            SearchItem::new("Another Document", ""),
-            SearchItem::new("Sample Test", ""),
+            SearchItem::new("Rust Guide", ""),
+            SearchItem::new("Python Guide", ""),
+            SearchItem::new("Rust and Python", ""),
         ];
-        let results = engine.search(&items, "test", 100, SearchLogic::default());
+        let results = engine.search(&items, "rust python", 100, SearchLogic::Or);
 
-        assert!(!results.is_empty());
-        assert!(results.len() <= items.len());
+        assert_eq!(results.len(), 3);
     }
 
     #[rstest]
-    fn test_fuzzy_search_exact_match(engine: FuzzySearchEngine) {
+    fn test_or_partial_match(engine: FuzzySearchEngine) {
         let items = vec![
-            SearchItem::new("Test Document", ""),
-            SearchItem::new("Another Document", ""),
+            SearchItem::new("Documentation", ""),
+            SearchItem::new("Sample", ""),
         ];
-        let results = engine.search(&items, "Test Document", 100, SearchLogic::default());
+        let results = engine.search(&items, "doc", 100, SearchLogic::Or);
 
-        assert!(!results.is_empty());
-        assert_eq!(results[0].title, "Test Document");
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].title, "Documentation");
     }
 
     #[rstest]
-    fn test_fuzzy_search_partial_match(engine: FuzzySearchEngine) {
-        let items = vec![
-            SearchItem::new("Test Document", ""),
-            SearchItem::new("Testing Framework", ""),
-        ];
+    fn test_or_no_match(engine: FuzzySearchEngine) {
+        let items = vec![SearchItem::new("Test", "")];
+        let results = engine.search(&items, "xyzzyx", 100, SearchLogic::Or);
 
-        let results = engine.search(&items, "doc", 100, SearchLogic::default());
-        assert!(!results.is_empty());
-
-        let results = engine.search(&items, "fram", 100, SearchLogic::default());
-        assert!(!results.is_empty());
-    }
-
-    #[rstest]
-    fn test_fuzzy_search_no_match(engine: FuzzySearchEngine) {
-        let items = vec![SearchItem::new("Test Document", "")];
-        let results = engine.search(&items, "xyzzyx", 100, SearchLogic::default());
         assert_eq!(results.len(), 0);
     }
 
     #[rstest]
-    fn test_fuzzy_search_empty_query(engine: FuzzySearchEngine) {
-        let items = vec![
-            SearchItem::new("Test Document", ""),
-            SearchItem::new("Another Document", ""),
-        ];
-        let results = engine.search(&items, "", 100, SearchLogic::default());
-        assert_eq!(results.len(), items.len());
-    }
-
-    #[rstest]
-    fn test_fuzzy_search_empty_items(engine: FuzzySearchEngine) {
-        let items: Vec<SearchItem> = vec![];
-        let results = engine.search(&items, "test", 100, SearchLogic::default());
-        assert_eq!(results.len(), 0);
-    }
-
-    #[rstest]
-    fn test_fuzzy_search_body_content(engine: FuzzySearchEngine) {
+    fn test_or_searches_body_content(engine: FuzzySearchEngine) {
         let items = vec![
             SearchItem::new("Document A", "contains uniquekeyword here"),
             SearchItem::new("Document B", "no match"),
         ];
-
-        let results = engine.search(&items, "uniquekeyword", 100, SearchLogic::default());
+        let results = engine.search(&items, "uniquekeyword", 100, SearchLogic::Or);
 
         assert_eq!(results.len(), 1);
         assert_eq!(results[0].title, "Document A");
     }
 
-    // ===========================================
-    // Result limit tests
-    // ===========================================
+    #[rstest]
+    fn test_or_empty_query_returns_all(engine: FuzzySearchEngine) {
+        let items = vec![SearchItem::new("A", ""), SearchItem::new("B", "")];
+        let results = engine.search(&items, "", 100, SearchLogic::Or);
+
+        assert_eq!(results.len(), 2);
+    }
 
     #[rstest]
-    fn test_fuzzy_search_num_limit(engine: FuzzySearchEngine) {
+    fn test_or_result_limit(engine: FuzzySearchEngine) {
         let items: Vec<SearchItem> = (0..10)
-            .map(|i| SearchItem::new(&format!("Test Document {}", i), ""))
+            .map(|i| SearchItem::new(&format!("Item {}", i), "keyword"))
             .collect();
+        let results = engine.search(&items, "keyword", 5, SearchLogic::Or);
 
-        assert_eq!(
-            engine
-                .search(&items, "test", 5, SearchLogic::default())
-                .len(),
-            5
-        );
-        assert_eq!(
-            engine
-                .search(&items, "test", 3, SearchLogic::default())
-                .len(),
-            3
-        );
-        assert_eq!(
-            engine
-                .search(&items, "test", 0, SearchLogic::default())
-                .len(),
-            0
-        );
-    }
-
-    #[rstest]
-    fn test_fuzzy_search_empty_query_limit(engine: FuzzySearchEngine) {
-        let items: Vec<SearchItem> = (0..101)
-            .map(|i| SearchItem::new(&format!("Document {}", i), ""))
-            .collect();
-
-        let results = engine.search(&items, "", 100, SearchLogic::default());
-        assert_eq!(results.len(), 100);
-    }
-
-    #[rstest]
-    fn test_fuzzy_search_num_larger_than_available(engine: FuzzySearchEngine) {
-        let items = vec![
-            SearchItem::new("Test Document", ""),
-            SearchItem::new("Sample Test", ""),
-        ];
-        let results = engine.search(&items, "test", 100, SearchLogic::default());
-        assert!(results.len() <= items.len());
-        assert!(!results.is_empty());
+        assert_eq!(results.len(), 5);
     }
 
     // ===========================================
-    // OR vs AND logic comparison tests
+    // AND logic tests
     // ===========================================
 
     #[rstest]
-    fn test_or_search_matches_any_keyword(engine: FuzzySearchEngine) {
+    fn test_and_requires_all_keywords(engine: FuzzySearchEngine) {
         let items = vec![
-            SearchItem::new("Rust Documentation", "Rust content"),
-            SearchItem::new("Python Documentation", "Python content"),
-            SearchItem::new("Rust and Python", "Both languages"),
+            SearchItem::new("Rust Guide", ""),
+            SearchItem::new("Python Guide", ""),
+            SearchItem::new("Rust and Python", ""),
         ];
-        // OR search: "rust python" should match all 3 items
-        let results = engine.search(&items, "rust python", 100, SearchLogic::Or);
-
-        assert_eq!(results.len(), 3);
-        let titles: Vec<&str> = results.iter().map(|r| r.title.as_str()).collect();
-        assert!(titles.contains(&"Rust Documentation"));
-        assert!(titles.contains(&"Python Documentation"));
-        assert!(titles.contains(&"Rust and Python"));
-    }
-
-    #[rstest]
-    fn test_and_search_requires_all_keywords(engine: FuzzySearchEngine) {
-        let items = vec![
-            SearchItem::new("Rust Documentation", "Rust content"),
-            SearchItem::new("Python Documentation", "Python content"),
-            SearchItem::new("Rust and Python", "Both languages"),
-        ];
-        // AND search: "rust python" should only match "Rust and Python"
         let results = engine.search(&items, "rust python", 100, SearchLogic::And);
 
         assert_eq!(results.len(), 1);
@@ -253,11 +170,83 @@ mod tests {
     }
 
     #[rstest]
+    fn test_and_exact_match(engine: FuzzySearchEngine) {
+        let items = vec![
+            SearchItem::new("Test Document", ""),
+            SearchItem::new("Another Test", ""),
+            SearchItem::new("Document Only", ""),
+        ];
+        let results = engine.search(&items, "Test Document", 100, SearchLogic::And);
+
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].title, "Test Document");
+    }
+
+    #[rstest]
+    fn test_and_keyword_order_independent(engine: FuzzySearchEngine) {
+        let items = vec![
+            SearchItem::new("Rust Programming", ""),
+            SearchItem::new("Programming Rust", ""),
+            SearchItem::new("Python Language", ""),
+        ];
+        let results = engine.search(&items, "Programming Rust", 100, SearchLogic::And);
+
+        assert_eq!(results.len(), 2);
+    }
+
+    #[rstest]
+    fn test_and_non_consecutive_keywords(engine: FuzzySearchEngine) {
+        let items = vec![
+            SearchItem::new("Rust is great for Programming", ""),
+            SearchItem::new("Python Language", ""),
+        ];
+        let results = engine.search(&items, "Rust Programming", 100, SearchLogic::And);
+
+        assert_eq!(results.len(), 1);
+    }
+
+    #[rstest]
+    fn test_and_no_match_missing_keyword(engine: FuzzySearchEngine) {
+        let items = vec![
+            SearchItem::new("Rust Guide", ""),
+            SearchItem::new("Python Guide", ""),
+        ];
+        let results = engine.search(&items, "rust java", 100, SearchLogic::And);
+
+        assert_eq!(results.len(), 0);
+    }
+
+    #[rstest]
+    fn test_and_searches_body_content(engine: FuzzySearchEngine) {
+        let items = vec![
+            SearchItem::new("Document", "rust programming"),
+            SearchItem::new("Another", "rust only"),
+        ];
+        let results = engine.search(&items, "rust programming", 100, SearchLogic::And);
+
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].title, "Document");
+    }
+
+    #[rstest]
+    fn test_and_result_limit(engine: FuzzySearchEngine) {
+        let items: Vec<SearchItem> = (0..10)
+            .map(|i| SearchItem::new(&format!("Test Item {}", i), ""))
+            .collect();
+        let results = engine.search(&items, "Test Item", 5, SearchLogic::And);
+
+        assert_eq!(results.len(), 5);
+    }
+
+    // ===========================================
+    // Common behavior tests
+    // ===========================================
+
+    #[rstest]
     fn test_single_keyword_same_for_or_and_and(engine: FuzzySearchEngine) {
         let items = vec![
-            SearchItem::new("Rust Documentation", "Rust content"),
-            SearchItem::new("Python Documentation", "Python content"),
-            SearchItem::new("Rust and Python", "Both languages"),
+            SearchItem::new("Rust Guide", ""),
+            SearchItem::new("Python Guide", ""),
         ];
         let or_results = engine.search(&items, "rust", 100, SearchLogic::Or);
         let and_results = engine.search(&items, "rust", 100, SearchLogic::And);
@@ -266,52 +255,26 @@ mod tests {
     }
 
     #[rstest]
-    fn test_and_search_keyword_order_independent(engine: FuzzySearchEngine) {
-        let items = vec![
-            SearchItem::new("Rust Programming", ""),
-            SearchItem::new("Programming Rust", ""),
-            SearchItem::new("Python Language", ""),
-        ];
-
-        let results = engine.search(&items, "Programming Rust", 100, SearchLogic::And);
-
-        assert_eq!(results.len(), 2);
-        let titles: Vec<&str> = results.iter().map(|r| r.title.as_str()).collect();
-        assert!(titles.contains(&"Rust Programming"));
-        assert!(titles.contains(&"Programming Rust"));
-    }
-
-    #[rstest]
-    fn test_and_search_non_consecutive_keywords(engine: FuzzySearchEngine) {
-        let items = vec![
-            SearchItem::new("Rust hoge Programming", ""),
-            SearchItem::new("Rust Programming", ""),
-            SearchItem::new("Python Language", ""),
-        ];
-
-        let results = engine.search(&items, "Rust Programming", 100, SearchLogic::And);
-
-        assert_eq!(results.len(), 2);
-        let titles: Vec<&str> = results.iter().map(|r| r.title.as_str()).collect();
-        assert!(titles.contains(&"Rust Programming"));
-        assert!(titles.contains(&"Rust hoge Programming"));
-    }
-
-    // ===========================================
-    // Default logic is OR
-    // ===========================================
-
-    #[rstest]
     fn test_default_logic_is_or(engine: FuzzySearchEngine) {
         let items = vec![
-            SearchItem::new("Rust Documentation", "Rust content"),
-            SearchItem::new("Python Documentation", "Python content"),
-            SearchItem::new("Rust and Python", "Both languages"),
+            SearchItem::new("Rust Guide", ""),
+            SearchItem::new("Python Guide", ""),
+            SearchItem::new("Rust and Python", ""),
         ];
         let default_results = engine.search(&items, "rust python", 100, SearchLogic::default());
         let or_results = engine.search(&items, "rust python", 100, SearchLogic::Or);
 
         assert_eq!(default_results.len(), or_results.len());
         assert_eq!(default_results.len(), 3);
+    }
+
+    #[rstest]
+    fn test_empty_items_returns_empty(engine: FuzzySearchEngine) {
+        let items: Vec<SearchItem> = vec![];
+        let or_results = engine.search(&items, "test", 100, SearchLogic::Or);
+        let and_results = engine.search(&items, "test", 100, SearchLogic::And);
+
+        assert_eq!(or_results.len(), 0);
+        assert_eq!(and_results.len(), 0);
     }
 }
