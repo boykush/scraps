@@ -20,18 +20,6 @@ impl FuzzySearchEngine {
             matcher: SkimMatcherV2::default(),
         }
     }
-
-    pub fn with_case_sensitive(case_sensitive: bool) -> Self {
-        if case_sensitive {
-            Self {
-                matcher: SkimMatcherV2::default(),
-            }
-        } else {
-            Self {
-                matcher: SkimMatcherV2::default().ignore_case(),
-            }
-        }
-    }
 }
 
 impl SearchEngine for FuzzySearchEngine {
@@ -166,28 +154,6 @@ mod tests {
         let items: Vec<SearchItem> = vec![];
         let results = engine.search(&items, "test", 100, SearchLogic::default());
         assert_eq!(results.len(), 0);
-    }
-
-    #[rstest]
-    fn test_fuzzy_search_case_insensitive(search_items: Vec<SearchItem>) {
-        let engine = FuzzySearchEngine::with_case_sensitive(false);
-
-        let results1 = engine.search(&search_items, "test", 100, SearchLogic::default());
-        let results2 = engine.search(&search_items, "Test", 100, SearchLogic::default());
-        let results3 = engine.search(&search_items, "TEST", 100, SearchLogic::default());
-
-        assert!(!results1.is_empty());
-        assert_eq!(results1.len(), results2.len());
-        assert_eq!(results2.len(), results3.len());
-    }
-
-    #[rstest]
-    fn test_fuzzy_search_case_sensitive(search_items: Vec<SearchItem>) {
-        let engine = FuzzySearchEngine::with_case_sensitive(true);
-
-        // "Test" matches items with "Test" (case-sensitive)
-        let results = engine.search(&search_items, "Test", 100, SearchLogic::default());
-        assert!(!results.is_empty());
     }
 
     #[rstest]
