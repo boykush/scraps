@@ -5,7 +5,7 @@ use crate::error::ScrapsResult;
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::title::Title;
-use scraps_libs::search::engine::SearchEngine;
+use scraps_libs::search::engine::{SearchEngine, SearchLogic};
 use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -26,7 +26,12 @@ impl SearchUsecase {
         }
     }
 
-    pub fn execute(&self, query: &str, num: usize) -> ScrapsResult<Vec<SearchResult>> {
+    pub fn execute(
+        &self,
+        query: &str,
+        num: usize,
+        logic: SearchLogic,
+    ) -> ScrapsResult<Vec<SearchResult>> {
         // Load scraps from directory directly
         let scrap_paths = crate::usecase::read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
         let scraps = scrap_paths
@@ -53,7 +58,7 @@ impl SearchUsecase {
 
         // Perform search
         let engine = FuzzySearchEngine::new();
-        let search_results = engine.search(&lib_items, query, num);
+        let search_results = engine.search(&lib_items, query, num, logic);
 
         // Convert to final results using HashMap lookup
         let results: Vec<SearchResult> = search_results
@@ -93,7 +98,7 @@ mod tests {
 
         let usecase = SearchUsecase::new(&project.scraps_dir);
 
-        let results = usecase.execute("test", 100).unwrap();
+        let results = usecase.execute("test", 100, SearchLogic::And).unwrap();
 
         // Should find documents containing "test"
         assert!(!results.is_empty());
@@ -115,7 +120,7 @@ mod tests {
 
         let usecase = SearchUsecase::new(&project.scraps_dir);
 
-        let results = usecase.execute("duplicate", 100).unwrap();
+        let results = usecase.execute("duplicate", 100, SearchLogic::And).unwrap();
 
         // Should find both scraps with the same title but different contexts
         assert_eq!(
@@ -188,7 +193,9 @@ mod tests {
         let usecase = SearchUsecase::new(&project.scraps_dir);
 
         // Search by body-only keyword - should match
-        let results = usecase.execute("uniquekeyword", 100).unwrap();
+        let results = usecase
+            .execute("uniquekeyword", 100, SearchLogic::And)
+            .unwrap();
 
         assert_eq!(results.len(), 1, "Body keyword should match scrap");
         assert_eq!(results[0].title.to_string(), "mydoc");

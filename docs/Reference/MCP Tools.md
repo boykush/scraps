@@ -10,13 +10,24 @@ matching.
 
 **Parameters:**
 - `query` (string, required): Search query to match against scrap titles and
-  contexts
+  body content
 - `num` (integer, optional): Maximum number of results to return (default: 100)
+- `logic` (string, optional): Search logic for combining multiple keywords:
+  - `"or"` (default): Any keyword can match
+  - `"and"`: All keywords must match
 
 **Returns:**
-- `results`: Array of matching scraps with their title, context, and full
-  Markdown content
+- `results`: Array of matching scraps with the following fields:
+  - `title`: Scrap title
+  - `ctx`: Context folder path (null if in root)
+  - `md_text`: Full Markdown content
 - `count`: Total number of matches found
+
+**Examples:**
+- `{"query": "rust cli", "logic": "and"}` - Returns scraps containing both
+  "rust" AND "cli"
+- `{"query": "rust cli", "logic": "or"}` - Returns scraps containing "rust" OR
+  "cli"
 
 ## list_tags
 

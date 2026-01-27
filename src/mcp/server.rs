@@ -29,7 +29,7 @@ impl ScrapsServer {
 #[tool_router]
 impl ScrapsServer {
     #[tool(
-        description = "Search for scraps using fuzzy matching against title and body content. Space-separated keywords use AND logic (all must match). Returns matching scraps with titles, contexts, and full content."
+        description = "Search for scraps using fuzzy matching against title and body content. Space-separated keywords use OR logic by default (any keyword matches). Set logic to 'and' for all keywords to match. Returns matching scraps with titles, contexts, and full content."
     )]
     async fn search_scraps(
         &self,
@@ -326,6 +326,108 @@ mod tests {
             content_text.text.contains("Test") || content_text.text.contains("test"),
             "Expected scrap with tag 'rust' in response, got: {}",
             content_text.text
+        );
+
+        client.cancel().await.unwrap();
+        server_handle.abort();
+    }
+
+    /// Test: search_scraps with AND logic (default) - all keywords must match
+    #[rstest]
+    #[tokio::test]
+    async fn test_call_search_scraps_and_logic(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        // Setup: 3 scraps - only one contains both "rust" and "python"
+        project.add_scrap("rust_doc.md", b"# Rust Documentation\n\nRust content");
+        project.add_scrap("python_doc.md", b"# Python Documentation\n\nPython content");
+        project.add_scrap("rust_python.md", b"# Rust and Python\n\nBoth languages");
+
+        let server = ScrapsServer::new(project.scraps_dir.clone());
+
+        let (client_stream, server_stream) = tokio::io::duplex(4096);
+
+        let server_handle = tokio::spawn(async move { server.serve(server_stream).await });
+
+        let client = ().serve(client_stream).await.unwrap();
+
+        // AND search: "rust python" should only match "rust_python.md"
+        let result = client
+            .call_tool(CallToolRequestParam {
+                name: "search_scraps".into(),
+                arguments: Some(
+                    serde_json::json!({"query": "rust python", "logic": "and"})
+                        .as_object()
+                        .unwrap()
+                        .clone(),
+                ),
+                task: None,
+            })
+            .await
+            .unwrap();
+
+        assert!(!result.is_error.unwrap_or(false));
+        assert!(!result.content.is_empty());
+
+        let content_text = result.content[0].as_text().unwrap();
+        // Parse the JSON response to check count
+        let response: serde_json::Value = serde_json::from_str(&content_text.text).unwrap();
+        assert_eq!(
+            response["count"], 1,
+            "AND search should return only 1 result matching both keywords"
+        );
+        assert!(
+            content_text.text.contains("Rust and Python"),
+            "AND search should match the scrap containing both keywords"
+        );
+
+        client.cancel().await.unwrap();
+        server_handle.abort();
+    }
+
+    /// Test: search_scraps with OR logic - any keyword can match
+    #[rstest]
+    #[tokio::test]
+    async fn test_call_search_scraps_or_logic(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        // Setup: 3 scraps - all contain either "rust" or "python"
+        project.add_scrap("rust_doc.md", b"# Rust Documentation\n\nRust content");
+        project.add_scrap("python_doc.md", b"# Python Documentation\n\nPython content");
+        project.add_scrap("rust_python.md", b"# Rust and Python\n\nBoth languages");
+
+        let server = ScrapsServer::new(project.scraps_dir.clone());
+
+        let (client_stream, server_stream) = tokio::io::duplex(4096);
+
+        let server_handle = tokio::spawn(async move { server.serve(server_stream).await });
+
+        let client = ().serve(client_stream).await.unwrap();
+
+        // OR search: "rust python" should match all 3 scraps
+        let result = client
+            .call_tool(CallToolRequestParam {
+                name: "search_scraps".into(),
+                arguments: Some(
+                    serde_json::json!({"query": "rust python", "logic": "or"})
+                        .as_object()
+                        .unwrap()
+                        .clone(),
+                ),
+                task: None,
+            })
+            .await
+            .unwrap();
+
+        assert!(!result.is_error.unwrap_or(false));
+        assert!(!result.content.is_empty());
+
+        let content_text = result.content[0].as_text().unwrap();
+        // Parse the JSON response to check count
+        let response: serde_json::Value = serde_json::from_str(&content_text.text).unwrap();
+        assert_eq!(
+            response["count"], 3,
+            "OR search should return all 3 results matching any keyword"
         );
 
         client.cancel().await.unwrap();
