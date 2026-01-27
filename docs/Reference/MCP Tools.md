@@ -17,8 +17,10 @@ matching.
   - `"and"`: All keywords must match
 
 **Returns:**
-- `results`: Array of matching scraps with their title, context, and full
-  Markdown content
+- `results`: Array of matching scraps with the following fields:
+  - `title`: Scrap title
+  - `ctx`: Context folder path (null if in root)
+  - `md_text`: Full Markdown content
 - `count`: Total number of matches found
 
 **Examples:**
