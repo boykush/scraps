@@ -21,6 +21,11 @@
       "groupName": "CDN dependencies",
       "matchManagers": ["regex"],
       "matchPackageNames": ["highlight.js", "mermaid", "nord-highlightjs", "fuse.js"]
+    },
+    {
+      "description": "Self-maintained packages: skip minimumReleaseAge",
+      "matchPackageNames": ["scraps", "boykush/scraps-deploy-action"],
+      "minimumReleaseAge": "0 days"
     }
   ],
   "customManagers": [
