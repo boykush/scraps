@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <!-- Page title -->
+        
+            
+            <title>Install Claude Code Plugin - Scraps Doc</title>
+            <meta property="og:title" content="Install Claude Code Plugin - Scraps Doc" />
+            <meta name="twitter:title" content="Install Claude Code Plugin - Scraps Doc" />
+        
+        <!-- Page description -->
+        
+            <meta name="description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta property="og:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta name="twitter:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+        
+        <!-- Page favicon -->
+        
+            <link rel="icon" type="image/png" href="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;logo.png?raw=true" />
+        
+        <!-- Rubik font -->
+        <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">
+        <!-- Noto Sans JP font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+        <!-- Style sheet -->
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;main.css">
+        
+<meta property="og:url" content="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/install-claude-code-plugin.how-to.html" />
+
+
+    </head>
+    <body>
+        <header>
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;">
+                <h1>Scraps Doc</h1>
+            </a>
+        </header>
+        <main>
+            
+    <div class="scrap">
+        
+          <h3 class="context">How-to<span>&#47;</span></h2>
+        
+        <h1 class="title">Install Claude Code Plugin</h1>
+        
+            <p class="commited-date">
+                commited date: 2025-12-30
+            </p>
+        
+        <div class="content">
+            <p>#<a href="https://boykush.github.io/scraps/scraps/integration.html">Integration</a></p>
+<p>This guide shows you how to enable the Scraps MCP (Model Context Protocol)
+server plugin in Claude Code.</p>
+<h2>Installation</h2>
+<h3>Step 1: Add the Plugin Marketplace</h3>
+<p>First, add the Scraps plugin marketplace:</p>
+<pre><code class="language-bash">claude plugin marketplace add boykush/scraps
+</code></pre>
+<p>This registers the Scraps plugin catalog with Claude Code.</p>
+<h3>Step 2: Enable the Plugin</h3>
+<p>Add the following to your project’s <code>.claude/settings.json</code>:</p>
+<pre><code class="language-json">{
+  "enabledPlugins": {
+    "mcp-server@scraps-claude-code-plugins": true
+  }
+}
+</code></pre>
+<p>The plugin will automatically use the current directory as your Scraps project
+path.</p>
+<h2>Configuration</h2>
+<h3>Custom Project Path (Optional)</h3>
+<p>To specify a different Scraps project path, set the <code>SCRAPS_PROJECT_PATH</code>
+environment variable:</p>
+<pre><code class="language-json">{
+  "env": {
+    "SCRAPS_PROJECT_PATH": "/path/to/your/scraps/project"
+  },
+  "enabledPlugins": {
+    "mcp-server@scraps-claude-code-plugins": true
+  }
+}
+</code></pre>
+
+        </div>
+    </div>
+    
+    <ul class="scrap-links">
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/integrate-with-ai-assistants.how-to.html">
+                    
+                        <div class="header">
+                            <div class="context">How-to&#47;</div>
+                            <div class="title">Integrate with AI Assistants</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Integration
+Scraps includes comprehensive Model Context Protocol (MCP) server functionality, enabling AI assistants to directly interact with your Scraps knowledge base.
+What is MCP?
+The Model Context Protocol (MCP) is an open standard that enables AI assistants to securely access external data sources and tools. Scraps implements an MCP server that exposes your documentation as a searchable, linkable knowledge base.
+Quick Start
+Claude Code (Recommended)
+For Claude Code users, we provide an official plugin for seamless integration. See Install Claude Code Plugin for installation instructions.
+Manual MCP Server Setup
+For other MCP-compatible clients or advanced configurations, you can add Scraps as an MCP server directly:
+claude mcp add scraps -- scraps mcp serve --path ~&#x2F;path&#x2F;to&#x2F;your&#x2F;scraps&#x2F;project&#x2F;
+
+Replace ~&#x2F;path&#x2F;to&#x2F;your&#x2F;scraps&#x2F;project&#x2F; with the actual path to your Scraps project directory.
+For command details, see MCP Serve.
+Available Tools
+For detailed MCP tool documentation, see MCP Tools.
+</div>
+                    
+                </a>
+            </li>
+        
+    </ul>
+
+
+        </main>
+        <footer>
+            Generated by <a href="https://github.com/boykush/scraps" target="_blank" rel="noopener noreferrer">Scraps</a>
+        </footer> 
+        <!-- Code syntax highlight -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!-- Code syntax highlight theme -->
+        <link href="https://unpkg.com/nord-highlightjs@0.2.0/dist/nord.css" rel="stylesheet" type="text/css" />
+        <!-- Mermaid -->
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.12.2/+esm'
+        </script>
+        
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const ogpCards = document.querySelectorAll('.ogp-card');
+
+    ogpCards.forEach(async (card) => {
+      const url = card.dataset.url;
+
+      try {
+        const proxyUrl = 'https://corsproxy.io/?url=';
+        const response = await fetch(proxyUrl + url);
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        const title = doc.querySelector('meta[property="og:title"]')?.content ||
+          doc.querySelector('title')?.textContent ||
+          'No title';
+        card.querySelector('.ogp-title').textContent = title;
+
+        const description = doc.querySelector('meta[property="og:description"]')?.content ||
+          doc.querySelector('meta[name="description"]')?.content ||
+          'No description';
+        card.querySelector('.ogp-description').textContent = description;
+
+        const image = doc.querySelector('meta[property="og:image"]')?.content;
+        if (image) {
+          const imageUrl = image.startsWith('/')
+            ? `https://${card.dataset.host}/${image}`
+            : image;
+          card.querySelector('.ogp-image').src = imageUrl;
+        } else {
+          card.querySelector('.ogp-image').remove();
+        }
+      } catch (error) {
+        console.error('Failed to fetch OGP data:', error);
+      }
+    });
+  });
+</script>
+ 
+    </body>
+</html>
