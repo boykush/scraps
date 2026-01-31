@@ -13,6 +13,13 @@
       "rangeStrategy": "pin"
     },
     {
+      "matchManagers": [
+        "github-actions",
+        "dockerfile"
+      ],
+      "minimumReleaseAge": "7 days"
+    },
+    {
       "groupName": "Rust toolchain",
       "matchManagers": ["dockerfile", "mise"],
       "matchPackageNames": ["rust"]
