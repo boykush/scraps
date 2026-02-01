@@ -14,24 +14,41 @@
     },
     {
       "groupName": "Rust toolchain",
-      "matchManagers": ["dockerfile", "mise"],
-      "matchPackageNames": ["rust"]
+      "matchManagers": [
+        "dockerfile",
+        "mise"
+      ],
+      "matchPackageNames": [
+        "rust"
+      ]
     },
     {
       "groupName": "CDN dependencies",
-      "matchManagers": ["regex"],
-      "matchPackageNames": ["highlight.js", "mermaid", "nord-highlightjs", "fuse.js"]
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchPackageNames": [
+        "highlight.js",
+        "mermaid",
+        "nord-highlightjs",
+        "fuse.js"
+      ]
     },
     {
       "description": "Self-maintained packages: skip minimumReleaseAge",
-      "matchPackageNames": ["scraps", "boykush/scraps-deploy-action"],
+      "matchPackageNames": [
+        "scraps",
+        "boykush/scraps-deploy-action"
+      ],
       "minimumReleaseAge": "0 days"
     }
   ],
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["src/usecase/build/html/cdn_versions\\.rs$"],
+      "managerFilePatterns": [
+        "/src/usecase/build/html/cdn_versions\\.rs$/"
+      ],
       "matchStrings": [
         "\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\",\\s*// renovate: datasource=npm depName=(?<depName>[^\\s]+)"
       ],
