@@ -1,14 +1,14 @@
 ---
 name: add-scrap
 description: Create a new scrap with intelligent tag selection and backlink suggestions.
-allowed-tools: mcp__plugin_scraps-writer_scraps__*, Read, Write, Edit, Glob, WebSearch, Skill
+allowed-tools: mcp__plugin_scraps-writer_scraps__*, Read, Write, Edit, Glob, WebSearch
 user-invocable: true
 argument-hint: [title] [max-lines]
 ---
 
 # Add Scrap
 
-Create a new scrap by calling `scraps-writer` skill.
+Create a new scrap with Wiki-link notation.
 
 ## Arguments
 
@@ -30,12 +30,25 @@ Create a new scrap by calling `scraps-writer` skill.
 
 4. **Search Related Scraps**
    - Use `search_scraps` to find related content
-   - Only use `title` and `ctx` from results as link targets (ensures links point to existing scraps)
+   - **IMPORTANT: You MUST use ONLY the exact `title` and `ctx` values returned from search results when creating Wiki-links. Never invent or guess link targets.**
    - Identify scraps that should link to the new scrap
 
 5. **Create the Scrap**
-   - Call `scraps-writer` skill with max-lines argument
-   - Write well-structured Markdown content
+   - Write well-structured Markdown content following the syntax below
 
 6. **Suggest Backlinks**
    - List existing scraps that should add links to this new scrap
+
+## Wiki-Link Syntax
+
+- `[[Page Name]]` - Normal link. Use `title` from `search_scraps` results.
+- `[[Page Name|Display Text]]` - Alias link with custom display text.
+- `[[Context/Page Name]]` - Context link. Use `ctx/title` from `search_scraps` results.
+- `#[[Tag Name]]` - Tag. Use tags from `list_tags` results only.
+
+## Markdown Features
+
+- CommonMark specification
+- GitHub-flavored Markdown (tables, task lists, strikethrough)
+- Mermaid diagrams with `mermaid` code blocks
+- Autolinks for OGP cards: `<https://example.com>`
