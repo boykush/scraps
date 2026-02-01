@@ -30,10 +30,11 @@ Create a new scrap with Wiki-link notation.
 
 4. **Search Related Scraps**
    - Use `search_scraps` to find related content
-   - **IMPORTANT: You MUST use ONLY the exact `title` and `ctx` values returned from search results when creating Wiki-links. Never invent or guess link targets.**
+   - **NEVER create Wiki-links that were not returned by `search_scraps`. If a scrap is not in the results, it does not exist.**
    - Identify scraps that should link to the new scrap
 
 5. **Create the Scrap**
+   - **Only use Wiki-links to scraps found in step 4. Do not link to anything else.**
    - Write well-structured Markdown content following the syntax below
 
 6. **Suggest Backlinks**
