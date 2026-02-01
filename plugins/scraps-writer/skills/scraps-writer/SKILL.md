@@ -17,7 +17,7 @@ Knowledge base for creating Scraps documentation with Wiki-link notation.
 ## MCP Tools Usage
 
 - `list_tags` → Identify tags for a scrap. Returns all tags sorted by backlinks count.
-- `search_scraps` → Find related scraps by keyword with fuzzy matching. Returns `title` and `ctx` for each result. Use `logic: "and"` to match all keywords, or `logic: "or"` (default) to match any keyword.
+- `search_scraps` → Find related scraps by keyword with fuzzy matching against title and body content. Returns `title` and `ctx` for each result. **IMPORTANT: Each result represents an existing scrap. Only use the returned `title` and `ctx` values when creating Wiki-links.** Use `logic: "and"` to match all keywords, or `logic: "or"` (default) to match any keyword.
 - `lookup_tag_backlinks` → Check which scraps are using a specific tag.
 - `lookup_scrap_links` → Get all scraps that a scrap links to.
 - `lookup_scrap_backlinks` → Get all scraps that link to a scrap.
