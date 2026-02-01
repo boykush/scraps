@@ -27,9 +27,10 @@ Summarize a web article and create a scrap with Wiki-link notation.
 
 3. **Search Related Scraps**
    - Use `search_scraps` to find related content
-   - **IMPORTANT: You MUST use ONLY the exact `title` and `ctx` values returned from search results when creating Wiki-links. Never invent or guess link targets.**
+   - **NEVER create Wiki-links that were not returned by `search_scraps`. If a scrap is not in the results, it does not exist.**
 
 4. **Create the Scrap**
+   - **Only use Wiki-links to scraps found in step 3. Do not link to anything else.**
    - Generate a concise summary of the article
    - Include the source URL as autolink: `<https://...>`
    - Write well-structured Markdown content following the syntax below
