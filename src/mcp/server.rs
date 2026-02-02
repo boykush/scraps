@@ -98,7 +98,7 @@ impl ServerHandler for ScrapsServer {
 mod tests {
     use super::*;
     use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
-    use rmcp::model::CallToolRequestParam;
+    use rmcp::model::CallToolRequestParams;
     use rmcp::ServiceExt;
     use rstest::rstest;
 
@@ -154,7 +154,8 @@ mod tests {
         let client = ().serve(client_stream).await.unwrap();
 
         let result = client
-            .call_tool(CallToolRequestParam {
+            .call_tool(CallToolRequestParams {
+                meta: None,
                 name: "search_scraps".into(),
                 arguments: Some(
                     serde_json::json!({"query": "test"})
@@ -191,7 +192,8 @@ mod tests {
         let client = ().serve(client_stream).await.unwrap();
 
         let result = client
-            .call_tool(CallToolRequestParam {
+            .call_tool(CallToolRequestParams {
+                meta: None,
                 name: "list_tags".into(),
                 arguments: None,
                 task: None,
@@ -228,7 +230,8 @@ mod tests {
         let client = ().serve(client_stream).await.unwrap();
 
         let result = client
-            .call_tool(CallToolRequestParam {
+            .call_tool(CallToolRequestParams {
+                meta: None,
                 name: "lookup_scrap_links".into(),
                 arguments: Some(
                     serde_json::json!({"title": "source"})
@@ -268,7 +271,8 @@ mod tests {
         let client = ().serve(client_stream).await.unwrap();
 
         let result = client
-            .call_tool(CallToolRequestParam {
+            .call_tool(CallToolRequestParams {
+                meta: None,
                 name: "lookup_scrap_backlinks".into(),
                 arguments: Some(
                     serde_json::json!({"title": "target"})
@@ -305,7 +309,8 @@ mod tests {
         let client = ().serve(client_stream).await.unwrap();
 
         let result = client
-            .call_tool(CallToolRequestParam {
+            .call_tool(CallToolRequestParams {
+                meta: None,
                 name: "lookup_tag_backlinks".into(),
                 arguments: Some(
                     serde_json::json!({"tag": "rust"})
@@ -353,7 +358,8 @@ mod tests {
 
         // AND search: "rust python" should only match "rust_python.md"
         let result = client
-            .call_tool(CallToolRequestParam {
+            .call_tool(CallToolRequestParams {
+                meta: None,
                 name: "search_scraps".into(),
                 arguments: Some(
                     serde_json::json!({"query": "rust python", "logic": "and"})
@@ -406,7 +412,8 @@ mod tests {
 
         // OR search: "rust python" should match all 3 scraps
         let result = client
-            .call_tool(CallToolRequestParam {
+            .call_tool(CallToolRequestParams {
+                meta: None,
                 name: "search_scraps".into(),
                 arguments: Some(
                     serde_json::json!({"query": "rust python", "logic": "or"})
