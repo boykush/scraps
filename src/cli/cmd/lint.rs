@@ -1,6 +1,8 @@
 use std::path::Path;
 use std::process;
 
+use colored::Colorize;
+
 use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
@@ -15,19 +17,27 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let warnings = usecase.execute()?;
 
     if warnings.is_empty() {
-        println!("No broken links found.");
+        println!("{}", "No warnings found.".green());
         return Ok(());
     }
 
     for warning in &warnings {
         eprintln!(
-            "warning: broken link [[{}]] in \"{}\"",
-            warning.broken_link, warning.scrap_title
+            "{}",
+            format!(
+                "warning: implicit tag [[{}]] in \"{}\".",
+                warning.broken_link, warning.scrap_title
+            )
+            .yellow()
         );
     }
     eprintln!(
-        "\nFound {} broken link(s). Use #[[tag]] to mark intentional tags.",
-        warnings.len()
+        "{}",
+        format!(
+            "\nFound {} warning(s). Use #[[tag]] to explicitly mark as a tag.",
+            warnings.len()
+        )
+        .yellow()
     );
 
     process::exit(1);
