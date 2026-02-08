@@ -13,7 +13,7 @@ Create a new scrap with Wiki-link notation.
 ## Arguments
 
 - **title**: `$ARGUMENTS` - Title of the scrap to create
-- **max-lines**: (optional) - Maximum number of lines for the generated scrap
+- **max-lines**: (optional, default: 10) - Maximum number of lines for the generated scrap
 
 ## Workflow
 
@@ -35,6 +35,7 @@ Create a new scrap with Wiki-link notation.
 
 5. **Create the Scrap**
    - Write well-structured Markdown content following the syntax below
+   - If `max-lines` is specified, keep the scrap within that line count
 
 6. **Verify Tag Consistency**
    - Use `list_tags` again and compare with the result from step 3
