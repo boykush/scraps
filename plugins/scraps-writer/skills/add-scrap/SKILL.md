@@ -24,20 +24,23 @@ Create a new scrap with Wiki-link notation.
 2. **Research the Topic**
    - Use `WebSearch` to gather information about the topic
 
-3. **Research Existing Tags**
+3. **Research Existing Tags** (snapshot for verification)
    - Use `list_tags` to get available tags
+   - Save this list for the verification step later
    - Identify tags relevant to the topic
 
 4. **Search Related Scraps**
    - Use `search_scraps` to find related content
-   - **NEVER create Wiki-links that were not returned by `search_scraps`. If a scrap is not in the results, it does not exist.**
    - Identify scraps that should link to the new scrap
 
 5. **Create the Scrap**
-   - **Only use Wiki-links to scraps found in step 4. Do not link to anything else.**
    - Write well-structured Markdown content following the syntax below
 
-6. **Suggest Backlinks**
+6. **Verify Tag Consistency**
+   - Use `list_tags` again and compare with the result from step 3
+   - If new tags appeared, find the `[[...]]` links that caused them and remove the `[[]]` notation (leave as plain text)
+
+7. **Suggest Backlinks**
    - List existing scraps that should add links to this new scrap
 
 ## Wiki-Link Syntax

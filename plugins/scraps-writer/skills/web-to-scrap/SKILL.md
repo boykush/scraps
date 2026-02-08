@@ -21,19 +21,22 @@ Summarize a web article and create a scrap with Wiki-link notation.
    - Use `WebFetch` to retrieve the web article content
    - Extract the title and main content
 
-2. **Research Existing Tags**
+2. **Research Existing Tags** (snapshot for verification)
    - Use `list_tags` to get available tags
+   - Save this list for the verification step later
    - Identify tags relevant to the article topic
 
 3. **Search Related Scraps**
    - Use `search_scraps` to find related content
-   - **NEVER create Wiki-links that were not returned by `search_scraps`. If a scrap is not in the results, it does not exist.**
 
 4. **Create the Scrap**
-   - **Only use Wiki-links to scraps found in step 3. Do not link to anything else.**
    - Generate a concise summary of the article
    - Include the source URL as autolink: `<https://...>`
    - Write well-structured Markdown content following the syntax below
+
+5. **Verify Tag Consistency**
+   - Use `list_tags` again and compare with the result from step 2
+   - If new tags appeared, find the `[[...]]` links that caused them and remove the `[[]]` notation (leave as plain text)
 
 ## Wiki-Link Syntax
 
