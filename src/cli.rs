@@ -36,7 +36,7 @@ pub enum SubCommands {
     #[command(about = "Init scraps project")]
     Init { project_name: String },
 
-    #[command(about = "Lint scraps for broken links")]
+    #[command(about = "Lint scraps for potential issues")]
     Lint,
 
     #[command(about = "Serve the site with build scraps")]
