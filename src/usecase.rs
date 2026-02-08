@@ -1,6 +1,5 @@
 pub mod build;
 pub mod init;
-pub mod lint;
 pub mod progress;
 mod read_scraps;
 pub mod scrap;
