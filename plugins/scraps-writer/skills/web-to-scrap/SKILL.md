@@ -13,7 +13,7 @@ Summarize a web article and create a scrap with Wiki-link notation.
 ## Arguments
 
 - **url**: `$ARGUMENTS` - URL of the web article to summarize
-- **max-lines**: (optional) - Maximum number of lines for the generated scrap
+- **max-lines**: (optional, default: 10) - Maximum number of lines for the generated scrap
 
 ## Workflow
 
@@ -33,6 +33,7 @@ Summarize a web article and create a scrap with Wiki-link notation.
    - Generate a concise summary of the article
    - Include the source URL as autolink: `<https://...>`
    - Write well-structured Markdown content following the syntax below
+   - If `max-lines` is specified, keep the scrap within that line count
 
 5. **Verify Tag Consistency**
    - Use `list_tags` again and compare with the result from step 2
