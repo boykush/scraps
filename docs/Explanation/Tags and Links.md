@@ -23,10 +23,6 @@ Many tools such as Obsidian and Foam use `#tag` (without wiki-link brackets). Sc
 - **Multi-word support**: `#[[Domain Driven Design]]` works naturally without special escaping
 - **No ambiguity**: `#` followed by `[[` is unambiguous, while `#tag` requires rules for where the tag name ends
 
-## Hierarchical organization
-
-Scraps does not introduce hierarchical tags like `#parent/child`. Instead, use [[Reference/Context Link]] for hierarchical organization. Tags remain flat labels for categorization.
-
 ## Future direction
 
-In a future release, `#[[tag]]` will become the only way to define tags. Plain `[[link]]` will always be treated strictly as a link, and implicit tag detection will be removed.
+In a future release, `#[[tag]]` will become the only way to define tags. Plain `[[link]]` will always be treated strictly as a link, and a `[[link]]` that does not match any existing scrap will no longer be treated as a tag.
