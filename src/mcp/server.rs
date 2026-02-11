@@ -41,7 +41,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Search for scraps using fuzzy matching against title and body content. Space-separated keywords use OR logic by default (any keyword matches). Set logic to 'and' for all keywords to match. Returns matching scraps with titles, contexts, and full content."
+        description = "Search for scraps using fuzzy matching against title and body content. Space-separated keywords use OR logic by default (any keyword matches). Set logic to 'and' for all keywords to match. Returns matching scraps with titles and contexts. Use get_scrap to retrieve full content."
     )]
     async fn search_scraps(
         &self,
@@ -52,7 +52,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Lookup outbound wiki links from a specific scrap. Returns all scraps that the specified scrap links to, with their full content."
+        description = "Lookup outbound wiki links from a specific scrap. Returns all scraps that the specified scrap links to. Use get_scrap to retrieve full content."
     )]
     async fn lookup_scrap_links(
         &self,
@@ -63,7 +63,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Lookup inbound wiki links (backlinks) to a specific scrap. Returns all scraps that link to the specified scrap, with their full content."
+        description = "Lookup inbound wiki links (backlinks) to a specific scrap. Returns all scraps that link to the specified scrap. Use get_scrap to retrieve full content."
     )]
     async fn lookup_scrap_backlinks(
         &self,
@@ -84,7 +84,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Lookup inbound references (backlinks) to a specific tag. Returns all scraps that reference the specified tag, with their full content."
+        description = "Lookup inbound references (backlinks) to a specific tag. Returns all scraps that reference the specified tag. Use get_scrap to retrieve full content."
     )]
     async fn lookup_tag_backlinks(
         &self,
@@ -185,7 +185,13 @@ mod tests {
         assert!(!result.content.is_empty());
 
         let content_text = result.content[0].as_text().unwrap();
-        assert!(content_text.text.contains("Test Scrap"));
+        let response: serde_json::Value = serde_json::from_str(&content_text.text).unwrap();
+        assert!(response["count"].as_u64().unwrap() > 0);
+        assert!(content_text.text.contains("test"));
+        assert!(
+            !content_text.text.contains("md_text"),
+            "search_scraps should not include md_text"
+        );
 
         client.cancel().await.unwrap();
         server_handle.abort();
@@ -435,7 +441,7 @@ mod tests {
             "AND search should return only 1 result matching both keywords"
         );
         assert!(
-            content_text.text.contains("Rust and Python"),
+            content_text.text.contains("rust_python"),
             "AND search should match the scrap containing both keywords"
         );
 

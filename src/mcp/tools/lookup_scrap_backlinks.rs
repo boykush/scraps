@@ -1,4 +1,4 @@
-use crate::mcp::json::scrap::ScrapJson;
+use crate::mcp::json::scrap::ScrapKeyJson;
 use crate::usecase::scrap::lookup_backlinks::usecase::LookupScrapBacklinksUsecase;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
@@ -20,7 +20,7 @@ pub struct LookupScrapBacklinksRequest {
 
 #[derive(Debug, Serialize)]
 pub struct LookupScrapBacklinksResponse {
-    pub results: Vec<ScrapJson>,
+    pub results: Vec<ScrapKeyJson>,
     pub count: usize,
 }
 
@@ -48,12 +48,11 @@ pub async fn lookup_scrap_backlinks(
     })?;
 
     // Convert results to structured response
-    let scrap_jsons: Vec<ScrapJson> = results
+    let scrap_jsons: Vec<ScrapKeyJson> = results
         .into_iter()
-        .map(|result| ScrapJson {
+        .map(|result| ScrapKeyJson {
             title: result.title.to_string(),
             ctx: result.ctx.map(|c| c.to_string()),
-            md_text: result.md_text,
         })
         .collect();
 
