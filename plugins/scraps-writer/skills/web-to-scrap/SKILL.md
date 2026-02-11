@@ -12,8 +12,10 @@ Summarize a web article and create a scrap with Wiki-link notation.
 
 ## Arguments
 
-- **url**: `$ARGUMENTS` - URL of the web article to summarize
-- **max-lines**: (optional, default: 10) - Maximum number of lines for the generated scrap
+Parse the following from `$ARGUMENTS`:
+
+- **url** (required) - URL of the web article to summarize
+- **max-lines** (optional, default: 10) - Maximum number of lines for the generated scrap
 
 ## Workflow
 
@@ -22,5 +24,5 @@ Summarize a web article and create a scrap with Wiki-link notation.
    - Extract the OGP title and use it as the scrap title
 
 2. **Create the Scrap**
-   - Call `scraps-writer` skill with max-lines argument
+   - Call `scraps-writer` skill with args: `<title> <max-lines>`
    - The scrap should be a concise summary of the article with a source autolink
