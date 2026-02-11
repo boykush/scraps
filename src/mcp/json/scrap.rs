@@ -6,3 +6,9 @@ pub struct ScrapJson {
     pub ctx: Option<String>,
     pub md_text: String,
 }
+
+#[derive(Debug, Serialize)]
+pub struct ScrapKeyJson {
+    pub title: String,
+    pub ctx: Option<String>,
+}

@@ -20,7 +20,6 @@ matching.
 - `results`: Array of matching scraps with the following fields:
   - `title`: Scrap title
   - `ctx`: Context folder path (null if in root)
-  - `md_text`: Full Markdown content
 - `count`: Total number of matches found
 
 **Examples:**
@@ -51,7 +50,7 @@ specified scrap links to.
 - `ctx` (string, optional): Context if the scrap has one
 
 **Returns:**
-Array of linked scraps with their full content.
+Array of linked scraps with `title` and `ctx`.
 
 ## lookup_scrap_backlinks
 
@@ -63,7 +62,7 @@ that link to the specified scrap.
 - `ctx` (string, optional): Context if the scrap has one
 
 **Returns:**
-Array of scraps that link to the specified scrap, with their full content.
+Array of scraps that link to the specified scrap, with `title` and `ctx`.
 
 ## lookup_tag_backlinks
 
@@ -73,14 +72,14 @@ Find all scraps that reference a specific tag.
 - `tag` (string, required): Tag name to get backlinks for
 
 **Returns:**
-Array of scraps that reference the specified tag, with their full content.
+Array of scraps that reference the specified tag, with `title` and `ctx`.
 
 ## Notes
 
 - All search and lookup operations are performed against the current state of
   your Scraps repository
 - Fuzzy matching is used for search queries to improve discoverability
-- Results include the full Markdown content of matching scraps
+- Use `get_scrap` to retrieve the full Markdown content of individual scraps
 - The MCP server must be running for these tools to be available to your AI
   assistant
 
