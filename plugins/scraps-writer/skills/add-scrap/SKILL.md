@@ -12,17 +12,18 @@ Create a new scrap with Wiki-link notation.
 
 ## Arguments
 
-- **title**: `$ARGUMENTS` - Title of the scrap to create
-- **max-lines**: (optional, default: 10) - Maximum number of lines for the generated scrap
+Parse the following from `$ARGUMENTS`:
+
+- **title** (required) - Title of the scrap to create
+- **max-lines** (optional, default: 10) - Maximum number of lines for the generated scrap
 
 ## Workflow
 
 1. **Understand the Request**
    - Ask clarifying questions if the content is unclear
-   - Identify the context folder if applicable
 
 2. **Research the Topic**
    - Use `WebSearch` to gather information about the topic
 
 3. **Create the Scrap**
-   - Call `scraps-writer` skill with max-lines argument
+   - Call `scraps-writer` skill with args: `<title> <max-lines>`

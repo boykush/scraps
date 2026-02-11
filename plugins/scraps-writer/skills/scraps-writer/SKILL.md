@@ -3,7 +3,7 @@ name: scraps-writer
 description: Shared workflow for creating scraps with tag research, Wiki-link resolution, and content verification.
 allowed-tools: mcp__plugin_scraps-writer_scraps__*, Read, Write, Edit, Glob
 user-invocable: false
-argument-hint: [max-lines]
+argument-hint: [title] [max-lines]
 ---
 
 # Scraps Writer
@@ -12,7 +12,10 @@ Shared workflow for creating scraps with Wiki-link notation.
 
 ## Arguments
 
-- **max-lines**: `$ARGUMENTS` (optional, default: 10) - Maximum number of lines for the generated scrap
+Parse the following from `$ARGUMENTS`:
+
+- **title** (required) - Title of the scrap to create
+- **max-lines** (optional, default: 10) - Maximum number of lines for the generated scrap
 
 ## Workflow
 
@@ -24,11 +27,13 @@ Shared workflow for creating scraps with Wiki-link notation.
 2. **Search Related Scraps**
    - Use `search_scraps` to find related content
    - Identify scraps that should link to the new scrap
+   - Check if a scrap with the same **title** already exists. If so, determine an appropriate context folder name to disambiguate
 
 3. **Create the Scrap**
    - Write well-structured Markdown content following the syntax below
    - If summarizing a web article, include the source URL as autolink: `<https://...>`
-   - If `max-lines` is specified, keep the scrap within that line count
+   - Filename: `scraps/<title>.md`, or `scraps/<ctx>/<title>.md` if a context folder is needed to avoid title conflicts
+   - **IMPORTANT**: The scrap content MUST NOT exceed **max-lines** lines. Count the total lines before writing and trim if necessary
 
 4. **Verify Tag Consistency**
    - Use `list_tags` again and compare with the result from step 1
