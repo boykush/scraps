@@ -25,7 +25,8 @@ Parse the following from `$ARGUMENTS`:
    - Identify tags relevant to the topic
 
 2. **Search Related Scraps**
-   - Use `search_scraps` to find related content
+   - Use `search_scraps` to find related scraps (returns `title` and `ctx` only)
+   - Use `get_scrap` to retrieve full content of specific scraps when needed
    - Identify scraps that should link to the new scrap
    - Check if a scrap with the same **title** already exists. If so, determine an appropriate context folder name to disambiguate
 
@@ -46,9 +47,10 @@ Parse the following from `$ARGUMENTS`:
 
 - `list_tags` - Get all tags sorted by backlinks count.
 - `search_scraps` - Find related scraps by keyword with fuzzy matching against title and body content. Returns `title` and `ctx` for each result. **IMPORTANT: Each result represents an existing scrap. Only use the returned `title` and `ctx` values when creating Wiki-links.**
-- `lookup_tag_backlinks` - Check which scraps are using a specific tag.
-- `lookup_scrap_links` - Get all scraps that a scrap links to.
-- `lookup_scrap_backlinks` - Get all scraps that link to a scrap.
+- `get_scrap` - Get a single scrap's full content by `title` and optional `ctx`.
+- `lookup_tag_backlinks` - Check which scraps are using a specific tag. Returns `title` and `ctx` for each result.
+- `lookup_scrap_links` - Get all scraps that a scrap links to. Returns `title` and `ctx` for each result.
+- `lookup_scrap_backlinks` - Get all scraps that link to a scrap. Returns `title` and `ctx` for each result.
 
 ## Wiki-Link Syntax
 
