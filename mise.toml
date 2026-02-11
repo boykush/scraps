@@ -2,7 +2,7 @@
 experimental = true
 
 [tools]
-"rust" = { version = "1.92.0", profile = "default" }
+"rust" = { version = "1.93.0", profile = "default" }
 "hk" = "latest"
 "pkl" = "latest"
 "cargo:scraps" = "0.31.0"
