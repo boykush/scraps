@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use super::tools::get_scrap::{get_scrap, GetScrapRequest};
 use super::tools::list_tags::list_tags;
 use super::tools::lookup_scrap_backlinks::{lookup_scrap_backlinks, LookupScrapBacklinksRequest};
 use super::tools::lookup_scrap_links::{lookup_scrap_links, LookupScrapLinksRequest};
@@ -28,6 +29,17 @@ impl ScrapsServer {
 
 #[tool_router]
 impl ScrapsServer {
+    #[tool(
+        description = "Get a single scrap by title and optional context. Returns the scrap's full content including title, context, and markdown body."
+    )]
+    async fn get_scrap(
+        &self,
+        context: RequestContext<RoleServer>,
+        parameters: Parameters<GetScrapRequest>,
+    ) -> Result<CallToolResult, ErrorData> {
+        get_scrap(&self.scraps_dir, context, parameters).await
+    }
+
     #[tool(
         description = "Search for scraps using fuzzy matching against title and body content. Space-separated keywords use OR logic by default (any keyword matches). Set logic to 'and' for all keywords to match. Returns matching scraps with titles, contexts, and full content."
     )]
@@ -127,9 +139,10 @@ mod tests {
 
         let tools = client.list_tools(Default::default()).await.unwrap();
 
-        assert_eq!(tools.tools.len(), 5);
+        assert_eq!(tools.tools.len(), 6);
 
         let tool_names: Vec<&str> = tools.tools.iter().map(|t| t.name.as_ref()).collect();
+        assert!(tool_names.contains(&"get_scrap"));
         assert!(tool_names.contains(&"search_scraps"));
         assert!(tool_names.contains(&"lookup_scrap_links"));
         assert!(tool_names.contains(&"lookup_scrap_backlinks"));
@@ -173,6 +186,45 @@ mod tests {
 
         let content_text = result.content[0].as_text().unwrap();
         assert!(content_text.text.contains("Test Scrap"));
+
+        client.cancel().await.unwrap();
+        server_handle.abort();
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_call_get_scrap(#[from(temp_scrap_project)] project: TempScrapProject) {
+        project.add_scrap("test.md", b"# Test Scrap\n\nContent here");
+
+        let server = ScrapsServer::new(project.scraps_dir.clone());
+
+        let (client_stream, server_stream) = tokio::io::duplex(4096);
+
+        let server_handle = tokio::spawn(async move { server.serve(server_stream).await });
+
+        let client = ().serve(client_stream).await.unwrap();
+
+        let result = client
+            .call_tool(CallToolRequestParams {
+                meta: None,
+                name: "get_scrap".into(),
+                arguments: Some(
+                    serde_json::json!({"title": "test"})
+                        .as_object()
+                        .unwrap()
+                        .clone(),
+                ),
+                task: None,
+            })
+            .await
+            .unwrap();
+
+        assert!(!result.is_error.unwrap_or(false));
+        assert!(!result.content.is_empty());
+
+        let content_text = result.content[0].as_text().unwrap();
+        assert!(content_text.text.contains("Test Scrap"));
+        assert!(content_text.text.contains("Content here"));
 
         client.cancel().await.unwrap();
         server_handle.abort();
