@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <!-- Page title -->
+        
+            
+            <title>Integrate with AI Assistants - Scraps Doc</title>
+            <meta property="og:title" content="Integrate with AI Assistants - Scraps Doc" />
+            <meta name="twitter:title" content="Integrate with AI Assistants - Scraps Doc" />
+        
+        <!-- Page description -->
+        
+            <meta name="description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta property="og:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta name="twitter:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+        
+        <!-- Page favicon -->
+        
+            <link rel="icon" type="image/png" href="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;logo.png?raw=true" />
+        
+        <!-- Rubik font -->
+        <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">
+        <!-- Noto Sans JP font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+        <!-- Style sheet -->
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;main.css">
+        
+<meta property="og:url" content="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/integrate-with-ai-assistants.how-to.html" />
+
+
+    </head>
+    <body>
+        <header>
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;">
+                <h1>Scraps Doc</h1>
+            </a>
+        </header>
+        <main>
+            
+    <div class="scrap">
+        
+          <h3 class="context">How-to<span>&#47;</span></h2>
+        
+        <h1 class="title">Integrate with AI Assistants</h1>
+        
+            <p class="commited-date">
+                commited date: 2025-12-30
+            </p>
+        
+        <div class="content">
+            <p>#<a href="https://boykush.github.io/scraps/scraps/integration.html">Integration</a></p>
+<p>Scraps includes comprehensive Model Context Protocol (MCP) server functionality, enabling AI assistants to directly interact with your Scraps knowledge base.</p>
+<h2>What is MCP?</h2>
+<p>The Model Context Protocol (MCP) is an open standard that enables AI assistants to securely access external data sources and tools. Scraps implements an MCP server that exposes your documentation as a searchable, linkable knowledge base.</p>
+<h2>Quick Start</h2>
+<h3>Claude Code (Recommended)</h3>
+<p>For Claude Code users, we provide an official plugin for seamless integration. See <a href="https://boykush.github.io/scraps/scraps/install-claude-code-plugin.how-to.html">Install Claude Code Plugin</a> for installation instructions.</p>
+<h3>Manual MCP Server Setup</h3>
+<p>For other MCP-compatible clients or advanced configurations, you can add Scraps as an MCP server directly:</p>
+<pre><code class="language-bash">claude mcp add scraps -- scraps mcp serve --path ~/path/to/your/scraps/project/
+</code></pre>
+<p>Replace <code>~/path/to/your/scraps/project/</code> with the actual path to your Scraps project directory.</p>
+<p>For command details, see <a href="https://boykush.github.io/scraps/scraps/mcp-serve.reference.html">MCP Serve</a>.</p>
+<h2>Available Tools</h2>
+<p>For detailed MCP tool documentation, see <a href="https://boykush.github.io/scraps/scraps/mcp-tools.reference.html">MCP Tools</a>.</p>
+
+        </div>
+    </div>
+    
+    <ul class="scrap-links">
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/mcp-tools.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">MCP Tools</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Integration
+This reference documents the MCP (Model Context Protocol) tools provided by
+Scraps for AI assistant integration.
+search_scraps
+Search through your Scraps content with natural language queries using fuzzy
+matching.
+Parameters:
+
+query (string, required): Search query to match against scrap titles and
+body content
+num (integer, optional): Maximum number of results to return (default: 100)
+logic (string, optional): Search logic for combining multiple keywords:
+&quot;or&quot; (default): Any keyword can match
+&quot;and&quot;: All keywords must match
+
+
+
+Returns:
+
+results: Array of matching scraps with the following fields:
+title: Scrap title
+ctx: Context folder path (null if in root)
+
+
+count: Total number of matches found
+
+Examples:
+
+{&quot;query&quot;: &quot;rust cli&quot;, &quot;logic&quot;: &quot;and&quot;} - Returns scraps containing both
+“rust” AND “cli”
+{&quot;query&quot;: &quot;rust cli&quot;, &quot;logic&quot;: &quot;or&quot;} - Returns scraps containing “rust” OR
+“cli”
+
+list_tags
+List all available tags in your Scraps repository with their backlink counts,
+sorted by popularity.
+Parameters: None
+Returns:
+Array of tags with the following fields:
+
+title: Tag name
+backlinks_count: Number of scraps referencing this tag
+
+lookup_scrap_links
+Find outbound wiki links from a specific scrap. Returns all scraps that the
+specified scrap links to.
+Parameters:
+
+title (string, required): Title of the scrap to get links for
+ctx (string, optional): Context if the scrap has one
+
+Returns:
+Array of linked scraps with title and ctx.
+lookup_scrap_backlinks
+Find inbound wiki links (backlinks) to a specific scrap. Returns all scraps
+that link to the specified scrap.
+Parameters:
+
+title (string, required): Title of the scrap to get backlinks for
+ctx (string, optional): Context if the scrap has one
+
+Returns:
+Array of scraps that link to the specified scrap, with title and ctx.
+lookup_tag_backlinks
+Find all scraps that reference a specific tag.
+Parameters:
+
+tag (string, required): Tag name to get backlinks for
+
+Returns:
+Array of scraps that reference the specified tag, with title and ctx.
+Notes
+
+All search and lookup operations are performed against the current state of
+your Scraps repository
+Fuzzy matching is used for search queries to improve discoverability
+Use get_scrap to retrieve the full Markdown content of individual scraps
+The MCP server must be running for these tools to be available to your AI
+assistant
+
+For setup instructions, see Integrate with AI Assistants.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/mcp-serve.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">MCP Serve</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#CLI
+❯ scraps mcp serve
+
+This command starts an MCP (Model Context Protocol) server that enables AI assistants like Claude Code to directly interact with your Scraps knowledge base.
+Examples
+# Basic MCP server
+❯ scraps mcp serve
+
+# Serve from specific directory  
+❯ scraps mcp serve --path &#x2F;path&#x2F;to&#x2F;project
+
+
+The MCP server provides tools for AI assistants to search through your content and list available tags, enabling intelligent assistance with your documentation.
+For more details, see Integrate with AI Assistants.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/what-is-scraps-question.explanation.html">
+                    
+                        <div class="header">
+                            <div class="context">Explanation&#47;</div>
+                            <div class="title">What is Scraps?</div>
+                        </div>
+                    
+                    
+                        <div class="thumbnail">
+                            <img class="thumbnail-image" alt="thumbnail" src="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;raw&#x2F;main&#x2F;assets&#x2F;logo_opacity.png?raw=true" loading="lazy" />
+                        </div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/getting-started.tutorial.html">
+                    
+                        <div class="header">
+                            <div class="context">Tutorial&#47;</div>
+                            <div class="title">Getting Started</div>
+                        </div>
+                    
+                    
+                        <div class="summary">This guide covers using Scraps as a static site generator (SSG).
+Setup
+
+Install Scraps
+
+Follow the Installation guide to install Scraps on your system
+
+
+Initialize Project
+
+Create a new Scraps project using Init:
+❯ scraps init my-knowledge-base
+❯ cd my-knowledge-base
+
+
+
+
+Configure Project
+
+Follow Configuration to set up your .scraps.toml
+
+
+
+Content Creation
+
+Write Markdown Files
+
+Create Markdown files in the &#x2F;scraps directory
+Use CommonMark and GitHub-flavored Markdown
+
+
+Add Internal Links
+
+Connect documents using Normal Link syntax:
+[[Page Name]] for simple links
+[[Page Name|Custom Text]] for custom link text
+
+
+
+
+Enhance Content
+
+Add Mermaid diagrams for visual representations
+Use Autolink functionality for external links
+Organize with context folders when needed
+
+
+
+Build and Preview
+
+Generate Site
+
+Use Build to generate static site files:
+❯ scraps build
+
+
+
+
+Preview Locally
+
+Use Serve for local preview and debugging:
+❯ scraps serve
+
+
+
+
+Deploy
+
+Deploy to platforms like Deploy to GitHub Pages when ready
+
+
+
+AI Integration
+
+MCP Server: Enable AI assistant integration using Integrate with AI Assistants for intelligent search and content assistance
+
+</div>
+                    
+                </a>
+            </li>
+        
+    </ul>
+
+
+        </main>
+        <footer>
+            Generated by <a href="https://github.com/boykush/scraps" target="_blank" rel="noopener noreferrer">Scraps</a>
+        </footer> 
+        <!-- Code syntax highlight -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!-- Code syntax highlight theme -->
+        <link href="https://unpkg.com/nord-highlightjs@0.2.0/dist/nord.css" rel="stylesheet" type="text/css" />
+        <!-- Mermaid -->
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.12.2/+esm'
+        </script>
+        
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const ogpCards = document.querySelectorAll('.ogp-card');
+
+    ogpCards.forEach(async (card) => {
+      const url = card.dataset.url;
+
+      try {
+        const proxyUrl = 'https://corsproxy.io/?url=';
+        const response = await fetch(proxyUrl + url);
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        const title = doc.querySelector('meta[property="og:title"]')?.content ||
+          doc.querySelector('title')?.textContent ||
+          'No title';
+        card.querySelector('.ogp-title').textContent = title;
+
+        const description = doc.querySelector('meta[property="og:description"]')?.content ||
+          doc.querySelector('meta[name="description"]')?.content ||
+          'No description';
+        card.querySelector('.ogp-description').textContent = description;
+
+        const image = doc.querySelector('meta[property="og:image"]')?.content;
+        if (image) {
+          const imageUrl = image.startsWith('/')
+            ? `https://${card.dataset.host}/${image}`
+            : image;
+          card.querySelector('.ogp-image').src = imageUrl;
+        } else {
+          card.querySelector('.ogp-image').remove();
+        }
+      } catch (error) {
+        console.error('Failed to fetch OGP data:', error);
+      }
+    });
+  });
+</script>
+ 
+    </body>
+</html>

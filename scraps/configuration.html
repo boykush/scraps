@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <!-- Page title -->
+        
+            <title>Scraps Doc</title>
+            <meta property="og:title" content="Scraps Doc" />
+            <meta name="twitter:title" content="Scraps Doc" />
+        
+        <!-- Page description -->
+        
+            <meta name="description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta property="og:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta name="twitter:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+        
+        <!-- Page favicon -->
+        
+            <link rel="icon" type="image/png" href="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;logo.png?raw=true" />
+        
+        <!-- Rubik font -->
+        <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">
+        <!-- Noto Sans JP font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+        <!-- Style sheet -->
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;main.css">
+        
+        
+    </head>
+    <body>
+        <header>
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;">
+                <h1>Scraps Doc</h1>
+            </a>
+        </header>
+        <main>
+            
+    <div class="tag">
+        <h1 class="title">Configuration</h1>
+    </div>
+    
+    <ul class="scrap-links">
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/configuration.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Configuration</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Configuration
+Configuration is managed by .scraps.toml in the Scraps project.
+Configuration Structure
+The configuration file has two sections:
+
+Root level: Contains scraps_dir and timezone for general settings
+[ssg] section: Contains all static site generator settings
+
+The [ssg] section is required for build and serve commands. Other commands
+like tag, mcp, and template can work without this section.
+Within the [ssg] section, base_url and title are required fields.
+Configuration Variables
+All configuration variables used by Scraps and their default values are listed below.
+# The scraps directory path relative to this .scraps.toml (optional, default=scraps)
+scraps_dir = &quot;scraps&quot;
+
+# The site timezone (optional, default=UTC)
+timezone = &quot;UTC&quot;
+
+# SSG (Static Site Generator) configuration section
+# This section is required for build and serve commands
+[ssg]
+# The site base url (required)
+base_url = &quot;https:&#x2F;&#x2F;username.github.io&#x2F;repository-name&#x2F;&quot;
+
+# The site title (required)
+title = &quot;&quot;
+
+# The site language (compliant with iso639-1, default=en)
+lang_code = &quot;en&quot;
+
+# The site description (optional)
+description = &quot;&quot;
+
+# The site favicon in the form of png file URL (optional)
+favicon = &quot;&quot;
+
+# The site color scheme
+# (optional, default=os_setting, choices=os_setting or only_light or only_dark)
+color_scheme = &quot;os_setting&quot;
+
+# Build a search index with the Fuse JSON and display search UI
+# (optional, default=true, choices=true or false)
+build_search_index = true
+
+# Scraps sort key choice on index page
+# (optional, default=committed_date, choices=committed_date or linked_count)
+sort_key = &quot;committed_date&quot;
+
+# Scraps pagination on index page(optional, default=no pagination)
+paginate_by = 20
+
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/color-scheme.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Color Scheme</div>
+                        </div>
+                    
+                    
+                        <div class="thumbnail">
+                            <img class="thumbnail-image" alt="thumbnail" src="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;light_mode.png?raw=true" loading="lazy" />
+                        </div>
+                    
+                </a>
+            </li>
+        
+    </ul>
+
+
+        </main>
+        <footer>
+            Generated by <a href="https://github.com/boykush/scraps" target="_blank" rel="noopener noreferrer">Scraps</a>
+        </footer> 
+        <!-- Code syntax highlight -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!-- Code syntax highlight theme -->
+        <link href="https://unpkg.com/nord-highlightjs@0.2.0/dist/nord.css" rel="stylesheet" type="text/css" />
+        <!-- Mermaid -->
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.12.2/+esm'
+        </script>
+        
+         
+    </body>
+</html>

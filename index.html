@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <!-- Page title -->
+        
+            <title>Scraps Doc</title>
+            <meta property="og:title" content="Scraps Doc" />
+            <meta name="twitter:title" content="Scraps Doc" />
+        
+        <!-- Page description -->
+        
+            <meta name="description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta property="og:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta name="twitter:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+        
+        <!-- Page favicon -->
+        
+            <link rel="icon" type="image/png" href="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;logo.png?raw=true" />
+        
+        <!-- Rubik font -->
+        <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">
+        <!-- Noto Sans JP font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+        <!-- Style sheet -->
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;main.css">
+        
+        
+    </head>
+    <body>
+        <header>
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;">
+                <h1>Scraps Doc</h1>
+            </a>
+        </header>
+        <main>
+            
+    <div class="index"> 
+        
+          <div class="readme-block">
+            <p>Scraps is a portable CLI knowledge hub for managing interconnected Markdown documentation with Wiki-link notation.</p>
+<p>Learn more: <a href="https://boykush.github.io/scraps/scraps/what-is-scraps-question.explanation.html">What is Scraps?</a></p>
+<h2>Documentation</h2>
+<p>This documentation follows the <a href="https://diataxis.fr/">Diátaxis</a> framework:</p>
+<ul>
+<li><strong>Tutorials</strong> - Learn Scraps: <a href="https://boykush.github.io/scraps/scraps/getting-started.tutorial.html">Getting Started</a></li>
+<li><strong>How-to Guides</strong> - Solve problems: <a href="https://boykush.github.io/scraps/scraps/deploy-to-github-pages.how-to.html">Deploy to GitHub Pages</a>, <a href="https://boykush.github.io/scraps/scraps/setup-lsp.how-to.html">Setup LSP</a>, <a href="https://boykush.github.io/scraps/scraps/use-templates.how-to.html">Use Templates</a></li>
+<li><strong>Reference</strong> - Look up details: <a href="https://boykush.github.io/scraps/scraps/build.reference.html">Build</a>, <a href="https://boykush.github.io/scraps/scraps/configuration.reference.html">Configuration</a>, <a href="https://boykush.github.io/scraps/scraps/normal-link.reference.html">Normal Link</a></li>
+<li><strong>Explanation</strong> - Understand concepts: <a href="https://boykush.github.io/scraps/scraps/what-is-scraps-question.explanation.html">What is Scraps?</a>, <a href="https://boykush.github.io/scraps/scraps/search-architecture.explanation.html">Search Architecture</a></li>
+</ul>
+<p>Browse by topic: #<a href="https://boykush.github.io/scraps/scraps/cli.html">CLI</a> #<a href="https://boykush.github.io/scraps/scraps/wiki-links.html">Wiki-Links</a> #<a href="https://boykush.github.io/scraps/scraps/markdown.html">Markdown</a></p>
+
+            <hr>
+          </div>
+        
+        
+          <div class="search-block">
+              <span class="icon" />
+              <input
+                type="text"
+                id="search-input"
+                onkeyup="doSearch()"
+                placeholder="Search by title..."
+                />
+              <ul id="search-results"></ul>
+          </div>
+        
+        <div class="tags-block">
+            
+    <ul class="tag-links">
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/markdown.html">
+                    <span class="title">Markdown</span>&nbsp;<span>(9)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/cli.html">
+                    <span class="title">CLI</span>&nbsp;<span>(6)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/integration.html">
+                    <span class="title">Integration</span>&nbsp;<span>(4)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/wiki-links.html">
+                    <span class="title">Wiki-Links</span>&nbsp;<span>(4)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/templates.html">
+                    <span class="title">Templates</span>&nbsp;<span>(3)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/configuration.html">
+                    <span class="title">Configuration</span>&nbsp;<span>(2)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/static-site.html">
+                    <span class="title">Static Site</span>&nbsp;<span>(2)</span>
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/deployment.html">
+                    <span class="title">Deployment</span>&nbsp;<span>(1)</span>
+                </a>
+            </li>
+        
+        
+    </ul>
+
+        </div>
+        <div class="links-block">
+            <p class="sort-key">Sort by - committed date</p>
+            
+    <ul class="scrap-links">
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/search-architecture.explanation.html">
+                    
+                        <div class="header">
+                            <div class="context">Explanation&#47;</div>
+                            <div class="title">Search Architecture</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Static Site
+Search index format
+Scraps can build a search index using the Fuse JSON schema as shown below.
+[
+    {
+      &quot;title&quot;: &quot;Search&quot;,
+      &quot;url&quot;: &quot;http:&#x2F;&#x2F;127.0.0.1:1112&#x2F;scraps&#x2F;search.html&quot;
+    },
+    {
+      &quot;title&quot;: &quot;Overview&quot;,
+      &quot;url&quot;: &quot;http:&#x2F;&#x2F;127.0.0.1:1112&#x2F;scraps&#x2F;overview.html&quot;
+    },
+    ...
+]
+
+Search libraries
+Scraps content perform searches with fuse.js using an index.
+We are considering WASM solutions like tinysearch for future performance improvements in our deployment environment.
+Configuration
+If you are not using the search function, please modify your .scraps.toml as follows. See the Configuration page for details.
+[ssg]
+# Build a search index with the Fuse JSON and display search UI (optional, default=true, choices=true or false)
+build_search_index = false
+
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/mcp-tools.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">MCP Tools</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Integration
+This reference documents the MCP (Model Context Protocol) tools provided by
+Scraps for AI assistant integration.
+search_scraps
+Search through your Scraps content with natural language queries using fuzzy
+matching.
+Parameters:
+
+query (string, required): Search query to match against scrap titles and
+body content
+num (integer, optional): Maximum number of results to return (default: 100)
+logic (string, optional): Search logic for combining multiple keywords:
+&quot;or&quot; (default): Any keyword can match
+&quot;and&quot;: All keywords must match
+
+
+
+Returns:
+
+results: Array of matching scraps with the following fields:
+title: Scrap title
+ctx: Context folder path (null if in root)
+
+
+count: Total number of matches found
+
+Examples:
+
+{&quot;query&quot;: &quot;rust cli&quot;, &quot;logic&quot;: &quot;and&quot;} - Returns scraps containing both
+“rust” AND “cli”
+{&quot;query&quot;: &quot;rust cli&quot;, &quot;logic&quot;: &quot;or&quot;} - Returns scraps containing “rust” OR
+“cli”
+
+list_tags
+List all available tags in your Scraps repository with their backlink counts,
+sorted by popularity.
+Parameters: None
+Returns:
+Array of tags with the following fields:
+
+title: Tag name
+backlinks_count: Number of scraps referencing this tag
+
+lookup_scrap_links
+Find outbound wiki links from a specific scrap. Returns all scraps that the
+specified scrap links to.
+Parameters:
+
+title (string, required): Title of the scrap to get links for
+ctx (string, optional): Context if the scrap has one
+
+Returns:
+Array of linked scraps with title and ctx.
+lookup_scrap_backlinks
+Find inbound wiki links (backlinks) to a specific scrap. Returns all scraps
+that link to the specified scrap.
+Parameters:
+
+title (string, required): Title of the scrap to get backlinks for
+ctx (string, optional): Context if the scrap has one
+
+Returns:
+Array of scraps that link to the specified scrap, with title and ctx.
+lookup_tag_backlinks
+Find all scraps that reference a specific tag.
+Parameters:
+
+tag (string, required): Tag name to get backlinks for
+
+Returns:
+Array of scraps that reference the specified tag, with title and ctx.
+Notes
+
+All search and lookup operations are performed against the current state of
+your Scraps repository
+Fuzzy matching is used for search queries to improve discoverability
+Use get_scrap to retrieve the full Markdown content of individual scraps
+The MCP server must be running for these tools to be available to your AI
+assistant
+
+For setup instructions, see Integrate with AI Assistants.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/tag-link.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Tag Link</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Wiki-Links #Markdown
+If there is no scrap with the specified title, such as #Markdown, it becomes a tag.
+Tags are displayed on the index page. Each tag links to a page that lists all scraps using that tag.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/installation.tutorial.html">
+                    
+                        <div class="header">
+                            <div class="context">Tutorial&#47;</div>
+                            <div class="title">Installation</div>
+                        </div>
+                    
+                    
+                        <div class="summary">You can find the latest version on GitHub Releases.
+Requirements
+The git command is required for features.
+Cargo
+❯ cargo install scraps
+
+macOS &#x2F; Linux (Homebrew)
+❯ brew install boykush&#x2F;tap&#x2F;scraps
+
+GitHub Releases
+Download the binary for your platform and place it in your PATH:
+# macOS (Apple Silicon)
+❯ curl -sL https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;releases&#x2F;latest&#x2F;download&#x2F;scraps-aarch64-apple-darwin.tar.gz | tar xz
+
+# macOS (Intel)
+❯ curl -sL https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;releases&#x2F;latest&#x2F;download&#x2F;scraps-x86_64-apple-darwin.tar.gz | tar xz
+
+# Linux (x86_64)
+❯ curl -sL https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;releases&#x2F;latest&#x2F;download&#x2F;scraps-x86_64-unknown-linux-gnu.tar.gz | tar xz
+
+# Linux (ARM64)
+❯ curl -sL https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;releases&#x2F;latest&#x2F;download&#x2F;scraps-aarch64-unknown-linux-gnu.tar.gz | tar xz
+
+Then move the binary to a directory in your PATH:
+❯ sudo mv scraps &#x2F;usr&#x2F;local&#x2F;bin&#x2F;
+
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/getting-started.tutorial.html">
+                    
+                        <div class="header">
+                            <div class="context">Tutorial&#47;</div>
+                            <div class="title">Getting Started</div>
+                        </div>
+                    
+                    
+                        <div class="summary">This guide covers using Scraps as a static site generator (SSG).
+Setup
+
+Install Scraps
+
+Follow the Installation guide to install Scraps on your system
+
+
+Initialize Project
+
+Create a new Scraps project using Init:
+❯ scraps init my-knowledge-base
+❯ cd my-knowledge-base
+
+
+
+
+Configure Project
+
+Follow Configuration to set up your .scraps.toml
+
+
+
+Content Creation
+
+Write Markdown Files
+
+Create Markdown files in the &#x2F;scraps directory
+Use CommonMark and GitHub-flavored Markdown
+
+
+Add Internal Links
+
+Connect documents using Normal Link syntax:
+[[Page Name]] for simple links
+[[Page Name|Custom Text]] for custom link text
+
+
+
+
+Enhance Content
+
+Add Mermaid diagrams for visual representations
+Use Autolink functionality for external links
+Organize with context folders when needed
+
+
+
+Build and Preview
+
+Generate Site
+
+Use Build to generate static site files:
+❯ scraps build
+
+
+
+
+Preview Locally
+
+Use Serve for local preview and debugging:
+❯ scraps serve
+
+
+
+
+Deploy
+
+Deploy to platforms like Deploy to GitHub Pages when ready
+
+
+
+AI Integration
+
+MCP Server: Enable AI assistant integration using Integrate with AI Assistants for intelligent search and content assistance
+
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/configuration.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Configuration</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Configuration
+Configuration is managed by .scraps.toml in the Scraps project.
+Configuration Structure
+The configuration file has two sections:
+
+Root level: Contains scraps_dir and timezone for general settings
+[ssg] section: Contains all static site generator settings
+
+The [ssg] section is required for build and serve commands. Other commands
+like tag, mcp, and template can work without this section.
+Within the [ssg] section, base_url and title are required fields.
+Configuration Variables
+All configuration variables used by Scraps and their default values are listed below.
+# The scraps directory path relative to this .scraps.toml (optional, default=scraps)
+scraps_dir = &quot;scraps&quot;
+
+# The site timezone (optional, default=UTC)
+timezone = &quot;UTC&quot;
+
+# SSG (Static Site Generator) configuration section
+# This section is required for build and serve commands
+[ssg]
+# The site base url (required)
+base_url = &quot;https:&#x2F;&#x2F;username.github.io&#x2F;repository-name&#x2F;&quot;
+
+# The site title (required)
+title = &quot;&quot;
+
+# The site language (compliant with iso639-1, default=en)
+lang_code = &quot;en&quot;
+
+# The site description (optional)
+description = &quot;&quot;
+
+# The site favicon in the form of png file URL (optional)
+favicon = &quot;&quot;
+
+# The site color scheme
+# (optional, default=os_setting, choices=os_setting or only_light or only_dark)
+color_scheme = &quot;os_setting&quot;
+
+# Build a search index with the Fuse JSON and display search UI
+# (optional, default=true, choices=true or false)
+build_search_index = true
+
+# Scraps sort key choice on index page
+# (optional, default=committed_date, choices=committed_date or linked_count)
+sort_key = &quot;committed_date&quot;
+
+# Scraps pagination on index page(optional, default=no pagination)
+paginate_by = 20
+
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/color-scheme.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Color Scheme</div>
+                        </div>
+                    
+                    
+                        <div class="thumbnail">
+                            <img class="thumbnail-image" alt="thumbnail" src="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;light_mode.png?raw=true" loading="lazy" />
+                        </div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/template-system.explanation.html">
+                    
+                        <div class="header">
+                            <div class="context">Explanation&#47;</div>
+                            <div class="title">Template System</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Templates
+Generate scrap files from predefined Markdown templates for efficient content creation.
+Basic Usage
+
+Create template files in &#x2F;templates directory
+Run generate scrap on command-line
+
+Template Syntax
+Templates use Tera template engine with TOML metadata:
++++
+title = &quot;{{ now() | date(timezone=timezone) }}&quot;
++++
+
+# Content goes here
+
+Available Variables
+
+timezone - Access .scraps.toml timezone setting
+All Tera built-in functions
+
+Examples
+See Use Templates for ready-to-use templates.
+For CLI commands, see Template.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/init.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Init</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#CLI
+❯ scraps init &amp;lt;PROJECT_NAME&amp;gt;
+
+This command initializes a new Scraps project. It creates the following structure:
+❯ tree -a -L 1
+.
+├── .gitignore    # Git ignore patterns for Scraps projects
+├── .scraps.toml  # Project configuration file
+└── scraps       # Directory for your Markdown files
+
+Examples
+# Initialize new project
+❯ scraps init my-knowledge-base
+❯ cd my-knowledge-base
+
+# Initialize with specific path
+❯ scraps init docs --path &#x2F;path&#x2F;to&#x2F;workspace
+
+After initializing the project, proceed to Build to generate your static site.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/deploy-to-github-pages.how-to.html">
+                    
+                        <div class="header">
+                            <div class="context">How-to&#47;</div>
+                            <div class="title">Deploy to GitHub Pages</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Deployment
+Custom actions are available to deploy Scraps to Github Pages.
+
+Repository: scraps-deploy-action
+Marketplace: Scraps Deploy to Pages
+
+YAML file
+Prepare a yaml file under .github&#x2F;workflows&#x2F; like this
+name: Deploy scraps github pages
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - &#x27;scraps&#x2F;**&#x27;
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions&#x2F;checkout@v6
+        with:
+          fetch-depth: 0 # For scraps git commited date
+      - name: build_and_deploy
+        uses: boykush&#x2F;scraps-deploy-action@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pages-branch: gh-pages
+
+GitHub settings
+Set up GitHub Pages for the repository.
+Build and deployment parameter as follows.
+
+Source: Deploy from a branch
+Branch: gh-pages
+
+</div>
+                    
+                </a>
+            </li>
+        
+    </ul>
+
+        </div>
+        <div class="paging-arrows">
+            
+            
+                <a class="next" href=".&#x2F;2.html">next</a>
+            
+        </div>
+    </div>
+
+        </main>
+        <footer>
+            Generated by <a href="https://github.com/boykush/scraps" target="_blank" rel="noopener noreferrer">Scraps</a>
+        </footer> 
+        <!-- Code syntax highlight -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!-- Code syntax highlight theme -->
+        <link href="https://unpkg.com/nord-highlightjs@0.2.0/dist/nord.css" rel="stylesheet" type="text/css" />
+        <!-- Mermaid -->
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.12.2/+esm'
+        </script>
+        
+  
+  <!-- For search scraps -->
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.1.0"></script>
+  <script type="module">
+    fetch('./search_index.json')
+      .then(response => response.json())
+      .then(data => {
+        const fuseOptions = {
+          minMatchCharLength: 3,
+          keys: ["title"]
+        };
+        const fuse = new Fuse(data, fuseOptions);
+        window.search = function (query, numResults) {
+          return fuse.search(query).slice(0, numResults).map(result => [result.item.title, result.item.url]);
+        };
+      })
+  </script>
+  <script>
+    function doSearch() {
+      let value = document.getElementById("search-input").value;
+      console.log(`Search query: ${value}`);
+
+      // Retrieve 5 results
+      const results = search(value, 5);
+
+      console.log(`Results: ${results}`);
+
+      let ul = document.getElementById("search-results");
+      ul.innerHTML = "";
+
+      results.forEach((result, index) => {
+        var li = document.createElement("li");
+
+        let [title, url] = result;
+        console.log(`Title: ${title}, URL: ${url}`);
+        let elemlink = document.createElement('a');
+        elemlink.innerHTML = title;
+        elemlink.setAttribute('href', url);
+        li.appendChild(elemlink);
+        li.style.top = `${(index * 30) - 16}px`;
+        ul.appendChild(li);
+      })
+    }
+  </script>
+  
+ 
+    </body>
+</html>

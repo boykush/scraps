@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <!-- Page title -->
+        
+            
+            <title>Build - Scraps Doc</title>
+            <meta property="og:title" content="Build - Scraps Doc" />
+            <meta name="twitter:title" content="Build - Scraps Doc" />
+        
+        <!-- Page description -->
+        
+            <meta name="description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta property="og:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta name="twitter:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+        
+        <!-- Page favicon -->
+        
+            <link rel="icon" type="image/png" href="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;logo.png?raw=true" />
+        
+        <!-- Rubik font -->
+        <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">
+        <!-- Noto Sans JP font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+        <!-- Style sheet -->
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;main.css">
+        
+<meta property="og:url" content="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/build.reference.html" />
+
+
+    </head>
+    <body>
+        <header>
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;">
+                <h1>Scraps Doc</h1>
+            </a>
+        </header>
+        <main>
+            
+    <div class="scrap">
+        
+          <h3 class="context">Reference<span>&#47;</span></h2>
+        
+        <h1 class="title">Build</h1>
+        
+            <p class="commited-date">
+                commited date: 2025-11-17
+            </p>
+        
+        <div class="content">
+            <p>#<a href="https://boykush.github.io/scraps/scraps/cli.html">CLI</a></p>
+<pre><code class="language-bash">❯ scraps build
+</code></pre>
+<p>This command processes Markdown files from the <code>/scraps</code> directory and generates a static website.</p>
+<h2>Source Structure</h2>
+<pre><code class="language-bash">❯ tree scraps
+scraps
+├── Getting Started.md
+└── Documentation.md
+</code></pre>
+<h2>Generated Files</h2>
+<p>The command generates the following files in the <code>public</code> directory:</p>
+<pre><code class="language-bash">❯ tree public
+public
+├── index.html      # Main page with scrap list
+├── getting-started.html
+├── documentation.html
+├── main.css       # Styling for the site
+└── search.json    # Search index (if enabled)
+</code></pre>
+<p>Each Markdown file is converted to a slugified HTML file. Additional files like <code>index.html</code> and <code>main.css</code> are generated to create a complete static website.</p>
+<h2>Examples</h2>
+<pre><code class="language-bash"># Basic build
+❯ scraps build
+
+# Build with verbose output
+❯ scraps build --verbose
+
+# Build from specific directory
+❯ scraps build --path /path/to/project
+</code></pre>
+<p>After building, use <a href="https://boykush.github.io/scraps/scraps/serve.reference.html">Serve</a> to preview your site locally.</p>
+
+        </div>
+    </div>
+    
+    <ul class="scrap-links">
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/init.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">Init</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#CLI
+❯ scraps init &amp;lt;PROJECT_NAME&amp;gt;
+
+This command initializes a new Scraps project. It creates the following structure:
+❯ tree -a -L 1
+.
+├── .gitignore    # Git ignore patterns for Scraps projects
+├── .scraps.toml  # Project configuration file
+└── scraps       # Directory for your Markdown files
+
+Examples
+# Initialize new project
+❯ scraps init my-knowledge-base
+❯ cd my-knowledge-base
+
+# Initialize with specific path
+❯ scraps init docs --path &#x2F;path&#x2F;to&#x2F;workspace
+
+After initializing the project, proceed to Build to generate your static site.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/getting-started.tutorial.html">
+                    
+                        <div class="header">
+                            <div class="context">Tutorial&#47;</div>
+                            <div class="title">Getting Started</div>
+                        </div>
+                    
+                    
+                        <div class="summary">This guide covers using Scraps as a static site generator (SSG).
+Setup
+
+Install Scraps
+
+Follow the Installation guide to install Scraps on your system
+
+
+Initialize Project
+
+Create a new Scraps project using Init:
+❯ scraps init my-knowledge-base
+❯ cd my-knowledge-base
+
+
+
+
+Configure Project
+
+Follow Configuration to set up your .scraps.toml
+
+
+
+Content Creation
+
+Write Markdown Files
+
+Create Markdown files in the &#x2F;scraps directory
+Use CommonMark and GitHub-flavored Markdown
+
+
+Add Internal Links
+
+Connect documents using Normal Link syntax:
+[[Page Name]] for simple links
+[[Page Name|Custom Text]] for custom link text
+
+
+
+
+Enhance Content
+
+Add Mermaid diagrams for visual representations
+Use Autolink functionality for external links
+Organize with context folders when needed
+
+
+
+Build and Preview
+
+Generate Site
+
+Use Build to generate static site files:
+❯ scraps build
+
+
+
+
+Preview Locally
+
+Use Serve for local preview and debugging:
+❯ scraps serve
+
+
+
+
+Deploy
+
+Deploy to platforms like Deploy to GitHub Pages when ready
+
+
+
+AI Integration
+
+MCP Server: Enable AI assistant integration using Integrate with AI Assistants for intelligent search and content assistance
+
+</div>
+                    
+                </a>
+            </li>
+        
+    </ul>
+
+
+        </main>
+        <footer>
+            Generated by <a href="https://github.com/boykush/scraps" target="_blank" rel="noopener noreferrer">Scraps</a>
+        </footer> 
+        <!-- Code syntax highlight -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!-- Code syntax highlight theme -->
+        <link href="https://unpkg.com/nord-highlightjs@0.2.0/dist/nord.css" rel="stylesheet" type="text/css" />
+        <!-- Mermaid -->
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.12.2/+esm'
+        </script>
+        
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const ogpCards = document.querySelectorAll('.ogp-card');
+
+    ogpCards.forEach(async (card) => {
+      const url = card.dataset.url;
+
+      try {
+        const proxyUrl = 'https://corsproxy.io/?url=';
+        const response = await fetch(proxyUrl + url);
+        const html = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        const title = doc.querySelector('meta[property="og:title"]')?.content ||
+          doc.querySelector('title')?.textContent ||
+          'No title';
+        card.querySelector('.ogp-title').textContent = title;
+
+        const description = doc.querySelector('meta[property="og:description"]')?.content ||
+          doc.querySelector('meta[name="description"]')?.content ||
+          'No description';
+        card.querySelector('.ogp-description').textContent = description;
+
+        const image = doc.querySelector('meta[property="og:image"]')?.content;
+        if (image) {
+          const imageUrl = image.startsWith('/')
+            ? `https://${card.dataset.host}/${image}`
+            : image;
+          card.querySelector('.ogp-image').src = imageUrl;
+        } else {
+          card.querySelector('.ogp-image').remove();
+        }
+      } catch (error) {
+        console.error('Failed to fetch OGP data:', error);
+      }
+    });
+  });
+</script>
+ 
+    </body>
+</html>
