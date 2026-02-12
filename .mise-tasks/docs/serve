@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+#MISE description="Serve documentation locally with scraps"
+scraps serve

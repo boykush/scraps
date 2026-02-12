@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+#MISE description="Build documentation with scraps"
+scraps build

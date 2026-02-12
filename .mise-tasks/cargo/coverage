@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+#MISE description="Run code coverage analysis with llvm-cov"
+cargo llvm-cov --all-features --workspace

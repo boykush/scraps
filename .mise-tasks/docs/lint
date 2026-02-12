@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+#MISE description="Lint markdown files in docs directory with markdownlint-cli2"
+markdownlint-cli2 'docs/**/*.md'
