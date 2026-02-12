@@ -7,6 +7,7 @@ experimental = true
 "pkl" = "latest"
 "github:boykush/scraps" = "latest"
 "npm:markdownlint-cli2" = "latest"
+"cargo:cargo-llvm-cov" = "latest"
 
 [hooks]
 postinstall = "hk install --mise"
@@ -37,8 +38,8 @@ depends = ["cargo:build", "cargo:test", "cargo:fmt", "cargo:clippy"]
 run = "echo '✅ All quality checks passed!'"
 
 [tasks."cargo:coverage"]
-description = "Run code coverage analysis with tarpaulin"
-run = "mise exec cargo:cargo-tarpaulin -- cargo tarpaulin --verbose --all-features --workspace --timeout 120 --exclude-files 'target/*'"
+description = "Run code coverage analysis with llvm-cov"
+run = "cargo llvm-cov --all-features --workspace"
 
 [tasks."e2e:test"]
 description = "Run E2E tests with Playwright"
