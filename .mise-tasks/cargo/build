@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+#MISE description="Build the project with cargo"
+cargo build --verbose --workspace

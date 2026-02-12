@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#MISE description="Run E2E tests with Playwright"
+#MISE dir="tests/e2e"
+npm install && npx playwright test

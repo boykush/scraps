@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+#MISE description="Auto-fix markdown files in docs directory with markdownlint-cli2"
+markdownlint-cli2 --fix 'docs/**/*.md'

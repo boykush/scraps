@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+#MISE description="Fix code formatting with rustfmt"
+cargo fmt --all
