@@ -24,25 +24,17 @@ impl Display for ScrapFileStem {
 
 #[cfg(test)]
 mod tests {
-
     use crate::model::title::Title;
+    use rstest::rstest;
 
     use super::*;
 
-    #[test]
-    fn it_from_scrap_link() {
-        let input_list = [
-            ScrapKey::from(Title::from("title")),
-            ScrapKey::from(Title::from("expected slugify")),
-            ScrapKey::with_ctx(&"title".into(), &"Context".into()),
-        ];
-        let expected_list = ["title", "expected-slugify", "title.context"];
-        input_list
-            .iter()
-            .zip(expected_list.iter())
-            .for_each(|(input, expected)| {
-                let file_name = ScrapFileStem::from(input.clone());
-                assert_eq!(file_name.to_string(), *expected);
-            });
+    #[rstest]
+    #[case::simple_title(ScrapKey::from(Title::from("title")), "title")]
+    #[case::slugified_title(ScrapKey::from(Title::from("expected slugify")), "expected-slugify")]
+    #[case::with_context(ScrapKey::with_ctx(&"title".into(), &"Context".into()), "title.context")]
+    fn it_from_scrap_link(#[case] input: ScrapKey, #[case] expected: &str) {
+        let file_name = ScrapFileStem::from(input);
+        assert_eq!(file_name.to_string(), expected);
     }
 }

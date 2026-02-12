@@ -76,20 +76,20 @@ impl ScrapKey {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
 
-    #[test]
-    fn it_from_path_str() {
-        let only_title_path = ScrapKey::from_path_str("ctx/title");
-        assert_eq!(Title::from(&only_title_path), "title".into());
-        assert_eq!(Option::<Ctx>::from(&only_title_path), Some("ctx".into()));
-
-        let with_context_path = ScrapKey::from_path_str("title");
-        assert_eq!(Title::from(&with_context_path), "title".into());
-        assert_eq!(Option::<Ctx>::from(&with_context_path), None);
-
-        let nested_path = ScrapKey::from_path_str("ctx/title/extra");
-        assert_eq!(Title::from(&nested_path), "title/extra".into());
-        assert_eq!(Option::<Ctx>::from(&nested_path), Some("ctx".into()));
+    #[rstest]
+    #[case::with_context("ctx/title", "title", Some("ctx"))]
+    #[case::title_only("title", "title", None)]
+    #[case::nested_path("ctx/title/extra", "title/extra", Some("ctx"))]
+    fn it_from_path_str(
+        #[case] path: &str,
+        #[case] expected_title: &str,
+        #[case] expected_ctx: Option<&str>,
+    ) {
+        let key = ScrapKey::from_path_str(path);
+        assert_eq!(Title::from(&key), expected_title.into());
+        assert_eq!(Option::<Ctx>::from(&key), expected_ctx.map(|c| c.into()));
     }
 
     #[test]
