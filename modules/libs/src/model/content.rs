@@ -44,44 +44,33 @@ impl fmt::Display for ContentElement {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
     use url::Url;
 
-    #[test]
-    fn test_content_display_single_element() {
-        let elements = vec![ContentElement::Raw("Hello World".to_string())];
-        let content = Content::new(elements);
-        assert_eq!(format!("{}", content), "Hello World");
-    }
-
-    #[test]
-    fn test_content_display_multiple_elements() {
-        let elements = vec![
+    #[rstest]
+    #[case::single_element(
+        vec![ContentElement::Raw("Hello World".to_string())],
+        "Hello World"
+    )]
+    #[case::multiple_elements(
+        vec![
             ContentElement::Raw("Hello ".to_string()),
             ContentElement::Raw("World".to_string()),
-        ];
-        let content = Content::new(elements);
-        assert_eq!(format!("{}", content), "Hello World");
-    }
-
-    #[test]
-    fn test_content_display_empty() {
-        let content = Content::new(vec![]);
-        assert_eq!(format!("{}", content), "");
-    }
-
-    #[test]
-    fn test_content_display_with_autolink() {
-        let url = Url::parse("https://example.com").unwrap();
-        let elements = vec![
+        ],
+        "Hello World"
+    )]
+    #[case::empty(vec![], "")]
+    #[case::with_autolink(
+        vec![
             ContentElement::Raw("Visit ".to_string()),
-            ContentElement::Autolink(url),
+            ContentElement::Autolink(Url::parse("https://example.com").unwrap()),
             ContentElement::Raw(" for more info".to_string()),
-        ];
+        ],
+        "Visit https://example.com/ for more info"
+    )]
+    fn test_content_display(#[case] elements: Vec<ContentElement>, #[case] expected: &str) {
         let content = Content::new(elements);
-        assert_eq!(
-            format!("{}", content),
-            "Visit https://example.com/ for more info"
-        );
+        assert_eq!(format!("{}", content), expected);
     }
 
     #[test]

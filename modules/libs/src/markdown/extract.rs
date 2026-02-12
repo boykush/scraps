@@ -40,16 +40,21 @@ pub fn scrap_links(text: &str) -> Vec<ScrapKey> {
 #[cfg(test)]
 mod tests {
     use crate::model::title::Title;
+    use rstest::rstest;
 
     use super::*;
 
-    #[test]
-    fn it_head_image() {
+    #[rstest]
+    #[case::image_found(
+        "![alt](https://example.com/image.png)",
+        Some("https://example.com/image.png")
+    )]
+    #[case::no_image("# header1", None)]
+    fn it_head_image(#[case] input: &str, #[case] expected_url: Option<&str>) {
         assert_eq!(
-            head_image("![alt](https://example.com/image.png)"),
-            Some(Url::parse("https://example.com/image.png").unwrap())
+            head_image(input),
+            expected_url.map(|u| Url::parse(u).unwrap())
         );
-        assert_eq!(head_image("# header1"), None)
     }
 
     #[test]

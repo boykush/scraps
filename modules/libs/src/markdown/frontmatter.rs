@@ -30,91 +30,50 @@ pub fn ignore_metadata(text: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
 
-    #[test]
-    fn it_metadata_text() {
-        assert_eq!(
-            get_metadata_text("+++\ntitle = \"title\"\n+++\n\n## Scrap"),
-            Some("title = \"title\"\n".to_string())
-        );
-        assert_eq!(
-            get_metadata_text("+++\ntitle = \"title\"\ntest = \"hoge\"\n+++\n\n## Scrap"),
-            Some("title = \"title\"\ntest = \"hoge\"\n".to_string())
-        );
-        assert_eq!(
-            get_metadata_text("+++\ntitle = \"title\"\n+++\n"),
-            Some("title = \"title\"\n".to_string())
-        );
-        assert_eq!(
-            get_metadata_text("+++\ntitle = \"title\"\n+++"),
-            Some("title = \"title\"\n".to_string())
-        );
-        assert_eq!(
-            get_metadata_text("+++\ntitle = \"title\"\n\n\n## Scrap"),
-            None
-        );
-        assert_eq!(get_metadata_text("+++\ntitle = \"title\"\n"), None);
-        assert_eq!(
-            get_metadata_text("title = \"title\"\n+++\n\n## Scrap"),
-            None
-        );
-        assert_eq!(get_metadata_text("title = \"title\"\n+++\n"), None);
+    #[rstest]
+    #[case::basic("+++\ntitle = \"title\"\n+++\n\n## Scrap", Some("title = \"title\"\n"))]
+    #[case::multiple_fields(
+        "+++\ntitle = \"title\"\ntest = \"hoge\"\n+++\n\n## Scrap",
+        Some("title = \"title\"\ntest = \"hoge\"\n")
+    )]
+    #[case::with_trailing_newline("+++\ntitle = \"title\"\n+++\n", Some("title = \"title\"\n"))]
+    #[case::no_trailing_newline("+++\ntitle = \"title\"\n+++", Some("title = \"title\"\n"))]
+    #[case::unclosed_block("+++\ntitle = \"title\"\n\n\n## Scrap", None)]
+    #[case::no_closing("+++\ntitle = \"title\"\n", None)]
+    #[case::no_opening("title = \"title\"\n+++\n\n## Scrap", None)]
+    #[case::no_opening_trailing("title = \"title\"\n+++\n", None)]
+    #[case::yaml_style_with_body("---\ntitle = \"title\"\n---\n\n## Scrap", None)]
+    #[case::yaml_style_trailing("---\ntitle = \"title\"\n---\n", None)]
+    fn it_metadata_text(#[case] input: &str, #[case] expected: Option<&str>) {
+        assert_eq!(get_metadata_text(input), expected.map(|s| s.to_string()));
     }
 
-    #[test]
-    fn it_metadata_text_ignores_yaml_style() {
-        assert_eq!(
-            get_metadata_text("---\ntitle = \"title\"\n---\n\n## Scrap"),
-            None
-        );
-        assert_eq!(get_metadata_text("---\ntitle = \"title\"\n---\n"), None);
-    }
-
-    #[test]
-    fn it_ignore_metadata_preserves_yaml_style() {
-        assert_eq!(
-            ignore_metadata("---\ntitle = \"title\"\n---\n\n## Scrap"),
-            "---\ntitle = \"title\"\n---\n\n## Scrap".to_string()
-        );
-        assert_eq!(
-            ignore_metadata("---\ntitle = \"title\"\n---\n"),
-            "---\ntitle = \"title\"\n---\n".to_string()
-        );
-    }
-
-    #[test]
-    fn it_ignore_metadata() {
-        assert_eq!(
-            ignore_metadata("+++\ntitle = \"title\"\n+++\n\n## Scrap"),
-            "\n## Scrap".to_string()
-        );
-        assert_eq!(
-            ignore_metadata("+++\ntitle = \"title\"\ntest = \"hoge\"\n+++\n\n## Scrap"),
-            "\n## Scrap".to_string()
-        );
-        assert_eq!(
-            ignore_metadata("+++\ntitle = \"title\"\n+++\n"),
-            "".to_string()
-        );
-        assert_eq!(
-            ignore_metadata("+++\ntitle = \"title\"\n+++"),
-            "".to_string()
-        );
-        assert_eq!(
-            ignore_metadata("+++\ntitle = \"title\"\n\n\n## Scrap"),
-            "+++\ntitle = \"title\"\n\n\n## Scrap".to_string()
-        );
-        assert_eq!(
-            ignore_metadata("+++\ntitle = \"title\"\n"),
-            "+++\ntitle = \"title\"\n".to_string()
-        );
-        assert_eq!(
-            ignore_metadata("title = \"title\"\n+++\n\n## Scrap"),
-            "title = \"title\"\n+++\n\n## Scrap".to_string()
-        );
-        assert_eq!(
-            ignore_metadata("title = \"title\"\n+++\n"),
-            "title = \"title\"\n+++\n".to_string()
-        );
+    #[rstest]
+    #[case::yaml_style_with_body(
+        "---\ntitle = \"title\"\n---\n\n## Scrap",
+        "---\ntitle = \"title\"\n---\n\n## Scrap"
+    )]
+    #[case::yaml_style_trailing("---\ntitle = \"title\"\n---\n", "---\ntitle = \"title\"\n---\n")]
+    #[case::basic("+++\ntitle = \"title\"\n+++\n\n## Scrap", "\n## Scrap")]
+    #[case::multiple_fields(
+        "+++\ntitle = \"title\"\ntest = \"hoge\"\n+++\n\n## Scrap",
+        "\n## Scrap"
+    )]
+    #[case::with_trailing_newline("+++\ntitle = \"title\"\n+++\n", "")]
+    #[case::no_trailing_newline("+++\ntitle = \"title\"\n+++", "")]
+    #[case::unclosed_block(
+        "+++\ntitle = \"title\"\n\n\n## Scrap",
+        "+++\ntitle = \"title\"\n\n\n## Scrap"
+    )]
+    #[case::no_closing("+++\ntitle = \"title\"\n", "+++\ntitle = \"title\"\n")]
+    #[case::no_opening(
+        "title = \"title\"\n+++\n\n## Scrap",
+        "title = \"title\"\n+++\n\n## Scrap"
+    )]
+    #[case::no_opening_trailing("title = \"title\"\n+++\n", "title = \"title\"\n+++\n")]
+    fn it_ignore_metadata(#[case] input: &str, #[case] expected: &str) {
+        assert_eq!(ignore_metadata(input), expected.to_string());
     }
 }

@@ -131,95 +131,93 @@ fn handle_code_block_start_event(language: &str) -> Event<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::{fixture, rstest};
 
-    #[test]
-    fn it_to_html_code() {
-        let input_list = [
-            "`[[quote block]]`",
-            "```\n[[code block]]\n```",
-            "```bash\nscraps build\n```",
-            "```mermaid\nflowchart LR\nid\n```",
-        ];
-        let expected_list = [
-            vec![
+    #[fixture]
+    fn base_url() -> BaseUrl {
+        BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap()
+    }
+
+    #[rstest]
+    #[case::inline_code("`[[quote block]]`", "<p>", "<code>[[quote block]]</code>", "</p>\n")]
+    #[case::code_block(
+        "```\n[[code block]]\n```",
+        "<pre><code>",
+        "[[code block]]\n",
+        "</code></pre>\n"
+    )]
+    #[case::bash_block(
+        "```bash\nscraps build\n```",
+        "<pre><code class=\"language-bash\">",
+        "scraps build\n",
+        "</code></pre>\n"
+    )]
+    #[case::mermaid(
+        "```mermaid\nflowchart LR\nid\n```",
+        "<pre><code class=\"language-mermaid mermaid\">",
+        "flowchart LR\nid\n",
+        "</code></pre>\n"
+    )]
+    fn it_to_html_code(
+        base_url: BaseUrl,
+        #[case] input: &str,
+        #[case] expected1: &str,
+        #[case] expected2: &str,
+        #[case] expected3: &str,
+    ) {
+        assert_eq!(
+            to_content(input, &base_url),
+            Content::new(vec![
+                ContentElement::Raw(expected1.to_string()),
+                ContentElement::Raw(expected2.to_string()),
+                ContentElement::Raw(expected3.to_string()),
+            ])
+        )
+    }
+
+    #[rstest]
+    #[case::basic(
+        "[[link]]",
+        "<a href=\"http://localhost:1112/scraps/link.html\">link</a>"
+    )]
+    #[case::display(
+        "[[link|display]]",
+        "<a href=\"http://localhost:1112/scraps/link.html\">display</a>"
+    )]
+    #[case::context(
+        "[[Context/link]]",
+        "<a href=\"http://localhost:1112/scraps/link.context.html\">link</a>"
+    )]
+    #[case::context_display(
+        "[[Context/link|context display]]",
+        "<a href=\"http://localhost:1112/scraps/link.context.html\">context display</a>"
+    )]
+    #[case::slugify(
+        "[[expect slugify]]",
+        "<a href=\"http://localhost:1112/scraps/expect-slugify.html\">expect slugify</a>"
+    )]
+    fn it_to_html_link(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
+        assert_eq!(
+            to_content(input, &base_url),
+            Content::new(vec![
                 ContentElement::Raw("<p>".to_string()),
-                ContentElement::Raw("<code>[[quote block]]</code>".to_string()),
+                ContentElement::Raw(expected.to_string()),
                 ContentElement::Raw("</p>\n".to_string()),
-            ],
-            vec![
-                ContentElement::Raw("<pre><code>".to_string()),
-                ContentElement::Raw("[[code block]]\n".to_string()),
-                ContentElement::Raw("</code></pre>\n".to_string()),
-            ],
-            vec![
-                ContentElement::Raw("<pre><code class=\"language-bash\">".to_string()),
-                ContentElement::Raw("scraps build\n".to_string()),
-                ContentElement::Raw("</code></pre>\n".to_string()),
-            ],
-            vec![
-                ContentElement::Raw("<pre><code class=\"language-mermaid mermaid\">".to_string()),
-                ContentElement::Raw("flowchart LR\nid\n".to_string()),
-                ContentElement::Raw("</code></pre>\n".to_string()),
-            ],
-        ];
-        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
-        input_list
-            .iter()
-            .zip(expected_list)
-            .for_each(|(input, expected)| {
-                assert_eq!(to_content(input, &base_url), Content::new(expected))
-            });
+            ])
+        )
     }
 
-    #[test]
-    fn it_to_html_link() {
-        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
-        let input_list = [
-            "[[link]]",
-            "[[link|display]]",
-            "[[Context/link]]",
-            "[[Context/link|context display]]",
-            "[[expect slugify]]",
-        ];
-        let expected_list = [
-            "<a href=\"http://localhost:1112/scraps/link.html\">link</a>",
-            "<a href=\"http://localhost:1112/scraps/link.html\">display</a>",
-            "<a href=\"http://localhost:1112/scraps/link.context.html\">link</a>",
-            "<a href=\"http://localhost:1112/scraps/link.context.html\">context display</a>",
-            "<a href=\"http://localhost:1112/scraps/expect-slugify.html\">expect slugify</a>",
-        ];
-        input_list
-            .iter()
-            .zip(expected_list)
-            .for_each(|(input, expected)| {
-                assert_eq!(
-                    to_content(input, &base_url),
-                    Content::new(vec![
-                        ContentElement::Raw("<p>".to_string()),
-                        ContentElement::Raw(expected.to_string()),
-                        ContentElement::Raw("</p>\n".to_string()),
-                    ])
-                )
-            });
-    }
-
-    #[test]
-    fn it_to_html_autolink() {
-        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
-        let input_list = ["<https://example.com>", "<http://example.com>"];
-        let expected_list = ["https://example.com", "http://example.com"];
-        input_list
-            .iter()
-            .zip(expected_list)
-            .for_each(|(input, expected)| {
-                assert_eq!(
-                    to_content(input, &base_url),
-                    Content::new(vec![
-                        ContentElement::Raw("<p>".to_string()),
-                        ContentElement::Autolink(Url::parse(expected).unwrap()),
-                        ContentElement::Raw("</p>\n".to_string()),
-                    ])
-                )
-            });
+    #[rstest]
+    #[case::https("<https://example.com>", "https://example.com")]
+    #[case::http("<http://example.com>", "http://example.com")]
+    fn it_to_html_autolink(base_url: BaseUrl, #[case] input: &str, #[case] expected_url: &str) {
+        assert_eq!(
+            to_content(input, &base_url),
+            Content::new(vec![
+                ContentElement::Raw("<p>".to_string()),
+                ContentElement::Autolink(Url::parse(expected_url).unwrap()),
+                ContentElement::Raw("</p>\n".to_string()),
+            ])
+        )
     }
 }
