@@ -1,29 +1,30 @@
+use pulldown_cmark::{Event, MetadataBlockKind, Options, Parser, Tag, TagEnd};
+
 pub fn get_metadata_text(text: &str) -> Option<String> {
-    let head: Vec<&str> = text.splitn(2, "+++\n").collect();
-    match head[..] {
-        ["", tail] => {
-            let body: Vec<&str> = tail.splitn(2, "+++").collect();
-            match body[..] {
-                [metadata, _] => Some(metadata.to_string()),
-                _ => None,
+    let parser = Parser::new_ext(text, Options::all());
+    let mut in_pluses_metadata = false;
+    for event in parser {
+        match event {
+            Event::Start(Tag::MetadataBlock(MetadataBlockKind::PlusesStyle)) => {
+                in_pluses_metadata = true;
             }
+            Event::Text(content) if in_pluses_metadata => {
+                return Some(content.to_string());
+            }
+            _ => {}
         }
-        _ => None,
     }
+    None
 }
 
 pub fn ignore_metadata(text: &str) -> String {
-    let head: Vec<&str> = text.splitn(2, "+++\n").collect();
-    match head[..] {
-        ["", tail] => {
-            let body: Vec<&str> = tail.splitn(2, "+++").collect();
-            match body[..] {
-                [_, body] => body.replacen("\n", "", 1).to_string(),
-                _ => text.to_string(),
-            }
+    let parser = Parser::new_ext(text, Options::all());
+    for (event, range) in parser.into_offset_iter() {
+        if let Event::End(TagEnd::MetadataBlock(MetadataBlockKind::PlusesStyle)) = event {
+            return text[range.end..].replacen("\n", "", 1);
         }
-        _ => text.to_string(),
     }
+    text.to_string()
 }
 
 #[cfg(test)]
@@ -58,6 +59,27 @@ mod tests {
             None
         );
         assert_eq!(get_metadata_text("title = \"title\"\n+++\n"), None);
+    }
+
+    #[test]
+    fn it_metadata_text_ignores_yaml_style() {
+        assert_eq!(
+            get_metadata_text("---\ntitle = \"title\"\n---\n\n## Scrap"),
+            None
+        );
+        assert_eq!(get_metadata_text("---\ntitle = \"title\"\n---\n"), None);
+    }
+
+    #[test]
+    fn it_ignore_metadata_preserves_yaml_style() {
+        assert_eq!(
+            ignore_metadata("---\ntitle = \"title\"\n---\n\n## Scrap"),
+            "---\ntitle = \"title\"\n---\n\n## Scrap".to_string()
+        );
+        assert_eq!(
+            ignore_metadata("---\ntitle = \"title\"\n---\n"),
+            "---\ntitle = \"title\"\n---\n".to_string()
+        );
     }
 
     #[test]
