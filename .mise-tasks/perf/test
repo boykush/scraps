@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+#MISE description="Run performance test using boykush/wiki repository"
+set -euo pipefail
+
+PROJECT_ROOT="$(pwd)"
+WIKI_DIR=$(mktemp -d)
+trap 'rm -rf "$WIKI_DIR"' EXIT
+
+echo "📦 Building scraps in release mode..."
+cargo build --release
+
+echo "📥 Cloning boykush/wiki..."
+git clone --depth 1 https://github.com/boykush/wiki.git "$WIKI_DIR"
+
+echo "⏱️ Running scraps build..."
+cd "$WIKI_DIR"
+START_TIME=$(date +%s%N)
+"$PROJECT_ROOT/target/release/scraps" build -v
+END_TIME=$(date +%s%N)
+
+DURATION_NS=$(( END_TIME - START_TIME ))
+SECONDS_PART=$(( DURATION_NS / 1000000000 ))
+MILLIS_PART=$(( DURATION_NS / 1000000 % 1000 ))
+DURATION="${SECONDS_PART}.${MILLIS_PART}"
+
+echo ""
+echo "========================================="
+echo "Build Time: ${DURATION}s"
+
+if (( SECONDS_PART >= 4 )); then
+  echo "Status: ❌ FAIL (threshold: < 4s)"
+  echo "========================================="
+  exit 1
+else
+  echo "Status: ✅ PASS (threshold: < 4s)"
+  echo "========================================="
+fi
