@@ -35,4 +35,7 @@ jobs:
         cache: false
     - name: Run quality checks
       run: mise run cargo:quality
-      # Runs cargo:build, cargo:test, cargo:fmt, cargo:clippy in parallel
+      # Runs cargo:build, cargo:test, cargo:fmt, cargo:clippy
+    - name: Run cargo-deny checks
+      run: mise run cargo:deny
+      # Checks advisories, licenses, bans, sources

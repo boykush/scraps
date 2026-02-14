@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 #MISE description="Run pre-commit quality checks (build, test, fmt, clippy)"
-#MISE depends=["cargo:build", "cargo:test", "cargo:fmt", "cargo:clippy", "cargo:deny"]
+#MISE depends=["cargo:build", "cargo:test", "cargo:fmt", "cargo:clippy"]
 echo '✅ All quality checks passed!'
