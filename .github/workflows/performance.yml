@@ -24,6 +24,7 @@ jobs:
         uses: jdx/mise-action@v3
         with:
           cache: false
+          install_args: "rust"
 
       - name: Run performance test
         id: build

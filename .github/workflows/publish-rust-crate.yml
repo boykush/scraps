@@ -18,6 +18,7 @@ jobs:
         uses: jdx/mise-action@v3
         with:
           cache: false
+          install_args: "rust"
       - name: Cargo Publish Libs
         run: cargo publish --manifest-path modules/libs/Cargo.toml
         env:
