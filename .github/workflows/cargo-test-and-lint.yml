@@ -36,6 +36,16 @@ jobs:
     - name: Run quality checks
       run: mise run cargo:quality
       # Runs cargo:build, cargo:test, cargo:fmt, cargo:clippy
+
+  deny:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+    - uses: jdx/mise-action@v3
+      with:
+        cache: false
     - name: Run cargo-deny checks
       run: mise run cargo:deny
       # Checks advisories, licenses, bans, sources
