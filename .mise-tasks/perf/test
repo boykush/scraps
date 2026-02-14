@@ -28,10 +28,20 @@ echo "========================================="
 echo "Build Time: ${DURATION}s"
 
 if (( SECONDS_PART >= 4 )); then
+  STATUS="fail"
   echo "Status: ❌ FAIL (threshold: < 4s)"
-  echo "========================================="
-  exit 1
 else
+  STATUS="pass"
   echo "Status: ✅ PASS (threshold: < 4s)"
-  echo "========================================="
+fi
+echo "========================================="
+
+# Output for GitHub Actions
+if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
+  echo "duration=$DURATION" >> "$GITHUB_OUTPUT"
+  echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+fi
+
+if [[ "$STATUS" == "fail" ]]; then
+  exit 1
 fi
