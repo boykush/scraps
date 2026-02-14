@@ -4,7 +4,7 @@ use scraps_libs::model::context::Ctx;
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::title::Title;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// Result for scrap backlinks lookup operation
 #[derive(Debug, Clone, PartialEq)]
@@ -19,7 +19,7 @@ pub struct LookupScrapBacklinksUsecase {
 }
 
 impl LookupScrapBacklinksUsecase {
-    pub fn new(scraps_dir_path: &PathBuf) -> LookupScrapBacklinksUsecase {
+    pub fn new(scraps_dir_path: &Path) -> LookupScrapBacklinksUsecase {
         LookupScrapBacklinksUsecase {
             scraps_dir_path: scraps_dir_path.to_owned(),
         }

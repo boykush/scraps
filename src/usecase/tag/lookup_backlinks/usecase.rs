@@ -5,7 +5,7 @@ use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::tag::Tag;
 use scraps_libs::model::tags::Tags;
 use scraps_libs::model::title::Title;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// Result for tag backlinks lookup operation
 #[derive(Debug, Clone, PartialEq)]
@@ -20,7 +20,7 @@ pub struct LookupTagBacklinksUsecase {
 }
 
 impl LookupTagBacklinksUsecase {
-    pub fn new(scraps_dir_path: &PathBuf) -> LookupTagBacklinksUsecase {
+    pub fn new(scraps_dir_path: &Path) -> LookupTagBacklinksUsecase {
         LookupTagBacklinksUsecase {
             scraps_dir_path: scraps_dir_path.to_owned(),
         }

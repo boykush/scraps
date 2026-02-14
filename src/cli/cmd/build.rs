@@ -4,8 +4,6 @@ use std::time::Instant;
 use tracing::{span, Level};
 use tracing_subscriber::fmt::format::FmtSpan;
 
-use crate::cli::config::color_scheme::ColorSchemeConfig;
-use crate::cli::config::sort_key::SortKeyConfig;
 use crate::cli::progress::ProgressImpl;
 use crate::error::ScrapsResult;
 use crate::usecase::build::model::color_scheme::ColorScheme;
@@ -48,27 +46,33 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
     let progress = ProgressImpl::init(Instant::now());
     let base_url = ssg.base_url();
     let title = &ssg.title;
+    let default_lang_code = scraps_libs::lang::LangCode::default();
     let lang_code = ssg
         .lang_code
-        .clone()
-        .map(|c| c.into_lang_code())
-        .unwrap_or_default();
+        .as_ref()
+        .map(|c| c.as_lang_code())
+        .unwrap_or(&default_lang_code);
     let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
-    let html_metadata = HtmlMetadata::new(&lang_code, title, &ssg.description, &ssg.favicon);
-    let css_metadata = CssMetadata::new(&ssg.color_scheme.clone().map_or_else(
-        || ColorScheme::OsSetting,
-        ColorSchemeConfig::into_color_scheme,
-    ));
+    let html_metadata = HtmlMetadata::new(lang_code, title, &ssg.description, &ssg.favicon);
+    let default_color_scheme = ColorScheme::OsSetting;
+    let css_metadata = CssMetadata::new(
+        ssg.color_scheme
+            .as_ref()
+            .map(|c| c.as_color_scheme())
+            .unwrap_or(&default_color_scheme),
+    );
     let build_search_index = ssg.build_search_index.unwrap_or(true);
+    let default_sort_key = SortKey::CommittedDate;
     let sort_key = ssg
         .sort_key
-        .clone()
-        .map_or_else(|| SortKey::CommittedDate, SortKeyConfig::into_sort_key);
+        .as_ref()
+        .map(|s| s.as_sort_key())
+        .unwrap_or(&default_sort_key);
     let paging = match ssg.paginate_by {
         None => Paging::Not,
         Some(u) => Paging::By(u),
     };
-    let list_view_configs = ListViewConfigs::new(&build_search_index, &sort_key, &paging);
+    let list_view_configs = ListViewConfigs::new(&build_search_index, sort_key, &paging);
 
     usecase.execute(
         git_command,

@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::error::ScrapsResult;
 use scraps_libs::model::context::Ctx;
@@ -20,7 +20,7 @@ pub struct SearchUsecase {
 }
 
 impl SearchUsecase {
-    pub fn new(scraps_dir_path: &PathBuf) -> SearchUsecase {
+    pub fn new(scraps_dir_path: &Path) -> SearchUsecase {
         SearchUsecase {
             scraps_dir_path: scraps_dir_path.to_owned(),
         }

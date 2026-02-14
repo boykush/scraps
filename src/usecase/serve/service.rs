@@ -22,7 +22,7 @@ pub struct ScrapsService {
 }
 
 impl ScrapsService {
-    pub fn new(public_dir_path: &PathBuf) -> ScrapsService {
+    pub fn new(public_dir_path: &Path) -> ScrapsService {
         ScrapsService {
             public_dir_path: public_dir_path.to_owned(),
         }

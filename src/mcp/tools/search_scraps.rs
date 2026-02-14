@@ -7,7 +7,7 @@ use rmcp::schemars::JsonSchema;
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer};
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
+use std::path::Path;
 
 /// Search logic for combining multiple keywords
 #[derive(Debug, Clone, Copy, Default, Deserialize, JsonSchema)]
@@ -47,7 +47,7 @@ pub struct SearchResponse {
 }
 
 pub async fn search_scraps(
-    scraps_dir: &PathBuf,
+    scraps_dir: &Path,
     _context: RequestContext<RoleServer>,
     Parameters(request): Parameters<SearchRequest>,
 ) -> Result<CallToolResult, ErrorData> {

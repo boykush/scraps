@@ -7,7 +7,7 @@ use rmcp::schemars::JsonSchema;
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer};
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
+use std::path::Path;
 
 #[derive(Debug, Deserialize, JsonSchema)]
 #[schemars(deny_unknown_fields)]
@@ -25,7 +25,7 @@ pub struct LookupScrapLinksResponse {
 }
 
 pub async fn lookup_scrap_links(
-    scraps_dir: &PathBuf,
+    scraps_dir: &Path,
     _context: RequestContext<RoleServer>,
     Parameters(request): Parameters<LookupScrapLinksRequest>,
 ) -> Result<CallToolResult, ErrorData> {

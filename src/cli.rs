@@ -87,6 +87,6 @@ impl Template {
     }
 
     pub fn title(&self) -> Option<Title> {
-        self.scrap_title.clone().map(|s| s.as_str().into())
+        self.scrap_title.as_ref().map(|s| s.as_str().into())
     }
 }

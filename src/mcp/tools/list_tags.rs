@@ -4,10 +4,10 @@ use rmcp::model::{CallToolResult, Content};
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer};
 use serde_json::json;
-use std::path::PathBuf;
+use std::path::Path;
 
 pub async fn list_tags(
-    scraps_dir: &PathBuf,
+    scraps_dir: &Path,
     _context: RequestContext<RoleServer>,
 ) -> Result<CallToolResult, ErrorData> {
     // Create tag usecase
