@@ -10,7 +10,6 @@ use crate::usecase::build::model::scrap_detail::ScrapDetail;
 use chrono_tz::Tz;
 use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::file::ScrapFileStem;
-use scraps_libs::model::scrap::Scrap;
 
 use crate::usecase::build::html::tera::scrap_tera;
 
@@ -20,22 +19,16 @@ use super::serde::scrap_detail::ScrapDetailTera;
 pub struct ScrapRender {
     static_dir_path: PathBuf,
     public_scraps_dir_path: PathBuf,
-    scraps: Vec<Scrap>,
 }
 
 impl ScrapRender {
-    pub fn new(
-        static_dir_path: &Path,
-        public_dir_path: &Path,
-        scraps: &Vec<Scrap>,
-    ) -> ScrapsResult<ScrapRender> {
+    pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> ScrapsResult<ScrapRender> {
         let public_scraps_dir_path = &public_dir_path.join("scraps");
         fs::create_dir_all(public_scraps_dir_path).context(BuildError::CreateDir)?;
 
         Ok(ScrapRender {
             static_dir_path: static_dir_path.to_owned(),
             public_scraps_dir_path: public_scraps_dir_path.to_owned(),
-            scraps: scraps.to_owned(),
         })
     }
 
@@ -45,6 +38,7 @@ impl ScrapRender {
         timezone: Tz,
         metadata: &HtmlMetadata,
         scrap_detail: &ScrapDetail,
+        backlinks_map: &BacklinksMap,
     ) -> ScrapsResult<()> {
         let (tera, mut context) = scrap_tera::base(
             base_url,
@@ -55,7 +49,6 @@ impl ScrapRender {
         let scrap = &scrap_detail.scrap();
 
         // insert to context for linked list
-        let backlinks_map = BacklinksMap::new(&self.scraps);
         context.insert("scrap", &ScrapDetailTera::from(scrap_detail.clone()));
 
         let linked_scraps = backlinks_map.get(&scrap.self_key());
@@ -78,9 +71,11 @@ mod tests {
     use std::fs;
     use url::Url;
 
+    use crate::usecase::build::model::backlinks_map::BacklinksMap;
     use crate::usecase::build::model::html::HtmlMetadata;
     use scraps_libs::lang::LangCode;
     use scraps_libs::model::base_url::BaseUrl;
+    use scraps_libs::model::scrap::Scrap;
 
     use super::*;
 
@@ -106,11 +101,12 @@ mod tests {
         let scrap1 = &Scrap::new("scrap 1", &None, "# header1");
         let scrap2 = &Scrap::new("scrap 2", &Some("Context"), "[[scrap1]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
+        let backlinks_map = BacklinksMap::new(&scraps);
 
         let scrap1_html_path = public_dir_path.join("scraps/scrap-1.html");
         let scrap2_html_path = public_dir_path.join("scraps/scrap-2.context.html");
 
-        let render = ScrapRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
+        let render = ScrapRender::new(&static_dir_path, &public_dir_path).unwrap();
 
         render
             .run(
@@ -118,6 +114,7 @@ mod tests {
                 timezone,
                 &metadata,
                 &ScrapDetail::new(scrap1, &commited_ts1, base_url),
+                &backlinks_map,
             )
             .unwrap();
 
@@ -130,6 +127,7 @@ mod tests {
                 timezone,
                 &metadata,
                 &ScrapDetail::new(scrap2, &commited_ts1, base_url),
+                &backlinks_map,
             )
             .unwrap();
 

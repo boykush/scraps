@@ -32,6 +32,7 @@ use super::{
         tags_index_render::TagsIndexRender,
     },
     model::{
+        backlinks_map::BacklinksMap,
         css::CssMetadata,
         html::HtmlMetadata,
         list_view_configs::ListViewConfigs,
@@ -95,6 +96,7 @@ impl BuildUsecase {
             .map(|s| ScrapDetails::new(&s))?;
 
         let scraps = scrap_details.to_scraps();
+        let backlinks_map = BacklinksMap::new(&scraps);
         span_read_scraps.exit();
         progress.complete_stage(&Stage::ReadScraps, &scrap_details.len());
 
@@ -110,6 +112,7 @@ impl BuildUsecase {
             html_metadata,
             list_view_configs,
             &scrap_details,
+            &backlinks_map,
             &readme_content,
         )?;
         span_generate_html_indexes.exit();
@@ -121,9 +124,14 @@ impl BuildUsecase {
             .into_par_iter()
             .try_for_each(|scrap_detail| {
                 let _span_generate_html_scrap = span!(Level::INFO, "generate_html_scrap").entered();
-                let scrap_render =
-                    ScrapRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-                scrap_render.run(base_url, timezone, html_metadata, &scrap_detail)
+                let scrap_render = ScrapRender::new(&self.static_dir_path, &self.public_dir_path)?;
+                scrap_render.run(
+                    base_url,
+                    timezone,
+                    html_metadata,
+                    &scrap_detail,
+                    &backlinks_map,
+                )
             })?;
         span_generate_html_scraps.exit();
 
@@ -131,7 +139,7 @@ impl BuildUsecase {
         let span_generate_html_tags_index =
             span!(Level::INFO, "generate_html_tags_index").entered();
         let tags_index_render = TagsIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
-        tags_index_render.run(base_url, html_metadata, &scraps)?;
+        tags_index_render.run(base_url, html_metadata, &scraps, &backlinks_map)?;
         span_generate_html_tags_index.exit();
 
         // generate html tags
@@ -139,8 +147,8 @@ impl BuildUsecase {
         let tags = Tags::new(&scraps);
         tags.clone().into_iter().par_bridge().try_for_each(|tag| {
             let _span_render_tag = span!(Level::INFO, "generate_html_tag").entered();
-            let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path, &scraps)?;
-            tag_render.run(base_url, html_metadata, &tag)
+            let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path)?;
+            tag_render.run(base_url, html_metadata, &tag, &backlinks_map)
         })?;
         span_generate_html_tags.exit();
 

@@ -40,10 +40,10 @@ impl IndexRender {
         metadata: &HtmlMetadata,
         list_view_configs: &ListViewConfigs,
         scrap_details: &ScrapDetails,
+        backlinks_map: &BacklinksMap,
         readme_content: &Option<Content>,
     ) -> ScrapsResult<usize> {
         let scraps = &scrap_details.to_scraps();
-        let backlinks_map = BacklinksMap::new(scraps);
         let sorted_scraps = IndexScrapsTera::new_with_sort(
             scrap_details,
             &backlinks_map,
@@ -166,6 +166,7 @@ mod tests {
     use url::Url;
 
     use super::*;
+    use crate::usecase::build::model::backlinks_map::BacklinksMap;
     use crate::usecase::build::model::paging::Paging;
     use crate::usecase::build::model::scrap_detail::ScrapDetail;
     use crate::usecase::build::model::sort::SortKey;
@@ -197,6 +198,9 @@ mod tests {
         let sc2 = ScrapDetail::new(&scrap2, &Some(0), base_url);
         let scrap_details = ScrapDetails::new(&vec![sc1.to_owned(), sc2.to_owned()]);
 
+        let scraps = scrap_details.to_scraps();
+        let backlinks_map = BacklinksMap::new(&scraps);
+
         let render = IndexRender::new(&project.static_dir, &project.public_dir).unwrap();
         render
             .run(
@@ -204,6 +208,7 @@ mod tests {
                 &metadata,
                 &list_view_configs,
                 &scrap_details,
+                &backlinks_map,
                 &None,
             )
             .unwrap();
@@ -249,6 +254,9 @@ mod tests {
             sc4.to_owned(),
         ]);
 
+        let scraps = scrap_details.to_scraps();
+        let backlinks_map = BacklinksMap::new(&scraps);
+
         let render = IndexRender::new(&project.static_dir, &project.public_dir).unwrap();
         let readme_content: Option<Content> = None;
         render
@@ -257,6 +265,7 @@ mod tests {
                 &metadata,
                 &list_view_configs,
                 &scrap_details,
+                &backlinks_map,
                 &readme_content,
             )
             .unwrap();
