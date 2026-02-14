@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+#MISE description="Run cargo-deny checks (advisories, licenses, bans, sources)"
+cargo deny check

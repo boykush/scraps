@@ -8,6 +8,7 @@ experimental = true
 "github:boykush/scraps" = "latest"
 "npm:markdownlint-cli2" = "latest"
 "cargo:cargo-llvm-cov" = "latest"
+"cargo:cargo-deny" = "latest"
 
 [hooks]
 postinstall = "hk install --mise"
