@@ -33,6 +33,7 @@ jobs:
     - uses: jdx/mise-action@v3
       with:
         cache: false
+        install_args: "rust"
     - name: Run quality checks
       run: mise run cargo:quality
       # Runs cargo:build, cargo:test, cargo:fmt, cargo:clippy
@@ -46,6 +47,7 @@ jobs:
     - uses: jdx/mise-action@v3
       with:
         cache: false
+        install_args: "rust cargo:cargo-deny"
     - name: Run cargo-deny checks
       run: mise run cargo:deny
       # Checks advisories, licenses, bans, sources

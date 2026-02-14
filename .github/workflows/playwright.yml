@@ -18,12 +18,15 @@ jobs:
     - uses: actions/checkout@v6
     - name: Setup Rust
       uses: jdx/mise-action@v3
+      with:
+        install_args: "rust"
     - name: Pre build
       run: mise run cargo:build
     - name: Setup Node.js
       uses: jdx/mise-action@v3
       with:
         working_directory: ./tests/e2e
+        install_args: "node"
     - name: Install dependencies
       working-directory: ./tests/e2e
       run: npm ci
