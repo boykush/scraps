@@ -11,4 +11,4 @@ experimental = true
 "cargo:cargo-deny" = "latest"
 
 [hooks]
-postinstall = "{{if not (env \"CI\")}}hk install --mise{{end}}"
+postinstall = "hk install --mise"
