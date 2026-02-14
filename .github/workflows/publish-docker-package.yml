@@ -58,13 +58,6 @@ jobs:
           version="${RELEASE_TAG#v}"
           echo "version=${version}" >> $GITHUB_OUTPUT
 
-      - name: Download release binary
-        env:
-          VERSION: ${{ steps.extract-version.outputs.version }}
-        run: |
-          curl -sL "https://github.com/${{ github.repository }}/releases/download/v${VERSION}/scraps-x86_64-unknown-linux-gnu.tar.gz" | tar xz
-          chmod +x scraps
-
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
@@ -85,6 +78,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.extract-version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
