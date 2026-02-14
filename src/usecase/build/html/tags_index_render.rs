@@ -35,9 +35,9 @@ impl TagsIndexRender {
         base_url: &BaseUrl,
         metadata: &HtmlMetadata,
         scraps: &[Scrap],
+        backlinks_map: &BacklinksMap,
     ) -> ScrapsResult<()> {
-        let backlinks_map = BacklinksMap::new(scraps);
-        let stags = &TagsTera::new(&Tags::new(scraps), &backlinks_map);
+        let stags = &TagsTera::new(&Tags::new(scraps), backlinks_map);
 
         Self::render_html(self, base_url, metadata, stags)
     }
@@ -69,6 +69,7 @@ impl TagsIndexRender {
 #[cfg(test)]
 mod tests {
     use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use crate::usecase::build::model::backlinks_map::BacklinksMap;
     use rstest::rstest;
     use scraps_libs::{lang::LangCode, model::base_url::BaseUrl};
     use std::fs;
@@ -97,8 +98,12 @@ mod tests {
         let scrap2 = Scrap::new("scrap2", &None, "[[tag1]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
+        let backlinks_map = BacklinksMap::new(&scraps);
+
         let render = TagsIndexRender::new(&project.static_dir, &project.public_dir).unwrap();
-        render.run(&base_url, &metadata, &scraps).unwrap();
+        render
+            .run(&base_url, &metadata, &scraps, &backlinks_map)
+            .unwrap();
 
         let result1 = fs::read_to_string(project.public_path("tags/index.html")).unwrap();
         assert_eq!(

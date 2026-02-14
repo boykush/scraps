@@ -7,7 +7,6 @@ use crate::error::{anyhow::Context, ScrapsResult};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use scraps_libs::model::base_url::BaseUrl;
-use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::slug::Slug;
 use scraps_libs::model::tag::Tag;
 
@@ -19,26 +18,26 @@ use super::serde::tag::TagTera;
 pub struct TagRender {
     static_dir_path: PathBuf,
     public_scraps_dir_path: PathBuf,
-    scraps: Vec<Scrap>,
 }
 
 impl TagRender {
-    pub fn new(
-        static_dir_path: &Path,
-        public_dir_path: &Path,
-        scraps: &Vec<Scrap>,
-    ) -> ScrapsResult<TagRender> {
+    pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> ScrapsResult<TagRender> {
         let public_tags_dir_path = &public_dir_path.join("scraps");
         fs::create_dir_all(public_tags_dir_path).context(BuildError::CreateDir)?;
 
         Ok(TagRender {
             static_dir_path: static_dir_path.to_owned(),
             public_scraps_dir_path: public_tags_dir_path.to_owned(),
-            scraps: scraps.to_owned(),
         })
     }
 
-    pub fn run(&self, base_url: &BaseUrl, metadata: &HtmlMetadata, tag: &Tag) -> ScrapsResult<()> {
+    pub fn run(
+        &self,
+        base_url: &BaseUrl,
+        metadata: &HtmlMetadata,
+        tag: &Tag,
+        backlinks_map: &BacklinksMap,
+    ) -> ScrapsResult<()> {
         let (tera, mut context) = tag_tera::base(
             base_url,
             metadata,
@@ -46,8 +45,7 @@ impl TagRender {
         )?;
 
         // insert to context for linked list
-        let backlinks_map = BacklinksMap::new(&self.scraps);
-        context.insert("tag", &TagTera::new(tag, &backlinks_map));
+        context.insert("tag", &TagTera::new(tag, backlinks_map));
 
         let linked_scraps = backlinks_map.get(&tag.title().clone().into());
         context.insert(
@@ -66,8 +64,10 @@ impl TagRender {
 
 #[cfg(test)]
 mod tests {
+    use crate::usecase::build::model::backlinks_map::BacklinksMap;
     use scraps_libs::lang::LangCode;
     use scraps_libs::model::base_url::BaseUrl;
+    use scraps_libs::model::scrap::Scrap;
     use url::Url;
 
     use super::*;
@@ -92,15 +92,18 @@ mod tests {
         let scrap1 = &Scrap::new("scrap1", &None, "[[tag1]]");
         let scrap2 = &Scrap::new("scrap2", &None, "[[tag1]][[tag2]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
+        let backlinks_map = BacklinksMap::new(&scraps);
         // tag
         let tag1: Tag = "tag 1".into();
 
         let tag1_html_path =
             public_dir_path.join(format!("scraps/{}.html", Slug::from(tag1.title().clone())));
 
-        let render = TagRender::new(&static_dir_path, &public_dir_path, &scraps).unwrap();
+        let render = TagRender::new(&static_dir_path, &public_dir_path).unwrap();
 
-        render.run(&base_url, &metadata, &tag1).unwrap();
+        render
+            .run(&base_url, &metadata, &tag1, &backlinks_map)
+            .unwrap();
 
         let result2 = fs::read_to_string(tag1_html_path).unwrap();
         assert!(!result2.is_empty());
