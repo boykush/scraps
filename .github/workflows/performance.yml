@@ -19,61 +19,40 @@ jobs:
     steps:
       - name: Checkout PR
         uses: actions/checkout@v6
-      
-      - name: Clone boykush/wiki
-        run: |
-          git clone https://github.com/boykush/wiki.git
-      
-      - name: Setup Rust
-        uses: jdx/mise-action@v3
 
-      - name: Cargo build
-        run: |
-          cargo build --release
-      
-      - name: Run scraps build with timing
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+        with:
+          cache: false
+
+      - name: Run performance test
         id: build
-        working-directory: ./wiki
-        run: |
-          START_TIME=$(date +%s%N)
-          ../target/release/scraps build -v
-          END_TIME=$(date +%s%N)
-          DURATION=$(( ($END_TIME - $START_TIME) / 1000000000 ))
-          MILLISECONDS=$(( ($END_TIME - $START_TIME) / 1000000 % 1000 ))
-          echo "duration=$DURATION.$MILLISECONDS" >> $GITHUB_OUTPUT
-          if (( $DURATION >= 4 )); then
-            echo "status=fail" >> $GITHUB_OUTPUT
-          else
-            echo "status=pass" >> $GITHUB_OUTPUT
-          fi
+        run: mise run perf:test
       
       - name: Comment PR
+        if: always()
         uses: actions/github-script@v8
         with:
           script: |
             const duration = parseFloat('${{ steps.build.outputs.duration }}');
             const status = '${{ steps.build.outputs.status }}';
             const emoji = status === 'pass' ? '✅' : '❌';
-            
+
             const comment = `## Performance Test Results 🚀
-            
+
             Build Time: ${duration} seconds
             Status: ${emoji} ${status.toUpperCase()}
-            
+
             Executed with: scraps build -v
             Repository: boykush/wiki
             Runner: Ubuntu latest`;
-            
+
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
               body: comment
             });
-      
-      - name: Check Duration
-        if: steps.build.outputs.status == 'fail'
-        run: exit 1
 
 env:
   CARGO_TERM_COLOR: always
