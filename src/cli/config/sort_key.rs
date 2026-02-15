@@ -13,7 +13,7 @@ pub enum SerdeSortKey {
 pub struct SortKeyConfig(#[serde(with = "SerdeSortKey")] SortKey);
 
 impl SortKeyConfig {
-    pub fn into_sort_key(self) -> SortKey {
-        self.0
+    pub fn as_sort_key(&self) -> &SortKey {
+        &self.0
     }
 }

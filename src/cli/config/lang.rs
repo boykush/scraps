@@ -18,7 +18,7 @@ impl<'de> Deserialize<'de> for LangCodeConfig {
 }
 
 impl LangCodeConfig {
-    pub fn into_lang_code(self) -> LangCode {
-        self.0.clone()
+    pub fn as_lang_code(&self) -> &LangCode {
+        &self.0
     }
 }

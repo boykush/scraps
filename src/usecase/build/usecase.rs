@@ -145,10 +145,10 @@ impl BuildUsecase {
         // generate html tags
         let span_generate_html_tags = span!(Level::INFO, "generate_html_tags").entered();
         let tags = Tags::new(&scraps);
-        tags.clone().into_iter().par_bridge().try_for_each(|tag| {
+        tags.iter().par_bridge().try_for_each(|tag| {
             let _span_render_tag = span!(Level::INFO, "generate_html_tag").entered();
             let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path)?;
-            tag_render.run(base_url, html_metadata, &tag, &backlinks_map)
+            tag_render.run(base_url, html_metadata, tag, &backlinks_map)
         })?;
         span_generate_html_tags.exit();
 
@@ -185,7 +185,7 @@ impl BuildUsecase {
         &self,
         git_command: GC,
         base_url: &BaseUrl,
-        path: &PathBuf,
+        path: &Path,
     ) -> ScrapsResult<ScrapDetail> {
         let span_convert_to_scrap = span!(Level::INFO, "convert_to_scrap").entered();
         let scrap = read_scraps::to_scrap_by_path(&self.scraps_dir_path, path)?;

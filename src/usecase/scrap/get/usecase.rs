@@ -3,7 +3,7 @@ use scraps_libs::model::context::Ctx;
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::title::Title;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// Result for get scrap operation
 #[derive(Debug, Clone, PartialEq)]
@@ -18,7 +18,7 @@ pub struct GetScrapUsecase {
 }
 
 impl GetScrapUsecase {
-    pub fn new(scraps_dir_path: &PathBuf) -> GetScrapUsecase {
+    pub fn new(scraps_dir_path: &Path) -> GetScrapUsecase {
         GetScrapUsecase {
             scraps_dir_path: scraps_dir_path.to_owned(),
         }

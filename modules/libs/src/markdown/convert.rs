@@ -98,8 +98,13 @@ fn handle_wiki_link_events<'a>(
     end: Event<'a>,
     has_pothole: bool,
 ) -> [Event<'a>; 3] {
-    let scrap_link = &ScrapKey::from_path_str(dest_url);
-    let file_stem = ScrapFileStem::from(scrap_link.clone());
+    let scrap_link = ScrapKey::from_path_str(dest_url);
+    let replaced_text = if has_pothole {
+        text.to_string()
+    } else {
+        Title::from(&scrap_link).to_string()
+    };
+    let file_stem = ScrapFileStem::from(scrap_link);
     let link = format!("{base_url}scraps/{file_stem}.html");
     let start_link = Event::Start(Tag::Link {
         link_type: LinkType::WikiLink { has_pothole },
@@ -107,11 +112,6 @@ fn handle_wiki_link_events<'a>(
         title,
         id,
     });
-    let replaced_text = if has_pothole {
-        text.to_string()
-    } else {
-        Title::from(scrap_link).to_string()
-    };
     [start_link, Event::Text(replaced_text.into()), end]
 }
 

@@ -7,7 +7,7 @@ use rmcp::schemars::JsonSchema;
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer};
 use serde::Deserialize;
-use std::path::PathBuf;
+use std::path::Path;
 
 #[derive(Debug, Deserialize, JsonSchema)]
 #[schemars(deny_unknown_fields)]
@@ -19,7 +19,7 @@ pub struct GetScrapRequest {
 }
 
 pub async fn get_scrap(
-    scraps_dir: &PathBuf,
+    scraps_dir: &Path,
     _context: RequestContext<RoleServer>,
     Parameters(request): Parameters<GetScrapRequest>,
 ) -> Result<CallToolResult, ErrorData> {

@@ -1,6 +1,6 @@
 use crate::{error::ScrapsResult, usecase::read_scraps};
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 
@@ -9,7 +9,7 @@ pub struct ListTagUsecase {
 }
 
 impl ListTagUsecase {
-    pub fn new(scraps_dir_path: &PathBuf) -> ListTagUsecase {
+    pub fn new(scraps_dir_path: &Path) -> ListTagUsecase {
         ListTagUsecase {
             scraps_dir_path: scraps_dir_path.to_owned(),
         }
