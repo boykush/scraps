@@ -24,5 +24,5 @@ Parse the following from `$ARGUMENTS`:
    - Extract the OGP title and use it as the scrap title
 
 2. **Create the Scrap**
-   - Call `scraps-writer` skill with args: `<title> <max-lines>`
+   - Call `scraps-writer` skill with args: `"<title>" <max-lines>`
    - The scrap should be a concise summary of the article with a source autolink

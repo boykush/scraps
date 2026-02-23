@@ -3,7 +3,7 @@ name: scraps-writer
 description: Shared workflow for creating scraps with tag research, Wiki-link resolution, and content verification.
 allowed-tools: mcp__plugin_scraps-writer_scraps__*, Read, Write, Edit, Glob
 user-invocable: false
-argument-hint: [title] [max-lines]
+argument-hint: "title" [max-lines]
 ---
 
 # Scraps Writer
@@ -14,8 +14,10 @@ Shared workflow for creating scraps with Wiki-link notation.
 
 Parse the following from `$ARGUMENTS`:
 
-- **title** (required) - Title of the scrap to create
+- **title** (required, quoted) - Title of the scrap to create. Must be enclosed in double quotes (e.g., `"My Title"`)
 - **max-lines** (optional, default: 10) - Maximum number of lines for the generated scrap
+
+Parse the title by extracting the text between the first pair of double quotes. Everything after the closing quote is parsed as remaining arguments.
 
 ## Workflow
 
