@@ -19,6 +19,7 @@ jobs:
     - name: Setup Rust
       uses: jdx/mise-action@v3
       with:
+        cache: false
         install_args: "rust"
     - name: Pre build
       run: mise run cargo:build
