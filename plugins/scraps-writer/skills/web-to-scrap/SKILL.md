@@ -1,6 +1,6 @@
 ---
 name: web-to-scrap
-description: Summarize a web article and create a scrap with source link and tags.
+description: Summarize a web article and create a scrap with source link and tags. Use this skill whenever the user shares a URL and wants to save it as a scrap, says "summarize this article", "save this link", or pastes a URL with intent to document or bookmark it.
 allowed-tools: Read, Glob, WebFetch, Skill
 user-invocable: true
 argument-hint: [url] [max-lines]

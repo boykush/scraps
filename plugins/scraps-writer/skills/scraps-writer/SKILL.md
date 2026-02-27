@@ -1,6 +1,6 @@
 ---
 name: scraps-writer
-description: Shared workflow for creating scraps with tag research, Wiki-link resolution, and content verification.
+description: Internal workflow called by add-scrap and web-to-scrap to create scraps with tag research, Wiki-link resolution, and content verification. Use this skill when another skill needs to write a scrap file with proper Wiki-link notation and tag consistency.
 allowed-tools: mcp__plugin_scraps-writer_scraps__*, Read, Write, Edit, Glob
 user-invocable: false
 argument-hint: "title" [max-lines]
@@ -31,12 +31,13 @@ Parse the title by extracting the text between the first pair of double quotes. 
    - Use `get_scrap` to retrieve full content of specific scraps when needed
    - Identify scraps that should link to the new scrap
    - Check if a scrap with the same **title** already exists. If so, determine an appropriate context folder name to disambiguate
+   - If a related scrap covers a similar topic, consider how the new scrap adds distinct value — focus on a different aspect, a more specific subtopic, or a different perspective rather than duplicating existing content
 
 3. **Create the Scrap**
    - Write well-structured Markdown content following the syntax below
    - If summarizing a web article, include the source URL as autolink: `<https://...>`
    - Filename: `scraps/<title>.md`, or `scraps/<ctx>/<title>.md` if a context folder is needed to avoid title conflicts
-   - **IMPORTANT**: The scrap content MUST NOT exceed **max-lines** lines. Count the total lines before writing and trim if necessary
+   - **Line limit**: The scrap content must not exceed **max-lines** lines. Scraps are designed as concise, focused knowledge units — keeping them short makes the wiki scannable and encourages linking between scraps rather than cramming everything into one page. Count the total lines before writing and trim if necessary
 
 4. **Verify Tag Consistency**
    - Use `list_tags` again and compare with the result from step 1
@@ -44,6 +45,7 @@ Parse the title by extracting the text between the first pair of double quotes. 
 
 5. **Suggest Backlinks**
    - List existing scraps that should add links to this new scrap
+   - Good candidates: scraps that share the same tags, cover a parent/sibling topic, or mention concepts that the new scrap explains in more detail
 
 ## MCP Tools Usage
 
