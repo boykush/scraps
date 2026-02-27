@@ -39,6 +39,15 @@ Help us make Scraps more accessible by:
 
 ---
 
+## Claude Code Plugins
+
+This project uses [Claude Code](https://claude.com/claude-code) plugins for development workflow:
+
+- `/commit` — Create a conventional commit
+- `/commit-push-pr` — Create branch, commit, push, and open a PR in one step
+
+---
+
 ## Testing Guidelines
 
 ### Overview
@@ -157,9 +166,11 @@ E2E tests are configured to:
 
 ```typescript
 import { test, expect } from '@playwright/test';
+
+test('example test', async ({ page }) => {
   // Navigate to page
   await page.goto('/your-page');
-  
+
   // Test interactions
   await page.locator('#element-id').click();
   await expect(page.locator('#result')).toBeVisible();

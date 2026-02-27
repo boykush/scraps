@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 #MISE description="Run all tests with cargo"
-cargo test --verbose --workspace
+cargo test --verbose --workspace --all-features
