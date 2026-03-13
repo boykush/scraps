@@ -1,8 +1,8 @@
 ---
 name: scraps-writer
-description: Internal workflow called by add-scrap and web-to-scrap to create scraps with tag research, Wiki-link resolution, and content verification. Use this skill when another skill needs to write a scrap file with proper Wiki-link notation and tag consistency.
+description: Shared workflow for creating scraps with tag research, Wiki-link resolution, and content verification.
 allowed-tools: mcp__plugin_scraps-writer_scraps__*, Read, Write, Edit, Glob
-user-invocable: false
+user-invocable: true
 argument-hint: "title" [max-lines]
 ---
 
