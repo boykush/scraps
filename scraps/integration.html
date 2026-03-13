@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <!-- Page title -->
+        
+            <title>Scraps Doc</title>
+            <meta property="og:title" content="Scraps Doc" />
+            <meta name="twitter:title" content="Scraps Doc" />
+        
+        <!-- Page description -->
+        
+            <meta name="description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta property="og:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+            <meta name="twitter:description" content="A static site generator that makes it easy to write internal links (Wiki links) in Markdown files." />
+        
+        <!-- Page favicon -->
+        
+            <link rel="icon" type="image/png" href="https:&#x2F;&#x2F;github.com&#x2F;boykush&#x2F;scraps&#x2F;blob&#x2F;main&#x2F;assets&#x2F;logo.png?raw=true" />
+        
+        <!-- Rubik font -->
+        <link href="https://fonts.cdnfonts.com/css/rubik" rel="stylesheet">
+        <!-- Noto Sans JP font -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+        <!-- Style sheet -->
+        <link rel="stylesheet" href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;main.css">
+        
+        
+    </head>
+    <body>
+        <header>
+            <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;">
+                <h1>Scraps Doc</h1>
+            </a>
+        </header>
+        <main>
+            
+    <div class="tag">
+        <h1 class="title">Integration</h1>
+    </div>
+    
+    <ul class="scrap-links">
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/mcp-tools.reference.html">
+                    
+                        <div class="header">
+                            <div class="context">Reference&#47;</div>
+                            <div class="title">MCP Tools</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Integration
+This reference documents the MCP (Model Context Protocol) tools provided by
+Scraps for AI assistant integration.
+search_scraps
+Search through your Scraps content with natural language queries using fuzzy
+matching.
+Parameters:
+
+query (string, required): Search query to match against scrap titles and
+body content
+num (integer, optional): Maximum number of results to return (default: 100)
+logic (string, optional): Search logic for combining multiple keywords:
+&quot;or&quot; (default): Any keyword can match
+&quot;and&quot;: All keywords must match
+
+
+
+Returns:
+
+results: Array of matching scraps with the following fields:
+title: Scrap title
+ctx: Context folder path (null if in root)
+
+
+count: Total number of matches found
+
+Examples:
+
+{&quot;query&quot;: &quot;rust cli&quot;, &quot;logic&quot;: &quot;and&quot;} - Returns scraps containing both
+“rust” AND “cli”
+{&quot;query&quot;: &quot;rust cli&quot;, &quot;logic&quot;: &quot;or&quot;} - Returns scraps containing “rust” OR
+“cli”
+
+list_tags
+List all available tags in your Scraps repository with their backlink counts,
+sorted by popularity.
+Parameters: None
+Returns:
+Array of tags with the following fields:
+
+title: Tag name
+backlinks_count: Number of scraps referencing this tag
+
+lookup_scrap_links
+Find outbound wiki links from a specific scrap. Returns all scraps that the
+specified scrap links to.
+Parameters:
+
+title (string, required): Title of the scrap to get links for
+ctx (string, optional): Context if the scrap has one
+
+Returns:
+Array of linked scraps with title and ctx.
+lookup_scrap_backlinks
+Find inbound wiki links (backlinks) to a specific scrap. Returns all scraps
+that link to the specified scrap.
+Parameters:
+
+title (string, required): Title of the scrap to get backlinks for
+ctx (string, optional): Context if the scrap has one
+
+Returns:
+Array of scraps that link to the specified scrap, with title and ctx.
+lookup_tag_backlinks
+Find all scraps that reference a specific tag.
+Parameters:
+
+tag (string, required): Tag name to get backlinks for
+
+Returns:
+Array of scraps that reference the specified tag, with title and ctx.
+Notes
+
+All search and lookup operations are performed against the current state of
+your Scraps repository
+Fuzzy matching is used for search queries to improve discoverability
+Use get_scrap to retrieve the full Markdown content of individual scraps
+The MCP server must be running for these tools to be available to your AI
+assistant
+
+For setup instructions, see Integrate with AI Assistants.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/setup-lsp.how-to.html">
+                    
+                        <div class="header">
+                            <div class="context">How-to&#47;</div>
+                            <div class="title">Setup LSP</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Integration
+Currently, the most recommended LSP for editing Scraps is markdown-oxide.
+markdown-oxide supports the following editing environments:
+
+Neovim
+VSCode
+Zed
+Helix
+
+To match the current features provided by Scraps, place the following configuration file .moxide.toml under the scraps&#x2F; directory and open the scraps&#x2F; directory directly for a comfortable editing experience.
+heading_completions = false
+title_headings = false
+tags_in_codeblocks = false
+references_in_codeblocks = false
+
+We are considering a feature to generate the LSP configuration file during the init command.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/integrate-with-ai-assistants.how-to.html">
+                    
+                        <div class="header">
+                            <div class="context">How-to&#47;</div>
+                            <div class="title">Integrate with AI Assistants</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Integration
+Scraps includes comprehensive Model Context Protocol (MCP) server functionality, enabling AI assistants to directly interact with your Scraps knowledge base.
+What is MCP?
+The Model Context Protocol (MCP) is an open standard that enables AI assistants to securely access external data sources and tools. Scraps implements an MCP server that exposes your documentation as a searchable, linkable knowledge base.
+Quick Start
+Claude Code (Recommended)
+For Claude Code users, we provide an official plugin for seamless integration. See Install Claude Code Plugin for installation instructions.
+Manual MCP Server Setup
+For other MCP-compatible clients or advanced configurations, you can add Scraps as an MCP server directly:
+claude mcp add scraps -- scraps mcp serve --path ~&#x2F;path&#x2F;to&#x2F;your&#x2F;scraps&#x2F;project&#x2F;
+
+Replace ~&#x2F;path&#x2F;to&#x2F;your&#x2F;scraps&#x2F;project&#x2F; with the actual path to your Scraps project directory.
+For command details, see MCP Serve.
+Available Tools
+For detailed MCP tool documentation, see MCP Tools.
+</div>
+                    
+                </a>
+            </li>
+        
+            <li class="item">
+                <a href="https:&#x2F;&#x2F;boykush.github.io&#x2F;scraps&#x2F;scraps/install-claude-code-plugin.how-to.html">
+                    
+                        <div class="header">
+                            <div class="context">How-to&#47;</div>
+                            <div class="title">Install Claude Code Plugin</div>
+                        </div>
+                    
+                    
+                        <div class="summary">#Integration
+This guide shows you how to enable the Scraps MCP (Model Context Protocol)
+server plugin in Claude Code.
+Installation
+Step 1: Add the Plugin Marketplace
+First, add the Scraps plugin marketplace:
+claude plugin marketplace add boykush&#x2F;scraps
+
+This registers the Scraps plugin catalog with Claude Code.
+Step 2: Enable the Plugin
+Add the following to your project’s .claude&#x2F;settings.json:
+{
+  &quot;enabledPlugins&quot;: {
+    &quot;mcp-server@scraps-claude-code-plugins&quot;: true
+  }
+}
+
+The plugin will automatically use the current directory as your Scraps project
+path.
+Configuration
+Custom Project Path (Optional)
+To specify a different Scraps project path, set the SCRAPS_PROJECT_PATH
+environment variable:
+{
+  &quot;env&quot;: {
+    &quot;SCRAPS_PROJECT_PATH&quot;: &quot;&#x2F;path&#x2F;to&#x2F;your&#x2F;scraps&#x2F;project&quot;
+  },
+  &quot;enabledPlugins&quot;: {
+    &quot;mcp-server@scraps-claude-code-plugins&quot;: true
+  }
+}
+
+</div>
+                    
+                </a>
+            </li>
+        
+    </ul>
+
+
+        </main>
+        <footer>
+            Generated by <a href="https://github.com/boykush/scraps" target="_blank" rel="noopener noreferrer">Scraps</a>
+        </footer> 
+        <!-- Code syntax highlight -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script>
+        <!-- Code syntax highlight theme -->
+        <link href="https://unpkg.com/nord-highlightjs@0.2.0/dist/nord.css" rel="stylesheet" type="text/css" />
+        <!-- Mermaid -->
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.12.2/+esm'
+        </script>
+        
+         
+    </body>
+</html>
