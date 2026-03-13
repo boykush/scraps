@@ -98,11 +98,8 @@ impl ScrapsServer {
 #[tool_handler]
 impl ServerHandler for ScrapsServer {
     fn get_info(&self) -> ServerInfo {
-        ServerInfo {
-            instructions: Some("This is a Scraps MCP server".into()),
-            capabilities: ServerCapabilities::builder().enable_tools().build(),
-            ..Default::default()
-        }
+        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
+            .with_instructions("This is a Scraps MCP server")
     }
 }
 
@@ -167,17 +164,14 @@ mod tests {
         let client = ().serve(client_stream).await.unwrap();
 
         let result = client
-            .call_tool(CallToolRequestParams {
-                meta: None,
-                name: "search_scraps".into(),
-                arguments: Some(
+            .call_tool(
+                CallToolRequestParams::new("search_scraps").with_arguments(
                     serde_json::json!({"query": "test"})
                         .as_object()
                         .unwrap()
                         .clone(),
                 ),
-                task: None,
-            })
+            )
             .await
             .unwrap();
 
@@ -211,17 +205,14 @@ mod tests {
         let client = ().serve(client_stream).await.unwrap();
 
         let result = client
-            .call_tool(CallToolRequestParams {
-                meta: None,
-                name: "get_scrap".into(),
-                arguments: Some(
+            .call_tool(
+                CallToolRequestParams::new("get_scrap").with_arguments(
                     serde_json::json!({"title": "test"})
                         .as_object()
                         .unwrap()
                         .clone(),
                 ),
-                task: None,
-            })
+            )
             .await
             .unwrap();
 
@@ -250,12 +241,7 @@ mod tests {
         let client = ().serve(client_stream).await.unwrap();
 
         let result = client
-            .call_tool(CallToolRequestParams {
-                meta: None,
-                name: "list_tags".into(),
-                arguments: None,
-                task: None,
-            })
+            .call_tool(CallToolRequestParams::new("list_tags"))
             .await
             .unwrap();
 
@@ -288,17 +274,14 @@ mod tests {
         let client = ().serve(client_stream).await.unwrap();
 
         let result = client
-            .call_tool(CallToolRequestParams {
-                meta: None,
-                name: "lookup_scrap_links".into(),
-                arguments: Some(
+            .call_tool(
+                CallToolRequestParams::new("lookup_scrap_links").with_arguments(
                     serde_json::json!({"title": "source"})
                         .as_object()
                         .unwrap()
                         .clone(),
                 ),
-                task: None,
-            })
+            )
             .await
             .unwrap();
 
@@ -329,17 +312,14 @@ mod tests {
         let client = ().serve(client_stream).await.unwrap();
 
         let result = client
-            .call_tool(CallToolRequestParams {
-                meta: None,
-                name: "lookup_scrap_backlinks".into(),
-                arguments: Some(
+            .call_tool(
+                CallToolRequestParams::new("lookup_scrap_backlinks").with_arguments(
                     serde_json::json!({"title": "target"})
                         .as_object()
                         .unwrap()
                         .clone(),
                 ),
-                task: None,
-            })
+            )
             .await
             .unwrap();
 
@@ -367,17 +347,14 @@ mod tests {
         let client = ().serve(client_stream).await.unwrap();
 
         let result = client
-            .call_tool(CallToolRequestParams {
-                meta: None,
-                name: "lookup_tag_backlinks".into(),
-                arguments: Some(
+            .call_tool(
+                CallToolRequestParams::new("lookup_tag_backlinks").with_arguments(
                     serde_json::json!({"tag": "rust"})
                         .as_object()
                         .unwrap()
                         .clone(),
                 ),
-                task: None,
-            })
+            )
             .await
             .unwrap();
 
@@ -416,17 +393,14 @@ mod tests {
 
         // AND search: "rust python" should only match "rust_python.md"
         let result = client
-            .call_tool(CallToolRequestParams {
-                meta: None,
-                name: "search_scraps".into(),
-                arguments: Some(
+            .call_tool(
+                CallToolRequestParams::new("search_scraps").with_arguments(
                     serde_json::json!({"query": "rust python", "logic": "and"})
                         .as_object()
                         .unwrap()
                         .clone(),
                 ),
-                task: None,
-            })
+            )
             .await
             .unwrap();
 
@@ -470,17 +444,14 @@ mod tests {
 
         // OR search: "rust python" should match all 3 scraps
         let result = client
-            .call_tool(CallToolRequestParams {
-                meta: None,
-                name: "search_scraps".into(),
-                arguments: Some(
+            .call_tool(
+                CallToolRequestParams::new("search_scraps").with_arguments(
                     serde_json::json!({"query": "rust python", "logic": "or"})
                         .as_object()
                         .unwrap()
                         .clone(),
                 ),
-                task: None,
-            })
+            )
             .await
             .unwrap();
 
