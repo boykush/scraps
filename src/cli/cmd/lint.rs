@@ -56,10 +56,10 @@ fn print_warning(warning: &LintWarning, scraps_dir: &Path, renderer: &Renderer) 
             eprintln!("{}", renderer.render(message));
         }
         _ => {
-            let message = Level::Warning
-                .title(&title)
-                .snippet(Snippet::source("").origin(&file_path_str));
+            let message = Level::Warning.title(&title);
             eprintln!("{}", renderer.render(message));
+            eprintln!(" {} {}", "-->".blue().bold(), file_path_str);
+            eprintln!();
         }
     }
 }
