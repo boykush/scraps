@@ -51,6 +51,14 @@ This guide covers using Scraps as a static site generator (SSG).
 3. **Deploy**
    - Deploy to platforms like [[How-to/Deploy to GitHub Pages]] when ready
 
+## Quality Check
+
+- **Lint**: Use [[Reference/Lint]] to check wiki-link quality:
+
+  ```bash
+  ❯ scraps lint
+  ```
+
 ## AI Integration
 
 - **MCP Server**: Enable AI assistant integration using [[How-to/Integrate with AI Assistants]] for intelligent search and content assistance

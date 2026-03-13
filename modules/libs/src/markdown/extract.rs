@@ -21,20 +21,24 @@ pub fn head_image(text: &str) -> Option<Url> {
 }
 
 pub fn scrap_links(text: &str) -> Vec<ScrapKey> {
+    let hashed: HashSet<ScrapKey> = scrap_links_with_duplicates(text).into_iter().collect();
+    hashed.into_iter().collect()
+}
+
+pub fn scrap_links_with_duplicates(text: &str) -> Vec<ScrapKey> {
     let parser = Parser::new_ext(text, PARSER_OPTION);
 
-    let links = parser.flat_map(|event| match event {
-        Event::Start(Tag::Link {
-            link_type: LinkType::WikiLink { has_pothole: _ },
-            dest_url: CowStr::Borrowed(dest_url),
-            title: _,
-            id: _,
-        }) => Some(ScrapKey::from_path_str(dest_url)),
-        _ => None,
-    });
-
-    let hashed: HashSet<ScrapKey> = links.into_iter().collect();
-    hashed.into_iter().collect()
+    parser
+        .flat_map(|event| match event {
+            Event::Start(Tag::Link {
+                link_type: LinkType::WikiLink { has_pothole: _ },
+                dest_url: CowStr::Borrowed(dest_url),
+                title: _,
+                id: _,
+            }) => Some(ScrapKey::from_path_str(dest_url)),
+            _ => None,
+        })
+        .collect()
 }
 
 #[cfg(test)]
@@ -55,6 +59,28 @@ mod tests {
             head_image(input),
             expected_url.map(|u| Url::parse(u).unwrap())
         );
+    }
+
+    #[test]
+    fn it_scrap_links_with_duplicates() {
+        let text = "[[a]] [[b]] [[a]] [[c]] [[b]] [[a]]";
+        let result = scrap_links_with_duplicates(text);
+        assert_eq!(result.len(), 6);
+
+        let a_key: ScrapKey = Title::from("a").into();
+        let a_count = result.iter().filter(|k| **k == a_key).count();
+        assert_eq!(a_count, 3);
+
+        let b_key: ScrapKey = Title::from("b").into();
+        let b_count = result.iter().filter(|k| **k == b_key).count();
+        assert_eq!(b_count, 2);
+    }
+
+    #[test]
+    fn it_scrap_links_with_duplicates_no_duplicates() {
+        let text = "[[a]] [[b]] [[c]]";
+        let result = scrap_links_with_duplicates(text);
+        assert_eq!(result.len(), 3);
     }
 
     #[test]
