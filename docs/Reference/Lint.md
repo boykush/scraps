@@ -12,19 +12,13 @@ This command checks your scraps for wiki-link quality issues. It focuses on grap
 
 Detects scraps with no outgoing links to other scraps. Dead-end pages break the interconnected nature of a knowledge base and may indicate incomplete content.
 
-Inspired by [[Reference/Normal Link|MediaWiki DeadendPages]].
-
 ### lonely
 
 Detects scraps that are not linked from any other scrap. Lonely pages are difficult to discover through navigation and may indicate content that needs to be integrated into the knowledge graph.
 
-Inspired by [[Reference/Normal Link|MediaWiki LonelyPages]].
-
 ### self-link
 
 Detects scraps that contain a `[[link]]` to themselves. Self-links are redundant as the reader is already on the page.
-
-Inspired by [[Reference/Normal Link|MediaWiki Self-link]].
 
 ### overlinking
 
@@ -32,13 +26,9 @@ Detects the same `[[link]]` appearing multiple times within a single scrap. Repe
 
 `[[Page|alias]]` and `[[Page]]` are treated as the same link.
 
-Inspired by [[Reference/Normal Link|Wikipedia Manual of Style]].
-
 ### singleton-tag
 
 Detects tags referenced by only 1 scrap. Tags used by a single scrap provide no grouping value and may indicate a tag that should be removed or consolidated.
-
-Inspired by [[Reference/Tag Link|MediaWiki UnusedCategories]].
 
 ## Output Format
 
