@@ -19,6 +19,7 @@ fn main() -> error::ScrapsResult<()> {
             cli::cmd::init::run(&project_name, cli.path.as_deref())
         }
         cli::SubCommands::Build { verbose } => cli::cmd::build::run(verbose, cli.path.as_deref()),
+        cli::SubCommands::Lint => cli::cmd::lint::run(cli.path.as_deref()),
         cli::SubCommands::Serve => cli::cmd::serve::run(cli.path.as_deref()),
         cli::SubCommands::Tag => cli::cmd::tag::run(cli.path.as_deref()),
         cli::SubCommands::Template {
