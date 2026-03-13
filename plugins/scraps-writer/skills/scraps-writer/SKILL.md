@@ -1,7 +1,7 @@
 ---
 name: scraps-writer
 description: Shared workflow for creating scraps with tag research, Wiki-link resolution, and content verification.
-allowed-tools: mcp__plugin_scraps-writer_scraps__*, Read, Write, Edit, Glob
+allowed-tools: mcp__plugin_scraps-writer_scraps__*, Read, Write, Edit, Glob, Bash
 user-invocable: true
 argument-hint: "title" [max-lines]
 ---
@@ -21,9 +21,8 @@ Parse the title by extracting the text between the first pair of double quotes. 
 
 ## Workflow
 
-1. **Research Existing Tags** (snapshot for verification)
+1. **Research Existing Tags**
    - Use `list_tags` to get available tags
-   - Save this list for the verification step later
    - Identify tags relevant to the topic
 
 2. **Search Related Scraps**
@@ -47,9 +46,10 @@ Parse the title by extracting the text between the first pair of double quotes. 
    - Filename: `scraps/<title>.md`, or `scraps/<ctx>/<title>.md` if a context folder is needed to avoid title conflicts
    - **Line limit**: The scrap content must not exceed **max-lines** lines. Scraps are designed as concise, focused knowledge units — keeping them short makes the wiki scannable and encourages linking between scraps rather than cramming everything into one page. Count the total lines before writing and trim if necessary
 
-5. **Verify Tag Consistency**
-   - Use `list_tags` again and compare with the result from step 1
-   - If new tags appeared, find the `[[...]]` links that caused them and remove the `[[]]` notation (leave as plain text)
+5. **Lint Tag Quality**
+   - Run `scraps lint` command via Bash tool from the project root directory
+   - Check the output for `singleton-tag` warnings — these indicate tags referenced by only 1 scrap
+   - If any singleton-tag warnings are caused by the newly created scrap, fix them by removing the `[[]]` notation from the offending tag links (leave as plain text)
 
 6. **Suggest Backlinks**
    - List existing scraps that should add links to this new scrap
