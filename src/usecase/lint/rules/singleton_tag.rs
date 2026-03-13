@@ -23,7 +23,7 @@ impl LintRule for SingletonTagRule {
             })
             .map(|tag| LintWarning {
                 rule_name: self.name().to_string(),
-                scrap_title: tag.title().to_string(),
+                scrap_path: tag.title().to_string(),
                 message: "tag is referenced by only 1 scrap".to_string(),
                 source: None,
                 span: None,
@@ -46,7 +46,7 @@ mod tests {
         let warnings = SingletonTagRule.check(&scraps, &backlinks_map, &tags);
         assert_eq!(warnings.len(), 1);
         assert_eq!(warnings[0].rule_name, "singleton-tag");
-        assert_eq!(warnings[0].scrap_title, "tag1");
+        assert_eq!(warnings[0].scrap_path, "tag1");
     }
 
     #[test]

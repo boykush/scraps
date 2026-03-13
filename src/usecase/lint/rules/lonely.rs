@@ -1,7 +1,7 @@
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
-use crate::usecase::lint::rule::{LintRule, LintWarning};
+use crate::usecase::lint::rule::{scrap_relative_path, LintRule, LintWarning};
 
 pub struct LonelyRule;
 
@@ -21,7 +21,7 @@ impl LintRule for LonelyRule {
             .filter(|scrap| backlinks_map.get(&scrap.self_key()).is_empty())
             .map(|scrap| LintWarning {
                 rule_name: self.name().to_string(),
-                scrap_title: scrap.self_key().to_string(),
+                scrap_path: scrap_relative_path(scrap),
                 message: "scrap is not linked from any other scrap".to_string(),
                 source: None,
                 span: None,
@@ -44,7 +44,7 @@ mod tests {
         let warnings = LonelyRule.check(&scraps, &backlinks_map, &tags);
         assert_eq!(warnings.len(), 1);
         assert_eq!(warnings[0].rule_name, "lonely");
-        assert_eq!(warnings[0].scrap_title, "lonely");
+        assert_eq!(warnings[0].scrap_path, "lonely.md");
     }
 
     #[test]
@@ -58,7 +58,7 @@ mod tests {
         let warnings = LonelyRule.check(&scraps, &backlinks_map, &tags);
         // linker has no backlinks but target does
         assert_eq!(warnings.len(), 1);
-        assert_eq!(warnings[0].scrap_title, "linker");
+        assert_eq!(warnings[0].scrap_path, "linker.md");
     }
 
     #[test]
