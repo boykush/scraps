@@ -42,6 +42,7 @@ Sample page in Japanese is [here](https://boykush.github.io/wiki/).
 - [x] Init scraps project
 - [x] Serve on localhost
 - [x] List a tags
+- [x] Lint wiki-link quality
 - [x] Template to generate the scrap
 - [x] MCP server for AI assistant integration
 ### 🤖 MCP Server
