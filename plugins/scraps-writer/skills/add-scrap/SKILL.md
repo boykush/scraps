@@ -15,7 +15,7 @@ Create a new scrap with Wiki-link notation.
 Parse the following from `$ARGUMENTS`:
 
 - **title** (required) - Title of the scrap to create. Double quotes are optional (e.g., `My Title` or `"My Title"`)
-- **max-lines** (optional, default: 10) - Maximum number of lines for the generated scrap
+- **max-lines** (optional) - Maximum number of lines for the generated scrap. If omitted, scraps-writer determines it automatically based on topic familiarity
 
 If double quotes are present, extract the text between them. Otherwise, treat everything before the optional trailing number as the title.
 
@@ -30,4 +30,4 @@ If double quotes are present, extract the text between them. Otherwise, treat ev
    - Focus on: official documentation, technical definitions, recent developments, and key concepts that help write an accurate and concise scrap
 
 3. **Create the Scrap**
-   - Call `scraps-writer` skill with args: `"<title>" <max-lines>`
+   - Call `scraps-writer` skill with args: `"<title>"` (append `<max-lines>` only if explicitly provided by the user)

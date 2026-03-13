@@ -15,7 +15,7 @@ Shared workflow for creating scraps with Wiki-link notation.
 Parse the following from `$ARGUMENTS`:
 
 - **title** (required, quoted) - Title of the scrap to create. Must be enclosed in double quotes (e.g., `"My Title"`)
-- **max-lines** (optional, default: 10) - Maximum number of lines for the generated scrap
+- **max-lines** (optional) - Maximum number of lines for the generated scrap. If omitted, automatically determined based on topic familiarity (see step 3)
 
 Parse the title by extracting the text between the first pair of double quotes. Everything after the closing quote is parsed as remaining arguments.
 
@@ -33,17 +33,25 @@ Parse the title by extracting the text between the first pair of double quotes. 
    - Check if a scrap with the same **title** already exists. If so, determine an appropriate context folder name to disambiguate
    - If a related scrap covers a similar topic, consider how the new scrap adds distinct value — focus on a different aspect, a more specific subtopic, or a different perspective rather than duplicating existing content
 
-3. **Create the Scrap**
+3. **Estimate Topic Familiarity** (only when max-lines is not explicitly provided)
+   - Use the `count` from `search_scraps` in step 2 — this directly reflects how much the user has written about closely related subjects
+   - Determine familiarity level:
+     - **Low familiarity** (0–2 related scraps): set max-lines to **5–7**. Unfamiliar topics benefit from concise summaries — details are hard to absorb without context
+     - **Medium familiarity** (3–7 related scraps): set max-lines to **10**
+     - **High familiarity** (8+ related scraps): set max-lines to **15–20**. Deep existing context allows for richer, more detailed content
+   - Report the chosen max-lines and the reasoning (e.g., "12 related scraps found → high familiarity → 18 lines")
+
+4. **Create the Scrap**
    - Write well-structured Markdown content following the syntax below
    - If summarizing a web article, include the source URL as autolink: `<https://...>`
    - Filename: `scraps/<title>.md`, or `scraps/<ctx>/<title>.md` if a context folder is needed to avoid title conflicts
    - **Line limit**: The scrap content must not exceed **max-lines** lines. Scraps are designed as concise, focused knowledge units — keeping them short makes the wiki scannable and encourages linking between scraps rather than cramming everything into one page. Count the total lines before writing and trim if necessary
 
-4. **Verify Tag Consistency**
+5. **Verify Tag Consistency**
    - Use `list_tags` again and compare with the result from step 1
    - If new tags appeared, find the `[[...]]` links that caused them and remove the `[[]]` notation (leave as plain text)
 
-5. **Suggest Backlinks**
+6. **Suggest Backlinks**
    - List existing scraps that should add links to this new scrap
    - Good candidates: scraps that share the same tags, cover a parent/sibling topic, or mention concepts that the new scrap explains in more detail
 
