@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use annotate_snippets::{Level, Renderer, Snippet};
 use colored::Colorize;
 
 use crate::cli::config::scrap_config::ScrapConfig;
@@ -21,8 +22,10 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
         return Ok(());
     }
 
+    let renderer = Renderer::styled();
+
     for warning in &warnings {
-        print_warning(warning, scraps_dir_name);
+        print_warning(warning, scraps_dir_name, &renderer);
     }
 
     let total = warnings.len();
@@ -36,61 +39,27 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     Ok(())
 }
 
-fn print_warning(warning: &LintWarning, scraps_dir: &Path) {
+fn print_warning(warning: &LintWarning, scraps_dir: &Path, renderer: &Renderer) {
     let file_path = scraps_dir.join(&warning.scrap_path);
-    let file_path_str = file_path.display();
-
-    // warning[rule-name]: message
-    eprintln!(
-        "{}{}{}{} {}",
-        "warning".yellow().bold(),
-        "[".bold(),
-        warning.rule_name.yellow().bold(),
-        "]".bold(),
-        format!(": {}", warning.message).bold()
-    );
+    let file_path_str = file_path.to_string_lossy();
+    let title = format!("{}: {}", warning.rule_name, warning.message);
 
     match (warning.source.as_ref(), warning.span) {
         (Some(source), Some((start, end))) => {
-            let (line, col) = warning.line_col().unwrap_or((1, 1));
-
-            // --> file:line:col
-            eprintln!(
-                " {} {}",
-                "-->".blue().bold(),
-                format!("{}:{}:{}", file_path_str, line, col)
+            let message = Level::Warning.title(&title).snippet(
+                Snippet::source(source)
+                    .line_start(1)
+                    .origin(&file_path_str)
+                    .fold(true)
+                    .annotation(Level::Warning.span(start..end)),
             );
-
-            // source snippet
-            let before = &source[..start];
-            let line_start = before.rfind('\n').map_or(0, |i| i + 1);
-            let line_end = source[end..].find('\n').map_or(source.len(), |i| end + i);
-            let line_content = &source[line_start..line_end];
-            let col_start = start - line_start;
-            let span_len = end - start;
-            let line_num_str = line.to_string();
-            let pad = " ".repeat(line_num_str.len());
-
-            eprintln!("{} {}", pad, "|".blue().bold());
-            eprintln!(
-                "{} {} {}",
-                line_num_str.blue().bold(),
-                "|".blue().bold(),
-                line_content
-            );
-            eprintln!(
-                "{} {} {}{}",
-                pad,
-                "|".blue().bold(),
-                " ".repeat(col_start),
-                "^".repeat(span_len).yellow().bold()
-            );
-            eprintln!("{} {}", pad, "|".blue().bold());
+            eprintln!("{}", renderer.render(message));
         }
         _ => {
-            // --> file
-            eprintln!(" {} {}", "-->".blue().bold(), file_path_str);
-            eprintln!();
+            let message = Level::Warning
+                .title(&title)
+                .snippet(Snippet::source("").origin(&file_path_str));
+            eprintln!("{}", renderer.render(message));
         }
     }
 }

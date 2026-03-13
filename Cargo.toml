@@ -42,6 +42,7 @@ rstest = "=0.26.1"
 tempfile = "=3.27.0"
 tokio-util = "=0.7.18"
 futures = "=0.3.32"
+annotate-snippets = "=0.11.5"
 
 [package]
 edition.workspace = true
@@ -92,6 +93,7 @@ clap-verbosity-flag.workspace = true
 indicatif.workspace = true
 rmcp.workspace = true
 schemars.workspace = true
+annotate-snippets.workspace = true
 
 [dev-dependencies]
 scraps_libs.workspace = true
