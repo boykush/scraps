@@ -35,10 +35,10 @@ Parse the title by extracting the text between the first pair of double quotes. 
 
 3. **Estimate Topic Familiarity** (only when max-lines is not explicitly provided)
    - Use the `count` from `search_scraps` in step 2 — this directly reflects how much the user has written about closely related subjects
-   - Determine familiarity level:
-     - **Low familiarity** (0–2 related scraps): set max-lines to **5–7**. Unfamiliar topics benefit from concise summaries — details are hard to absorb without context
-     - **Medium familiarity** (3–7 related scraps): set max-lines to **10**
-     - **High familiarity** (8+ related scraps): set max-lines to **15–20**. Deep existing context allows for richer, more detailed content
+   - Determine familiarity level (inverted-U curve — cognitive load theory + expertise reversal effect):
+     - **Low familiarity** (0–5 related scraps): set max-lines to **5–7**. Lacking schema, too much information overwhelms working memory (cognitive load theory, Sweller)
+     - **Medium familiarity** (6–15 related scraps): set max-lines to **10–12**. Sufficient prior knowledge to process detailed content effectively (schema theory)
+     - **High familiarity** (16+ related scraps): set max-lines to **5–7**. Redundant explanations become counterproductive; concise content with links is more effective (expertise reversal effect, Kalyuga & Sweller)
    - Report the chosen max-lines and the reasoning (e.g., "12 related scraps found → high familiarity → 18 lines")
 
 4. **Create the Scrap**
