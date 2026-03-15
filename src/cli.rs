@@ -1,7 +1,9 @@
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::{Verbosity, WarnLevel};
 use scraps_libs::model::title::Title;
 use std::path::PathBuf;
+
+use crate::usecase::lint::rule::LintRuleName;
 
 pub mod cmd;
 mod config;
@@ -37,7 +39,14 @@ pub enum SubCommands {
     Init { project_name: String },
 
     #[command(about = "Lint scraps for wiki-link quality issues")]
-    Lint,
+    Lint {
+        #[arg(
+            short = 'r',
+            long = "rule",
+            help = "Run only the specified lint rule(s)"
+        )]
+        rules: Vec<CliLintRuleName>,
+    },
 
     #[command(about = "Serve the site with build scraps")]
     Serve,
@@ -74,6 +83,32 @@ pub enum TemplateSubCommands {
 pub enum McpSubCommands {
     #[command(about = "Start MCP server with stdio transport")]
     Serve,
+}
+
+#[derive(Clone, Debug, ValueEnum)]
+pub enum CliLintRuleName {
+    #[value(name = "dead-end")]
+    DeadEnd,
+    #[value(name = "lonely")]
+    Lonely,
+    #[value(name = "self-link")]
+    SelfLink,
+    #[value(name = "overlinking")]
+    Overlinking,
+    #[value(name = "singleton-tag")]
+    SingletonTag,
+}
+
+impl From<CliLintRuleName> for LintRuleName {
+    fn from(cli: CliLintRuleName) -> Self {
+        match cli {
+            CliLintRuleName::DeadEnd => LintRuleName::DeadEnd,
+            CliLintRuleName::Lonely => LintRuleName::Lonely,
+            CliLintRuleName::SelfLink => LintRuleName::SelfLink,
+            CliLintRuleName::Overlinking => LintRuleName::Overlinking,
+            CliLintRuleName::SingletonTag => LintRuleName::SingletonTag,
+        }
+    }
 }
 
 #[derive(Args, Clone)]

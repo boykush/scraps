@@ -6,17 +6,17 @@ use colored::Colorize;
 use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
-use crate::usecase::lint::rule::LintWarning;
+use crate::usecase::lint::rule::{LintRuleName, LintWarning};
 use crate::usecase::lint::usecase::LintUsecase;
 
-pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
+pub fn run(project_path: Option<&Path>, rule_names: &[LintRuleName]) -> ScrapsResult<()> {
     let path_resolver = PathResolver::new(project_path)?;
     let config = ScrapConfig::from_path(project_path)?;
     let scraps_dir_path = path_resolver.scraps_dir(&config);
     let scraps_dir_name = config.scraps_dir.as_deref().unwrap_or(Path::new("scraps"));
     let usecase = LintUsecase::new(&scraps_dir_path);
 
-    let warnings = usecase.execute()?;
+    let warnings = usecase.execute(rule_names)?;
 
     if warnings.is_empty() {
         return Ok(());
