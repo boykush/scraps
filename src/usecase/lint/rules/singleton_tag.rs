@@ -1,13 +1,13 @@
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
-use crate::usecase::lint::rule::{LintRule, LintWarning};
+use crate::usecase::lint::rule::{LintRule, LintRuleName, LintWarning};
 
 pub struct SingletonTagRule;
 
 impl LintRule for SingletonTagRule {
-    fn name(&self) -> &str {
-        "singleton-tag"
+    fn name(&self) -> LintRuleName {
+        LintRuleName::SingletonTag
     }
 
     fn check(
@@ -22,7 +22,7 @@ impl LintRule for SingletonTagRule {
                 backlinks.len() == 1
             })
             .map(|tag| LintWarning {
-                rule_name: self.name().to_string(),
+                rule_name: self.name(),
                 scrap_path: tag.title().to_string(),
                 message: "tag is referenced by only 1 scrap".to_string(),
                 source: None,
@@ -45,7 +45,7 @@ mod tests {
 
         let warnings = SingletonTagRule.check(&scraps, &backlinks_map, &tags);
         assert_eq!(warnings.len(), 1);
-        assert_eq!(warnings[0].rule_name, "singleton-tag");
+        assert_eq!(warnings[0].rule_name, LintRuleName::SingletonTag);
         assert_eq!(warnings[0].scrap_path, "tag1");
     }
 

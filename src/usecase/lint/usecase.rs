@@ -9,7 +9,7 @@ use crate::{
 };
 
 use super::{
-    rule::{LintRule, LintWarning},
+    rule::{LintRule, LintRuleName, LintWarning},
     rules::{
         dead_end::DeadEndRule, lonely::LonelyRule, overlinking::OverlinkingRule,
         self_link::SelfLinkRule, singleton_tag::SingletonTagRule,
@@ -78,12 +78,12 @@ mod tests {
         let usecase = LintUsecase::new(&project.scraps_dir);
         let warnings = usecase.execute().unwrap();
 
-        let rule_names: Vec<&str> = warnings.iter().map(|w| w.rule_name.as_str()).collect();
-        assert!(rule_names.contains(&"dead-end"));
-        assert!(rule_names.contains(&"lonely"));
-        assert!(rule_names.contains(&"self-link"));
-        assert!(rule_names.contains(&"overlinking"));
-        assert!(rule_names.contains(&"singleton-tag"));
+        let rule_names: Vec<&LintRuleName> = warnings.iter().map(|w| &w.rule_name).collect();
+        assert!(rule_names.contains(&&LintRuleName::DeadEnd));
+        assert!(rule_names.contains(&&LintRuleName::Lonely));
+        assert!(rule_names.contains(&&LintRuleName::SelfLink));
+        assert!(rule_names.contains(&&LintRuleName::Overlinking));
+        assert!(rule_names.contains(&&LintRuleName::SingletonTag));
     }
 
     #[rstest]
