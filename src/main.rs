@@ -19,7 +19,10 @@ fn main() -> error::ScrapsResult<()> {
             cli::cmd::init::run(&project_name, cli.path.as_deref())
         }
         cli::SubCommands::Build { verbose } => cli::cmd::build::run(verbose, cli.path.as_deref()),
-        cli::SubCommands::Lint => cli::cmd::lint::run(cli.path.as_deref()),
+        cli::SubCommands::Lint { rules } => {
+            let rule_names: Vec<_> = rules.into_iter().map(Into::into).collect();
+            cli::cmd::lint::run(cli.path.as_deref(), &rule_names)
+        }
         cli::SubCommands::Serve => cli::cmd::serve::run(cli.path.as_deref()),
         cli::SubCommands::Tag => cli::cmd::tag::run(cli.path.as_deref()),
         cli::SubCommands::Template {
