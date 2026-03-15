@@ -249,7 +249,7 @@ mod tests {
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
         let css_metadata = &CssMetadata::new(&ColorScheme::OsSetting);
-        let list_view_configs = ListViewConfigs::new(&true, &SortKey::LinkedCount, &Paging::Not);
+        let list_view_configs = ListViewConfigs::new(true, SortKey::LinkedCount, Paging::Not);
 
         let usecase = BuildUsecase::new(
             &project.scraps_dir,
@@ -321,7 +321,7 @@ mod tests {
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
         let css_metadata = &CssMetadata::new(&ColorScheme::OsSetting);
-        let list_view_configs = ListViewConfigs::new(&false, &SortKey::LinkedCount, &Paging::Not);
+        let list_view_configs = ListViewConfigs::new(false, SortKey::LinkedCount, Paging::Not);
 
         let usecase = BuildUsecase::new(
             &project.scraps_dir,

@@ -188,8 +188,7 @@ mod tests {
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
-        let list_view_configs =
-            ListViewConfigs::new(&true, &SortKey::CommittedDate, &Paging::By(2));
+        let list_view_configs = ListViewConfigs::new(true, SortKey::CommittedDate, Paging::By(2));
 
         // scraps
         let scrap1 = Scrap::new("scrap1", &None, "# header1");
@@ -235,8 +234,7 @@ mod tests {
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
-        let list_view_configs =
-            ListViewConfigs::new(&true, &SortKey::CommittedDate, &Paging::By(2));
+        let list_view_configs = ListViewConfigs::new(true, SortKey::CommittedDate, Paging::By(2));
 
         // scraps
         let scrap1 = Scrap::new("scrap1", &None, "# header1");

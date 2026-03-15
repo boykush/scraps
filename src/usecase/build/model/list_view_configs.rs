@@ -7,11 +7,11 @@ pub struct ListViewConfigs {
 }
 
 impl ListViewConfigs {
-    pub fn new(build_search_index: &bool, sort_key: &SortKey, paging: &Paging) -> ListViewConfigs {
+    pub fn new(build_search_index: bool, sort_key: SortKey, paging: Paging) -> ListViewConfigs {
         ListViewConfigs {
-            build_search_index: *build_search_index,
-            sort_key: sort_key.clone(),
-            paging: paging.clone(),
+            build_search_index,
+            sort_key,
+            paging,
         }
     }
 }

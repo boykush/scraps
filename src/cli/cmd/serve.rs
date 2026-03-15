@@ -65,7 +65,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
         Some(u) => Paging::By(u),
     };
     let list_view_configs =
-        list_view_configs::ListViewConfigs::new(&build_search_index, sort_key, &paging);
+        list_view_configs::ListViewConfigs::new(build_search_index, sort_key.clone(), paging);
 
     let build_config = BuildConfig {
         base_url: &base_url,

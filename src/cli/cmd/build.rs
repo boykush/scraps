@@ -73,7 +73,7 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
         None => Paging::Not,
         Some(u) => Paging::By(u),
     };
-    let list_view_configs = ListViewConfigs::new(&build_search_index, sort_key, &paging);
+    let list_view_configs = ListViewConfigs::new(build_search_index, sort_key.clone(), paging);
 
     let build_config = BuildConfig {
         base_url: &base_url,
