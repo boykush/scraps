@@ -38,7 +38,7 @@ impl ScrapDetail {
 pub struct ScrapDetails(Vec<ScrapDetail>);
 
 impl ScrapDetails {
-    pub fn new(scraps: &Vec<ScrapDetail>) -> ScrapDetails {
+    pub fn new(scraps: &[ScrapDetail]) -> ScrapDetails {
         ScrapDetails(scraps.to_owned())
     }
 
@@ -47,11 +47,7 @@ impl ScrapDetails {
     }
 
     pub fn to_scraps(&self) -> Vec<Scrap> {
-        self.0
-            .clone()
-            .into_iter()
-            .map(|sc| sc.scrap())
-            .collect_vec()
+        self.0.iter().map(|sc| sc.scrap()).collect_vec()
     }
 
     pub fn len(&self) -> usize {
