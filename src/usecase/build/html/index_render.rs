@@ -46,10 +46,10 @@ impl IndexRender {
         let scraps = &scrap_details.to_scraps();
         let sorted_scraps = IndexScrapsTera::new_with_sort(
             scrap_details,
-            &backlinks_map,
+            backlinks_map,
             &list_view_configs.sort_key,
         );
-        let stags = &TagsTera::new(&Tags::new(scraps), &backlinks_map);
+        let stags = &TagsTera::new(&Tags::new(scraps), backlinks_map);
         // setup tera
         let (tera, base_context) = {
             let (tera, mut context) = index_tera::base(
