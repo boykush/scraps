@@ -1,13 +1,13 @@
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
-use crate::usecase::lint::rule::{scrap_relative_path, LintRule, LintWarning};
+use crate::usecase::lint::rule::{scrap_relative_path, LintRule, LintRuleName, LintWarning};
 
 pub struct SelfLinkRule;
 
 impl LintRule for SelfLinkRule {
-    fn name(&self) -> &str {
-        "self-link"
+    fn name(&self) -> LintRuleName {
+        LintRuleName::SelfLink
     }
 
     fn check(
@@ -20,7 +20,7 @@ impl LintRule for SelfLinkRule {
             .iter()
             .filter(|scrap| scrap.links().contains(&scrap.self_key()))
             .map(|scrap| LintWarning {
-                rule_name: self.name().to_string(),
+                rule_name: self.name(),
                 scrap_path: scrap_relative_path(scrap),
                 message: "scrap links to itself".to_string(),
                 source: Some(scrap.md_text().to_string()),
@@ -51,7 +51,7 @@ mod tests {
 
         let warnings = SelfLinkRule.check(&scraps, &backlinks_map, &tags);
         assert_eq!(warnings.len(), 1);
-        assert_eq!(warnings[0].rule_name, "self-link");
+        assert_eq!(warnings[0].rule_name, LintRuleName::SelfLink);
         assert_eq!(warnings[0].scrap_path, "myself.md");
         assert!(warnings[0].span.is_some());
     }

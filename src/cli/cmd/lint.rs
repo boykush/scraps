@@ -42,7 +42,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
 fn print_warning(warning: &LintWarning, scraps_dir: &Path, renderer: &Renderer) {
     let file_path = scraps_dir.join(&warning.scrap_path);
     let file_path_str = file_path.to_string_lossy();
-    let title = format!("{}: {}", warning.rule_name, warning.message);
+    let title = format!("{}: {}", warning.rule_name.as_str(), warning.message);
 
     match (warning.source.as_ref(), warning.span) {
         (Some(source), Some((start, end))) => {

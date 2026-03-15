@@ -1,13 +1,13 @@
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
-use crate::usecase::lint::rule::{scrap_relative_path, LintRule, LintWarning};
+use crate::usecase::lint::rule::{scrap_relative_path, LintRule, LintRuleName, LintWarning};
 
 pub struct DeadEndRule;
 
 impl LintRule for DeadEndRule {
-    fn name(&self) -> &str {
-        "dead-end"
+    fn name(&self) -> LintRuleName {
+        LintRuleName::DeadEnd
     }
 
     fn check(
@@ -20,7 +20,7 @@ impl LintRule for DeadEndRule {
             .iter()
             .filter(|scrap| scrap.links().is_empty())
             .map(|scrap| LintWarning {
-                rule_name: self.name().to_string(),
+                rule_name: self.name(),
                 scrap_path: scrap_relative_path(scrap),
                 message: "scrap has no links to other scraps".to_string(),
                 source: None,
@@ -43,7 +43,7 @@ mod tests {
 
         let warnings = DeadEndRule.check(&scraps, &backlinks_map, &tags);
         assert_eq!(warnings.len(), 1);
-        assert_eq!(warnings[0].rule_name, "dead-end");
+        assert_eq!(warnings[0].rule_name, LintRuleName::DeadEnd);
         assert_eq!(warnings[0].scrap_path, "orphan.md");
     }
 

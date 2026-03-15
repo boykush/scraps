@@ -4,13 +4,13 @@ use scraps_libs::markdown::extract::scrap_links_with_duplicates;
 use scraps_libs::model::{key::ScrapKey, scrap::Scrap, tags::Tags};
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
-use crate::usecase::lint::rule::{scrap_relative_path, LintRule, LintWarning};
+use crate::usecase::lint::rule::{scrap_relative_path, LintRule, LintRuleName, LintWarning};
 
 pub struct OverlinkingRule;
 
 impl LintRule for OverlinkingRule {
-    fn name(&self) -> &str {
-        "overlinking"
+    fn name(&self) -> LintRuleName {
+        LintRuleName::Overlinking
     }
 
     fn check(
@@ -37,7 +37,7 @@ impl LintRule for OverlinkingRule {
                         let span = source.find(&pattern).map(|s| (s, s + pattern.len()));
 
                         LintWarning {
-                            rule_name: self.name().to_string(),
+                            rule_name: self.name(),
                             scrap_path: scrap_relative_path(scrap),
                             message: format!("link [[{}]] appears {} times", key, count),
                             source: Some(source),
@@ -63,7 +63,7 @@ mod tests {
 
         let warnings = OverlinkingRule.check(&scraps, &backlinks_map, &tags);
         assert_eq!(warnings.len(), 1);
-        assert_eq!(warnings[0].rule_name, "overlinking");
+        assert_eq!(warnings[0].rule_name, LintRuleName::Overlinking);
         assert!(warnings[0].message.contains("2 times"));
     }
 
