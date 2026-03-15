@@ -16,7 +16,6 @@ use crate::{
     error::{anyhow::Context, ScrapsResult},
     usecase::read_scraps,
 };
-use chrono_tz::Tz;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use scraps_libs::{
@@ -33,9 +32,7 @@ use super::{
     },
     model::{
         backlinks_map::BacklinksMap,
-        css::CssMetadata,
-        html::HtmlMetadata,
-        list_view_configs::ListViewConfigs,
+        build_config::BuildConfig,
         scrap_detail::{ScrapDetail, ScrapDetails},
     },
 };
@@ -63,12 +60,14 @@ impl BuildUsecase {
         &self,
         git_command: GC,
         progress: &PG,
-        base_url: &BaseUrl,
-        timezone: Tz,
-        html_metadata: &HtmlMetadata,
-        css_metadata: &CssMetadata,
-        list_view_configs: &ListViewConfigs,
+        config: &BuildConfig,
     ) -> ScrapsResult<usize> {
+        let base_url = config.base_url;
+        let timezone = config.timezone;
+        let html_metadata = config.html_metadata;
+        let css_metadata = config.css_metadata;
+        let list_view_configs = config.list_view_configs;
+
         progress.start_stage(&Stage::ReadScraps);
         let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
         let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
@@ -203,7 +202,10 @@ mod tests {
     use std::fs;
 
     use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
-    use crate::usecase::build::model::{color_scheme::ColorScheme, paging::Paging, sort::SortKey};
+    use crate::usecase::build::model::{
+        build_config::BuildConfig, color_scheme::ColorScheme, css::CssMetadata, html::HtmlMetadata,
+        list_view_configs::ListViewConfigs, paging::Paging, sort::SortKey,
+    };
     use crate::usecase::progress::tests::ProgressTest;
     use rstest::rstest;
 
@@ -254,16 +256,15 @@ mod tests {
             &project.static_dir,
             &project.public_dir,
         );
+        let build_config = BuildConfig {
+            base_url: &base_url,
+            timezone,
+            html_metadata,
+            css_metadata,
+            list_view_configs: &list_view_configs,
+        };
         let result1 = usecase
-            .execute(
-                git_command,
-                &progress,
-                &base_url,
-                timezone,
-                html_metadata,
-                css_metadata,
-                &list_view_configs,
-            )
+            .execute(git_command, &progress, &build_config)
             .unwrap();
         assert_eq!(result1, 2);
 
@@ -327,16 +328,15 @@ mod tests {
             &project.static_dir,
             &project.public_dir,
         );
+        let build_config = BuildConfig {
+            base_url: &base_url,
+            timezone,
+            html_metadata,
+            css_metadata,
+            list_view_configs: &list_view_configs,
+        };
         let result1 = usecase
-            .execute(
-                git_command,
-                &progress,
-                &base_url,
-                timezone,
-                html_metadata,
-                css_metadata,
-                &list_view_configs,
-            )
+            .execute(git_command, &progress, &build_config)
             .unwrap();
         assert_eq!(result1, 2);
 

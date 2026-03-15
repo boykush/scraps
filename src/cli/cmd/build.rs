@@ -6,6 +6,7 @@ use tracing_subscriber::fmt::format::FmtSpan;
 
 use crate::cli::progress::ProgressImpl;
 use crate::error::ScrapsResult;
+use crate::usecase::build::model::build_config::BuildConfig;
 use crate::usecase::build::model::color_scheme::ColorScheme;
 use crate::usecase::build::model::css::CssMetadata;
 use crate::usecase::build::model::html::HtmlMetadata;
@@ -74,15 +75,14 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
     };
     let list_view_configs = ListViewConfigs::new(&build_search_index, sort_key, &paging);
 
-    usecase.execute(
-        git_command,
-        &progress,
-        &base_url,
+    let build_config = BuildConfig {
+        base_url: &base_url,
         timezone,
-        &html_metadata,
-        &css_metadata,
-        &list_view_configs,
-    )?;
+        html_metadata: &html_metadata,
+        css_metadata: &css_metadata,
+        list_view_configs: &list_view_configs,
+    };
+    usecase.execute(git_command, &progress, &build_config)?;
     span_run.exit();
     progress.end();
 

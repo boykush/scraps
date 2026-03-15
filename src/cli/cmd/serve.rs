@@ -12,8 +12,8 @@ use crate::{
     cli::config::scrap_config::ScrapConfig,
     usecase::build::{
         model::{
-            color_scheme::ColorScheme, css::CssMetadata, html::HtmlMetadata, list_view_configs,
-            paging::Paging, sort::SortKey,
+            build_config::BuildConfig, color_scheme::ColorScheme, css::CssMetadata,
+            html::HtmlMetadata, list_view_configs, paging::Paging, sort::SortKey,
         },
         usecase::BuildUsecase,
     },
@@ -67,15 +67,14 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let list_view_configs =
         list_view_configs::ListViewConfigs::new(&build_search_index, sort_key, &paging);
 
-    let build_result = build_usecase.execute(
-        git_command,
-        &progress,
-        &base_url,
+    let build_config = BuildConfig {
+        base_url: &base_url,
         timezone,
-        &html_metadata,
-        &css_metadata,
-        &list_view_configs,
-    );
+        html_metadata: &html_metadata,
+        css_metadata: &css_metadata,
+        list_view_configs: &list_view_configs,
+    };
+    let build_result = build_usecase.execute(git_command, &progress, &build_config);
     progress.end();
 
     // serve command
