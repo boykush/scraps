@@ -1,3 +1,4 @@
+use crate::input::file::read_scraps;
 use crate::mcp::json::scrap::ScrapJson;
 use crate::usecase::scrap::get::usecase::GetScrapUsecase;
 use rmcp::handler::server::wrapper::Parameters;
@@ -23,7 +24,16 @@ pub async fn get_scrap(
     _context: RequestContext<RoleServer>,
     Parameters(request): Parameters<GetScrapRequest>,
 ) -> Result<CallToolResult, ErrorData> {
-    let usecase = GetScrapUsecase::new(scraps_dir);
+    // Load scraps from directory
+    let scraps = read_scraps::to_all_scraps(scraps_dir).map_err(|e| {
+        ErrorData::new(
+            ErrorCode(-32003),
+            format!("Failed to load scraps: {e}"),
+            None,
+        )
+    })?;
+
+    let usecase = GetScrapUsecase::new();
 
     let title = scraps_libs::model::title::Title::from(request.title.as_str());
     let ctx = request
@@ -32,7 +42,7 @@ pub async fn get_scrap(
         .map(|c| scraps_libs::model::context::Ctx::from(c.as_str()));
 
     let result = usecase
-        .execute(&title, &ctx)
+        .execute(&scraps, &title, &ctx)
         .map_err(|e| ErrorData::new(ErrorCode(-32004), format!("Get scrap failed: {e}"), None))?;
 
     let scrap_json = ScrapJson {

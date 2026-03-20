@@ -1,3 +1,4 @@
+use crate::input::file::read_scraps;
 use crate::mcp::json::scrap::ScrapKeyJson;
 use crate::usecase::scrap::lookup_backlinks::usecase::LookupScrapBacklinksUsecase;
 use rmcp::handler::server::wrapper::Parameters;
@@ -29,8 +30,17 @@ pub async fn lookup_scrap_backlinks(
     _context: RequestContext<RoleServer>,
     Parameters(request): Parameters<LookupScrapBacklinksRequest>,
 ) -> Result<CallToolResult, ErrorData> {
+    // Load scraps from directory
+    let scraps = read_scraps::to_all_scraps(scraps_dir).map_err(|e| {
+        ErrorData::new(
+            ErrorCode(-32003),
+            format!("Failed to load scraps: {e}"),
+            None,
+        )
+    })?;
+
     // Create get scrap backlinks usecase
-    let get_backlinks_usecase = LookupScrapBacklinksUsecase::new(scraps_dir);
+    let get_backlinks_usecase = LookupScrapBacklinksUsecase::new();
 
     // Execute get backlinks
     let title = scraps_libs::model::title::Title::from(request.title.as_str());
@@ -39,13 +49,15 @@ pub async fn lookup_scrap_backlinks(
         .as_ref()
         .map(|c| scraps_libs::model::context::Ctx::from(c.as_str()));
 
-    let results = get_backlinks_usecase.execute(&title, &ctx).map_err(|e| {
-        ErrorData::new(
-            ErrorCode(-32006),
-            format!("Get scrap backlinks failed: {e}"),
-            None,
-        )
-    })?;
+    let results = get_backlinks_usecase
+        .execute(&scraps, &title, &ctx)
+        .map_err(|e| {
+            ErrorData::new(
+                ErrorCode(-32006),
+                format!("Get scrap backlinks failed: {e}"),
+                None,
+            )
+        })?;
 
     // Convert results to structured response
     let scrap_jsons: Vec<ScrapKeyJson> = results

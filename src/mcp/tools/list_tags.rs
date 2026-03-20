@@ -1,3 +1,4 @@
+use crate::input::file::read_scraps;
 use crate::usecase::tag::list::usecase::ListTagUsecase;
 use rmcp::model::ErrorCode;
 use rmcp::model::{CallToolResult, Content};
@@ -10,12 +11,21 @@ pub async fn list_tags(
     scraps_dir: &Path,
     _context: RequestContext<RoleServer>,
 ) -> Result<CallToolResult, ErrorData> {
+    // Load scraps from directory
+    let scraps = read_scraps::to_all_scraps(scraps_dir).map_err(|e| {
+        ErrorData::new(
+            ErrorCode(-32003),
+            format!("Failed to load scraps: {e}"),
+            None,
+        )
+    })?;
+
     // Create tag usecase
-    let tag_usecase = ListTagUsecase::new(scraps_dir);
+    let tag_usecase = ListTagUsecase::new();
 
     // Execute tag listing
     let (tags, backlinks_map) = tag_usecase
-        .execute()
+        .execute(&scraps)
         .map_err(|e| ErrorData::new(ErrorCode(-32004), format!("List tags failed: {e}"), None))?;
 
     // Convert results to JSON

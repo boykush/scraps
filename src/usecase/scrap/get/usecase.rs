@@ -3,7 +3,6 @@ use scraps_libs::model::context::Ctx;
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::title::Title;
-use std::path::{Path, PathBuf};
 
 /// Result for get scrap operation
 #[derive(Debug, Clone, PartialEq)]
@@ -13,25 +12,19 @@ pub struct GetScrapResult {
     pub md_text: String,
 }
 
-pub struct GetScrapUsecase {
-    scraps_dir_path: PathBuf,
-}
+pub struct GetScrapUsecase;
 
 impl GetScrapUsecase {
-    pub fn new(scraps_dir_path: &Path) -> GetScrapUsecase {
-        GetScrapUsecase {
-            scraps_dir_path: scraps_dir_path.to_owned(),
-        }
+    pub fn new() -> GetScrapUsecase {
+        GetScrapUsecase
     }
 
-    pub fn execute(&self, title: &Title, ctx: &Option<Ctx>) -> ScrapsResult<GetScrapResult> {
-        // Load all scraps from directory
-        let scrap_paths = crate::usecase::read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
-        let scraps = scrap_paths
-            .into_iter()
-            .map(|path| crate::usecase::read_scraps::to_scrap_by_path(&self.scraps_dir_path, &path))
-            .collect::<ScrapsResult<Vec<Scrap>>>()?;
-
+    pub fn execute(
+        &self,
+        scraps: &[Scrap],
+        title: &Title,
+        ctx: &Option<Ctx>,
+    ) -> ScrapsResult<GetScrapResult> {
         // Create scrap key for the target scrap
         let target_key = if let Some(ctx) = ctx {
             ScrapKey::with_ctx(title, ctx)
@@ -62,17 +55,19 @@ impl GetScrapUsecase {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
-    use rstest::rstest;
 
-    #[rstest]
-    fn test_get_scrap_success(#[from(temp_scrap_project)] project: TempScrapProject) {
-        project.add_scrap("scrap1.md", b"# Scrap 1\n\nContent of scrap 1.");
+    #[test]
+    fn test_get_scrap_success() {
+        let scraps = vec![Scrap::new(
+            "scrap1",
+            &None,
+            "# Scrap 1\n\nContent of scrap 1.",
+        )];
 
-        let usecase = GetScrapUsecase::new(&project.scraps_dir);
+        let usecase = GetScrapUsecase::new();
 
         let result = usecase
-            .execute(&Title::from("scrap1"), &None)
+            .execute(&scraps, &Title::from("scrap1"), &None)
             .expect("Should succeed");
 
         assert_eq!(result.title.to_string(), "scrap1");
@@ -80,14 +75,18 @@ mod tests {
         assert!(result.md_text.contains("Content of scrap 1"));
     }
 
-    #[rstest]
-    fn test_get_scrap_with_context(#[from(temp_scrap_project)] project: TempScrapProject) {
-        project.add_scrap_with_context("Context", "scrap1.md", b"# Scrap 1\n\nContent of scrap 1.");
+    #[test]
+    fn test_get_scrap_with_context() {
+        let scraps = vec![Scrap::new(
+            "scrap1",
+            &Some("Context"),
+            "# Scrap 1\n\nContent of scrap 1.",
+        )];
 
-        let usecase = GetScrapUsecase::new(&project.scraps_dir);
+        let usecase = GetScrapUsecase::new();
 
         let result = usecase
-            .execute(&Title::from("scrap1"), &Some(Ctx::from("Context")))
+            .execute(&scraps, &Title::from("scrap1"), &Some(Ctx::from("Context")))
             .expect("Should succeed");
 
         assert_eq!(result.title.to_string(), "scrap1");
@@ -95,13 +94,13 @@ mod tests {
         assert!(result.md_text.contains("Content of scrap 1"));
     }
 
-    #[rstest]
-    fn test_get_scrap_not_found(#[from(temp_scrap_project)] project: TempScrapProject) {
-        project.add_scrap("scrap1.md", b"# Scrap 1\n\nContent.");
+    #[test]
+    fn test_get_scrap_not_found() {
+        let scraps = vec![Scrap::new("scrap1", &None, "# Scrap 1\n\nContent.")];
 
-        let usecase = GetScrapUsecase::new(&project.scraps_dir);
+        let usecase = GetScrapUsecase::new();
 
-        let result = usecase.execute(&Title::from("nonexistent"), &None);
+        let result = usecase.execute(&scraps, &Title::from("nonexistent"), &None);
 
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("Scrap not found"));

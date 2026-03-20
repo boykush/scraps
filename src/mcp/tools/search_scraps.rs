@@ -1,3 +1,4 @@
+use crate::input::file::read_scraps;
 use crate::mcp::json::scrap::ScrapKeyJson;
 use crate::usecase::search::usecase::SearchUsecase;
 use rmcp::handler::server::wrapper::Parameters;
@@ -51,14 +52,23 @@ pub async fn search_scraps(
     _context: RequestContext<RoleServer>,
     Parameters(request): Parameters<SearchRequest>,
 ) -> Result<CallToolResult, ErrorData> {
+    // Load scraps from directory
+    let scraps = read_scraps::to_all_scraps(scraps_dir).map_err(|e| {
+        ErrorData::new(
+            ErrorCode(-32003),
+            format!("Failed to load scraps: {e}"),
+            None,
+        )
+    })?;
+
     // Create search usecase
-    let search_usecase = SearchUsecase::new(scraps_dir);
+    let search_usecase = SearchUsecase::new();
 
     // Execute search
     let num = request.num.unwrap_or(100);
     let logic = request.logic.unwrap_or_default().into();
     let results = search_usecase
-        .execute(&request.query, num, logic)
+        .execute(&scraps, &request.query, num, logic)
         .map_err(|e| ErrorData::new(ErrorCode(-32004), format!("Search failed: {e}"), None))?;
 
     // Convert results to structured response
