@@ -1,4 +1,4 @@
-use crate::adapter::file::read_scraps;
+use crate::input::file::read_scraps;
 use crate::usecase::tag::list::usecase::ListTagUsecase;
 use rmcp::model::ErrorCode;
 use rmcp::model::{CallToolResult, Content};

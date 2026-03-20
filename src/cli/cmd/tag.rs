@@ -2,10 +2,10 @@ use std::path::Path;
 
 use itertools::Itertools;
 
-use crate::adapter::file::read_scraps;
 use crate::cli::display::tag::DisplayTag;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
+use crate::input::file::read_scraps;
 
 use crate::cli::config::scrap_config::ScrapConfig;
 use crate::usecase::tag::list::usecase::ListTagUsecase;

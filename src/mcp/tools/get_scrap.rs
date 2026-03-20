@@ -1,4 +1,4 @@
-use crate::adapter::file::read_scraps;
+use crate::input::file::read_scraps;
 use crate::mcp::json::scrap::ScrapJson;
 use crate::usecase::scrap::get::usecase::GetScrapUsecase;
 use rmcp::handler::server::wrapper::Parameters;

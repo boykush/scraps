@@ -3,10 +3,10 @@ use std::path::Path;
 use annotate_snippets::{Level, Renderer, Snippet};
 use colored::Colorize;
 
-use crate::adapter::file::read_scraps;
 use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
+use crate::input::file::read_scraps;
 use crate::usecase::lint::rule::{LintRuleName, LintWarning};
 use crate::usecase::lint::usecase::LintUsecase;
 

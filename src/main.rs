@@ -1,7 +1,7 @@
-mod adapter;
 mod cli;
 mod constants;
 mod error;
+mod input;
 mod mcp;
 mod service;
 mod usecase;
