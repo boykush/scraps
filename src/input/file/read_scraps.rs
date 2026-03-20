@@ -63,3 +63,42 @@ pub(crate) fn to_all_scraps(scraps_dir_path: &Path) -> ScrapsResult<Vec<Scrap>> 
         .map(|path| to_scrap_by_path(scraps_dir_path, path))
         .collect()
 }
+
+/// Read all scraps with git commit timestamps, and README text separately.
+/// Used by build/serve commands that need both scraps+timestamps and README.
+pub(crate) fn to_all_scraps_with_timestamps<
+    GC: scraps_libs::git::GitCommand + Send + Sync + Copy,
+>(
+    scraps_dir_path: &Path,
+    git_command: GC,
+) -> ScrapsResult<(Vec<(Scrap, Option<i64>)>, Option<String>)> {
+    use crate::error::BuildError;
+    use rayon::prelude::*;
+
+    let paths = to_scrap_paths(scraps_dir_path)?;
+
+    // Separate README.md from other scraps
+    let readme_path = scraps_dir_path.join("README.md");
+    let (readme_paths, scrap_paths): (Vec<_>, Vec<_>) =
+        paths.into_iter().partition(|path| path == &readme_path);
+
+    // Read README text
+    let readme_text = readme_paths
+        .first()
+        .map(|path| fs::read_to_string(path).context(BuildError::ReadREADMEFile))
+        .transpose()?;
+
+    // Read scraps with git timestamps in parallel
+    let scraps_with_ts = scrap_paths
+        .into_par_iter()
+        .map(|path| {
+            let scrap = to_scrap_by_path(scraps_dir_path, &path)?;
+            let commited_ts = git_command
+                .commited_ts(&path)
+                .context(BuildError::GitCommitedTs)?;
+            Ok((scrap, commited_ts))
+        })
+        .collect::<ScrapsResult<Vec<(Scrap, Option<i64>)>>>()?;
+
+    Ok((scraps_with_ts, readme_text))
+}

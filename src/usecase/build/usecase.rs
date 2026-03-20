@@ -3,8 +3,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use std::fs;
-
+use crate::error::{anyhow::Context, ScrapsResult};
 use crate::{
     error::BuildError,
     usecase::{
@@ -12,17 +11,12 @@ use crate::{
         progress::{Progress, Stage},
     },
 };
-use crate::{
-    error::{anyhow::Context, ScrapsResult},
-    input::file::read_scraps,
-};
 use chrono_tz::Tz;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use scraps_libs::{
-    git::GitCommand,
     markdown,
-    model::{base_url::BaseUrl, tags::Tags},
+    model::{base_url::BaseUrl, scrap::Scrap, tags::Tags},
 };
 use tracing::{span, Level};
 
@@ -42,26 +36,21 @@ use super::{
 use crate::service::search::render::SearchIndexRender;
 
 pub struct BuildUsecase {
-    scraps_dir_path: PathBuf,
     static_dir_path: PathBuf,
     public_dir_path: PathBuf,
 }
 
 impl BuildUsecase {
-    pub fn new(
-        scraps_dir_path: &Path,
-        static_dir_path: &Path,
-        public_dir_path: &Path,
-    ) -> BuildUsecase {
+    pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> BuildUsecase {
         BuildUsecase {
-            scraps_dir_path: scraps_dir_path.to_path_buf(),
             static_dir_path: static_dir_path.to_path_buf(),
             public_dir_path: public_dir_path.to_path_buf(),
         }
     }
-    pub fn execute<GC: GitCommand + Send + Sync + Copy, PG: Progress>(
+    pub fn execute<PG: Progress>(
         &self,
-        git_command: GC,
+        scraps_with_ts: &[(Scrap, Option<i64>)],
+        readme_text: &Option<String>,
         progress: &PG,
         base_url: &BaseUrl,
         timezone: Tz,
@@ -71,29 +60,18 @@ impl BuildUsecase {
     ) -> ScrapsResult<usize> {
         progress.start_stage(&Stage::ReadScraps);
         let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
-        let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
-
-        // Separate README.md and other scraps
-        let readme_path = self.scraps_dir_path.join("README.md");
-        let (readme_paths, scrap_paths): (Vec<_>, Vec<_>) =
-            paths.into_iter().partition(|path| path == &readme_path);
 
         // Process README content
-        let readme_path = readme_paths.first();
-        let readme_content = match readme_path {
-            Some(path) => {
-                let readme_str = fs::read_to_string(path).context(BuildError::ReadREADMEFile)?;
-                Some(markdown::convert::to_content(&readme_str, base_url))
-            }
-            None => None,
-        };
+        let readme_content = readme_text
+            .as_ref()
+            .map(|text| markdown::convert::to_content(text, base_url));
 
-        // Process other scraps in parallel
-        let scrap_details = scrap_paths
+        // Build ScrapDetails from pre-loaded data
+        let scrap_details = scraps_with_ts
             .into_par_iter()
-            .map(|path| self.to_scrap_detail_by_path(git_command, base_url, &path))
-            .collect::<ScrapsResult<Vec<ScrapDetail>>>()
-            .map(|s| ScrapDetails::new(&s))?;
+            .map(|(scrap, commited_ts)| ScrapDetail::new(scrap, commited_ts, base_url))
+            .collect::<Vec<ScrapDetail>>();
+        let scrap_details = ScrapDetails::new(&scrap_details);
 
         let scraps = scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(&scraps);
@@ -180,22 +158,6 @@ impl BuildUsecase {
 
         Ok(scraps.len())
     }
-
-    fn to_scrap_detail_by_path<GC: GitCommand + Send + Sync + Copy>(
-        &self,
-        git_command: GC,
-        base_url: &BaseUrl,
-        path: &Path,
-    ) -> ScrapsResult<ScrapDetail> {
-        let span_convert_to_scrap = span!(Level::INFO, "convert_to_scrap").entered();
-        let scrap = read_scraps::to_scrap_by_path(&self.scraps_dir_path, path)?;
-        let commited_ts = git_command
-            .commited_ts(path)
-            .context(BuildError::GitCommitedTs)?;
-        span_convert_to_scrap.exit();
-
-        Ok(ScrapDetail::new(&scrap, &commited_ts, base_url))
-    }
 }
 
 #[cfg(test)]
@@ -208,35 +170,23 @@ mod tests {
     use rstest::rstest;
 
     use super::*;
-    use scraps_libs::{git::tests::GitCommandTest, lang::LangCode};
+    use scraps_libs::lang::LangCode;
     use url::Url;
 
     #[rstest]
     fn it_run(#[from(temp_scrap_project)] project: TempScrapProject) {
-        // Create scraps
-        project
-            .add_scrap(
-                "test1.md",
-                concat!("# header1\n", "## header2\n",).as_bytes(),
-            )
-            .add_scrap("test2.md", "[[test1]]\n".as_bytes());
+        // Create scraps as (Scrap, Option<i64>) pairs
+        let scraps_with_ts = vec![
+            (
+                Scrap::new("test1", &None, &concat!("# header1\n", "## header2\n")),
+                Some(0i64),
+            ),
+            (Scrap::new("test2", &None, "[[test1]]\n"), Some(0i64)),
+        ];
 
-        // Add non-markdown file (should be excluded)
-        std::fs::write(
-            project.scraps_dir.join("test3.txt"),
-            concat!("# header1\n", "## header2\n",).as_bytes(),
-        )
-        .unwrap();
-
-        // Add README.md (should not generate README.html)
-        std::fs::write(
-            project.scraps_dir.join("README.md"),
-            "# README\n".as_bytes(),
-        )
-        .unwrap();
+        let readme_text = Some("# README\n".to_string());
 
         // Run build
-        let git_command = GitCommandTest::new();
         let progress = ProgressTest::new();
         let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let timezone = chrono_tz::UTC;
@@ -249,14 +199,11 @@ mod tests {
         let css_metadata = &CssMetadata::new(&ColorScheme::OsSetting);
         let list_view_configs = ListViewConfigs::new(&true, &SortKey::LinkedCount, &Paging::Not);
 
-        let usecase = BuildUsecase::new(
-            &project.scraps_dir,
-            &project.static_dir,
-            &project.public_dir,
-        );
+        let usecase = BuildUsecase::new(&project.static_dir, &project.public_dir);
         let result1 = usecase
             .execute(
-                git_command,
+                &scraps_with_ts,
+                &readme_text,
                 &progress,
                 &base_url,
                 timezone,
@@ -275,14 +222,6 @@ mod tests {
         let result3 = fs::read_to_string(project.public_path("scraps/test2.html")).unwrap();
         assert!(!result3.is_empty());
 
-        // Verify non-markdown file excluded
-        let result4 = fs::read_to_string(project.public_path("scraps/test3.html"));
-        assert!(result4.is_err());
-
-        // Verify README.html not generated
-        let result5 = fs::read_to_string(project.public_path("README.html"));
-        assert!(result5.is_err());
-
         // Verify index.html generated
         let result6 = fs::read_to_string(project.public_path("index.html")).unwrap();
         assert!(!result6.is_empty());
@@ -300,16 +239,15 @@ mod tests {
     fn it_run_when_build_search_index_is_false(
         #[from(temp_scrap_project)] project: TempScrapProject,
     ) {
-        // Create scraps
-        project
-            .add_scrap(
-                "test1.md",
-                concat!("# header1\n", "## header2\n",).as_bytes(),
-            )
-            .add_scrap("test2.md", "[[test1]]\n".as_bytes());
+        let scraps_with_ts = vec![
+            (
+                Scrap::new("test1", &None, &concat!("# header1\n", "## header2\n")),
+                Some(0i64),
+            ),
+            (Scrap::new("test2", &None, "[[test1]]\n"), Some(0i64)),
+        ];
 
         // Run build with search index disabled
-        let git_command = GitCommandTest::new();
         let progress = ProgressTest::new();
         let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let timezone = chrono_tz::UTC;
@@ -322,14 +260,11 @@ mod tests {
         let css_metadata = &CssMetadata::new(&ColorScheme::OsSetting);
         let list_view_configs = ListViewConfigs::new(&false, &SortKey::LinkedCount, &Paging::Not);
 
-        let usecase = BuildUsecase::new(
-            &project.scraps_dir,
-            &project.static_dir,
-            &project.public_dir,
-        );
+        let usecase = BuildUsecase::new(&project.static_dir, &project.public_dir);
         let result1 = usecase
             .execute(
-                git_command,
+                &scraps_with_ts,
+                &None,
                 &progress,
                 &base_url,
                 timezone,
