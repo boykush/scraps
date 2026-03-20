@@ -6,15 +6,15 @@ use std::{
 use std::fs;
 
 use crate::{
+    adapter::file::read_scraps,
+    error::{anyhow::Context, ScrapsResult},
+};
+use crate::{
     error::BuildError,
     usecase::{
         build::css::render::CSSRender,
         progress::{Progress, Stage},
     },
-};
-use crate::{
-    error::{anyhow::Context, ScrapsResult},
-    usecase::read_scraps,
 };
 use chrono_tz::Tz;
 use rayon::iter::IntoParallelIterator;

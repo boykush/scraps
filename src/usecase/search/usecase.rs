@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
 
 use crate::error::ScrapsResult;
 use scraps_libs::model::context::Ctx;
@@ -15,30 +14,20 @@ pub struct SearchResult {
     pub md_text: String,
 }
 
-pub struct SearchUsecase {
-    scraps_dir_path: PathBuf,
-}
+pub struct SearchUsecase;
 
 impl SearchUsecase {
-    pub fn new(scraps_dir_path: &Path) -> SearchUsecase {
-        SearchUsecase {
-            scraps_dir_path: scraps_dir_path.to_owned(),
-        }
+    pub fn new() -> SearchUsecase {
+        SearchUsecase
     }
 
     pub fn execute(
         &self,
+        scraps: &[Scrap],
         query: &str,
         num: usize,
         logic: SearchLogic,
     ) -> ScrapsResult<Vec<SearchResult>> {
-        // Load scraps from directory directly
-        let scrap_paths = crate::usecase::read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
-        let scraps = scrap_paths
-            .into_iter()
-            .map(|path| crate::usecase::read_scraps::to_scrap_by_path(&self.scraps_dir_path, &path))
-            .collect::<ScrapsResult<Vec<Scrap>>>()?;
-
         // Create title-to-scrap mapping for efficient lookup
         let scrap_map: HashMap<String, &Scrap> = scraps
             .iter()
@@ -85,20 +74,24 @@ impl SearchUsecase {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
-    use rstest::rstest;
-
     use super::*;
 
-    #[rstest]
-    fn it_run(#[from(temp_scrap_project)] project: TempScrapProject) {
-        project
-            .add_scrap("test1.md", b"# Test Document 1\nThis is a test document.")
-            .add_scrap("test2.md", b"# Another Document\nAnother test content.");
+    #[test]
+    fn it_run() {
+        let scraps = vec![
+            Scrap::new(
+                "test1",
+                &None,
+                "# Test Document 1\nThis is a test document.",
+            ),
+            Scrap::new("test2", &None, "# Another Document\nAnother test content."),
+        ];
 
-        let usecase = SearchUsecase::new(&project.scraps_dir);
+        let usecase = SearchUsecase::new();
 
-        let results = usecase.execute("test", 100, SearchLogic::And).unwrap();
+        let results = usecase
+            .execute(&scraps, "test", 100, SearchLogic::And)
+            .unwrap();
 
         // Should find documents containing "test"
         assert!(!results.is_empty());
@@ -107,20 +100,27 @@ mod tests {
         assert!(results.iter().all(|r| !r.md_text.is_empty()));
     }
 
-    #[rstest]
-    fn it_handles_duplicate_titles(#[from(temp_scrap_project)] project: TempScrapProject) {
+    #[test]
+    fn it_handles_duplicate_titles() {
         // Two scraps with the same title but different contexts (ctx/ and root)
-        project
-            .add_scrap_with_context(
-                "ctx",
-                "duplicate.md",
-                b"# Duplicate\nContent in ctx directory.",
-            )
-            .add_scrap("duplicate.md", b"# Duplicate\nContent in root directory.");
+        let scraps = vec![
+            Scrap::new(
+                "duplicate",
+                &Some("ctx"),
+                "# Duplicate\nContent in ctx directory.",
+            ),
+            Scrap::new(
+                "duplicate",
+                &None,
+                "# Duplicate\nContent in root directory.",
+            ),
+        ];
 
-        let usecase = SearchUsecase::new(&project.scraps_dir);
+        let usecase = SearchUsecase::new();
 
-        let results = usecase.execute("duplicate", 100, SearchLogic::And).unwrap();
+        let results = usecase
+            .execute(&scraps, "duplicate", 100, SearchLogic::And)
+            .unwrap();
 
         // Should find both scraps with the same title but different contexts
         assert_eq!(
@@ -183,18 +183,19 @@ mod tests {
     }
 
     /// Test: search matches body content, not just title
-    #[rstest]
-    fn it_searches_body_content(#[from(temp_scrap_project)] project: TempScrapProject) {
-        project.add_scrap(
-            "mydoc.md",
-            b"# mydoc\n\nThis body contains uniquekeyword here.",
-        );
+    #[test]
+    fn it_searches_body_content() {
+        let scraps = vec![Scrap::new(
+            "mydoc",
+            &None,
+            "# mydoc\n\nThis body contains uniquekeyword here.",
+        )];
 
-        let usecase = SearchUsecase::new(&project.scraps_dir);
+        let usecase = SearchUsecase::new();
 
         // Search by body-only keyword - should match
         let results = usecase
-            .execute("uniquekeyword", 100, SearchLogic::And)
+            .execute(&scraps, "uniquekeyword", 100, SearchLogic::And)
             .unwrap();
 
         assert_eq!(results.len(), 1, "Body keyword should match scrap");

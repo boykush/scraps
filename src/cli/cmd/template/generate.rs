@@ -24,3 +24,41 @@ pub fn run(
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use rstest::rstest;
+
+    #[rstest]
+    fn run_succeeds_with_valid_template(#[from(temp_scrap_project)] project: TempScrapProject) {
+        project
+            .add_config(b"")
+            .add_template("daily.md", b"+++\ntitle = \"test_title\"\n+++\n\ncontent");
+
+        let result = run("daily", &None, Some(project.project_root.as_path()));
+        assert!(result.is_ok());
+        assert!(project.scrap_path("test_title.md").exists());
+    }
+
+    #[rstest]
+    fn run_fails_with_missing_template(#[from(temp_scrap_project)] project: TempScrapProject) {
+        project.add_config(b"");
+
+        let result = run("nonexistent", &None, Some(project.project_root.as_path()));
+        assert!(result.is_err());
+    }
+
+    #[rstest]
+    fn run_succeeds_with_title_override(#[from(temp_scrap_project)] project: TempScrapProject) {
+        project
+            .add_config(b"")
+            .add_template("daily.md", b"+++\ntitle = \"default\"\n+++\n\ncontent");
+
+        let title: Title = "custom_title".into();
+        let result = run("daily", &Some(title), Some(project.project_root.as_path()));
+        assert!(result.is_ok());
+        assert!(project.scrap_path("custom_title.md").exists());
+    }
+}

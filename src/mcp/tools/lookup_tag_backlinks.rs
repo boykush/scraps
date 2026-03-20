@@ -1,3 +1,4 @@
+use crate::adapter::file::read_scraps;
 use crate::mcp::json::scrap::ScrapKeyJson;
 use crate::usecase::tag::lookup_backlinks::usecase::LookupTagBacklinksUsecase;
 use rmcp::handler::server::wrapper::Parameters;
@@ -27,13 +28,22 @@ pub async fn lookup_tag_backlinks(
     _context: RequestContext<RoleServer>,
     Parameters(request): Parameters<LookupTagBacklinksRequest>,
 ) -> Result<CallToolResult, ErrorData> {
+    // Load scraps from directory
+    let scraps = read_scraps::to_all_scraps(scraps_dir).map_err(|e| {
+        ErrorData::new(
+            ErrorCode(-32003),
+            format!("Failed to load scraps: {e}"),
+            None,
+        )
+    })?;
+
     // Create tag backlinks usecase
-    let lookup_usecase = LookupTagBacklinksUsecase::new(scraps_dir);
+    let lookup_usecase = LookupTagBacklinksUsecase::new();
 
     // Execute lookup
     let tag_title = scraps_libs::model::title::Title::from(request.tag.as_str());
 
-    let results = lookup_usecase.execute(&tag_title).map_err(|e| {
+    let results = lookup_usecase.execute(&scraps, &tag_title).map_err(|e| {
         ErrorData::new(
             ErrorCode(-32008),
             format!("Lookup tag backlinks failed: {e}"),

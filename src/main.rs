@@ -1,3 +1,4 @@
+mod adapter;
 mod cli;
 mod constants;
 mod error;

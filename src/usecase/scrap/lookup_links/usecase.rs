@@ -4,7 +4,6 @@ use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::title::Title;
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
 
 /// Result for scrap links lookup operation
 #[derive(Debug, Clone, PartialEq)]
@@ -14,29 +13,19 @@ pub struct LookupScrapLinksResult {
     pub md_text: String,
 }
 
-pub struct LookupScrapLinksUsecase {
-    scraps_dir_path: PathBuf,
-}
+pub struct LookupScrapLinksUsecase;
 
 impl LookupScrapLinksUsecase {
-    pub fn new(scraps_dir_path: &Path) -> LookupScrapLinksUsecase {
-        LookupScrapLinksUsecase {
-            scraps_dir_path: scraps_dir_path.to_owned(),
-        }
+    pub fn new() -> LookupScrapLinksUsecase {
+        LookupScrapLinksUsecase
     }
 
     pub fn execute(
         &self,
+        scraps: &[Scrap],
         title: &Title,
         ctx: &Option<Ctx>,
     ) -> ScrapsResult<Vec<LookupScrapLinksResult>> {
-        // Load all scraps from directory
-        let scrap_paths = crate::usecase::read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
-        let scraps = scrap_paths
-            .into_iter()
-            .map(|path| crate::usecase::read_scraps::to_scrap_by_path(&self.scraps_dir_path, &path))
-            .collect::<ScrapsResult<Vec<Scrap>>>()?;
-
         // Create scrap key for the target scrap
         let target_key = if let Some(ctx) = ctx {
             ScrapKey::with_ctx(title, ctx)
@@ -85,23 +74,23 @@ impl LookupScrapLinksUsecase {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
-    use rstest::rstest;
 
-    #[rstest]
-    fn test_lookup_scrap_links_success(#[from(temp_scrap_project)] project: TempScrapProject) {
-        project
-            .add_scrap(
-                "scrap1.md",
-                b"# Scrap 1\n\nThis links to [[scrap2]] and [[scrap3]].",
-            )
-            .add_scrap("scrap2.md", b"# Scrap 2\n\nContent of scrap 2.")
-            .add_scrap("scrap3.md", b"# Scrap 3\n\nContent of scrap 3.");
+    #[test]
+    fn test_lookup_scrap_links_success() {
+        let scraps = vec![
+            Scrap::new(
+                "scrap1",
+                &None,
+                "# Scrap 1\n\nThis links to [[scrap2]] and [[scrap3]].",
+            ),
+            Scrap::new("scrap2", &None, "# Scrap 2\n\nContent of scrap 2."),
+            Scrap::new("scrap3", &None, "# Scrap 3\n\nContent of scrap 3."),
+        ];
 
-        let usecase = LookupScrapLinksUsecase::new(&project.scraps_dir);
+        let usecase = LookupScrapLinksUsecase::new();
 
         let results = usecase
-            .execute(&Title::from("scrap1"), &None)
+            .execute(&scraps, &Title::from("scrap1"), &None)
             .expect("Should succeed");
 
         assert_eq!(results.len(), 2);
@@ -112,46 +101,51 @@ mod tests {
         assert!(titles.contains(&"scrap3".to_string()));
     }
 
-    #[rstest]
-    fn test_lookup_scrap_links_with_context(#[from(temp_scrap_project)] project: TempScrapProject) {
-        project
-            .add_scrap_with_context(
-                "Context",
-                "scrap1.md",
-                b"# Scrap 1\n\nThis links to [[scrap2]].",
-            )
-            .add_scrap("scrap2.md", b"# Scrap 2\n\nContent of scrap 2.");
+    #[test]
+    fn test_lookup_scrap_links_with_context() {
+        let scraps = vec![
+            Scrap::new(
+                "scrap1",
+                &Some("Context"),
+                "# Scrap 1\n\nThis links to [[scrap2]].",
+            ),
+            Scrap::new("scrap2", &None, "# Scrap 2\n\nContent of scrap 2."),
+        ];
 
-        let usecase = LookupScrapLinksUsecase::new(&project.scraps_dir);
+        let usecase = LookupScrapLinksUsecase::new();
 
         let results = usecase
-            .execute(&Title::from("scrap1"), &Some(Ctx::from("Context")))
+            .execute(&scraps, &Title::from("scrap1"), &Some(Ctx::from("Context")))
             .expect("Should succeed");
 
         assert_eq!(results.len(), 1);
         assert_eq!(results[0].title.to_string(), "scrap2");
     }
 
-    #[rstest]
-    fn test_lookup_scrap_links_not_found(#[from(temp_scrap_project)] project: TempScrapProject) {
-        project.add_scrap("scrap1.md", b"# Scrap 1\n\nContent.");
+    #[test]
+    fn test_lookup_scrap_links_not_found() {
+        let scraps = vec![Scrap::new("scrap1", &None, "# Scrap 1\n\nContent.")];
 
-        let usecase = LookupScrapLinksUsecase::new(&project.scraps_dir);
+        let usecase = LookupScrapLinksUsecase::new();
 
-        let result = usecase.execute(&Title::from("Nonexistent Scrap"), &None);
+        let result = usecase.execute(&scraps, &Title::from("Nonexistent Scrap"), &None);
 
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("Scrap not found"));
     }
 
-    #[rstest]
-    fn test_lookup_scrap_links_no_links(#[from(temp_scrap_project)] project: TempScrapProject) {
-        project.add_scrap("scrap1.md", b"# Scrap 1\n\nThis scrap has no links.");
+    #[test]
+    fn test_lookup_scrap_links_no_links() {
+        let scraps = vec![Scrap::new(
+            "scrap1",
+            &None,
+            "# Scrap 1\n\nThis scrap has no links.",
+        )];
 
-        let usecase = LookupScrapLinksUsecase::new(&project.scraps_dir);
+        let usecase = LookupScrapLinksUsecase::new();
 
         let results = usecase
-            .execute(&Title::from("scrap1"), &None)
+            .execute(&scraps, &Title::from("scrap1"), &None)
             .expect("Should succeed");
 
         assert_eq!(results.len(), 0);

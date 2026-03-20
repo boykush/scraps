@@ -1,12 +1,7 @@
-use std::path::{Path, PathBuf};
-
 use rayon::prelude::*;
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 
-use crate::{
-    error::ScrapsResult,
-    usecase::{build::model::backlinks_map::BacklinksMap, read_scraps},
-};
+use crate::{error::ScrapsResult, usecase::build::model::backlinks_map::BacklinksMap};
 
 use super::{
     rule::{LintRule, LintRuleName, LintWarning},
@@ -16,26 +11,19 @@ use super::{
     },
 };
 
-pub struct LintUsecase {
-    scraps_dir_path: PathBuf,
-}
+pub struct LintUsecase;
 
 impl LintUsecase {
-    pub fn new(scraps_dir_path: &Path) -> LintUsecase {
-        LintUsecase {
-            scraps_dir_path: scraps_dir_path.to_owned(),
-        }
+    pub fn new() -> LintUsecase {
+        LintUsecase
     }
 
-    pub fn execute(&self, rule_names: &[LintRuleName]) -> ScrapsResult<Vec<LintWarning>> {
-        let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
-
-        let scraps = paths
-            .iter()
-            .map(|path| read_scraps::to_scrap_by_path(&self.scraps_dir_path, path))
-            .collect::<ScrapsResult<Vec<Scrap>>>()?;
-
-        let backlinks_map = BacklinksMap::new(&scraps);
+    pub fn execute(
+        &self,
+        scraps: &[Scrap],
+        rule_names: &[LintRuleName],
+    ) -> ScrapsResult<Vec<LintWarning>> {
+        let backlinks_map = BacklinksMap::new(scraps);
         let tags = Tags::new(&scraps);
 
         let all_rules: Vec<Box<dyn LintRule>> = vec![
@@ -66,26 +54,19 @@ impl LintUsecase {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
-    use rstest::rstest;
-
     use super::*;
 
-    #[rstest]
-    fn all_rules_run_and_aggregate(#[from(temp_scrap_project)] project: TempScrapProject) {
-        // dead-end: no_links has no links
-        // lonely: no_links has no backlinks
-        // self-link: self_linker links to itself
-        // overlinking: overlinker has duplicate link
-        // singleton-tag: singleton_tag is only referenced once
-        project
-            .add_scrap("no_links.md", b"plain text")
-            .add_scrap("self_linker.md", b"[[self_linker]] [[no_links]]")
-            .add_scrap("overlinker.md", b"[[no_links]] [[no_links]]")
-            .add_scrap("with_tag.md", b"[[singleton_tag]]");
+    #[test]
+    fn all_rules_run_and_aggregate() {
+        let scraps = vec![
+            Scrap::new("no_links", &None, "plain text"),
+            Scrap::new("self_linker", &None, "[[self_linker]] [[no_links]]"),
+            Scrap::new("overlinker", &None, "[[no_links]] [[no_links]]"),
+            Scrap::new("with_tag", &None, "[[singleton_tag]]"),
+        ];
 
-        let usecase = LintUsecase::new(&project.scraps_dir);
-        let warnings = usecase.execute(&[]).unwrap();
+        let usecase = LintUsecase::new();
+        let warnings = usecase.execute(&scraps, &[]).unwrap();
 
         let rule_names: Vec<&LintRuleName> = warnings.iter().map(|w| &w.rule_name).collect();
         assert!(rule_names.contains(&&LintRuleName::DeadEnd));
@@ -95,35 +76,36 @@ mod tests {
         assert!(rule_names.contains(&&LintRuleName::SingletonTag));
     }
 
-    #[rstest]
-    fn clean_project_no_warnings(#[from(temp_scrap_project)] project: TempScrapProject) {
-        // Two scraps mutually linked, with shared tags
-        project
-            .add_scrap("a.md", b"[[b]] [[shared_tag]]")
-            .add_scrap("b.md", b"[[a]] [[shared_tag]]");
+    #[test]
+    fn clean_project_no_warnings() {
+        let scraps = vec![
+            Scrap::new("a", &None, "[[b]] [[shared_tag]]"),
+            Scrap::new("b", &None, "[[a]] [[shared_tag]]"),
+        ];
 
-        let usecase = LintUsecase::new(&project.scraps_dir);
-        let warnings = usecase.execute(&[]).unwrap();
-
-        assert!(warnings.is_empty());
-    }
-
-    #[rstest]
-    fn empty_project_no_errors(#[from(temp_scrap_project)] project: TempScrapProject) {
-        let usecase = LintUsecase::new(&project.scraps_dir);
-        let warnings = usecase.execute(&[]).unwrap();
+        let usecase = LintUsecase::new();
+        let warnings = usecase.execute(&scraps, &[]).unwrap();
 
         assert!(warnings.is_empty());
     }
 
-    #[rstest]
-    fn filter_by_specific_rule(#[from(temp_scrap_project)] project: TempScrapProject) {
-        project
-            .add_scrap("no_links.md", b"plain text")
-            .add_scrap("self_linker.md", b"[[self_linker]] [[no_links]]");
+    #[test]
+    fn empty_project_no_errors() {
+        let usecase = LintUsecase::new();
+        let warnings = usecase.execute(&[], &[]).unwrap();
 
-        let usecase = LintUsecase::new(&project.scraps_dir);
-        let warnings = usecase.execute(&[LintRuleName::DeadEnd]).unwrap();
+        assert!(warnings.is_empty());
+    }
+
+    #[test]
+    fn filter_by_specific_rule() {
+        let scraps = vec![
+            Scrap::new("no_links", &None, "plain text"),
+            Scrap::new("self_linker", &None, "[[self_linker]] [[no_links]]"),
+        ];
+
+        let usecase = LintUsecase::new();
+        let warnings = usecase.execute(&scraps, &[LintRuleName::DeadEnd]).unwrap();
 
         assert!(warnings
             .iter()

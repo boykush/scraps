@@ -1,29 +1,17 @@
-use crate::{error::ScrapsResult, usecase::read_scraps};
+use crate::error::ScrapsResult;
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
-use std::path::{Path, PathBuf};
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 
-pub struct ListTagUsecase {
-    scraps_dir_path: PathBuf,
-}
+pub struct ListTagUsecase;
 
 impl ListTagUsecase {
-    pub fn new(scraps_dir_path: &Path) -> ListTagUsecase {
-        ListTagUsecase {
-            scraps_dir_path: scraps_dir_path.to_owned(),
-        }
+    pub fn new() -> ListTagUsecase {
+        ListTagUsecase
     }
-    pub fn execute(&self) -> ScrapsResult<(Tags, BacklinksMap)> {
-        let paths = read_scraps::to_scrap_paths(&self.scraps_dir_path)?;
-
-        let scraps = paths
-            .iter()
-            .map(|path| read_scraps::to_scrap_by_path(&self.scraps_dir_path, path))
-            .collect::<ScrapsResult<Vec<Scrap>>>()?;
-
-        let tags = Tags::new(&scraps);
-        let backlinks_map = BacklinksMap::new(&scraps);
+    pub fn execute(&self, scraps: &[Scrap]) -> ScrapsResult<(Tags, BacklinksMap)> {
+        let tags = Tags::new(scraps);
+        let backlinks_map = BacklinksMap::new(scraps);
 
         Ok((tags, backlinks_map))
     }
@@ -31,24 +19,20 @@ impl ListTagUsecase {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
     use itertools::Itertools;
-    use rstest::rstest;
 
     use super::*;
     use scraps_libs::model::tag::Tag;
 
-    #[rstest]
-    fn it_run(#[from(temp_scrap_project)] project: TempScrapProject) {
-        project
-            .add_scrap("test1.md", b"#[[Tag1]] #[[Tag2]]")
-            .add_scrap("test2.md", b"#[[Tag1]] #[[Tag3]]");
+    #[test]
+    fn it_run() {
+        let scraps = vec![
+            Scrap::new("test1", &None, "#[[Tag1]] #[[Tag2]]"),
+            Scrap::new("test2", &None, "#[[Tag1]] #[[Tag3]]"),
+        ];
 
-        let usecase = ListTagUsecase::new(&project.scraps_dir);
-
-        let result = usecase.execute().unwrap();
-
-        let (tags, backlinks_map) = result;
+        let usecase = ListTagUsecase::new();
+        let (tags, backlinks_map) = usecase.execute(&scraps).unwrap();
 
         // test tags
         let tag1: Tag = "Tag1".into();

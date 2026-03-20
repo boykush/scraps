@@ -55,3 +55,11 @@ pub(crate) fn to_scrap_by_path(
 
     Ok(scrap)
 }
+
+pub(crate) fn to_all_scraps(scraps_dir_path: &Path) -> ScrapsResult<Vec<Scrap>> {
+    let paths = to_scrap_paths(scraps_dir_path)?;
+    paths
+        .iter()
+        .map(|path| to_scrap_by_path(scraps_dir_path, path))
+        .collect()
+}
