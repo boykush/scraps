@@ -46,7 +46,7 @@ impl FileIndexPageWriter {
 }
 
 impl IndexPageWriter for FileIndexPageWriter {
-    fn write_index_page(
+    fn write(
         &self,
         list_view_configs: &ListViewConfigs,
         scrap_details: &ScrapDetails,
@@ -92,11 +92,7 @@ impl FileScrapPageWriter {
 }
 
 impl ScrapPageWriter for FileScrapPageWriter {
-    fn write_scrap_page(
-        &self,
-        scrap_detail: &ScrapDetail,
-        backlinks_map: &BacklinksMap,
-    ) -> ScrapsResult<()> {
+    fn write(&self, scrap_detail: &ScrapDetail, backlinks_map: &BacklinksMap) -> ScrapsResult<()> {
         let render = ScrapRender::new(&self.static_dir_path, &self.public_dir_path)?;
         render.run(
             &self.base_url,
@@ -132,16 +128,12 @@ impl FileTagPageWriter {
 }
 
 impl TagPageWriter for FileTagPageWriter {
-    fn write_tags_index_page(
-        &self,
-        scraps: &[Scrap],
-        backlinks_map: &BacklinksMap,
-    ) -> ScrapsResult<()> {
+    fn write_index(&self, scraps: &[Scrap], backlinks_map: &BacklinksMap) -> ScrapsResult<()> {
         let render = TagsIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         render.run(&self.base_url, &self.html_metadata, scraps, backlinks_map)
     }
 
-    fn write_tag_page(&self, tag: &Tag, backlinks_map: &BacklinksMap) -> ScrapsResult<()> {
+    fn write_detail(&self, tag: &Tag, backlinks_map: &BacklinksMap) -> ScrapsResult<()> {
         let render = TagRender::new(&self.static_dir_path, &self.public_dir_path)?;
         render.run(&self.base_url, &self.html_metadata, tag, backlinks_map)
     }
@@ -164,7 +156,7 @@ impl FileStyleWriter {
 }
 
 impl StyleWriter for FileStyleWriter {
-    fn write_style(&self) -> ScrapsResult<()> {
+    fn write(&self) -> ScrapsResult<()> {
         let render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
         render.render_main(&self.css_metadata)
     }
@@ -187,7 +179,7 @@ impl FileSearchIndexWriter {
 }
 
 impl SearchIndexWriter for FileSearchIndexWriter {
-    fn write_search_index(&self, scraps: &[Scrap]) -> ScrapsResult<()> {
+    fn write(&self, scraps: &[Scrap]) -> ScrapsResult<()> {
         let render = SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         render.run(&self.base_url, scraps)
     }

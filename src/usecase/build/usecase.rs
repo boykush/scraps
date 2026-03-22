@@ -94,7 +94,7 @@ where
 
         // generate index page
         let span_generate_html_indexes = span!(Level::INFO, "generate_html_indexes").entered();
-        let index_page_count = self.index_page_writer.write_index_page(
+        let index_page_count = self.index_page_writer.write(
             list_view_configs,
             &scrap_details,
             &backlinks_map,
@@ -109,16 +109,14 @@ where
             .into_par_iter()
             .try_for_each(|scrap_detail| {
                 let _span_generate_html_scrap = span!(Level::INFO, "generate_html_scrap").entered();
-                self.scrap_page_writer
-                    .write_scrap_page(&scrap_detail, &backlinks_map)
+                self.scrap_page_writer.write(&scrap_detail, &backlinks_map)
             })?;
         span_generate_html_scraps.exit();
 
         // generate tags index page
         let span_generate_html_tags_index =
             span!(Level::INFO, "generate_html_tags_index").entered();
-        self.tag_page_writer
-            .write_tags_index_page(&scraps, &backlinks_map)?;
+        self.tag_page_writer.write_index(&scraps, &backlinks_map)?;
         span_generate_html_tags_index.exit();
 
         // generate tag pages
@@ -126,7 +124,7 @@ where
         let tags = Tags::new(&scraps);
         tags.iter().par_bridge().try_for_each(|tag| {
             let _span_render_tag = span!(Level::INFO, "generate_html_tag").entered();
-            self.tag_page_writer.write_tag_page(tag, &backlinks_map)
+            self.tag_page_writer.write_detail(tag, &backlinks_map)
         })?;
         span_generate_html_tags.exit();
 
@@ -140,7 +138,7 @@ where
         // generate style
         self.progress.start_stage(&Stage::GenerateCss);
         let span_generate_css = span!(Level::INFO, "generate_css").entered();
-        self.style_writer.write_style()?;
+        self.style_writer.write()?;
         span_generate_css.exit();
         self.progress.complete_stage(&Stage::GenerateCss, &1);
 
@@ -149,7 +147,7 @@ where
             self.progress.start_stage(&Stage::GenerateJson);
             let _span_generate_json_search_index =
                 span!(Level::INFO, "generate_json_search_index").entered();
-            self.search_index_writer.write_search_index(&scraps)?;
+            self.search_index_writer.write(&scraps)?;
             self.progress.complete_stage(&Stage::GenerateJson, &1);
         }
 

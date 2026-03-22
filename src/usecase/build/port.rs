@@ -8,7 +8,7 @@ use super::model::{
 };
 
 pub trait IndexPageWriter: Send + Sync {
-    fn write_index_page(
+    fn write(
         &self,
         list_view_configs: &ListViewConfigs,
         scrap_details: &ScrapDetails,
@@ -18,27 +18,19 @@ pub trait IndexPageWriter: Send + Sync {
 }
 
 pub trait ScrapPageWriter: Send + Sync {
-    fn write_scrap_page(
-        &self,
-        scrap_detail: &ScrapDetail,
-        backlinks_map: &BacklinksMap,
-    ) -> ScrapsResult<()>;
+    fn write(&self, scrap_detail: &ScrapDetail, backlinks_map: &BacklinksMap) -> ScrapsResult<()>;
 }
 
 pub trait TagPageWriter: Send + Sync {
-    fn write_tags_index_page(
-        &self,
-        scraps: &[Scrap],
-        backlinks_map: &BacklinksMap,
-    ) -> ScrapsResult<()>;
+    fn write_index(&self, scraps: &[Scrap], backlinks_map: &BacklinksMap) -> ScrapsResult<()>;
 
-    fn write_tag_page(&self, tag: &Tag, backlinks_map: &BacklinksMap) -> ScrapsResult<()>;
+    fn write_detail(&self, tag: &Tag, backlinks_map: &BacklinksMap) -> ScrapsResult<()>;
 }
 
 pub trait StyleWriter {
-    fn write_style(&self) -> ScrapsResult<()>;
+    fn write(&self) -> ScrapsResult<()>;
 }
 
 pub trait SearchIndexWriter {
-    fn write_search_index(&self, scraps: &[Scrap]) -> ScrapsResult<()>;
+    fn write(&self, scraps: &[Scrap]) -> ScrapsResult<()>;
 }
