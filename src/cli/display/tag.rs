@@ -2,7 +2,7 @@ use std::fmt;
 
 use crate::error::{anyhow::Context, CliError, ScrapsResult};
 use colored::Colorize;
-use comfy_table::{modifiers::UTF8_ROUND_CORNERS, presets::UTF8_FULL, Cell, CellAlignment, Table};
+use comfy_table::{presets::NOTHING, Cell, CellAlignment, Table};
 use scraps_libs::model::{base_url::BaseUrl, slug::Slug, tag::Tag, title::Title};
 use url::Url;
 
@@ -69,8 +69,7 @@ impl fmt::Display for DisplayTagTable {
         }
 
         let mut table = Table::new();
-        table.load_preset(UTF8_FULL);
-        table.apply_modifier(UTF8_ROUND_CORNERS);
+        table.load_preset(NOTHING);
 
         if self.has_url {
             table.set_header(vec![
