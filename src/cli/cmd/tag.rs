@@ -2,7 +2,7 @@ use std::path::Path;
 
 use itertools::Itertools;
 
-use crate::cli::display::tag::DisplayTag;
+use crate::cli::display::tag::{DisplayTag, DisplayTagTable};
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
@@ -29,10 +29,10 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
         let sorted = tags
             .into_iter()
             .sorted_by_key(|tag| tag.backlinks_count())
-            .rev();
-        for tag in sorted {
-            println!("{tag}")
-        }
+            .rev()
+            .collect::<Vec<_>>();
+        let table = DisplayTagTable::new(sorted);
+        println!("{table}");
     })
 }
 

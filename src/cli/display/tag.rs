@@ -2,7 +2,7 @@ use std::fmt;
 
 use crate::error::{anyhow::Context, CliError, ScrapsResult};
 use colored::Colorize;
-use itertools::Itertools;
+use comfy_table::{modifiers::UTF8_ROUND_CORNERS, presets::UTF8_FULL, Cell, CellAlignment, Table};
 use scraps_libs::model::{base_url::BaseUrl, slug::Slug, tag::Tag, title::Title};
 use url::Url;
 
@@ -37,27 +37,119 @@ impl DisplayTag {
         })
     }
 
+    pub fn title(&self) -> &Title {
+        &self.title
+    }
+
+    pub fn url(&self) -> Option<&Url> {
+        self.url.as_ref()
+    }
+
     pub fn backlinks_count(&self) -> usize {
         self.backlinks_count
     }
 }
 
-impl fmt::Display for DisplayTag {
+pub struct DisplayTagTable {
+    tags: Vec<DisplayTag>,
+    has_url: bool,
+}
+
+impl DisplayTagTable {
+    pub fn new(tags: Vec<DisplayTag>) -> Self {
+        let has_url = tags.iter().any(|t| t.url().is_some());
+        Self { tags, has_url }
+    }
+}
+
+impl fmt::Display for DisplayTagTable {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let title_with_backlinks_count_str =
-            format!("{}({})", self.title, self.backlinks_count).bold();
+        if self.tags.is_empty() {
+            return Ok(());
+        }
 
-        let tag_str = if let Some(url) = &self.url {
-            let url_str = url.to_string().blue();
-            vec![title_with_backlinks_count_str, url_str]
-                .into_iter()
-                .map(|c| c.to_string())
-                .collect_vec()
-                .join(" ")
+        let mut table = Table::new();
+        table.load_preset(UTF8_FULL);
+        table.apply_modifier(UTF8_ROUND_CORNERS);
+
+        if self.has_url {
+            table.set_header(vec![
+                Cell::new("Tag".bold()),
+                Cell::new("Count".bold()),
+                Cell::new("URL".bold()),
+            ]);
         } else {
-            title_with_backlinks_count_str.to_string()
-        };
+            table.set_header(vec![Cell::new("Tag".bold()), Cell::new("Count".bold())]);
+        }
 
-        write!(f, "{tag_str}")
+        for tag in &self.tags {
+            if self.has_url {
+                let url_str = tag
+                    .url()
+                    .map(|u| u.to_string().blue().to_string())
+                    .unwrap_or_default();
+                table.add_row(vec![
+                    Cell::new(tag.title()),
+                    Cell::new(tag.backlinks_count()).set_alignment(CellAlignment::Right),
+                    Cell::new(url_str),
+                ]);
+            } else {
+                table.add_row(vec![
+                    Cell::new(tag.title()),
+                    Cell::new(tag.backlinks_count()).set_alignment(CellAlignment::Right),
+                ]);
+            }
+        }
+
+        write!(f, "{table}")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn display_tag_table_with_url_contains_all_columns() {
+        let tags = vec![
+            DisplayTag {
+                title: Title::from("Rust"),
+                url: Some(Url::parse("https://example.com/scraps/rust.html").unwrap()),
+                backlinks_count: 5,
+            },
+            DisplayTag {
+                title: Title::from("CLI"),
+                url: Some(Url::parse("https://example.com/scraps/cli.html").unwrap()),
+                backlinks_count: 2,
+            },
+        ];
+        let table = DisplayTagTable::new(tags);
+        let output = table.to_string();
+        assert!(output.contains("Tag"));
+        assert!(output.contains("Count"));
+        assert!(output.contains("URL"));
+        assert!(output.contains("Rust"));
+        assert!(output.contains("CLI"));
+    }
+
+    #[test]
+    fn display_tag_table_without_url_omits_url_column() {
+        let tags = vec![DisplayTag {
+            title: Title::from("Rust"),
+            url: None,
+            backlinks_count: 3,
+        }];
+        let table = DisplayTagTable::new(tags);
+        let output = table.to_string();
+        assert!(output.contains("Tag"));
+        assert!(output.contains("Count"));
+        assert!(!output.contains("URL"));
+    }
+
+    #[test]
+    fn display_tag_table_empty_produces_no_output() {
+        let table = DisplayTagTable::new(vec![]);
+        let output = table.to_string();
+        assert!(output.is_empty());
     }
 }
