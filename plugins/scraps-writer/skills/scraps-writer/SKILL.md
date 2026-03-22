@@ -47,7 +47,7 @@ Parse the title by extracting the text between the first pair of double quotes. 
    - **Line limit**: The scrap content must not exceed **max-lines** lines. Scraps are designed as concise, focused knowledge units — keeping them short makes the wiki scannable and encourages linking between scraps rather than cramming everything into one page. Count the total lines before writing and trim if necessary
 
 5. **Lint Tag Quality**
-   - Run `scraps lint` command via Bash tool from the project root directory
+   - Run `scraps lint --rule singleton-tag` command via Bash tool from the project root directory
    - Check the output for `singleton-tag` warnings — these indicate tags referenced by only 1 scrap
    - If any singleton-tag warnings are caused by the newly created scrap, fix them by removing the `[[]]` notation from the offending tag links (leave as plain text)
 
