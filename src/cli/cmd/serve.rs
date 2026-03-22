@@ -8,7 +8,10 @@ use crate::cli::path_resolver::PathResolver;
 use crate::cli::progress::ProgressImpl;
 use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
-use crate::output::file::build_output::FileBuildOutput;
+use crate::output::file::build_output::{
+    FileIndexPageWriter, FileScrapPageWriter, FileSearchIndexWriter, FileStyleWriter,
+    FileTagPageWriter,
+};
 use crate::usecase::build::model::{
     color_scheme::ColorScheme, css::CssMetadata, html::HtmlMetadata, list_view_configs,
     paging::Paging, sort::SortKey,
@@ -66,16 +69,37 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let list_view_configs =
         list_view_configs::ListViewConfigs::new(&build_search_index, sort_key, &paging);
 
-    let output = FileBuildOutput::new(
+    let index_page_writer = FileIndexPageWriter::new(
+        &static_dir_path,
+        &public_dir_path,
+        base_url.clone(),
+        html_metadata.clone(),
+    );
+    let scrap_page_writer = FileScrapPageWriter::new(
         &static_dir_path,
         &public_dir_path,
         base_url.clone(),
         timezone,
-        html_metadata,
-        css_metadata,
+        html_metadata.clone(),
     );
+    let tag_page_writer = FileTagPageWriter::new(
+        &static_dir_path,
+        &public_dir_path,
+        base_url.clone(),
+        html_metadata,
+    );
+    let style_writer = FileStyleWriter::new(&static_dir_path, &public_dir_path, css_metadata);
+    let search_index_writer =
+        FileSearchIndexWriter::new(&static_dir_path, &public_dir_path, base_url.clone());
     let progress = ProgressImpl::init(Instant::now());
-    let build_usecase = BuildUsecase::new(&output, &progress);
+    let build_usecase = BuildUsecase::new(
+        &index_page_writer,
+        &scrap_page_writer,
+        &tag_page_writer,
+        &style_writer,
+        &search_index_writer,
+        &progress,
+    );
     let build_result =
         build_usecase.execute(&scraps_with_ts, &readme_text, &base_url, &list_view_configs);
     progress.end();

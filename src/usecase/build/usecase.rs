@@ -17,22 +17,48 @@ use super::port::{
     IndexPageWriter, ScrapPageWriter, SearchIndexWriter, StyleWriter, TagPageWriter,
 };
 
-pub struct BuildUsecase<'a, O, PG>
+pub struct BuildUsecase<'a, IP, SP, TP, SW, SI, PG>
 where
-    O: IndexPageWriter + ScrapPageWriter + TagPageWriter + StyleWriter + SearchIndexWriter,
+    IP: IndexPageWriter,
+    SP: ScrapPageWriter,
+    TP: TagPageWriter,
+    SW: StyleWriter,
+    SI: SearchIndexWriter,
     PG: Progress,
 {
-    output: &'a O,
+    index_page_writer: &'a IP,
+    scrap_page_writer: &'a SP,
+    tag_page_writer: &'a TP,
+    style_writer: &'a SW,
+    search_index_writer: &'a SI,
     progress: &'a PG,
 }
 
-impl<'a, O, PG> BuildUsecase<'a, O, PG>
+impl<'a, IP, SP, TP, SW, SI, PG> BuildUsecase<'a, IP, SP, TP, SW, SI, PG>
 where
-    O: IndexPageWriter + ScrapPageWriter + TagPageWriter + StyleWriter + SearchIndexWriter,
+    IP: IndexPageWriter,
+    SP: ScrapPageWriter,
+    TP: TagPageWriter,
+    SW: StyleWriter,
+    SI: SearchIndexWriter,
     PG: Progress,
 {
-    pub fn new(output: &'a O, progress: &'a PG) -> Self {
-        BuildUsecase { output, progress }
+    pub fn new(
+        index_page_writer: &'a IP,
+        scrap_page_writer: &'a SP,
+        tag_page_writer: &'a TP,
+        style_writer: &'a SW,
+        search_index_writer: &'a SI,
+        progress: &'a PG,
+    ) -> Self {
+        BuildUsecase {
+            index_page_writer,
+            scrap_page_writer,
+            tag_page_writer,
+            style_writer,
+            search_index_writer,
+            progress,
+        }
     }
 
     pub fn execute(
@@ -68,7 +94,7 @@ where
 
         // generate index page
         let span_generate_html_indexes = span!(Level::INFO, "generate_html_indexes").entered();
-        let index_page_count = self.output.write_index_page(
+        let index_page_count = self.index_page_writer.write_index_page(
             list_view_configs,
             &scrap_details,
             &backlinks_map,
@@ -83,14 +109,16 @@ where
             .into_par_iter()
             .try_for_each(|scrap_detail| {
                 let _span_generate_html_scrap = span!(Level::INFO, "generate_html_scrap").entered();
-                self.output.write_scrap_page(&scrap_detail, &backlinks_map)
+                self.scrap_page_writer
+                    .write_scrap_page(&scrap_detail, &backlinks_map)
             })?;
         span_generate_html_scraps.exit();
 
         // generate tags index page
         let span_generate_html_tags_index =
             span!(Level::INFO, "generate_html_tags_index").entered();
-        self.output.write_tags_index_page(&scraps, &backlinks_map)?;
+        self.tag_page_writer
+            .write_tags_index_page(&scraps, &backlinks_map)?;
         span_generate_html_tags_index.exit();
 
         // generate tag pages
@@ -98,7 +126,7 @@ where
         let tags = Tags::new(&scraps);
         tags.iter().par_bridge().try_for_each(|tag| {
             let _span_render_tag = span!(Level::INFO, "generate_html_tag").entered();
-            self.output.write_tag_page(tag, &backlinks_map)
+            self.tag_page_writer.write_tag_page(tag, &backlinks_map)
         })?;
         span_generate_html_tags.exit();
 
@@ -112,7 +140,7 @@ where
         // generate style
         self.progress.start_stage(&Stage::GenerateCss);
         let span_generate_css = span!(Level::INFO, "generate_css").entered();
-        self.output.write_style()?;
+        self.style_writer.write_style()?;
         span_generate_css.exit();
         self.progress.complete_stage(&Stage::GenerateCss, &1);
 
@@ -121,7 +149,7 @@ where
             self.progress.start_stage(&Stage::GenerateJson);
             let _span_generate_json_search_index =
                 span!(Level::INFO, "generate_json_search_index").entered();
-            self.output.write_search_index(&scraps)?;
+            self.search_index_writer.write_search_index(&scraps)?;
             self.progress.complete_stage(&Stage::GenerateJson, &1);
         }
 
@@ -133,7 +161,10 @@ where
 mod tests {
     use std::fs;
 
-    use crate::output::file::build_output::FileBuildOutput;
+    use crate::output::file::build_output::{
+        FileIndexPageWriter, FileScrapPageWriter, FileSearchIndexWriter, FileStyleWriter,
+        FileTagPageWriter,
+    };
     use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
     use crate::usecase::build::model::{
         color_scheme::ColorScheme, css::CssMetadata, html::HtmlMetadata, paging::Paging,
@@ -171,16 +202,38 @@ mod tests {
         let css_metadata = CssMetadata::new(&ColorScheme::OsSetting);
         let list_view_configs = ListViewConfigs::new(&true, &SortKey::LinkedCount, &Paging::Not);
 
-        let output = FileBuildOutput::new(
+        let index_page_writer = FileIndexPageWriter::new(
+            &project.static_dir,
+            &project.public_dir,
+            base_url.clone(),
+            html_metadata.clone(),
+        );
+        let scrap_page_writer = FileScrapPageWriter::new(
             &project.static_dir,
             &project.public_dir,
             base_url.clone(),
             timezone,
-            html_metadata,
-            css_metadata,
+            html_metadata.clone(),
         );
+        let tag_page_writer = FileTagPageWriter::new(
+            &project.static_dir,
+            &project.public_dir,
+            base_url.clone(),
+            html_metadata,
+        );
+        let style_writer =
+            FileStyleWriter::new(&project.static_dir, &project.public_dir, css_metadata);
+        let search_index_writer =
+            FileSearchIndexWriter::new(&project.static_dir, &project.public_dir, base_url.clone());
         let progress = ProgressTest::new();
-        let usecase = BuildUsecase::new(&output, &progress);
+        let usecase = BuildUsecase::new(
+            &index_page_writer,
+            &scrap_page_writer,
+            &tag_page_writer,
+            &style_writer,
+            &search_index_writer,
+            &progress,
+        );
         let result1 = usecase
             .execute(&scraps_with_ts, &readme_text, &base_url, &list_view_configs)
             .unwrap();
@@ -231,16 +284,38 @@ mod tests {
         let css_metadata = CssMetadata::new(&ColorScheme::OsSetting);
         let list_view_configs = ListViewConfigs::new(&false, &SortKey::LinkedCount, &Paging::Not);
 
-        let output = FileBuildOutput::new(
+        let index_page_writer = FileIndexPageWriter::new(
+            &project.static_dir,
+            &project.public_dir,
+            base_url.clone(),
+            html_metadata.clone(),
+        );
+        let scrap_page_writer = FileScrapPageWriter::new(
             &project.static_dir,
             &project.public_dir,
             base_url.clone(),
             timezone,
-            html_metadata,
-            css_metadata,
+            html_metadata.clone(),
         );
+        let tag_page_writer = FileTagPageWriter::new(
+            &project.static_dir,
+            &project.public_dir,
+            base_url.clone(),
+            html_metadata,
+        );
+        let style_writer =
+            FileStyleWriter::new(&project.static_dir, &project.public_dir, css_metadata);
+        let search_index_writer =
+            FileSearchIndexWriter::new(&project.static_dir, &project.public_dir, base_url.clone());
         let progress = ProgressTest::new();
-        let usecase = BuildUsecase::new(&output, &progress);
+        let usecase = BuildUsecase::new(
+            &index_page_writer,
+            &scrap_page_writer,
+            &tag_page_writer,
+            &style_writer,
+            &search_index_writer,
+            &progress,
+        );
         let result1 = usecase
             .execute(&scraps_with_ts, &None, &base_url, &list_view_configs)
             .unwrap();

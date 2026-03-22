@@ -22,36 +22,30 @@ use super::html::{
 };
 use super::json::render::SearchIndexRender;
 
-pub struct FileBuildOutput {
+pub struct FileIndexPageWriter {
     static_dir_path: PathBuf,
     public_dir_path: PathBuf,
     base_url: BaseUrl,
-    timezone: Tz,
     html_metadata: HtmlMetadata,
-    css_metadata: CssMetadata,
 }
 
-impl FileBuildOutput {
+impl FileIndexPageWriter {
     pub fn new(
         static_dir_path: &Path,
         public_dir_path: &Path,
         base_url: BaseUrl,
-        timezone: Tz,
         html_metadata: HtmlMetadata,
-        css_metadata: CssMetadata,
     ) -> Self {
-        FileBuildOutput {
+        Self {
             static_dir_path: static_dir_path.to_path_buf(),
             public_dir_path: public_dir_path.to_path_buf(),
             base_url,
-            timezone,
             html_metadata,
-            css_metadata,
         }
     }
 }
 
-impl IndexPageWriter for FileBuildOutput {
+impl IndexPageWriter for FileIndexPageWriter {
     fn write_index_page(
         &self,
         list_view_configs: &ListViewConfigs,
@@ -71,7 +65,33 @@ impl IndexPageWriter for FileBuildOutput {
     }
 }
 
-impl ScrapPageWriter for FileBuildOutput {
+pub struct FileScrapPageWriter {
+    static_dir_path: PathBuf,
+    public_dir_path: PathBuf,
+    base_url: BaseUrl,
+    timezone: Tz,
+    html_metadata: HtmlMetadata,
+}
+
+impl FileScrapPageWriter {
+    pub fn new(
+        static_dir_path: &Path,
+        public_dir_path: &Path,
+        base_url: BaseUrl,
+        timezone: Tz,
+        html_metadata: HtmlMetadata,
+    ) -> Self {
+        Self {
+            static_dir_path: static_dir_path.to_path_buf(),
+            public_dir_path: public_dir_path.to_path_buf(),
+            base_url,
+            timezone,
+            html_metadata,
+        }
+    }
+}
+
+impl ScrapPageWriter for FileScrapPageWriter {
     fn write_scrap_page(
         &self,
         scrap_detail: &ScrapDetail,
@@ -88,7 +108,30 @@ impl ScrapPageWriter for FileBuildOutput {
     }
 }
 
-impl TagPageWriter for FileBuildOutput {
+pub struct FileTagPageWriter {
+    static_dir_path: PathBuf,
+    public_dir_path: PathBuf,
+    base_url: BaseUrl,
+    html_metadata: HtmlMetadata,
+}
+
+impl FileTagPageWriter {
+    pub fn new(
+        static_dir_path: &Path,
+        public_dir_path: &Path,
+        base_url: BaseUrl,
+        html_metadata: HtmlMetadata,
+    ) -> Self {
+        Self {
+            static_dir_path: static_dir_path.to_path_buf(),
+            public_dir_path: public_dir_path.to_path_buf(),
+            base_url,
+            html_metadata,
+        }
+    }
+}
+
+impl TagPageWriter for FileTagPageWriter {
     fn write_tags_index_page(
         &self,
         scraps: &[Scrap],
@@ -104,14 +147,46 @@ impl TagPageWriter for FileBuildOutput {
     }
 }
 
-impl StyleWriter for FileBuildOutput {
+pub struct FileStyleWriter {
+    static_dir_path: PathBuf,
+    public_dir_path: PathBuf,
+    css_metadata: CssMetadata,
+}
+
+impl FileStyleWriter {
+    pub fn new(static_dir_path: &Path, public_dir_path: &Path, css_metadata: CssMetadata) -> Self {
+        Self {
+            static_dir_path: static_dir_path.to_path_buf(),
+            public_dir_path: public_dir_path.to_path_buf(),
+            css_metadata,
+        }
+    }
+}
+
+impl StyleWriter for FileStyleWriter {
     fn write_style(&self) -> ScrapsResult<()> {
         let render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
         render.render_main(&self.css_metadata)
     }
 }
 
-impl SearchIndexWriter for FileBuildOutput {
+pub struct FileSearchIndexWriter {
+    static_dir_path: PathBuf,
+    public_dir_path: PathBuf,
+    base_url: BaseUrl,
+}
+
+impl FileSearchIndexWriter {
+    pub fn new(static_dir_path: &Path, public_dir_path: &Path, base_url: BaseUrl) -> Self {
+        Self {
+            static_dir_path: static_dir_path.to_path_buf(),
+            public_dir_path: public_dir_path.to_path_buf(),
+            base_url,
+        }
+    }
+}
+
+impl SearchIndexWriter for FileSearchIndexWriter {
     fn write_search_index(&self, scraps: &[Scrap]) -> ScrapsResult<()> {
         let render = SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
         render.run(&self.base_url, scraps)
