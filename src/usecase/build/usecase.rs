@@ -1,15 +1,9 @@
-use std::{
-    marker::{Send, Sync},
-    path::{Path, PathBuf},
-};
+use std::path::{Path, PathBuf};
 
-use crate::error::{anyhow::Context, ScrapsResult};
-use crate::{
-    error::BuildError,
-    usecase::{
-        build::css::render::CSSRender,
-        progress::{Progress, Stage},
-    },
+use crate::error::ScrapsResult;
+use crate::usecase::{
+    build::css::render::CSSRender,
+    progress::{Progress, Stage},
 };
 use chrono_tz::Tz;
 use rayon::iter::IntoParallelIterator;
