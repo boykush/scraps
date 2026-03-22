@@ -4,6 +4,7 @@ use std::{net::SocketAddr, path::Path};
 use scraps_libs::model::base_url::BaseUrl;
 use url::Url;
 
+use crate::cli::display::serve::DisplayServeInfo;
 use crate::cli::path_resolver::PathResolver;
 use crate::cli::progress::ProgressImpl;
 use crate::error::ScrapsResult;
@@ -73,7 +74,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let list_view_configs =
         list_view_configs::ListViewConfigs::new(&build_search_index, sort_key, &paging);
 
-    let build_result = build_usecase.execute(
+    let scrap_count = build_usecase.execute(
         &scraps_with_ts,
         &readme_text,
         &progress,
@@ -82,13 +83,14 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
         &html_metadata,
         &css_metadata,
         &list_view_configs,
-    );
+    )?;
     progress.end();
+
+    // display serve info
+    let serve_info = DisplayServeInfo::new(title, &format!("http://{addr}"), scrap_count);
+    println!("{serve_info}");
 
     // serve command
     let serve_usecase = ServeUsecase::new(&public_dir_path);
-    let serve_result = serve_usecase.execute(&addr);
-
-    // merge result
-    build_result.and(serve_result)
+    serve_usecase.execute(&addr)
 }

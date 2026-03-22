@@ -24,7 +24,6 @@ impl ServeUsecase {
     #[tokio::main]
     pub async fn execute(&self, addr: &SocketAddr) -> ScrapsResult<()> {
         let listener = TcpListener::bind(&addr).await?;
-        println!("\n🚀 Listening on http://{addr}\n");
 
         loop {
             let (stream, _) = listener.accept().await?;
