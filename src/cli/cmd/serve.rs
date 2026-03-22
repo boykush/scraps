@@ -8,9 +8,10 @@ use crate::cli::path_resolver::PathResolver;
 use crate::cli::progress::ProgressImpl;
 use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
-use crate::output::file::build_output::{
-    FileIndexPageWriter, FileScrapPageWriter, FileSearchIndexWriter, FileStyleWriter,
-    FileTagPageWriter,
+use crate::output::file::{
+    index_page_writer::FileIndexPageWriter, scrap_page_writer::FileScrapPageWriter,
+    search_index_writer::FileSearchIndexWriter, style_writer::FileStyleWriter,
+    tag_page_writer::FileTagPageWriter,
 };
 use crate::usecase::build::model::{
     color_scheme::ColorScheme, css::CssMetadata, html::HtmlMetadata, list_view_configs,

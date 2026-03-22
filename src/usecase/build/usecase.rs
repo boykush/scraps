@@ -159,9 +159,10 @@ where
 mod tests {
     use std::fs;
 
-    use crate::output::file::build_output::{
-        FileIndexPageWriter, FileScrapPageWriter, FileSearchIndexWriter, FileStyleWriter,
-        FileTagPageWriter,
+    use crate::output::file::{
+        index_page_writer::FileIndexPageWriter, scrap_page_writer::FileScrapPageWriter,
+        search_index_writer::FileSearchIndexWriter, style_writer::FileStyleWriter,
+        tag_page_writer::FileTagPageWriter,
     };
     use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
     use crate::usecase::build::model::{
