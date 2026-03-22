@@ -8,18 +8,14 @@ use crate::cli::path_resolver::PathResolver;
 use crate::cli::progress::ProgressImpl;
 use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
-use crate::usecase::progress::Progress;
-use crate::{
-    cli::config::scrap_config::ScrapConfig,
-    usecase::build::{
-        model::{
-            color_scheme::ColorScheme, css::CssMetadata, html::HtmlMetadata, list_view_configs,
-            paging::Paging, sort::SortKey,
-        },
-        usecase::BuildUsecase,
-    },
-    usecase::serve::usecase::ServeUsecase,
+use crate::output::file::build_output::FileBuildOutput;
+use crate::usecase::build::model::{
+    color_scheme::ColorScheme, css::CssMetadata, html::HtmlMetadata, list_view_configs,
+    paging::Paging, sort::SortKey,
 };
+use crate::usecase::build::usecase::BuildUsecase;
+use crate::usecase::progress::Progress;
+use crate::{cli::config::scrap_config::ScrapConfig, usecase::serve::usecase::ServeUsecase};
 use scraps_libs::git::GitCommandImpl;
 
 pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
@@ -40,9 +36,6 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let (scraps_with_ts, readme_text) =
         read_scraps::to_all_scraps_with_timestamps(&scraps_dir_path, git_command)?;
 
-    let build_usecase = BuildUsecase::new(&static_dir_path, &public_dir_path);
-
-    let progress = ProgressImpl::init(Instant::now());
     let title = &ssg.title;
     let default_lang_code = scraps_libs::lang::LangCode::default();
     let lang_code = ssg
@@ -73,16 +66,18 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let list_view_configs =
         list_view_configs::ListViewConfigs::new(&build_search_index, sort_key, &paging);
 
-    let build_result = build_usecase.execute(
-        &scraps_with_ts,
-        &readme_text,
-        &progress,
-        &base_url,
+    let output = FileBuildOutput::new(
+        &static_dir_path,
+        &public_dir_path,
+        base_url.clone(),
         timezone,
-        &html_metadata,
-        &css_metadata,
-        &list_view_configs,
+        html_metadata,
+        css_metadata,
     );
+    let progress = ProgressImpl::init(Instant::now());
+    let build_usecase = BuildUsecase::new(&output, &progress);
+    let build_result =
+        build_usecase.execute(&scraps_with_ts, &readme_text, &base_url, &list_view_configs);
     progress.end();
 
     // serve command

@@ -3,7 +3,7 @@ mod constants;
 mod error;
 mod input;
 mod mcp;
-mod service;
+mod output;
 mod usecase;
 
 #[cfg(test)]

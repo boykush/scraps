@@ -1,12 +1,12 @@
 use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
-use crate::usecase::build::html::cdn_versions::CDN_VERSIONS;
+use crate::output::file::html::cdn_versions::CDN_VERSIONS;
 use crate::usecase::build::model::html::HtmlMetadata;
 use once_cell::sync::Lazy;
 use scraps_libs::model::base_url::BaseUrl;
 use tera::Tera;
 
-static TAG_TERA: Lazy<Tera> = Lazy::new(|| {
+static TAGS_INDEX_TERA: Lazy<Tera> = Lazy::new(|| {
     let mut tera = Tera::default();
     tera.add_raw_templates(vec![
         (
@@ -17,7 +17,10 @@ static TAG_TERA: Lazy<Tera> = Lazy::new(|| {
             "__builtins/macros.html",
             include_str!("../builtins/macros.html"),
         ),
-        ("__builtins/tag.html", include_str!("../builtins/tag.html")),
+        (
+            "__builtins/tags_index.html",
+            include_str!("../builtins/tags_index.html"),
+        ),
     ])
     .unwrap();
     tera
@@ -29,7 +32,7 @@ pub fn base(
     template_dir: &str,
 ) -> ScrapsResult<(Tera, tera::Context)> {
     let mut tera = Tera::new(template_dir).context(BuildError::RenderHtml)?;
-    tera.extend(&TAG_TERA).unwrap();
+    tera.extend(&TAGS_INDEX_TERA).unwrap();
 
     let mut context = tera::Context::new();
     context.insert("base_url", &base_url.as_url());

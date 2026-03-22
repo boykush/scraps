@@ -11,7 +11,7 @@ use chrono_tz::Tz;
 use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::file::ScrapFileStem;
 
-use crate::usecase::build::html::tera::scrap_tera;
+use crate::output::file::html::tera::scrap_tera;
 
 use super::serde::link_scraps::LinkScrapsTera;
 use super::serde::scrap_detail::ScrapDetailTera;

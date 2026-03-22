@@ -10,7 +10,7 @@ use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::slug::Slug;
 use scraps_libs::model::tag::Tag;
 
-use crate::usecase::build::html::tera::tag_tera;
+use crate::output::file::html::tera::tag_tera;
 
 use super::serde::link_scraps::LinkScrapsTera;
 use super::serde::tag::TagTera;

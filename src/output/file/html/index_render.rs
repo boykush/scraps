@@ -11,7 +11,7 @@ use crate::usecase::build::model::scrap_detail::ScrapDetails;
 use scraps_libs::model::{base_url::BaseUrl, content::Content, tags::Tags};
 use tracing::{span, Level};
 
-use crate::usecase::build::html::tera::index_tera;
+use crate::output::file::html::tera::index_tera;
 
 use super::page_pointer::PagePointer;
 use super::serde::content::ContentTera;

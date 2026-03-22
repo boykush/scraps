@@ -7,6 +7,7 @@ use tracing_subscriber::fmt::format::FmtSpan;
 use crate::cli::progress::ProgressImpl;
 use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
+use crate::output::file::build_output::FileBuildOutput;
 use crate::usecase::build::model::color_scheme::ColorScheme;
 use crate::usecase::build::model::css::CssMetadata;
 use crate::usecase::build::model::html::HtmlMetadata;
@@ -47,8 +48,6 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
     let (scraps_with_ts, readme_text) =
         read_scraps::to_all_scraps_with_timestamps(&scraps_dir_path, git_command)?;
 
-    let usecase = BuildUsecase::new(&static_dir_path, &public_dir_path);
-    let progress = ProgressImpl::init(Instant::now());
     let base_url = ssg.base_url();
     let title = &ssg.title;
     let default_lang_code = scraps_libs::lang::LangCode::default();
@@ -79,16 +78,17 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
     };
     let list_view_configs = ListViewConfigs::new(&build_search_index, sort_key, &paging);
 
-    usecase.execute(
-        &scraps_with_ts,
-        &readme_text,
-        &progress,
-        &base_url,
+    let output = FileBuildOutput::new(
+        &static_dir_path,
+        &public_dir_path,
+        base_url.clone(),
         timezone,
-        &html_metadata,
-        &css_metadata,
-        &list_view_configs,
-    )?;
+        html_metadata,
+        css_metadata,
+    );
+    let progress = ProgressImpl::init(Instant::now());
+    let usecase = BuildUsecase::new(&output, &progress);
+    usecase.execute(&scraps_with_ts, &readme_text, &base_url, &list_view_configs)?;
     span_run.exit();
     progress.end();
 
