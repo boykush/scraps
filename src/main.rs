@@ -3,6 +3,7 @@ mod constants;
 mod error;
 mod input;
 mod mcp;
+mod output;
 mod service;
 mod usecase;
 

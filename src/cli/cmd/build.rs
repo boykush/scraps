@@ -7,6 +7,7 @@ use tracing_subscriber::fmt::format::FmtSpan;
 use crate::cli::progress::ProgressImpl;
 use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
+use crate::output::build_renderer::BuildRendererImpl;
 use crate::usecase::build::model::color_scheme::ColorScheme;
 use crate::usecase::build::model::css::CssMetadata;
 use crate::usecase::build::model::html::HtmlMetadata;
@@ -47,7 +48,8 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
     let (scraps_with_ts, readme_text) =
         read_scraps::to_all_scraps_with_timestamps(&scraps_dir_path, git_command)?;
 
-    let usecase = BuildUsecase::new(&static_dir_path, &public_dir_path);
+    let renderer = BuildRendererImpl::new(&static_dir_path, &public_dir_path);
+    let usecase = BuildUsecase::new();
     let progress = ProgressImpl::init(Instant::now());
     let base_url = ssg.base_url();
     let title = &ssg.title;
@@ -83,6 +85,7 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
         &scraps_with_ts,
         &readme_text,
         &progress,
+        &renderer,
         &base_url,
         timezone,
         &html_metadata,

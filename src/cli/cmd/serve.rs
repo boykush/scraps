@@ -9,6 +9,7 @@ use crate::cli::path_resolver::PathResolver;
 use crate::cli::progress::ProgressImpl;
 use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
+use crate::output::build_renderer::BuildRendererImpl;
 use crate::usecase::progress::Progress;
 use crate::{
     cli::config::scrap_config::ScrapConfig,
@@ -41,7 +42,8 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let (scraps_with_ts, readme_text) =
         read_scraps::to_all_scraps_with_timestamps(&scraps_dir_path, git_command)?;
 
-    let build_usecase = BuildUsecase::new(&static_dir_path, &public_dir_path);
+    let renderer = BuildRendererImpl::new(&static_dir_path, &public_dir_path);
+    let build_usecase = BuildUsecase::new();
 
     let progress = ProgressImpl::init(Instant::now());
     let title = &ssg.title;
@@ -78,6 +80,7 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
         &scraps_with_ts,
         &readme_text,
         &progress,
+        &renderer,
         &base_url,
         timezone,
         &html_metadata,
