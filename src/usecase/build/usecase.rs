@@ -1,5 +1,5 @@
+use super::renderer::BuildRenderer;
 use crate::error::ScrapsResult;
-use crate::output::build_renderer::BuildRenderer;
 use crate::usecase::progress::{Progress, Stage};
 use chrono_tz::Tz;
 use rayon::iter::IntoParallelIterator;
@@ -131,8 +131,8 @@ impl BuildUsecase {
 
 #[cfg(test)]
 mod tests {
-    use crate::output::build_renderer::tests::BuildRendererTest;
     use crate::usecase::build::model::{color_scheme::ColorScheme, paging::Paging, sort::SortKey};
+    use crate::usecase::build::renderer::tests::BuildRendererTest;
     use crate::usecase::progress::tests::ProgressTest;
 
     use super::*;
