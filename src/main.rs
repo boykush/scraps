@@ -26,7 +26,9 @@ fn main() -> error::ScrapsResult<()> {
             cli::cmd::lint::run(cli.path.as_deref(), &rule_names)
         }
         cli::SubCommands::Serve => cli::cmd::serve::run(cli.path.as_deref()),
-        cli::SubCommands::Tag => cli::cmd::tag::run(cli.path.as_deref()),
+        cli::SubCommands::Tag { tag_command } => match tag_command {
+            cli::TagSubCommands::List => cli::cmd::tag::list::run(cli.path.as_deref()),
+        },
         cli::SubCommands::Template {
             template_command: template_commands,
         } => match template_commands {
