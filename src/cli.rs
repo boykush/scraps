@@ -51,8 +51,11 @@ pub enum SubCommands {
     #[command(about = "Serve the site with build scraps")]
     Serve,
 
-    #[command(about = "List a tags")]
-    Tag,
+    #[command(about = "Tag commands")]
+    Tag {
+        #[command(subcommand)]
+        tag_command: TagSubCommands,
+    },
 
     #[command(about = "Template of scraps")]
     Template {
@@ -76,6 +79,12 @@ pub enum TemplateSubCommands {
     },
 
     #[command(about = "List templates")]
+    List,
+}
+
+#[derive(Subcommand)]
+pub enum TagSubCommands {
+    #[command(about = "List tags")]
     List,
 }
 
