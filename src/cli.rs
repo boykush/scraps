@@ -8,6 +8,7 @@ use crate::usecase::lint::rule::LintRuleName;
 pub mod cmd;
 mod config;
 mod display;
+mod json;
 pub mod path_resolver;
 mod progress;
 
@@ -51,8 +52,11 @@ pub enum SubCommands {
     #[command(about = "Serve the site with build scraps")]
     Serve,
 
-    #[command(about = "List a tags")]
-    Tag,
+    #[command(about = "List tags")]
+    Tag {
+        #[arg(long, help = "Output as JSON")]
+        json: bool,
+    },
 
     #[command(about = "Template of scraps")]
     Template {
