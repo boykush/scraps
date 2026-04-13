@@ -52,10 +52,10 @@ pub enum SubCommands {
     #[command(about = "Serve the site with build scraps")]
     Serve,
 
-    #[command(about = "List tags")]
+    #[command(about = "Tag commands")]
     Tag {
-        #[arg(long, help = "Output as JSON")]
-        json: bool,
+        #[command(subcommand)]
+        tag_command: TagSubCommands,
     },
 
     #[command(about = "Template of scraps")]
@@ -81,6 +81,15 @@ pub enum TemplateSubCommands {
 
     #[command(about = "List templates")]
     List,
+}
+
+#[derive(Subcommand)]
+pub enum TagSubCommands {
+    #[command(about = "List tags")]
+    List {
+        #[arg(long, help = "Output as JSON")]
+        json: bool,
+    },
 }
 
 #[derive(Subcommand)]
