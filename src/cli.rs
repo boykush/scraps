@@ -90,6 +90,14 @@ pub enum TagSubCommands {
         #[arg(long, help = "Output as JSON")]
         json: bool,
     },
+
+    #[command(about = "List scraps that reference the specified tag")]
+    Backlinks {
+        tag: String,
+
+        #[arg(long, help = "Output as JSON")]
+        json: bool,
+    },
 }
 
 #[derive(Subcommand)]
