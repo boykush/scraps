@@ -30,6 +30,12 @@ fn main() -> error::ScrapsResult<()> {
             cli::TagSubCommands::List { json } => {
                 cli::cmd::tag::list::run(json, cli.path.as_deref(), &mut std::io::stdout())
             }
+            cli::TagSubCommands::Backlinks { tag, json } => cli::cmd::tag::backlinks::run(
+                &tag,
+                json,
+                cli.path.as_deref(),
+                &mut std::io::stdout(),
+            ),
         },
         cli::SubCommands::Template {
             template_command: template_commands,
