@@ -33,24 +33,22 @@ pub fn run(json: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
             .sorted_by(|a, b| b.backlinks_count.cmp(&a.backlinks_count))
             .collect();
         println!("{}", serde_json::to_string(&tags_json)?);
-        Ok(())
     } else {
         let base_url = config.get_base_url();
-        let display_tags_result = tags
+        let display_tags = tags
             .into_iter()
             .map(|tag| DisplayTag::new(&tag, base_url.as_ref(), &backlinks_map))
-            .collect::<ScrapsResult<Vec<DisplayTag>>>();
+            .collect::<ScrapsResult<Vec<DisplayTag>>>()?;
 
-        display_tags_result.map(|tags| {
-            let sorted = tags
-                .into_iter()
-                .sorted_by_key(|tag| tag.backlinks_count())
-                .rev()
-                .collect::<Vec<_>>();
-            let table = DisplayTagTable::new(sorted);
-            println!("{table}");
-        })
+        let sorted = display_tags
+            .into_iter()
+            .sorted_by_key(|tag| tag.backlinks_count())
+            .rev()
+            .collect::<Vec<_>>();
+        let table = DisplayTagTable::new(sorted);
+        println!("{table}");
     }
+    Ok(())
 }
 
 #[cfg(test)]
