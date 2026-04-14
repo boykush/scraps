@@ -21,7 +21,7 @@ pub fn run(json: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
     let (tags, backlinks_map) = usecase.execute(&scraps)?;
 
     if json {
-        let mut tags_json: Vec<TagJson> = tags
+        let tags_json: Vec<TagJson> = tags
             .into_iter()
             .map(|tag| {
                 let backlinks_count = backlinks_map.get(&tag.title().clone().into()).len();
@@ -30,8 +30,8 @@ pub fn run(json: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
                     backlinks_count,
                 }
             })
+            .sorted_by(|a, b| b.backlinks_count.cmp(&a.backlinks_count))
             .collect();
-        tags_json.sort_by(|a, b| b.backlinks_count.cmp(&a.backlinks_count));
         println!("{}", serde_json::to_string(&tags_json)?);
         Ok(())
     } else {
