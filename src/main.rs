@@ -28,7 +28,7 @@ fn main() -> error::ScrapsResult<()> {
         cli::SubCommands::Serve => cli::cmd::serve::run(cli.path.as_deref()),
         cli::SubCommands::Tag { tag_command } => match tag_command {
             cli::TagSubCommands::List { json } => {
-                cli::cmd::tag::list::run(json, cli.path.as_deref())
+                cli::cmd::tag::list::run(json, cli.path.as_deref(), &mut std::io::stdout())
             }
         },
         cli::SubCommands::Template {

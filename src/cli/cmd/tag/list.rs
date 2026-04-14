@@ -1,3 +1,4 @@
+use std::io::Write;
 use std::path::Path;
 
 use itertools::Itertools;
@@ -10,7 +11,7 @@ use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
 use crate::usecase::tag::list::usecase::ListTagUsecase;
 
-pub fn run(json: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
+pub fn run(json: bool, project_path: Option<&Path>, writer: &mut impl Write) -> ScrapsResult<()> {
     let path_resolver = PathResolver::new(project_path)?;
     let config = ScrapConfig::from_path(project_path)?;
     let scraps_dir_path = path_resolver.scraps_dir(&config);
@@ -32,7 +33,7 @@ pub fn run(json: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
             })
             .sorted_by(|a, b| b.backlinks_count.cmp(&a.backlinks_count))
             .collect();
-        println!("{}", serde_json::to_string(&tags_json)?);
+        writeln!(writer, "{}", serde_json::to_string(&tags_json)?)?;
     } else {
         let base_url = config.get_base_url();
         let display_tags = tags
@@ -46,7 +47,7 @@ pub fn run(json: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
             .rev()
             .collect::<Vec<_>>();
         let table = DisplayTagTable::new(sorted);
-        println!("{table}");
+        writeln!(writer, "{table}")?;
     }
     Ok(())
 }
@@ -64,7 +65,8 @@ mod tests {
             .add_scrap("a.md", b"#[[tag1]]")
             .add_scrap("b.md", b"#[[tag1]] #[[tag2]]");
 
-        let result = run(false, Some(project.project_root.as_path()));
+        let mut buf = Vec::new();
+        let result = run(false, Some(project.project_root.as_path()), &mut buf);
         assert!(result.is_ok());
     }
 
@@ -72,7 +74,8 @@ mod tests {
     fn run_succeeds_without_ssg_section(#[from(temp_scrap_project)] project: TempScrapProject) {
         project.add_config(b"").add_scrap("a.md", b"#[[tag1]]");
 
-        let result = run(false, Some(project.project_root.as_path()));
+        let mut buf = Vec::new();
+        let result = run(false, Some(project.project_root.as_path()), &mut buf);
         assert!(result.is_ok());
     }
 
@@ -80,32 +83,46 @@ mod tests {
     fn run_succeeds_with_empty_scraps(#[from(temp_scrap_project)] project: TempScrapProject) {
         project.add_config(b"");
 
-        let result = run(false, Some(project.project_root.as_path()));
+        let mut buf = Vec::new();
+        let result = run(false, Some(project.project_root.as_path()), &mut buf);
         assert!(result.is_ok());
     }
 
     #[rstest]
     fn run_fails_without_config(#[from(temp_scrap_project)] project: TempScrapProject) {
-        let result = run(false, Some(project.project_root.as_path()));
+        let mut buf = Vec::new();
+        let result = run(false, Some(project.project_root.as_path()), &mut buf);
         assert!(result.is_err());
     }
 
     #[rstest]
-    fn run_json_succeeds_with_tags(#[from(temp_scrap_project)] project: TempScrapProject) {
+    fn run_json_outputs_sorted_tags(#[from(temp_scrap_project)] project: TempScrapProject) {
         project
             .add_config(b"")
             .add_scrap("a.md", b"#[[tag1]]")
             .add_scrap("b.md", b"#[[tag1]] #[[tag2]]");
 
-        let result = run(true, Some(project.project_root.as_path()));
-        assert!(result.is_ok());
+        let mut buf = Vec::new();
+        run(true, Some(project.project_root.as_path()), &mut buf).unwrap();
+
+        let output = String::from_utf8(buf).unwrap();
+        let tags: Vec<TagJson> = serde_json::from_str(output.trim()).unwrap();
+        assert_eq!(tags.len(), 2);
+        assert_eq!(tags[0].title, "tag1");
+        assert_eq!(tags[0].backlinks_count, 2);
+        assert_eq!(tags[1].title, "tag2");
+        assert_eq!(tags[1].backlinks_count, 1);
     }
 
     #[rstest]
-    fn run_json_succeeds_with_empty_scraps(#[from(temp_scrap_project)] project: TempScrapProject) {
+    fn run_json_outputs_empty_array(#[from(temp_scrap_project)] project: TempScrapProject) {
         project.add_config(b"");
 
-        let result = run(true, Some(project.project_root.as_path()));
-        assert!(result.is_ok());
+        let mut buf = Vec::new();
+        run(true, Some(project.project_root.as_path()), &mut buf).unwrap();
+
+        let output = String::from_utf8(buf).unwrap();
+        let tags: Vec<TagJson> = serde_json::from_str(output.trim()).unwrap();
+        assert!(tags.is_empty());
     }
 }
