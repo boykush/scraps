@@ -8,6 +8,7 @@ use crate::usecase::lint::rule::LintRuleName;
 pub mod cmd;
 mod config;
 mod display;
+mod json;
 pub mod path_resolver;
 mod progress;
 
@@ -85,7 +86,10 @@ pub enum TemplateSubCommands {
 #[derive(Subcommand)]
 pub enum TagSubCommands {
     #[command(about = "List tags")]
-    List,
+    List {
+        #[arg(long, help = "Output as JSON")]
+        json: bool,
+    },
 }
 
 #[derive(Subcommand)]
