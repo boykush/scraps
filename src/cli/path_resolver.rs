@@ -62,11 +62,6 @@ impl PathResolver {
         self.project_root.join("public")
     }
 
-    /// Get the templates directory path
-    pub fn templates_dir(&self) -> PathBuf {
-        self.project_root.join("templates")
-    }
-
     /// Get the config file path
     pub fn config_path(&self) -> PathBuf {
         self.project_root.join(CONFIG_FILE_NAME)
@@ -174,17 +169,6 @@ base_url = "http://example.com/"
         let public_dir = resolver.public_dir();
         assert_eq!(public_dir.file_name().unwrap(), "public");
         assert!(public_dir.starts_with(&test_project_path));
-    }
-
-    #[rstest]
-    fn test_templates_dir_path(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
-        temp_dir.add_dir("test_project_templates");
-
-        let test_project_path = temp_dir.path.join("test_project_templates");
-        let resolver = PathResolver::new(Some(&test_project_path)).unwrap();
-        let templates_dir = resolver.templates_dir();
-        assert_eq!(templates_dir.file_name().unwrap(), "templates");
-        assert!(templates_dir.starts_with(&test_project_path));
     }
 
     #[rstest]

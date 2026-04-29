@@ -1,6 +1,5 @@
-use clap::{Args, Parser, Subcommand, ValueEnum};
+use clap::{Parser, Subcommand, ValueEnum};
 use clap_verbosity_flag::{Verbosity, WarnLevel};
-use scraps_libs::model::title::Title;
 use std::path::PathBuf;
 
 use crate::usecase::lint::rule::LintRuleName;
@@ -81,29 +80,11 @@ pub enum SubCommands {
         tag_command: TagSubCommands,
     },
 
-    #[command(about = "Template of scraps")]
-    Template {
-        #[command(subcommand)]
-        template_command: TemplateSubCommands,
-    },
-
     #[command(about = "MCP server commands")]
     Mcp {
         #[command(subcommand)]
         mcp_command: McpSubCommands,
     },
-}
-
-#[derive(Subcommand)]
-pub enum TemplateSubCommands {
-    #[command(about = "Generate scrap from template")]
-    Generate {
-        #[command(flatten)]
-        template: Template,
-    },
-
-    #[command(about = "List templates")]
-    List,
 }
 
 #[derive(Subcommand)]
@@ -152,23 +133,5 @@ impl From<CliLintRuleName> for LintRuleName {
             CliLintRuleName::Overlinking => LintRuleName::Overlinking,
             CliLintRuleName::SingletonTag => LintRuleName::SingletonTag,
         }
-    }
-}
-
-#[derive(Args, Clone)]
-pub struct Template {
-    template_name: String,
-
-    #[arg(short = 't', long, help = "This overrides the template metadata.")]
-    scrap_title: Option<String>,
-}
-
-impl Template {
-    pub fn name(&self) -> &str {
-        &self.template_name
-    }
-
-    pub fn title(&self) -> Option<Title> {
-        self.scrap_title.as_ref().map(|s| s.as_str().into())
     }
 }

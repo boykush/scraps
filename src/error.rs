@@ -8,9 +8,6 @@ pub type ScrapsResult<T> = anyhow::Result<T>;
 
 #[derive(Error, PartialEq, Debug)]
 pub enum ScrapsError {
-    #[error("Template error: {0}")]
-    Template(#[from] TemplateError),
-
     #[error("Init error: {0}")]
     Init(#[from] InitError),
 
@@ -28,24 +25,6 @@ pub enum ScrapsError {
 
     #[error("Failed to read scraps")]
     ReadScraps,
-}
-
-#[derive(Error, PartialEq, Debug)]
-pub enum TemplateError {
-    #[error("Failed to load template metadata")]
-    LoadMetadata,
-
-    #[error("Template title is required via command line or in template file")]
-    RequiredTitle,
-
-    #[error("Template not found: {0}")]
-    NotFound(String),
-
-    #[error("Failed to render template")]
-    RenderFailure,
-
-    #[error("Failed to write file")]
-    WriteFailure,
 }
 
 #[derive(Error, PartialEq, Debug)]
