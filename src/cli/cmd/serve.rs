@@ -24,7 +24,7 @@ use crate::{
 };
 use scraps_libs::git::GitCommandImpl;
 
-pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
+pub fn run(git: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
     // set local environment
     let addr: SocketAddr = ([127, 0, 0, 1], 1112).into();
     let base_url = BaseUrl::new(Url::parse(&format!("http://{addr}"))?.join("").unwrap()).unwrap();
@@ -37,8 +37,8 @@ pub fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
     let static_dir_path = path_resolver.static_dir();
     let public_dir_path = path_resolver.public_dir();
 
-    // Input: read scraps with git timestamps and README
-    let git_command = GitCommandImpl::new();
+    // Input: read scraps (with git timestamps if --git is set) and README
+    let git_command = git.then(GitCommandImpl::new);
     let (scraps_with_ts, readme_text) =
         read_scraps::to_all_scraps_with_timestamps(&scraps_dir_path, git_command)?;
 

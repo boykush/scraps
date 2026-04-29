@@ -64,15 +64,18 @@ pub(crate) fn to_all_scraps(scraps_dir_path: &Path) -> ScrapsResult<Vec<Scrap>> 
         .collect()
 }
 
-/// Read all scraps with git commit timestamps, and README text separately.
+/// Read all scraps with optional git commit timestamps, and README text separately.
 /// Used by build/serve commands that need both scraps+timestamps and README.
+///
+/// When `git_command` is `None`, no git subprocess is spawned and every scrap's
+/// `commited_ts` is returned as `None`. When `Some`, a `git not installed`
+/// failure is downgraded to `None` with a warning rather than an error.
 pub(crate) fn to_all_scraps_with_timestamps<
     GC: scraps_libs::git::GitCommand + Send + Sync + Copy,
 >(
     scraps_dir_path: &Path,
-    git_command: GC,
+    git_command: Option<GC>,
 ) -> ScrapsResult<(Vec<(Scrap, Option<i64>)>, Option<String>)> {
-    use crate::error::BuildError;
     use rayon::prelude::*;
 
     let paths = to_scrap_paths(scraps_dir_path)?;
@@ -85,17 +88,32 @@ pub(crate) fn to_all_scraps_with_timestamps<
     // Read README text
     let readme_text = readme_paths
         .first()
-        .map(|path| fs::read_to_string(path).context(BuildError::ReadREADMEFile))
+        .map(|path| fs::read_to_string(path).context(crate::error::BuildError::ReadREADMEFile))
         .transpose()?;
 
-    // Read scraps with git timestamps in parallel
+    // Read scraps (with git timestamps if enabled) in parallel
     let scraps_with_ts = scrap_paths
         .into_par_iter()
         .map(|path| {
             let scrap = to_scrap_by_path(scraps_dir_path, &path)?;
-            let commited_ts = git_command
-                .commited_ts(&path)
-                .context(BuildError::GitCommitedTs)?;
+            let commited_ts = match git_command {
+                Some(gc) => match gc.commited_ts(&path) {
+                    Ok(ts) => ts,
+                    Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+                        tracing::warn!(
+                            "git binary not found; skipping commited_ts for {}",
+                            path.display()
+                        );
+                        None
+                    }
+                    Err(e) => {
+                        return Err(
+                            anyhow::Error::new(e).context(crate::error::BuildError::GitCommitedTs)
+                        );
+                    }
+                },
+                None => None,
+            };
             Ok((scrap, commited_ts))
         })
         .collect::<ScrapsResult<Vec<(Scrap, Option<i64>)>>>()?;
