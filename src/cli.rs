@@ -42,6 +42,17 @@ pub enum SubCommands {
         git: bool,
     },
 
+    #[command(about = "Get the markdown body of a scrap by title")]
+    Get {
+        title: String,
+
+        #[arg(long, help = "Disambiguate title across contexts")]
+        ctx: Option<String>,
+
+        #[arg(long, help = "Output as JSON")]
+        json: bool,
+    },
+
     #[command(about = "Init scraps project")]
     Init { project_name: String },
 

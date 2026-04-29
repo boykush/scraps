@@ -1,4 +1,5 @@
 pub mod build;
+pub mod get;
 pub mod init;
 pub mod lint;
 pub mod mcp;
