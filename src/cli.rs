@@ -34,6 +34,12 @@ pub enum SubCommands {
     Build {
         #[command(flatten)]
         verbose: Verbosity<WarnLevel>,
+
+        #[arg(
+            long,
+            help = "Include git-derived metadata (commited_ts) in HTML output and template variables"
+        )]
+        git: bool,
     },
 
     #[command(about = "Get the markdown body of a scrap by title")]
@@ -61,7 +67,13 @@ pub enum SubCommands {
     },
 
     #[command(about = "Serve the site with build scraps")]
-    Serve,
+    Serve {
+        #[arg(
+            long,
+            help = "Include git-derived metadata (commited_ts) in HTML output and template variables"
+        )]
+        git: bool,
+    },
 
     #[command(about = "Tag commands")]
     Tag {

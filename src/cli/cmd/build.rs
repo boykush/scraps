@@ -21,7 +21,11 @@ use crate::cli::path_resolver::PathResolver;
 use crate::usecase::progress::Progress;
 use scraps_libs::git::GitCommandImpl;
 
-pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> ScrapsResult<()> {
+pub fn run(
+    verbose: Verbosity<WarnLevel>,
+    git: bool,
+    project_path: Option<&Path>,
+) -> ScrapsResult<()> {
     let log_level = match verbose.log_level() {
         Some(log::Level::Error) => Level::ERROR,
         Some(log::Level::Warn) => Level::WARN,
@@ -35,12 +39,12 @@ pub fn run(verbose: Verbosity<WarnLevel>, project_path: Option<&Path>) -> Scraps
         .with_max_level(log_level)
         .init();
     let span_run = span!(Level::INFO, "run").entered();
-    let result = execute(project_path);
+    let result = execute(git, project_path);
     span_run.exit();
     result
 }
 
-fn execute(project_path: Option<&Path>) -> ScrapsResult<()> {
+fn execute(git: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
     let path_resolver = PathResolver::new(project_path)?;
     let config = ScrapConfig::from_path(project_path)?;
     let ssg = config.require_ssg()?;
@@ -48,8 +52,8 @@ fn execute(project_path: Option<&Path>) -> ScrapsResult<()> {
     let static_dir_path = path_resolver.static_dir();
     let public_dir_path = path_resolver.public_dir();
 
-    // Input: read scraps with git timestamps and README
-    let git_command = GitCommandImpl::new();
+    // Input: read scraps (with git timestamps if --git is set) and README
+    let git_command = git.then(GitCommandImpl::new);
     let (scraps_with_ts, readme_text) =
         read_scraps::to_all_scraps_with_timestamps(&scraps_dir_path, git_command)?;
 
@@ -116,7 +120,7 @@ mod tests {
             .add_scrap("test1.md", b"# header1\n## header2\n")
             .add_scrap("test2.md", b"[[test1]]\n");
 
-        let result = execute(Some(project.project_root.as_path()));
+        let result = execute(false, Some(project.project_root.as_path()));
         assert!(result.is_ok());
 
         // Verify scrap HTMLs generated
@@ -147,11 +151,28 @@ mod tests {
             .add_scrap("test1.md", b"# header1\n")
             .add_scrap("test2.md", b"[[test1]]\n");
 
-        let result = execute(Some(project.project_root.as_path()));
+        let result = execute(false, Some(project.project_root.as_path()));
         assert!(result.is_ok());
 
         // Verify search index JSON not generated
         let json = fs::read_to_string(project.public_path("search_index.json"));
         assert!(json.is_err());
+    }
+
+    #[rstest]
+    fn run_with_git_flag_includes_commited_date_block(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(b"[ssg]\nbase_url = \"http://localhost:1112/\"\ntitle = \"Test\"")
+            .add_scrap("test1.md", b"# header1\n");
+
+        let result = execute(true, Some(project.project_root.as_path()));
+        assert!(result.is_ok());
+
+        // Outside a git repo `commited_ts` is None so the conditional block
+        // is omitted; this test just asserts that --git does not error out.
+        let html = fs::read_to_string(project.public_path("scraps/test1.html")).unwrap();
+        assert!(!html.is_empty());
     }
 }

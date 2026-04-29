@@ -20,7 +20,9 @@ fn main() -> error::ScrapsResult<()> {
         cli::SubCommands::Init { project_name } => {
             cli::cmd::init::run(&project_name, cli.path.as_deref())
         }
-        cli::SubCommands::Build { verbose } => cli::cmd::build::run(verbose, cli.path.as_deref()),
+        cli::SubCommands::Build { verbose, git } => {
+            cli::cmd::build::run(verbose, git, cli.path.as_deref())
+        }
         cli::SubCommands::Get { title, ctx, json } => cli::cmd::get::run(
             &title,
             ctx.as_deref(),
@@ -32,7 +34,7 @@ fn main() -> error::ScrapsResult<()> {
             let rule_names: Vec<_> = rules.into_iter().map(Into::into).collect();
             cli::cmd::lint::run(cli.path.as_deref(), &rule_names)
         }
-        cli::SubCommands::Serve => cli::cmd::serve::run(cli.path.as_deref()),
+        cli::SubCommands::Serve { git } => cli::cmd::serve::run(git, cli.path.as_deref()),
         cli::SubCommands::Tag { tag_command } => match tag_command {
             cli::TagSubCommands::List { json } => {
                 cli::cmd::tag::list::run(json, cli.path.as_deref(), &mut std::io::stdout())
