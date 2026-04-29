@@ -13,7 +13,7 @@ rust-version.workspace = true
 [dependencies]
 url.workspace = true
 itertools.workspace = true
-comrak = "=0.52.0"
+comrak = { version = "=0.52.0", default-features = false }
 iso639_enum = "=0.6.0"
 fuzzy-matcher = { version = "=0.3.7", optional = true }
 
