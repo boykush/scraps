@@ -10,7 +10,7 @@ The configuration file has two sections:
 - **[ssg] section**: Contains all static site generator settings
 
 The `[ssg]` section is required for `build` and `serve` commands. Other commands
-like `lint`, `tag`, `mcp`, and `template` can work without this section.
+like `lint`, `tag`, and `mcp` can work without this section.
 
 Within the `[ssg]` section, `base_url` and `title` are required fields.
 

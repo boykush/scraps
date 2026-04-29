@@ -11,7 +11,7 @@ use tempfile::TempDir;
 
 /// High-level fixture for a complete Scraps project structure
 ///
-/// Provides a temporary project with scraps/, static/, public/, and templates/
+/// Provides a temporary project with scraps/, static/, and public/
 /// directories automatically created and cleaned up after the test.
 ///
 /// # Example
@@ -34,7 +34,6 @@ pub struct TempScrapProject {
     pub scraps_dir: PathBuf,
     pub static_dir: PathBuf,
     pub public_dir: PathBuf,
-    pub templates_dir: PathBuf,
     pub project_root: PathBuf,
 }
 
@@ -47,20 +46,17 @@ impl TempScrapProject {
         let scraps_dir = project_root.join("scraps");
         let static_dir = project_root.join("static");
         let public_dir = project_root.join("public");
-        let templates_dir = project_root.join("templates");
 
         // Create all directories
         fs::create_dir_all(&scraps_dir).expect("Failed to create scraps dir");
         fs::create_dir_all(&static_dir).expect("Failed to create static dir");
         fs::create_dir_all(&public_dir).expect("Failed to create public dir");
-        fs::create_dir_all(&templates_dir).expect("Failed to create templates dir");
 
         Self {
             temp_dir,
             scraps_dir,
             static_dir,
             public_dir,
-            templates_dir,
             project_root,
         }
     }
@@ -115,17 +111,6 @@ impl TempScrapProject {
     pub fn add_config(&self, content: &[u8]) -> &Self {
         let config_path = self.project_root.join(CONFIG_FILE_NAME);
         fs::write(&config_path, content).expect("Failed to write config file");
-        self
-    }
-
-    /// Add a template file to the templates directory
-    ///
-    /// # Arguments
-    /// * `filename` - Template filename (e.g., "template.md")
-    /// * `content` - Template content as bytes
-    pub fn add_template(&self, filename: &str, content: &[u8]) -> &Self {
-        let path = self.templates_dir.join(filename);
-        fs::write(&path, content).expect("Failed to write template file");
         self
     }
 
@@ -274,7 +259,6 @@ mod tests {
         assert!(project.scraps_dir.exists());
         assert!(project.static_dir.exists());
         assert!(project.public_dir.exists());
-        assert!(project.templates_dir.exists());
         assert!(project.project_root.exists());
     }
 
