@@ -1,6 +1,10 @@
-use itertools::Itertools;
-use pulldown_cmark::{
-    html::push_html, CodeBlockKind, CowStr, Event, LinkType, Options, Parser, Tag, TagEnd,
+use std::borrow::Cow;
+
+use comrak::{
+    format_html,
+    nodes::{AstNode, NodeCodeBlock, NodeLink, NodeValue, NodeWikiLink},
+    options::Extension,
+    parse_document, Arena, Options,
 };
 use url::Url;
 
@@ -12,120 +16,149 @@ use crate::model::{
     title::Title,
 };
 
-const PARSER_OPTION: Options = Options::all();
+fn options() -> Options<'static> {
+    Options {
+        extension: Extension {
+            wikilinks_title_after_pipe: true,
+            autolink: true,
+            table: true,
+            strikethrough: true,
+            tasklist: true,
+            footnotes: true,
+            superscript: true,
+            math_dollars: true,
+            ..Extension::default()
+        },
+        ..Options::default()
+    }
+}
 
 pub fn to_content(text: &str, base_url: &BaseUrl) -> Content {
-    let parser = Parser::new_ext(text, PARSER_OPTION);
-    let parser_vec = parser.into_iter().collect::<Vec<_>>();
-    let mut parser_windows = parser_vec.into_iter().circular_tuple_windows::<(_, _, _)>();
-    let mut content_elements = Vec::new();
+    let arena = Arena::new();
+    let opts = options();
+    let root = parse_document(&arena, text, &opts);
 
-    while let Some(events) = parser_windows.next() {
-        match events {
-            (
-                Event::Start(Tag::Link {
-                    link_type: LinkType::WikiLink { has_pothole },
-                    dest_url: CowStr::Borrowed(dest_url),
-                    title,
-                    id,
-                }),
-                Event::Text(CowStr::Borrowed(text)),
-                end @ Event::End(TagEnd::Link),
-            ) => {
-                let events = handle_wiki_link_events(
-                    base_url.as_url(),
-                    dest_url,
-                    title,
-                    id,
-                    text,
-                    end,
-                    has_pothole,
-                );
-                (0..2).for_each(|_| {
-                    parser_windows.next();
-                });
-                let mut html_buf = String::new();
-                push_html(&mut html_buf, events.into_iter());
-                content_elements.push(ContentElement::Raw(html_buf))
-            }
-            (
-                Event::Start(Tag::Link {
-                    link_type: LinkType::Autolink,
-                    dest_url: CowStr::Borrowed(dest_url),
-                    title: _,
-                    id: _,
-                }),
-                _,
-                _,
-            ) => {
-                (0..2).for_each(|_| {
-                    parser_windows.next();
-                });
-                match Url::parse(dest_url) {
-                    Ok(url) => content_elements.push(ContentElement::Autolink(url)),
-                    Err(e) => content_elements
-                        .push(ContentElement::Raw(format!("Error parsing URL: {e}"))),
-                }
-            }
-            (
-                Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(CowStr::Borrowed(language)))),
-                _,
-                _,
-            ) => {
-                let mut html_buf = String::new();
-                push_html(
-                    &mut html_buf,
-                    [handle_code_block_start_event(language)].into_iter(),
-                );
-                content_elements.push(ContentElement::Raw(html_buf))
-            }
-            (e1, _, _) => {
-                let mut html_buf = String::new();
-                push_html(&mut html_buf, [e1].into_iter());
-                content_elements.push(ContentElement::Raw(html_buf))
-            }
+    transform_wikilinks(root, base_url);
+
+    let mut elements = Vec::new();
+    for child in root.children() {
+        push_node(child, &opts, &mut elements);
+    }
+    Content::new(elements)
+}
+
+fn push_node<'a>(node: &'a AstNode<'a>, opts: &Options, out: &mut Vec<ContentElement>) {
+    if let Some(url_str) = autolink_paragraph_url(node) {
+        out.push(ContentElement::Raw("<p>".to_string()));
+        match Url::parse(&url_str) {
+            Ok(url) => out.push(ContentElement::Autolink(url)),
+            Err(e) => out.push(ContentElement::Raw(format!("Error parsing URL: {e}"))),
+        }
+        out.push(ContentElement::Raw("</p>\n".to_string()));
+        return;
+    }
+
+    if let NodeValue::CodeBlock(cb) = &node.data().value {
+        let NodeCodeBlock { info, literal, .. } = cb.as_ref();
+        if info.split_whitespace().next() == Some("mermaid") {
+            let escaped = escape_html(literal);
+            out.push(ContentElement::Raw(format!(
+                "<pre><code class=\"language-mermaid mermaid\">{escaped}</code></pre>\n"
+            )));
+            return;
         }
     }
-    Content::new(content_elements)
+
+    let mut buf = String::new();
+    let _ = format_html(node, opts, &mut buf);
+    out.push(ContentElement::Raw(buf));
 }
 
-fn handle_wiki_link_events<'a>(
-    base_url: &Url,
-    dest_url: &str,
-    title: CowStr<'a>,
-    id: CowStr<'a>,
-    text: &str,
-    end: Event<'a>,
-    has_pothole: bool,
-) -> [Event<'a>; 3] {
-    let scrap_link = ScrapKey::from_path_str(dest_url);
-    let replaced_text = if has_pothole {
-        text.to_string()
-    } else {
-        Title::from(&scrap_link).to_string()
-    };
-    let file_stem = ScrapFileStem::from(scrap_link);
-    let link = format!("{base_url}scraps/{file_stem}.html");
-    let start_link = Event::Start(Tag::Link {
-        link_type: LinkType::WikiLink { has_pothole },
-        dest_url: link.into(),
-        title,
-        id,
-    });
-    [start_link, Event::Text(replaced_text.into()), end]
-}
-
-fn handle_code_block_start_event(language: &str) -> Event<'_> {
-    if language == "mermaid" {
-        Event::Html(CowStr::Borrowed(
-            // Add the `mermaid`` class in addition to the existing `language-mermaid` class to target it with mermaid.js.
-            "<pre><code class=\"language-mermaid mermaid\">",
-        ))
-    } else {
-        Event::Start(Tag::CodeBlock(CodeBlockKind::Fenced(CowStr::Borrowed(
-            language,
-        ))))
+fn autolink_paragraph_url<'a>(node: &'a AstNode<'a>) -> Option<String> {
+    if !matches!(node.data().value, NodeValue::Paragraph) {
+        return None;
     }
+    let mut children = node.children();
+    let first = children.next()?;
+    if children.next().is_some() {
+        return None;
+    }
+    let NodeValue::Link(link) = &first.data().value else {
+        return None;
+    };
+    let url = link.url.clone();
+    let mut link_children = first.children();
+    let only_text = link_children.next()?;
+    if link_children.next().is_some() {
+        return None;
+    }
+    let NodeValue::Text(t) = &only_text.data().value else {
+        return None;
+    };
+    if t.as_ref() == url.as_str() {
+        Some(url)
+    } else {
+        None
+    }
+}
+
+fn transform_wikilinks<'a>(root: &'a AstNode<'a>, base_url: &BaseUrl) {
+    for node in root.descendants() {
+        let url = match &node.data().value {
+            NodeValue::WikiLink(NodeWikiLink { url }) => url.clone(),
+            _ => continue,
+        };
+
+        let scrap_link = ScrapKey::from_path_str(&url);
+        let file_stem = ScrapFileStem::from(scrap_link.clone());
+        let new_url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
+
+        let label = collect_text(node);
+        let has_pothole = label != url;
+
+        node.data_mut().value = NodeValue::Link(Box::new(NodeLink {
+            url: new_url,
+            title: String::new(),
+        }));
+
+        if !has_pothole {
+            let new_label = Title::from(&scrap_link).to_string();
+            replace_first_text(node, &new_label);
+        }
+    }
+}
+
+fn collect_text<'a>(node: &'a AstNode<'a>) -> String {
+    let mut s = String::new();
+    for d in node.descendants() {
+        if let NodeValue::Text(t) = &d.data().value {
+            s.push_str(t);
+        }
+    }
+    s
+}
+
+fn replace_first_text<'a>(node: &'a AstNode<'a>, new_text: &str) {
+    for d in node.descendants() {
+        if matches!(d.data().value, NodeValue::Text(_)) {
+            d.data_mut().value = NodeValue::Text(Cow::Owned(new_text.to_string()));
+            return;
+        }
+    }
+}
+
+fn escape_html(input: &str) -> String {
+    let mut out = String::with_capacity(input.len());
+    for c in input.chars() {
+        match c {
+            '&' => out.push_str("&amp;"),
+            '<' => out.push_str("&lt;"),
+            '>' => out.push_str("&gt;"),
+            '"' => out.push_str("&quot;"),
+            _ => out.push(c),
+        }
+    }
+    out
 }
 
 #[cfg(test)]
@@ -139,72 +172,48 @@ mod tests {
     }
 
     #[rstest]
-    #[case::inline_code("`[[quote block]]`", "<p>", "<code>[[quote block]]</code>", "</p>\n")]
+    #[case::inline_code("`[[quote block]]`", "<p><code>[[quote block]]</code></p>\n")]
     #[case::code_block(
         "```\n[[code block]]\n```",
-        "<pre><code>",
-        "[[code block]]\n",
-        "</code></pre>\n"
+        "<pre><code>[[code block]]\n</code></pre>\n"
     )]
     #[case::bash_block(
         "```bash\nscraps build\n```",
-        "<pre><code class=\"language-bash\">",
-        "scraps build\n",
-        "</code></pre>\n"
+        "<pre><code class=\"language-bash\">scraps build\n</code></pre>\n"
     )]
     #[case::mermaid(
         "```mermaid\nflowchart LR\nid\n```",
-        "<pre><code class=\"language-mermaid mermaid\">",
-        "flowchart LR\nid\n",
-        "</code></pre>\n"
+        "<pre><code class=\"language-mermaid mermaid\">flowchart LR\nid\n</code></pre>\n"
     )]
-    fn it_to_html_code(
-        base_url: BaseUrl,
-        #[case] input: &str,
-        #[case] expected1: &str,
-        #[case] expected2: &str,
-        #[case] expected3: &str,
-    ) {
-        assert_eq!(
-            to_content(input, &base_url),
-            Content::new(vec![
-                ContentElement::Raw(expected1.to_string()),
-                ContentElement::Raw(expected2.to_string()),
-                ContentElement::Raw(expected3.to_string()),
-            ])
-        )
+    fn it_to_html_code(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
+        let content = to_content(input, &base_url);
+        assert_eq!(content.to_string(), expected);
     }
 
     #[rstest]
     #[case::basic(
         "[[link]]",
-        "<a href=\"http://localhost:1112/scraps/link.html\">link</a>"
+        "<p><a href=\"http://localhost:1112/scraps/link.html\">link</a></p>\n"
     )]
     #[case::display(
         "[[link|display]]",
-        "<a href=\"http://localhost:1112/scraps/link.html\">display</a>"
+        "<p><a href=\"http://localhost:1112/scraps/link.html\">display</a></p>\n"
     )]
     #[case::context(
         "[[Context/link]]",
-        "<a href=\"http://localhost:1112/scraps/link.context.html\">link</a>"
+        "<p><a href=\"http://localhost:1112/scraps/link.context.html\">link</a></p>\n"
     )]
     #[case::context_display(
         "[[Context/link|context display]]",
-        "<a href=\"http://localhost:1112/scraps/link.context.html\">context display</a>"
+        "<p><a href=\"http://localhost:1112/scraps/link.context.html\">context display</a></p>\n"
     )]
     #[case::slugify(
         "[[expect slugify]]",
-        "<a href=\"http://localhost:1112/scraps/expect-slugify.html\">expect slugify</a>"
+        "<p><a href=\"http://localhost:1112/scraps/expect-slugify.html\">expect slugify</a></p>\n"
     )]
     fn it_to_html_link(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
-        assert_eq!(
-            to_content(input, &base_url),
-            Content::new(vec![
-                ContentElement::Raw("<p>".to_string()),
-                ContentElement::Raw(expected.to_string()),
-                ContentElement::Raw("</p>\n".to_string()),
-            ])
-        )
+        let content = to_content(input, &base_url);
+        assert_eq!(content.to_string(), expected);
     }
 
     #[rstest]

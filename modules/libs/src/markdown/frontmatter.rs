@@ -1,30 +1,58 @@
-use pulldown_cmark::{Event, MetadataBlockKind, Options, Parser, Tag, TagEnd};
+use comrak::{nodes::NodeValue, options::Extension, parse_document, Arena, Options};
+
+const DELIMITER: &str = "+++";
+
+fn options() -> Options<'static> {
+    Options {
+        extension: Extension {
+            front_matter_delimiter: Some(DELIMITER.to_string()),
+            ..Extension::default()
+        },
+        ..Options::default()
+    }
+}
 
 pub fn get_metadata_text(text: &str) -> Option<String> {
-    let parser = Parser::new_ext(text, Options::all());
-    let mut in_pluses_metadata = false;
-    for event in parser {
-        match event {
-            Event::Start(Tag::MetadataBlock(MetadataBlockKind::PlusesStyle)) => {
-                in_pluses_metadata = true;
-            }
-            Event::Text(content) if in_pluses_metadata => {
-                return Some(content.to_string());
-            }
-            _ => {}
+    let arena = Arena::new();
+    let opts = options();
+    let root = parse_document(&arena, text, &opts);
+    for child in root.children() {
+        if let NodeValue::FrontMatter(fm) = &child.data().value {
+            return Some(strip_delimiters(fm));
         }
     }
     None
 }
 
 pub fn ignore_metadata(text: &str) -> String {
-    let parser = Parser::new_ext(text, Options::all());
-    for (event, range) in parser.into_offset_iter() {
-        if let Event::End(TagEnd::MetadataBlock(MetadataBlockKind::PlusesStyle)) = event {
-            return text[range.end..].replacen("\n", "", 1);
+    let arena = Arena::new();
+    let opts = options();
+    let root = parse_document(&arena, text, &opts);
+    for child in root.children() {
+        if let NodeValue::FrontMatter(fm) = &child.data().value {
+            // comrak's FrontMatter content spans from the opening `+++` up to and
+            // including any trailing blank lines after the closing `+++`. To match
+            // pulldown-cmark's behavior of `text[range.end..].replacen("\n", "", 1)`
+            // — where range.end is right after the closing delimiter — strip those
+            // trailing newlines and use that length as the cut point.
+            let cut = fm.trim_end_matches('\n').len();
+            return text[cut..].replacen('\n', "", 1);
         }
     }
     text.to_string()
+}
+
+fn strip_delimiters(fm: &str) -> String {
+    let trimmed = fm.trim_end_matches('\n');
+    let after_open = trimmed
+        .strip_prefix(DELIMITER)
+        .map(|s| s.strip_prefix('\n').unwrap_or(s))
+        .unwrap_or(trimmed);
+    let body = after_open
+        .strip_suffix(DELIMITER)
+        .unwrap_or(after_open)
+        .to_string();
+    body
 }
 
 #[cfg(test)]
