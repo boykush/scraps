@@ -79,7 +79,7 @@ mod tests {
     fn test_get_scrap_with_context() {
         let scraps = vec![Scrap::new(
             "scrap1",
-            &Some("Context"),
+            &Some("Context".into()),
             "# Scrap 1\n\nContent of scrap 1.",
         )];
 

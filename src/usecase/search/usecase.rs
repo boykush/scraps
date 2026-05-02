@@ -106,7 +106,7 @@ mod tests {
         let scraps = vec![
             Scrap::new(
                 "duplicate",
-                &Some("ctx"),
+                &Some("ctx".into()),
                 "# Duplicate\nContent in ctx directory.",
             ),
             Scrap::new(

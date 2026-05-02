@@ -58,7 +58,11 @@ mod tests {
 
     #[test]
     fn detect_self_link_with_context() {
-        let scrap = Scrap::new("title", &Some("Context"), "text [[Context/title]] more");
+        let scrap = Scrap::new(
+            "title",
+            &Some("Context".into()),
+            "text [[Context/title]] more",
+        );
         let scraps = vec![scrap];
         let backlinks_map = BacklinksMap::new(&scraps);
         let tags = Tags::new(&scraps);

@@ -4,7 +4,7 @@ use std::{
 };
 
 use anyhow::Context;
-use scraps_libs::model::scrap::Scrap;
+use scraps_libs::model::{context::Ctx, scrap::Scrap};
 
 use crate::error::{ScrapsError, ScrapsResult};
 
@@ -45,13 +45,25 @@ pub(crate) fn to_scrap_by_path(
     let changed_directory_path = scrap_file_path
         .strip_prefix(scraps_dir_path)
         .context(ScrapsError::ReadScrap(scrap_file_path.to_path_buf()))?;
-    let folder_name = changed_directory_path
+    // Walk the path components under scraps/ to build the (possibly nested)
+    // ctx. Using components() is portable across separators.
+    let ctx_segments: Vec<String> = changed_directory_path
         .parent()
-        .and_then(|s| s.to_str())
-        .filter(|s| !s.is_empty());
+        .map(|p| {
+            p.components()
+                .map(|c| c.as_os_str().to_string_lossy().to_string())
+                .filter(|s| !s.is_empty())
+                .collect()
+        })
+        .unwrap_or_default();
+    let ctx: Option<Ctx> = if ctx_segments.is_empty() {
+        None
+    } else {
+        Some(Ctx::from(ctx_segments.join("/").as_str()))
+    };
     let md_text = fs::read_to_string(scrap_file_path)
         .context(ScrapsError::ReadScrap(scrap_file_path.to_path_buf()))?;
-    let scrap = Scrap::new(file_prefix, &folder_name, &md_text);
+    let scrap = Scrap::new(file_prefix, &ctx, &md_text);
 
     Ok(scrap)
 }

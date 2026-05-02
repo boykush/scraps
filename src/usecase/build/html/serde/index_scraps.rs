@@ -95,7 +95,7 @@ mod tests {
             base_url,
         );
         let sc4 = ScrapDetail::new(
-            &Scrap::new("title4", &Some("Context"), "[[title1]]"),
+            &Scrap::new("title4", &Some("Context".into()), "[[title1]]"),
             &Some(1),
             base_url,
         );

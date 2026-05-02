@@ -99,7 +99,7 @@ mod tests {
             Scrap::new("scrap1", &None, "# Scrap 1\n\nThis links to [[test_tag]]."),
             Scrap::new(
                 "scrap2",
-                &Some("Context"),
+                &Some("Context".into()),
                 "# Scrap 2\n\nThis also links to [[test_tag]].",
             ),
         ];

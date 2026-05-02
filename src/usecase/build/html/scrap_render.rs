@@ -60,6 +60,11 @@ impl ScrapRender {
         let file_path = &self
             .public_scraps_dir_path
             .join(format!("{}.html", ScrapFileStem::from(scrap.self_key())));
+        // The stem may contain `/`-separated context directories; ensure the
+        // parent directory exists before creating the file.
+        if let Some(parent) = file_path.parent() {
+            fs::create_dir_all(parent).context(BuildError::CreateDir)?;
+        }
         let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to("__builtins/scrap.html", &context, wtr)
             .context(BuildError::WriteFailure(file_path.clone()))
@@ -99,12 +104,14 @@ mod tests {
         // scraps
         let commited_ts1 = None;
         let scrap1 = &Scrap::new("scrap 1", &None, "# header1");
-        let scrap2 = &Scrap::new("scrap 2", &Some("Context"), "[[scrap1]]");
+        let scrap2 = &Scrap::new("scrap 2", &Some("Context".into()), "[[scrap1]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
         let backlinks_map = BacklinksMap::new(&scraps);
 
         let scrap1_html_path = public_dir_path.join("scraps/scrap-1.html");
-        let scrap2_html_path = public_dir_path.join("scraps/scrap-2.context.html");
+        // v1: nested ctx is a directory (`context/scrap-2.html`), not a
+        // dot-suffix on the file stem.
+        let scrap2_html_path = public_dir_path.join("scraps/context/scrap-2.html");
 
         let render = ScrapRender::new(&static_dir_path, &public_dir_path).unwrap();
 

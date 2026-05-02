@@ -59,8 +59,8 @@ mod tests {
 
     #[test]
     fn it_get_with_context() {
-        let scrap1 = Scrap::new("scrap1", &Some("Context"), "");
-        let scrap2 = Scrap::new("scrap2", &Some("Context"), "[[Context/scrap1]]");
+        let scrap1 = Scrap::new("scrap1", &Some("Context".into()), "");
+        let scrap2 = Scrap::new("scrap2", &Some("Context".into()), "[[Context/scrap1]]");
         let scrap3 = Scrap::new("scrap3", &None, "[[Context/scrap1]][[Context/scrap2]]");
         let scraps = vec![scrap1.clone(), scrap2.clone(), scrap3.clone()];
 
