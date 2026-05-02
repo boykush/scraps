@@ -186,7 +186,8 @@ mod tests {
     #[rstest]
     #[case::no_ctx(link(&[], "a", None, None), "a", None)]
     #[case::single_ctx(link(&["ctx"], "a", None, None), "a", Some("ctx"))]
-    #[case::two_deep(link(&["a", "b"], "c", None, None), "b/c", Some("a"))]
+    #[case::two_deep(link(&["a", "b"], "c", None, None), "c", Some("a/b"))]
+    #[case::three_deep(link(&["a", "b", "c"], "d", None, None), "d", Some("a/b/c"))]
     fn it_wikilinkref_into_scrapkey(
         #[case] w: WikiLinkRef,
         #[case] expected_title: &str,
@@ -196,6 +197,7 @@ mod tests {
         use crate::model::title::Title;
         let key: ScrapKey = (&w).into();
         assert_eq!(Title::from(&key), expected_title.into());
-        assert_eq!(Option::<Ctx>::from(&key), expected_ctx.map(|c| c.into()));
+        let ctx_str = Option::<Ctx>::from(&key).as_ref().map(|c| format!("{}", c));
+        assert_eq!(ctx_str.as_deref(), expected_ctx);
     }
 }

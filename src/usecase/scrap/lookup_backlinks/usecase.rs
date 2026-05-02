@@ -113,7 +113,7 @@ mod tests {
             ),
             Scrap::new(
                 "target_scrap",
-                &Some("Context"),
+                &Some("Context".into()),
                 "# Target Scrap\n\nContent of target scrap.",
             ),
         ];

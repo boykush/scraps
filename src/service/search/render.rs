@@ -76,7 +76,7 @@ mod tests {
 
         // Create scraps
         let sc1 = Scrap::new("scrap1", &None, "# header1");
-        let sc2 = Scrap::new("scrap2", &Some("Context"), "## header2");
+        let sc2 = Scrap::new("scrap2", &Some("Context".into()), "## header2");
         let scraps = vec![sc1, sc2];
 
         let render = SearchIndexRender::new(&project.static_dir, &project.public_dir).unwrap();
@@ -85,6 +85,6 @@ mod tests {
         let result = fs::read_to_string(project.public_path("search_index.json")).unwrap();
         assert_eq!(
             result,
-            "[{ \"title\": \"scrap1\", \"url\": \"http://localhost:1112/scraps/scrap1.html\" },{ \"title\": \"Context/scrap2\", \"url\": \"http://localhost:1112/scraps/scrap2.context.html\" }]");
+            "[{ \"title\": \"scrap1\", \"url\": \"http://localhost:1112/scraps/scrap1.html\" },{ \"title\": \"Context/scrap2\", \"url\": \"http://localhost:1112/scraps/context/scrap2.html\" }]");
     }
 }

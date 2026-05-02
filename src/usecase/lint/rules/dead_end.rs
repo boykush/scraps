@@ -73,7 +73,7 @@ mod tests {
 
     #[test]
     fn detect_dead_end_with_context() {
-        let scrap = Scrap::new("contextual", &Some("Book"), "plain text");
+        let scrap = Scrap::new("contextual", &Some("Book".into()), "plain text");
         let scraps = vec![scrap];
         let backlinks_map = BacklinksMap::new(&scraps);
         let tags = Tags::new(&scraps);

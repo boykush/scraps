@@ -106,7 +106,7 @@ mod tests {
         let scraps = vec![
             Scrap::new(
                 "scrap1",
-                &Some("Context"),
+                &Some("Context".into()),
                 "# Scrap 1\n\nThis links to [[scrap2]].",
             ),
             Scrap::new("scrap2", &None, "# Scrap 2\n\nContent of scrap 2."),

@@ -201,11 +201,15 @@ mod tests {
     )]
     #[case::context(
         "[[Context/link]]",
-        "<p><a href=\"http://localhost:1112/scraps/link.context.html\">link</a></p>\n"
+        "<p><a href=\"http://localhost:1112/scraps/context/link.html\">link</a></p>\n"
     )]
     #[case::context_display(
         "[[Context/link|context display]]",
-        "<p><a href=\"http://localhost:1112/scraps/link.context.html\">context display</a></p>\n"
+        "<p><a href=\"http://localhost:1112/scraps/context/link.html\">context display</a></p>\n"
+    )]
+    #[case::nested_context(
+        "[[Programming/Rust/borrowing]]",
+        "<p><a href=\"http://localhost:1112/scraps/programming/rust/borrowing.html\">borrowing</a></p>\n"
     )]
     #[case::slugify(
         "[[expect slugify]]",
