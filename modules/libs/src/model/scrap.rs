@@ -49,7 +49,7 @@ impl Scrap {
             .collect::<HashSet<_>>()
             .into_iter()
             .collect();
-        let thumbnail = markdown::extract::head_image(text);
+        let thumbnail = markdown::query::images(text).into_iter().next();
 
         Scrap {
             title: title.into(),

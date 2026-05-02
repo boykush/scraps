@@ -1,8 +1,8 @@
 use comrak::{
     nodes::{AstNode, NodeValue, NodeWikiLink},
-    options::Extension,
     parse_document, Arena, Options,
 };
+use url::Url;
 
 use crate::model::key::ScrapKey;
 
@@ -68,6 +68,18 @@ fn parse_wikilink_url(url: &str) -> (Vec<String>, String, Option<String>) {
     let mut parts: Vec<String> = path.split('/').map(|s| s.to_string()).collect();
     let title = parts.pop().unwrap_or_default();
     (parts, title, heading)
+}
+
+pub fn images(text: &str) -> Vec<Url> {
+    let arena = Arena::new();
+    let opts = options();
+    let root = parse_document(&arena, text, &opts);
+    root.descendants()
+        .filter_map(|node| match &node.data().value {
+            NodeValue::Image(node_link) => Url::parse(&node_link.url).ok(),
+            _ => None,
+        })
+        .collect()
 }
 
 pub fn wikilinks(text: &str) -> Vec<WikiLinkRef> {
@@ -363,6 +375,41 @@ pub fn section<'a>(text: &'a str, heading_slug: &str) -> Option<&'a str> {
         return Some("");
     }
     Some(&text[start_byte..end_byte])
+}
+
+#[cfg(test)]
+mod images_tests {
+    use super::*;
+    use rstest::rstest;
+
+    fn url(s: &str) -> Url {
+        Url::parse(s).unwrap()
+    }
+
+    #[rstest]
+    #[case::single(
+        "![alt](https://example.com/image.png)",
+        vec!["https://example.com/image.png"]
+    )]
+    #[case::no_image("# header", Vec::<&str>::new())]
+    #[case::multiple(
+        "![a](https://example.com/a.png) and ![b](https://example.com/b.png)",
+        vec!["https://example.com/a.png", "https://example.com/b.png"]
+    )]
+    #[case::skips_invalid_url(
+        "![bad](not-a-url) ![good](https://example.com/g.png)",
+        vec!["https://example.com/g.png"]
+    )]
+    fn it_images(#[case] input: &str, #[case] expected: Vec<&str>) {
+        let expected: Vec<Url> = expected.into_iter().map(url).collect();
+        assert_eq!(images(input), expected);
+    }
+
+    #[test]
+    fn it_images_in_code_still_excluded_naturally() {
+        assert!(images("`![alt](https://example.com/x.png)`").is_empty());
+        assert!(images("```\n![alt](https://example.com/x.png)\n```").is_empty());
+    }
 }
 
 #[cfg(test)]
