@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use url::Url;
 
 use crate::markdown;
@@ -41,7 +43,12 @@ impl Scrap {
 
 impl Scrap {
     pub fn new(title: &str, ctx: &Option<&str>, text: &str) -> Scrap {
-        let links = markdown::extract::scrap_links(text);
+        let links: Vec<ScrapKey> = markdown::query::wikilinks(text)
+            .iter()
+            .map(ScrapKey::from)
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
         let thumbnail = markdown::extract::head_image(text);
 
         Scrap {
