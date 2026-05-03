@@ -33,3 +33,14 @@ title = "My Site"
 
 # Scraps pagination on index page(optional, default=no pagination)
 # paginate_by = 20
+
+# Lint rule configuration (optional)
+# Each opt-in rule lives in its own [lint.<rule>] section. Section presence
+# enables the rule (enabled defaults to true); set enabled = false to disable
+# while preserving the rule's parameters.
+
+# stale_by_git: flag scraps whose latest git commit is older than the threshold.
+# Opt-in because it shells out to git per scrap.
+# [lint.stale_by_git]
+# enabled = true
+# threshold_days = 180
