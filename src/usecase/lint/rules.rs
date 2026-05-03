@@ -1,3 +1,4 @@
+pub mod broken_heading_ref;
 pub mod broken_link;
 pub mod dead_end;
 pub mod lonely;

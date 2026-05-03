@@ -122,6 +122,8 @@ pub enum CliLintRuleName {
     Overlinking,
     #[value(name = "broken-link")]
     BrokenLink,
+    #[value(name = "broken-heading-ref")]
+    BrokenHeadingRef,
 }
 
 impl From<CliLintRuleName> for LintRuleName {
@@ -132,6 +134,7 @@ impl From<CliLintRuleName> for LintRuleName {
             CliLintRuleName::SelfLink => LintRuleName::SelfLink,
             CliLintRuleName::Overlinking => LintRuleName::Overlinking,
             CliLintRuleName::BrokenLink => LintRuleName::BrokenLink,
+            CliLintRuleName::BrokenHeadingRef => LintRuleName::BrokenHeadingRef,
         }
     }
 }

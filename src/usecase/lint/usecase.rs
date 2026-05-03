@@ -6,8 +6,9 @@ use crate::{error::ScrapsResult, usecase::build::model::backlinks_map::Backlinks
 use super::{
     rule::{LintRule, LintRuleName, LintWarning},
     rules::{
-        broken_link::BrokenLinkRule, dead_end::DeadEndRule, lonely::LonelyRule,
-        overlinking::OverlinkingRule, self_link::SelfLinkRule,
+        broken_heading_ref::BrokenHeadingRefRule, broken_link::BrokenLinkRule,
+        dead_end::DeadEndRule, lonely::LonelyRule, overlinking::OverlinkingRule,
+        self_link::SelfLinkRule,
     },
 };
 
@@ -32,6 +33,7 @@ impl LintUsecase {
             Box::new(SelfLinkRule),
             Box::new(OverlinkingRule),
             Box::new(BrokenLinkRule),
+            Box::new(BrokenHeadingRefRule),
         ];
 
         let rules: Vec<Box<dyn LintRule>> = if rule_names.is_empty() {
@@ -63,11 +65,14 @@ mod tests {
         // - self_linker: self_link
         // - overlinker: overlinking (duplicate refs to no_links)
         // - linker_to_unknown: broken_link ([[unknown]] doesn't resolve)
+        // - heading_referrer: broken_heading_ref ([[no_links#missing]] - target
+        //   exists but heading doesn't)
         let scraps = vec![
             Scrap::new("no_links", &None, "plain text"),
             Scrap::new("self_linker", &None, "[[self_linker]] [[no_links]]"),
             Scrap::new("overlinker", &None, "[[no_links]] [[no_links]]"),
             Scrap::new("linker_to_unknown", &None, "[[unknown]]"),
+            Scrap::new("heading_referrer", &None, "[[no_links#missing]]"),
         ];
 
         let usecase = LintUsecase::new();
@@ -79,6 +84,7 @@ mod tests {
         assert!(rule_names.contains(&&LintRuleName::SelfLink));
         assert!(rule_names.contains(&&LintRuleName::Overlinking));
         assert!(rule_names.contains(&&LintRuleName::BrokenLink));
+        assert!(rule_names.contains(&&LintRuleName::BrokenHeadingRef));
     }
 
     #[test]
