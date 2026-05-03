@@ -24,6 +24,7 @@ rstest.workspace = true
 error = []
 git = []
 git_test = []
+html = ["markdown", "model", "slugify"]
 lang = []
 markdown = []
 model = []

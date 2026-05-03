@@ -79,26 +79,25 @@ mod tests {
     #[test]
     fn it_new_with_sort() {
         let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
-        let sc1 = ScrapDetail::new(
-            &Scrap::new("title1", &None, "[[Context/title4]][[title2]]"),
-            &None,
-            base_url,
-        );
-        let sc2 = ScrapDetail::new(
-            &Scrap::new("title2", &None, "[[Context/title4]][[title1]]"),
-            &Some(3),
-            base_url,
-        );
-        let sc3 = ScrapDetail::new(
-            &Scrap::new("title3", &None, "[[Context/title4]]"),
-            &Some(2),
-            base_url,
-        );
-        let sc4 = ScrapDetail::new(
-            &Scrap::new("title4", &Some("Context".into()), "[[title1]]"),
-            &Some(1),
-            base_url,
-        );
+        let scrap1 = Scrap::new("title1", &None, "[[Context/title4]][[title2]]");
+        let scrap2 = Scrap::new("title2", &None, "[[Context/title4]][[title1]]");
+        let scrap3 = Scrap::new("title3", &None, "[[Context/title4]]");
+        let scrap4 = Scrap::new("title4", &Some("Context".into()), "[[title1]]");
+        let scraps = [
+            scrap1.clone(),
+            scrap2.clone(),
+            scrap3.clone(),
+            scrap4.clone(),
+        ];
+        let scrap_texts = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
+            .collect();
+
+        let sc1 = ScrapDetail::new(&scrap1, &None, base_url, &scrap_texts);
+        let sc2 = ScrapDetail::new(&scrap2, &Some(3), base_url, &scrap_texts);
+        let sc3 = ScrapDetail::new(&scrap3, &Some(2), base_url, &scrap_texts);
+        let sc4 = ScrapDetail::new(&scrap4, &Some(1), base_url, &scrap_texts);
         let backlinks_map =
             BacklinksMap::new(&[sc1.scrap(), sc2.scrap(), sc3.scrap(), sc4.scrap()]);
 

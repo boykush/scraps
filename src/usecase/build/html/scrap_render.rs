@@ -106,6 +106,10 @@ mod tests {
         let scrap1 = &Scrap::new("scrap 1", &None, "# header1");
         let scrap2 = &Scrap::new("scrap 2", &Some("Context".into()), "[[scrap1]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
+        let scrap_texts = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
+            .collect();
         let backlinks_map = BacklinksMap::new(&scraps);
 
         let scrap1_html_path = public_dir_path.join("scraps/scrap-1.html");
@@ -120,7 +124,7 @@ mod tests {
                 base_url,
                 timezone,
                 &metadata,
-                &ScrapDetail::new(scrap1, &commited_ts1, base_url),
+                &ScrapDetail::new(scrap1, &commited_ts1, base_url, &scrap_texts),
                 &backlinks_map,
             )
             .unwrap();
@@ -133,7 +137,7 @@ mod tests {
                 base_url,
                 timezone,
                 &metadata,
-                &ScrapDetail::new(scrap2, &commited_ts1, base_url),
+                &ScrapDetail::new(scrap2, &commited_ts1, base_url, &scrap_texts),
                 &backlinks_map,
             )
             .unwrap();

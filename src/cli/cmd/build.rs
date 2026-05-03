@@ -160,6 +160,43 @@ mod tests {
     }
 
     #[rstest]
+    fn run_renders_tag_links_and_embeds(#[from(temp_scrap_project)] project: TempScrapProject) {
+        project
+            .add_config(b"[ssg]\nbase_url = \"http://localhost:1112/\"\ntitle = \"Test\"")
+            .add_scrap(
+                "source.md",
+                b"Tagged #[[ai/ml]]\n\nEmbed: ![[target#Notes]]",
+            )
+            .add_scrap(
+                "target.md",
+                b"# Target\n\n## Notes\n\nembedded body\n\n## Other\n\nhidden body\n",
+            );
+
+        let result = execute(false, Some(project.project_root.as_path()));
+        assert!(result.is_ok());
+
+        let html = fs::read_to_string(project.public_path("scraps/source.html")).unwrap();
+        assert!(html.contains("http://localhost:1112/tags/ai/ml.html"));
+        assert!(html.contains("embedded body"));
+        assert!(!html.contains("hidden body"));
+    }
+
+    #[rstest]
+    fn run_generates_tag_links_with_tags_path(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(b"[ssg]\nbase_url = \"http://localhost:1112/\"\ntitle = \"Test\"")
+            .add_scrap("source.md", b"#[[ai]]");
+
+        let result = execute(false, Some(project.project_root.as_path()));
+        assert!(result.is_ok());
+
+        let index = fs::read_to_string(project.public_path("index.html")).unwrap();
+        assert!(index.contains("tags/ai.html"));
+    }
+
+    #[rstest]
     fn run_with_git_flag_includes_commited_date_block(
         #[from(temp_scrap_project)] project: TempScrapProject,
     ) {
