@@ -65,6 +65,17 @@ pub enum SubCommands {
         rules: Vec<CliLintRuleName>,
     },
 
+    #[command(about = "List outbound wiki-links from a scrap")]
+    Links {
+        title: String,
+
+        #[arg(long, help = "Disambiguate title across contexts")]
+        ctx: Option<String>,
+
+        #[arg(long, help = "Output as JSON")]
+        json: bool,
+    },
+
     #[command(about = "Serve the site with build scraps")]
     Serve {
         #[arg(

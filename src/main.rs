@@ -34,6 +34,13 @@ fn main() -> error::ScrapsResult<()> {
             let rule_names: Vec<_> = rules.into_iter().map(Into::into).collect();
             cli::cmd::lint::run(cli.path.as_deref(), &rule_names)
         }
+        cli::SubCommands::Links { title, ctx, json } => cli::cmd::links::run(
+            &title,
+            ctx.as_deref(),
+            json,
+            cli.path.as_deref(),
+            &mut std::io::stdout(),
+        ),
         cli::SubCommands::Serve { git } => cli::cmd::serve::run(git, cli.path.as_deref()),
         cli::SubCommands::Tag { tag_command } => match tag_command {
             cli::TagSubCommands::List { json } => {
