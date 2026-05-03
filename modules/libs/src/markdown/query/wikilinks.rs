@@ -1,6 +1,6 @@
 use crate::model::key::ScrapKey;
 
-use super::wiki_link::{wiki_links, WikiLink};
+use super::wiki_ref::{wiki_refs, WikiRef};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct WikiLinkRef {
@@ -11,13 +11,13 @@ pub struct WikiLinkRef {
 }
 
 /// Plain `[[link]]` occurrences from the body. `#[[tag]]` and `![[embed]]`
-/// are handled by the unified `wiki_links` classifier and excluded here, so
+/// are handled by the unified `wiki_refs` classifier and excluded here, so
 /// this function carries no special-case knowledge of tag or embed syntax.
 pub fn wikilinks(text: &str) -> Vec<WikiLinkRef> {
-    wiki_links(text)
+    wiki_refs(text)
         .into_iter()
         .filter_map(|w| match w {
-            WikiLink::Link(r) => Some(r),
+            WikiRef::Link(r) => Some(r),
             _ => None,
         })
         .collect()

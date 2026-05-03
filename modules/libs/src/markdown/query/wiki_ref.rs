@@ -10,16 +10,16 @@ use comrak::{
 
 use super::common::{collect_text, options, parse_wikilink_url};
 use super::embeds::{embeds, EmbedRef};
-use super::tags::{tags, TagOccurrence};
+use super::tags::{tags, TagRef};
 use super::wikilinks::WikiLinkRef;
 
 /// One occurrence of a `[[]]`-family construct.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum WikiLink {
+pub enum WikiRef {
     /// Plain wikilink `[[name]]` / `[[a/b/name#h|alias]]`.
     Link(WikiLinkRef),
     /// Explicit tag `#[[tag]]` / `#[[a/b/c]]`.
-    Tag(TagOccurrence),
+    Tag(TagRef),
     /// Inline embed `![[name]]` / `![[name#heading]]`.
     Embed(EmbedRef),
 }
@@ -27,8 +27,8 @@ pub enum WikiLink {
 /// Extract every `[[]]`-family occurrence from the markdown body in source
 /// order. Tags and embeds are masked out before the link parser runs, so a
 /// `#[[ai]]` is reported only as a `Tag` (never duplicated as a `Link`).
-pub fn wiki_links(text: &str) -> Vec<WikiLink> {
-    let tag_occs = tags(text);
+pub fn wiki_refs(text: &str) -> Vec<WikiRef> {
+    let tag_refs = tags(text);
     let embed_refs = embeds(text);
 
     // Mask out `#[[…]]` and `![[…]]` byte ranges so the wikilink parser
@@ -68,15 +68,15 @@ pub fn wiki_links(text: &str) -> Vec<WikiLink> {
         .collect();
 
     // Combine and sort by source line for stable order.
-    let mut all: Vec<(usize, WikiLink)> = Vec::new();
+    let mut all: Vec<(usize, WikiRef)> = Vec::new();
     for (line, r) in link_pairs {
-        all.push((line, WikiLink::Link(r)));
+        all.push((line, WikiRef::Link(r)));
     }
-    for occ in tag_occs {
-        all.push((occ.line, WikiLink::Tag(occ)));
+    for tag in tag_refs {
+        all.push((tag.line, WikiRef::Tag(tag)));
     }
     for embed in embed_refs {
-        all.push((embed.line, WikiLink::Embed(embed)));
+        all.push((embed.line, WikiRef::Embed(embed)));
     }
     all.sort_by_key(|(line, _)| *line);
     all.into_iter().map(|(_, wl)| wl).collect()
@@ -146,89 +146,87 @@ mod tests {
 
     #[test]
     fn it_classifies_link_only() {
-        let res = wiki_links("see [[scrap]]");
-        assert_eq!(res, vec![WikiLink::Link(link(&[], "scrap"))]);
+        let res = wiki_refs("see [[scrap]]");
+        assert_eq!(res, vec![WikiRef::Link(link(&[], "scrap"))]);
     }
 
     #[test]
     fn it_classifies_tag_only() {
-        let res = wiki_links("tagged #[[ai]]");
+        let res = wiki_refs("tagged #[[ai]]");
         assert_eq!(res.len(), 1);
-        assert!(matches!(&res[0], WikiLink::Tag(t) if t.path == vec!["ai".to_string()]));
+        assert!(matches!(&res[0], WikiRef::Tag(t) if t.path == vec!["ai".to_string()]));
     }
 
     #[test]
     fn it_classifies_embed_only() {
-        let res = wiki_links("see ![[paper]]");
+        let res = wiki_refs("see ![[paper]]");
         assert_eq!(res.len(), 1);
-        assert!(matches!(&res[0], WikiLink::Embed(e) if e.title == "paper"));
+        assert!(matches!(&res[0], WikiRef::Embed(e) if e.title == "paper"));
     }
 
     #[test]
     fn it_disambiguates_link_tag_embed_in_one_paragraph() {
-        let res = wiki_links("link [[scrap]] tag #[[ai]] embed ![[paper]]");
+        let res = wiki_refs("link [[scrap]] tag #[[ai]] embed ![[paper]]");
         assert_eq!(res.len(), 3);
-        assert!(matches!(&res[0], WikiLink::Link(r) if r.title == "scrap"));
-        assert!(matches!(&res[1], WikiLink::Tag(t) if t.path == vec!["ai".to_string()]));
-        assert!(matches!(&res[2], WikiLink::Embed(e) if e.title == "paper"));
+        assert!(matches!(&res[0], WikiRef::Link(r) if r.title == "scrap"));
+        assert!(matches!(&res[1], WikiRef::Tag(t) if t.path == vec!["ai".to_string()]));
+        assert!(matches!(&res[2], WikiRef::Embed(e) if e.title == "paper"));
     }
 
     #[test]
     fn it_does_not_double_count_tag_as_link() {
         // The smell this refactor addresses: `#[[ai]]` must be a Tag only,
         // never reported as a phantom Link "ai".
-        let res = wiki_links("only #[[ai]] here");
+        let res = wiki_refs("only #[[ai]] here");
         assert_eq!(res.len(), 1);
-        assert!(matches!(&res[0], WikiLink::Tag(_)));
+        assert!(matches!(&res[0], WikiRef::Tag(_)));
     }
 
     #[test]
     fn it_does_not_double_count_embed_as_link() {
-        let res = wiki_links("only ![[paper]] here");
+        let res = wiki_refs("only ![[paper]] here");
         assert_eq!(res.len(), 1);
-        assert!(matches!(&res[0], WikiLink::Embed(_)));
+        assert!(matches!(&res[0], WikiRef::Embed(_)));
     }
 
     #[test]
     fn it_orders_by_source_line() {
         let input = "first line [[a]]\n\ntag #[[t]] on line 3\n\nembed ![[e]] on line 5";
-        let res = wiki_links(input);
+        let res = wiki_refs(input);
         assert_eq!(res.len(), 3);
-        assert!(matches!(&res[0], WikiLink::Link(r) if r.title == "a"));
-        assert!(matches!(&res[1], WikiLink::Tag(_)));
-        assert!(matches!(&res[2], WikiLink::Embed(_)));
+        assert!(matches!(&res[0], WikiRef::Link(r) if r.title == "a"));
+        assert!(matches!(&res[1], WikiRef::Tag(_)));
+        assert!(matches!(&res[2], WikiRef::Embed(_)));
     }
 
     #[test]
     fn it_excludes_inside_code_block() {
         let input = "```\n[[code-link]]\n#[[code-tag]]\n![[code-embed]]\n```";
-        let res = wiki_links(input);
+        let res = wiki_refs(input);
         assert!(res.is_empty());
     }
 
     #[test]
     fn it_excludes_inside_inline_code() {
         let input = "`[[c-link]]` and `#[[c-tag]]` and `![[c-embed]]`";
-        let res = wiki_links(input);
+        let res = wiki_refs(input);
         assert!(res.is_empty());
     }
 
     #[test]
     fn it_handles_unicode_inside_brackets() {
-        let res = wiki_links("[[日本語]] and #[[プログラミング]] and ![[論文]]");
+        let res = wiki_refs("[[日本語]] and #[[プログラミング]] and ![[論文]]");
         assert_eq!(res.len(), 3);
-        assert!(matches!(&res[0], WikiLink::Link(r) if r.title == "日本語"));
-        assert!(
-            matches!(&res[1], WikiLink::Tag(t) if t.path == vec!["プログラミング".to_string()])
-        );
-        assert!(matches!(&res[2], WikiLink::Embed(e) if e.title == "論文"));
+        assert!(matches!(&res[0], WikiRef::Link(r) if r.title == "日本語"));
+        assert!(matches!(&res[1], WikiRef::Tag(t) if t.path == vec!["プログラミング".to_string()]));
+        assert!(matches!(&res[2], WikiRef::Embed(e) if e.title == "論文"));
     }
 
     #[test]
     fn it_preserves_link_with_alias_and_heading() {
-        let res = wiki_links("[[Person/Eric Evans#bio|Eric]]");
+        let res = wiki_refs("[[Person/Eric Evans#bio|Eric]]");
         assert_eq!(res.len(), 1);
-        let WikiLink::Link(r) = &res[0] else {
+        let WikiRef::Link(r) = &res[0] else {
             panic!("expected Link");
         };
         assert_eq!(r.ctx_path, vec!["Person".to_string()]);
@@ -241,13 +239,13 @@ mod tests {
     fn it_handles_unterminated_brackets_safely() {
         // Unterminated `#[[` or `![[` should not panic and should be left
         // alone (no Tag/Embed emitted, not masked).
-        let res = wiki_links("text #[[unterminated and ![[also without close");
+        let res = wiki_refs("text #[[unterminated and ![[also without close");
         assert!(res.is_empty());
     }
 
     #[test]
     fn it_handles_empty_input() {
-        let res = wiki_links("");
+        let res = wiki_refs("");
         assert!(res.is_empty());
     }
 }

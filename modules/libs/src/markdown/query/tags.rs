@@ -3,12 +3,12 @@ use comrak::{parse_document, Arena};
 use super::common::{byte_to_line, code_byte_ranges, in_code, line_starts, options};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct TagOccurrence {
+pub struct TagRef {
     pub path: Vec<String>,
     pub line: usize,
 }
 
-pub fn tags(text: &str) -> Vec<TagOccurrence> {
+pub fn tags(text: &str) -> Vec<TagRef> {
     let arena = Arena::new();
     let opts = options();
     let root = parse_document(&arena, text, &opts);
@@ -38,7 +38,7 @@ pub fn tags(text: &str) -> Vec<TagOccurrence> {
                     let path: Vec<String> = inner.split('/').map(|s| s.to_string()).collect();
                     if path.iter().all(|s| !s.is_empty()) {
                         let line = byte_to_line(&starts, i);
-                        out.push(TagOccurrence { path, line });
+                        out.push(TagRef { path, line });
                     }
                 }
                 i = j + 2;
@@ -55,8 +55,8 @@ mod tests {
     use super::*;
     use rstest::rstest;
 
-    fn tag(path: &[&str], line: usize) -> TagOccurrence {
-        TagOccurrence {
+    fn tag(path: &[&str], line: usize) -> TagRef {
+        TagRef {
             path: path.iter().map(|s| s.to_string()).collect(),
             line,
         }
@@ -70,7 +70,7 @@ mod tests {
         "#[[a]] and #[[b]] and #[[c]]",
         vec![tag(&["a"], 1), tag(&["b"], 1), tag(&["c"], 1)]
     )]
-    fn it_tags_base(#[case] input: &str, #[case] expected: Vec<TagOccurrence>) {
+    fn it_tags_base(#[case] input: &str, #[case] expected: Vec<TagRef>) {
         assert_eq!(tags(input), expected);
     }
 
@@ -112,7 +112,7 @@ mod tests {
     #[rstest]
     #[case::japanese("#[[日本語]]", vec![tag(&["日本語"], 1)])]
     #[case::japanese_ctx("#[[ctx/日本]]", vec![tag(&["ctx", "日本"], 1)])]
-    fn it_tags_unicode(#[case] input: &str, #[case] expected: Vec<TagOccurrence>) {
+    fn it_tags_unicode(#[case] input: &str, #[case] expected: Vec<TagRef>) {
         assert_eq!(tags(input), expected);
     }
 
