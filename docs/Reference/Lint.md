@@ -26,16 +26,6 @@ Detects the same `[[link]]` appearing multiple times within a single scrap. Repe
 
 `[[Page|alias]]` and `[[Page]]` are treated as the same link.
 
-### broken-link
-
-Detects `[[wikilink]]` references that don't resolve to any existing scrap. An unresolved scrap link is a real bug — usually a typo or a stale reference left behind after a rename.
-
-### broken-heading-ref
-
-Detects `[[name#heading]]` references whose `#heading` part doesn't match any heading in the target scrap. Headings are compared after slug normalization (lowercased, whitespace and special characters mapped to dashes), so `[[Topic#My Section]]` and `## my-section` resolve to the same anchor.
-
-If the target scrap itself doesn't exist, `broken-link` fires instead — `broken-heading-ref` only reports cases where the scrap was found but the heading inside it wasn't.
-
 ### singleton-tag
 
 Detects tags referenced by only 1 scrap. Tags used by a single scrap provide no grouping value and may indicate a tag that should be removed or consolidated.
