@@ -1,8 +1,4 @@
-use comrak::{parse_document, Arena};
-
-use super::common::{
-    byte_to_line, code_byte_ranges, in_code, line_starts, options, parse_wikilink_url,
-};
+use super::wiki_ref::{wiki_refs, WikiRef};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EmbedRef {
@@ -13,50 +9,13 @@ pub struct EmbedRef {
 }
 
 pub fn embeds(text: &str) -> Vec<EmbedRef> {
-    let arena = Arena::new();
-    let opts = options();
-    let root = parse_document(&arena, text, &opts);
-    let starts = line_starts(text);
-    let codes = code_byte_ranges(root, &starts);
-    let bytes = text.as_bytes();
-    let mut out = Vec::new();
-    let mut i = 0;
-    while i + 4 < bytes.len() {
-        if bytes[i] == b'!' && bytes[i + 1] == b'[' && bytes[i + 2] == b'[' && !in_code(&codes, i) {
-            let inner_start = i + 3;
-            let mut j = inner_start;
-            let mut found = false;
-            while j + 1 < bytes.len() {
-                if bytes[j] == b'\n' {
-                    break;
-                }
-                if bytes[j] == b']' && bytes[j + 1] == b']' {
-                    found = true;
-                    break;
-                }
-                j += 1;
-            }
-            if found {
-                let inner = &text[inner_start..j];
-                if !inner.is_empty() && !inner.contains('|') {
-                    let (ctx_path, title, heading) = parse_wikilink_url(inner);
-                    if !title.is_empty() {
-                        let line = byte_to_line(&starts, i);
-                        out.push(EmbedRef {
-                            ctx_path,
-                            title,
-                            heading,
-                            line,
-                        });
-                    }
-                }
-                i = j + 2;
-                continue;
-            }
-        }
-        i += 1;
-    }
-    out
+    wiki_refs(text)
+        .into_iter()
+        .filter_map(|w| match w {
+            WikiRef::Embed(r) => Some(r),
+            _ => None,
+        })
+        .collect()
 }
 
 #[cfg(test)]

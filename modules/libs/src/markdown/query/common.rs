@@ -41,10 +41,6 @@ pub(super) fn line_starts(text: &str) -> Vec<usize> {
     v
 }
 
-pub(super) fn byte_to_line(starts: &[usize], byte: usize) -> usize {
-    starts.partition_point(|&s| s <= byte)
-}
-
 pub(super) fn line_col_to_byte(starts: &[usize], line: usize, col: usize) -> usize {
     let li = line.saturating_sub(1);
     let base = starts.get(li).copied().unwrap_or(0);
@@ -56,27 +52,4 @@ pub(super) fn line_byte_offset(starts: &[usize], total_len: usize, line: usize) 
         return 0;
     }
     starts.get(line - 1).copied().unwrap_or(total_len)
-}
-
-pub(super) fn code_byte_ranges<'a>(root: &'a AstNode<'a>, starts: &[usize]) -> Vec<(usize, usize)> {
-    let mut ranges = Vec::new();
-    for n in root.descendants() {
-        let in_code = matches!(
-            &n.data().value,
-            NodeValue::CodeBlock(_) | NodeValue::Code(_)
-        );
-        if !in_code {
-            continue;
-        }
-        let pos = n.data().sourcepos;
-        let s = line_col_to_byte(starts, pos.start.line, pos.start.column);
-        let e = line_col_to_byte(starts, pos.end.line, pos.end.column) + 1;
-        ranges.push((s, e));
-    }
-    ranges.sort_by_key(|r| r.0);
-    ranges
-}
-
-pub(super) fn in_code(ranges: &[(usize, usize)], byte: usize) -> bool {
-    ranges.iter().any(|(s, e)| *s <= byte && byte < *e)
 }

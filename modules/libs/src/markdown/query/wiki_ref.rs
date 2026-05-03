@@ -1,16 +1,16 @@
 //! Unified retrieval of wiki-shaped inline syntax: `[[link]]`, `#[[tag]]`,
 //! and `![[embed]]` are all variants of the same `[[]]` family. This module
-//! parses them in one pass and classifies each occurrence, so individual
-//! consumers (wikilinks / tags / embeds) don't need to know about each other.
+//! lets comrak extract the bracketed shape first, then classifies each
+//! occurrence by the prefix immediately attached to the `[[`.
 
 use comrak::{
     nodes::{NodeValue, NodeWikiLink},
     parse_document, Arena,
 };
 
-use super::common::{collect_text, options, parse_wikilink_url};
-use super::embeds::{embeds, EmbedRef};
-use super::tags::{tags, TagRef};
+use super::common::{collect_text, line_col_to_byte, line_starts, options, parse_wikilink_url};
+use super::embeds::EmbedRef;
+use super::tags::TagRef;
 use super::wikilinks::WikiLinkRef;
 
 /// One occurrence of a `[[]]`-family construct.
@@ -25,21 +25,16 @@ pub enum WikiRef {
 }
 
 /// Extract every `[[]]`-family occurrence from the markdown body in source
-/// order. Tags and embeds are masked out before the link parser runs, so a
-/// `#[[ai]]` is reported only as a `Tag` (never duplicated as a `Link`).
+/// order. Comrak owns extraction of wiki-shaped syntax; scraps only classifies
+/// the extracted node by the prefix immediately before `[[`.
 pub fn wiki_refs(text: &str) -> Vec<WikiRef> {
-    let tag_refs = tags(text);
-    let embed_refs = embeds(text);
-
-    // Mask out `#[[…]]` and `![[…]]` byte ranges so the wikilink parser
-    // (comrak) doesn't pick those up as plain `[[…]]` again.
-    let masked = mask_tag_and_embed_syntax(text);
-
     let arena = Arena::new();
     let opts = options();
-    let root = parse_document(&arena, &masked, &opts);
-    let link_pairs: Vec<(usize, WikiLinkRef)> = root
-        .descendants()
+    let parse_text = expose_embed_wikilinks(text);
+    let root = parse_document(&arena, &parse_text, &opts);
+    let starts = line_starts(text);
+
+    root.descendants()
         .filter_map(|node| {
             let NodeValue::WikiLink(NodeWikiLink { url }) = &node.data().value else {
                 return None;
@@ -47,7 +42,11 @@ pub fn wiki_refs(text: &str) -> Vec<WikiRef> {
             if url.is_empty() {
                 return None;
             }
-            let line = node.data().sourcepos.start.line;
+
+            let pos = node.data().sourcepos;
+            let line = pos.start.line;
+            let byte = line_col_to_byte(&starts, line, pos.start.column);
+            let prefix = byte.checked_sub(1).and_then(|i| text.as_bytes().get(i));
             let (ctx_path, title, heading) = parse_wikilink_url(url);
             let label = collect_text(node);
             let display = match &heading {
@@ -55,31 +54,38 @@ pub fn wiki_refs(text: &str) -> Vec<WikiRef> {
                 None => url_path(&ctx_path, &title),
             };
             let alias = if label == display { None } else { Some(label) };
-            Some((
-                line,
-                WikiLinkRef {
+
+            match prefix {
+                Some(b'#') => {
+                    let mut path = ctx_path;
+                    path.push(title);
+                    if path.iter().all(|s| !s.is_empty()) {
+                        Some(WikiRef::Tag(TagRef { path, line }))
+                    } else {
+                        None
+                    }
+                }
+                Some(b'!') => {
+                    if title.is_empty() || alias.is_some() {
+                        None
+                    } else {
+                        Some(WikiRef::Embed(EmbedRef {
+                            ctx_path,
+                            title,
+                            heading,
+                            line,
+                        }))
+                    }
+                }
+                _ => Some(WikiRef::Link(WikiLinkRef {
                     ctx_path,
                     title,
                     heading,
                     alias,
-                },
-            ))
+                })),
+            }
         })
-        .collect();
-
-    // Combine and sort by source line for stable order.
-    let mut all: Vec<(usize, WikiRef)> = Vec::new();
-    for (line, r) in link_pairs {
-        all.push((line, WikiRef::Link(r)));
-    }
-    for tag in tag_refs {
-        all.push((tag.line, WikiRef::Tag(tag)));
-    }
-    for embed in embed_refs {
-        all.push((embed.line, WikiRef::Embed(embed)));
-    }
-    all.sort_by_key(|(line, _)| *line);
-    all.into_iter().map(|(_, wl)| wl).collect()
+        .collect()
 }
 
 fn url_path(ctx_path: &[String], title: &str) -> String {
@@ -90,44 +96,19 @@ fn url_path(ctx_path: &[String], title: &str) -> String {
     }
 }
 
-/// Replace every byte of `#[[…]]` and `![[…]]` (including the closing `]]`)
-/// with ASCII spaces. Length is preserved so line and column offsets remain
-/// valid for downstream parsing.
-fn mask_tag_and_embed_syntax(text: &str) -> String {
+/// Comrak treats `![[x]]` as image-shaped Markdown, not as a WikiLink node.
+/// Replacing only the attached `!` keeps byte positions stable while letting
+/// comrak extract the same `[[x]]` shape that tags and links use.
+fn expose_embed_wikilinks(text: &str) -> String {
     let bytes = text.as_bytes();
-    let mut out: Vec<u8> = bytes.to_vec();
+    let mut out = bytes.to_vec();
     let mut i = 0;
-    while i + 4 < bytes.len() {
-        let prefix_match =
-            (bytes[i] == b'#' || bytes[i] == b'!') && bytes[i + 1] == b'[' && bytes[i + 2] == b'[';
-        if !prefix_match {
-            i += 1;
-            continue;
+    while i + 2 < bytes.len() {
+        if bytes[i] == b'!' && bytes[i + 1] == b'[' && bytes[i + 2] == b'[' {
+            out[i] = b' ';
         }
-        // Search for the closing `]]` on the same line.
-        let mut j = i + 3;
-        let mut found = false;
-        while j + 1 < bytes.len() {
-            if bytes[j] == b'\n' {
-                break;
-            }
-            if bytes[j] == b']' && bytes[j + 1] == b']' {
-                found = true;
-                break;
-            }
-            j += 1;
-        }
-        if found {
-            for k in i..(j + 2) {
-                out[k] = b' ';
-            }
-            i = j + 2;
-        } else {
-            i += 1;
-        }
+        i += 1;
     }
-    // The original text was valid UTF-8 and we only replaced complete byte
-    // ranges with ASCII spaces, so the result is also valid UTF-8.
     String::from_utf8(out).unwrap_or_else(|_| text.to_string())
 }
 
