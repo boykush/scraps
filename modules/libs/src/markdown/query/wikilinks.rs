@@ -1,11 +1,6 @@
-use comrak::{
-    nodes::{AstNode, NodeValue, NodeWikiLink},
-    parse_document, Arena,
-};
-
 use crate::model::key::ScrapKey;
 
-use super::common::{collect_text, options, parse_wikilink_url};
+use super::wiki_link::{wiki_links, WikiLink};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct WikiLinkRef {
@@ -15,47 +10,17 @@ pub struct WikiLinkRef {
     pub alias: Option<String>,
 }
 
+/// Plain `[[link]]` occurrences from the body. `#[[tag]]` and `![[embed]]`
+/// are handled by the unified `wiki_links` classifier and excluded here, so
+/// this function carries no special-case knowledge of tag or embed syntax.
 pub fn wikilinks(text: &str) -> Vec<WikiLinkRef> {
-    let arena = Arena::new();
-    let opts = options();
-    let root = parse_document(&arena, text, &opts);
-    root.descendants()
-        .filter_map(|node| match &node.data().value {
-            NodeValue::WikiLink(NodeWikiLink { url }) if !url.is_empty() => {
-                // `#[[tag]]` is an explicit tag — not a wikilink. Exclude
-                // wikilinks immediately preceded by a `#`.
-                if preceded_by_hash(node) {
-                    return None;
-                }
-                let (ctx_path, title, heading) = parse_wikilink_url(url);
-                let label = collect_text(node);
-                let display = match &heading {
-                    Some(h) => format!("{}#{}", url_path(&ctx_path, &title), h),
-                    None => url_path(&ctx_path, &title),
-                };
-                let alias = if label == display { None } else { Some(label) };
-                Some(WikiLinkRef {
-                    ctx_path,
-                    title,
-                    heading,
-                    alias,
-                })
-            }
+    wiki_links(text)
+        .into_iter()
+        .filter_map(|w| match w {
+            WikiLink::Link(r) => Some(r),
             _ => None,
         })
         .collect()
-}
-
-/// Returns `true` if the immediately preceding sibling is a `Text` node whose
-/// content ends with a `#` character — the tag-syntax marker.
-fn preceded_by_hash<'a>(node: &'a AstNode<'a>) -> bool {
-    let Some(prev) = node.previous_sibling() else {
-        return false;
-    };
-    if let NodeValue::Text(t) = &prev.data().value {
-        return t.ends_with('#');
-    }
-    false
 }
 
 fn url_path(ctx_path: &[String], title: &str) -> String {
