@@ -5,7 +5,7 @@ use chrono_tz::Tz;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use scraps_libs::{
-    markdown,
+    html::{self, EmbedMode},
     model::{base_url::BaseUrl, scrap::Scrap, tags::Tags},
 };
 use tracing::{span, Level};
@@ -17,6 +17,7 @@ use super::model::{
     list_view_configs::ListViewConfigs,
     scrap_detail::{ScrapDetail, ScrapDetails},
 };
+use std::collections::HashMap;
 
 pub struct BuildUsecase;
 
@@ -40,15 +41,22 @@ impl BuildUsecase {
         progress.start_stage(&Stage::ReadScraps);
         let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
 
+        let scrap_texts: HashMap<_, _> = scraps_with_ts
+            .iter()
+            .map(|(scrap, _)| (scrap.self_key(), scrap.md_text().to_string()))
+            .collect();
+
         // Process README content
         let readme_content = readme_text
             .as_ref()
-            .map(|text| markdown::convert::to_content(text, base_url));
+            .map(|text| html::to_content(text, base_url, EmbedMode::Expand(&scrap_texts)));
 
         // Build ScrapDetails from pre-loaded data
         let scrap_details = scraps_with_ts
             .into_par_iter()
-            .map(|(scrap, commited_ts)| ScrapDetail::new(scrap, commited_ts, base_url))
+            .map(|(scrap, commited_ts)| {
+                ScrapDetail::new(scrap, commited_ts, base_url, &scrap_texts)
+            })
             .collect::<Vec<ScrapDetail>>();
         let scrap_details = ScrapDetails::new(&scrap_details);
 

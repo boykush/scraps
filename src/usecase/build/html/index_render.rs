@@ -193,9 +193,14 @@ mod tests {
 
         // scraps
         let scrap1 = Scrap::new("scrap1", &None, "# header1");
-        let sc1 = ScrapDetail::new(&scrap1, &Some(1), base_url);
         let scrap2 = Scrap::new("scrap2", &None, "## header2");
-        let sc2 = ScrapDetail::new(&scrap2, &Some(0), base_url);
+        let scraps = [scrap1.clone(), scrap2.clone()];
+        let scrap_texts = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
+            .collect();
+        let sc1 = ScrapDetail::new(&scrap1, &Some(1), base_url, &scrap_texts);
+        let sc2 = ScrapDetail::new(&scrap2, &Some(0), base_url, &scrap_texts);
         let scrap_details = ScrapDetails::new(&vec![sc1.to_owned(), sc2.to_owned()]);
 
         let scraps = scrap_details.to_scraps();
@@ -240,13 +245,23 @@ mod tests {
 
         // scraps
         let scrap1 = Scrap::new("scrap1", &None, "# header1");
-        let sc1 = ScrapDetail::new(&scrap1, &Some(3), base_url);
         let scrap2 = Scrap::new("scrap2", &None, "## header2");
-        let sc2 = ScrapDetail::new(&scrap2, &Some(2), base_url);
         let scrap3 = Scrap::new("scrap3", &None, "### header3");
-        let sc3 = ScrapDetail::new(&scrap3, &Some(1), base_url);
         let scrap4 = Scrap::new("scrap4", &None, "#### header4");
-        let sc4 = ScrapDetail::new(&scrap4, &Some(0), base_url);
+        let scraps = [
+            scrap1.clone(),
+            scrap2.clone(),
+            scrap3.clone(),
+            scrap4.clone(),
+        ];
+        let scrap_texts = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
+            .collect();
+        let sc1 = ScrapDetail::new(&scrap1, &Some(3), base_url, &scrap_texts);
+        let sc2 = ScrapDetail::new(&scrap2, &Some(2), base_url, &scrap_texts);
+        let sc3 = ScrapDetail::new(&scrap3, &Some(1), base_url, &scrap_texts);
+        let sc4 = ScrapDetail::new(&scrap4, &Some(0), base_url, &scrap_texts);
         let scrap_details = ScrapDetails::new(&vec![
             sc1.to_owned(),
             sc2.to_owned(),

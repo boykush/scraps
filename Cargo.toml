@@ -67,7 +67,7 @@ include = [
 [dependencies]
 # sub crates
 scraps_libs.workspace = true
-scraps_libs.features = ["git", "lang", "markdown", "model", "search", "slugify"]
+scraps_libs.features = ["git", "html", "lang", "markdown", "model", "search", "slugify"]
 #external crates
 url.workspace = true
 itertools.workspace = true
