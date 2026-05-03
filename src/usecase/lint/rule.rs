@@ -8,7 +8,7 @@ pub enum LintRuleName {
     Lonely,
     SelfLink,
     Overlinking,
-    SingletonTag,
+    BrokenLink,
 }
 
 impl LintRuleName {
@@ -18,7 +18,7 @@ impl LintRuleName {
             Self::Lonely => "lonely",
             Self::SelfLink => "self-link",
             Self::Overlinking => "overlinking",
-            Self::SingletonTag => "singleton-tag",
+            Self::BrokenLink => "broken-link",
         }
     }
 }

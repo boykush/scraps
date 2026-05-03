@@ -4,13 +4,14 @@ use url::Url;
 
 use crate::markdown;
 
-use super::{context::Ctx, key::ScrapKey, title::Title};
+use super::{context::Ctx, key::ScrapKey, tag::Tag, title::Title};
 
 #[derive(PartialEq, Clone, Debug)]
 pub struct Scrap {
     title: Title,
     ctx: Option<Ctx>,
     links: Vec<ScrapKey>,
+    tags: Vec<Tag>,
     md_text: String,
     thumbnail: Option<Url>,
 }
@@ -32,6 +33,12 @@ impl Scrap {
         &self.links
     }
 
+    /// Explicitly-declared `#[[tag]]` tags found in the body, in occurrence
+    /// order with duplicates removed (first occurrence kept).
+    pub fn tags(&self) -> &[Tag] {
+        &self.tags
+    }
+
     pub fn md_text(&self) -> &str {
         &self.md_text
     }
@@ -51,10 +58,21 @@ impl Scrap {
             .collect();
         let thumbnail = markdown::query::images(text).into_iter().next();
 
+        // Build the tag list from explicit `#[[tag]]` occurrences. Preserve
+        // the first occurrence order and drop duplicates within this scrap;
+        // cross-scrap aggregation is `Tags::new`'s job.
+        let mut seen = HashSet::new();
+        let tags: Vec<Tag> = markdown::query::tags(text)
+            .into_iter()
+            .map(|occ| Tag::from(occ.path.join("/").as_str()))
+            .filter(|tag| seen.insert(tag.clone()))
+            .collect();
+
         Scrap {
             title: title.into(),
             ctx: ctx.clone(),
             links,
+            tags,
             md_text: text.to_string(),
             thumbnail,
         }
@@ -108,5 +126,47 @@ mod tests {
         let scrap = Scrap::new("foo", &None, "");
         let key = scrap.self_key();
         assert_eq!(format!("{}", key), "foo");
+    }
+
+    // v1 shape: Scrap exposes explicitly-declared `#[[tag]]` occurrences via
+    // `tags()`, populated at construction time from the markdown body.
+    // Implicit derivation from unresolved `[[]]` links is being removed.
+    #[test]
+    fn it_tags_extracted_from_body() {
+        let scrap = Scrap::new(
+            "foo",
+            &None,
+            "body with #[[ai]] and #[[programming/rust]] tags",
+        );
+        let mut got: Vec<String> = scrap.tags().iter().map(|t| format!("{}", t)).collect();
+        got.sort();
+        assert_eq!(got, vec!["ai".to_string(), "programming/rust".to_string()]);
+    }
+
+    #[test]
+    fn it_tags_empty_when_no_explicit_tags() {
+        let scrap = Scrap::new(
+            "foo",
+            &None,
+            "body with [[wikilink]] but no hashtag tags here",
+        );
+        assert!(scrap.tags().is_empty());
+    }
+
+    #[test]
+    fn it_tags_dedup_within_scrap() {
+        let scrap = Scrap::new("foo", &None, "#[[ai]] then #[[ai]] again");
+        assert_eq!(scrap.tags().len(), 1);
+    }
+
+    #[test]
+    fn it_tags_excluded_from_code_blocks() {
+        let scrap = Scrap::new(
+            "foo",
+            &None,
+            "real #[[ai]]\n```\n#[[code-only]]\n```\n`#[[inline-code]]`",
+        );
+        let names: Vec<String> = scrap.tags().iter().map(|t| format!("{}", t)).collect();
+        assert_eq!(names, vec!["ai".to_string()]);
     }
 }

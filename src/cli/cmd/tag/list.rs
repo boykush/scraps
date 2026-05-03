@@ -25,9 +25,9 @@ pub fn run(json: bool, project_path: Option<&Path>, writer: &mut impl Write) -> 
         let tags_json: Vec<TagJson> = tags
             .into_iter()
             .map(|tag| {
-                let backlinks_count = backlinks_map.get(&tag.title().clone().into()).len();
+                let backlinks_count = backlinks_map.get_tag(&tag).len();
                 TagJson {
-                    title: tag.title().to_string(),
+                    title: tag.to_string(),
                     backlinks_count,
                 }
             })

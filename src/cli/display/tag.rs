@@ -3,13 +3,16 @@ use std::fmt;
 use crate::error::{anyhow::Context, CliError, ScrapsResult};
 use colored::Colorize;
 use comfy_table::{presets::NOTHING, Cell, CellAlignment, Table};
-use scraps_libs::model::{base_url::BaseUrl, slug::Slug, tag::Tag, title::Title};
+use scraps_libs::{
+    model::{base_url::BaseUrl, tag::Tag},
+    slugify,
+};
 use url::Url;
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 
 pub struct DisplayTag {
-    title: Title,
+    tag: Tag,
     url: Option<Url>,
     backlinks_count: usize,
 }
@@ -24,21 +27,21 @@ impl DisplayTag {
             .map(|base_url| {
                 base_url
                     .as_url()
-                    .join(&format!("scraps/{}.html", Slug::from(tag.title().clone())))
+                    .join(&format!("tags/{}.html", tag_slug_path(tag)))
             })
             .transpose()
             .context(CliError::Display)?;
-        let backlinks_count = backlinks_map.get(&tag.title().clone().into()).len();
+        let backlinks_count = backlinks_map.get_tag(tag).len();
 
         Ok(DisplayTag {
-            title: tag.title().to_owned(),
+            tag: tag.clone(),
             url,
             backlinks_count,
         })
     }
 
-    pub fn title(&self) -> &Title {
-        &self.title
+    pub fn tag(&self) -> &Tag {
+        &self.tag
     }
 
     pub fn url(&self) -> Option<&Url> {
@@ -48,6 +51,16 @@ impl DisplayTag {
     pub fn backlinks_count(&self) -> usize {
         self.backlinks_count
     }
+}
+
+/// Slugify each segment of a hierarchical tag and join with `/`. Used both
+/// for URL generation and HTML output paths.
+fn tag_slug_path(tag: &Tag) -> String {
+    tag.segments()
+        .iter()
+        .map(|s| slugify::by_dash(s))
+        .collect::<Vec<_>>()
+        .join("/")
 }
 
 pub struct DisplayTagTable {
@@ -88,13 +101,13 @@ impl fmt::Display for DisplayTagTable {
                     .map(|u| u.to_string().blue().to_string())
                     .unwrap_or_default();
                 table.add_row(vec![
-                    Cell::new(tag.title()),
+                    Cell::new(tag.tag().to_string()),
                     Cell::new(tag.backlinks_count()).set_alignment(CellAlignment::Right),
                     Cell::new(url_str),
                 ]);
             } else {
                 table.add_row(vec![
-                    Cell::new(tag.title()),
+                    Cell::new(tag.tag().to_string()),
                     Cell::new(tag.backlinks_count()).set_alignment(CellAlignment::Right),
                 ]);
             }
@@ -112,13 +125,13 @@ mod tests {
     fn display_tag_table_with_url_contains_all_columns() {
         let tags = vec![
             DisplayTag {
-                title: Title::from("Rust"),
-                url: Some(Url::parse("https://example.com/scraps/rust.html").unwrap()),
+                tag: Tag::from("Rust"),
+                url: Some(Url::parse("https://example.com/tags/rust.html").unwrap()),
                 backlinks_count: 5,
             },
             DisplayTag {
-                title: Title::from("CLI"),
-                url: Some(Url::parse("https://example.com/scraps/cli.html").unwrap()),
+                tag: Tag::from("CLI"),
+                url: Some(Url::parse("https://example.com/tags/cli.html").unwrap()),
                 backlinks_count: 2,
             },
         ];
@@ -134,7 +147,7 @@ mod tests {
     #[test]
     fn display_tag_table_without_url_omits_url_column() {
         let tags = vec![DisplayTag {
-            title: Title::from("Rust"),
+            tag: Tag::from("Rust"),
             url: None,
             backlinks_count: 3,
         }];
@@ -150,5 +163,19 @@ mod tests {
         let table = DisplayTagTable::new(vec![]);
         let output = table.to_string();
         assert!(output.is_empty());
+    }
+
+    #[test]
+    fn display_tag_table_renders_hierarchical_path() {
+        // Hierarchical tag like ai/ml should display its full path in the
+        // "Tag" column, not just the leaf segment.
+        let tags = vec![DisplayTag {
+            tag: Tag::from("ai/ml"),
+            url: Some(Url::parse("https://example.com/tags/ai/ml.html").unwrap()),
+            backlinks_count: 1,
+        }];
+        let table = DisplayTagTable::new(tags);
+        let output = table.to_string();
+        assert!(output.contains("ai/ml"));
     }
 }

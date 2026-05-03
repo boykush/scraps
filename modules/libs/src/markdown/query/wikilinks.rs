@@ -1,5 +1,5 @@
 use comrak::{
-    nodes::{NodeValue, NodeWikiLink},
+    nodes::{AstNode, NodeValue, NodeWikiLink},
     parse_document, Arena,
 };
 
@@ -22,6 +22,11 @@ pub fn wikilinks(text: &str) -> Vec<WikiLinkRef> {
     root.descendants()
         .filter_map(|node| match &node.data().value {
             NodeValue::WikiLink(NodeWikiLink { url }) if !url.is_empty() => {
+                // `#[[tag]]` is an explicit tag — not a wikilink. Exclude
+                // wikilinks immediately preceded by a `#`.
+                if preceded_by_hash(node) {
+                    return None;
+                }
                 let (ctx_path, title, heading) = parse_wikilink_url(url);
                 let label = collect_text(node);
                 let display = match &heading {
@@ -39,6 +44,18 @@ pub fn wikilinks(text: &str) -> Vec<WikiLinkRef> {
             _ => None,
         })
         .collect()
+}
+
+/// Returns `true` if the immediately preceding sibling is a `Text` node whose
+/// content ends with a `#` character — the tag-syntax marker.
+fn preceded_by_hash<'a>(node: &'a AstNode<'a>) -> bool {
+    let Some(prev) = node.previous_sibling() else {
+        return false;
+    };
+    if let NodeValue::Text(t) = &prev.data().value {
+        return t.ends_with('#');
+    }
+    false
 }
 
 fn url_path(ctx_path: &[String], title: &str) -> String {
@@ -152,6 +169,24 @@ mod tests {
     #[case::multi_pipe("[[a|b|c]]")]
     fn it_wikilinks_invalid(#[case] input: &str) {
         assert!(wikilinks(input).is_empty());
+    }
+
+    // `#[[tag]]` is the v1 explicit tag syntax — it must NOT be picked up by
+    // the wikilink parser. Tag and link are separate namespaces.
+    #[rstest]
+    #[case::tag_simple("#[[ai]]")]
+    #[case::tag_hierarchical("#[[ai/ml]]")]
+    #[case::tag_with_alias_like("#[[Domain Driven Design]]")]
+    fn it_wikilinks_excludes_tag_syntax(#[case] input: &str) {
+        assert!(wikilinks(input).is_empty(), "input was: {input:?}");
+    }
+
+    #[test]
+    fn it_wikilinks_distinguishes_tag_and_link_in_same_doc() {
+        let input = "see [[scrap]] and tagged #[[ai]]";
+        let res = wikilinks(input);
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0], link(&[], "scrap", None, None));
     }
 
     #[test]

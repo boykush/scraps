@@ -26,23 +26,20 @@ impl LookupTagBacklinksUsecase {
         scraps: &[Scrap],
         tag_title: &Title,
     ) -> ScrapsResult<Vec<LookupTagBacklinksResult>> {
-        // Get valid tags and check if the requested title is actually a tag
-        let valid_tags = Tags::new(scraps);
-        let requested_tag: Tag = tag_title.clone().into();
+        // Treat the input as a possibly-hierarchical tag path (e.g. "ai/ml").
+        let requested_tag: Tag = Tag::from(tag_title.to_string().as_str());
 
-        // If the requested title is not a valid tag, return empty results
+        // Verify the requested tag actually exists in the wiki (with ancestor
+        // auto-aggregation): if no scrap declares this tag at any descendant
+        // level, return an empty result.
+        let valid_tags = Tags::new(scraps);
         if !valid_tags.into_iter().any(|tag| tag == requested_tag) {
             return Ok(Vec::new());
         }
 
-        // Create tag key (tags don't have contexts, so we use ScrapKey::from)
-        let tag_key = tag_title.clone().into();
-
-        // Use BacklinksMap to find all scraps that link to the tag
         let backlinks_map = BacklinksMap::new(scraps);
-        let linking_scraps = backlinks_map.get(&tag_key);
+        let linking_scraps = backlinks_map.get_tag(&requested_tag);
 
-        // Convert each linking scrap to LookupTagBacklinksResult
         let results: Vec<LookupTagBacklinksResult> = linking_scraps
             .into_iter()
             .map(|linking_scrap| {
@@ -66,16 +63,18 @@ impl LookupTagBacklinksUsecase {
 mod tests {
     use super::*;
 
+    // v1: tags come from explicit `#[[tag]]` declarations.
+
     #[test]
     fn test_lookup_tag_backlinks_success() {
         let scraps = vec![
-            Scrap::new("scrap1", &None, "# Scrap 1\n\nThis links to [[test_tag]]."),
+            Scrap::new("scrap1", &None, "# Scrap 1\n\nTagged #[[test_tag]]."),
+            Scrap::new("scrap2", &None, "# Scrap 2\n\nAlso tagged #[[test_tag]]."),
             Scrap::new(
-                "scrap2",
+                "scrap3",
                 &None,
-                "# Scrap 2\n\nThis also links to [[test_tag]].",
+                "# Scrap 3\n\nDifferent tag #[[other_tag]].",
             ),
-            Scrap::new("scrap3", &None, "# Scrap 3\n\nThis links to [[other_tag]]."),
         ];
 
         let usecase = LookupTagBacklinksUsecase::new();
@@ -86,7 +85,6 @@ mod tests {
 
         assert_eq!(results.len(), 2);
 
-        // Check that we got the expected linking scraps
         let titles: Vec<String> = results.iter().map(|r| r.title.to_string()).collect();
         assert!(titles.contains(&"scrap1".to_string()));
         assert!(titles.contains(&"scrap2".to_string()));
@@ -96,11 +94,11 @@ mod tests {
     #[test]
     fn test_lookup_tag_backlinks_with_context_scraps() {
         let scraps = vec![
-            Scrap::new("scrap1", &None, "# Scrap 1\n\nThis links to [[test_tag]]."),
+            Scrap::new("scrap1", &None, "# Scrap 1\n\nTagged #[[test_tag]]."),
             Scrap::new(
                 "scrap2",
                 &Some("Context".into()),
-                "# Scrap 2\n\nThis also links to [[test_tag]].",
+                "# Scrap 2\n\nAlso tagged #[[test_tag]].",
             ),
         ];
 
@@ -112,7 +110,6 @@ mod tests {
 
         assert_eq!(results.len(), 2);
 
-        // Check that we got scraps from both root and context directory
         let scrap_keys: Vec<(String, Option<String>)> = results
             .iter()
             .map(|r| (r.title.to_string(), r.ctx.as_ref().map(|c| c.to_string())))
@@ -142,11 +139,7 @@ mod tests {
     #[test]
     fn test_lookup_tag_backlinks_invalid_tag() {
         let scraps = vec![
-            Scrap::new(
-                "scrap1",
-                &None,
-                "# Scrap 1\n\nThis links to [[actual_tag]].",
-            ),
+            Scrap::new("scrap1", &None, "# Scrap 1\n\nTagged #[[actual_tag]]."),
             Scrap::new(
                 "scrap2",
                 &None,
@@ -161,8 +154,9 @@ mod tests {
 
         let usecase = LookupTagBacklinksUsecase::new();
 
-        // Request backlinks for "actual_scrap" - this is a scrap title, not a tag
-        // Even though scrap2 links to it, it should return empty because it's not a tag
+        // Request backlinks for "actual_scrap" — it's a scrap title, not a tag.
+        // The scrap-link namespace and tag namespace are disjoint in v1, so
+        // even though scrap2 wikilinks to it, this returns empty.
         let results = usecase
             .execute(&scraps, &Title::from("actual_scrap"))
             .expect("Should succeed");
@@ -173,7 +167,7 @@ mod tests {
             "Should return empty results for non-tag titles"
         );
 
-        // Verify that actual tags still work
+        // Real tags work.
         let tag_results = usecase
             .execute(&scraps, &Title::from("actual_tag"))
             .expect("Should succeed");

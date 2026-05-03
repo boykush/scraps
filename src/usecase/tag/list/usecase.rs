@@ -42,17 +42,17 @@ mod tests {
         assert_eq!(
             tags.clone()
                 .into_iter()
-                .sorted_by_key(|t| t.title().to_string())
+                .sorted_by_key(|t| t.to_string())
                 .collect_vec(),
             vec![tag1.clone(), tag2.clone(), tag3.clone(),]
         );
 
-        // test backlinks map
+        // test backlinks map (tag-keyed, separate from scrap-link backlinks)
         let scrap1 = Scrap::new("test1", &None, "#[[Tag1]] #[[Tag2]]");
         let scrap2 = Scrap::new("test2", &None, "#[[Tag1]] #[[Tag3]]");
         assert_eq!(
             backlinks_map
-                .get(&tag1.title().clone().into())
+                .get_tag(&tag1)
                 .into_iter()
                 .map(|s| s.title().clone())
                 .sorted_by_key(|t| t.to_string())
@@ -61,7 +61,7 @@ mod tests {
         );
         assert_eq!(
             backlinks_map
-                .get(&tag2.title().clone().into())
+                .get_tag(&tag2)
                 .into_iter()
                 .map(|s| s.title().clone())
                 .collect_vec(),
@@ -69,7 +69,7 @@ mod tests {
         );
         assert_eq!(
             backlinks_map
-                .get(&tag3.title().clone().into())
+                .get_tag(&tag3)
                 .into_iter()
                 .map(|s| s.title().clone())
                 .collect_vec(),
