@@ -6,8 +6,8 @@ use crate::{error::ScrapsResult, usecase::build::model::backlinks_map::Backlinks
 use super::{
     rule::{LintRule, LintRuleName, LintWarning},
     rules::{
-        dead_end::DeadEndRule, lonely::LonelyRule, overlinking::OverlinkingRule,
-        self_link::SelfLinkRule, singleton_tag::SingletonTagRule,
+        broken_link::BrokenLinkRule, dead_end::DeadEndRule, lonely::LonelyRule,
+        overlinking::OverlinkingRule, self_link::SelfLinkRule,
     },
 };
 
@@ -31,7 +31,7 @@ impl LintUsecase {
             Box::new(LonelyRule),
             Box::new(SelfLinkRule),
             Box::new(OverlinkingRule),
-            Box::new(SingletonTagRule),
+            Box::new(BrokenLinkRule),
         ];
 
         let rules: Vec<Box<dyn LintRule>> = if rule_names.is_empty() {
@@ -58,11 +58,16 @@ mod tests {
 
     #[test]
     fn all_rules_run_and_aggregate() {
+        // v1: each scrap below triggers a different rule.
+        // - no_links: dead_end (no outbound) and lonely (no inbound)
+        // - self_linker: self_link
+        // - overlinker: overlinking (duplicate refs to no_links)
+        // - linker_to_unknown: broken_link ([[unknown]] doesn't resolve)
         let scraps = vec![
             Scrap::new("no_links", &None, "plain text"),
             Scrap::new("self_linker", &None, "[[self_linker]] [[no_links]]"),
             Scrap::new("overlinker", &None, "[[no_links]] [[no_links]]"),
-            Scrap::new("with_tag", &None, "[[singleton_tag]]"),
+            Scrap::new("linker_to_unknown", &None, "[[unknown]]"),
         ];
 
         let usecase = LintUsecase::new();
@@ -73,14 +78,16 @@ mod tests {
         assert!(rule_names.contains(&&LintRuleName::Lonely));
         assert!(rule_names.contains(&&LintRuleName::SelfLink));
         assert!(rule_names.contains(&&LintRuleName::Overlinking));
-        assert!(rule_names.contains(&&LintRuleName::SingletonTag));
+        assert!(rule_names.contains(&&LintRuleName::BrokenLink));
     }
 
     #[test]
     fn clean_project_no_warnings() {
+        // v1: explicit `#[[]]` tags don't introduce broken links, and mutual
+        // `[[]]` refs satisfy lonely / dead_end.
         let scraps = vec![
-            Scrap::new("a", &None, "[[b]] [[shared_tag]]"),
-            Scrap::new("b", &None, "[[a]] [[shared_tag]]"),
+            Scrap::new("a", &None, "[[b]] #[[shared_tag]]"),
+            Scrap::new("b", &None, "[[a]] #[[shared_tag]]"),
         ];
 
         let usecase = LintUsecase::new();

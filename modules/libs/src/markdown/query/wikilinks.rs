@@ -1,11 +1,6 @@
-use comrak::{
-    nodes::{NodeValue, NodeWikiLink},
-    parse_document, Arena,
-};
-
 use crate::model::key::ScrapKey;
 
-use super::common::{collect_text, options, parse_wikilink_url};
+use super::wiki_ref::{wiki_refs, WikiRef};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct WikiLinkRef {
@@ -15,27 +10,14 @@ pub struct WikiLinkRef {
     pub alias: Option<String>,
 }
 
+/// Plain `[[link]]` occurrences from the body. `#[[tag]]` and `![[embed]]`
+/// are handled by the unified `wiki_refs` classifier and excluded here, so
+/// this function carries no special-case knowledge of tag or embed syntax.
 pub fn wikilinks(text: &str) -> Vec<WikiLinkRef> {
-    let arena = Arena::new();
-    let opts = options();
-    let root = parse_document(&arena, text, &opts);
-    root.descendants()
-        .filter_map(|node| match &node.data().value {
-            NodeValue::WikiLink(NodeWikiLink { url }) if !url.is_empty() => {
-                let (ctx_path, title, heading) = parse_wikilink_url(url);
-                let label = collect_text(node);
-                let display = match &heading {
-                    Some(h) => format!("{}#{}", url_path(&ctx_path, &title), h),
-                    None => url_path(&ctx_path, &title),
-                };
-                let alias = if label == display { None } else { Some(label) };
-                Some(WikiLinkRef {
-                    ctx_path,
-                    title,
-                    heading,
-                    alias,
-                })
-            }
+    wiki_refs(text)
+        .into_iter()
+        .filter_map(|w| match w {
+            WikiRef::Link(r) => Some(r),
             _ => None,
         })
         .collect()
@@ -152,6 +134,24 @@ mod tests {
     #[case::multi_pipe("[[a|b|c]]")]
     fn it_wikilinks_invalid(#[case] input: &str) {
         assert!(wikilinks(input).is_empty());
+    }
+
+    // `#[[tag]]` is the v1 explicit tag syntax — it must NOT be picked up by
+    // the wikilink parser. Tag and link are separate namespaces.
+    #[rstest]
+    #[case::tag_simple("#[[ai]]")]
+    #[case::tag_hierarchical("#[[ai/ml]]")]
+    #[case::tag_with_alias_like("#[[Domain Driven Design]]")]
+    fn it_wikilinks_excludes_tag_syntax(#[case] input: &str) {
+        assert!(wikilinks(input).is_empty(), "input was: {input:?}");
+    }
+
+    #[test]
+    fn it_wikilinks_distinguishes_tag_and_link_in_same_doc() {
+        let input = "see [[scrap]] and tagged #[[ai]]";
+        let res = wikilinks(input);
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0], link(&[], "scrap", None, None));
     }
 
     #[test]

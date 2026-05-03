@@ -120,8 +120,8 @@ pub enum CliLintRuleName {
     SelfLink,
     #[value(name = "overlinking")]
     Overlinking,
-    #[value(name = "singleton-tag")]
-    SingletonTag,
+    #[value(name = "broken-link")]
+    BrokenLink,
 }
 
 impl From<CliLintRuleName> for LintRuleName {
@@ -131,7 +131,7 @@ impl From<CliLintRuleName> for LintRuleName {
             CliLintRuleName::Lonely => LintRuleName::Lonely,
             CliLintRuleName::SelfLink => LintRuleName::SelfLink,
             CliLintRuleName::Overlinking => LintRuleName::Overlinking,
-            CliLintRuleName::SingletonTag => LintRuleName::SingletonTag,
+            CliLintRuleName::BrokenLink => LintRuleName::BrokenLink,
         }
     }
 }
