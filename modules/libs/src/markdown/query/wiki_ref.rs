@@ -115,6 +115,7 @@ fn expose_embed_wikilinks(text: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
 
     fn link(ctx_path: &[&str], title: &str) -> WikiLinkRef {
         WikiLinkRef {
@@ -125,71 +126,52 @@ mod tests {
         }
     }
 
-    #[test]
-    fn it_classifies_link_only() {
-        let res = wiki_refs("see [[scrap]]");
-        assert_eq!(res, vec![WikiRef::Link(link(&[], "scrap"))]);
+    #[rstest]
+    #[case::basic("see [[scrap]]", "scrap")]
+    #[case::japanese("see [[日本語]]", "日本語")]
+    fn it_classifies_link_only(#[case] input: &str, #[case] title: &str) {
+        assert_eq!(wiki_refs(input), vec![WikiRef::Link(link(&[], title))]);
     }
 
-    #[test]
-    fn it_classifies_tag_only() {
-        let res = wiki_refs("tagged #[[ai]]");
+    #[rstest]
+    #[case::basic("tagged #[[ai]]", &["ai"])]
+    #[case::hierarchical("tagged #[[ai/ml]]", &["ai", "ml"])]
+    #[case::japanese("tagged #[[プログラミング]]", &["プログラミング"])]
+    fn it_classifies_tag_only(#[case] input: &str, #[case] path: &[&str]) {
+        let expected: Vec<String> = path.iter().map(|s| s.to_string()).collect();
+        let res = wiki_refs(input);
         assert_eq!(res.len(), 1);
-        assert!(matches!(&res[0], WikiRef::Tag(t) if t.path == vec!["ai".to_string()]));
+        assert!(matches!(&res[0], WikiRef::Tag(t) if t.path == expected));
     }
 
-    #[test]
-    fn it_classifies_embed_only() {
-        let res = wiki_refs("see ![[paper]]");
+    #[rstest]
+    #[case::basic("see ![[paper]]", "paper")]
+    #[case::japanese("see ![[論文]]", "論文")]
+    fn it_classifies_embed_only(#[case] input: &str, #[case] title: &str) {
+        let res = wiki_refs(input);
         assert_eq!(res.len(), 1);
-        assert!(matches!(&res[0], WikiRef::Embed(e) if e.title == "paper"));
+        assert!(matches!(&res[0], WikiRef::Embed(e) if e.title == title));
     }
 
-    #[test]
-    fn it_disambiguates_link_tag_embed_in_one_paragraph() {
-        let res = wiki_refs("link [[scrap]] tag #[[ai]] embed ![[paper]]");
+    #[rstest]
+    #[case::same_paragraph("link [[scrap]] tag #[[ai]] embed ![[paper]]")]
+    #[case::source_lines(
+        "first line [[scrap]]\n\ntag #[[ai]] on line 3\n\nembed ![[paper]] on line 5"
+    )]
+    fn it_disambiguates_link_tag_embed(#[case] input: &str) {
+        let res = wiki_refs(input);
         assert_eq!(res.len(), 3);
         assert!(matches!(&res[0], WikiRef::Link(r) if r.title == "scrap"));
         assert!(matches!(&res[1], WikiRef::Tag(t) if t.path == vec!["ai".to_string()]));
         assert!(matches!(&res[2], WikiRef::Embed(e) if e.title == "paper"));
     }
 
-    #[test]
-    fn it_does_not_double_count_tag_as_link() {
-        // The smell this refactor addresses: `#[[ai]]` must be a Tag only,
-        // never reported as a phantom Link "ai".
-        let res = wiki_refs("only #[[ai]] here");
-        assert_eq!(res.len(), 1);
-        assert!(matches!(&res[0], WikiRef::Tag(_)));
-    }
-
-    #[test]
-    fn it_does_not_double_count_embed_as_link() {
-        let res = wiki_refs("only ![[paper]] here");
-        assert_eq!(res.len(), 1);
-        assert!(matches!(&res[0], WikiRef::Embed(_)));
-    }
-
-    #[test]
-    fn it_orders_by_source_line() {
-        let input = "first line [[a]]\n\ntag #[[t]] on line 3\n\nembed ![[e]] on line 5";
-        let res = wiki_refs(input);
-        assert_eq!(res.len(), 3);
-        assert!(matches!(&res[0], WikiRef::Link(r) if r.title == "a"));
-        assert!(matches!(&res[1], WikiRef::Tag(_)));
-        assert!(matches!(&res[2], WikiRef::Embed(_)));
-    }
-
-    #[test]
-    fn it_excludes_inside_code_block() {
-        let input = "```\n[[code-link]]\n#[[code-tag]]\n![[code-embed]]\n```";
-        let res = wiki_refs(input);
-        assert!(res.is_empty());
-    }
-
-    #[test]
-    fn it_excludes_inside_inline_code() {
-        let input = "`[[c-link]]` and `#[[c-tag]]` and `![[c-embed]]`";
+    #[rstest]
+    #[case::fenced_code("```\n[[code-link]]\n#[[code-tag]]\n![[code-embed]]\n```")]
+    #[case::inline_code("`[[c-link]]` and `#[[c-tag]]` and `![[c-embed]]`")]
+    #[case::unterminated("text #[[unterminated and ![[also without close")]
+    #[case::empty("")]
+    fn it_excludes_non_refs(#[case] input: &str) {
         let res = wiki_refs(input);
         assert!(res.is_empty());
     }
@@ -214,19 +196,5 @@ mod tests {
         assert_eq!(r.title, "Eric Evans");
         assert_eq!(r.heading.as_deref(), Some("bio"));
         assert_eq!(r.alias.as_deref(), Some("Eric"));
-    }
-
-    #[test]
-    fn it_handles_unterminated_brackets_safely() {
-        // Unterminated `#[[` or `![[` should not panic and should be left
-        // alone (no Tag/Embed emitted, not masked).
-        let res = wiki_refs("text #[[unterminated and ![[also without close");
-        assert!(res.is_empty());
-    }
-
-    #[test]
-    fn it_handles_empty_input() {
-        let res = wiki_refs("");
-        assert!(res.is_empty());
     }
 }
