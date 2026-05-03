@@ -41,6 +41,13 @@ fn main() -> error::ScrapsResult<()> {
             cli.path.as_deref(),
             &mut std::io::stdout(),
         ),
+        cli::SubCommands::Backlinks { title, ctx, json } => cli::cmd::backlinks::run(
+            &title,
+            ctx.as_deref(),
+            json,
+            cli.path.as_deref(),
+            &mut std::io::stdout(),
+        ),
         cli::SubCommands::Serve { git } => cli::cmd::serve::run(git, cli.path.as_deref()),
         cli::SubCommands::Tag { tag_command } => match tag_command {
             cli::TagSubCommands::List { json } => {

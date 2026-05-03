@@ -76,6 +76,17 @@ pub enum SubCommands {
         json: bool,
     },
 
+    #[command(about = "List inbound wiki-links (backlinks) to a scrap")]
+    Backlinks {
+        title: String,
+
+        #[arg(long, help = "Disambiguate title across contexts")]
+        ctx: Option<String>,
+
+        #[arg(long, help = "Output as JSON")]
+        json: bool,
+    },
+
     #[command(about = "Serve the site with build scraps")]
     Serve {
         #[arg(
