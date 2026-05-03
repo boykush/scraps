@@ -3,6 +3,7 @@ use clap_verbosity_flag::{Verbosity, WarnLevel};
 use std::path::PathBuf;
 
 use crate::usecase::lint::rule::LintRuleName;
+use scraps_libs::search::engine::SearchLogic;
 
 pub mod cmd;
 mod config;
@@ -87,6 +88,25 @@ pub enum SubCommands {
         json: bool,
     },
 
+    #[command(about = "Search scraps by query (fuzzy)")]
+    Search {
+        query: String,
+
+        #[arg(long, default_value_t = 100, help = "Maximum number of results")]
+        num: usize,
+
+        #[arg(
+            long,
+            value_enum,
+            default_value_t = CliSearchLogic::Or,
+            help = "Search logic for multi-keyword queries"
+        )]
+        logic: CliSearchLogic,
+
+        #[arg(long, help = "Output as JSON")]
+        json: bool,
+    },
+
     #[command(about = "Serve the site with build scraps")]
     Serve {
         #[arg(
@@ -146,6 +166,23 @@ pub enum CliLintRuleName {
     BrokenLink,
     #[value(name = "broken-heading-ref")]
     BrokenHeadingRef,
+}
+
+#[derive(Clone, Copy, Debug, ValueEnum)]
+pub enum CliSearchLogic {
+    #[value(name = "and")]
+    And,
+    #[value(name = "or")]
+    Or,
+}
+
+impl From<CliSearchLogic> for SearchLogic {
+    fn from(cli: CliSearchLogic) -> Self {
+        match cli {
+            CliSearchLogic::And => SearchLogic::And,
+            CliSearchLogic::Or => SearchLogic::Or,
+        }
+    }
 }
 
 impl From<CliLintRuleName> for LintRuleName {
