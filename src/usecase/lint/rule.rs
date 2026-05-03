@@ -9,6 +9,7 @@ pub enum LintRuleName {
     SelfLink,
     Overlinking,
     BrokenLink,
+    BrokenHeadingRef,
 }
 
 impl LintRuleName {
@@ -19,6 +20,7 @@ impl LintRuleName {
             Self::SelfLink => "self-link",
             Self::Overlinking => "overlinking",
             Self::BrokenLink => "broken-link",
+            Self::BrokenHeadingRef => "broken-heading-ref",
         }
     }
 }
