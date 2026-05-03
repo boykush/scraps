@@ -4,10 +4,10 @@ use std::path::Path;
 use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::json::scrap::ScrapJson;
 use crate::cli::path_resolver::PathResolver;
-use crate::cli::scrap_resolver::resolve_ctx;
 use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
 use crate::usecase::scrap::get::usecase::GetScrapUsecase;
+use scraps_libs::model::context::Ctx;
 use scraps_libs::model::title::Title;
 
 pub fn run(
@@ -23,10 +23,10 @@ pub fn run(
 
     let scraps = read_scraps::to_all_scraps(&scraps_dir_path)?;
     let target_title = Title::from(title);
-    let resolved_ctx = resolve_ctx(&scraps, &target_title, ctx)?;
+    let target_ctx = ctx.map(Ctx::from);
 
     let usecase = GetScrapUsecase::new();
-    let result = usecase.execute(&scraps, &target_title, &resolved_ctx)?;
+    let result = usecase.execute(&scraps, &target_title, &target_ctx)?;
 
     if json {
         let scrap_json = ScrapJson {
@@ -92,35 +92,12 @@ mod tests {
     }
 
     #[rstest]
-    fn run_resolves_unique_title_without_ctx(
+    fn run_errors_when_ctx_is_omitted_for_ctx_scoped_scrap(
         #[from(temp_scrap_project)] project: TempScrapProject,
     ) {
         project
             .add_config(b"")
             .add_scrap("Backend/Auth.md", b"# Auth\n\nFrom Backend");
-
-        let mut buf = Vec::new();
-        run(
-            "Auth",
-            None,
-            true,
-            Some(project.project_root.as_path()),
-            &mut buf,
-        )
-        .unwrap();
-
-        let output = String::from_utf8(buf).unwrap();
-        let scrap: ScrapJson = serde_json::from_str(output.trim()).unwrap();
-        assert_eq!(scrap.title, "Auth");
-        assert_eq!(scrap.ctx.as_deref(), Some("Backend"));
-    }
-
-    #[rstest]
-    fn run_errors_on_ambiguous_title(#[from(temp_scrap_project)] project: TempScrapProject) {
-        project
-            .add_config(b"")
-            .add_scrap("Backend/Auth.md", b"# Auth\n\nBackend body")
-            .add_scrap("Frontend/Auth.md", b"# Auth\n\nFrontend body");
 
         let mut buf = Vec::new();
         let result = run(
@@ -130,12 +107,7 @@ mod tests {
             Some(project.project_root.as_path()),
             &mut buf,
         );
-
         assert!(result.is_err());
-        let msg = result.unwrap_err().to_string();
-        assert!(msg.contains("multiple scraps found"));
-        assert!(msg.contains("Backend/Auth"));
-        assert!(msg.contains("Frontend/Auth"));
     }
 
     #[rstest]

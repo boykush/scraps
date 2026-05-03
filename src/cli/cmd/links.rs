@@ -9,10 +9,10 @@ use serde::{Deserialize, Serialize};
 use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::json::scrap::ScrapKeyJson;
 use crate::cli::path_resolver::PathResolver;
-use crate::cli::scrap_resolver::resolve_ctx;
 use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
 use crate::usecase::scrap::lookup_links::usecase::LookupScrapLinksUsecase;
+use scraps_libs::model::context::Ctx;
 use scraps_libs::model::title::Title;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -34,10 +34,10 @@ pub fn run(
 
     let scraps = read_scraps::to_all_scraps(&scraps_dir_path)?;
     let target_title = Title::from(title);
-    let resolved_ctx = resolve_ctx(&scraps, &target_title, ctx)?;
+    let target_ctx = ctx.map(Ctx::from);
 
     let usecase = LookupScrapLinksUsecase::new();
-    let results = usecase.execute(&scraps, &target_title, &resolved_ctx)?;
+    let results = usecase.execute(&scraps, &target_title, &target_ctx)?;
 
     let scrap_keys: Vec<ScrapKeyJson> = results
         .into_iter()
@@ -154,31 +154,6 @@ mod tests {
     }
 
     #[rstest]
-    fn run_resolves_unique_title_without_ctx(
-        #[from(temp_scrap_project)] project: TempScrapProject,
-    ) {
-        project
-            .add_config(b"")
-            .add_scrap("Backend/Auth.md", b"# Auth\n\nLinks to [[Token]].")
-            .add_scrap("Token.md", b"# Token");
-
-        let mut buf = Vec::new();
-        run(
-            "Auth",
-            None,
-            true,
-            Some(project.project_root.as_path()),
-            &mut buf,
-        )
-        .unwrap();
-
-        let output = String::from_utf8(buf).unwrap();
-        let response: LinksResponse = serde_json::from_str(output.trim()).unwrap();
-        assert_eq!(response.count, 1);
-        assert_eq!(response.results[0].title, "Token");
-    }
-
-    #[rstest]
     fn run_with_ctx_resolves_target(#[from(temp_scrap_project)] project: TempScrapProject) {
         project
             .add_config(b"")
@@ -204,11 +179,13 @@ mod tests {
     }
 
     #[rstest]
-    fn run_errors_on_ambiguous_title(#[from(temp_scrap_project)] project: TempScrapProject) {
+    fn run_errors_when_ctx_is_omitted_for_ctx_scoped_scrap(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
         project
             .add_config(b"")
-            .add_scrap("Backend/Auth.md", b"# Auth")
-            .add_scrap("Frontend/Auth.md", b"# Auth");
+            .add_scrap("Backend/Auth.md", b"# Auth\n\nLinks to [[Token]].")
+            .add_scrap("Token.md", b"# Token");
 
         let mut buf = Vec::new();
         let result = run(
@@ -218,12 +195,7 @@ mod tests {
             Some(project.project_root.as_path()),
             &mut buf,
         );
-
         assert!(result.is_err());
-        let msg = result.unwrap_err().to_string();
-        assert!(msg.contains("multiple scraps found"));
-        assert!(msg.contains("Backend/Auth"));
-        assert!(msg.contains("Frontend/Auth"));
     }
 
     #[rstest]

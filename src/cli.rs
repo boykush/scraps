@@ -10,7 +10,6 @@ mod display;
 mod json;
 pub mod path_resolver;
 mod progress;
-mod scrap_resolver;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
