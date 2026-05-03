@@ -10,6 +10,9 @@ pub struct Ctx {
 }
 
 impl Ctx {
+    /// Maximum number of nested ctx segments accepted by `try_parse`.
+    pub const MAX_DEPTH: usize = 3;
+
     pub fn depth(&self) -> usize {
         self.segments.len()
     }
@@ -17,7 +20,38 @@ impl Ctx {
     pub fn segments(&self) -> &[String] {
         &self.segments
     }
+
+    /// Parse a `/`-separated string and reject ctx whose depth exceeds
+    /// [`Ctx::MAX_DEPTH`]. Empty / collapsed segments are dropped before
+    /// the depth check, matching `From<&str>` semantics.
+    pub fn try_parse(s: &str) -> Result<Self, CtxParseError> {
+        let ctx = Ctx::from(s);
+        if ctx.depth() > Self::MAX_DEPTH {
+            return Err(CtxParseError::DepthExceeded {
+                actual: ctx.depth(),
+                max: Self::MAX_DEPTH,
+            });
+        }
+        Ok(ctx)
+    }
 }
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum CtxParseError {
+    DepthExceeded { actual: usize, max: usize },
+}
+
+impl Display for CtxParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::DepthExceeded { actual, max } => {
+                write!(f, "ctx depth {actual} exceeds maximum {max}")
+            }
+        }
+    }
+}
+
+impl std::error::Error for CtxParseError {}
 
 /// Parses a `/`-separated string. Empty segments (from leading, trailing, or
 /// repeated `/`) are dropped. An entirely empty input yields a `Ctx` with no
@@ -103,5 +137,40 @@ mod tests {
         v.sort();
         let displayed: Vec<String> = v.iter().map(|c| format!("{}", c)).collect();
         assert_eq!(displayed, vec!["a", "a/a", "a/b", "b"]);
+    }
+
+    #[rstest]
+    #[case::single_segment("a", 1)]
+    #[case::two_segments("a/b", 2)]
+    #[case::at_max_depth("a/b/c", 3)]
+    fn it_try_parse_accepts_within_max_depth(#[case] input: &str, #[case] expected_depth: usize) {
+        let ctx = Ctx::try_parse(input).expect("within max depth");
+        assert_eq!(ctx.depth(), expected_depth);
+    }
+
+    #[rstest]
+    #[case::four("a/b/c/d", 4)]
+    #[case::five("a/b/c/d/e", 5)]
+    fn it_try_parse_rejects_over_max_depth(#[case] input: &str, #[case] actual: usize) {
+        let err = Ctx::try_parse(input).expect_err("exceeds max depth");
+        assert_eq!(
+            err,
+            CtxParseError::DepthExceeded {
+                actual,
+                max: Ctx::MAX_DEPTH,
+            }
+        );
+    }
+
+    #[test]
+    fn it_try_parse_collapses_empty_segments_before_depth_check() {
+        // double slash collapses to 3 segments — under the limit
+        let ctx = Ctx::try_parse("a//b/c").expect("double-slash collapses");
+        assert_eq!(ctx.depth(), 3);
+    }
+
+    #[test]
+    fn it_max_depth_default_is_three() {
+        assert_eq!(Ctx::MAX_DEPTH, 3);
     }
 }
