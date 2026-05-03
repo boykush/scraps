@@ -9,11 +9,10 @@ use serde::{Deserialize, Serialize};
 use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::json::scrap::ScrapKeyJson;
 use crate::cli::path_resolver::PathResolver;
+use crate::cli::scrap_resolver::resolve_ctx;
 use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
 use crate::usecase::scrap::lookup_links::usecase::LookupScrapLinksUsecase;
-use scraps_libs::model::context::Ctx;
-use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::title::Title;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -73,31 +72,6 @@ pub fn run(
         writeln!(writer, "{table}")?;
     }
     Ok(())
-}
-
-fn resolve_ctx(scraps: &[Scrap], title: &Title, ctx: Option<&str>) -> ScrapsResult<Option<Ctx>> {
-    if let Some(c) = ctx {
-        return Ok(Some(Ctx::from(c)));
-    }
-
-    let candidates: Vec<&Scrap> = scraps.iter().filter(|s| s.title() == title).collect();
-
-    match candidates.as_slice() {
-        [] => Ok(None),
-        [only] => Ok(Option::<Ctx>::from(&only.self_key())),
-        many => {
-            let mut listed: Vec<String> = many.iter().map(|s| s.self_key().to_string()).collect();
-            listed.sort();
-            let joined = listed
-                .into_iter()
-                .map(|k| format!("  - {k}"))
-                .collect::<Vec<_>>()
-                .join("\n");
-            Err(anyhow::anyhow!(
-                "multiple scraps found for \"{title}\". Specify --ctx:\n{joined}"
-            ))
-        }
-    }
 }
 
 #[cfg(test)]
