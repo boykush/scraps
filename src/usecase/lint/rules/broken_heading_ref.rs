@@ -41,7 +41,7 @@ impl LintRule for BrokenHeadingRefRule {
             .map(|(key, scrap)| {
                 let slugs = markdown::query::headings(scrap.md_text())
                     .into_iter()
-                    .map(|h| slugify::by_dash(&h))
+                    .map(|h| slugify::by_dash(&h.text))
                     .collect();
                 (key.clone(), slugs)
             })

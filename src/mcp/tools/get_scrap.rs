@@ -1,5 +1,5 @@
 use crate::input::file::read_scraps;
-use crate::mcp::json::scrap::ScrapJson;
+use crate::mcp::json::scrap::{CodeBlockJson, HeadingJson, ScrapJson};
 use crate::usecase::scrap::get::usecase::GetScrapUsecase;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
@@ -7,6 +7,7 @@ use rmcp::model::{CallToolResult, Content};
 use rmcp::schemars::JsonSchema;
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer};
+use scraps_libs::markdown::query::{code_blocks, headings};
 use serde::Deserialize;
 use std::path::Path;
 
@@ -45,10 +46,21 @@ pub async fn get_scrap(
         .execute(&scraps, &title, &ctx)
         .map_err(|e| ErrorData::new(ErrorCode(-32004), format!("Get scrap failed: {e}"), None))?;
 
+    let headings_json: Vec<HeadingJson> = headings(&result.md_text)
+        .into_iter()
+        .map(Into::into)
+        .collect();
+    let code_blocks_json: Vec<CodeBlockJson> = code_blocks(&result.md_text)
+        .into_iter()
+        .map(Into::into)
+        .collect();
+
     let scrap_json = ScrapJson {
         title: result.title.to_string(),
         ctx: result.ctx.map(|c| c.to_string()),
         md_text: result.md_text,
+        headings: headings_json,
+        code_blocks: code_blocks_json,
     };
 
     Ok(CallToolResult::success(vec![Content::text(
