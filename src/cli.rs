@@ -3,6 +3,7 @@ use clap_verbosity_flag::{Verbosity, WarnLevel};
 use std::path::PathBuf;
 
 use crate::usecase::lint::rule::LintRuleName;
+use crate::usecase::todo::usecase::StatusFilter;
 use scraps_libs::search::engine::SearchLogic;
 
 pub mod cmd;
@@ -122,6 +123,20 @@ pub enum SubCommands {
         tag_command: TagSubCommands,
     },
 
+    #[command(about = "Aggregate markdown task list items across the wiki")]
+    Todo {
+        #[arg(
+            long,
+            value_enum,
+            default_value_t = CliTodoStatus::Open,
+            help = "Filter task items by status"
+        )]
+        status: CliTodoStatus,
+
+        #[arg(long, help = "Output as JSON")]
+        json: bool,
+    },
+
     #[command(about = "MCP server commands")]
     Mcp {
         #[command(subcommand)]
@@ -176,6 +191,29 @@ pub enum CliSearchLogic {
     And,
     #[value(name = "or")]
     Or,
+}
+
+#[derive(Clone, Copy, Debug, ValueEnum)]
+pub enum CliTodoStatus {
+    #[value(name = "open")]
+    Open,
+    #[value(name = "done")]
+    Done,
+    #[value(name = "deferred")]
+    Deferred,
+    #[value(name = "all")]
+    All,
+}
+
+impl From<CliTodoStatus> for StatusFilter {
+    fn from(cli: CliTodoStatus) -> Self {
+        match cli {
+            CliTodoStatus::Open => StatusFilter::Open,
+            CliTodoStatus::Done => StatusFilter::Done,
+            CliTodoStatus::Deferred => StatusFilter::Deferred,
+            CliTodoStatus::All => StatusFilter::All,
+        }
+    }
 }
 
 impl From<CliSearchLogic> for SearchLogic {

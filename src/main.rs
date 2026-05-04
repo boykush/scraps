@@ -73,6 +73,12 @@ fn main() -> error::ScrapsResult<()> {
                 &mut std::io::stdout(),
             ),
         },
+        cli::SubCommands::Todo { status, json } => cli::cmd::todo::run(
+            status.into(),
+            json,
+            cli.path.as_deref(),
+            &mut std::io::stdout(),
+        ),
         cli::SubCommands::Mcp { mcp_command } => match mcp_command {
             cli::McpSubCommands::Serve => {
                 let runtime = tokio::runtime::Runtime::new()
