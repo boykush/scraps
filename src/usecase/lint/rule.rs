@@ -10,6 +10,7 @@ pub enum LintRuleName {
     Overlinking,
     BrokenLink,
     BrokenHeadingRef,
+    StaleByGit,
 }
 
 impl LintRuleName {
@@ -21,7 +22,28 @@ impl LintRuleName {
             Self::Overlinking => "overlinking",
             Self::BrokenLink => "broken-link",
             Self::BrokenHeadingRef => "broken-heading-ref",
+            Self::StaleByGit => "stale-by-git",
         }
+    }
+
+    /// Rules selected when `scraps lint` is invoked without `--rule` or `--all`.
+    /// Excludes opt-in rules with external dependencies (e.g. `_by_git`).
+    pub fn default_rules() -> Vec<LintRuleName> {
+        vec![
+            Self::DeadEnd,
+            Self::Lonely,
+            Self::SelfLink,
+            Self::Overlinking,
+            Self::BrokenLink,
+            Self::BrokenHeadingRef,
+        ]
+    }
+
+    /// All rules including opt-in ones. Used by `scraps lint --all`.
+    pub fn all_rules() -> Vec<LintRuleName> {
+        let mut rules = Self::default_rules();
+        rules.push(Self::StaleByGit);
+        rules
     }
 }
 

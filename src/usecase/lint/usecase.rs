@@ -19,15 +19,25 @@ impl LintUsecase {
         LintUsecase
     }
 
+    /// Run lint rules over `scraps` and return collected warnings.
+    ///
+    /// `rule_names` selects which rules to run:
+    /// - empty: default rules only (excludes opt-in rules like `stale-by-git`)
+    /// - non-empty: only the listed rules, drawn from default and `extra_rules`
+    ///
+    /// `extra_rules` lets the caller register opt-in rules (e.g. `StaleByGitRule`)
+    /// whose construction depends on resources the usecase does not own
+    /// (git command, project path, current time).
     pub fn execute(
         &self,
         scraps: &[Scrap],
         rule_names: &[LintRuleName],
+        extra_rules: Vec<Box<dyn LintRule>>,
     ) -> ScrapsResult<Vec<LintWarning>> {
         let backlinks_map = BacklinksMap::new(scraps);
         let tags = Tags::new(&scraps);
 
-        let all_rules: Vec<Box<dyn LintRule>> = vec![
+        let mut rules: Vec<Box<dyn LintRule>> = vec![
             Box::new(DeadEndRule),
             Box::new(LonelyRule),
             Box::new(SelfLinkRule),
@@ -36,14 +46,10 @@ impl LintUsecase {
             Box::new(BrokenHeadingRefRule),
         ];
 
-        let rules: Vec<Box<dyn LintRule>> = if rule_names.is_empty() {
-            all_rules
-        } else {
-            all_rules
-                .into_iter()
-                .filter(|r| rule_names.contains(&r.name()))
-                .collect()
-        };
+        if !rule_names.is_empty() {
+            rules.extend(extra_rules);
+            rules.retain(|r| rule_names.contains(&r.name()));
+        }
 
         let warnings: Vec<LintWarning> = rules
             .par_iter()
@@ -76,7 +82,7 @@ mod tests {
         ];
 
         let usecase = LintUsecase::new();
-        let warnings = usecase.execute(&scraps, &[]).unwrap();
+        let warnings = usecase.execute(&scraps, &[], Vec::new()).unwrap();
 
         let rule_names: Vec<&LintRuleName> = warnings.iter().map(|w| &w.rule_name).collect();
         assert!(rule_names.contains(&&LintRuleName::DeadEnd));
@@ -97,7 +103,7 @@ mod tests {
         ];
 
         let usecase = LintUsecase::new();
-        let warnings = usecase.execute(&scraps, &[]).unwrap();
+        let warnings = usecase.execute(&scraps, &[], Vec::new()).unwrap();
 
         assert!(warnings.is_empty());
     }
@@ -105,7 +111,7 @@ mod tests {
     #[test]
     fn empty_project_no_errors() {
         let usecase = LintUsecase::new();
-        let warnings = usecase.execute(&[], &[]).unwrap();
+        let warnings = usecase.execute(&[], &[], Vec::new()).unwrap();
 
         assert!(warnings.is_empty());
     }
@@ -118,11 +124,76 @@ mod tests {
         ];
 
         let usecase = LintUsecase::new();
-        let warnings = usecase.execute(&scraps, &[LintRuleName::DeadEnd]).unwrap();
+        let warnings = usecase
+            .execute(&scraps, &[LintRuleName::DeadEnd], Vec::new())
+            .unwrap();
 
         assert!(warnings
             .iter()
             .all(|w| w.rule_name == LintRuleName::DeadEnd));
         assert!(!warnings.is_empty());
+    }
+
+    #[test]
+    fn default_excludes_opt_in_rules() {
+        // StaleByGit must not run when no rule is explicitly requested,
+        // even if an extra rule is registered.
+        use crate::usecase::lint::rules::stale_by_git::StaleByGitRule;
+        use scraps_libs::git::tests::GitCommandTest;
+        use std::path::PathBuf;
+
+        let scraps = vec![
+            Scrap::new("a", &None, "[[b]]"),
+            Scrap::new("b", &None, "[[a]]"),
+        ];
+        let stale_rule = StaleByGitRule {
+            git_command: GitCommandTest::new(),
+            scraps_dir: PathBuf::from("/tmp"),
+            threshold_days: 1,
+            now_ts: 1_700_000_000,
+        };
+
+        let usecase = LintUsecase::new();
+        let warnings = usecase
+            .execute(&scraps, &[], vec![Box::new(stale_rule)])
+            .unwrap();
+
+        assert!(warnings
+            .iter()
+            .all(|w| w.rule_name != LintRuleName::StaleByGit));
+    }
+
+    #[test]
+    fn extra_rule_runs_when_explicitly_selected() {
+        use crate::usecase::lint::rules::stale_by_git::StaleByGitRule;
+        use scraps_libs::git::tests::GitCommandTest;
+        use std::path::PathBuf;
+
+        // GitCommandTest returns ts=0 for every scrap, so any positive
+        // threshold flags everything as stale.
+        let scraps = vec![
+            Scrap::new("a", &None, "[[b]]"),
+            Scrap::new("b", &None, "[[a]]"),
+        ];
+        let stale_rule = StaleByGitRule {
+            git_command: GitCommandTest::new(),
+            scraps_dir: PathBuf::from("/tmp"),
+            threshold_days: 1,
+            now_ts: 1_700_000_000,
+        };
+
+        let usecase = LintUsecase::new();
+        let warnings = usecase
+            .execute(
+                &scraps,
+                &[LintRuleName::StaleByGit],
+                vec![Box::new(stale_rule)],
+            )
+            .unwrap();
+
+        assert!(!warnings.is_empty());
+        assert!(warnings
+            .iter()
+            .all(|w| w.rule_name == LintRuleName::StaleByGit));
     }
 }

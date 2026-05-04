@@ -7,6 +7,12 @@ use std::{
 pub trait GitCommand {
     fn init(&self, path: &Path) -> io::Result<()>;
     fn commited_ts(&self, path: &Path) -> io::Result<Option<i64>>;
+    /// Whether `path` lives inside a git working tree.
+    ///
+    /// Returns `Ok(false)` when git reports the path is not inside a working
+    /// tree. A missing `git` binary is also reported as `Ok(false)` so that
+    /// callers can degrade gracefully without distinguishing the two cases.
+    fn is_git_repository(&self, path: &Path) -> io::Result<bool>;
 }
 
 #[derive(Clone, Copy)]
@@ -46,6 +52,25 @@ impl GitCommand for GitCommandImpl {
         let commited_ts = output_str.trim().parse::<i64>().ok();
         Ok(commited_ts)
     }
+
+    fn is_git_repository(&self, path: &Path) -> io::Result<bool> {
+        let result = Command::new("git")
+            .current_dir(path)
+            .arg("rev-parse")
+            .arg("--is-inside-work-tree")
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output();
+
+        match result {
+            Ok(output) => {
+                Ok(output.status.success()
+                    && String::from_utf8_lossy(&output.stdout).trim() == "true")
+            }
+            Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(false),
+            Err(e) => Err(e),
+        }
+    }
 }
 
 #[cfg(feature = "git_test")]
@@ -67,6 +92,9 @@ pub mod tests {
         }
         fn commited_ts(&self, _path: &Path) -> io::Result<Option<i64>> {
             Ok(Some(0))
+        }
+        fn is_git_repository(&self, _path: &Path) -> io::Result<bool> {
+            Ok(true)
         }
     }
 

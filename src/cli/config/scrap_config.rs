@@ -33,12 +33,40 @@ impl SsgConfig {
     }
 }
 
+/// Lint-specific configuration. Each rule lives in its own nested table.
+///
+/// Rules surface opt-in/opt-out via `enabled` (default `true` when the
+/// section is present) and rule-specific parameters as sibling fields. This
+/// keeps selection and parameters co-located, so writing `[lint.stale_by_git]`
+/// is enough to opt in with defaults.
+#[derive(Debug, Deserialize, Default)]
+pub struct LintConfig {
+    pub stale_by_git: Option<StaleByGitConfig>,
+}
+
+/// Configuration for the `stale_by_git` lint rule.
+///
+/// `enabled` defaults to `true` when the section is present in `.scraps.toml`,
+/// so a bare `[lint.stale_by_git]` opts the rule in. Setting `enabled = false`
+/// disables the rule while preserving the threshold for later toggling.
+#[derive(Debug, Deserialize)]
+pub struct StaleByGitConfig {
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+    pub threshold_days: Option<u64>,
+}
+
+fn default_true() -> bool {
+    true
+}
+
 /// Main configuration struct
 #[derive(Debug, Deserialize)]
 pub struct ScrapConfig {
     pub scraps_dir: Option<PathBuf>,
     pub timezone: Option<Tz>,
     pub ssg: Option<SsgConfig>,
+    pub lint: Option<LintConfig>,
 }
 
 impl ScrapConfig {
