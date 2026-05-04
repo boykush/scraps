@@ -73,15 +73,8 @@ fn main() -> error::ScrapsResult<()> {
                 &mut std::io::stdout(),
             ),
         },
-        cli::SubCommands::Todo {
-            status,
-            ctx,
-            tag,
-            json,
-        } => cli::cmd::todo::run(
+        cli::SubCommands::Todo { status, json } => cli::cmd::todo::run(
             status.into(),
-            ctx.as_deref(),
-            tag.as_deref(),
             json,
             cli.path.as_deref(),
             &mut std::io::stdout(),

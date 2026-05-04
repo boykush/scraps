@@ -12,8 +12,6 @@ use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
 use crate::usecase::todo::usecase::{StatusFilter, TodoUsecase};
 use scraps_libs::markdown::query::TaskStatus;
-use scraps_libs::model::context::Ctx;
-use scraps_libs::model::tag::Tag;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct TodoScrapJson {
@@ -52,8 +50,6 @@ fn scrap_label(title: &str, ctx: Option<&str>) -> String {
 
 pub fn run(
     status: StatusFilter,
-    ctx: Option<&str>,
-    tag: Option<&str>,
     json: bool,
     project_path: Option<&Path>,
     writer: &mut impl Write,
@@ -63,11 +59,9 @@ pub fn run(
     let scraps_dir_path = path_resolver.scraps_dir(&config);
 
     let scraps = read_scraps::to_all_scraps(&scraps_dir_path)?;
-    let ctx_filter = ctx.map(Ctx::from);
-    let tag_filter = tag.map(Tag::from);
 
     let usecase = TodoUsecase::new();
-    let results = usecase.execute(&scraps, status, ctx_filter.as_ref(), tag_filter.as_ref())?;
+    let results = usecase.execute(&scraps, status)?;
 
     if json {
         let items: Vec<TodoItemJson> = results
@@ -135,8 +129,6 @@ mod tests {
         let mut buf = Vec::new();
         run(
             StatusFilter::Open,
-            None,
-            None,
             false,
             Some(project.project_root.as_path()),
             &mut buf,
@@ -159,8 +151,6 @@ mod tests {
         let mut buf = Vec::new();
         run(
             StatusFilter::Open,
-            None,
-            None,
             true,
             Some(project.project_root.as_path()),
             &mut buf,
@@ -188,8 +178,6 @@ mod tests {
         let mut buf = Vec::new();
         run(
             StatusFilter::Done,
-            None,
-            None,
             true,
             Some(project.project_root.as_path()),
             &mut buf,
@@ -212,8 +200,6 @@ mod tests {
         let mut buf = Vec::new();
         run(
             StatusFilter::All,
-            None,
-            None,
             true,
             Some(project.project_root.as_path()),
             &mut buf,
@@ -226,57 +212,6 @@ mod tests {
     }
 
     #[rstest]
-    fn run_json_filters_by_ctx_prefix(#[from(temp_scrap_project)] project: TempScrapProject) {
-        project
-            .add_config(b"")
-            .add_scrap("Programming/Rust/borrowing.md", b"- [ ] one\n")
-            .add_scrap("Programming/Python/zen.md", b"- [ ] two\n")
-            .add_scrap("AI/mcp.md", b"- [ ] three\n");
-
-        let mut buf = Vec::new();
-        run(
-            StatusFilter::Open,
-            Some("Programming"),
-            None,
-            true,
-            Some(project.project_root.as_path()),
-            &mut buf,
-        )
-        .unwrap();
-
-        let output = String::from_utf8(buf).unwrap();
-        let response: TodoResponse = serde_json::from_str(output.trim()).unwrap();
-        let texts: Vec<&str> = response.results.iter().map(|r| r.text.as_str()).collect();
-        assert_eq!(texts.len(), 2);
-        assert!(texts.contains(&"one"));
-        assert!(texts.contains(&"two"));
-    }
-
-    #[rstest]
-    fn run_json_filters_by_tag(#[from(temp_scrap_project)] project: TempScrapProject) {
-        project
-            .add_config(b"")
-            .add_scrap("a.md", b"#[[programming/rust]]\n- [ ] one\n")
-            .add_scrap("b.md", b"#[[ai]]\n- [ ] two\n");
-
-        let mut buf = Vec::new();
-        run(
-            StatusFilter::Open,
-            None,
-            Some("programming"),
-            true,
-            Some(project.project_root.as_path()),
-            &mut buf,
-        )
-        .unwrap();
-
-        let output = String::from_utf8(buf).unwrap();
-        let response: TodoResponse = serde_json::from_str(output.trim()).unwrap();
-        assert_eq!(response.count, 1);
-        assert_eq!(response.results[0].text, "one");
-    }
-
-    #[rstest]
     fn run_json_outputs_empty_for_no_tasks(#[from(temp_scrap_project)] project: TempScrapProject) {
         project
             .add_config(b"")
@@ -285,8 +220,6 @@ mod tests {
         let mut buf = Vec::new();
         run(
             StatusFilter::Open,
-            None,
-            None,
             true,
             Some(project.project_root.as_path()),
             &mut buf,
@@ -304,8 +237,6 @@ mod tests {
         let mut buf = Vec::new();
         let result = run(
             StatusFilter::Open,
-            None,
-            None,
             false,
             Some(project.project_root.as_path()),
             &mut buf,

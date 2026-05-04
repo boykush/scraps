@@ -133,12 +133,6 @@ pub enum SubCommands {
         )]
         status: CliTodoStatus,
 
-        #[arg(long, help = "Filter scraps by ctx (prefix match on segments)")]
-        ctx: Option<String>,
-
-        #[arg(long, help = "Filter scraps by tag (matches descendant tags too)")]
-        tag: Option<String>,
-
         #[arg(long, help = "Output as JSON")]
         json: bool,
     },
