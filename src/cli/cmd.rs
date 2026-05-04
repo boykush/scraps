@@ -8,3 +8,4 @@ pub mod mcp;
 pub mod search;
 pub mod serve;
 pub mod tag;
+pub mod todo;
