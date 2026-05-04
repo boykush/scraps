@@ -1,3 +1,4 @@
+mod code_blocks;
 mod common;
 mod embeds;
 mod headings;
@@ -8,8 +9,9 @@ mod task_items;
 mod wiki_ref;
 mod wikilinks;
 
+pub use code_blocks::{code_blocks, CodeBlock};
 pub use embeds::{embeds, EmbedRef};
-pub use headings::headings;
+pub use headings::{headings, Heading};
 pub use images::images;
 pub use section::section;
 pub use tags::{tags, TagRef};
