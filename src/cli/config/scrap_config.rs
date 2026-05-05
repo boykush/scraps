@@ -64,6 +64,7 @@ fn default_true() -> bool {
 #[derive(Debug, Deserialize)]
 pub struct ScrapConfig {
     pub scraps_dir: Option<PathBuf>,
+    pub output_dir: Option<PathBuf>,
     pub timezone: Option<Tz>,
     pub ssg: Option<SsgConfig>,
     pub lint: Option<LintConfig>,

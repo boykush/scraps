@@ -1,5 +1,5 @@
 target
-public
+_site
 
 # Claude Code
 .claude/worktrees/

@@ -11,7 +11,7 @@ use tempfile::TempDir;
 
 /// High-level fixture for a complete Scraps project structure
 ///
-/// Provides a temporary project with scraps/, static/, and public/
+/// Provides a temporary project with scraps/, static/, and _site/
 /// directories automatically created and cleaned up after the test.
 ///
 /// # Example
@@ -24,7 +24,7 @@ use tempfile::TempDir;
 ///     temp_scrap_project
 ///         .add_scrap("test.md", b"# Test Content");
 ///
-///     // Use temp_scrap_project.scraps_dir, .static_dir, .public_dir, etc.
+///     // Use temp_scrap_project.scraps_dir, .static_dir, .output_dir, etc.
 ///     // Automatic cleanup when temp_scrap_project goes out of scope
 /// }
 /// ```
@@ -33,7 +33,7 @@ pub struct TempScrapProject {
     temp_dir: TempDir,
     pub scraps_dir: PathBuf,
     pub static_dir: PathBuf,
-    pub public_dir: PathBuf,
+    pub output_dir: PathBuf,
     pub project_root: PathBuf,
 }
 
@@ -45,18 +45,18 @@ impl TempScrapProject {
 
         let scraps_dir = project_root.join("scraps");
         let static_dir = project_root.join("static");
-        let public_dir = project_root.join("public");
+        let output_dir = project_root.join("_site");
 
         // Create all directories
         fs::create_dir_all(&scraps_dir).expect("Failed to create scraps dir");
         fs::create_dir_all(&static_dir).expect("Failed to create static dir");
-        fs::create_dir_all(&public_dir).expect("Failed to create public dir");
+        fs::create_dir_all(&output_dir).expect("Failed to create output dir");
 
         Self {
             temp_dir,
             scraps_dir,
             static_dir,
-            public_dir,
+            output_dir,
             project_root,
         }
     }
@@ -128,19 +128,19 @@ impl TempScrapProject {
         self
     }
 
-    /// Get the path to a file in the public directory
+    /// Get the path to a file in the build output directory
     ///
     /// Useful for checking generated output files.
     ///
     /// # Arguments
-    /// * `filename` - Relative path from public_dir (e.g., "index.html" or "scraps/test.html")
+    /// * `filename` - Relative path from output_dir (e.g., "index.html" or "scraps/test.html")
     ///
     /// # Example
     /// ```no_run
-    /// assert!(project.public_path("index.html").exists());
+    /// assert!(project.output_path("index.html").exists());
     /// ```
-    pub fn public_path(&self, filename: &str) -> PathBuf {
-        self.public_dir.join(filename)
+    pub fn output_path(&self, filename: &str) -> PathBuf {
+        self.output_dir.join(filename)
     }
 
     /// Get the path to a file in the scraps directory
@@ -258,7 +258,7 @@ mod tests {
 
         assert!(project.scraps_dir.exists());
         assert!(project.static_dir.exists());
-        assert!(project.public_dir.exists());
+        assert!(project.output_dir.exists());
         assert!(project.project_root.exists());
     }
 

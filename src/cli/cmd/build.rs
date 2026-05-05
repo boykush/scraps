@@ -50,14 +50,14 @@ fn execute(git: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
     let ssg = config.require_ssg()?;
     let scraps_dir_path = path_resolver.scraps_dir(&config);
     let static_dir_path = path_resolver.static_dir();
-    let public_dir_path = path_resolver.public_dir();
+    let output_dir_path = path_resolver.output_dir(&config);
 
     // Input: read scraps (with git timestamps if --git is set) and README
     let git_command = git.then(GitCommandImpl::new);
     let (scraps_with_ts, readme_text) =
         read_scraps::to_all_scraps_with_timestamps(&scraps_dir_path, git_command)?;
 
-    let renderer = BuildRendererImpl::new(&static_dir_path, &public_dir_path);
+    let renderer = BuildRendererImpl::new(&static_dir_path, &output_dir_path);
     let usecase = BuildUsecase::new();
     let progress = ProgressImpl::init(Instant::now());
     let base_url = ssg.base_url();
@@ -124,21 +124,21 @@ mod tests {
         assert!(result.is_ok());
 
         // Verify scrap HTMLs generated
-        let html1 = fs::read_to_string(project.public_path("scraps/test1.html")).unwrap();
+        let html1 = fs::read_to_string(project.output_path("scraps/test1.html")).unwrap();
         assert!(!html1.is_empty());
-        let html2 = fs::read_to_string(project.public_path("scraps/test2.html")).unwrap();
+        let html2 = fs::read_to_string(project.output_path("scraps/test2.html")).unwrap();
         assert!(!html2.is_empty());
 
         // Verify index.html generated
-        let index = fs::read_to_string(project.public_path("index.html")).unwrap();
+        let index = fs::read_to_string(project.output_path("index.html")).unwrap();
         assert!(!index.is_empty());
 
         // Verify CSS generated
-        let css = fs::read_to_string(project.public_path("main.css")).unwrap();
+        let css = fs::read_to_string(project.output_path("main.css")).unwrap();
         assert!(!css.is_empty());
 
         // Verify search index JSON generated (default: true)
-        let json = fs::read_to_string(project.public_path("search_index.json")).unwrap();
+        let json = fs::read_to_string(project.output_path("search_index.json")).unwrap();
         assert!(!json.is_empty());
     }
 
@@ -155,7 +155,7 @@ mod tests {
         assert!(result.is_ok());
 
         // Verify search index JSON not generated
-        let json = fs::read_to_string(project.public_path("search_index.json"));
+        let json = fs::read_to_string(project.output_path("search_index.json"));
         assert!(json.is_err());
     }
 
@@ -175,7 +175,7 @@ mod tests {
         let result = execute(false, Some(project.project_root.as_path()));
         assert!(result.is_ok());
 
-        let html = fs::read_to_string(project.public_path("scraps/source.html")).unwrap();
+        let html = fs::read_to_string(project.output_path("scraps/source.html")).unwrap();
         assert!(html.contains("http://localhost:1112/tags/ai/ml.html"));
         assert!(html.contains("embedded body"));
         assert!(!html.contains("hidden body"));
@@ -192,7 +192,7 @@ mod tests {
         let result = execute(false, Some(project.project_root.as_path()));
         assert!(result.is_ok());
 
-        let index = fs::read_to_string(project.public_path("index.html")).unwrap();
+        let index = fs::read_to_string(project.output_path("index.html")).unwrap();
         assert!(index.contains("tags/ai.html"));
     }
 
@@ -209,7 +209,7 @@ mod tests {
 
         // Outside a git repo `commited_ts` is None so the conditional block
         // is omitted; this test just asserts that --git does not error out.
-        let html = fs::read_to_string(project.public_path("scraps/test1.html")).unwrap();
+        let html = fs::read_to_string(project.output_path("scraps/test1.html")).unwrap();
         assert!(!html.is_empty());
     }
 }

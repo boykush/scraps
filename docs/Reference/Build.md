@@ -17,11 +17,11 @@ scraps
 
 ## Generated Files
 
-The command generates the following files in the `public` directory:
+The command generates the following files in the `_site` directory (configurable via `output_dir` in `.scraps.toml`):
 
 ```bash
-❯ tree public
-public
+❯ tree _site
+_site
 ├── index.html      # Main page with scrap list
 ├── getting-started.html
 ├── documentation.html

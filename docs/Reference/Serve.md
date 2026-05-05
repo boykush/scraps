@@ -4,7 +4,7 @@
 ❯ scraps serve
 ```
 
-This command starts a local development server to preview your static site. The server automatically serves the files from the `public` directory at [http://127.0.0.1:1112](http://127.0.0.1:1112).
+This command starts a local development server to preview your static site. The server automatically serves the files from the build output directory (`_site` by default, configurable via `output_dir` in `.scraps.toml`) at [http://127.0.0.1:1112](http://127.0.0.1:1112).
 
 ## Examples
 

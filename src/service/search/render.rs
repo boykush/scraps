@@ -10,19 +10,19 @@ use super::serde::search_index_scraps::SearchIndexScrapsTera;
 
 pub struct SearchIndexRender {
     static_dir_path: PathBuf,
-    public_dir_path: PathBuf,
+    output_dir_path: PathBuf,
 }
 
 impl SearchIndexRender {
     pub fn new(
         static_dir_path: &PathBuf,
-        public_dir_path: &PathBuf,
+        output_dir_path: &PathBuf,
     ) -> ScrapsResult<SearchIndexRender> {
-        std::fs::create_dir_all(public_dir_path).context(BuildError::CreateDir)?;
+        std::fs::create_dir_all(output_dir_path).context(BuildError::CreateDir)?;
 
         Ok(SearchIndexRender {
             static_dir_path: static_dir_path.to_owned(),
-            public_dir_path: public_dir_path.to_owned(),
+            output_dir_path: output_dir_path.to_owned(),
         })
     }
 
@@ -47,7 +47,7 @@ impl SearchIndexRender {
             "__builtins/search_index.json"
         };
         context.insert("scraps", scraps);
-        let file_path = &self.public_dir_path.join("search_index.json");
+        let file_path = &self.output_dir_path.join("search_index.json");
         let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to(template_name, &context, wtr)
             .context(BuildError::WriteFailure(file_path.clone()))
@@ -79,10 +79,10 @@ mod tests {
         let sc2 = Scrap::new("scrap2", &Some("Context".into()), "## header2");
         let scraps = vec![sc1, sc2];
 
-        let render = SearchIndexRender::new(&project.static_dir, &project.public_dir).unwrap();
+        let render = SearchIndexRender::new(&project.static_dir, &project.output_dir).unwrap();
         render.run(&base_url, &scraps).unwrap();
 
-        let result = fs::read_to_string(project.public_path("search_index.json")).unwrap();
+        let result = fs::read_to_string(project.output_path("search_index.json")).unwrap();
         assert_eq!(
             result,
             "[{ \"title\": \"scrap1\", \"url\": \"http://localhost:1112/scraps/scrap1.html\" },{ \"title\": \"Context/scrap2\", \"url\": \"http://localhost:1112/scraps/context/scrap2.html\" }]");

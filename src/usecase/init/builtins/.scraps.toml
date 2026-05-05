@@ -1,6 +1,9 @@
 # The scraps directory path relative to this .scraps.toml (optional, default=scraps)
 # scraps_dir = "scraps"
 
+# The build output directory path relative to this .scraps.toml (optional, default=_site)
+# output_dir = "_site"
+
 # The site timezone (optional, default=UTC)
 # timezone = "UTC"
 
