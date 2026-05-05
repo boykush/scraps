@@ -13,5 +13,5 @@ This command lists all tags found in your Scraps content, helping you understand
 ❯ scraps tag
 
 # List tags from specific directory
-❯ scraps tag -C /path/to/project
+❯ scraps tag --path /path/to/project
 ```

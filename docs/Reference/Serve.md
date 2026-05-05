@@ -13,7 +13,7 @@ This command starts a local development server to preview your static site. The 
 ❯ scraps serve
 
 # Serve from specific directory
-❯ scraps serve -C /path/to/project
+❯ scraps serve --path /path/to/project
 ```
 
 Use this command to check how your site looks and functions before deployment.
