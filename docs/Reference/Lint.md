@@ -36,10 +36,10 @@ Diagnostics follow the same style as `cargo clippy`:
 
 ```
 warning[dead-end]: scrap has no links to other scraps
- --> orphan.md
+ --> scraps/orphan.md
 
 warning[overlinking]: link [[Rust]] appears 3 times
- --> programming.md:2:5
+ --> scraps/programming.md:2:5
   |
 2 | See [[Rust]] for details. Also [[Rust]] and [[Rust]].
   |     ^^^^^^^^
