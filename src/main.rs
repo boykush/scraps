@@ -17,9 +17,7 @@ fn main() -> error::ScrapsResult<()> {
     let cli = cli::Cli::parse();
 
     match cli.command {
-        cli::SubCommands::Init { project_name } => {
-            cli::cmd::init::run(&project_name, cli.path.as_deref())
-        }
+        cli::SubCommands::Init => cli::cmd::init::run(cli.path.as_deref()),
         cli::SubCommands::Build { verbose, git } => {
             cli::cmd::build::run(verbose, git, cli.path.as_deref())
         }
