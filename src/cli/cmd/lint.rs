@@ -5,7 +5,7 @@ use annotate_snippets::{Level, Renderer, Snippet};
 use colored::Colorize;
 use scraps_libs::git::GitCommandImpl;
 
-use crate::cli::config::scrap_config::{ScrapConfig, StaleByGitConfig};
+use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
@@ -13,87 +13,57 @@ use crate::usecase::lint::rule::{LintRule, LintRuleName, LintWarning};
 use crate::usecase::lint::rules::stale_by_git::StaleByGitRule;
 use crate::usecase::lint::usecase::LintUsecase;
 
-const DEFAULT_STALE_THRESHOLD_DAYS: u64 = 180;
-
 pub fn run(project_path: Option<&Path>, rule_names: &[LintRuleName]) -> ScrapsResult<()> {
     let path_resolver = PathResolver::new(project_path)?;
     let config = ScrapConfig::from_path(project_path)?;
     let scraps_dir_path = path_resolver.scraps_dir(&config);
     let scraps_dir_name = config.scraps_dir.as_deref().unwrap_or(Path::new("scraps"));
-
     let scraps = read_scraps::to_all_scraps(&scraps_dir_path)?;
 
+    // CLI `--rule X` overrides everything; otherwise default rules plus
+    // opt-in rules whose config section enables them.
     let stale_config = config.lint.as_ref().and_then(|l| l.stale_by_git.as_ref());
-    let effective_rules = resolve_effective_rules(rule_names, stale_config);
+    let effective_rules = if !rule_names.is_empty() {
+        rule_names.to_vec()
+    } else {
+        let mut rules = LintRuleName::default_rules();
+        if stale_config.is_some_and(|c| c.enabled) {
+            rules.push(LintRuleName::StaleByGit);
+        }
+        rules
+    };
 
-    let extra_rules = build_extra_rules(&effective_rules, stale_config, &scraps_dir_path);
+    let extra_rules: Vec<Box<dyn LintRule>> = vec![Box::new(StaleByGitRule {
+        git_command: GitCommandImpl::new(),
+        scraps_dir: scraps_dir_path.clone(),
+        threshold_days: stale_config.and_then(|c| c.threshold_days).unwrap_or(180),
+        now_ts: SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|d| d.as_secs() as i64)
+            .unwrap_or(0),
+    })];
 
-    let usecase = LintUsecase::new();
-    let warnings = usecase.execute(&scraps, &effective_rules, extra_rules)?;
+    let warnings = LintUsecase::new().execute(&scraps, &effective_rules, extra_rules)?;
 
     if warnings.is_empty() {
         return Ok(());
     }
 
     let renderer = Renderer::styled();
-
     for warning in &warnings {
         print_warning(warning, scraps_dir_name, &renderer);
     }
-
-    let total = warnings.len();
     eprintln!(
         "{}",
-        format!("warning: `scraps lint` generated {} warning(s)", total)
-            .yellow()
-            .bold()
+        format!(
+            "warning: `scraps lint` generated {} warning(s)",
+            warnings.len()
+        )
+        .yellow()
+        .bold()
     );
 
     Ok(())
-}
-
-/// Decide which rules will actually run.
-///
-/// CLI selection (`--rule X`) wins outright when given. Otherwise the default
-/// rules run, plus any opt-in rules whose config section says they should
-/// (e.g. `[lint.stale_by_git]` with `enabled = true`).
-fn resolve_effective_rules(
-    cli_rule_names: &[LintRuleName],
-    stale_config: Option<&StaleByGitConfig>,
-) -> Vec<LintRuleName> {
-    if !cli_rule_names.is_empty() {
-        return cli_rule_names.to_vec();
-    }
-
-    let mut rules = LintRuleName::default_rules();
-    if stale_config.is_some_and(|c| c.enabled) {
-        rules.push(LintRuleName::StaleByGit);
-    }
-    rules
-}
-
-fn build_extra_rules(
-    effective_rules: &[LintRuleName],
-    stale_config: Option<&StaleByGitConfig>,
-    scraps_dir: &Path,
-) -> Vec<Box<dyn LintRule>> {
-    let mut extras: Vec<Box<dyn LintRule>> = Vec::new();
-    if effective_rules.contains(&LintRuleName::StaleByGit) {
-        let threshold_days = stale_config
-            .and_then(|c| c.threshold_days)
-            .unwrap_or(DEFAULT_STALE_THRESHOLD_DAYS);
-        let now_ts = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map(|d| d.as_secs() as i64)
-            .unwrap_or(0);
-        extras.push(Box::new(StaleByGitRule {
-            git_command: GitCommandImpl::new(),
-            scraps_dir: scraps_dir.to_path_buf(),
-            threshold_days,
-            now_ts,
-        }));
-    }
-    extras
 }
 
 fn print_warning(warning: &LintWarning, scraps_dir: &Path, renderer: &Renderer) {
@@ -188,52 +158,5 @@ mod tests {
         // rule; outside a git repo it gracefully skips.
         let result = run(Some(project.project_root.as_path()), &[]);
         assert!(result.is_ok());
-    }
-
-    #[test]
-    fn resolve_uses_cli_when_given() {
-        let cli = vec![LintRuleName::DeadEnd];
-        let resolved = resolve_effective_rules(&cli, None);
-        assert_eq!(resolved, vec![LintRuleName::DeadEnd]);
-    }
-
-    #[test]
-    fn resolve_omits_stale_when_section_absent() {
-        let resolved = resolve_effective_rules(&[], None);
-        assert!(!resolved.contains(&LintRuleName::StaleByGit));
-        // sanity: at least one default rule is included
-        assert!(resolved.contains(&LintRuleName::DeadEnd));
-    }
-
-    #[test]
-    fn resolve_includes_stale_when_section_present_and_enabled() {
-        let stale = StaleByGitConfig {
-            enabled: true,
-            threshold_days: Some(90),
-        };
-        let resolved = resolve_effective_rules(&[], Some(&stale));
-        assert!(resolved.contains(&LintRuleName::StaleByGit));
-    }
-
-    #[test]
-    fn resolve_omits_stale_when_section_present_but_disabled() {
-        let stale = StaleByGitConfig {
-            enabled: false,
-            threshold_days: Some(90),
-        };
-        let resolved = resolve_effective_rules(&[], Some(&stale));
-        assert!(!resolved.contains(&LintRuleName::StaleByGit));
-    }
-
-    #[test]
-    fn cli_rule_overrides_config_disable() {
-        // Even if config disables stale-by-git, explicit `--rule stale-by-git`
-        // still runs only that rule.
-        let stale = StaleByGitConfig {
-            enabled: false,
-            threshold_days: None,
-        };
-        let resolved = resolve_effective_rules(&[LintRuleName::StaleByGit], Some(&stale));
-        assert_eq!(resolved, vec![LintRuleName::StaleByGit]);
     }
 }
