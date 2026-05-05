@@ -17,7 +17,7 @@ For Claude Code users, we provide an official plugin for seamless integration. S
 For other MCP-compatible clients or advanced configurations, you can add Scraps as an MCP server directly:
 
 ```bash
-claude mcp add scraps -- scraps mcp serve -C ~/path/to/your/scraps/project/
+claude mcp add scraps -- scraps mcp serve --path ~/path/to/your/scraps/project/
 ```
 
 Replace `~/path/to/your/scraps/project/` with the actual path to your Scraps project directory.
