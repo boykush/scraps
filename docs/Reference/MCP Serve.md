@@ -13,7 +13,7 @@ This command starts an MCP (Model Context Protocol) server that enables AI assis
 ❯ scraps mcp serve
 
 # Serve from specific directory  
-❯ scraps mcp serve --path /path/to/project
+❯ scraps mcp serve -C /path/to/project
 
 ```
 

@@ -21,8 +21,8 @@ This command initializes a new Scraps project. It creates the following structur
 ❯ scraps init my-knowledge-base
 ❯ cd my-knowledge-base
 
-# Initialize with specific path
-❯ scraps init docs --path /path/to/workspace
+# Initialize with specific directory
+❯ scraps init -C /path/to/workspace
 ```
 
 After initializing the project, proceed to [[Reference/Build|Build]] to generate your static site.
