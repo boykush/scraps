@@ -22,11 +22,12 @@ pub struct GetScrapRequest {
 
 pub async fn get_scrap(
     scraps_dir: &Path,
+    exclude_dirs: &[std::path::PathBuf],
     _context: RequestContext<RoleServer>,
     Parameters(request): Parameters<GetScrapRequest>,
 ) -> Result<CallToolResult, ErrorData> {
     // Load scraps from directory
-    let scraps = read_scraps::to_all_scraps(scraps_dir).map_err(|e| {
+    let scraps = read_scraps::to_all_scraps(scraps_dir, exclude_dirs).map_err(|e| {
         ErrorData::new(
             ErrorCode(-32003),
             format!("Failed to load scraps: {e}"),

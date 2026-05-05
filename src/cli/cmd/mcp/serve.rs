@@ -21,17 +21,21 @@ pub async fn run(project_path: Option<&Path>) -> ScrapsResult<()> {
 
     info!("Starting Scraps MCP server...");
 
-    // Set up path resolver and config
+    // Set up path resolver. The wiki root is the directory containing
+    // `.scraps.toml` (i.e. the project root). Config is loaded only to resolve
+    // the configured `output_dir` so it can be excluded from scrap traversal.
     let path_resolver = PathResolver::new(project_path)
         .map_err(|e| McpError::ServiceError(format!("Failed to resolve paths: {e}")))?;
-
-    // Load config to get scraps_dir
     let config = ScrapConfig::from_path(project_path)
         .map_err(|e| McpError::ServiceError(format!("Failed to load config: {e}")))?;
 
-    let scraps_dir = path_resolver.scraps_dir(&config);
+    let scraps_dir = path_resolver.scraps_dir();
+    let exclude_dirs = vec![
+        path_resolver.static_dir(),
+        path_resolver.output_dir(&config),
+    ];
 
-    let service = ScrapsServer::new(scraps_dir)
+    let service = ScrapsServer::new(scraps_dir, exclude_dirs)
         .serve((stdin(), stdout()))
         .await
         .inspect_err(|e| {

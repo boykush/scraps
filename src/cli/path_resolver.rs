@@ -44,12 +44,13 @@ impl PathResolver {
         Ok(PathResolver { project_root })
     }
 
-    /// Get the scraps directory path
-    pub fn scraps_dir(&self, config: &ScrapConfig) -> PathBuf {
-        match &config.scraps_dir {
-            Some(dir) => self.project_root.join(dir),
-            None => self.project_root.join("scraps"),
-        }
+    /// Get the scraps directory path.
+    ///
+    /// In v1 the directory containing `.scraps.toml` IS the wiki root, so this
+    /// is simply the project root. The method is retained as the canonical
+    /// entry point for callers that read scraps.
+    pub fn scraps_dir(&self) -> PathBuf {
+        self.project_root.clone()
     }
 
     /// Get the static directory path
@@ -111,45 +112,14 @@ mod tests {
     }
 
     #[rstest]
-    fn test_scraps_dir_path_default(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
-        temp_dir.add_dir("test_project_scraps").add_file(
-            "test_project_scraps/.scraps.toml",
-            br#"
-[ssg]
-title = "Test"
-base_url = "http://example.com/"
-"#,
-        );
+    fn test_scraps_dir_returns_project_root(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
+        temp_dir.add_dir("test_project_scraps");
 
         let test_project_path = temp_dir.path.join("test_project_scraps");
         let resolver = PathResolver::new(Some(&test_project_path)).unwrap();
-        let config = ScrapConfig::from_path(Some(&test_project_path)).unwrap();
 
-        let scraps_dir = resolver.scraps_dir(&config);
-        assert_eq!(scraps_dir.file_name().unwrap(), "scraps");
-        assert!(scraps_dir.starts_with(&test_project_path));
-    }
-
-    #[rstest]
-    fn test_scraps_dir_path_custom(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
-        temp_dir.add_dir("test_project_scraps_custom").add_file(
-            "test_project_scraps_custom/.scraps.toml",
-            br#"
-scraps_dir = "custom_docs"
-
-[ssg]
-title = "Test"
-base_url = "http://example.com/"
-"#,
-        );
-
-        let test_project_path = temp_dir.path.join("test_project_scraps_custom");
-        let resolver = PathResolver::new(Some(&test_project_path)).unwrap();
-        let config = ScrapConfig::from_path(Some(&test_project_path)).unwrap();
-
-        let scraps_dir = resolver.scraps_dir(&config);
-        assert_eq!(scraps_dir.file_name().unwrap(), "custom_docs");
-        assert!(scraps_dir.starts_with(&test_project_path));
+        let scraps_dir = resolver.scraps_dir();
+        assert_eq!(scraps_dir, test_project_path);
     }
 
     #[rstest]
