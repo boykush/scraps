@@ -21,16 +21,16 @@ use super::serde::tags::TagsTera;
 
 pub struct IndexRender {
     static_dir_path: PathBuf,
-    public_dir_path: PathBuf,
+    output_dir_path: PathBuf,
 }
 
 impl IndexRender {
-    pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> ScrapsResult<IndexRender> {
-        fs::create_dir_all(public_dir_path).context(BuildError::CreateDir)?;
+    pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<IndexRender> {
+        fs::create_dir_all(output_dir_path).context(BuildError::CreateDir)?;
 
         Ok(IndexRender {
             static_dir_path: static_dir_path.to_path_buf(),
-            public_dir_path: public_dir_path.to_path_buf(),
+            output_dir_path: output_dir_path.to_path_buf(),
         })
     }
 
@@ -150,7 +150,7 @@ impl IndexRender {
         } else {
             "__builtins/index.html"
         };
-        let file_path = &self.public_dir_path.join(pointer.current_file_name());
+        let file_path = &self.output_dir_path.join(pointer.current_file_name());
         let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to(template_name, context, wtr)
             .context(BuildError::WriteFailure(file_path.clone()))?;
@@ -206,7 +206,7 @@ mod tests {
         let scraps = scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(&scraps);
 
-        let render = IndexRender::new(&project.static_dir, &project.public_dir).unwrap();
+        let render = IndexRender::new(&project.static_dir, &project.output_dir).unwrap();
         render
             .run(
                 base_url,
@@ -218,7 +218,7 @@ mod tests {
             )
             .unwrap();
 
-        let result = fs::read_to_string(project.public_path("index.html")).unwrap();
+        let result = fs::read_to_string(project.output_path("index.html")).unwrap();
         assert_eq!(
             result,
             "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
@@ -272,7 +272,7 @@ mod tests {
         let scraps = scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(&scraps);
 
-        let render = IndexRender::new(&project.static_dir, &project.public_dir).unwrap();
+        let render = IndexRender::new(&project.static_dir, &project.output_dir).unwrap();
         let readme_content: Option<Content> = None;
         render
             .run(
@@ -285,13 +285,13 @@ mod tests {
             )
             .unwrap();
 
-        let index_result = fs::read_to_string(project.public_path("index.html")).unwrap();
+        let index_result = fs::read_to_string(project.output_path("index.html")).unwrap();
         assert_eq!(
             index_result,
             "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
         );
 
-        let page2_result = fs::read_to_string(project.public_path("2.html")).unwrap();
+        let page2_result = fs::read_to_string(project.output_path("2.html")).unwrap();
         assert_eq!(
             page2_result,
             "true<a href=\"./scrap3.html\">scrap3</a><a href=\"./scrap4.html\">scrap4</a>"

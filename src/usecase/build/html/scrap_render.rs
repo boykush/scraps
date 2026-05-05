@@ -18,17 +18,17 @@ use super::serde::scrap_detail::ScrapDetailTera;
 
 pub struct ScrapRender {
     static_dir_path: PathBuf,
-    public_scraps_dir_path: PathBuf,
+    output_scraps_dir_path: PathBuf,
 }
 
 impl ScrapRender {
-    pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> ScrapsResult<ScrapRender> {
-        let public_scraps_dir_path = &public_dir_path.join("scraps");
-        fs::create_dir_all(public_scraps_dir_path).context(BuildError::CreateDir)?;
+    pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<ScrapRender> {
+        let output_scraps_dir_path = &output_dir_path.join("scraps");
+        fs::create_dir_all(output_scraps_dir_path).context(BuildError::CreateDir)?;
 
         Ok(ScrapRender {
             static_dir_path: static_dir_path.to_owned(),
-            public_scraps_dir_path: public_scraps_dir_path.to_owned(),
+            output_scraps_dir_path: output_scraps_dir_path.to_owned(),
         })
     }
 
@@ -58,7 +58,7 @@ impl ScrapRender {
         );
 
         let file_path = &self
-            .public_scraps_dir_path
+            .output_scraps_dir_path
             .join(format!("{}.html", ScrapFileStem::from(scrap.self_key())));
         // The stem may contain `/`-separated context directories; ensure the
         // parent directory exists before creating the file.
@@ -99,7 +99,7 @@ mod tests {
         let test_resource_path =
             PathBuf::from("tests/resource/build/html/render/it_render_scrap_htmls");
         let static_dir_path = test_resource_path.join("static");
-        let public_dir_path = test_resource_path.join("public");
+        let output_dir_path = test_resource_path.join("_site");
 
         // scraps
         let commited_ts1 = None;
@@ -112,12 +112,12 @@ mod tests {
             .collect();
         let backlinks_map = BacklinksMap::new(&scraps);
 
-        let scrap1_html_path = public_dir_path.join("scraps/scrap-1.html");
+        let scrap1_html_path = output_dir_path.join("scraps/scrap-1.html");
         // v1: nested ctx is a directory (`context/scrap-2.html`), not a
         // dot-suffix on the file stem.
-        let scrap2_html_path = public_dir_path.join("scraps/context/scrap-2.html");
+        let scrap2_html_path = output_dir_path.join("scraps/context/scrap-2.html");
 
-        let render = ScrapRender::new(&static_dir_path, &public_dir_path).unwrap();
+        let render = ScrapRender::new(&static_dir_path, &output_dir_path).unwrap();
 
         render
             .run(

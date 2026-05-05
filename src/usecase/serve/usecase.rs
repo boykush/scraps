@@ -11,13 +11,13 @@ use tokio::net::TcpListener;
 use crate::error::ScrapsResult;
 
 pub struct ServeUsecase {
-    public_dir_path: PathBuf,
+    output_dir_path: PathBuf,
 }
 
 impl ServeUsecase {
-    pub fn new(public_dir_path: &Path) -> ServeUsecase {
+    pub fn new(output_dir_path: &Path) -> ServeUsecase {
         ServeUsecase {
-            public_dir_path: public_dir_path.to_path_buf(),
+            output_dir_path: output_dir_path.to_path_buf(),
         }
     }
 
@@ -29,7 +29,7 @@ impl ServeUsecase {
             let (stream, _) = listener.accept().await?;
             let io = TokioIo::new(stream);
 
-            let service = ScrapsService::new(&self.public_dir_path);
+            let service = ScrapsService::new(&self.output_dir_path);
             tokio::task::spawn(async move {
                 if let Err(err) = http1::Builder::new().serve_connection(io, service).await {
                     println!("Failed to serve connection: {err:?}");

@@ -35,14 +35,14 @@ pub fn run(git: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
     let ssg = config.require_ssg()?;
     let scraps_dir_path = path_resolver.scraps_dir(&config);
     let static_dir_path = path_resolver.static_dir();
-    let public_dir_path = path_resolver.public_dir();
+    let output_dir_path = path_resolver.output_dir(&config);
 
     // Input: read scraps (with git timestamps if --git is set) and README
     let git_command = git.then(GitCommandImpl::new);
     let (scraps_with_ts, readme_text) =
         read_scraps::to_all_scraps_with_timestamps(&scraps_dir_path, git_command)?;
 
-    let renderer = BuildRendererImpl::new(&static_dir_path, &public_dir_path);
+    let renderer = BuildRendererImpl::new(&static_dir_path, &output_dir_path);
     let build_usecase = BuildUsecase::new();
 
     let progress = ProgressImpl::init(Instant::now());
@@ -94,6 +94,6 @@ pub fn run(git: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
     println!("{serve_info}");
 
     // serve command
-    let serve_usecase = ServeUsecase::new(&public_dir_path);
+    let serve_usecase = ServeUsecase::new(&output_dir_path);
     serve_usecase.execute(&addr)
 }

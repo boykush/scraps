@@ -17,19 +17,19 @@ use super::serde::tag::TagTera;
 
 pub struct TagRender {
     static_dir_path: PathBuf,
-    public_tags_dir_path: PathBuf,
+    output_tags_dir_path: PathBuf,
 }
 
 impl TagRender {
-    pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> ScrapsResult<TagRender> {
+    pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<TagRender> {
         // Tag pages live in their own `tags/` directory, separate from
         // `scraps/`, to keep the two namespaces isolated (v1 design).
-        let public_tags_dir_path = &public_dir_path.join("tags");
-        fs::create_dir_all(public_tags_dir_path).context(BuildError::CreateDir)?;
+        let output_tags_dir_path = &output_dir_path.join("tags");
+        fs::create_dir_all(output_tags_dir_path).context(BuildError::CreateDir)?;
 
         Ok(TagRender {
             static_dir_path: static_dir_path.to_owned(),
-            public_tags_dir_path: public_tags_dir_path.to_owned(),
+            output_tags_dir_path: output_tags_dir_path.to_owned(),
         })
     }
 
@@ -59,7 +59,7 @@ impl TagRender {
         // segment of a hierarchical tag becomes a directory.
         let slug_path = tag_slug_path(tag);
         let file_path = self
-            .public_tags_dir_path
+            .output_tags_dir_path
             .join(format!("{}.html", slug_path));
         if let Some(parent) = file_path.parent() {
             fs::create_dir_all(parent).context(BuildError::CreateDir)?;
@@ -102,7 +102,7 @@ mod tests {
         let test_resource_path =
             PathBuf::from("tests/resource/build/html/render/it_render_tag_htmls");
         let static_dir_path = test_resource_path.join("static");
-        let public_dir_path = test_resource_path.join("public");
+        let output_dir_path = test_resource_path.join("_site");
 
         // scraps with explicit `#[[tag]]` tags
         let scrap1 = &Scrap::new("scrap1", &None, "#[[tag 1]]");
@@ -114,9 +114,9 @@ mod tests {
 
         // v1: tag pages live under `tags/` (not `scraps/`) and the slug is
         // built per-segment. "tag 1" slugifies to "tag-1".
-        let tag1_html_path = public_dir_path.join("tags/tag-1.html");
+        let tag1_html_path = output_dir_path.join("tags/tag-1.html");
 
-        let render = TagRender::new(&static_dir_path, &public_dir_path).unwrap();
+        let render = TagRender::new(&static_dir_path, &output_dir_path).unwrap();
 
         render
             .run(&base_url, &metadata, &tag1, &backlinks_map)
@@ -139,7 +139,7 @@ mod tests {
         let test_resource_path =
             PathBuf::from("tests/resource/build/html/render/it_render_nested_tag_htmls");
         let static_dir_path = test_resource_path.join("static");
-        let public_dir_path = test_resource_path.join("public");
+        let output_dir_path = test_resource_path.join("_site");
 
         let scrap = Scrap::new("paper", &None, "#[[ai/ml]]");
         let scraps = vec![scrap];
@@ -147,9 +147,9 @@ mod tests {
 
         let tag: Tag = "ai/ml".into();
         // Expected path: public/tags/ai/ml.html
-        let html_path = public_dir_path.join("tags/ai/ml.html");
+        let html_path = output_dir_path.join("tags/ai/ml.html");
 
-        let render = TagRender::new(&static_dir_path, &public_dir_path).unwrap();
+        let render = TagRender::new(&static_dir_path, &output_dir_path).unwrap();
         render
             .run(&base_url, &metadata, &tag, &backlinks_map)
             .unwrap();

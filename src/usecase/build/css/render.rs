@@ -9,14 +9,14 @@ use super::css_tera;
 
 pub struct CSSRender {
     static_dir_path: PathBuf,
-    public_dir_path: PathBuf,
+    output_dir_path: PathBuf,
 }
 
 impl CSSRender {
-    pub fn new(static_dir_path: &PathBuf, public_dir_path: &PathBuf) -> CSSRender {
+    pub fn new(static_dir_path: &PathBuf, output_dir_path: &PathBuf) -> CSSRender {
         CSSRender {
             static_dir_path: static_dir_path.to_owned(),
-            public_dir_path: public_dir_path.to_owned(),
+            output_dir_path: output_dir_path.to_owned(),
         }
     }
 
@@ -30,7 +30,7 @@ impl CSSRender {
         } else {
             "__builtins/main.css"
         };
-        let file_path = &self.public_dir_path.join("main.css");
+        let file_path = &self.output_dir_path.join("main.css");
         let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
         tera.render_to(template_name, &context, wtr)
             .context(BuildError::WriteFailure(file_path.clone()))
@@ -54,10 +54,10 @@ mod tests {
         let css_metadata = &CssMetadata::new(&ColorScheme::OsSetting);
 
         // Run render
-        let render = CSSRender::new(&project.static_dir, &project.public_dir);
+        let render = CSSRender::new(&project.static_dir, &project.output_dir);
         render.render_main(css_metadata).unwrap();
 
-        let result = fs::read_to_string(project.public_path("main.css")).unwrap();
+        let result = fs::read_to_string(project.output_path("main.css")).unwrap();
         assert_eq!(result, ":root { color-scheme: light dark;}");
     }
 }

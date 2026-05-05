@@ -1,6 +1,6 @@
 #[[Markdown]]
 
-In Scraps, the `scraps/README.md` file is automatically converted to HTML and included in the static site's top page ( `public/index.html` ).
+In Scraps, the `scraps/README.md` file is automatically converted to HTML and included in the static site's top page ( `_site/index.html` ).
 
 For Markdown syntax, please refer to [[Reference/CommonMark]].
 

@@ -26,14 +26,14 @@ use crate::usecase::build::{
 
 pub struct BuildRendererImpl {
     static_dir_path: PathBuf,
-    public_dir_path: PathBuf,
+    output_dir_path: PathBuf,
 }
 
 impl BuildRendererImpl {
-    pub fn new(static_dir_path: &Path, public_dir_path: &Path) -> BuildRendererImpl {
+    pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> BuildRendererImpl {
         BuildRendererImpl {
             static_dir_path: static_dir_path.to_path_buf(),
-            public_dir_path: public_dir_path.to_path_buf(),
+            output_dir_path: output_dir_path.to_path_buf(),
         }
     }
 }
@@ -48,7 +48,7 @@ impl HtmlIndexRenderer for BuildRendererImpl {
         backlinks_map: &BacklinksMap,
         readme_content: &Option<Content>,
     ) -> ScrapsResult<usize> {
-        let index_render = IndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
+        let index_render = IndexRender::new(&self.static_dir_path, &self.output_dir_path)?;
         index_render.run(
             base_url,
             html_metadata,
@@ -69,7 +69,7 @@ impl HtmlScrapRenderer for BuildRendererImpl {
         scrap_detail: &ScrapDetail,
         backlinks_map: &BacklinksMap,
     ) -> ScrapsResult<()> {
-        let scrap_render = ScrapRender::new(&self.static_dir_path, &self.public_dir_path)?;
+        let scrap_render = ScrapRender::new(&self.static_dir_path, &self.output_dir_path)?;
         scrap_render.run(
             base_url,
             timezone,
@@ -88,7 +88,7 @@ impl HtmlTagsIndexRenderer for BuildRendererImpl {
         scraps: &[Scrap],
         backlinks_map: &BacklinksMap,
     ) -> ScrapsResult<()> {
-        let tags_index_render = TagsIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
+        let tags_index_render = TagsIndexRender::new(&self.static_dir_path, &self.output_dir_path)?;
         tags_index_render.run(base_url, html_metadata, scraps, backlinks_map)
     }
 }
@@ -101,14 +101,14 @@ impl HtmlTagRenderer for BuildRendererImpl {
         tag: &Tag,
         backlinks_map: &BacklinksMap,
     ) -> ScrapsResult<()> {
-        let tag_render = TagRender::new(&self.static_dir_path, &self.public_dir_path)?;
+        let tag_render = TagRender::new(&self.static_dir_path, &self.output_dir_path)?;
         tag_render.run(base_url, html_metadata, tag, backlinks_map)
     }
 }
 
 impl CssRenderer for BuildRendererImpl {
     fn render_css(&self, css_metadata: &CssMetadata) -> ScrapsResult<()> {
-        let css_render = CSSRender::new(&self.static_dir_path, &self.public_dir_path);
+        let css_render = CSSRender::new(&self.static_dir_path, &self.output_dir_path);
         css_render.render_main(css_metadata)
     }
 }
@@ -116,7 +116,7 @@ impl CssRenderer for BuildRendererImpl {
 impl SearchIndexJsonRenderer for BuildRendererImpl {
     fn render_search_index(&self, base_url: &BaseUrl, scraps: &[Scrap]) -> ScrapsResult<()> {
         let search_index_render =
-            SearchIndexRender::new(&self.static_dir_path, &self.public_dir_path)?;
+            SearchIndexRender::new(&self.static_dir_path, &self.output_dir_path)?;
         search_index_render.run(base_url, scraps)
     }
 }

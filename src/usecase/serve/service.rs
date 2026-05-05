@@ -18,13 +18,13 @@ use percent_encoding::percent_decode_str;
 
 #[derive(Clone)]
 pub struct ScrapsService {
-    pub public_dir_path: PathBuf,
+    pub output_dir_path: PathBuf,
 }
 
 impl ScrapsService {
-    pub fn new(public_dir_path: &Path) -> ScrapsService {
+    pub fn new(output_dir_path: &Path) -> ScrapsService {
         ScrapsService {
-            public_dir_path: public_dir_path.to_owned(),
+            output_dir_path: output_dir_path.to_owned(),
         }
     }
 
@@ -81,7 +81,7 @@ impl Service<Request<Incoming>> for ScrapsService {
 
     fn call(&self, request: Request<Incoming>) -> Self::Future {
         let requested_path = request.uri().path().replacen('/', "", 1); // remove head absolute slash;
-        let allowed_path = self.public_dir_path.join(requested_path);
+        let allowed_path = self.output_dir_path.join(requested_path);
         let resolved_index_path = if allowed_path.is_dir() {
             allowed_path.join("index.html")
         } else {

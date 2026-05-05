@@ -57,9 +57,12 @@ impl PathResolver {
         self.project_root.join("static")
     }
 
-    /// Get the public directory path
-    pub fn public_dir(&self) -> PathBuf {
-        self.project_root.join("public")
+    /// Get the build output directory path
+    pub fn output_dir(&self, config: &ScrapConfig) -> PathBuf {
+        match &config.output_dir {
+            Some(dir) => self.project_root.join(dir),
+            None => self.project_root.join("_site"),
+        }
     }
 
     /// Get the config file path
@@ -161,14 +164,45 @@ base_url = "http://example.com/"
     }
 
     #[rstest]
-    fn test_public_dir_path(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
-        temp_dir.add_dir("test_project_public");
+    fn test_output_dir_path_default(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
+        temp_dir.add_dir("test_project_output").add_file(
+            "test_project_output/.scraps.toml",
+            br#"
+[ssg]
+title = "Test"
+base_url = "http://example.com/"
+"#,
+        );
 
-        let test_project_path = temp_dir.path.join("test_project_public");
+        let test_project_path = temp_dir.path.join("test_project_output");
         let resolver = PathResolver::new(Some(&test_project_path)).unwrap();
-        let public_dir = resolver.public_dir();
-        assert_eq!(public_dir.file_name().unwrap(), "public");
-        assert!(public_dir.starts_with(&test_project_path));
+        let config = ScrapConfig::from_path(Some(&test_project_path)).unwrap();
+
+        let output_dir = resolver.output_dir(&config);
+        assert_eq!(output_dir.file_name().unwrap(), "_site");
+        assert!(output_dir.starts_with(&test_project_path));
+    }
+
+    #[rstest]
+    fn test_output_dir_path_custom(#[from(simple_temp_dir)] temp_dir: SimpleTempDir) {
+        temp_dir.add_dir("test_project_output_custom").add_file(
+            "test_project_output_custom/.scraps.toml",
+            br#"
+output_dir = "dist"
+
+[ssg]
+title = "Test"
+base_url = "http://example.com/"
+"#,
+        );
+
+        let test_project_path = temp_dir.path.join("test_project_output_custom");
+        let resolver = PathResolver::new(Some(&test_project_path)).unwrap();
+        let config = ScrapConfig::from_path(Some(&test_project_path)).unwrap();
+
+        let output_dir = resolver.output_dir(&config);
+        assert_eq!(output_dir.file_name().unwrap(), "dist");
+        assert!(output_dir.starts_with(&test_project_path));
     }
 
     #[rstest]
