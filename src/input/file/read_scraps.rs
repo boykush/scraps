@@ -8,24 +8,41 @@ use scraps_libs::model::{context::Ctx, scrap::Scrap};
 
 use crate::error::{ScrapsError, ScrapsResult};
 
-pub(crate) fn to_scrap_paths(dir_path: &Path) -> ScrapsResult<Vec<PathBuf>> {
-    let read_dir = fs::read_dir(dir_path).context(ScrapsError::ReadScraps)?;
+/// Recursively walk `dir_path` collecting `*.md` files. Skips entries whose
+/// name starts with `.` (so `.git/`, `.scraps.toml`, etc. never enter the
+/// traversal) and any directory whose absolute path matches `exclude_dirs`
+/// (callers pass the project's `static/` and configured output directory at
+/// the top level).
+pub(crate) fn to_scrap_paths(
+    scraps_dir_path: &Path,
+    exclude_dirs: &[PathBuf],
+) -> ScrapsResult<Vec<PathBuf>> {
+    let read_dir = fs::read_dir(scraps_dir_path).context(ScrapsError::ReadScraps)?;
 
     let paths = read_dir
         .map(|entry_res| {
             let entry = entry_res?;
+            let entry_path = entry.path();
+
+            if entry.file_name().to_string_lossy().starts_with('.') {
+                return Ok(vec![]);
+            }
+
             match entry.file_type() {
-                Ok(file_type) if file_type.is_file() => {
-                    let file_path = entry.path();
-                    match file_path.extension() {
-                        Some(ext) if ext == "md" => Ok(vec![file_path]),
-                        _ => Ok(vec![]),
+                Ok(file_type) if file_type.is_file() => match entry_path.extension() {
+                    Some(ext) if ext == "md" => Ok(vec![entry_path]),
+                    _ => Ok(vec![]),
+                },
+                Ok(file_type) if file_type.is_dir() => {
+                    if exclude_dirs.iter().any(|p| p == &entry_path) {
+                        Ok(vec![])
+                    } else {
+                        to_scrap_paths(&entry_path, &[])
                     }
                 }
-                Ok(file_type) if file_type.is_dir() => to_scrap_paths(&entry.path()),
                 res => res
                     .map(|_| vec![])
-                    .context(ScrapsError::ReadScrap(entry.path())),
+                    .context(ScrapsError::ReadScrap(entry_path)),
             }
         })
         .collect::<ScrapsResult<Vec<Vec<PathBuf>>>>()?;
@@ -68,8 +85,11 @@ pub(crate) fn to_scrap_by_path(
     Ok(scrap)
 }
 
-pub(crate) fn to_all_scraps(scraps_dir_path: &Path) -> ScrapsResult<Vec<Scrap>> {
-    let paths = to_scrap_paths(scraps_dir_path)?;
+pub(crate) fn to_all_scraps(
+    scraps_dir_path: &Path,
+    exclude_dirs: &[PathBuf],
+) -> ScrapsResult<Vec<Scrap>> {
+    let paths = to_scrap_paths(scraps_dir_path, exclude_dirs)?;
     paths
         .iter()
         .map(|path| to_scrap_by_path(scraps_dir_path, path))
@@ -86,11 +106,12 @@ pub(crate) fn to_all_scraps_with_timestamps<
     GC: scraps_libs::git::GitCommand + Send + Sync + Copy,
 >(
     scraps_dir_path: &Path,
+    exclude_dirs: &[PathBuf],
     git_command: Option<GC>,
 ) -> ScrapsResult<(Vec<(Scrap, Option<i64>)>, Option<String>)> {
     use rayon::prelude::*;
 
-    let paths = to_scrap_paths(scraps_dir_path)?;
+    let paths = to_scrap_paths(scraps_dir_path, exclude_dirs)?;
 
     // Separate README.md from other scraps
     let readme_path = scraps_dir_path.join("README.md");
@@ -131,4 +152,85 @@ pub(crate) fn to_all_scraps_with_timestamps<
         .collect::<ScrapsResult<Vec<(Scrap, Option<i64>)>>>()?;
 
     Ok((scraps_with_ts, readme_text))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_fixtures::TempScrapProject;
+    use std::collections::HashSet;
+
+    fn collect_titles(scraps: &[Scrap]) -> HashSet<String> {
+        scraps
+            .iter()
+            .map(|s| {
+                let key = s.self_key();
+                let title = key.title().to_string();
+                match key.ctx() {
+                    Some(ctx) => format!("{ctx}/{title}"),
+                    None => title,
+                }
+            })
+            .collect()
+    }
+
+    #[test]
+    fn skips_static_output_and_dotfiles() {
+        let project = TempScrapProject::new();
+        // Top-level scrap, plus markdown under `static/` and the build output dir
+        // that should be ignored, plus a dotfile directory and dotfile.
+        project.add_scrap("intro.md", b"# Intro");
+        project.add_static_file("style.md", b"# In static");
+        std::fs::write(project.output_dir.join("page.md"), b"# In output").unwrap();
+        let dot_dir = project.project_root.join(".cache");
+        std::fs::create_dir_all(&dot_dir).unwrap();
+        std::fs::write(dot_dir.join("note.md"), b"# In dotdir").unwrap();
+        std::fs::write(project.project_root.join(".hidden.md"), b"# Hidden").unwrap();
+
+        let exclude = vec![project.static_dir.clone(), project.output_dir.clone()];
+        let scraps = to_all_scraps(&project.project_root, &exclude).unwrap();
+        let titles = collect_titles(&scraps);
+
+        assert_eq!(titles, HashSet::from(["intro".to_string()]));
+    }
+
+    #[test]
+    fn collects_nested_ctx_under_project_root() {
+        let project = TempScrapProject::new();
+        project.add_scrap("root.md", b"# Root");
+        project.add_scrap_with_context("architecture", "overview.md", b"# Overview");
+
+        let exclude = vec![project.static_dir.clone(), project.output_dir.clone()];
+        let scraps = to_all_scraps(&project.project_root, &exclude).unwrap();
+        let titles = collect_titles(&scraps);
+
+        assert_eq!(
+            titles,
+            HashSet::from(["root".to_string(), "architecture/overview".to_string()])
+        );
+    }
+
+    #[test]
+    fn readme_at_project_root_is_partitioned() {
+        let project = TempScrapProject::new();
+        project
+            .add_scrap("README.md", b"# Readme body")
+            .add_scrap("intro.md", b"# Intro");
+
+        let exclude = vec![project.static_dir.clone(), project.output_dir.clone()];
+        let (scraps_with_ts, readme) = to_all_scraps_with_timestamps::<
+            scraps_libs::git::GitCommandImpl,
+        >(&project.project_root, &exclude, None)
+        .unwrap();
+
+        // Only `intro.md` is a scrap; README is returned separately.
+        let titles = collect_titles(
+            &scraps_with_ts
+                .iter()
+                .map(|(s, _)| s.clone())
+                .collect::<Vec<_>>(),
+        );
+        assert_eq!(titles, HashSet::from(["intro".to_string()]));
+        assert_eq!(readme.as_deref(), Some("# Readme body"));
+    }
 }

@@ -1,5 +1,7 @@
-# The scraps directory path relative to this .scraps.toml (optional, default=scraps)
-# scraps_dir = "scraps"
+# The directory containing this .scraps.toml is the wiki root: every *.md file
+# under it (recursively) is a scrap. Top-level `static/` and the build output
+# directory, and any entries whose name starts with `.`, are skipped
+# automatically.
 
 # The build output directory path relative to this .scraps.toml (optional, default=_site)
 # output_dir = "_site"

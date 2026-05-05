@@ -11,8 +11,9 @@ use tempfile::TempDir;
 
 /// High-level fixture for a complete Scraps project structure
 ///
-/// Provides a temporary project with scraps/, static/, and _site/
-/// directories automatically created and cleaned up after the test.
+/// Provides a temporary project with `static/` and `_site/` subdirectories
+/// (the project root itself acts as the wiki root in v1). All resources are
+/// automatically cleaned up when the fixture is dropped.
 ///
 /// # Example
 /// ```no_run
@@ -24,13 +25,14 @@ use tempfile::TempDir;
 ///     temp_scrap_project
 ///         .add_scrap("test.md", b"# Test Content");
 ///
-///     // Use temp_scrap_project.scraps_dir, .static_dir, .output_dir, etc.
+///     // Use temp_scrap_project.scraps_dir (== project_root), .static_dir, .output_dir, etc.
 ///     // Automatic cleanup when temp_scrap_project goes out of scope
 /// }
 /// ```
 pub struct TempScrapProject {
     #[allow(dead_code)]
     temp_dir: TempDir,
+    /// Wiki root. In v1 this is the project root itself.
     pub scraps_dir: PathBuf,
     pub static_dir: PathBuf,
     pub output_dir: PathBuf,
@@ -43,12 +45,11 @@ impl TempScrapProject {
         let temp_dir = TempDir::new().expect("Failed to create temp directory");
         let project_root = temp_dir.path().to_path_buf();
 
-        let scraps_dir = project_root.join("scraps");
+        // The project root IS the wiki root.
+        let scraps_dir = project_root.clone();
         let static_dir = project_root.join("static");
         let output_dir = project_root.join("_site");
 
-        // Create all directories
-        fs::create_dir_all(&scraps_dir).expect("Failed to create scraps dir");
         fs::create_dir_all(&static_dir).expect("Failed to create static dir");
         fs::create_dir_all(&output_dir).expect("Failed to create output dir");
 
@@ -61,10 +62,10 @@ impl TempScrapProject {
         }
     }
 
-    /// Add a markdown scrap file to the scraps directory
+    /// Add a markdown scrap file under the wiki root (project root)
     ///
     /// # Arguments
-    /// * `filename` - Relative path from scraps_dir (e.g., "test.md" or "subdir/test.md")
+    /// * `filename` - Relative path from the project root (e.g., "test.md" or "subdir/test.md")
     /// * `content` - File content as bytes
     ///
     /// # Example
@@ -72,7 +73,7 @@ impl TempScrapProject {
     /// project.add_scrap("test.md", b"# Header\n\nContent");
     /// ```
     pub fn add_scrap(&self, filename: &str, content: &[u8]) -> &Self {
-        let path = self.scraps_dir.join(filename);
+        let path = self.project_root.join(filename);
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent).expect("Failed to create parent dir");
         }
@@ -80,19 +81,14 @@ impl TempScrapProject {
         self
     }
 
-    /// Add a scrap file in a context subdirectory
+    /// Add a scrap file in a context subdirectory under the project root
     ///
     /// # Arguments
     /// * `context` - Context directory name (e.g., "Context")
     /// * `filename` - Filename within the context directory
     /// * `content` - File content as bytes
-    ///
-    /// # Example
-    /// ```no_run
-    /// project.add_scrap_with_context("Context", "test.md", b"# Contextual Content");
-    /// ```
     pub fn add_scrap_with_context(&self, context: &str, filename: &str, content: &[u8]) -> &Self {
-        let context_dir = self.scraps_dir.join(context);
+        let context_dir = self.project_root.join(context);
         fs::create_dir_all(&context_dir).expect("Failed to create context dir");
         let path = context_dir.join(filename);
         fs::write(&path, content).expect("Failed to write scrap file");
@@ -106,7 +102,7 @@ impl TempScrapProject {
     ///
     /// # Example
     /// ```no_run
-    /// project.add_config(b"scraps_dir = \"docs\"\n\n[ssg]\nbase_url = \"https://example.com/\"\ntitle = \"Test\"");
+    /// project.add_config(b"[ssg]\nbase_url = \"https://example.com/\"\ntitle = \"Test\"");
     /// ```
     pub fn add_config(&self, content: &[u8]) -> &Self {
         let config_path = self.project_root.join(CONFIG_FILE_NAME);
@@ -143,12 +139,12 @@ impl TempScrapProject {
         self.output_dir.join(filename)
     }
 
-    /// Get the path to a file in the scraps directory
+    /// Get the path to a scrap file under the project root
     ///
     /// # Arguments
-    /// * `filename` - Relative path from scraps_dir
+    /// * `filename` - Relative path from the project root
     pub fn scrap_path(&self, filename: &str) -> PathBuf {
-        self.scraps_dir.join(filename)
+        self.project_root.join(filename)
     }
 }
 
@@ -256,7 +252,7 @@ mod tests {
     fn test_temp_scrap_project_creates_directories() {
         let project = TempScrapProject::new();
 
-        assert!(project.scraps_dir.exists());
+        assert_eq!(project.scraps_dir, project.project_root);
         assert!(project.static_dir.exists());
         assert!(project.output_dir.exists());
         assert!(project.project_root.exists());
@@ -277,7 +273,7 @@ mod tests {
         let project = TempScrapProject::new();
         project.add_scrap_with_context("Context", "test.md", b"# Contextual");
 
-        let scrap_path = project.scraps_dir.join("Context/test.md");
+        let scrap_path = project.project_root.join("Context/test.md");
         assert!(scrap_path.exists());
         assert_eq!(fs::read_to_string(scrap_path).unwrap(), "# Contextual");
     }

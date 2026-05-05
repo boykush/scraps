@@ -16,13 +16,15 @@ use rmcp::{tool, tool_handler, tool_router, ErrorData, RoleServer};
 pub struct ScrapsServer {
     tool_router: ToolRouter<ScrapsServer>,
     scraps_dir: PathBuf,
+    exclude_dirs: Vec<PathBuf>,
 }
 
 impl ScrapsServer {
-    pub fn new(scraps_dir: PathBuf) -> Self {
+    pub fn new(scraps_dir: PathBuf, exclude_dirs: Vec<PathBuf>) -> Self {
         Self {
             tool_router: Self::tool_router(),
             scraps_dir,
+            exclude_dirs,
         }
     }
 }
@@ -37,7 +39,7 @@ impl ScrapsServer {
         context: RequestContext<RoleServer>,
         parameters: Parameters<GetScrapRequest>,
     ) -> Result<CallToolResult, ErrorData> {
-        get_scrap(&self.scraps_dir, context, parameters).await
+        get_scrap(&self.scraps_dir, &self.exclude_dirs, context, parameters).await
     }
 
     #[tool(
@@ -48,7 +50,7 @@ impl ScrapsServer {
         context: RequestContext<RoleServer>,
         parameters: Parameters<SearchRequest>,
     ) -> Result<CallToolResult, ErrorData> {
-        search_scraps(&self.scraps_dir, context, parameters).await
+        search_scraps(&self.scraps_dir, &self.exclude_dirs, context, parameters).await
     }
 
     #[tool(
@@ -59,7 +61,7 @@ impl ScrapsServer {
         context: RequestContext<RoleServer>,
         parameters: Parameters<LookupScrapLinksRequest>,
     ) -> Result<CallToolResult, ErrorData> {
-        lookup_scrap_links(&self.scraps_dir, context, parameters).await
+        lookup_scrap_links(&self.scraps_dir, &self.exclude_dirs, context, parameters).await
     }
 
     #[tool(
@@ -70,7 +72,7 @@ impl ScrapsServer {
         context: RequestContext<RoleServer>,
         parameters: Parameters<LookupScrapBacklinksRequest>,
     ) -> Result<CallToolResult, ErrorData> {
-        lookup_scrap_backlinks(&self.scraps_dir, context, parameters).await
+        lookup_scrap_backlinks(&self.scraps_dir, &self.exclude_dirs, context, parameters).await
     }
 
     #[tool(
@@ -80,7 +82,7 @@ impl ScrapsServer {
         &self,
         context: RequestContext<RoleServer>,
     ) -> Result<CallToolResult, ErrorData> {
-        list_tags(&self.scraps_dir, context).await
+        list_tags(&self.scraps_dir, &self.exclude_dirs, context).await
     }
 
     #[tool(
@@ -91,7 +93,7 @@ impl ScrapsServer {
         context: RequestContext<RoleServer>,
         parameters: Parameters<LookupTagBacklinksRequest>,
     ) -> Result<CallToolResult, ErrorData> {
-        lookup_tag_backlinks(&self.scraps_dir, context, parameters).await
+        lookup_tag_backlinks(&self.scraps_dir, &self.exclude_dirs, context, parameters).await
     }
 }
 
@@ -113,7 +115,10 @@ mod tests {
 
     #[rstest]
     fn test_server_info(#[from(temp_scrap_project)] project: TempScrapProject) {
-        let server = ScrapsServer::new(project.scraps_dir.clone());
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
         let info = server.get_info();
 
         assert_eq!(
@@ -126,7 +131,10 @@ mod tests {
     #[rstest]
     #[tokio::test]
     async fn test_list_tools(#[from(temp_scrap_project)] project: TempScrapProject) {
-        let server = ScrapsServer::new(project.scraps_dir.clone());
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
 
         let (client_stream, server_stream) = tokio::io::duplex(4096);
 
@@ -155,7 +163,10 @@ mod tests {
     async fn test_call_search_scraps(#[from(temp_scrap_project)] project: TempScrapProject) {
         project.add_scrap("test.md", b"# Test Scrap\n\nContent here");
 
-        let server = ScrapsServer::new(project.scraps_dir.clone());
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
 
         let (client_stream, server_stream) = tokio::io::duplex(4096);
 
@@ -196,7 +207,10 @@ mod tests {
     async fn test_call_get_scrap(#[from(temp_scrap_project)] project: TempScrapProject) {
         project.add_scrap("test.md", b"# Test Scrap\n\nContent here");
 
-        let server = ScrapsServer::new(project.scraps_dir.clone());
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
 
         let (client_stream, server_stream) = tokio::io::duplex(4096);
 
@@ -232,7 +246,10 @@ mod tests {
     async fn test_call_list_tags(#[from(temp_scrap_project)] project: TempScrapProject) {
         project.add_scrap("test.md", b"#[[rust]] #[[programming]]");
 
-        let server = ScrapsServer::new(project.scraps_dir.clone());
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
 
         let (client_stream, server_stream) = tokio::io::duplex(4096);
 
@@ -265,7 +282,10 @@ mod tests {
         project.add_scrap("source.md", b"# Source\n\n[[target]]");
         project.add_scrap("target.md", b"# Target\n\nTarget content");
 
-        let server = ScrapsServer::new(project.scraps_dir.clone());
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
 
         let (client_stream, server_stream) = tokio::io::duplex(4096);
 
@@ -303,7 +323,10 @@ mod tests {
         project.add_scrap("source.md", b"# Source\n\n[[target]]");
         project.add_scrap("target.md", b"# Target\n\nTarget content");
 
-        let server = ScrapsServer::new(project.scraps_dir.clone());
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
 
         let (client_stream, server_stream) = tokio::io::duplex(4096);
 
@@ -338,7 +361,10 @@ mod tests {
     async fn test_call_lookup_tag_backlinks(#[from(temp_scrap_project)] project: TempScrapProject) {
         project.add_scrap("test.md", b"# Test\n\n#[[rust]]");
 
-        let server = ScrapsServer::new(project.scraps_dir.clone());
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
 
         let (client_stream, server_stream) = tokio::io::duplex(4096);
 
@@ -383,7 +409,10 @@ mod tests {
         project.add_scrap("python_doc.md", b"# Python Documentation\n\nPython content");
         project.add_scrap("rust_python.md", b"# Rust and Python\n\nBoth languages");
 
-        let server = ScrapsServer::new(project.scraps_dir.clone());
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
 
         let (client_stream, server_stream) = tokio::io::duplex(4096);
 
@@ -434,7 +463,10 @@ mod tests {
         project.add_scrap("python_doc.md", b"# Python Documentation\n\nPython content");
         project.add_scrap("rust_python.md", b"# Rust and Python\n\nBoth languages");
 
-        let server = ScrapsServer::new(project.scraps_dir.clone());
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
 
         let (client_stream, server_stream) = tokio::io::duplex(4096);
 

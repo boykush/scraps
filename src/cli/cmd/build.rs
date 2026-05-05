@@ -48,14 +48,17 @@ fn execute(git: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
     let path_resolver = PathResolver::new(project_path)?;
     let config = ScrapConfig::from_path(project_path)?;
     let ssg = config.require_ssg()?;
-    let scraps_dir_path = path_resolver.scraps_dir(&config);
+    let scraps_dir_path = path_resolver.scraps_dir();
     let static_dir_path = path_resolver.static_dir();
     let output_dir_path = path_resolver.output_dir(&config);
 
-    // Input: read scraps (with git timestamps if --git is set) and README
+    // Input: read scraps (with git timestamps if --git is set) and README.
+    // The wiki root is the project root, so skip `static/` and the configured
+    // output directory at the top level.
     let git_command = git.then(GitCommandImpl::new);
+    let exclude_dirs = vec![static_dir_path.clone(), output_dir_path.clone()];
     let (scraps_with_ts, readme_text) =
-        read_scraps::to_all_scraps_with_timestamps(&scraps_dir_path, git_command)?;
+        read_scraps::to_all_scraps_with_timestamps(&scraps_dir_path, &exclude_dirs, git_command)?;
 
     let renderer = BuildRendererImpl::new(&static_dir_path, &output_dir_path);
     let usecase = BuildUsecase::new();

@@ -14,12 +14,10 @@ impl<GC: GitCommand> InitUsecase<GC> {
     }
 
     pub fn execute(&self, project_dir: &Path) -> ScrapsResult<()> {
-        let scraps_dir = project_dir.join("scraps");
         let config_toml_file = &project_dir.join(CONFIG_FILE_NAME);
         let gitignore_file = &project_dir.join(".gitignore");
 
         fs::create_dir_all(project_dir).context(InitError::CreateDirectory)?;
-        fs::create_dir(scraps_dir).context(InitError::CreateDirectory)?;
         fs::write(config_toml_file, include_str!("builtins/.scraps.toml"))
             .context(InitError::WriteFailure(config_toml_file.clone()))?;
         fs::write(gitignore_file, "_site")
@@ -48,7 +46,6 @@ mod tests {
         usecase.execute(&project_path).unwrap();
 
         assert!(project_path.exists());
-        assert!(project_path.join("scraps").exists());
         assert!(project_path.join(CONFIG_FILE_NAME).exists());
         assert!(project_path.join(".gitignore").exists());
         assert!(project_path.join(".git").exists());

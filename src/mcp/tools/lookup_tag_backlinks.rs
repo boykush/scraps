@@ -25,11 +25,12 @@ pub struct LookupTagBacklinksResponse {
 
 pub async fn lookup_tag_backlinks(
     scraps_dir: &Path,
+    exclude_dirs: &[std::path::PathBuf],
     _context: RequestContext<RoleServer>,
     Parameters(request): Parameters<LookupTagBacklinksRequest>,
 ) -> Result<CallToolResult, ErrorData> {
     // Load scraps from directory
-    let scraps = read_scraps::to_all_scraps(scraps_dir).map_err(|e| {
+    let scraps = read_scraps::to_all_scraps(scraps_dir, exclude_dirs).map_err(|e| {
         ErrorData::new(
             ErrorCode(-32003),
             format!("Failed to load scraps: {e}"),

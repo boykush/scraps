@@ -6,7 +6,7 @@ Configuration is managed by `.scraps.toml` in the Scraps project.
 
 The configuration file has two sections:
 
-- **Root level**: Contains `scraps_dir` and `timezone` for general settings
+- **Root level**: Contains `output_dir` and `timezone` for general settings
 - **[ssg] section**: Contains all static site generator settings
 
 The `[ssg]` section is required for `build` and `serve` commands. Other commands
@@ -14,13 +14,20 @@ like `lint`, `tag`, and `mcp` can work without this section.
 
 Within the `[ssg]` section, `base_url` and `title` are required fields.
 
+## Wiki Root
+
+The directory containing `.scraps.toml` IS the wiki root. Every `*.md` file
+under that directory (recursive) is treated as a scrap. Top-level `static/`
+and the configured build output directory (default `_site/`), and any entries
+whose name starts with `.` (e.g. `.git/`), are skipped automatically.
+
 ## Configuration Variables
 
 All configuration variables used by Scraps and their default values are listed below.
 
 ```toml:.scraps.toml
-# The scraps directory path relative to this .scraps.toml (optional, default=scraps)
-scraps_dir = "scraps"
+# The build output directory path relative to this .scraps.toml (optional, default=_site)
+output_dir = "_site"
 
 # The site timezone (optional, default=UTC)
 timezone = "UTC"

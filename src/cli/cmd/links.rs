@@ -30,9 +30,13 @@ pub fn run(
 ) -> ScrapsResult<()> {
     let path_resolver = PathResolver::new(project_path)?;
     let config = ScrapConfig::from_path(project_path)?;
-    let scraps_dir_path = path_resolver.scraps_dir(&config);
+    let scraps_dir_path = path_resolver.scraps_dir();
+    let exclude_dirs = vec![
+        path_resolver.static_dir(),
+        path_resolver.output_dir(&config),
+    ];
 
-    let scraps = read_scraps::to_all_scraps(&scraps_dir_path)?;
+    let scraps = read_scraps::to_all_scraps(&scraps_dir_path, &exclude_dirs)?;
     let target_title = Title::from(title);
     let target_ctx = ctx.map(Ctx::from);
 
