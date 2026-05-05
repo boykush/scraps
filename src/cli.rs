@@ -17,16 +17,46 @@ mod progress;
 #[command(author, version, about, long_about = None)]
 pub struct Cli {
     #[arg(
+        short = 'C',
+        long = "directory",
+        global = true,
+        env = "SCRAPS_DIRECTORY",
+        value_name = "DIR",
+        help = "Run as if started in <DIR> (instead of the current directory)"
+    )]
+    pub directory: Option<PathBuf>,
+
+    #[arg(
         short = 'p',
         long = "path",
         global = true,
         env = "SCRAPS_PROJECT_PATH",
-        help = "Specify the project directory path"
+        value_name = "DIR",
+        hide = true,
+        help = "[DEPRECATED] Use -C/--directory instead. Will be removed in v1.1."
     )]
     pub path: Option<PathBuf>,
 
     #[command(subcommand)]
     pub command: SubCommands,
+}
+
+impl Cli {
+    /// Resolve the effective working directory, preferring `-C/--directory`.
+    ///
+    /// Emits a deprecation warning to stderr when `-p/--path` (or
+    /// `SCRAPS_PROJECT_PATH`) is used.
+    pub fn resolve_directory<'a>(
+        directory: Option<&'a std::path::Path>,
+        path: Option<&'a std::path::Path>,
+    ) -> Option<&'a std::path::Path> {
+        if path.is_some() {
+            eprintln!(
+                "warning: -p/--path (and SCRAPS_PROJECT_PATH) is deprecated and will be removed in v1.1. Use -C/--directory (or SCRAPS_DIRECTORY) instead."
+            );
+        }
+        directory.or(path)
+    }
 }
 
 #[derive(Subcommand)]
@@ -236,5 +266,39 @@ impl From<CliLintRuleName> for LintRuleName {
             CliLintRuleName::BrokenHeadingRef => LintRuleName::BrokenHeadingRef,
             CliLintRuleName::StaleByGit => LintRuleName::StaleByGit,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::Path;
+
+    #[test]
+    fn resolve_directory_prefers_directory_over_path() {
+        let directory = PathBuf::from("/dir");
+        let path = PathBuf::from("/path");
+        let resolved = Cli::resolve_directory(Some(&directory), Some(&path));
+        assert_eq!(resolved, Some(Path::new("/dir")));
+    }
+
+    #[test]
+    fn resolve_directory_falls_back_to_path_when_directory_absent() {
+        let path = PathBuf::from("/path");
+        let resolved = Cli::resolve_directory(None, Some(&path));
+        assert_eq!(resolved, Some(Path::new("/path")));
+    }
+
+    #[test]
+    fn resolve_directory_uses_directory_when_path_absent() {
+        let directory = PathBuf::from("/dir");
+        let resolved = Cli::resolve_directory(Some(&directory), None);
+        assert_eq!(resolved, Some(Path::new("/dir")));
+    }
+
+    #[test]
+    fn resolve_directory_returns_none_when_both_absent() {
+        let resolved = Cli::resolve_directory(None, None);
+        assert_eq!(resolved, None);
     }
 }

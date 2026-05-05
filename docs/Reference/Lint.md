@@ -53,5 +53,5 @@ warning[overlinking]: link [[Rust]] appears 3 times
 ❯ scraps lint
 
 # Lint from specific directory
-❯ scraps lint --path /path/to/project
+❯ scraps lint -C /path/to/project
 ```
