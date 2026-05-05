@@ -29,12 +29,6 @@ pub enum ScrapsError {
 
 #[derive(Error, PartialEq, Debug)]
 pub enum InitError {
-    #[error("Failed to initialize git repository")]
-    GitInit,
-
-    #[error("Failed to create directory")]
-    CreateDirectory,
-
     #[error("Failed to write file: {0}")]
     WriteFailure(PathBuf),
 }

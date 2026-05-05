@@ -54,8 +54,8 @@ pub enum SubCommands {
         json: bool,
     },
 
-    #[command(about = "Init scraps project")]
-    Init { project_name: String },
+    #[command(about = "Write .scraps.toml to the project directory")]
+    Init,
 
     #[command(about = "Lint scraps for wiki-link quality issues")]
     Lint {
