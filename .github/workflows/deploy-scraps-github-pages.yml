@@ -1,11 +1,8 @@
 name: Deploy scraps github pages
-on: 
-  push:
-    branches:
-      - main
-    paths:
-      - 'docs/**'
-      - '.github/workflows/deploy-scraps-github-pages.yml'
+# Auto-deploy on push to main is paused while v1 docs are being rewritten.
+# Re-enable the push trigger when v1 docs are ready to publish.
+on:
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
