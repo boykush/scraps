@@ -1,4 +1,3 @@
-scraps_dir = "docs"
 timezone = "Asia/Tokyo"
 
 [ssg]

@@ -1,18 +1,55 @@
 name: Deploy scraps github pages
-# Auto-deploy on push to main is paused while v1 docs are being rewritten.
-# Re-enable the push trigger when v1 docs are ready to publish.
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - '.github/workflows/deploy-scraps-github-pages.yml'
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # For scraps git commited date
-      - name: build_and_deploy
-        uses: boykush/scraps-deploy-action@fb0c9aa408b81b7a45f00329c92054a26e0e8333 # v4.4.0
+          fetch-depth: 0 # For scraps git committed date
+
+      - name: Setup mise (install scraps)
+        uses: jdx/mise-action@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          pages-branch: gh-pages
+          cache: false
+          install_args: "github:boykush/scraps"
+
+      - name: Build docs
+        run: scraps build --directory docs
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/_site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
