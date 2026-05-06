@@ -4,15 +4,18 @@
 ❯ scraps build
 ```
 
-This command processes Markdown files from the `/scraps` directory and generates a static website.
+This command processes Markdown files under the wiki root and generates a static website. The wiki root is the directory containing `.scraps.toml`.
 
 ## Source Structure
 
 ```bash
-❯ tree scraps
-scraps
+❯ tree -a -I _site
+.
+├── .scraps.toml
 ├── Getting Started.md
-└── Documentation.md
+├── Documentation.md
+└── Guide
+    └── Links.md
 ```
 
 ## Generated Files
@@ -23,13 +26,19 @@ The command generates the following files in the `_site` directory (configurable
 ❯ tree _site
 _site
 ├── index.html      # Main page with scrap list
-├── getting-started.html
-├── documentation.html
+├── scraps
+│   ├── getting-started.html
+│   ├── documentation.html
+│   └── guide
+│       └── links.html
 ├── main.css       # Styling for the site
-└── search.json    # Search index (if enabled)
+└── search_index.json # Search index (if enabled)
 ```
 
-Each Markdown file is converted to a slugified HTML file. Additional files like `index.html` and `main.css` are generated to create a complete static website.
+Each Markdown file is converted to a slugified HTML file. `README.md` is special:
+it becomes the site top page (`index.html`) instead of a normal scrap page.
+Files in `static/` and the build output directory are excluded from scrap
+traversal.
 
 ## Examples
 
@@ -40,8 +49,11 @@ Each Markdown file is converted to a slugified HTML file. Additional files like 
 # Build with verbose output
 ❯ scraps build --verbose
 
+# Include git-derived committed timestamps in generated pages
+❯ scraps build --git
+
 # Build from specific directory
-❯ scraps build --path /path/to/project
+❯ scraps -C /path/to/wiki build
 ```
 
 After building, use [[Reference/Serve]] to preview your site locally.

@@ -1,4 +1,5 @@
-This guide covers using Scraps as a static site generator (SSG).
+This guide gets you from an empty directory to a small Scraps wiki that can be
+built as a static site and queried from the CLI.
 
 ## Setup
 
@@ -6,28 +7,35 @@ This guide covers using Scraps as a static site generator (SSG).
    - Follow the [[Tutorial/Installation]] guide to install Scraps on your system
 
 2. **Initialize Project**
-   - Create a new Scraps project using [[Reference/Init]]:
+   - Create a project directory and initialize it using [[Reference/Init]]:
 
      ```bash
-     ❯ scraps init my-knowledge-base
+     ❯ mkdir my-knowledge-base
      ❯ cd my-knowledge-base
+     ❯ scraps init
      ```
 
 3. **Configure Project**
-   - Follow [[Reference/Configuration]] to set up your `.scraps.toml`
+   - Edit `.scraps.toml`. The directory containing this file is the wiki root.
 
 ## Content Creation
 
 1. **Write Markdown Files**
-   - Create Markdown files in the `/scraps` directory
+   - Create Markdown files next to `.scraps.toml` or in folders under it
    - Use [[Reference/CommonMark]] and [[Reference/GitHub-flavored Markdown]]
 
 2. **Add Internal Links**
    - Connect documents using [[Reference/Normal Link]] syntax:
      - `[[Page Name]]` for simple links
      - `[[Page Name|Custom Text]]` for custom link text
+     - `[[Folder/Page Name]]` for a context-qualified link
 
-3. **Enhance Content**
+3. **Add Tags**
+   - Use [[Reference/Tag Link]] syntax:
+     - `#[[Topic]]` for a tag
+     - `#[[Area/Subtopic]]` for a nested tag
+
+4. **Enhance Content**
    - Add [[Reference/Mermaid]] diagrams for visual representations
    - Use [[Reference/Autolink]] functionality for external links
    - Organize with [[Reference/Context Link|context folders]] when needed
@@ -61,4 +69,6 @@ This guide covers using Scraps as a static site generator (SSG).
 
 ## AI Integration
 
-- **MCP Server**: Enable AI assistant integration using [[How-to/Integrate with AI Assistants]] for intelligent search and content assistance
+- **CLI JSON**: Query scraps with commands like `scraps search "query" --json`,
+  `scraps get "Page Name" --json`, and `scraps todo --json`
+- **MCP Server**: Enable MCP-compatible assistant integration using [[How-to/Integrate with AI Assistants]]

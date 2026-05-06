@@ -9,7 +9,9 @@ markdown-oxide supports the following editing environments:
 - Zed
 - Helix
 
-To match the current features provided by Scraps, place the following configuration file `.moxide.toml` under the `scraps/` directory and open the `scraps/` directory directly for a comfortable editing experience.
+To match the current features provided by Scraps, place the following
+configuration file `.moxide.toml` in the wiki root and open that directory
+directly for a comfortable editing experience.
 
 ```toml
 heading_completions = false
