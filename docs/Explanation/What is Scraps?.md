@@ -1,39 +1,73 @@
 ![Scraps Logo](https://github.com/boykush/scraps/raw/main/assets/logo_opacity.png?raw=true)
 
-Scraps is a portable CLI knowledge hub for managing interconnected Markdown documentation with Wiki-link notation.
+Scraps is a wiki-link document compiler for the LLM era.
 
-## Built for Docs as Code
+It turns human-curated Markdown into a typed, queryable knowledge artifact. The
+same source can become a static site for readers and structured JSON for scripts
+or AI agents.
 
-Scraps is built on the foundation of [Docs as Code](https://www.writethedocs.org/guide/docs-as-code/) principles:
+## Markdown As Typed Source
 
-- **Version Control Native**: Documentation evolves with your codebase through Git workflows
-- **Review-Driven Quality**: Markdown + Git enables proper documentation review processes
-- **Documentation as Code**: Same standards, processes, and tooling as software development
-- **Developer Experience**:
-  - CLI-first workflow: all functionality accessible through single command-line tool
-  - Seamless integration with existing tools (e.g., editors via [[How-to/Setup LSP|LSP]], [[How-to/Deploy to GitHub Pages|GitHub Pages]] deployment, [[How-to/Integrate with AI Assistants|MCP Server]] for AI assistants)
+Scraps keeps authoring close to plain Markdown, but gives a few pieces of
+syntax clear meaning:
 
-## Core Capabilities
+- `[[link]]` references another scrap
+- `#[[tag]]` marks a tag
+- `[[name#heading]]` references a heading inside another scrap
+- `![[embed]]` embeds content from another scrap
+- folders provide context, so `DDD/Service.md` and `Kubernetes/Service.md` are
+  different scraps
 
-Built on this foundation, Scraps provides three core capabilities:
+Because these are typed, Scraps can lint broken references, render navigation,
+and expose structured documentation data to other tools.
 
-### 1. Knowledge-First Architecture
+## More Than A Static Site Generator
 
-Information is organized into atomic, interconnected units following the DRY principle.
+Scraps reads Markdown into structured knowledge data, then emits useful outputs
+from it:
 
-- Single source of truth with `[[WikiLink]]` and [[Reference/Context Link|Context]] functionality
-- [[Reference/Tag Link|Tags]] for knowledge categorization
+```text
+Markdown sources -> structured Scraps data -> emitters
+```
 
-### 2. Knowledge Visualization
+Scraps focuses on two outputs:
 
-Transform your knowledge structure into discoverable, navigable experiences.
+- **Static HTML** for human readers
+- **CLI JSON** for scripts, CI, and AI agents
 
-- Wiki-links become interconnected web experiences
-- Static sites with search and pagination for knowledge exploration
+The static site is one important output, but the core artifact is structured
+documentation data that preserves links, tags, headings, tasks, and context.
 
-### 3. Knowledge Externalization
+## CLI-First For Agents
 
-Make your knowledge accessible beyond traditional documentation boundaries.
+Any assistant that can run shell commands can query Scraps directly:
 
-- [[How-to/Integrate with AI Assistants|MCP Server]] functionality for AI assistants
-- API-like access for external tool integration
+```bash
+❯ scraps search "release checklist" --json
+❯ scraps get "Configuration" --json
+❯ scraps backlinks "Configuration" --json
+❯ scraps todo --status all --json
+```
+
+Scraps also provides an MCP server for MCP-compatible clients. Shell plus JSON
+is the primary agent integration path.
+
+## Influenced By LLM Wiki
+
+Scraps is influenced by Andrej Karpathy's LLM Wiki idea: a persistent,
+curated knowledge base that compounds over time and gives AI agents something
+better than one-off context stuffing.
+
+Scraps keeps that spirit, but makes cross-references explicit.
+Instead of relying on implicit mentions, Scraps uses `[[link]]`, `#[[tag]]`,
+and lintable structure so the same wiki can serve both human readers and
+machine queries.
+
+## Local-First
+
+The directory containing `.scraps.toml` is the wiki root. Markdown files under
+that root are scraps, and folders become bounded context.
+
+Scraps fits into normal Git workflows: write Markdown, review changes in pull
+requests, run `scraps lint` for wiki health, and build or query the same source
+whenever you need it.
