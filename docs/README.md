@@ -1,8 +1,10 @@
-Scraps is a wiki-link document compiler for the LLM era.
+**The Wiki-link doc compiler for the LLM era.**
 
-Write plain Markdown, connect scraps with typed wiki-links, and compile the
-same source into a static site for readers and JSON-queryable knowledge for
-CLI tools and AI agents.
+Scraps treats documentation like a programming language. Wiki-linked
+markdown becomes a typed source, compiling into a static site for readers
+and into JSON any agent can shell into — turning Karpathy's *LLM Wiki*
+pattern into a typed, queryable artifact. CLI primary with companion AI
+skills, fitting any editor and any LLM agent.
 
 Start at [[Explanation/What is Scraps?]] for the bigger picture.
 
@@ -12,7 +14,7 @@ This documentation follows the [Diátaxis](https://diataxis.fr/) framework.
 
 - **Tutorial** — learn Scraps: [[Tutorial/Getting Started]], [[Tutorial/Installation]]
 - **How-to** — solve problems: [[How-to/Deploy to GitHub Pages]], [[How-to/Integrate with AI Assistants]]
-- **Reference** — look up details: [[Reference/CLI Overview]], [[Reference/Configuration]], [[Reference/Wiki-link Notation]], [[Reference/Markdown Support]], [[Reference/Static Site]]
+- **Reference** — look up details: [[Reference/CLI Overview]], [[Reference/Configuration]], [[Reference/Lint Rules]], [[Reference/Wiki-link Notation]], [[Reference/Markdown Support]], [[Reference/Static Site]]
 - **Explanation** — understand the design: [[Explanation/What is Scraps?]]
 
 Browse by topic: #[[CLI]] #[[Notation/Wiki-link]] #[[Notation/Markdown]] #[[Emit/Static Site]] #[[Emit/CLI JSON]] #[[Configuration]] #[[Integration]] #[[Deployment]]

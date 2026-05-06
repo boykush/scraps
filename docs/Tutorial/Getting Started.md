@@ -57,7 +57,7 @@ in [[Reference/Static Site]]. For deploying, see
 
 `scraps lint` checks wiki health: dead-end scraps, broken links, broken
 heading references, repeated links, and more. Rules are documented in
-[[Reference/CLI Overview#lint]].
+[[Reference/Lint Rules]].
 
 ```bash
 ❯ scraps lint

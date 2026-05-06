@@ -81,7 +81,7 @@ enabled = true
 threshold_days = 180
 ```
 
-Default (graph-mechanical) rules are always on; see [[Reference/CLI Overview#lint]].
+Default (graph-mechanical) rules are always on; see [[Reference/Lint Rules]].
 
 ## Project Root
 

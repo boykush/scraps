@@ -25,7 +25,7 @@ syntax clear meaning:
 Because these are typed, Scraps can lint broken references, render navigation,
 and expose structured documentation data to other tools. See
 [[Reference/Wiki-link Notation]] for the full syntax and resolution rules,
-and [[Reference/CLI Overview#lint]] for the lint surface that enforces them.
+and [[Reference/Lint Rules]] for the lint surface that enforces them.
 
 ## More than a static site generator
 
@@ -42,7 +42,7 @@ graph LR
 Scraps focuses on two outputs:
 
 - **[[Reference/Static Site|Static HTML]]** for human readers
-- **[[Reference/CLI Overview#--json|CLI JSON]]** for scripts, CI, and AI agents
+- **[[Reference/CLI Overview|CLI JSON]]** for scripts, CI, and AI agents
 
 The static site is one important output, but the core artifact is structured
 documentation data that preserves links, tags, headings, tasks, and context.
