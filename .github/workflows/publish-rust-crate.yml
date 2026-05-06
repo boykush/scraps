@@ -11,6 +11,7 @@ env:
 jobs:
   cargo_publish:
     runs-on: ubuntu-latest
+    if: ${{ !contains(github.ref_name, '-') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
