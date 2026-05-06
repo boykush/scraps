@@ -1,0 +1,11 @@
+{
+  "name": "scraps",
+  "version": "0.1.0",
+  "description": "Official AI skills bundle for Scraps. Workflows for ingesting sources, querying the wiki, and running purpose-driven lint via the scraps CLI.",
+  "author": {
+    "name": "boykush",
+    "email": "boykush315@gmail.com"
+  },
+  "homepage": "https://boykush.github.io/scraps",
+  "repository": "https://github.com/boykush/scraps"
+}
