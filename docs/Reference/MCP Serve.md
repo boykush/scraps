@@ -12,11 +12,14 @@ This command starts an MCP (Model Context Protocol) server that enables AI assis
 # Basic MCP server
 ❯ scraps mcp serve
 
-# Serve from specific directory  
-❯ scraps mcp serve --path /path/to/project
+# Serve from specific directory
+❯ scraps -C /path/to/wiki mcp serve
 
 ```
 
-The MCP server provides tools for AI assistants to search through your content and list available tags, enabling intelligent assistance with your documentation.
+The MCP server provides tools for AI assistants to search content, retrieve
+scraps, inspect wiki-links, and list tags. CLI JSON commands are the primary
+agent integration surface in v1; MCP remains available for MCP-compatible
+clients.
 
 For more details, see [[How-to/Integrate with AI Assistants]].

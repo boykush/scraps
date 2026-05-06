@@ -26,9 +26,21 @@ Detects the same `[[link]]` appearing multiple times within a single scrap. Repe
 
 `[[Page|alias]]` and `[[Page]]` are treated as the same link.
 
-### singleton-tag
+### broken-link
 
-Detects tags referenced by only 1 scrap. Tags used by a single scrap provide no grouping value and may indicate a tag that should be removed or consolidated.
+Detects `[[link]]` references that do not resolve to an existing scrap. Tags are
+not implicit fallback targets in v1; write `#[[tag]]` when you mean a tag.
+
+### broken-heading-ref
+
+Detects `[[Page#Heading]]` references where the scrap exists but the heading
+fragment does not match any heading in that target scrap.
+
+### stale-by-git
+
+Detects scraps whose latest git commit is older than a threshold. This rule is
+opt-in because it depends on git metadata. Enable it with `--rule stale-by-git`
+or with `[lint.stale_by_git]` in `.scraps.toml`.
 
 ## Output Format
 
@@ -36,10 +48,10 @@ Diagnostics follow the same style as `cargo clippy`:
 
 ```
 warning[dead-end]: scrap has no links to other scraps
- --> scraps/orphan.md
+ --> /path/to/wiki/orphan.md
 
 warning[overlinking]: link [[Rust]] appears 3 times
- --> scraps/programming.md:2:5
+ --> /path/to/wiki/programming.md:2:5
   |
 2 | See [[Rust]] for details. Also [[Rust]] and [[Rust]].
   |     ^^^^^^^^
@@ -52,6 +64,12 @@ warning[overlinking]: link [[Rust]] appears 3 times
 # Lint current project
 ❯ scraps lint
 
+# Run one rule
+❯ scraps lint --rule broken-link
+
+# Run opt-in stale check
+❯ scraps lint --rule stale-by-git
+
 # Lint from specific directory
-❯ scraps lint --path /path/to/project
+❯ scraps -C /path/to/wiki lint
 ```

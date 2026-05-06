@@ -34,13 +34,13 @@ path.
 
 ### Custom Project Path (Optional)
 
-To specify a different Scraps project path, set the `SCRAPS_PROJECT_PATH`
+To specify a different Scraps project path, set the `SCRAPS_DIRECTORY`
 environment variable:
 
 ```json
 {
   "env": {
-    "SCRAPS_PROJECT_PATH": "/path/to/your/scraps/project"
+    "SCRAPS_DIRECTORY": "/path/to/your/wiki"
   },
   "enabledPlugins": {
     "mcp-server@scraps-claude-code-plugins": true

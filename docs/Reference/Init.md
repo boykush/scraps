@@ -1,28 +1,29 @@
 #[[CLI]]
 
 ```bash
-❯ scraps init <PROJECT_NAME>
+❯ scraps init
 ```
 
-This command initializes a new Scraps project. It creates the following structure:
+This command initializes the current directory as a Scraps wiki. Create the
+directory first, then run `scraps init` inside it.
 
 ```bash
 ❯ tree -a -L 1
 .
 ├── .gitignore    # Git ignore patterns for Scraps projects
-├── .scraps.toml  # Project configuration file
-└── scraps       # Directory for your Markdown files
+└── .scraps.toml  # Project configuration file
 ```
 
 ## Examples
 
 ```bash
 # Initialize new project
-❯ scraps init my-knowledge-base
+❯ mkdir my-knowledge-base
 ❯ cd my-knowledge-base
+❯ scraps init
 
-# Initialize with specific path
-❯ scraps init docs --path /path/to/workspace
+# Initialize a specific existing directory
+❯ scraps -C /path/to/wiki init
 ```
 
 After initializing the project, proceed to [[Reference/Build|Build]] to generate your static site.

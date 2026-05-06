@@ -40,6 +40,21 @@ Array of tags with the following fields:
 - `title`: Tag name
 - `backlinks_count`: Number of scraps referencing this tag
 
+## get_scrap
+
+Retrieve a single scrap by title and optional context.
+
+**Parameters:**
+- `title` (string, required): Title of the scrap
+- `ctx` (string, optional): Context folder path if the title is not at the root
+
+**Returns:**
+- `title`: Scrap title
+- `ctx`: Context folder path, or null if the scrap is at the root
+- `md_text`: Full Markdown content
+- `headings`: Parsed headings with `level`, `text`, `line`, and optional `parent`
+- `code_blocks`: Fenced code blocks with `lang`, `content`, and `line`
+
 ## lookup_scrap_links
 
 Find outbound wiki links from a specific scrap. Returns all scraps that the
@@ -50,7 +65,8 @@ specified scrap links to.
 - `ctx` (string, optional): Context if the scrap has one
 
 **Returns:**
-Array of linked scraps with `title` and `ctx`.
+- `results`: Array of linked scraps with `title` and `ctx`
+- `count`: Total number of linked scraps
 
 ## lookup_scrap_backlinks
 
@@ -62,7 +78,8 @@ that link to the specified scrap.
 - `ctx` (string, optional): Context if the scrap has one
 
 **Returns:**
-Array of scraps that link to the specified scrap, with `title` and `ctx`.
+- `results`: Array of scraps that link to the specified scrap, with `title` and `ctx`
+- `count`: Total number of backlinks
 
 ## lookup_tag_backlinks
 
@@ -72,7 +89,8 @@ Find all scraps that reference a specific tag.
 - `tag` (string, required): Tag name to get backlinks for
 
 **Returns:**
-Array of scraps that reference the specified tag, with `title` and `ctx`.
+- `results`: Array of scraps that reference the specified tag, with `title` and `ctx`
+- `count`: Total number of tag backlinks
 
 ## Notes
 

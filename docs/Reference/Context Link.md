@@ -3,17 +3,19 @@
 In cases where the same term exists in different contexts and Scrap titles would overlap, you can use the context feature by separating them with folders. For example:
 
 ```bash
-❯ tree scraps
-scraps
+❯ tree
+.
 ├── DDD
 │   └── Service.md
 └── Kubernetes
     └── Service.md
 ```
 
-Links to Scrap with different contexts can be specified like `[[DDD/Service]]`, `[[Kubernetes/Service]]`. You can also combine them with [[Reference/Alias Link|Alias link]] such as `[[Kubernetes/Service|Kubernetes Service]]`.
+Links to scraps with different contexts can be specified like `[[DDD/Service]]`, `[[Kubernetes/Service]]`. You can also combine them with [[Reference/Alias Link|Alias link]] such as `[[Kubernetes/Service|Kubernetes Service]]`.
 
 The context is also displayed on the Scrap detail page in the static site.
+
+Context depth is bounded to three folder segments.
 
 ## Not Recommended
 
