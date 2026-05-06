@@ -1,19 +1,50 @@
-# Scraps Writer Plugin
+# Scraps Writer Plugin (DEPRECATED)
 
-AI skills for creating Scraps documentation with intelligent tag selection and backlink suggestions.
+> **Deprecated.** This plugin is the v0 skill bundle, kept temporarily for users mid-migration. Use the [`scraps` plugin](../scraps/README.md) instead.
+>
+> Scheduled for removal in a future release.
 
-## Overview
+## Why deprecated
 
-This plugin provides AI-powered skills for creating and managing Scraps documentation. It combines the MCP server tools with structured workflows to ensure consistent, well-linked documentation that follows Scraps conventions.
+The v1 redesign moved the official AI skills bundle to the new [`scraps` plugin](../scraps/README.md), which:
 
-The skills automatically research existing tags and related scraps, ensuring new content integrates naturally into your knowledge graph with proper Wiki-links and tag assignments.
+- runs through `scraps <cmd> --json` instead of MCP, so any agent that can run a shell can use it
+- maps directly to Karpathy's *Ingest / Query / Lint* primitives
+- ships a `lint-rule-handler` agent for purpose-driven wiki health checks
 
-## Skills
+The legacy `scraps-writer` skills are still functional via the bundled MCP server, but they will not receive feature updates.
+
+## Migration guide
+
+| Legacy (`scraps-writer`) | v1 (`scraps`) |
+| --- | --- |
+| `/add-scrap "<title>"` | `/ingest "<topic or instruction>"` |
+| `/web-to-scrap <url>` | `/ingest <url>` |
+| `/scraps-writer "<title>"` | `/ingest "<topic>"` |
+| (lint built into add-scrap) | invoke the `lint-rule-handler` agent with a stated purpose |
+| (no read-side workflow) | `/query "<question>"` |
+
+To migrate:
+
+1. Install the new `scraps` plugin from the same marketplace.
+2. Replace any saved aliases or workflow scripts that reference `/add-scrap` / `/web-to-scrap` with `/ingest`.
+3. Uninstall `scraps-writer` once you have confirmed the new flows.
+
+## Legacy skills (still functional during the transition)
 
 ### `/add-scrap [title] [max-lines]`
 
-Create a new scrap on any topic. The skill researches the topic via web search, identifies relevant existing tags, finds related scraps for Wiki-linking, and suggests which existing scraps should add backlinks to the new content.
+Create a new scrap on any topic. Researches existing tags and related scraps, drafts the new scrap, and suggests backlinks.
 
 ### `/web-to-scrap [url] [max-lines]`
 
-Convert a web article into a scrap. The skill fetches the article, generates a concise summary, adds a source autolink for OGP card display, and connects the content to your existing knowledge base through tags and Wiki-links.
+Convert a web article into a scrap. Fetches the article, generates a concise summary, adds a source autolink, and connects the content via tags and `[[Wiki-links]]`.
+
+### `/scraps-writer [title] [max-lines]`
+
+Shared workflow used by `add-scrap` and `web-to-scrap` for tag research, Wiki-link resolution, and content verification.
+
+## Further reading
+
+- New `scraps` plugin: [../scraps/README.md](../scraps/README.md)
+- Scraps documentation: <https://boykush.github.io/scraps/>

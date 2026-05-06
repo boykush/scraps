@@ -1,7 +1,7 @@
 {
   "name": "scraps-writer",
-  "version": "2.9.1",
-  "description": "AI skills for creating Scraps documentation with add-scrap and web-to-scrap workflows",
+  "version": "2.9.2",
+  "description": "[DEPRECATED] Use the `scraps` plugin instead. Legacy v0 skills (add-scrap, web-to-scrap) kept temporarily for users mid-migration; scheduled for removal in a future release.",
   "author": {
     "name": "boykush",
     "email": "boykush315@gmail.com"
