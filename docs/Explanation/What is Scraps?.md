@@ -2,11 +2,13 @@
 
 ![Scraps Logo](https://github.com/boykush/scraps/raw/main/assets/logo_opacity.png?raw=true)
 
-Scraps is a wiki-link document compiler for the LLM era.
+**The Wiki-link doc compiler for the LLM era.**
 
-It turns human-curated Markdown into a typed, queryable knowledge artifact.
-The same source can become a static site for readers and structured JSON for
-scripts or AI agents.
+Scraps treats documentation like a programming language. Wiki-linked markdown
+becomes a typed source, compiling into a static site for readers and into
+JSON any agent can shell into — turning Karpathy's *LLM Wiki* pattern into a
+typed, queryable artifact. CLI primary with companion AI skills, fitting any
+editor and any LLM agent.
 
 ## Markdown as typed source
 

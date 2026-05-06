@@ -115,5 +115,5 @@ Replace `~/path/to/your/wiki` with the directory containing `.scraps.toml`.
 ## Further reading
 
 - Scraps documentation: <https://boykush.github.io/scraps/>
-- AI integration overview: <https://boykush.github.io/scraps/scraps/integrate-with-ai-assistants.how-to.html>
+- AI integration overview: <https://boykush.github.io/scraps/scraps/how-to/integrate-with-ai-assistants.html>
 - CLI + JSON skills bundle: [`scraps` plugin](../scraps/README.md)
