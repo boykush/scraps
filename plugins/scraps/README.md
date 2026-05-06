@@ -6,6 +6,28 @@ Official AI skills bundle for [Scraps](https://github.com/boykush/scraps), the W
 
 This plugin provides skills and an agent that wrap the `scraps` CLI for AI-driven workflows. All integration runs through `scraps <cmd> --json`; no MCP dependency. For users who prefer an MCP server, see the separate [`mcp-server`](../mcp-server/README.md) plugin.
 
+## Install
+
+### Step 1: Add the marketplace
+
+```bash
+claude plugin marketplace add boykush/scraps
+```
+
+### Step 2: Enable the plugin
+
+Add this to your project's `.claude/settings.json`:
+
+```json
+{
+  "enabledPlugins": {
+    "scraps@scraps-claude-code-plugins": true
+  }
+}
+```
+
+The plugin operates against the current Scraps wiki. To target a different wiki, set `SCRAPS_DIRECTORY` in your environment or pass `-C` to scraps commands inside the skill workflows.
+
 The plugin maps directly to Andrej Karpathy's *Ingest / Query / Lint* primitives, applied to Scraps' typed wiki-link graph:
 
 | Primitive | Component | Role |

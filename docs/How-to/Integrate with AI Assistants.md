@@ -1,12 +1,14 @@
-#[[Integration]]
+#[[Integration]] #[[Emit/CLI JSON]]
 
-Scraps is CLI-first for AI integration. Prefer `--json` commands when your
-assistant can run shell commands, and use the MCP server when your client expects
-Model Context Protocol tools.
+Scraps integrates with AI assistants in two ways. **CLI + JSON is the primary
+path** because shell commands plus structured output are the lowest-friction
+contract any agent can use. MCP is supported for clients that expect Model
+Context Protocol tools.
 
-## CLI JSON
+## CLI + JSON (recommended)
 
-Any assistant with shell access can query Scraps without a long-running server:
+Any assistant with shell access can query Scraps without a long-running
+server.
 
 ```bash
 ❯ scraps search "rust cli" --logic and --json
@@ -17,19 +19,35 @@ Any assistant with shell access can query Scraps without a long-running server:
 ❯ scraps todo --status all --json
 ```
 
-## What is MCP?
+The full command map is in [[Reference/CLI Overview]]. Each command's `--help`
+documents flags and JSON shape.
 
-The Model Context Protocol (MCP) is an open standard that enables AI assistants to securely access external data sources and tools. Scraps implements an MCP server that exposes your documentation as a searchable, linkable knowledge base.
+### Bundled AI skills
 
-## Quick Start
+For Claude Code users, the official **scraps plugin** packages
+[Karpathy](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)-style
+*Ingest / Query / Lint* workflows around the CLI:
 
-### Claude Code (Recommended)
+<https://github.com/boykush/scraps/tree/main/plugins/scraps>
 
-For Claude Code users, we provide an official plugin for seamless integration. See [[How-to/Install Claude Code Plugin]] for installation instructions.
+| Skill / Agent | Role |
+|---|---|
+| `/ingest` | Add a new scrap from a prompt, URL, or markdown; update cross-links |
+| `/query` | Answer a question against the wiki with `[[Title]]` citations |
+| `lint-rule-handler` agent | Purpose-driven wiki health checks, one or a few rules at a time |
 
-### Manual MCP Server Setup
+Install instructions live in the plugin README so that marketplace browsers
+have everything in one place.
 
-For other MCP-compatible clients or advanced configurations, you can add Scraps as an MCP server directly:
+## MCP (for MCP-compatible clients)
+
+Scraps ships an MCP server for clients that prefer the Model Context
+Protocol. The server is bundled as a plugin so installation and tool
+specifications stay together:
+
+<https://github.com/boykush/scraps/tree/main/plugins/mcp-server>
+
+To wire the MCP server into Claude Code manually without the plugin:
 
 ```bash
 claude mcp add scraps -- scraps -C ~/path/to/your/wiki mcp serve
@@ -37,9 +55,7 @@ claude mcp add scraps -- scraps -C ~/path/to/your/wiki mcp serve
 
 Replace `~/path/to/your/wiki` with the directory containing `.scraps.toml`.
 
-For command details, see [[Reference/MCP Serve]].
-
-## Available Tools
-
-For detailed MCP tool documentation, see [[Reference/MCP Tools]]. For CLI JSON
-commands, see [[Reference/Get]], [[Reference/Search]], [[Reference/Links]], [[Reference/Backlinks]], [[Reference/Tag]], and [[Reference/Todo]].
+For most read-shaped agent workflows, the CLI + JSON path above is simpler:
+no long-running process, no MCP client implementation required, works with
+any shell-capable agent. MCP is the right choice when your agent already
+expects MCP tools as its integration surface.

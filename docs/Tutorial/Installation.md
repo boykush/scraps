@@ -1,4 +1,10 @@
-You can find the latest version on [GitHub Releases](https://github.com/boykush/scraps/releases).
+#[[CLI]]
+
+After installing, see [[Tutorial/Getting Started]] for the basic flow.
+
+You can find the latest version on GitHub Releases.
+
+<https://github.com/boykush/scraps/releases>
 
 ## Requirements
 

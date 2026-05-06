@@ -1,74 +1,79 @@
-This guide gets you from an empty directory to a small Scraps wiki that can be
-built as a static site and queried from the CLI.
+#[[CLI]]
+
+This guide gets you from an empty directory to a small Scraps wiki that can
+be built as a static site and queried from the CLI.
+
+For the bigger picture of what Scraps is and why, see
+[[Explanation/What is Scraps?]].
 
 ## Setup
 
-1. **Install Scraps**
-   - Follow the [[Tutorial/Installation]] guide to install Scraps on your system
+1. **Install Scraps** — follow [[Tutorial/Installation]].
 
-2. **Initialize Project**
-   - Create a project directory and initialize it using [[Reference/Init]]:
+2. **Initialize a project** — create a directory and initialize it:
 
-     ```bash
-     ❯ mkdir my-knowledge-base
-     ❯ cd my-knowledge-base
-     ❯ scraps init
-     ```
+   ```bash
+   ❯ mkdir my-knowledge-base
+   ❯ cd my-knowledge-base
+   ❯ scraps init
+   ```
 
-3. **Configure Project**
-   - Edit `.scraps.toml`. The directory containing this file is the wiki root.
+   This writes a `.scraps.toml` to the current directory. The directory
+   containing it becomes the wiki root.
 
-## Content Creation
+3. **Configure the project** — open `.scraps.toml` and set `[ssg]` `base_url`
+   and `title`. See [[Reference/Configuration#ssg-section]] for the full
+   schema.
 
-1. **Write Markdown Files**
-   - Create Markdown files next to `.scraps.toml` or in folders under it
-   - Use [[Reference/CommonMark]] and [[Reference/GitHub-flavored Markdown]]
+## Authoring
 
-2. **Add Internal Links**
-   - Connect documents using [[Reference/Normal Link]] syntax:
-     - `[[Page Name]]` for simple links
-     - `[[Page Name|Custom Text]]` for custom link text
-     - `[[Folder/Page Name]]` for a context-qualified link
+1. **Write Markdown files** next to `.scraps.toml` or in folders under it.
+   Standard CommonMark and GitHub-flavored Markdown are supported — see
+   [[Reference/Markdown Support]].
 
-3. **Add Tags**
-   - Use [[Reference/Tag Link]] syntax:
-     - `#[[Topic]]` for a tag
-     - `#[[Area/Subtopic]]` for a nested tag
+2. **Connect scraps with wiki-links.** The full notation is in
+   [[Reference/Wiki-link Notation]]; the most common forms are:
 
-4. **Enhance Content**
-   - Add [[Reference/Mermaid]] diagrams for visual representations
-   - Use [[Reference/Autolink]] functionality for external links
-   - Organize with [[Reference/Context Link|context folders]] when needed
+   - `[[Page Name]]` — normal link
+   - `[[Page Name|Display]]` — alias
+   - `[[Folder/Page Name]]` — context-qualified
+   - `[[Page Name#Heading]]` — heading reference
+   - `![[Page Name]]` — embed another scrap inline
+   - `#[[Topic]]` — tag (separate namespace from scraps)
+   - `#[[Area/Sub]]` — nested tag (auto-aggregated)
 
-## Build and Preview
+## Build and preview
 
-1. **Generate Site**
-   - Use [[Reference/Build]] to generate static site files:
+```bash
+❯ scraps build      # write _site/
+❯ scraps serve      # serve at http://127.0.0.1:1112
+```
 
-     ```bash
-     ❯ scraps build
-     ```
+The output structure, `README.md` handling, and search index are documented
+in [[Reference/Static Site]]. For deploying, see
+[[How-to/Deploy to GitHub Pages]].
 
-2. **Preview Locally**
-   - Use [[Reference/Serve]] for local preview and debugging:
+## Lint
 
-     ```bash
-     ❯ scraps serve
-     ```
+`scraps lint` checks wiki health: dead-end scraps, broken links, broken
+heading references, repeated links, and more. Rules are documented in
+[[Reference/CLI Overview#lint]].
 
-3. **Deploy**
-   - Deploy to platforms like [[How-to/Deploy to GitHub Pages]] when ready
+```bash
+❯ scraps lint
+```
 
-## Quality Check
+## AI integration
 
-- **Lint**: Use [[Reference/Lint]] to check wiki-link quality:
+Scraps is CLI-first for AI agents. Any assistant that can run shell commands
+can query the wiki:
 
-  ```bash
-  ❯ scraps lint
-  ```
+```bash
+❯ scraps search "query" --json
+❯ scraps get "Page Name" --json
+❯ scraps backlinks "Page Name" --json
+❯ scraps todo --json
+```
 
-## AI Integration
-
-- **CLI JSON**: Query scraps with commands like `scraps search "query" --json`,
-  `scraps get "Page Name" --json`, and `scraps todo --json`
-- **MCP Server**: Enable MCP-compatible assistant integration using [[How-to/Integrate with AI Assistants]]
+For Claude Code users there is also an official skills bundle. See
+[[How-to/Integrate with AI Assistants]] for both paths.
