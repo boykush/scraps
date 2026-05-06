@@ -26,14 +26,11 @@ jobs:
         with:
           fetch-depth: 0 # For scraps git committed date
 
-      - name: Setup mise
+      - name: Setup mise (install scraps)
         uses: jdx/mise-action@v4
         with:
           cache: false
-          install_args: "rust"
-
-      - name: Install scraps from source
-        run: cargo install --path . --locked
+          install_args: "github:boykush/scraps"
 
       - name: Build docs
         run: scraps build --directory docs
