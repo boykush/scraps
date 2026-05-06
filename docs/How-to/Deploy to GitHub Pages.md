@@ -1,36 +1,8 @@
 #[[Deployment]]
 
-Custom actions are available to deploy Scraps to Github Pages.
-
-- Repository: [scraps-deploy-action](https://github.com/boykush/scraps-deploy-action)
-- Marketplace: [Scraps Deploy to Pages](https://github.com/marketplace/actions/scraps-deploy-to-pages)
-
-### YAML file
-
-Prepare a yaml file under `.github/workflows/` like this
-
-```yaml
-name: Deploy scraps github pages
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'scraps/**'
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0 # For scraps git commited date
-      - name: build_and_deploy
-        uses: boykush/scraps-deploy-action@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          pages-branch: gh-pages
-```
+Deploy a Scraps site to GitHub Pages using GitHub Actions. The build output
+(`_site/`) is uploaded as a Pages artifact and published via the official
+`actions/deploy-pages` action — no `gh-pages` branch required.
 
 ### GitHub settings
 
@@ -38,5 +10,72 @@ Set up GitHub Pages for the repository.
 
 `Build and deployment` parameter as follows.
 
-- Source: `Deploy from a branch`
-- Branch: `gh-pages`
+- Source: `GitHub Actions`
+
+### YAML file
+
+Prepare a yaml file under `.github/workflows/` like this:
+
+```yaml
+name: Deploy scraps github pages
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # For scraps git committed date
+
+      - name: Install Scraps
+        uses: jdx/mise-action@v2
+        with:
+          mise_toml: |
+            [tools]
+            "github:boykush/scraps" = "v0.33.0"
+
+      - name: Build
+        run: scraps build
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+Scraps is installed via [mise](https://mise.jdx.dev/) using the
+`github:boykush/scraps` backend, which fetches a binary from
+[GitHub Releases](https://github.com/boykush/scraps/releases). Pin a released
+tag so deploys stay reproducible.
+
+If you already maintain a `mise.toml` in the repository, you can omit the
+`mise_toml` input and `jdx/mise-action` will pick it up automatically.
