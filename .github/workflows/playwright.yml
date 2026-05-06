@@ -16,13 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
-    - name: Setup Rust
+    - name: Setup mise (install scraps)
       uses: jdx/mise-action@v4
       with:
         cache: false
-        install_args: "rust"
-    - name: Pre build
-      run: mise run cargo:build
+        install_args: "github:boykush/scraps"
     - name: Setup Node.js
       uses: jdx/mise-action@v4
       with:
