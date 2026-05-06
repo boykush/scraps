@@ -13,6 +13,8 @@ In cases where the same term exists in different contexts and Scrap titles would
 
 Links to scraps with different contexts can be specified like `[[DDD/Service]]`, `[[Kubernetes/Service]]`. You can also combine them with [[Reference/Alias Link|Alias link]] such as `[[Kubernetes/Service|Kubernetes Service]]`.
 
+Context-qualified links are resolved from the wiki root, not relative to the current Scrap's context. For example, `[[Service]]` always refers to the root `Service.md`; use `[[Kubernetes/Service]]` to link to `Kubernetes/Service.md`.
+
 The context is also displayed on the Scrap detail page in the static site.
 
 Context depth is bounded to three folder segments.
