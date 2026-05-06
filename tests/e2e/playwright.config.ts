@@ -53,7 +53,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     cwd: '../..',
-    command: 'cargo run serve',
+    command: 'mise run docs:serve',
     url: 'http://127.0.0.1:1112',
     reuseExistingServer: !process.env.CI,
   },

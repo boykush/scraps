@@ -5,7 +5,7 @@ experimental = true
 "rust" = { version = "1.93.0", profile = "default" }
 "hk" = "latest"
 "pkl" = "latest"
-"github:boykush/scraps" = "latest"
+"github:boykush/scraps" = "1.0.0-rc.1"
 "npm:markdownlint-cli2" = "latest"
 "cargo:cargo-llvm-cov" = "latest"
 "cargo:cargo-deny" = "latest"
