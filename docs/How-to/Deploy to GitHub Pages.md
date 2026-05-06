@@ -1,20 +1,22 @@
-#[[Deployment]]
+#[[Deployment]] #[[Emit/Static Site]]
 
 Deploy a Scraps site to GitHub Pages using GitHub Actions. The build output
-(`_site/`) is uploaded as a Pages artifact and published via the official
-`actions/deploy-pages` action — no `gh-pages` branch required.
+(`_site/` by default; configurable in
+[[Reference/Configuration#root-level]]) is uploaded as a Pages artifact and
+published via the official `actions/deploy-pages` action — no `gh-pages`
+branch required.
 
-### GitHub settings
+## GitHub settings
 
 Set up GitHub Pages for the repository.
 
-`Build and deployment` parameter as follows.
+`Build and deployment` parameter as follows:
 
 - Source: `GitHub Actions`
 
-### YAML file
+## Workflow file
 
-Prepare a yaml file under `.github/workflows/` like this:
+Prepare a YAML file under `.github/workflows/` like this:
 
 ```yaml
 name: Deploy scraps github pages
@@ -72,10 +74,14 @@ jobs:
         uses: actions/deploy-pages@v4
 ```
 
-Scraps is installed via [mise](https://mise.jdx.dev/) using the
-`github:boykush/scraps` backend, which fetches a binary from
-[GitHub Releases](https://github.com/boykush/scraps/releases). Pin a released
-tag so deploys stay reproducible.
+Scraps is installed via mise using the `github:boykush/scraps` backend, which
+fetches a binary from GitHub Releases. Pin a released tag so deploys stay
+reproducible.
+
+<https://mise.jdx.dev/>
 
 If you already maintain a `mise.toml` in the repository, you can omit the
 `mise_toml` input and `jdx/mise-action` will pick it up automatically.
+
+If your `output_dir` differs from `_site/`, update the `path:` in the
+`upload-pages-artifact` step to match.

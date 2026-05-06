@@ -1,25 +1,28 @@
 #[[Configuration]]
 
-Configuration is managed by `.scraps.toml`. The directory containing this file
-is the Scraps wiki root, and every Markdown file under it is treated as a
-scrap unless it is in `static/` or the configured output directory.
+`.scraps.toml` declares a Scraps wiki: the directory containing this file is
+the wiki root, and every Markdown file under it is a scrap unless it lives in
+`static/` or the configured `output_dir`.
 
-## Configuration Structure
+See [[Explanation/What is Scraps?]] for why config discovery follows this shape,
+and [[Reference/CLI Overview]] for how `-C` selects between multiple
+`.scraps.toml` directories.
 
-The configuration file has three areas:
+## Areas
 
-- **Root level**: Contains `output_dir` and `timezone`
-- **[ssg] section**: Contains all static site generator settings
-- **[lint.*] sections**: Configure opt-in lint rules
+`.scraps.toml` has three areas:
 
-The `[ssg]` section is required for `build` and `serve` commands. Other commands
-like `lint`, `tag`, and `mcp` can work without this section.
+| Area | Purpose | Required for |
+|---|---|---|
+| Root level | wiki-wide settings | every command |
+| `[ssg]` | static-site emit target | `build`, `serve` |
+| `[lint.*]` | opt-in lint rule config | `lint` (only those rules) |
 
-Within the `[ssg]` section, `base_url` and `title` are required fields.
+The `[ssg]` section is required only for `build` and `serve`; `lint`, `tag`,
+`get`, `search`, and `mcp serve` work without it. Within `[ssg]`, `base_url`
+and `title` are required.
 
-## Configuration Variables
-
-All configuration variables used by Scraps and their default values are listed below.
+## Root level
 
 ```toml:.scraps.toml
 # Build output directory relative to this .scraps.toml (optional, default=_site)
@@ -27,9 +30,13 @@ output_dir = "_site"
 
 # The site timezone (optional, default=UTC)
 timezone = "UTC"
+```
 
-# SSG (Static Site Generator) configuration section
-# This section is required for build and serve commands
+## SSG section
+
+Used by [[Reference/Static Site]] (HTML emit target).
+
+```toml:.scraps.toml
 [ssg]
 # The site base url (required)
 base_url = "https://username.github.io/repository-name/"
@@ -58,15 +65,23 @@ build_search_index = true
 # (optional, default=committed_date, choices=committed_date or linked_count)
 sort_key = "committed_date"
 
-# Scraps pagination on index page(optional, default=no pagination)
+# Scraps pagination on index page (optional, default=no pagination)
 paginate_by = 20
+```
 
-# Optional lint rule configuration.
-# Presence of this section enables stale-by-git during `scraps lint`.
+## Lint rules
+
+Opt-in rules read their config from `[lint.<rule>]`. Presence of the section
+enables the rule for `scraps lint` without requiring `--rule`.
+
+```toml:.scraps.toml
+# Enables stale-by-git during `scraps lint`.
 [lint.stale_by_git]
 enabled = true
 threshold_days = 180
 ```
+
+Default (graph-mechanical) rules are always on; see [[Reference/Lint Rules]].
 
 ## Project Root
 
@@ -78,6 +93,9 @@ and run commands with `-C`:
 ❯ scraps -C docs build
 ❯ scraps -C internal-wiki lint
 ```
+
+Each `.scraps.toml` is its own independent wiki — they do not cross-link, and
+each builds to its own `output_dir`.
 
 The old `-p` / `--path` flag is still accepted as a deprecated alias for one
 release. Prefer `-C` / `--directory` or the `SCRAPS_DIRECTORY` environment
