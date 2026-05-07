@@ -34,4 +34,10 @@ jobs:
       run: npx playwright install --with-deps
     - name: Run Playwright tests
       working-directory: ./tests/e2e
+      env:
+        # Skip auto-install of dev-only tools (rust, cargo-deny, llvm-cov, hk,
+        # pkl, markdownlint-cli2) when the webServer subprocess invokes
+        # `mise run docs:serve`. Only scraps is required and is installed
+        # explicitly by the mise-action step above.
+        MISE_AUTO_INSTALL: "false"
       run: npx playwright test
