@@ -42,7 +42,7 @@ rstest = "=0.26.1"
 tempfile = "=3.27.0"
 tokio-util = "=0.7.18"
 futures = "=0.3.32"
-annotate-snippets = "=0.11.5"
+annotate-snippets = "=0.12.16"
 comfy-table = { version = "=7.2.2", features = ["custom_styling"] }
 
 [package]
