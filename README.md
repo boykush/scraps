@@ -42,9 +42,9 @@ See the [Getting Started tutorial](https://boykush.github.io/scraps/scraps/tutor
 
 ```mermaid
 graph LR
-  Source[Markdown sources] --> IR[Scraps IR — typed graph]
-  IR --> HTML[Static HTML]
-  IR --> JSON[CLI JSON]
+  Source["Markdown sources"] --> IR["Scraps IR — typed graph"]
+  IR --> HTML["Static HTML"]
+  IR --> JSON["CLI JSON"]
 ```
 
 Scraps reads `[[wiki-link]]`, `#[[tag]]`, `![[embed]]`, `[[Page#heading]]`, and `ctx_path` as typed primitives. The same source compiles to an HTML site for human readers and to JSON for scripts and AI agents.
