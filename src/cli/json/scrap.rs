@@ -8,15 +8,6 @@ pub struct ScrapKeyJson {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ScrapJson {
-    pub title: String,
-    pub ctx: Option<String>,
-    pub md_text: String,
-    pub headings: Vec<HeadingJson>,
-    pub code_blocks: Vec<CodeBlockJson>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
 pub struct HeadingJson {
     pub level: u8,
     pub text: String,

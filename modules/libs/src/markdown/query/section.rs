@@ -2,6 +2,14 @@ use comrak::{nodes::NodeValue, parse_document, Arena};
 
 use super::common::{collect_text, line_byte_offset, line_starts, options};
 
+/// Slugify a heading text using GitHub Flavored Markdown rules.
+///
+/// Matches the slug emitted for anchors in rendered HTML, so it can be used
+/// to look up sections by the visible heading text.
+pub fn heading_slug(s: &str) -> String {
+    gfm_slug(s)
+}
+
 fn gfm_slug(s: &str) -> String {
     let mut out = String::new();
     for c in s.chars() {
