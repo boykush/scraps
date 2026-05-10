@@ -17,8 +17,10 @@ export default defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  /* Retry on CI only. One retry absorbs genuine flakiness without compounding
+   * cost: at retries=2 the worst case (all tests timing out) blew past the
+   * job timeout, masking real failures as `Run Playwright tests` hangs. */
+  retries: process.env.CI ? 1 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
@@ -56,5 +58,8 @@ export default defineConfig({
     command: 'mise run docs:serve',
     url: 'http://127.0.0.1:1112',
     reuseExistingServer: !process.env.CI,
+    /* `scraps serve` builds + binds in well under a second locally; default
+     * (60s) is too lenient and lets a broken serve eat into test time. */
+    timeout: 30_000,
   },
 });

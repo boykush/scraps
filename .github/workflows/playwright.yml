@@ -21,7 +21,9 @@ on:
 
 jobs:
   test:
-    timeout-minutes: 60
+    # Hard cap so a hang fails fast. Local full suite is ~15s; CI with browser
+    # startup + retries should stay well under this budget.
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
@@ -40,11 +42,7 @@ jobs:
       run: npm ci
     - name: Install Playwright Browsers
       working-directory: ./tests/e2e
-      # `--with-deps` runs apt-get for system libs and is the slowest step in
-      # this workflow (occasionally tens of minutes). ubuntu-latest already
-      # ships most browser deps; if a future browser fails to launch, fall
-      # back to a targeted `playwright install --with-deps <browser>` step.
-      run: npx playwright install
+      run: npx playwright install --with-deps
     - name: Run Playwright tests
       working-directory: ./tests/e2e
       env:
