@@ -27,7 +27,7 @@ jobs:
           fetch-depth: 0 # For scraps git committed date
 
       - name: Setup Scraps
-        uses: boykush/scraps@v1.0.0-rc.2
+        uses: boykush/scraps@v1.0.0-rc.3
 
       - name: Build docs
         run: scraps build --directory docs
