@@ -1,0 +1,62 @@
+name: 'Setup Scraps'
+description: 'Install the Scraps CLI from GitHub Releases for documentation builds.'
+author: 'boykush'
+branding:
+  icon: 'book-open'
+  color: 'blue'
+
+inputs:
+  version:
+    description: 'Scraps version to install (e.g. "1.0.0"). Defaults to the version bundled with this action ref.'
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve version and target
+      id: resolve
+      shell: bash
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        set -euo pipefail
+
+        if [ -n "$INPUT_VERSION" ]; then
+          VERSION="$INPUT_VERSION"
+        else
+          VERSION=$(grep -m1 '^version' "$ACTION_PATH/Cargo.toml" | sed -E 's/.*"(.*)".*/\1/')
+        fi
+
+        OS="$(uname -s)"
+        ARCH="$(uname -m)"
+        case "$OS-$ARCH" in
+          Linux-x86_64)   TARGET="x86_64-unknown-linux-gnu" ;;
+          Linux-aarch64)  TARGET="aarch64-unknown-linux-gnu" ;;
+          Darwin-x86_64)  TARGET="x86_64-apple-darwin" ;;
+          Darwin-arm64)   TARGET="aarch64-apple-darwin" ;;
+          *) echo "::error::Unsupported platform: $OS-$ARCH"; exit 1 ;;
+        esac
+
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+
+    - name: Download and install scraps
+      shell: bash
+      env:
+        VERSION: ${{ steps.resolve.outputs.version }}
+        TARGET: ${{ steps.resolve.outputs.target }}
+        REPO: ${{ github.repository }}
+      run: |
+        set -euo pipefail
+        URL="https://github.com/${REPO}/releases/download/v${VERSION}/scraps-${TARGET}.tar.gz"
+        DEST="${RUNNER_TEMP}/scraps"
+        mkdir -p "$DEST"
+        echo "Downloading scraps v${VERSION} (${TARGET}) from ${URL}"
+        curl -fsSL "$URL" | tar xz -C "$DEST"
+        echo "$DEST" >> "$GITHUB_PATH"
+
+    - name: Verify installation
+      shell: bash
+      run: scraps --version
