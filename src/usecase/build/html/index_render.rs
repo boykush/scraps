@@ -297,4 +297,63 @@ mod tests {
             "true<a href=\"./scrap3.html\">scrap3</a><a href=\"./scrap4.html\">scrap4</a>"
         );
     }
+
+    /// Regression test for the v1.0.0-rc.1 Fuse.js loading bug.
+    ///
+    /// fuse.js@7+ ships only an ES module from cdn.jsdelivr.net. Loading it
+    /// with a classic `<script src=...>` tag makes the browser fail on the
+    /// `export` statement, so `window.Fuse` never gets defined and the
+    /// in-page search dies.
+    ///
+    /// We must (a) load fuse.js inside a `type="module"` script via `import`,
+    /// and (b) avoid emitting a classic `<script src=".../fuse.js@...">` tag.
+    #[rstest]
+    fn fusejs_loads_as_es_module_in_builtin_index(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        // Do NOT register a static index.html — we want the builtin template.
+
+        let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
+        let metadata = HtmlMetadata::new(
+            &LangCode::default(),
+            "Scrap",
+            &Some("Scrap Wiki".to_string()),
+            &Some(Url::parse("https://github.io/image.png").unwrap()),
+        );
+        let list_view_configs =
+            ListViewConfigs::new(&true, &SortKey::CommittedDate, &Paging::By(10));
+
+        let scrap1 = Scrap::new("scrap1", &None, "# header1");
+        let scrap_texts = [&scrap1]
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
+            .collect();
+        let sc1 = ScrapDetail::new(&scrap1, &Some(0), base_url, &scrap_texts);
+        let scrap_details = ScrapDetails::new(&vec![sc1]);
+        let backlinks_map = BacklinksMap::new(&scrap_details.to_scraps());
+
+        let render = IndexRender::new(&project.static_dir, &project.output_dir).unwrap();
+        render
+            .run(
+                base_url,
+                &metadata,
+                &list_view_configs,
+                &scrap_details,
+                &backlinks_map,
+                &None,
+            )
+            .unwrap();
+
+        let html = fs::read_to_string(project.output_path("index.html")).unwrap();
+
+        assert!(
+            !html.contains(r#"<script src="https://cdn.jsdelivr.net/npm/fuse.js@"#),
+            "fuse.js@7+ is ESM-only: a classic <script src> tag fails to evaluate it. \
+             Got HTML:\n{html}"
+        );
+        assert!(
+            html.contains(r#"import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@"#),
+            "fuse.js must be imported inside a `type=\"module\"` script. Got HTML:\n{html}"
+        );
+    }
 }

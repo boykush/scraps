@@ -42,8 +42,15 @@
 {% block script %}
   {% if build_search_index == true %}
   <!-- For search scraps -->
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js@{{ cdn.fusejs }}"></script>
+  <!--
+    fuse.js@7+ ships as ESM only; loading it through a classic <script src>
+    fails to evaluate the `export` and leaves window.Fuse undefined. Import it
+    from a module script and re-expose it as a global so the classic
+    doSearch() handler below can call `new Fuse(...)`.
+  -->
   <script type="module">
+    import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@{{ cdn.fusejs }}";
+    window.Fuse = Fuse;
     fetch('./search_index.json')
       .then(response => response.json())
       .then(data => {

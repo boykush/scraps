@@ -37,7 +37,10 @@ test('CDN libraries are loaded', async ({ page }) => {
 });
 
 test('fetch OGP data', async ({ page }) => {
-  await page.goto('/scraps/autolink.reference.html');
+  // Autolink.md intentionally hosts a live `<https://github.com/boykush/scraps>`
+  // autolink so this test has a stable OGP card to assert against.
+  // Keep that autolink in `docs/Reference/Markdown/Autolink.md` if you edit it.
+  await page.goto('/scraps/reference/markdown/autolink.html');
 
   // Wait for OGP card to be present
   const ogpCard = page.locator('.ogp-card').first();
@@ -57,7 +60,7 @@ test('fetch OGP data', async ({ page }) => {
   const description = await ogpCard.locator('.ogp-description').textContent();
   
   expect(title).toContain('GitHub - boykush/scraps');
-  expect(description).toContain('Scraps is a portable CLI knowledge hub');
+  expect(description).toContain('The Wiki-link doc compiler for the LLM era');
 
   // Verify image is loaded
   const image = ogpCard.locator('.ogp-image');
