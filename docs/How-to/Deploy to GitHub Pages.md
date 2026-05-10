@@ -44,12 +44,8 @@ jobs:
         with:
           fetch-depth: 0 # For scraps git committed date
 
-      - name: Install Scraps
-        uses: jdx/mise-action@v2
-        with:
-          mise_toml: |
-            [tools]
-            "github:boykush/scraps" = "v0.33.0"
+      - name: Setup Scraps
+        uses: boykush/scraps@v1
 
       - name: Build
         run: scraps build
@@ -74,14 +70,14 @@ jobs:
         uses: actions/deploy-pages@v4
 ```
 
-Scraps is installed via mise using the `github:boykush/scraps` backend, which
-fetches a binary from GitHub Releases. Pin a released tag so deploys stay
-reproducible.
+The [`boykush/scraps`](https://github.com/marketplace/actions/setup-scraps)
+action installs the matching CLI binary from GitHub Releases. Pin to a
+specific tag (`@v1.0.0`) or to a SHA with a version comment for
+Renovate-managed updates:
 
-<https://mise.jdx.dev/>
-
-If you already maintain a `mise.toml` in the repository, you can omit the
-`mise_toml` input and `jdx/mise-action` will pick it up automatically.
+```yaml
+- uses: boykush/scraps@<sha> # v1.0.0
+```
 
 If your `output_dir` differs from `_site/`, update the `path:` in the
 `upload-pages-artifact` step to match.
