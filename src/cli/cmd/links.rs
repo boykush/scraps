@@ -7,17 +7,40 @@ use comfy_table::{Cell, Table};
 use serde::{Deserialize, Serialize};
 
 use crate::cli::config::scrap_config::ScrapConfig;
-use crate::cli::json::scrap::ScrapKeyJson;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
-use crate::usecase::scrap::lookup_links::usecase::LookupScrapLinksUsecase;
+use crate::usecase::scrap::lookup_links::usecase::{LinkRefKind, LookupScrapLinksUsecase};
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::title::Title;
 
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
+#[serde(rename_all = "lowercase")]
+enum LinkRefKindJson {
+    Link,
+    Embed,
+}
+
+impl From<LinkRefKind> for LinkRefKindJson {
+    fn from(k: LinkRefKind) -> Self {
+        match k {
+            LinkRefKind::Link => LinkRefKindJson::Link,
+            LinkRefKind::Embed => LinkRefKindJson::Embed,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct LinkRefJson {
+    kind: LinkRefKindJson,
+    title: String,
+    ctx: Option<String>,
+    heading: Option<String>,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 struct LinksResponse {
-    results: Vec<ScrapKeyJson>,
+    results: Vec<LinkRefJson>,
     count: usize,
 }
 
@@ -43,34 +66,47 @@ pub fn run(
     let usecase = LookupScrapLinksUsecase::new();
     let results = usecase.execute(&scraps, &target_title, &target_ctx)?;
 
-    let scrap_keys: Vec<ScrapKeyJson> = results
+    let refs: Vec<LinkRefJson> = results
         .into_iter()
-        .map(|r| ScrapKeyJson {
+        .map(|r| LinkRefJson {
+            kind: r.kind.into(),
             title: r.title.to_string(),
             ctx: r.ctx.map(|c| c.to_string()),
+            heading: r.heading,
         })
         .collect();
 
     if json {
-        let count = scrap_keys.len();
+        let count = refs.len();
         let response = LinksResponse {
-            results: scrap_keys,
+            results: refs,
             count,
         };
         writeln!(writer, "{}", serde_json::to_string(&response)?)?;
     } else {
-        if scrap_keys.is_empty() {
+        if refs.is_empty() {
             return Ok(());
         }
 
         let mut table = Table::new();
         table.load_preset(NOTHING);
-        table.set_header(vec![Cell::new("Title".bold()), Cell::new("Context".bold())]);
+        table.set_header(vec![
+            Cell::new("Kind".bold()),
+            Cell::new("Title".bold()),
+            Cell::new("Context".bold()),
+            Cell::new("Heading".bold()),
+        ]);
 
-        for key in &scrap_keys {
+        for r in &refs {
+            let kind_str = match r.kind {
+                LinkRefKindJson::Link => "link",
+                LinkRefKindJson::Embed => "embed",
+            };
             table.add_row(vec![
-                Cell::new(&key.title),
-                Cell::new(key.ctx.as_deref().unwrap_or("")),
+                Cell::new(kind_str),
+                Cell::new(&r.title),
+                Cell::new(r.ctx.as_deref().unwrap_or("")),
+                Cell::new(r.heading.as_deref().unwrap_or("")),
             ]);
         }
         writeln!(writer, "{table}")?;
@@ -133,6 +169,11 @@ mod tests {
         let titles: Vec<&str> = response.results.iter().map(|r| r.title.as_str()).collect();
         assert!(titles.contains(&"cargo"));
         assert!(titles.contains(&"clippy"));
+        assert!(response
+            .results
+            .iter()
+            .all(|r| r.kind == LinkRefKindJson::Link));
+        assert!(response.results.iter().all(|r| r.heading.is_none()));
     }
 
     #[rstest]
@@ -228,5 +269,113 @@ mod tests {
             &mut buf,
         );
         assert!(result.is_err());
+    }
+
+    #[rstest]
+    fn run_json_outputs_heading_qualified_occurrences(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(b"")
+            .add_scrap(
+                "rust.md",
+                b"# Rust\n\nSee [[Target#Install]] and [[Target#Usage]].",
+            )
+            .add_scrap("Target.md", b"# Target");
+
+        let mut buf = Vec::new();
+        run(
+            "rust",
+            None,
+            true,
+            Some(project.project_root.as_path()),
+            &mut buf,
+        )
+        .unwrap();
+
+        let output = String::from_utf8(buf).unwrap();
+        let response: LinksResponse = serde_json::from_str(output.trim()).unwrap();
+        assert_eq!(response.count, 2);
+        let headings: Vec<Option<&str>> = response
+            .results
+            .iter()
+            .map(|r| r.heading.as_deref())
+            .collect();
+        assert!(headings.contains(&Some("Install")));
+        assert!(headings.contains(&Some("Usage")));
+    }
+
+    #[rstest]
+    fn run_json_includes_embed_kind(#[from(temp_scrap_project)] project: TempScrapProject) {
+        project
+            .add_config(b"")
+            .add_scrap("rust.md", b"# Rust\n\nEmbed ![[Guide]] and link [[Other]].")
+            .add_scrap("Guide.md", b"# Guide")
+            .add_scrap("Other.md", b"# Other");
+
+        let mut buf = Vec::new();
+        run(
+            "rust",
+            None,
+            true,
+            Some(project.project_root.as_path()),
+            &mut buf,
+        )
+        .unwrap();
+
+        let output = String::from_utf8(buf).unwrap();
+        let response: LinksResponse = serde_json::from_str(output.trim()).unwrap();
+        assert_eq!(response.count, 2);
+        let kinds: Vec<LinkRefKindJson> = response.results.iter().map(|r| r.kind).collect();
+        assert!(kinds.contains(&LinkRefKindJson::Embed));
+        assert!(kinds.contains(&LinkRefKindJson::Link));
+    }
+
+    #[rstest]
+    fn run_json_excludes_explicit_tags(#[from(temp_scrap_project)] project: TempScrapProject) {
+        project
+            .add_config(b"")
+            .add_scrap("rust.md", b"# Rust\n\nLink [[Target]] and tag #[[ai]].")
+            .add_scrap("Target.md", b"# Target");
+
+        let mut buf = Vec::new();
+        run(
+            "rust",
+            None,
+            true,
+            Some(project.project_root.as_path()),
+            &mut buf,
+        )
+        .unwrap();
+
+        let output = String::from_utf8(buf).unwrap();
+        let response: LinksResponse = serde_json::from_str(output.trim()).unwrap();
+        assert_eq!(response.count, 1);
+        assert_eq!(response.results[0].title, "Target");
+    }
+
+    #[rstest]
+    fn run_json_serializes_kind_as_lowercase(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(b"")
+            .add_scrap("rust.md", b"# Rust\n\n[[Target]] and ![[Guide]].")
+            .add_scrap("Target.md", b"# Target")
+            .add_scrap("Guide.md", b"# Guide");
+
+        let mut buf = Vec::new();
+        run(
+            "rust",
+            None,
+            true,
+            Some(project.project_root.as_path()),
+            &mut buf,
+        )
+        .unwrap();
+
+        let output = String::from_utf8(buf).unwrap();
+        assert!(output.contains("\"kind\":\"link\""));
+        assert!(output.contains("\"kind\":\"embed\""));
     }
 }

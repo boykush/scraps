@@ -1,16 +1,27 @@
 use crate::error::ScrapsResult;
+use scraps_libs::markdown::query::{wiki_refs, WikiRef};
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::title::Title;
 use std::collections::HashMap;
 
-/// Result for scrap links lookup operation
+/// Kind of an outbound reference occurrence.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LinkRefKind {
+    /// Plain wikilink `[[...]]`.
+    Link,
+    /// Inline embed `![[...]]`.
+    Embed,
+}
+
+/// One outbound reference occurrence found in a scrap.
 #[derive(Debug, Clone, PartialEq)]
 pub struct LookupScrapLinksResult {
+    pub kind: LinkRefKind,
     pub title: Title,
     pub ctx: Option<Ctx>,
-    pub md_text: String,
+    pub heading: Option<String>,
 }
 
 pub struct LookupScrapLinksUsecase;
@@ -26,14 +37,12 @@ impl LookupScrapLinksUsecase {
         title: &Title,
         ctx: &Option<Ctx>,
     ) -> ScrapsResult<Vec<LookupScrapLinksResult>> {
-        // Create scrap key for the target scrap
         let target_key = if let Some(ctx) = ctx {
             ScrapKey::with_ctx(title, ctx)
         } else {
             ScrapKey::from(title.clone())
         };
 
-        // Find the target scrap
         let target_scrap = scraps
             .iter()
             .find(|scrap| scrap.self_key() == target_key)
@@ -41,33 +50,51 @@ impl LookupScrapLinksUsecase {
                 anyhow::anyhow!("Scrap not found: title='{}', ctx='{:?}'", title, ctx)
             })?;
 
-        // Create scrap key-to-scrap mapping for efficient lookup
         let scrap_map: HashMap<ScrapKey, &Scrap> = scraps
             .iter()
             .map(|scrap| (scrap.self_key(), scrap))
             .collect();
 
-        // Convert each link to LookupScrapLinksResult
-        let results: Vec<LookupScrapLinksResult> = target_scrap
-            .links()
-            .iter()
-            .filter_map(|link_key| {
-                // Find the linked scrap
-                scrap_map.get(link_key).map(|linked_scrap| {
-                    let scrap_key = &linked_scrap.self_key();
-                    let title: Title = scrap_key.into();
-                    let ctx: Option<Ctx> = scrap_key.into();
-
-                    LookupScrapLinksResult {
-                        title,
-                        ctx,
-                        md_text: linked_scrap.md_text().to_string(),
-                    }
-                })
+        let results: Vec<LookupScrapLinksResult> = wiki_refs(target_scrap.md_text())
+            .into_iter()
+            .filter_map(|wref| match wref {
+                WikiRef::Link(r) => {
+                    let key = ScrapKey::from_path_str(&join_path(&r.ctx_path, &r.title));
+                    scrap_map.get(&key).map(|linked| {
+                        let linked_key = linked.self_key();
+                        LookupScrapLinksResult {
+                            kind: LinkRefKind::Link,
+                            title: (&linked_key).into(),
+                            ctx: (&linked_key).into(),
+                            heading: r.heading,
+                        }
+                    })
+                }
+                WikiRef::Embed(r) => {
+                    let key = ScrapKey::from_path_str(&join_path(&r.ctx_path, &r.title));
+                    scrap_map.get(&key).map(|linked| {
+                        let linked_key = linked.self_key();
+                        LookupScrapLinksResult {
+                            kind: LinkRefKind::Embed,
+                            title: (&linked_key).into(),
+                            ctx: (&linked_key).into(),
+                            heading: r.heading,
+                        }
+                    })
+                }
+                WikiRef::Tag(_) => None,
             })
             .collect();
 
         Ok(results)
+    }
+}
+
+fn join_path(ctx_path: &[String], title: &str) -> String {
+    if ctx_path.is_empty() {
+        title.to_string()
+    } else {
+        format!("{}/{}", ctx_path.join("/"), title)
     }
 }
 
@@ -94,11 +121,10 @@ mod tests {
             .expect("Should succeed");
 
         assert_eq!(results.len(), 2);
-
-        // Check that we got the expected linked scraps
-        let titles: Vec<String> = results.iter().map(|r| r.title.to_string()).collect();
-        assert!(titles.contains(&"scrap2".to_string()));
-        assert!(titles.contains(&"scrap3".to_string()));
+        assert_eq!(results[0].kind, LinkRefKind::Link);
+        assert_eq!(results[0].title.to_string(), "scrap2");
+        assert_eq!(results[1].kind, LinkRefKind::Link);
+        assert_eq!(results[1].title.to_string(), "scrap3");
     }
 
     #[test]
@@ -149,5 +175,96 @@ mod tests {
             .expect("Should succeed");
 
         assert_eq!(results.len(), 0);
+    }
+
+    // Heading-qualified references for the same target are preserved as
+    // separate occurrences so callers can distinguish them.
+    #[test]
+    fn test_lookup_scrap_links_preserves_heading_occurrences() {
+        let scraps = vec![
+            Scrap::new(
+                "scrap1",
+                &None,
+                "# Scrap 1\n\nSee [[Target#Install]] and [[Target#Usage]].",
+            ),
+            Scrap::new("Target", &None, "# Target"),
+        ];
+
+        let usecase = LookupScrapLinksUsecase::new();
+        let results = usecase
+            .execute(&scraps, &Title::from("scrap1"), &None)
+            .expect("Should succeed");
+
+        assert_eq!(results.len(), 2);
+        assert_eq!(results[0].kind, LinkRefKind::Link);
+        assert_eq!(results[0].title.to_string(), "Target");
+        assert_eq!(results[0].heading.as_deref(), Some("Install"));
+        assert_eq!(results[1].heading.as_deref(), Some("Usage"));
+    }
+
+    #[test]
+    fn test_lookup_scrap_links_includes_embeds() {
+        let scraps = vec![
+            Scrap::new(
+                "scrap1",
+                &None,
+                "# Scrap 1\n\nEmbed ![[Target#Install]] and link [[Other]].",
+            ),
+            Scrap::new("Target", &None, "# Target"),
+            Scrap::new("Other", &None, "# Other"),
+        ];
+
+        let usecase = LookupScrapLinksUsecase::new();
+        let results = usecase
+            .execute(&scraps, &Title::from("scrap1"), &None)
+            .expect("Should succeed");
+
+        assert_eq!(results.len(), 2);
+        assert_eq!(results[0].kind, LinkRefKind::Embed);
+        assert_eq!(results[0].title.to_string(), "Target");
+        assert_eq!(results[0].heading.as_deref(), Some("Install"));
+        assert_eq!(results[1].kind, LinkRefKind::Link);
+        assert_eq!(results[1].title.to_string(), "Other");
+        assert_eq!(results[1].heading, None);
+    }
+
+    #[test]
+    fn test_lookup_scrap_links_excludes_tags() {
+        let scraps = vec![
+            Scrap::new(
+                "scrap1",
+                &None,
+                "# Scrap 1\n\nLink [[Target]] and tag #[[ai]].",
+            ),
+            Scrap::new("Target", &None, "# Target"),
+        ];
+
+        let usecase = LookupScrapLinksUsecase::new();
+        let results = usecase
+            .execute(&scraps, &Title::from("scrap1"), &None)
+            .expect("Should succeed");
+
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].title.to_string(), "Target");
+    }
+
+    #[test]
+    fn test_lookup_scrap_links_resolves_ctx_target() {
+        let scraps = vec![
+            Scrap::new("scrap1", &None, "# Scrap 1\n\nSee [[Book/Target]]."),
+            Scrap::new("Target", &Some("Book".into()), "# Target"),
+        ];
+
+        let usecase = LookupScrapLinksUsecase::new();
+        let results = usecase
+            .execute(&scraps, &Title::from("scrap1"), &None)
+            .expect("Should succeed");
+
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].title.to_string(), "Target");
+        assert_eq!(
+            results[0].ctx.as_ref().map(|c| c.to_string()).as_deref(),
+            Some("Book")
+        );
     }
 }

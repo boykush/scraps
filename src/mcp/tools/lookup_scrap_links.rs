@@ -1,6 +1,5 @@
 use crate::input::file::read_scraps;
-use crate::mcp::json::scrap::ScrapKeyJson;
-use crate::usecase::scrap::lookup_links::usecase::LookupScrapLinksUsecase;
+use crate::usecase::scrap::lookup_links::usecase::{LinkRefKind, LookupScrapLinksUsecase};
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
 use rmcp::model::{CallToolResult, Content};
@@ -19,9 +18,33 @@ pub struct LookupScrapLinksRequest {
     pub ctx: Option<String>,
 }
 
+#[derive(Debug, Serialize, PartialEq, Eq, Clone, Copy)]
+#[serde(rename_all = "lowercase")]
+pub enum LinkRefKindJson {
+    Link,
+    Embed,
+}
+
+impl From<LinkRefKind> for LinkRefKindJson {
+    fn from(k: LinkRefKind) -> Self {
+        match k {
+            LinkRefKind::Link => LinkRefKindJson::Link,
+            LinkRefKind::Embed => LinkRefKindJson::Embed,
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+pub struct LinkRefJson {
+    pub kind: LinkRefKindJson,
+    pub title: String,
+    pub ctx: Option<String>,
+    pub heading: Option<String>,
+}
+
 #[derive(Debug, Serialize)]
 pub struct LookupScrapLinksResponse {
-    pub results: Vec<ScrapKeyJson>,
+    pub results: Vec<LinkRefJson>,
     pub count: usize,
 }
 
@@ -61,17 +84,19 @@ pub async fn lookup_scrap_links(
         })?;
 
     // Convert results to structured response
-    let scrap_jsons: Vec<ScrapKeyJson> = results
+    let refs: Vec<LinkRefJson> = results
         .into_iter()
-        .map(|result| ScrapKeyJson {
+        .map(|result| LinkRefJson {
+            kind: result.kind.into(),
             title: result.title.to_string(),
             ctx: result.ctx.map(|c| c.to_string()),
+            heading: result.heading,
         })
         .collect();
 
-    let count = scrap_jsons.len();
+    let count = refs.len();
     let response = LookupScrapLinksResponse {
-        results: scrap_jsons,
+        results: refs,
         count,
     };
 
