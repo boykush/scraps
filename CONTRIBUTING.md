@@ -52,12 +52,16 @@ This project uses [Claude Code](https://claude.com/claude-code) plugins for deve
 
 ### Overview
 
-Scraps maintains a comprehensive testing strategy with three main types of tests:
+Scraps maintains a comprehensive testing strategy:
 - **Small Tests**: Fast tests for individual functions and methods
 - **Medium Tests**: Integration tests using tempfile + rstest fixtures for file
   system operations
-- **E2E Tests**: Large, browser-based end-to-end tests using Playwright
 - **Performance Tests**: Automated build time validation (≤ 3 seconds)
+
+Browser-runtime checks (search box, OGP card, CDN script loading) are
+verified manually on the deployed docs site after each release. The
+in-source HTML output is kept honest by Rust render tests asserting
+template-level invariants (e.g. fuse.js loads as an ES module).
 
 ## Development Environment Setup
 
@@ -73,7 +77,6 @@ mise install
 
 This will automatically install the correct versions of:
 - **Rust** (stable version)
-- **Node.js** (for E2E tests)
 - **hk** (git hook manager)
 - **pkl** (configuration language)
 - Any other tools specified in the project configuration
@@ -145,37 +148,6 @@ mod tests {
 - `TempScrapProject`: Full project structure (scraps_dir, static_dir,
   public_dir, templates_dir)
 - `SimpleTempDir`: Single temporary directory for simple tests
-
-### E2E Tests
-
-#### Running E2E Tests
-
-```bash
-# Run all E2E tests
-mise run e2e:test
-```
-
-#### E2E Test Configuration
-
-E2E tests are configured to:
-- Use three browsers: Chromium, Firefox, and WebKit
-- Automatically start `cargo run serve` on `http://127.0.0.1:1112`
-- Generate HTML reports for test results
-
-#### Writing E2E Tests
-
-```typescript
-import { test, expect } from '@playwright/test';
-
-test('example test', async ({ page }) => {
-  // Navigate to page
-  await page.goto('/your-page');
-
-  // Test interactions
-  await page.locator('#element-id').click();
-  await expect(page.locator('#result')).toBeVisible();
-});
-```
 
 ### Performance Tests
 
