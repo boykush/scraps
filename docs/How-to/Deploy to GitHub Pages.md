@@ -81,22 +81,3 @@ Renovate-managed updates:
 
 If your `output_dir` differs from `_site/`, update the `path:` in the
 `upload-pages-artifact` step to match.
-
-## Alternative: install via mise
-
-If you already manage tool versions with [mise](https://mise.jdx.dev/), you
-can use the `github:` backend instead of the dedicated action:
-
-```yaml
-- name: Install Scraps
-  uses: jdx/mise-action@v2
-  with:
-    mise_toml: |
-      [tools]
-      "github:boykush/scraps" = "v1.0.0"
-```
-
-When using a repository-level `mise.toml`, omit the `mise_toml` input and
-`jdx/mise-action` picks it up automatically. Note that Renovate's `mise`
-manager does not auto-update entries using the `github:` backend, so the
-version pin needs manual maintenance.
