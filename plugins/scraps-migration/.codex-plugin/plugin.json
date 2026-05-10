@@ -1,6 +1,6 @@
 {
   "name": "scraps-migration",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "LLM migration workflows for moving Scraps wikis from v0 to v1. Use this plugin when a user wants an agent to migrate a Scraps wiki, upgrade v0 syntax/config to v1, compare v0/v1 CLI behavior, or produce a v0 to v1 migration plan.",
   "author": {
     "name": "boykush",

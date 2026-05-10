@@ -1,6 +1,6 @@
 {
   "name": "scraps-migration",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "LLM migration workflows for moving Scraps wikis from v0 to v1. Runs version-pinned audits, converts tag and config syntax, and verifies the result with v1 lint/build.",
   "author": {
     "name": "boykush",
