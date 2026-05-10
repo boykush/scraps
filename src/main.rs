@@ -24,10 +24,16 @@ fn main() -> error::ScrapsResult<()> {
     match command {
         cli::SubCommands::Init => cli::cmd::init::run(directory),
         cli::SubCommands::Build { verbose, git } => cli::cmd::build::run(verbose, git, directory),
-        cli::SubCommands::Get { title, ctx, json } => cli::cmd::get::run(
+        cli::SubCommands::Get {
+            title,
+            ctx,
+            heading,
+            json,
+        } => cli::cmd::get::run(
             &title,
             ctx.as_deref(),
-            json,
+            heading.as_deref(),
+            json.as_deref(),
             directory,
             &mut std::io::stdout(),
         ),

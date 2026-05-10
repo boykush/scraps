@@ -2,15 +2,6 @@ use scraps_libs::markdown::query::{CodeBlock, Heading};
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]
-pub struct ScrapJson {
-    pub title: String,
-    pub ctx: Option<String>,
-    pub md_text: String,
-    pub headings: Vec<HeadingJson>,
-    pub code_blocks: Vec<CodeBlockJson>,
-}
-
-#[derive(Debug, Serialize)]
 pub struct ScrapKeyJson {
     pub title: String,
     pub ctx: Option<String>,

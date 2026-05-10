@@ -32,7 +32,7 @@ impl ScrapsServer {
 #[tool_router]
 impl ScrapsServer {
     #[tool(
-        description = "Get a single scrap by title and optional context. Returns the scrap's full content including title, context, and markdown body."
+        description = "Get a single scrap by title and optional context. Optionally restrict to a heading section via 'heading'. Optionally project specific fields via 'fields' (allowed: title, ctx, body, headings, code_blocks); defaults to ['title', 'ctx', 'body']."
     )]
     async fn get_scrap(
         &self,

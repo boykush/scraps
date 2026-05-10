@@ -13,7 +13,7 @@ pub use code_blocks::{code_blocks, CodeBlock};
 pub use embeds::{embeds, EmbedRef};
 pub use headings::{headings, Heading};
 pub use images::images;
-pub use section::section;
+pub use section::{heading_slug, section};
 pub use tags::{tags, TagRef};
 pub use task_items::{task_items, TaskItem, TaskStatus};
 pub use wiki_ref::{wiki_refs, WikiRef};

@@ -80,8 +80,21 @@ pub enum SubCommands {
         #[arg(long, help = "Disambiguate title across contexts")]
         ctx: Option<String>,
 
-        #[arg(long, help = "Output as JSON")]
-        json: bool,
+        #[arg(
+            long,
+            value_name = "HEADING",
+            help = "Restrict the output to the section under the given heading text"
+        )]
+        heading: Option<String>,
+
+        #[arg(
+            long,
+            value_name = "FIELDS",
+            num_args = 0..=1,
+            default_missing_value = "",
+            help = "Output as JSON. Optionally accepts a comma-separated field projection (title,ctx,body,headings,code_blocks)."
+        )]
+        json: Option<String>,
     },
 
     #[command(about = "Write .scraps.toml to the project directory")]
