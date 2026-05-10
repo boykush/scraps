@@ -121,6 +121,41 @@ jobs:
           git commit -m "scraps ${VERSION}"
           git push
 
+  update-floating-tags:
+    name: Update v{major} and v{major}.{minor} tags
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.ref, '-') }} # skip prereleases
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Move floating tags to released commit
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$TAG" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "::error::Tag '$TAG' is not a vMAJOR.MINOR.PATCH release tag; skipping."
+            exit 1
+          fi
+          MAJOR="${BASH_REMATCH[1]}"
+          MINOR="${BASH_REMATCH[2]}"
+          MAJOR_TAG="v${MAJOR}"
+          MINOR_TAG="v${MAJOR}.${MINOR}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git tag -f "$MAJOR_TAG" "$SHA"
+          git tag -f "$MINOR_TAG" "$SHA"
+          git push origin -f "refs/tags/$MAJOR_TAG"
+          git push origin -f "refs/tags/$MINOR_TAG"
+
   publish-crate:
     name: Publish to crates.io
     needs: build
