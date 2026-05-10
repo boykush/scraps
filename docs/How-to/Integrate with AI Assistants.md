@@ -13,11 +13,19 @@ server.
 ```bash
 ❯ scraps search "rust cli" --logic and --json
 ❯ scraps get "Getting Started" --json
+❯ scraps get "Getting Started" --heading "Install" --json body
+❯ scraps get "Getting Started" --json code_blocks
 ❯ scraps links "Getting Started" --json
 ❯ scraps backlinks "Configuration" --json
 ❯ scraps tag list --json
 ❯ scraps todo --status all --json
 ```
+
+`scraps get --json` defaults to `title`, `ctx`, and `body`. It can project
+specific fields (`title`, `ctx`, `body`, `headings`, `code_blocks`) so an
+agent can avoid loading full bodies when it only needs structure or examples.
+`scraps links --json` returns outbound `link` and `embed` references with
+optional heading targets; `backlinks` stays a scrap-level inbound lookup.
 
 The full command map is in [[Reference/CLI Overview]]. Each command's `--help`
 documents flags and JSON shape.

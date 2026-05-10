@@ -37,6 +37,7 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
    - `scraps search "<keyword>" --json` to find related scraps
    - `scraps tag list --json` to find relevant tags
    - Read 3–8 of the most related scraps via `scraps get "<title>" --json`
+   - Use `scraps get "<title>" --json headings` first when only the outline is needed
 
 3. **Decide title and ctx**
    - Pick a clear, atomic title
@@ -82,7 +83,7 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
 ## CLI used
 
 - `scraps search <query> --json`
-- `scraps get <title> [--ctx <ctx>] --json`
+- `scraps get <title> [--ctx <ctx>] [--heading <heading>] --json [fields]`
 - `scraps tag list --json`
 - `scraps tag backlinks <tag> --json`
 - `scraps lint --rule <rule>`

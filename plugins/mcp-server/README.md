@@ -61,14 +61,17 @@ Returns: `[{ title, backlinks_count }]`.
 
 ### `get_scrap`
 
-Retrieve a single scrap by title (and optional context).
+Retrieve a single scrap by title, optional context, optional heading, and
+optional field projection.
 
-| Parameter | Type | Required |
-|---|---|---|
-| `title` | string | yes |
-| `ctx` | string | no |
+| Parameter | Type | Required | Notes |
+|---|---|---|---|
+| `title` | string | yes | Scrap title |
+| `ctx` | string | no | Context folder/path |
+| `heading` | string | no | Restrict body/structure fields to this section |
+| `fields` | string[] | no | Defaults to `["title", "ctx", "body"]`; allowed: `title`, `ctx`, `body`, `headings`, `code_blocks` |
 
-Returns: `{ title, ctx, md_text, headings, code_blocks }`.
+Returns the requested fields. Default response: `{ title, ctx, body }`.
 
 ### `lookup_scrap_links`
 
@@ -79,7 +82,17 @@ Outbound wiki-links from a scrap.
 | `title` | string | yes |
 | `ctx` | string | no |
 
-Returns: `{ results: [{ title, ctx }], count }`.
+Returns outbound reference occurrences:
+
+```json
+{
+  "results": [
+    { "kind": "link", "title": "Target", "ctx": null, "heading": "Install" },
+    { "kind": "embed", "title": "Guide", "ctx": "Docs", "heading": null }
+  ],
+  "count": 2
+}
+```
 
 ### `lookup_scrap_backlinks`
 

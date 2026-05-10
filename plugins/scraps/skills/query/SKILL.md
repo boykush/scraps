@@ -36,6 +36,8 @@ Implements Karpathy's *Query* primitive for Scraps: search the wiki, read releva
 
 4. **Read selected scraps**
    - `scraps get "<title>" [--ctx <ctx>] --json` for each candidate
+   - Use field projection to save context when appropriate, e.g. `--json body`, `--json headings`, or `--json code_blocks`
+   - If a link result includes `heading`, read just that section with `scraps get "<title>" [--ctx <ctx>] --heading "<heading>" --json body`
    - For graph-shaped questions, also use:
      - `scraps links "<title>" --json` (outbound)
      - `scraps backlinks "<title>" --json` (inbound)
@@ -59,12 +61,13 @@ Implements Karpathy's *Query* primitive for Scraps: search the wiki, read releva
 - If a claim has no source in the wiki, mark it as outside the wiki ("not in the current scraps"); do not bluff.
 - Use the exact `title` value returned by `scraps search --json` / `scraps get --json` so the citation resolves cleanly.
 - For ctx-disambiguated scraps, use `[[Ctx/Title]]`.
+- `scraps links --json` may return a `heading`; use it for targeted reads, but cite the scrap as `[[Title]]` or `[[Ctx/Title]]` unless the answer specifically needs a heading reference.
 
 ## CLI used
 
 - `scraps search <query> [--logic and|or] --json`
-- `scraps get <title> [--ctx <ctx>] --json`
-- `scraps links <title> [--ctx <ctx>] --json`
+- `scraps get <title> [--ctx <ctx>] [--heading <heading>] --json [fields]`
+- `scraps links <title> [--ctx <ctx>] --json` (returns `{ kind, title, ctx, heading }` refs)
 - `scraps backlinks <title> [--ctx <ctx>] --json`
 - `scraps tag list --json`
 - `scraps tag backlinks <tag> --json`

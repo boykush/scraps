@@ -54,12 +54,16 @@ Any assistant that can run shell commands can query Scraps directly:
 ```bash
 ❯ scraps search "release checklist" --json
 ❯ scraps get "Configuration" --json
+❯ scraps get "Configuration" --heading "Profiles" --json body
+❯ scraps links "Configuration" --json
 ❯ scraps backlinks "Configuration" --json
 ❯ scraps todo --status all --json
 ```
 
-Shell plus JSON is the primary agent integration path. Scraps also provides
-an MCP server for MCP-compatible clients — see
+Shell plus JSON is the primary agent integration path. `get` can project only
+the fields an agent needs, and `links` returns structured outbound references
+for follow-up reads. Scraps also provides an MCP server for MCP-compatible
+clients — see
 [[How-to/Integrate with AI Assistants]] for both paths and the trade-offs
 between them.
 
