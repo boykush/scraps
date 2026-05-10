@@ -59,9 +59,9 @@ Parse the title by extracting the text between the first pair of double quotes. 
 
 - `list_tags` - Get all tags sorted by backlinks count.
 - `search_scraps` - Find related scraps by keyword with fuzzy matching against title and body content. Returns `title` and `ctx` for each result. **IMPORTANT: Each result represents an existing scrap. Only use the returned `title` and `ctx` values when creating Wiki-links.**
-- `get_scrap` - Get a single scrap's full content by `title` and optional `ctx`.
+- `get_scrap` - Get a single scrap by `title`, optional `ctx`, optional `heading`, and optional `fields`. Defaults to `title`, `ctx`, and `body`.
 - `lookup_tag_backlinks` - Check which scraps are using a specific tag. Returns `title` and `ctx` for each result.
-- `lookup_scrap_links` - Get all scraps that a scrap links to. Returns `title` and `ctx` for each result.
+- `lookup_scrap_links` - Get outbound link/embed refs from a scrap. Returns `kind`, `title`, `ctx`, and `heading` for each result.
 - `lookup_scrap_backlinks` - Get all scraps that link to a scrap. Returns `title` and `ctx` for each result.
 
 ## Wiki-Link Syntax

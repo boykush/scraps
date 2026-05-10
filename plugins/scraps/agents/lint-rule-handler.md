@@ -61,7 +61,7 @@ Reject requests like "run all default rules" without a stated purpose.
 For each violation:
 - Identify the likely fix
   - `broken-link`: search for the closest title via `scraps search --json`
-  - `broken-heading-ref`: read the target scrap, find a matching heading
+  - `broken-heading-ref`: read target headings with `scraps get <title> --json headings`, then choose the closest valid heading
   - `self-link`: remove the link
 - Propose the Edit
 - Apply on user confirmation (or directly when invoked from a trusted skill context)
@@ -70,7 +70,7 @@ For each violation:
 ### Judgment rules (dead-end, lonely, overlinking)
 
 For each violation:
-- Read the offending scrap via `scraps get --json`
+- Read the offending scrap via `scraps get <title> [--ctx <ctx>] --json`
 - Interpret against purpose:
   - `dead-end` → atomic definition (signal: keep) vs. genuinely incomplete (signal: extend)
   - `lonely` → natural root/source note (signal: accept) vs. orphan (signal: link from a related scrap)
@@ -101,7 +101,7 @@ For each violation:
 ## CLI used
 
 - `scraps lint --rule <rule> [--rule <rule> ...]`
-- `scraps get <title> [--ctx <ctx>] --json`
+- `scraps get <title> [--ctx <ctx>] [--heading <heading>] --json [fields]`
 - `scraps search <query> --json` (for `broken-link` replacement candidates)
 
 Full command details: `scraps <cmd> --help`.
