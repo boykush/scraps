@@ -38,15 +38,6 @@ scraps lint
 
 See the [Getting Started tutorial](https://boykush.github.io/scraps/scraps/tutorial/getting-started.html) for the full flow.
 
-### Use in GitHub Actions
-
-```yaml
-- uses: boykush/scraps@v1
-- run: scraps build --directory docs
-```
-
-The `boykush/scraps` action installs the matching CLI binary from GitHub Releases. Pin to a specific version (e.g. `@v1.0.0`) or a SHA for fully reproducible builds. See [Deploy to GitHub Pages](https://boykush.github.io/scraps/scraps/how-to/deploy-to-github-pages.html) for a full deployment example.
-
 ## How it works
 
 ```mermaid
