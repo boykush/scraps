@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code plugins for Scraps - AI skills, migration workflows, and MCP integration for interconnected Markdown documentation",
-    "version": "1.2.0"
+    "version": "1.2.1"
   },
   "plugins": [
     {

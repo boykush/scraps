@@ -43,6 +43,7 @@ The skill:
 - runs v1 lint/build to identify breaking changes
 - converts known v0 tag links to explicit v1 `#[[tag]]`
 - updates `.scraps.toml` discovery/config shape
+- removes `scraps template generate` / `scraps template list` workflow usage
 - replaces `-p` / `--path` workflow references with `-C` / `--directory`
 - fully migrates GitHub Pages deploys to v1 (`_site/`, `boykush/scraps@v1`,
   and Pages source set to GitHub Actions)

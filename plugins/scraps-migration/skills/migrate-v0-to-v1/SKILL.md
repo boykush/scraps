@@ -69,7 +69,8 @@ support `-C`.
 | project path config / `scraps_dir` style | `.scraps.toml` directory is wiki root | Move or rewrite config so the file sits at the wiki root. |
 | `public/` output assumptions | `_site/` default output | Migrate config, deploy workflows, and docs to `_site/`; do not preserve `public/` as a compatibility branch. |
 | `-p` / `--path` / `SCRAPS_PROJECT_PATH` | `-C` / `--directory` / `SCRAPS_DIRECTORY` | Update docs, scripts, CI, and agent settings. |
-| template/frontmatter authoring path | skill-based authoring | Remove workflow dependence on generated templates/frontmatter fields; keep ordinary markdown content. |
+| `scraps template generate` / `scraps template list` | removed | Delete template command usage from docs, scripts, aliases, and agent workflows; replace authoring with `scraps` plugin `/ingest` or normal markdown edits. |
+| template/frontmatter authoring path | skill-based authoring | Remove generated template files, frontmatter fields used only by templates, and workflow dependence on generated template scaffolds; keep ordinary markdown content. |
 | `scraps-writer` plugin | `scraps` plugin | Replace `/add-scrap`, `/web-to-scrap`, `/scraps-writer` with `/ingest`; use `/query` for read-side synthesis. |
 
 ## Workflow
@@ -80,7 +81,8 @@ support `-C`.
 2. Locate the wiki root and `.scraps.toml`.
 3. Count markdown files and identify docs/scripts/CI files that mention
    `scraps`, `scraps-writer`, `-p`, `--path`, `SCRAPS_PROJECT_PATH`,
-   `public`, `_site`, `upload-pages-artifact`, `github-pages`, `template`, or
+   `public`, `_site`, `upload-pages-artifact`, `github-pages`,
+   `scraps template`, `template generate`, `template list`, `template`, or
    `frontmatter`.
 4. Resolve and record the latest v0 and latest v1-or-newer CLI refs that will
    be used.
@@ -147,6 +149,13 @@ Update `.scraps.toml` and surrounding automation:
   - `scraps -p <dir> ...` -> `scraps -C <dir> ...`
   - `scraps --path <dir> ...` -> `scraps --directory <dir> ...`
   - `SCRAPS_PROJECT_PATH` -> `SCRAPS_DIRECTORY`
+- Remove template command usage:
+  - Delete `scraps template generate` and `scraps template list` examples from
+    docs, scripts, aliases, CI, and agent instructions.
+  - Do not replace them with another CLI command; v1 authoring is markdown
+    editing plus the `scraps` plugin `/ingest` workflow.
+  - Remove generated template scaffolds only when they are clearly template
+    artifacts. Preserve user-authored markdown content.
 - Update GitHub Pages deployment:
   - Use `boykush/scraps@v1` or a pinned v1 tag/SHA.
   - Ensure the build step runs the v1 CLI, usually `scraps build`.
@@ -195,6 +204,7 @@ End with:
 - files changed
 - tag conversions count
 - config/workflow changes
+- template command removals
 - GitHub Pages workflow changes and repository setting status
 - lint/build result
 - ambiguous references or unresolved items needing human judgment
