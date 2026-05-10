@@ -15,7 +15,6 @@
     {
       "groupName": "Rust toolchain",
       "matchManagers": [
-        "dockerfile",
         "mise"
       ],
       "matchPackageNames": [
@@ -33,13 +32,6 @@
         "nord-highlightjs",
         "fuse.js"
       ]
-    },
-    {
-      "description": "Self-maintained packages: skip minimumReleaseAge",
-      "matchPackageNames": [
-        "boykush/scraps-deploy-action"
-      ],
-      "minimumReleaseAge": "0 days"
     }
   ],
   "customManagers": [
