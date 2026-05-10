@@ -5,10 +5,18 @@
     "email": "boykush315@gmail.com"
   },
   "metadata": {
-    "description": "Claude Code plugins for Scraps - MCP server integration for interconnected Markdown documentation",
-    "version": "1.1.2"
+    "description": "Claude Code plugins for Scraps - AI skills, migration workflows, and MCP integration for interconnected Markdown documentation",
+    "version": "1.2.0"
   },
   "plugins": [
+    {
+      "name": "scraps",
+      "source": "./plugins/scraps"
+    },
+    {
+      "name": "scraps-migration",
+      "source": "./plugins/scraps-migration"
+    },
     {
       "name": "mcp-server",
       "source": "./plugins/mcp-server"

@@ -51,9 +51,10 @@ Scraps reads `[[wiki-link]]`, `#[[tag]]`, `![[embed]]`, `[[Page#heading]]`, and 
 
 ## AI integration
 
-CLI + JSON is the primary path — any shell-capable agent can query Scraps without an MCP client implementation. For Claude Code, two bundled plugins wrap this CLI:
+CLI + JSON is the primary path — any shell-capable agent can query Scraps without an MCP client implementation. Bundled plugins provide agent-facing workflows:
 
-- [`scraps`](plugins/scraps) — Karpathy-style *Ingest / Query / Lint* skills + a `lint-rule-handler` agent
+- [`scraps`](plugins/scraps) — Karpathy-style *Ingest / Query / Lint* skills for Claude Code and Codex, plus a Claude Code `lint-rule-handler` agent
+- [`scraps-migration`](plugins/scraps-migration) — LLM-led v0 → v1 migration workflow for Claude Code and Codex with version-pinned audits
 - [`mcp-server`](plugins/mcp-server) — MCP server for MCP-compatible clients
 
 See the [AI integration guide](https://boykush.github.io/scraps/scraps/how-to/integrate-with-ai-assistants.html) for the trade-offs.

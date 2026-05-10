@@ -1,0 +1,32 @@
+{
+  "name": "scraps-codex-plugins",
+  "interface": {
+    "displayName": "Scraps Plugins"
+  },
+  "plugins": [
+    {
+      "name": "scraps",
+      "source": {
+        "source": "local",
+        "path": "./plugins/scraps"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Engineering"
+    },
+    {
+      "name": "scraps-migration",
+      "source": {
+        "source": "local",
+        "path": "./plugins/scraps-migration"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Engineering"
+    }
+  ]
+}
