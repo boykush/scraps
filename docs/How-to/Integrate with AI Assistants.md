@@ -32,7 +32,7 @@ documents flags and JSON shape.
 
 ### Bundled AI skills
 
-For Claude Code users, the official **scraps plugin** packages
+For Claude Code and Codex users, the official **scraps plugin** packages
 [Karpathy](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)-style
 *Ingest / Query / Lint* workflows around the CLI:
 

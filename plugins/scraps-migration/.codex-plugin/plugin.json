@@ -1,0 +1,38 @@
+{
+  "name": "scraps-migration",
+  "version": "0.1.0",
+  "description": "LLM migration workflows for moving Scraps wikis from v0 to v1. Use this plugin when a user wants an agent to migrate a Scraps wiki, upgrade v0 syntax/config to v1, compare v0/v1 CLI behavior, or produce a v0 to v1 migration plan.",
+  "author": {
+    "name": "boykush",
+    "email": "boykush315@gmail.com"
+  },
+  "homepage": "https://boykush.github.io/scraps",
+  "repository": "https://github.com/boykush/scraps",
+  "license": "MIT",
+  "keywords": [
+    "scraps",
+    "migration",
+    "wiki",
+    "markdown",
+    "llm"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Scraps Migration",
+    "shortDescription": "Guide LLM agents through Scraps v0 to v1 wiki migrations",
+    "longDescription": "Scraps Migration gives Codex a structured workflow for upgrading Scraps wikis from v0 to v1. It uses version-pinned CLI runs, v0 tag inventory, controlled markdown edits, and v1 lint/build verification so an agent can migrate a wiki in one pass with a clear report.",
+    "developerName": "boykush",
+    "category": "Engineering",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://boykush.github.io/scraps/",
+    "defaultPrompt": [
+      "Migrate this Scraps wiki from v0 to v1",
+      "Audit this wiki for Scraps v1 migration issues"
+    ],
+    "brandColor": "#4C566A",
+    "screenshots": []
+  }
+}

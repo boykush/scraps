@@ -1,0 +1,38 @@
+{
+  "name": "scraps",
+  "version": "0.1.0",
+  "description": "Official AI skills bundle for Scraps. Use this plugin when a user wants to ingest sources into a Scraps wiki, query existing scraps, synthesize wiki-backed answers, or run purpose-driven wiki lint workflows through the scraps CLI.",
+  "author": {
+    "name": "boykush",
+    "email": "boykush315@gmail.com"
+  },
+  "homepage": "https://boykush.github.io/scraps",
+  "repository": "https://github.com/boykush/scraps",
+  "license": "MIT",
+  "keywords": [
+    "scraps",
+    "wiki",
+    "markdown",
+    "llm",
+    "cli"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Scraps",
+    "shortDescription": "Ingest and query Scraps wikis with CLI-backed skills",
+    "longDescription": "Scraps gives Codex workflows for adding new scraps, querying a wiki with citations, and running purpose-driven lint through the scraps CLI and JSON output.",
+    "developerName": "boykush",
+    "category": "Engineering",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://boykush.github.io/scraps/",
+    "defaultPrompt": [
+      "Query this Scraps wiki",
+      "Add this article as a scrap"
+    ],
+    "brandColor": "#4C566A",
+    "screenshots": []
+  }
+}
