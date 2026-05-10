@@ -1,4 +1,4 @@
-name: Build binary and update homebrew
+name: Release
 
 on:
   release:
@@ -120,3 +120,23 @@ jobs:
           git add Formula/scraps.rb
           git commit -m "scraps ${VERSION}"
           git push
+
+  publish-crate:
+    name: Publish to crates.io
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ !contains(github.ref, '-') }} # skip prereleases
+    steps:
+      - uses: actions/checkout@v6
+      - uses: jdx/mise-action@v4
+        with:
+          cache: false
+          install_args: "rust"
+      - name: Publish libs crate
+        run: cargo publish --manifest-path modules/libs/Cargo.toml
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      - name: Publish main crate
+        run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
