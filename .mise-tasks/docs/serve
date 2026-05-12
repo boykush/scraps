@@ -1,3 +1,16 @@
 #!/usr/bin/env bash
 #MISE description="Serve documentation locally with scraps"
-scraps serve --directory docs
+# Diagnostic mode for the CI hang investigation: trace each line, dump PATH /
+# scraps resolution before invoking, and bypass the mise shim by going through
+# `mise exec` so the github:boykush/scraps tool resolves explicitly.
+set -x
+echo "[docs:serve] HOME=$HOME"
+echo "[docs:serve] PWD=$PWD"
+echo "[docs:serve] MISE_AUTO_INSTALL=${MISE_AUTO_INSTALL:-unset}"
+echo "[docs:serve] PATH=$PATH"
+echo "[docs:serve] which scraps:"
+which scraps || true
+echo "[docs:serve] mise current scraps:"
+mise current github:boykush/scraps || true
+echo "[docs:serve] handing off to mise exec scraps serve"
+exec mise exec github:boykush/scraps -- scraps serve --directory docs
