@@ -15,7 +15,7 @@ git clone --depth 1 https://github.com/boykush/wiki.git "$WIKI_DIR"
 echo "⏱️ Running scraps build..."
 cd "$WIKI_DIR"
 START_TIME=$(date +%s%N)
-"$PROJECT_ROOT/target/release/scraps" build -v
+"$PROJECT_ROOT/target/release/scraps" --directory scraps build -v
 END_TIME=$(date +%s%N)
 
 DURATION_NS=$(( END_TIME - START_TIME ))
