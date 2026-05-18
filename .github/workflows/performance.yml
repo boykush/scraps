@@ -44,7 +44,7 @@ jobs:
             Build Time: ${duration} seconds
             Status: ${emoji} ${status.toUpperCase()}
 
-            Executed with: scraps build -v
+            Executed with: scraps --directory scraps build -v
             Repository: boykush/wiki
             Runner: Ubuntu latest`;
 
