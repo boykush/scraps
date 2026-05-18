@@ -36,10 +36,11 @@ no projection it returns `title`, `ctx`, and `body`.
 ```bash
 scraps get "Title" --json title,ctx,body
 scraps get "Title" --json code_blocks
+scraps get "Title" --json images
 scraps get "Title" --heading "Install" --json body,headings
 ```
 
-Allowed fields are `title`, `ctx`, `body`, `headings`, and `code_blocks`.
+Allowed fields are `title`, `ctx`, `body`, `headings`, `code_blocks`, and `images`.
 Reference navigation stays separate: use `scraps links`, `scraps backlinks`,
 and `scraps tag ...`.
 

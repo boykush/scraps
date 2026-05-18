@@ -7,7 +7,7 @@ use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
 use crate::usecase::scrap::get::usecase::GetScrapUsecase;
-use scraps_libs::markdown::query::{code_blocks, heading_slug, headings, section};
+use scraps_libs::markdown::query::{code_blocks, heading_slug, headings, images, section};
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::title::Title;
 use serde_json::{Map, Value};
@@ -17,6 +17,7 @@ const FIELD_CTX: &str = "ctx";
 const FIELD_BODY: &str = "body";
 const FIELD_HEADINGS: &str = "headings";
 const FIELD_CODE_BLOCKS: &str = "code_blocks";
+const FIELD_IMAGES: &str = "images";
 
 const DEFAULT_FIELDS: &[&str] = &[FIELD_TITLE, FIELD_CTX, FIELD_BODY];
 const ALLOWED_FIELDS: &[&str] = &[
@@ -25,6 +26,7 @@ const ALLOWED_FIELDS: &[&str] = &[
     FIELD_BODY,
     FIELD_HEADINGS,
     FIELD_CODE_BLOCKS,
+    FIELD_IMAGES,
 ];
 
 fn parse_fields(spec: &str) -> ScrapsResult<Vec<&'static str>> {
@@ -121,6 +123,13 @@ pub fn run(
                     FIELD_CODE_BLOCKS => {
                         let v: Vec<CodeBlockJson> =
                             code_blocks(body_text).into_iter().map(Into::into).collect();
+                        out.insert(field.to_string(), serde_json::to_value(v)?);
+                    }
+                    FIELD_IMAGES => {
+                        let v: Vec<String> = images(body_text)
+                            .into_iter()
+                            .map(|url| url.to_string())
+                            .collect();
                         out.insert(field.to_string(), serde_json::to_value(v)?);
                     }
                     _ => unreachable!("validated by parse_fields"),
@@ -236,6 +245,45 @@ mod tests {
         assert_eq!(obj["title"], "Tokio");
         let h = obj["headings"].as_array().unwrap();
         assert_eq!(h.len(), 2);
+    }
+
+    #[rstest]
+    fn run_json_field_projection_supports_images(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_config(b"").add_scrap(
+            "Gallery.md",
+            b"# Gallery\n\n![one](https://example.com/one.png)\n\n![bad](local.png)\n\n## More\n\n![two](https://example.com/two.jpg)\n",
+        );
+
+        let output = run_get("Gallery", None, None, Some("images"), &project).unwrap();
+        let v: Value = serde_json::from_str(output.trim()).unwrap();
+
+        assert_eq!(
+            v["images"].as_array().unwrap(),
+            &vec![
+                Value::String("https://example.com/one.png".to_string()),
+                Value::String("https://example.com/two.jpg".to_string()),
+            ]
+        );
+    }
+
+    #[rstest]
+    fn run_json_images_respects_heading_scope(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_config(b"").add_scrap(
+            "Gallery.md",
+            b"# Gallery\n\n![one](https://example.com/one.png)\n\n## More\n\n![two](https://example.com/two.jpg)\n",
+        );
+
+        let output = run_get("Gallery", None, Some("More"), Some("images"), &project).unwrap();
+        let v: Value = serde_json::from_str(output.trim()).unwrap();
+
+        assert_eq!(
+            v["images"].as_array().unwrap(),
+            &vec![Value::String("https://example.com/two.jpg".to_string())]
+        );
     }
 
     #[rstest]
