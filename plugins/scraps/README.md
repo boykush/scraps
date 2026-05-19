@@ -58,9 +58,9 @@ Translates a natural-language wiki-health request (e.g., "fix broken links", "au
 
 Lint warnings are signals against a purpose, not absolute errors. The agent rejects "run everything without a purpose" requests and asks for narrowing when intent is vague.
 
-### `karpathy-llm-wiki-advisor`
+### `scraps-llm-wiki-schema`
 
-Helps users apply Karpathy's LLM Wiki pattern through the existing Scraps workflows. It routes intent to `ingest`, `query`, or `lint-rule-handler`, explains when to compose them explicitly, and pushes back on hidden orchestration or unnecessary new components.
+Acts as the default LLM Wiki schema for Scraps. It grounds tool guidance in the official Scraps docs, maps LLM Wiki practice to the existing `ingest`, `query`, and `lint-rule-handler` workflows, and reduces the need for project-specific `CLAUDE.md` or `AGENTS.md` boilerplate.
 
 ## Integration model
 
