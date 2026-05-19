@@ -76,4 +76,3 @@ asks for the old version before making migration edits because v0
 
 - v1 vision: `design/v1/vision.md`
 - v1 AI skills: `plugins/scraps/README.md`
-- legacy v0 skills: `plugins/scraps-writer/README.md`

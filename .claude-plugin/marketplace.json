@@ -20,10 +20,6 @@
     {
       "name": "mcp-server",
       "source": "./plugins/mcp-server"
-    },
-    {
-      "name": "scraps-writer",
-      "source": "./plugins/scraps-writer"
     }
   ]
 }
