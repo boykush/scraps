@@ -77,7 +77,7 @@ can query the wiki:
 ```
 
 `scraps get --json` returns `title`, `ctx`, and `body` by default. It can also
-project fields such as `headings` or `code_blocks`, and `--heading` narrows
+project fields such as `headings`, `code_blocks`, or `images`, and `--heading` narrows
 the read to one section.
 
 For Claude Code users there is also an official skills bundle. See
