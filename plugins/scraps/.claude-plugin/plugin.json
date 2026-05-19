@@ -1,7 +1,7 @@
 {
   "name": "scraps",
-  "version": "0.1.0",
-  "description": "Official AI skills bundle for Scraps. Workflows for ingesting sources, querying the wiki, and running purpose-driven lint via the scraps CLI.",
+  "version": "0.1.1",
+  "description": "Official AI skills and agents bundle for Scraps. Workflows for ingesting sources, querying the wiki, routing LLM Wiki intent, and running purpose-driven lint via the scraps CLI.",
   "author": {
     "name": "boykush",
     "email": "boykush315@gmail.com"

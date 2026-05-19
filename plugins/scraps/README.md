@@ -4,7 +4,7 @@ Official AI skills bundle for [Scraps](https://github.com/boykush/scraps), the W
 
 ## Overview
 
-This plugin provides skills and an agent that wrap the `scraps` CLI for AI-driven workflows. All integration runs through `scraps <cmd> --json`; no MCP dependency. For users who prefer an MCP server, see the separate [`mcp-server`](../mcp-server/README.md) plugin.
+This plugin provides skills and agents that wrap the `scraps` CLI for AI-driven workflows. All integration runs through `scraps <cmd> --json`; no MCP dependency. For users who prefer an MCP server, see the separate [`mcp-server`](../mcp-server/README.md) plugin.
 
 ## Install
 
@@ -58,10 +58,14 @@ Translates a natural-language wiki-health request (e.g., "fix broken links", "au
 
 Lint warnings are signals against a purpose, not absolute errors. The agent rejects "run everything without a purpose" requests and asks for narrowing when intent is vague.
 
+### `karpathy-llm-wiki-advisor`
+
+Helps users apply Karpathy's LLM Wiki pattern through the existing Scraps workflows. It routes intent to `ingest`, `query`, or `lint-rule-handler`, explains when to compose them explicitly, and pushes back on hidden orchestration or unnecessary new components.
+
 ## Integration model
 
 - **Primary path**: `scraps <cmd> --json` invoked via the shell. Works with any agent that can run a shell command, no client implementation needed.
-- **Composability**: skills and the agent are independent. `query` does not auto-invoke `ingest`; the user composes them by calling each as needed.
+- **Composability**: skills and agents are independent. `query` does not auto-invoke `ingest`; the user composes them by calling each as needed.
 - **Reference docs**: full CLI surface is documented at <https://boykush.github.io/scraps/>. Skill bodies stay focused on workflow and link out for syntax / config detail.
 
 ## Further reading
