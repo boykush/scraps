@@ -7,8 +7,8 @@
 Scraps treats documentation like a programming language. Wiki-linked markdown
 becomes a typed source, compiling into a static site for readers and into
 JSON any agent can shell into — turning Karpathy's *LLM Wiki* pattern into a
-typed, queryable artifact. CLI primary with companion AI skills, fitting any
-editor and any LLM agent.
+typed, queryable artifact. CLI primary with companion AI skills and agents,
+fitting any editor and any LLM agent.
 
 ## Markdown as typed source
 

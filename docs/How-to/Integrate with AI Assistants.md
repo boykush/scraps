@@ -31,11 +31,13 @@ optional heading targets; `backlinks` stays a scrap-level inbound lookup.
 The full command map is in [[Reference/CLI Overview]]. Each command's `--help`
 documents flags and JSON shape.
 
-### Bundled AI skills
+### Bundled AI skills and agents
 
 For Claude Code and Codex users, the official **scraps plugin** packages
 [Karpathy](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)-style
-*Ingest / Query / Lint* workflows around the CLI:
+*Ingest / Query / Lint* workflows around the CLI. The Claude Code agents add
+purpose-driven lint handling and a routing advisor for choosing the existing
+workflows:
 
 <https://github.com/boykush/scraps/tree/main/plugins/scraps>
 
@@ -44,6 +46,7 @@ For Claude Code and Codex users, the official **scraps plugin** packages
 | `/ingest` | Add a new scrap from a prompt, URL, or markdown; update cross-links |
 | `/query` | Answer a question against the wiki with `[[Title]]` citations |
 | `lint-rule-handler` agent | Purpose-driven wiki health checks, one or a few rules at a time |
+| `karpathy-llm-wiki-advisor` agent | Route user intent to `ingest`, `query`, or `lint-rule-handler` without hidden orchestration |
 
 Install instructions live in the plugin README so that marketplace browsers
 have everything in one place.
