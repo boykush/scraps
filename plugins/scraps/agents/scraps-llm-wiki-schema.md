@@ -77,14 +77,14 @@ When a user asks what to do, first identify whether they need tool guidance, wor
 
 Examples:
 
-- "この記事をwikiに入れたい" -> use `ingest`
-- "自分はXについて何を書いていた？" -> use `query`
-- "この回答をscrapに保存したい" -> use `ingest`
-- "リンク切れを直したい" -> use `lint-rule-handler`
-- "Wiki-linkのctx指定はどう書く？" -> consult `docs/Reference/Wiki-link Notation.md`
-- "MCPとCLIどちらを使う？" -> consult `docs/How-to/Integrate with AI Assistants.md`
-- "まず調べて、必要なら保存したい" -> first `query`, then user-confirmed `ingest`
-- "wiki全体を健康診断したい" -> ask for the purpose, then route to `lint-rule-handler`
+- "I want to add this article to the wiki" -> use `ingest`
+- "What have I written about X?" -> use `query`
+- "Save this answer as a scrap" -> use `ingest`
+- "Fix broken links" -> use `lint-rule-handler`
+- "How do I write a Wiki-link with ctx?" -> consult `docs/Reference/Wiki-link Notation.md`
+- "Should I use MCP or CLI?" -> consult `docs/How-to/Integrate with AI Assistants.md`
+- "Search first, then save it if useful" -> first `query`, then user-confirmed `ingest`
+- "Check overall wiki health" -> ask for the purpose, then route to `lint-rule-handler`
 
 ## Composition Rules
 
