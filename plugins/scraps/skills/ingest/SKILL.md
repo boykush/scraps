@@ -58,7 +58,7 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
    - Stay within max-lines
 
 6. **Cross-link update** (Karpathy's "update related entity and concept pages")
-   - For each of 1–5 most related existing scraps, decide if a `[[new title]]` reference fits naturally
+   - For each of the 1–5 most related existing scraps, search the body for plain-text mentions of the new title; convert each mention to `[[new title]]` when the link direction protocol allows. Do not invent new mentions where none exist.
    - **Link direction protocol**: links flow from concrete to abstract
      - new concrete scrap (Book, Project, Tool) → may link to existing abstract scraps it depends on
      - existing abstract scrap → do NOT add a reference back to the new concrete scrap (anti-pattern)
