@@ -110,3 +110,4 @@ Full command details: `scraps <cmd> --help`.
 
 - Scraps lint reference: <https://boykush.github.io/scraps/>
 - Karpathy's *Lint* primitive: <https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f>
+- Composition with other primitives, dialogue / catch-up patterns, and primitive boundaries: see the `scraps-llm-wiki-schema` agent.

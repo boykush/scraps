@@ -85,6 +85,8 @@ Examples:
 - "Should I use MCP or CLI?" -> consult `docs/How-to/Integrate with AI Assistants.md`
 - "Search first, then save it if useful" -> first `query`, then user-confirmed `ingest`
 - "Check overall wiki health" -> ask for the purpose, then route to `lint-rule-handler`
+- "Catch up on X" / "Explore a topic not yet in my scraps" -> `ingest` URLs or topics (it fetches externally and writes scraps for the user to read); `query` to revisit existing scraps
+- "Discuss this article before I file it" -> discuss the source here; the user invokes `ingest` when ready
 
 ## Composition Rules
 
@@ -102,59 +104,20 @@ Good pattern:
 2. If the user wants to preserve the synthesis, use `ingest`.
 3. If new links may be broken or the user asks for cleanup, use `lint-rule-handler`.
 
-Bad pattern:
-
-1. Query the wiki.
-2. Silently create a scrap.
-3. Silently run broad lint.
-4. Silently edit unrelated scraps.
-
 ## Scraps Principles
 
-Use these principles when guiding users:
+1. **Existing workflows first**
+   - Prefer `ingest`, `query`, and `lint-rule-handler` before proposing anything new. Treat new skills or agents as exceptional.
+   - Before suggesting a new component, check: could it be one of the existing primitives with a narrower source or clearer purpose? Could user-side composition (e.g., a catch-up skill) provide it? Would docs or examples solve it?
 
-1. **Official docs first**
-   - Ground tool explanations in the Scraps docs and plugin instructions.
-   - When current behavior matters, read the relevant local docs before answering.
-
-2. **Existing workflows first**
-   - Prefer `ingest`, `query`, and `lint-rule-handler` before proposing anything new.
-   - Treat new skills or agents as exceptional, not the default answer.
-
-3. **Explicit user composition**
-   - Users decide when a read workflow becomes a write workflow.
-   - Users decide the purpose of lint before lint runs.
-
-4. **Citation-rich query**
-   - `query` answers should cite scraps using `[[Title]]`.
-   - If the wiki does not contain the answer, say so rather than inventing.
-
-5. **Careful ingest**
-   - `ingest` should add atomic scraps and update only relevant cross-links.
-   - Avoid bidirectional links added merely for completeness.
-
-6. **Purpose-driven lint**
-   - Lint warnings are signals against a stated purpose.
-   - Mechanical fixes and judgment-based reports should stay distinct.
-
-7. **Local schema extensions**
+2. **Local schema extensions**
    - Project-level `CLAUDE.md`, `AGENTS.md`, or user instructions may add domain-specific conventions.
    - Follow local conventions when present, while preserving Scraps workflow boundaries.
 
-## When To Mention New Components
-
-Only mention a new skill, agent, CLI feature, or MCP tool when the existing components clearly do not fit.
-
-Before suggesting anything new, check:
-
-- Is this just `ingest` with a narrower source type?
-- Is this just `query` with a different output shape?
-- Is this just `lint-rule-handler` with a clearer purpose?
-- Is this a CLI behavior that already exists in the official docs?
-- Can the user compose existing workflows explicitly?
-- Would docs or examples solve the confusion better than a new component?
-
-If the answer is yes, recommend the existing component or documentation path instead.
+3. **Dialogue at the conversation layer**
+   - Dialogue, catch-up sessions, and weighing external sources happen here in the conversation with the schema agent or a user-side skill — not inside the primitives.
+   - The primitives (`ingest`, `query`, `lint-rule-handler`) stay silent, one-shot tools, suitable for both automated CI runs and interactive use.
+   - When tempted to add a `discuss` step inside `ingest`, an iterative mode inside `query`, or an external-fetch inside `query`, route the concern to this conversation layer instead.
 
 ## Expected Output
 
