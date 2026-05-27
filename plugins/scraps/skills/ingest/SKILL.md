@@ -22,16 +22,16 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
 
 | Source | Provided as | First step |
 | --- | --- | --- |
-| prompt | user's topic or instruction | gather context (search related scraps) |
+| prompt | user's topic, instruction, or ready-to-use content (e.g., a `/query` synthesis) | if the input is complete content, use as-is; otherwise gather context (search related scraps) and ask one clarifying question only when scope is unclear |
 | URL | pasted link | `WebFetch <url>`, extract title and key content |
-| arbitrary markdown | content from prior conversation (e.g., query answer) | use as-is |
+| term | an atomic term surfaced in discussion (often unknown until just now) | treat the term itself as the title; skip clarifying questions |
 
 ## Workflow
 
 1. **Identify source and topic**
    - URL: `WebFetch` → use OGP / heading title as initial title
-   - prompt: ask clarifying questions if scope is unclear
-   - arbitrary markdown: take the content as the source
+   - prompt: if the input is complete content (e.g., a `/query` synthesis), use as-is; if it's a topic, ask one clarifying question only when scope is unclear
+   - term: the term is the title; do not ask clarifying questions (the discussion already established scope). Proceed to step 2 with the term as the search keyword.
 
 2. **Research existing wiki state**
    - `scraps search "<keyword>" --json` to find related scraps
@@ -49,7 +49,8 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
    - Low → 5–7 lines (protect working memory)
    - Medium → 10–12 lines (schema is forming, more detail welcome)
    - High → 5–7 lines (avoid redundant explanation; prefer link-rich brevity)
-   - Skip this step if the user specified max-lines explicitly
+   - Skip this step if the user specified `--max-lines` explicitly (CLI flag is authoritative)
+   - If the user signals depth in conversation ("go deeper" / "longer" / "厚めに" etc.), bump one band upward; "shorter" / "ライトに" etc. bumps downward. Conversation cue overrides the heuristic but stays below the explicit `--max-lines` flag.
 
 5. **Draft the scrap**
    - Plain Markdown with `[[link]]` for references and `#[[tag]]` for tags
@@ -94,3 +95,4 @@ Full command details: `scraps <cmd> --help`.
 
 - Scraps docs: <https://boykush.github.io/scraps/>
 - Karpathy's *Ingest / Query / Lint* framing: <https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f>
+- Composition with other primitives, dialogue / catch-up patterns, and primitive boundaries: see the `scraps-llm-wiki-schema` agent.
