@@ -21,6 +21,7 @@ Pick the smallest rule set that serves the stated purpose.
 | "audit orphans" / "孤立 scrap" | `lonely` |
 | "audit graph isolation" (orphans + dead-ends) | `lonely`, `dead-end` |
 | "trim graph noise" / "link 重複" | `overlinking` |
+| "audit tag usage" / "1 件しか付いてないタグ" | `singleton-tag` |
 | "find stale scraps" / "更新ない scrap" | `stale-by-git` |
 | "wiki health 全般" (vague) | ask for narrowing first |
 
@@ -36,6 +37,7 @@ Reject requests like "run all default rules" without a stated purpose.
 | `dead-end` | judgment | read the scrap, report whether it is a natural atom or genuinely incomplete |
 | `lonely` | judgment | read the scrap, report whether it is a natural root/source note or an orphan that should be linked |
 | `overlinking` | judgment | report which repetitions are structural emphasis vs. noise (graph dedupes; this is about HTML readability) |
+| `singleton-tag` | judgment | read the scrap, report whether `#` was an accidental prefix on a link (propose converting `#[[x]]` to `[[x]]`) or a genuine tag that needs wider use |
 | `stale-by-git` | informational | list stale scraps with last-modified dates |
 
 ## Workflow
@@ -67,7 +69,7 @@ For each violation:
 - Apply on user confirmation (or directly when invoked from a trusted skill context)
 - Re-run the same rule to verify the fix
 
-### Judgment rules (dead-end, lonely, overlinking)
+### Judgment rules (dead-end, lonely, overlinking, singleton-tag)
 
 For each violation:
 - Read the offending scrap via `scraps get <title> [--ctx <ctx>] --json`
@@ -75,6 +77,7 @@ For each violation:
   - `dead-end` → atomic definition (signal: keep) vs. genuinely incomplete (signal: extend)
   - `lonely` → natural root/source note (signal: accept) vs. orphan (signal: link from a related scrap)
   - `overlinking` → structural emphasis (signal: keep) vs. visual noise (signal: trim duplicates)
+  - `singleton-tag` → accidental `#` on a link (signal: convert `#[[x]]` to `[[x]]`) vs. genuine tag concept (signal: apply the tag to more scraps, or accept as intentional)
 - Report findings; do not auto-fix
 - Suggest concrete next actions where appropriate
 

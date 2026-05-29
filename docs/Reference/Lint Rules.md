@@ -13,6 +13,7 @@ rules with dependencies are opt-in via `--rule` or `[lint.<rule>]` in
 | `overlinking` | same `[[link]]` repeated in one scrap | on |
 | `broken-link` | `[[link]]` that does not resolve | on |
 | `broken-heading-ref` | `[[Page#Heading]]` heading missing | on |
+| `singleton-tag` | `#[[tag]]` used by only one scrap | on |
 | `stale-by-git` | last commit older than threshold (git-dependent) | opt-in |
 
 Output follows the `cargo clippy`-style diagnostic format. For LLM-driven

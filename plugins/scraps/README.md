@@ -53,7 +53,7 @@ Answer a question against the wiki. The skill searches scraps with `scraps searc
 Translates a natural-language wiki-health request (e.g., "fix broken links", "audit orphans") into a small, deliberate set of `scraps lint` rules and runs them. Behavior branches per rule type:
 
 - **Mechanical** (`broken-link`, `broken-heading-ref`, `self-link`) — propose and apply fixes
-- **Judgment** (`dead-end`, `lonely`, `overlinking`) — read affected scraps and report; do not auto-fix
+- **Judgment** (`dead-end`, `lonely`, `overlinking`, `singleton-tag`) — read affected scraps and report; do not auto-fix
 - **Informational** (`stale-by-git`) — list with metadata
 
 Lint warnings are signals against a purpose, not absolute errors. The agent rejects "run everything without a purpose" requests and asks for narrowing when intent is vague.

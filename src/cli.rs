@@ -224,6 +224,8 @@ pub enum CliLintRuleName {
     BrokenLink,
     #[value(name = "broken-heading-ref")]
     BrokenHeadingRef,
+    #[value(name = "singleton-tag")]
+    SingletonTag,
     #[value(name = "stale-by-git")]
     StaleByGit,
 }
@@ -277,6 +279,7 @@ impl From<CliLintRuleName> for LintRuleName {
             CliLintRuleName::Overlinking => LintRuleName::Overlinking,
             CliLintRuleName::BrokenLink => LintRuleName::BrokenLink,
             CliLintRuleName::BrokenHeadingRef => LintRuleName::BrokenHeadingRef,
+            CliLintRuleName::SingletonTag => LintRuleName::SingletonTag,
             CliLintRuleName::StaleByGit => LintRuleName::StaleByGit,
         }
     }

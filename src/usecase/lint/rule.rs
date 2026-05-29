@@ -10,6 +10,7 @@ pub enum LintRuleName {
     Overlinking,
     BrokenLink,
     BrokenHeadingRef,
+    SingletonTag,
     StaleByGit,
 }
 
@@ -22,6 +23,7 @@ impl LintRuleName {
             Self::Overlinking => "overlinking",
             Self::BrokenLink => "broken-link",
             Self::BrokenHeadingRef => "broken-heading-ref",
+            Self::SingletonTag => "singleton-tag",
             Self::StaleByGit => "stale-by-git",
         }
     }
@@ -36,6 +38,7 @@ impl LintRuleName {
             Self::Overlinking,
             Self::BrokenLink,
             Self::BrokenHeadingRef,
+            Self::SingletonTag,
         ]
     }
 

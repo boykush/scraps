@@ -8,7 +8,7 @@ use super::{
     rules::{
         broken_heading_ref::BrokenHeadingRefRule, broken_link::BrokenLinkRule,
         dead_end::DeadEndRule, lonely::LonelyRule, overlinking::OverlinkingRule,
-        self_link::SelfLinkRule,
+        self_link::SelfLinkRule, singleton_tag::SingletonTagRule,
     },
 };
 
@@ -44,6 +44,7 @@ impl LintUsecase {
             Box::new(OverlinkingRule),
             Box::new(BrokenLinkRule),
             Box::new(BrokenHeadingRefRule),
+            Box::new(SingletonTagRule),
         ];
 
         if !rule_names.is_empty() {
@@ -73,12 +74,14 @@ mod tests {
         // - linker_to_unknown: broken_link ([[unknown]] doesn't resolve)
         // - heading_referrer: broken_heading_ref ([[no_links#missing]] - target
         //   exists but heading doesn't)
+        // - tagger: singleton_tag (#[[orphan_tag]] used by only this scrap)
         let scraps = vec![
             Scrap::new("no_links", &None, "plain text"),
             Scrap::new("self_linker", &None, "[[self_linker]] [[no_links]]"),
             Scrap::new("overlinker", &None, "[[no_links]] [[no_links]]"),
             Scrap::new("linker_to_unknown", &None, "[[unknown]]"),
             Scrap::new("heading_referrer", &None, "[[no_links#missing]]"),
+            Scrap::new("tagger", &None, "#[[orphan_tag]]"),
         ];
 
         let usecase = LintUsecase::new();
@@ -91,6 +94,7 @@ mod tests {
         assert!(rule_names.contains(&&LintRuleName::Overlinking));
         assert!(rule_names.contains(&&LintRuleName::BrokenLink));
         assert!(rule_names.contains(&&LintRuleName::BrokenHeadingRef));
+        assert!(rule_names.contains(&&LintRuleName::SingletonTag));
     }
 
     #[test]
