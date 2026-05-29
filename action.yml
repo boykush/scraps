@@ -47,9 +47,13 @@ runs:
       env:
         VERSION: ${{ steps.resolve.outputs.version }}
         TARGET: ${{ steps.resolve.outputs.target }}
-        REPO: ${{ github.repository }}
+        ACTION_REPOSITORY: ${{ github.action_repository }}
       run: |
         set -euo pipefail
+        # github.action_repository resolves to the action's own repo (boykush/scraps)
+        # where the release assets live, not the consuming repo. It is empty when the
+        # action is run via a local path (uses: ./), so fall back to boykush/scraps.
+        REPO="${ACTION_REPOSITORY:-boykush/scraps}"
         URL="https://github.com/${REPO}/releases/download/v${VERSION}/scraps-${TARGET}.tar.gz"
         DEST="${RUNNER_TEMP}/scraps"
         mkdir -p "$DEST"
