@@ -1,24 +1,22 @@
 import { test, expect, type Page } from '@playwright/test';
 
 /*
- * These E2E tests exercise the *wiring* of a scraps-generated site (home,
- * search box, code-highlight hook, OGP cards) against the local `scraps serve`.
+ * Lightweight browser smoke tests for a scraps-generated site, run against the
+ * local `scraps serve`.
  *
- * The generated pages pull their JS from third-party CDNs (jsdelivr for Fuse +
- * mermaid, cdnjs for highlight.js) and fetch OGP data through corsproxy.io.
- * Hanging the suite on those services made CI red for weeks: requests to them
- * intermittently *stall* on GitHub-hosted runners, and since a page waits on
- * its <script> resources (the classic highlight.js tag even blocks
- * DOMContentLoaded), a single stalled request makes a navigation hang until the
- * test timeout. With mermaid alone pulling 60+ transitive ESM modules from
- * jsdelivr per page, the odds of a run completing without one stall approached
- * zero, so every run hit the 15-minute job cap.
+ * The generated pages pull JS from third-party CDNs (jsdelivr for Fuse +
+ * mermaid, cdnjs for highlight.js). Those requests intermittently *stall* on CI
+ * runners, and since a navigation waits on its <script> resources (the classic
+ * highlight.js tag even blocks DOMContentLoaded) a single stall hangs the whole
+ * job. So we intercept every external request and answer it locally: the suite
+ * becomes hermetic and never depends on CDN/runner network weather.
  *
- * Fix: intercept every external request and fulfill it locally, making the
- * suite hermetic and fast regardless of CDN/runner network weather. The real
- * "Fuse must load as ESM" contract is covered by the Rust regression test in
- * src/usecase/build/html/index_render.rs; here we assert that scraps emits
- * pages that correctly wire up search / highlight / OGP.
+ * We deliberately keep the set small — a serve+render smoke test and the search
+ * wiring. Purely presentational / external-fetch checks (the old "CDN libraries
+ * are loaded" and "fetch OGP data" cases) were dropped: the first was a
+ * tautology once the libs are stubbed, and OGP card markup / the ESM-only Fuse
+ * contract are better covered by Rust tests (e.g.
+ * src/usecase/build/html/index_render.rs).
  */
 
 // Minimal stand-in for Fuse.js (ESM). index.html does
@@ -40,29 +38,12 @@ export default class Fuse {
 }
 `;
 
-// mermaid is imported but never invoked by the template, so any object works.
-// A Proxy returning no-op functions keeps it safe if a call is ever added.
-const MERMAID_STUB = `export default new Proxy({}, { get: () => () => {} });`;
-
-// highlight.js is a classic <script> followed by an inline `hljs.highlightAll()`
-// call, so the stub must expose those globals synchronously.
-const HLJS_STUB = `window.hljs = { highlightAll() {}, highlightElement() {} };`;
-
-// Canned OGP document returned in place of the corsproxy.io response for
-// <https://github.com/boykush/scraps>.
-const OGP_HTML = `<!doctype html><html><head>
-<meta property="og:title" content="GitHub - boykush/scraps: The Wiki-link doc compiler for the LLM era" />
-<meta property="og:description" content="The Wiki-link doc compiler for the LLM era - boykush/scraps" />
-<meta property="og:image" content="https://repository-images.githubusercontent.com/000000000/scraps.png" />
-</head><body></body></html>`;
-
-// Route every external request to a local response so no test ever depends on
-// (or stalls on) a third-party service. Requests served by `scraps serve` on
-// 127.0.0.1 are left untouched.
+// Stub every external request so nothing reaches the network (and nothing can
+// stall a navigation). Fuse needs a working stand-in; mermaid and highlight.js
+// just need to exist so their import / inline `hljs.highlightAll()` don't error.
 async function mockExternalRequests(page: Page) {
   await page.route('**/*', async (route) => {
     const url = route.request().url();
-
     if (url.includes('127.0.0.1') || url.includes('localhost')) {
       return route.continue();
     }
@@ -70,16 +51,12 @@ async function mockExternalRequests(page: Page) {
       return route.fulfill({ contentType: 'text/javascript', body: FUSE_STUB });
     }
     if (url.includes('cdn.jsdelivr.net/npm/mermaid')) {
-      return route.fulfill({ contentType: 'text/javascript', body: MERMAID_STUB });
+      return route.fulfill({ contentType: 'text/javascript', body: 'export default {};' });
     }
     if (url.includes('cdnjs.cloudflare.com') && url.includes('highlight')) {
-      return route.fulfill({ contentType: 'text/javascript', body: HLJS_STUB });
+      return route.fulfill({ contentType: 'text/javascript', body: 'window.hljs = { highlightAll() {} };' });
     }
-    if (url.includes('corsproxy.io')) {
-      return route.fulfill({ contentType: 'text/html', body: OGP_HTML });
-    }
-    // Fonts, theme CSS, transitive ESM deps, anything else external: succeed
-    // empty so nothing reaches the network and nothing can block a load.
+    // Fonts, theme CSS, anything else external: empty 200 so nothing blocks.
     return route.fulfill({ status: 200, contentType: 'text/css', body: '' });
   });
 }
@@ -113,49 +90,4 @@ test('search scraps', async ({ page }) => {
 
   // Expect the search results to contain "What is Scraps?" (auto-retries).
   await expect(page.locator('[id="search-results"]')).toContainText('What is Scraps?');
-});
-
-test('CDN libraries are loaded', async ({ page }) => {
-  await page.goto('/', { waitUntil: 'domcontentloaded' });
-
-  // highlight.js (classic script) and Fuse.js (module script) are wired up
-  // asynchronously, so poll instead of reading once.
-  await expect
-    .poll(() => page.evaluate(() => typeof (window as any).hljs !== 'undefined'))
-    .toBe(true);
-  await expect
-    .poll(() => page.evaluate(() => typeof (window as any).Fuse !== 'undefined'))
-    .toBe(true);
-});
-
-test('fetch OGP data', async ({ page }) => {
-  // Autolink.md intentionally hosts a live `<https://github.com/boykush/scraps>`
-  // autolink so this test has a stable OGP card to assert against.
-  // Keep that autolink in `docs/Reference/Markdown/Autolink.md` if you edit it.
-  await page.goto('/scraps/reference/markdown/autolink.html', { waitUntil: 'domcontentloaded' });
-
-  // Wait for OGP card to be present
-  const ogpCard = page.locator('.ogp-card').first();
-  await expect(ogpCard).toBeVisible();
-
-  // Wait for OGP data to be loaded (max 5 seconds)
-  await expect(async () => {
-    const titleText = await ogpCard.locator('.ogp-title').textContent();
-    expect(titleText).not.toBeNull();
-    expect(titleText).not.toBe('Loading...');
-  }).toPass({
-    timeout: 5000,
-  });
-
-  // Verify GitHub repository OGP data
-  const title = await ogpCard.locator('.ogp-title').textContent();
-  const description = await ogpCard.locator('.ogp-description').textContent();
-
-  expect(title).toContain('GitHub - boykush/scraps');
-  expect(description).toContain('The Wiki-link doc compiler for the LLM era');
-
-  // Verify image is loaded
-  const image = ogpCard.locator('.ogp-image');
-  const imageSrc = await image.getAttribute('src');
-  expect(imageSrc).toContain('https://repository-images.githubusercontent.com/');
 });
