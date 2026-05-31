@@ -23,12 +23,26 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  /* Per-test cap. The suite is hermetic (external requests are mocked in the
+   * specs) so this is generous; it exists as a backstop. */
+  timeout: 30_000,
+  /* Ultimate backstop: even if a future change introduces an un-mocked,
+   * stalling external dependency, Playwright aborts and writes a report well
+   * before the workflow's job timeout instead of hanging opaquely. */
+  globalTimeout: 5 * 60_000,
+  /* `list` so CI shows per-test progress (the bare `html` reporter is silent
+   * mid-run, which made past stalls look like an unexplained hang); `html` for
+   * the browsable report. */
+  reporter: [['list'], ['html', { open: 'never' }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'http://127.0.0.1:1112',
+
+    /* Bound individual navigations/actions so nothing waits the full test
+     * timeout on a stall. */
+    navigationTimeout: 15_000,
+    actionTimeout: 15_000,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -52,10 +66,18 @@ export default defineConfig({
     },
   ],
 
-  /* Run your local dev server before starting the tests */
+  /* Run your local dev server before starting the tests.
+   *
+   * Invoke the `scraps` binary directly rather than going through
+   * `mise run docs:serve`. The mise wrapper (mise -> bash task -> shim
+   * resolution -> scraps) was unreliable on CI runners: shim resolution can
+   * stall on the network at startup, and on teardown the multi-process tree
+   * was left orphaned so Playwright's webServer shutdown hung until the job
+   * timeout. `scraps` is on PATH in both the mise dev shell and CI, so a single
+   * directly-spawned process is what Playwright starts and cleanly kills. */
   webServer: {
     cwd: '../..',
-    command: 'mise run docs:serve',
+    command: 'scraps serve --directory docs',
     url: 'http://127.0.0.1:1112',
     reuseExistingServer: !process.env.CI,
     /* `scraps serve` builds + binds in well under a second locally; default
