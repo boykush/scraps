@@ -9,15 +9,6 @@ on:
       - 'LICENSE.md'
       - 'README.md'
       - 'CLAUDE.md'
-  pull_request:
-    branches: [ main ]
-    paths-ignore:
-      - 'scraps/**'
-      - 'assets/**'
-      - 'CONTRIBUTING.md'
-      - 'LICENSE.md'
-      - 'README.md'
-      - 'CLAUDE.md'
 
 permissions:
   contents: read
