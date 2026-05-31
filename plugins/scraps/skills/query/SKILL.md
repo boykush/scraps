@@ -73,7 +73,7 @@ Implements Karpathy's *Query* primitive for Scraps: search the wiki, read releva
 - `scraps tag backlinks <tag> --json`
 - `scraps todo [--status open|done|deferred|all] --json`
 
-Full command details: `scraps <cmd> --help`.
+These commands are shown with `--json` because this skill consumes structured output — without it Scraps prints human-formatted text that is unstable to parse, so `--json` is part of the command, not an option. Use `scraps <cmd> --help` only as a fallback for a rare flag not listed here, not as a routine discovery step; for deeper syntax or spec questions, consult the `scraps-llm-wiki-schema` agent (it reads the official docs).
 
 ## Further reading
 

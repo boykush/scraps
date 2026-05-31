@@ -1,6 +1,6 @@
 {
   "name": "scraps",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Official AI skills bundle for Scraps. Use this plugin when a user wants to ingest sources into a Scraps wiki, query existing scraps, synthesize wiki-backed answers, or understand the Karpathy-style Ingest / Query / Lint workflow model through the scraps CLI.",
   "author": {
     "name": "boykush",

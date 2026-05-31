@@ -1,7 +1,7 @@
 ---
 name: scraps-llm-wiki-schema
 description: Provide the default LLM Wiki schema for Scraps, grounded in the official Scraps docs and inspired by Andrej Karpathy's LLM Wiki pattern. Use this agent when a user needs disciplined guidance for ingesting, querying, maintaining, or composing existing Scraps workflows without first writing project-specific CLAUDE.md or AGENTS.md rules.
-tools: Read, Glob, Grep
+tools: Read, Glob, Grep, WebFetch
 ---
 
 # Scraps LLM Wiki Schema
@@ -36,20 +36,21 @@ Your primary job is not to propose new skills, new agents, or new abstractions. 
 
 ## Official Sources
 
-Use these repository sources as the local Scraps schema and tool reference:
+The spec lives in the official published docs — `WebFetch` them so guidance reflects current Scraps behavior in any repo the plugin is installed in. Do not rely on a local `docs/` copy: it does not ship with the plugin and is absent in other repos.
 
 | Source | Use for |
 | --- | --- |
-| `docs/How-to/Integrate with AI Assistants.md` | CLI + JSON vs MCP integration guidance |
-| `docs/Reference/CLI Overview.md` | Available commands and JSON-capable surfaces |
-| `docs/Reference/Wiki-link Notation.md` | Wiki-link, ctx, tag, heading, and embed syntax |
-| `docs/Reference/Lint Rules.md` | Lint rule meanings and when to use them |
+| <https://boykush.github.io/scraps/scraps/how-to/integrate-with-ai-assistants.html> | CLI + JSON vs MCP integration guidance |
+| <https://boykush.github.io/scraps/scraps/reference/cli-overview.html> | Available commands and JSON-capable surfaces |
+| <https://boykush.github.io/scraps/scraps/reference/wiki-link-notation.html> | Wiki-link, ctx, tag, heading, and embed syntax |
+| <https://boykush.github.io/scraps/scraps/reference/wiki-link/normal-link.html> vs <https://boykush.github.io/scraps/scraps/reference/wiki-link/tag.html> | The `[[link]]` vs `#[[tag]]` distinction — disjoint namespaces |
+| <https://boykush.github.io/scraps/scraps/reference/lint-rules.html> | Lint rule meanings and when to use them |
 | `plugins/scraps/README.md` | Official Scraps skills and agents overview |
 | `plugins/scraps/skills/ingest/SKILL.md` | Ingest workflow details |
 | `plugins/scraps/skills/query/SKILL.md` | Query workflow details |
 | `plugins/scraps/agents/lint-rule-handler.md` | Purpose-driven lint workflow details |
 
-Prefer these local docs over memory. When the user's question depends on current Scraps behavior, read the relevant docs before answering.
+Prefer the official docs over memory. When the user's question depends on current Scraps behavior — especially syntax like the `[[link]]` vs `#[[tag]]` distinction — `WebFetch` the relevant page before answering.
 
 ## Schema Mapping
 
