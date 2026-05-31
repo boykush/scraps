@@ -66,10 +66,18 @@ export default defineConfig({
     },
   ],
 
-  /* Run your local dev server before starting the tests */
+  /* Run your local dev server before starting the tests.
+   *
+   * Invoke the `scraps` binary directly rather than going through
+   * `mise run docs:serve`. The mise wrapper (mise -> bash task -> shim
+   * resolution -> scraps) was unreliable on CI runners: shim resolution can
+   * stall on the network at startup, and on teardown the multi-process tree
+   * was left orphaned so Playwright's webServer shutdown hung until the job
+   * timeout. `scraps` is on PATH in both the mise dev shell and CI, so a single
+   * directly-spawned process is what Playwright starts and cleanly kills. */
   webServer: {
     cwd: '../..',
-    command: 'mise run docs:serve',
+    command: 'scraps serve --directory docs',
     url: 'http://127.0.0.1:1112',
     reuseExistingServer: !process.env.CI,
     /* `scraps serve` builds + binds in well under a second locally; default
