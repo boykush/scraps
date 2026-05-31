@@ -28,8 +28,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -43,6 +41,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0 # For scraps git committed date
+          persist-credentials: false
 
       - name: Setup Scraps
         uses: boykush/scraps@v1
@@ -61,6 +60,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
