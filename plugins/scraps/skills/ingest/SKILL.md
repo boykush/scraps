@@ -54,6 +54,7 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
 
 5. **Draft the scrap**
    - Plain Markdown with `[[link]]` for references and `#[[tag]]` for tags
+   - **Link vs tag** (the most common mistake): to point at any scrap — one that exists or one that *should* exist — always use `[[Title]]`. `#[[Tag]]` is ONLY for a cross-cutting category that already appears in the `scraps tag list` from step 2. Never reach for `#[[ ]]` to reference a scrap. When unsure, it is a link, not a tag.
    - Include source autolink if URL: `<https://...>`
    - Stay within max-lines
 
@@ -68,6 +69,7 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
    - Backlinks are auto-computed by Scraps; explicit reverse links are redundant
 
 7. **Post-write sanity check**
+   - **Tag check**: list every `#[[tag]]` you wrote and confirm each already appeared in the `scraps tag list --json` from step 2. A tag that was not in that list was almost certainly meant to be a `[[link]]` — convert it. Add a genuinely new tag only when you deliberately intend a new cross-cutting category. (Broken-link lint cannot catch this: a stray tag is valid syntax, it just creates a single-use tag.)
    - `scraps lint --rule broken-link` (purpose: confirm the new scrap introduced no broken references)
    - For non-trivial violations, hand off to the `lint-rule-handler` agent
 
@@ -82,6 +84,8 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
 | `#[[Tag]]` | tag |
 | `<https://...>` | autolink (renders as OGP card) |
 
+`[[ ]]` and `#[[ ]]` are disjoint namespaces: `[[Title]]` references a scrap; `#[[Tag]]` declares or joins a tag. Using `#[[ ]]` to point at a scrap does not link — it silently creates a stray single-use tag.
+
 ## CLI used
 
 - `scraps search <query> --json`
@@ -90,7 +94,7 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
 - `scraps tag backlinks <tag> --json`
 - `scraps lint --rule <rule>`
 
-Full command details: `scraps <cmd> --help`.
+These commands are shown with `--json` because this skill consumes structured output — without it Scraps prints human-formatted text that is unstable to parse, so `--json` is part of the command, not an option. Use `scraps <cmd> --help` only as a fallback for a rare flag not listed here, not as a routine discovery step; for deeper syntax or spec questions, consult the `scraps-llm-wiki-schema` agent (it reads the official docs).
 
 ## Further reading
 
