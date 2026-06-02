@@ -1,7 +1,7 @@
 use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use annotate_snippets::{Level, Renderer, Snippet};
+use annotate_snippets::{AnnotationKind, Group, Level, Renderer, Snippet};
 use colored::Colorize;
 use scraps_libs::git::GitCommandImpl;
 
@@ -75,18 +75,18 @@ fn print_warning(warning: &LintWarning, scraps_dir: &Path, renderer: &Renderer) 
 
     match (warning.source.as_ref(), warning.span) {
         (Some(source), Some((start, end))) => {
-            let message = Level::Warning.title(&title).snippet(
+            let report = &[Level::WARNING.primary_title(&title).element(
                 Snippet::source(source)
                     .line_start(1)
-                    .origin(&file_path_str)
+                    .path(&file_path_str)
                     .fold(true)
-                    .annotation(Level::Warning.span(start..end)),
-            );
-            eprintln!("{}", renderer.render(message));
+                    .annotation(AnnotationKind::Primary.span(start..end)),
+            )];
+            eprintln!("{}", renderer.render(report));
         }
         _ => {
-            let message = Level::Warning.title(&title);
-            eprintln!("{}", renderer.render(message));
+            let report = &[Group::with_title(Level::WARNING.primary_title(&title))];
+            eprintln!("{}", renderer.render(report));
             eprintln!(" {} {}", "-->".blue().bold(), file_path_str);
             eprintln!();
         }
