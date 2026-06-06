@@ -59,13 +59,13 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
    - Stay within max-lines
 
 6. **Cross-link update** (Karpathy's "update related entity and concept pages")
-   - For each of the 1–5 most related existing scraps, search the body for plain-text mentions of the new title; convert each mention to `[[new title]]` when the link direction protocol allows. Do not invent new mentions where none exist.
+   - Link **every genuinely-related** existing scrap (typically 3–5, up to ~5); skip only weakly or tangentially related ones — do not stop at the first one or two obvious hits. For each, search the body for plain-text mentions of the new title and convert each mention to `[[new title]]` when the link direction protocol allows. Do not invent new mentions where none exist.
    - **Link direction protocol**: links always flow concrete → abstract. The new scrap can be at either end:
      - new scrap is concrete (Book, Project, Tool) → edit the NEW scrap to link out to the existing abstract scraps it depends on
      - new scrap is abstract (a concept/topic) → edit the EXISTING concrete scraps that mention it to link in: convert their plain-text mentions to `[[new title]]`
      - existing abstract scrap → do NOT add a reference back to a new concrete scrap (anti-pattern)
      - sibling scraps may link only when the relation is direct and asymmetric
-   - **Anti-patterns**: bidirectional links between abstract↔concrete, "for completeness" additions, mention-based reflexive linking
+   - **Anti-patterns**: any link that violates concrete → abstract — a bidirectional abstract↔concrete pair, or an abstract scrap linking out to a concrete one
    - Backlinks are auto-computed by Scraps; explicit reverse links are redundant
 
 7. **Post-write sanity check**
