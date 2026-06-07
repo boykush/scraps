@@ -14,5 +14,5 @@ pub const CDN_VERSIONS: CdnVersions = CdnVersions {
     highlightjs: "11.11.1",    // renovate: datasource=npm depName=highlight.js
     mermaid: "11.15.0",        // renovate: datasource=npm depName=mermaid
     nord_highlightjs: "0.2.0", // renovate: datasource=npm depName=nord-highlightjs
-    fusejs: "7.3.0",           // renovate: datasource=npm depName=fuse.js
+    fusejs: "7.4.2",           // renovate: datasource=npm depName=fuse.js
 };
