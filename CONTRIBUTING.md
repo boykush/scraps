@@ -89,6 +89,7 @@ The pre-commit hook runs quality checks on staged files:
   - Code formatting check (rustfmt)
   - Linter checks (clippy)
 - **PKL files (*.pkl)**: Validates configuration syntax
+- **Plugin sources (`plugins/**`)**: Runs `mise run plugins:check-version`, which blocks the commit when a plugin's content (skills, agents, etc.) changes without also updating its `.claude-plugin/plugin.json` / `.codex-plugin/plugin.json` (i.e. bumping the `version`).
 
 If any check fails, the commit will be blocked. Fix the issues and try again.
 

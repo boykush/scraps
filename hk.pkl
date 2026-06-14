@@ -15,6 +15,13 @@ local linters = new Mapping<String, Step> {
         glob = "*.pkl"
         check = "pkl eval {{files}} >/dev/null"
     }
+
+    // Plugin distribution version guard: if a plugin's content changes,
+    // its .claude-plugin / .codex-plugin plugin.json must be updated too.
+    ["plugin_version"] = new Step {
+        glob = "plugins/**/*"
+        check = "mise run plugins:check-version"
+    }
 }
 
 hooks {
