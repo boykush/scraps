@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+#MISE description="Guard: block commit if plugin content changed without updating its plugin.json"
+set -euo pipefail
+
+# Staged changes under plugins/ (added/copied/modified/renamed)
+staged="$(git diff --cached --name-only --diff-filter=ACMR -- 'plugins/')"
+[ -z "$staged" ] && exit 0
+
+# Plugin names with staged changes (plugins/<name>/...)
+plugins="$(printf '%s\n' "$staged" | awk -F/ 'NF>=2 {print $2}' | sort -u)"
+
+errors=()
+for name in $plugins; do
+  base="plugins/$name"
+  files="$(printf '%s\n' "$staged" | grep -E "^${base}/" || true)"
+
+  # Skip when only plugin.json itself changed (no content change)
+  content="$(printf '%s\n' "$files" | grep -vE "/\.(claude|codex)-plugin/plugin\.json$" || true)"
+  [ -z "$content" ] && continue
+
+  # Each existing plugin.json must be staged alongside the content change
+  for pj in "$base/.claude-plugin/plugin.json" "$base/.codex-plugin/plugin.json"; do
+    [ -f "$pj" ] || continue
+    printf '%s\n' "$staged" | grep -qxF "$pj" ||
+      errors+=("$name: content changed but $pj was not updated (bump its \"version\")")
+  done
+done
+
+if [ "${#errors[@]}" -gt 0 ]; then
+  echo "Plugin version check failed:" >&2
+  for e in "${errors[@]}"; do echo "  - $e" >&2; done
+  echo "Update the plugin.json version(s) above, re-stage, and commit again." >&2
+  exit 1
+fi
