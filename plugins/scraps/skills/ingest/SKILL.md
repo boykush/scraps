@@ -54,8 +54,8 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
 
 5. **Draft the scrap**
    - Plain Markdown with `[[link]]` for references and `#[[tag]]` for tags
-   - **Link vs tag** (the most common mistake): to point at any scrap — one that exists or one that *should* exist — always use `[[Title]]`. `#[[Tag]]` is ONLY for a cross-cutting category that already appears in the `scraps tag list` from step 2. Never reach for `#[[ ]]` to reference a scrap. When unsure, it is a link, not a tag.
-   - **Link direction (outbound)**: the new scrap's own links flow concrete → abstract. A concrete new scrap (Book, Project, Tool) links out to the abstract scraps it depends on; an abstract new scrap rarely links out to a concrete one — those concrete scraps link IN to it instead (handled in step 6). An abstract scrap linking out to a concrete one is an anti-pattern. Sibling scraps may link only when the relation is direct and asymmetric.
+   - **Link vs tag**: reference a scrap with `[[Title]]`, never `#[[Tag]]` (tags are only existing categories from step 2). A `[[Title]]` must resolve to a real scrap — a concept that *should* exist but doesn't yet stays **plain text**, since an unresolved `[[Title]]` is a broken link (step 7), not a forward reference.
+   - **Link direction & fidelity (outbound)**: links flow concrete → abstract — a concrete scrap links out to the abstractions it depends on; the reverse is the anti-pattern (concrete scraps link IN instead, step 6), and siblings link only on a direct, asymmetric relation. From a source, add only what it attests — never a concrete entity it doesn't name (a CVE, product, person), though an abstraction it genuinely instantiates is fine.
    - Include source autolink if URL: `<https://...>`
    - Stay within max-lines
 
