@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-#MISE description="Audit GitHub Actions workflows for security issues with zizmor"
-zizmor .github/workflows/

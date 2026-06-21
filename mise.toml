@@ -9,7 +9,6 @@ experimental = true
 "npm:markdownlint-cli2" = "latest"
 "cargo:cargo-llvm-cov" = "latest"
 "cargo:cargo-deny" = "latest"
-"zizmor" = "1.25.2"
 
 [hooks]
 postinstall = "hk install --mise"
