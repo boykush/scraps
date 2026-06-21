@@ -31,3 +31,7 @@ jobs:
           # shared template simple even though public repos could use code scanning.
           advanced-security: false
           annotations: true
+          # Fanned out to every owned repo, including ones with no workflows yet.
+          # Without this, zizmor exits 3 ("no inputs collected") and reds their CI;
+          # false makes it pass with a warning until the repo grows a workflow.
+          fail-on-no-inputs: false
