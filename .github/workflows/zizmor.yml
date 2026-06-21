@@ -1,0 +1,33 @@
+# Managed by Terraform (boykush/github-management): this file is distributed by
+# the github_repository_file resource. Edits made directly in a target repo are
+# overwritten on the next `terraform apply` — change templates/zizmor.yml instead.
+name: zizmor
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Least privilege by default; the job grants only what zizmor needs.
+permissions: {}
+
+jobs:
+  zizmor:
+    name: zizmor
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # checkout
+      actions: read # read workflow definitions (needed for private repos)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false # zizmor: avoid token persistence (artipacked)
+      - name: Run zizmor
+        uses: zizmorcore/zizmor-action@5f14fd08f7cf1cb1609c1e344975f152c7ee938d # v0.5.6
+        with:
+          # Plain mode: zizmor fails the job on any finding (no SARIF upload to
+          # GitHub code scanning). Uniform across all managed repos — keeps the
+          # shared template simple even though public repos could use code scanning.
+          advanced-security: false
+          annotations: true
