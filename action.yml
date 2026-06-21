@@ -55,11 +55,14 @@ runs:
         # action is run via a local path (uses: ./), so fall back to boykush/scraps.
         REPO="${ACTION_REPOSITORY:-boykush/scraps}"
         URL="https://github.com/${REPO}/releases/download/v${VERSION}/scraps-${TARGET}.tar.gz"
-        DEST="${RUNNER_TEMP}/scraps"
-        mkdir -p "$DEST"
+        WORKDIR="${RUNNER_TEMP}/scraps"
+        mkdir -p "$WORKDIR"
         echo "Downloading scraps v${VERSION} (${TARGET}) from ${URL}"
-        curl -fsSL "$URL" | tar xz -C "$DEST"
-        echo "$DEST" >> "$GITHUB_PATH"
+        curl -fsSL "$URL" | tar xz -C "$WORKDIR"
+        # Install into /usr/local/bin (already on PATH for GitHub-hosted Linux/macOS
+        # runners) instead of appending to $GITHUB_PATH, which the github-env audit
+        # flags as a code-execution risk.
+        sudo install -m 0755 "$WORKDIR/scraps" /usr/local/bin/scraps
 
     - name: Verify installation
       shell: bash
