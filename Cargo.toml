@@ -13,7 +13,7 @@ rust-version = "1.92"
 version = "1.0.1"
 path = "modules/libs"
 [workspace.dependencies]
-anyhow = "=1.0.102"
+anyhow = "=1.0.103"
 thiserror = "=2.0.18"
 url = { version = "=2.5.8", features = ["serde"] }
 itertools = "=0.14.0"
