@@ -24,12 +24,12 @@ jobs:
       with:
         persist-credentials: false
     - name: Setup mise (install scraps)
-      uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+      uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea # v4.2.1
       with:
         cache: false
         install_args: "github:boykush/scraps"
     - name: Setup Node.js
-      uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+      uses: jdx/mise-action@dad1bfd3df957f44999b559dd69dc1671cb4e9ea # v4.2.1
       with:
         working_directory: ./tests/e2e
         install_args: "node"
