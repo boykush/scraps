@@ -90,4 +90,7 @@ pub enum McpError {
 
     #[error("Failed to create tokio runtime: {0}")]
     RuntimeCreation(String),
+
+    #[error("Failed to bind MCP server to {0}")]
+    Bind(String),
 }
