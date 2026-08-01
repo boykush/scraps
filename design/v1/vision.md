@@ -51,7 +51,7 @@ explicit design decision, not an emergent property.
 | **CLI** | Primary agent integration. Deterministic, typed primitives. Read-centric. `--json` is a first-class output. | `build`, `lint`, `get --json`, `search --json`, `log`, `todo --json` |
 | **Skill** | LLM-driven workflows. Authoring (write) lives here. Bundled and distributed *pup*-style as official AI-facing docs. | ingest, query, file-back |
 | **Core libs** | Trait-based plugin points. | `GitCommand`, future `MetadataProvider` |
-| **MCP** | De-emphasized in narrative; code is kept. v1 does not deprecate the existing `scraps mcp serve` / `plugins/mcp-server/`; v2+ revisits. | (kept as-is) |
+| **MCP** | De-emphasized in narrative; code is kept. v1 does not deprecate the existing `scraps mcp serve` / `plugins/mcp-server/`; v2+ revisits. | `mcp serve`, `mcp serve --http` (loopback only) |
 
 CLI + JSON is the agent-integration primary path because shell + JSON is the
 half-century-old contract: every agent that can run a shell can use it, no MCP

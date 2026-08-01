@@ -204,10 +204,23 @@ pub enum TagSubCommands {
     },
 }
 
+/// Loopback IPv4 rather than `localhost`, which resolves to `::1` first on some
+/// systems and would leave IPv4 clients unable to connect.
+const DEFAULT_MCP_HTTP_ADDR: &str = "127.0.0.1:1113";
+
 #[derive(Subcommand)]
 pub enum McpSubCommands {
-    #[command(about = "Start MCP server with stdio transport")]
-    Serve,
+    #[command(about = "Start MCP server with stdio transport, or Streamable HTTP with --http")]
+    Serve {
+        #[arg(
+            long,
+            value_name = "ADDR",
+            num_args = 0..=1,
+            default_missing_value = DEFAULT_MCP_HTTP_ADDR,
+            help = "Serve over Streamable HTTP at this address instead of stdio; the MCP endpoint is <addr>/mcp"
+        )]
+        http: Option<String>,
+    },
 }
 
 #[derive(Clone, Debug, ValueEnum)]
