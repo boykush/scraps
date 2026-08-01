@@ -17,7 +17,7 @@ the authoritative reference for flags and arguments. This page is the
 | `scraps tag list` | List all tags with backlink counts | ✓ |
 | `scraps tag backlinks <tag>` | Scraps referencing a tag | ✓ |
 | `scraps todo` | Aggregate GFM task list items wiki-wide | ✓ |
-| `scraps mcp serve` | Start an MCP server | – |
+| `scraps mcp serve` | Start an MCP server over stdio, or `--http` | – |
 
 `-C` / `--directory` (or `SCRAPS_DIRECTORY` env) runs as if started in the
 given directory.
