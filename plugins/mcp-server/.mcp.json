@@ -1,11 +1,8 @@
 {
   "mcpServers": {
     "scraps": {
-      "command": "scraps",
-      "args": ["mcp", "serve"],
-      "env": {
-        "SCRAPS_DIRECTORY": "${SCRAPS_DIRECTORY:-.}"
-      }
+      "type": "http",
+      "url": "${SCRAPS_MCP_URL:-http://127.0.0.1:1113/mcp}"
     }
   }
 }

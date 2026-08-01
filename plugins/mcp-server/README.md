@@ -2,17 +2,37 @@
 
 MCP server for browsing and searching [Scraps](https://github.com/boykush/scraps) wikis.
 
-This plugin packages `scraps mcp serve` as a Claude Code plugin so MCP-compatible clients can call Scraps tools directly. For most read-shaped agent workflows the simpler path is `scraps <cmd> --json` via the shell — see the [`scraps` plugin](../scraps/README.md) for the bundled CLI + JSON skills.
+This plugin points MCP-compatible clients at a locally running `scraps mcp serve --http`, so Scraps tools can be called from any repository on your machine. For most read-shaped agent workflows the simpler path is `scraps <cmd> --json` via the shell — see the [`scraps` plugin](../scraps/README.md) for the bundled CLI + JSON skills.
+
+```text
+ scraps -C ~/wiki mcp serve --http    ← one local server, holds the wiki
+        │  /mcp
+        ├── repo A  (mcp-server plugin)
+        ├── repo B  (mcp-server plugin)
+        └── repo C  (mcp-server plugin)
+```
+
+One server backs every repo: no per-repo wiki path, no MCP subprocess per client. The wiki is read per request, so edits are served live.
 
 ## Install
 
-### Step 1: Add the marketplace
+### Step 1: Run the server
+
+From anywhere, pointing at the directory that contains `.scraps.toml` (one long-running process):
+
+```bash
+scraps -C ~/path/to/your/wiki mcp serve --http
+```
+
+It listens on `127.0.0.1:1113` and serves MCP at `http://127.0.0.1:1113/mcp`. Pass an address to `--http` to use a different port or host.
+
+### Step 2: Add the marketplace
 
 ```bash
 claude plugin marketplace add boykush/scraps
 ```
 
-### Step 2: Enable the plugin
+### Step 3: Enable the plugin
 
 Add this to your project's `.claude/settings.json`:
 
@@ -24,18 +44,16 @@ Add this to your project's `.claude/settings.json`:
 }
 ```
 
-The plugin uses the current directory as the Scraps wiki root. To target a different wiki, set `SCRAPS_DIRECTORY`:
+## Configuration
 
-```json
-{
-  "env": {
-    "SCRAPS_DIRECTORY": "/path/to/your/wiki"
-  },
-  "enabledPlugins": {
-    "mcp-server@scraps-claude-code-plugins": true
-  }
-}
+The plugin connects to `http://127.0.0.1:1113/mcp`. To point at another address — a different port, or a second wiki served by its own process — set `SCRAPS_MCP_URL` before launching your agent:
+
+```bash
+scraps -C ~/path/to/another/wiki mcp serve --http 127.0.0.1:1114
+export SCRAPS_MCP_URL=http://127.0.0.1:1114/mcp
 ```
+
+One process serves one wiki. The server binds loopback with no authentication; it is not meant to be exposed to a network.
 
 ## MCP tools
 
@@ -117,13 +135,21 @@ Returns: `{ results: [{ title, ctx }], count }`.
 
 ## Manual setup (without the plugin)
 
-For other MCP-compatible clients, run the server directly:
+Register the shared server with any MCP-compatible client:
+
+```bash
+claude mcp add --transport http scraps http://127.0.0.1:1113/mcp
+```
+
+### stdio (no server to run)
+
+For a single repository, the client can spawn `scraps mcp serve` as a subprocess instead:
 
 ```bash
 claude mcp add scraps -- scraps -C ~/path/to/your/wiki mcp serve
 ```
 
-Replace `~/path/to/your/wiki` with the directory containing `.scraps.toml`.
+Replace `~/path/to/your/wiki` with the directory containing `.scraps.toml`. stdio needs that path per repository, so — unlike the shared HTTP URL — it cannot ship as a turnkey plugin config. Plugin versions before 2.0.0 bundled this stdio setup; if you relied on it, either start the server (see [Install](#install)) or add the command above.
 
 ## Further reading
 
