@@ -1,6 +1,6 @@
 ---
 description: Create a GitHub Release for an existing git tag
-allowed-tools: ["Bash(git tag:*)", "Bash(git log:*)", "Bash(git show:*)", "Bash(gh pr view:*)", "Bash(gh api:*)", "Read", "Grep"]
+allowed-tools: ["Bash(git tag:*)", "Bash(git log:*)", "Bash(git show:*)", "Bash(git fetch:*)", "Bash(git merge-base:*)", "Bash(gh pr view:*)", "Bash(gh api:*)", "Bash(gh release create:*)", "Bash(gh release view:*)", "Bash(gh run list:*)", "Bash(gh run view:*)", "Bash(gh run watch:*)", "Read", "Grep"]
 ---
 
 Create a GitHub Release for the Scraps project using the following workflow:
@@ -10,9 +10,11 @@ Create a GitHub Release for the Scraps project using the following workflow:
 
 **Workflow**:
 
-1. **Verify tag exists**:
+1. **Verify tag exists and points at main**:
    - Check if tag `v$ARGUMENTS` exists with `git tag --list v$ARGUMENTS`
    - If tag doesn't exist, inform user to run `/release-tag-create` first
+   - Check the tag is an ancestor of main: `git fetch origin main` then `git merge-base --is-ancestor v$ARGUMENTS origin/main`
+   - If it isn't, stop: the tag must be deleted (`git push origin :refs/tags/v$ARGUMENTS`) and recreated on main via `/release-tag-create`
 
 2. **Find previous version tag**:
    - Get sorted list of tags: `git tag --sort=-v:refname`
@@ -71,6 +73,8 @@ Create a GitHub Release for the Scraps project using the following workflow:
 8. **Verify**:
    - Confirm release creation with `gh release view v$ARGUMENTS`
    - Display release URL
+   - Follow the triggered workflow: `gh run list --workflow=release.yml --limit 1`, then `gh run watch <run_id> --exit-status`
+   - Report each job: `publish-crate`, `update-homebrew`, and `update-floating-tags` run after `build` and can fail independently, leaving the release half-published
 
 **Usage**: `/release-create 0.27.0`
 
@@ -81,7 +85,8 @@ Create a GitHub Release for the Scraps project using the following workflow:
 ```
 
 **Notes**:
-- This command requires that the git tag already exists (created by `/release-tag-create`)
+- This command requires that the git tag already exists (created by `/release-tag-create`) and is an ancestor of main
+- Creating the Release triggers the crates.io publish, the homebrew-tap update, and the floating v{major}/v{major}.{minor} tag moves (see `.github/workflows/release.yml`); a tag off main would ship a build that is not on main
 - The version format should be semver without 'v' prefix in arguments
 - Release notes are automatically generated from PR information
 - User confirmation is required before creating the GitHub Release
