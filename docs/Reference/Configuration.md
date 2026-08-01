@@ -97,6 +97,6 @@ and run commands with `-C`:
 Each `.scraps.toml` is its own independent wiki — they do not cross-link, and
 each builds to its own `output_dir`.
 
-The old `-p` / `--path` flag is still accepted as a deprecated alias for one
-release. Prefer `-C` / `--directory` or the `SCRAPS_DIRECTORY` environment
-variable.
+The old `-p` / `--path` flag and `SCRAPS_PROJECT_PATH` were removed in v1.1
+after one deprecated release. Use `-C` / `--directory` or the
+`SCRAPS_DIRECTORY` environment variable.

@@ -14,12 +14,8 @@ use clap::Parser;
 use error::McpError;
 
 fn main() -> error::ScrapsResult<()> {
-    let cli::Cli {
-        directory,
-        path,
-        command,
-    } = cli::Cli::parse();
-    let directory = cli::Cli::resolve_directory(directory.as_deref(), path.as_deref());
+    let cli::Cli { directory, command } = cli::Cli::parse();
+    let directory = directory.as_deref();
 
     match command {
         cli::SubCommands::Init => cli::cmd::init::run(directory),

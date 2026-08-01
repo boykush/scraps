@@ -217,8 +217,8 @@ under that directory is a scrap; `ctx` is the relative path.
   / `.mise.toml` up the tree), scraps does not search upward — the compose
   motivation does not exist for documentation.
 - **`-C` / `--directory`** replaces `-p` / `--path` (#510), aligning with
-  `git -C`, `make -C`, `pnpm -C`. The old flag stays as a deprecated alias for
-  one release.
+  `git -C`, `make -C`, `pnpm -C`. The old flag stayed as a deprecated alias for
+  one release and was removed in v1.1.
 - **`output_dir`** defaults to `_site/` instead of `public/` (#508), aligning
   with Jekyll / Hakyll and avoiding ctx collisions with a `public/` directory
   in the source tree.
