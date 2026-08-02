@@ -40,7 +40,7 @@ rmcp = { version = "=1.8.0", features = [
     "server",
     "transport-streamable-http-server",
 ] }
-schemars = "=1.2.1"
+schemars = "=1.2.2"
 rstest = "=0.26.1"
 tempfile = "=3.27.0"
 tokio-util = "=0.7.18"
