@@ -26,7 +26,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup Scraps
-        uses: boykush/scraps@a8bf05b091898d347535c052707d7b77b2a74274 # v1.0.1
+        uses: boykush/scraps@b8da11e2943a9c20bbc444a3061aab5ce7dbb752 # v1.1.0
 
       - name: Build docs
         run: scraps build --directory docs
