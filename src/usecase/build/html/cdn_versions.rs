@@ -11,7 +11,7 @@ pub struct CdnVersions {
 }
 
 pub const CDN_VERSIONS: CdnVersions = CdnVersions {
-    highlightjs: "11.11.1",    // renovate: datasource=npm depName=highlight.js
+    highlightjs: "11.12.0",    // renovate: datasource=npm depName=highlight.js
     mermaid: "11.16.1",        // renovate: datasource=npm depName=mermaid
     nord_highlightjs: "0.2.0", // renovate: datasource=npm depName=nord-highlightjs
     fusejs: "7.5.0",           // renovate: datasource=npm depName=fuse.js
