@@ -13,6 +13,20 @@
       "rangeStrategy": "pin"
     },
     {
+      "description": "Automerge non-major cargo updates once required CI passes. The gate is the required check `build` (cargo-test-and-lint.yml), which covers every Cargo change since nothing Cargo-related is in its paths-ignore. Majors stay manual: they have consistently needed code changes (tera v2 reworked the Tera::new() signature and dropped Tera::context). addLabels is mandatory alongside automerge — this repository requires one approving review and Renovate cannot approve its own PR, so renovate-runner's approve-bot-prs workflow keys off the automerge label. Without the label no approval arrives and automerge waits forever.",
+      "matchManagers": [
+        "cargo"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": true,
+      "addLabels": [
+        "automerge"
+      ]
+    },
+    {
       "groupName": "Rust toolchain",
       "matchManagers": [
         "mise"
