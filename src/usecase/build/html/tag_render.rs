@@ -1,4 +1,5 @@
 use std::fs;
+use std::io::{BufWriter, Write};
 use std::path::Path;
 use std::{fs::File, path::PathBuf};
 
@@ -9,6 +10,7 @@ use crate::usecase::build::model::html::HtmlMetadata;
 use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::tag::Tag;
 use scraps_libs::slugify;
+use tera::Tera;
 
 use crate::usecase::build::html::tera::tag_tera;
 
@@ -16,7 +18,7 @@ use super::serde::link_scraps::LinkScrapsTera;
 use super::serde::tag::TagTera;
 
 pub struct TagRender {
-    static_dir_path: PathBuf,
+    tera: Tera,
     output_tags_dir_path: PathBuf,
 }
 
@@ -26,9 +28,12 @@ impl TagRender {
         // `scraps/`, to keep the two namespaces isolated (v1 design).
         let output_tags_dir_path = &output_dir_path.join("tags");
         fs::create_dir_all(output_tags_dir_path).context(BuildError::CreateDir)?;
+        // Built once here rather than per tag: loading the glob re-parses
+        // every template, which dominates the build on large wikis.
+        let tera = tag_tera::tera(static_dir_path.join("*.html").to_str().unwrap())?;
 
         Ok(TagRender {
-            static_dir_path: static_dir_path.to_owned(),
+            tera,
             output_tags_dir_path: output_tags_dir_path.to_owned(),
         })
     }
@@ -40,11 +45,7 @@ impl TagRender {
         tag: &Tag,
         backlinks_map: &BacklinksMap,
     ) -> ScrapsResult<()> {
-        let (tera, mut context) = tag_tera::base(
-            base_url,
-            metadata,
-            self.static_dir_path.join("*.html").to_str().unwrap(),
-        )?;
+        let mut context = tag_tera::context(base_url, metadata);
 
         // insert to context for linked list
         context.insert("tag", &TagTera::new(tag, backlinks_map));
@@ -64,8 +65,14 @@ impl TagRender {
         if let Some(parent) = file_path.parent() {
             fs::create_dir_all(parent).context(BuildError::CreateDir)?;
         }
-        let wtr = File::create(&file_path).context(BuildError::WriteFailure(file_path.clone()))?;
-        tera.render_to("__builtins/tag.html", &context, wtr)
+        // tera renders in many small writes, so buffer them into one file write.
+        let mut wtr = BufWriter::new(
+            File::create(&file_path).context(BuildError::WriteFailure(file_path.clone()))?,
+        );
+        self.tera
+            .render_to("__builtins/tag.html", &context, &mut wtr)
+            .context(BuildError::WriteFailure(file_path.clone()))?;
+        wtr.flush()
             .context(BuildError::WriteFailure(file_path.clone()))
     }
 }

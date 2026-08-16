@@ -1,4 +1,4 @@
-{% macro scrap_links(scraps) %}
+{% component scrap_links(scraps, base_url) %}
     <ul class="scrap-links">
         {% for scrap in scraps %}
             <li class="item">
@@ -24,9 +24,9 @@
             </li>
         {% endfor %}
     </ul>
-{% endmacro scrap_links %}
+{% endcomponent scrap_links %}
 
-{% macro tag_links(tags, slice_size=100) %}
+{% component tag_links(tags, base_url, slice_size=100) %}
     <ul class="tag-links">
         {% for tag in tags | slice(end=slice_size) %}
             <li class="item">
@@ -43,9 +43,9 @@
             </li>
         {% endif %}
     </ul>
-{% endmacro tag_links %}
+{% endcomponent tag_links %}
 
-{% macro ogp_card(autolink) %}
+{% component ogp_card(autolink) %}
 <div class="ogp-card" data-url="{{ autolink.url }}" data-host="{{ autolink.host }}">
     <a class="ogp-card-link" href="{{ autolink.url }}" target="_blank" rel="noopener noreferrer">
         <img class="ogp-image" src="" alt="OGP Image" />
@@ -55,4 +55,4 @@
         </div>
     </a>
 </div>
-{% endmacro ogp_card %}
+{% endcomponent ogp_card %}

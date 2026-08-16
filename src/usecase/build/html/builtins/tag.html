@@ -1,9 +1,8 @@
 {% extends "__builtins/base.html" %}
-{% import "__builtins/macros.html" as macros %}
 
 {% block main %}
     <div class="tag">
         <h1 class="title">{{ tag.title }}</h1>
     </div>
-    {{ macros::scrap_links(scraps = linked_scraps) }}
+    {{ <scrap_links scraps={linked_scraps} base_url={base_url} /> }}
 {% endblock %}

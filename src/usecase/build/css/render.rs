@@ -1,4 +1,5 @@
 use crate::error::anyhow::Context;
+use std::io::{BufWriter, Write};
 use std::{fs::File, path::PathBuf};
 
 use crate::error::{BuildError, ScrapsResult};
@@ -31,8 +32,13 @@ impl CSSRender {
             "__builtins/main.css"
         };
         let file_path = &self.output_dir_path.join("main.css");
-        let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
-        tera.render_to(template_name, &context, wtr)
+        // tera renders in many small writes, so buffer them into one file write.
+        let mut wtr = BufWriter::new(
+            File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?,
+        );
+        tera.render_to(template_name, &context, &mut wtr)
+            .context(BuildError::WriteFailure(file_path.clone()))?;
+        wtr.flush()
             .context(BuildError::WriteFailure(file_path.clone()))
     }
 }
@@ -45,6 +51,7 @@ mod tests {
 
     use super::*;
     use std::fs;
+    use std::io::{BufWriter, Write};
 
     #[rstest]
     fn test_render_main(#[from(temp_scrap_project)] project: TempScrapProject) {

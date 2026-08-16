@@ -8,6 +8,7 @@ use tera::Tera;
 
 static TAGS_INDEX_TERA: Lazy<Tera> = Lazy::new(|| {
     let mut tera = Tera::default();
+    crate::service::tera_filters::register(&mut tera);
     tera.add_raw_templates(vec![
         (
             "__builtins/base.html",
@@ -31,8 +32,9 @@ pub fn base(
     metadata: &HtmlMetadata,
     template_dir: &str,
 ) -> ScrapsResult<(Tera, tera::Context)> {
-    let mut tera = Tera::new(template_dir).context(BuildError::RenderHtml)?;
-    tera.extend(&TAGS_INDEX_TERA).unwrap();
+    let mut tera = TAGS_INDEX_TERA.clone();
+    tera.load_from_glob(template_dir)
+        .context(BuildError::RenderHtml)?;
 
     let mut context = tera::Context::new();
     context.insert("base_url", &base_url.as_url());
