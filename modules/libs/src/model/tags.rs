@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 use super::{scrap::Scrap, tag::Tag};
 
@@ -6,12 +6,16 @@ use super::{scrap::Scrap, tag::Tag};
 /// occurrences across all scraps. Hierarchical tags are auto-aggregated:
 /// a `#[[a/b/c]]` occurrence implicitly creates `a/b` and `a` as well
 /// (Logseq-style).
+///
+/// Ordered rather than hashed so iteration is reproducible across builds:
+/// generated sites are committed to git, and a randomly seeded set turned
+/// every build into a diff.
 #[derive(PartialEq, Debug, Clone)]
-pub struct Tags(HashSet<Tag>);
+pub struct Tags(BTreeSet<Tag>);
 
 impl IntoIterator for Tags {
     type Item = Tag;
-    type IntoIter = std::collections::hash_set::IntoIter<Tag>;
+    type IntoIter = std::collections::btree_set::IntoIter<Tag>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
@@ -23,7 +27,7 @@ impl Tags {
     /// declarations and folding in their proper ancestors for hierarchical
     /// tags.
     pub fn new(scraps: &[Scrap]) -> Tags {
-        let mut all = HashSet::new();
+        let mut all = BTreeSet::new();
         for scrap in scraps {
             for tag in scrap.tags() {
                 all.insert(tag.clone());
@@ -35,7 +39,7 @@ impl Tags {
         Tags(all)
     }
 
-    pub fn iter(&self) -> std::collections::hash_set::Iter<'_, Tag> {
+    pub fn iter(&self) -> std::collections::btree_set::Iter<'_, Tag> {
         self.0.iter()
     }
 
@@ -120,6 +124,31 @@ mod tests {
                 "a/b/d".to_string(),
             ]
         );
+    }
+
+    #[test]
+    fn it_iterates_in_tag_order_regardless_of_scrap_order() {
+        // Regression: a hashed set iterated in a per-instance random order,
+        // which leaked into generated HTML and made builds non-reproducible.
+        let scraps = [
+            Scrap::new("s1", &None, "#[[delta]]"),
+            Scrap::new("s2", &None, "#[[charlie]]"),
+            Scrap::new("s3", &None, "#[[bravo]] #[[bravo/nested]]"),
+            Scrap::new("s4", &None, "#[[alpha]]"),
+        ];
+        let expected = vec!["alpha", "bravo", "bravo/nested", "charlie", "delta"];
+
+        let observed: Vec<String> = Tags::new(&scraps).iter().map(|t| t.to_string()).collect();
+        assert_eq!(observed, expected);
+
+        // Same tags, different declaration order, and repeated construction:
+        // all must agree.
+        let reversed: [Scrap; 4] = std::array::from_fn(|i| scraps[3 - i].clone());
+        for _ in 0..100 {
+            let observed: Vec<String> =
+                Tags::new(&reversed).iter().map(|t| t.to_string()).collect();
+            assert_eq!(observed, expected);
+        }
     }
 
     #[test]

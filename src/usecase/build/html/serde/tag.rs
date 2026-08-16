@@ -4,7 +4,7 @@ use scraps_libs::{model::tag::Tag, slugify};
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 pub struct TagTera {
     /// Full hierarchical tag path for display, e.g. `ai/ml`.
-    title: String,
+    pub title: String,
     /// Slug-form path with each segment slugified, joined by `/`.
     /// Used to build the tag's HTML URL: `/tags/<slug>.html`.
     slug: String,
