@@ -1,7 +1,7 @@
 use crate::input::file::read_scraps;
 use crate::usecase::tag::list::usecase::ListTagUsecase;
 use rmcp::model::ErrorCode;
-use rmcp::model::{CallToolResult, Content};
+use rmcp::model::{CallToolResult, ContentBlock};
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer};
 use serde_json::json;
@@ -48,7 +48,7 @@ pub async fn list_tags(
         count_b.cmp(&count_a)
     });
 
-    Ok(CallToolResult::success(vec![Content::text(
+    Ok(CallToolResult::success(vec![ContentBlock::text(
         serde_json::to_string(&tags_with_backlinks).unwrap(),
     )]))
 }

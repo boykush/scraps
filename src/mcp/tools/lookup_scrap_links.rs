@@ -2,7 +2,7 @@ use crate::input::file::read_scraps;
 use crate::usecase::scrap::lookup_links::usecase::{LinkRefKind, LookupScrapLinksUsecase};
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
-use rmcp::model::{CallToolResult, Content};
+use rmcp::model::{CallToolResult, ContentBlock};
 use rmcp::schemars::JsonSchema;
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer};
@@ -100,7 +100,7 @@ pub async fn lookup_scrap_links(
         count,
     };
 
-    Ok(CallToolResult::success(vec![Content::text(
+    Ok(CallToolResult::success(vec![ContentBlock::text(
         serde_json::to_string(&response).map_err(|e| {
             ErrorData::new(
                 ErrorCode(-32005),

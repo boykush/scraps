@@ -27,7 +27,7 @@ pub fn build_service(scraps_dir: PathBuf, exclude_dirs: Vec<PathBuf>) -> McpServ
         move || Ok(ScrapsServer::new(scraps_dir.clone(), exclude_dirs.clone())),
         Arc::new(NeverSessionManager::default()),
         StreamableHttpServerConfig::default()
-            .with_stateful_mode(false)
+            .with_legacy_session_mode(false)
             .with_json_response(true),
     )
 }
