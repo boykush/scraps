@@ -5,6 +5,7 @@ use tera::Tera;
 
 static SEARCH_INDEX_TERA: Lazy<Tera> = Lazy::new(|| {
     let mut tera = Tera::default();
+    crate::service::tera_filters::register(&mut tera);
     tera.add_raw_templates(vec![(
         "__builtins/search_index.json",
         include_str!("builtins/search_index.json"),
@@ -14,8 +15,9 @@ static SEARCH_INDEX_TERA: Lazy<Tera> = Lazy::new(|| {
 });
 
 pub fn base(base_url: &BaseUrl, template_dir: &str) -> ScrapsResult<(Tera, tera::Context)> {
-    let mut tera = Tera::new(template_dir).context(BuildError::RenderJson)?;
-    tera.extend(&SEARCH_INDEX_TERA).unwrap();
+    let mut tera = SEARCH_INDEX_TERA.clone();
+    tera.load_from_glob(template_dir)
+        .context(BuildError::RenderJson)?;
 
     let mut context = tera::Context::new();
     context.insert("base_url", base_url.as_url());

@@ -1,4 +1,5 @@
 use std::fs;
+use std::io::{BufWriter, Write};
 use std::path::Path;
 use std::{fs::File, path::PathBuf};
 
@@ -151,8 +152,13 @@ impl IndexRender {
             "__builtins/index.html"
         };
         let file_path = &self.output_dir_path.join(pointer.current_file_name());
-        let wtr = File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?;
-        tera.render_to(template_name, context, wtr)
+        // tera renders in many small writes, so buffer them into one file write.
+        let mut wtr = BufWriter::new(
+            File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?,
+        );
+        tera.render_to(template_name, context, &mut wtr)
+            .context(BuildError::WriteFailure(file_path.clone()))?;
+        wtr.flush()
             .context(BuildError::WriteFailure(file_path.clone()))?;
         Ok(())
     }

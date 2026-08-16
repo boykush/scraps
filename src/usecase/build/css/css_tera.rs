@@ -8,6 +8,7 @@ use super::serde::color_scheme::ColorSchemeTera;
 
 static CSS_TERA: Lazy<Tera> = Lazy::new(|| {
     let mut tera = Tera::default();
+    crate::service::tera_filters::register(&mut tera);
     tera.add_raw_templates(vec![(
         "__builtins/main.css",
         include_str!("builtins/main.css"),
@@ -17,8 +18,9 @@ static CSS_TERA: Lazy<Tera> = Lazy::new(|| {
 });
 
 pub fn base(template_dir: &str, color_scheme: &ColorScheme) -> ScrapsResult<(Tera, tera::Context)> {
-    let mut tera = Tera::new(template_dir).context(BuildError::RenderCss)?;
-    tera.extend(&CSS_TERA).unwrap();
+    let mut tera = CSS_TERA.clone();
+    tera.load_from_glob(template_dir)
+        .context(BuildError::RenderCss)?;
 
     let mut context = tera::Context::new();
     context.insert("color_scheme", &ColorSchemeTera::new(color_scheme));

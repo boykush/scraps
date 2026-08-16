@@ -1,5 +1,4 @@
 {% extends "__builtins/base.html" %}
-{% import "__builtins/macros.html" as macros %}
 
 {% block head %}
 <meta property="og:url" content="{{ base_url }}scraps/{{ scrap.html_file_name }}" />
@@ -21,10 +20,10 @@
             </p>
         {% endif %}
         <div class="content">
-            {% for element in scrap.content.elements %}{% if element.raw %}{{ element.raw | safe }}{% elif element.autolink %}{{ macros::ogp_card(autolink=element.autolink) }}{% endif %}{% endfor %}
+            {% for element in scrap.content.elements %}{% if element.raw %}{{ element.raw | safe }}{% elif element.autolink %}{{ <ogp_card autolink={element.autolink} /> }}{% endif %}{% endfor %}
         </div>
     </div>
-    {{ macros::scrap_links(scraps = linked_scraps) }}
+    {{ <scrap_links scraps={linked_scraps} base_url={base_url} /> }}
 {% endblock %}
 {% block script %}
 <script>
