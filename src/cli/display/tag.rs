@@ -82,7 +82,7 @@ impl fmt::Display for DisplayTagTable {
         }
 
         let mut table = Table::new();
-        table.load_preset(NOTHING);
+        table.load_style(NOTHING);
 
         if self.has_url {
             table.set_header(vec![

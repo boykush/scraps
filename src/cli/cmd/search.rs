@@ -62,7 +62,7 @@ pub fn run(
         }
 
         let mut table = Table::new();
-        table.load_preset(NOTHING);
+        table.load_style(NOTHING);
         table.set_header(vec![Cell::new("Title".bold()), Cell::new("Context".bold())]);
 
         for key in &scrap_keys {

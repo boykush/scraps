@@ -91,7 +91,7 @@ pub fn run(
         }
 
         let mut table = Table::new();
-        table.load_preset(NOTHING);
+        table.load_style(NOTHING);
         table.set_header(vec![
             Cell::new("Scrap".bold()),
             Cell::new("Status".bold()),
