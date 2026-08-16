@@ -3,7 +3,7 @@ use crate::mcp::json::scrap::ScrapKeyJson;
 use crate::usecase::tag::lookup_backlinks::usecase::LookupTagBacklinksUsecase;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
-use rmcp::model::{CallToolResult, Content};
+use rmcp::model::{CallToolResult, ContentBlock};
 use rmcp::schemars::JsonSchema;
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer};
@@ -67,7 +67,7 @@ pub async fn lookup_tag_backlinks(
         count,
     };
 
-    Ok(CallToolResult::success(vec![Content::text(
+    Ok(CallToolResult::success(vec![ContentBlock::text(
         serde_json::to_string(&response).map_err(|e| {
             ErrorData::new(
                 ErrorCode(-32009),

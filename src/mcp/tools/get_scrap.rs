@@ -3,7 +3,7 @@ use crate::mcp::json::scrap::{CodeBlockJson, HeadingJson};
 use crate::usecase::scrap::get::usecase::GetScrapUsecase;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
-use rmcp::model::{CallToolResult, Content};
+use rmcp::model::{CallToolResult, ContentBlock};
 use rmcp::schemars::JsonSchema;
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer};
@@ -160,7 +160,7 @@ pub async fn get_scrap(
         }
     }
 
-    Ok(CallToolResult::success(vec![Content::text(
+    Ok(CallToolResult::success(vec![ContentBlock::text(
         serde_json::to_string(&Value::Object(out)).map_err(|e| {
             ErrorData::new(
                 ErrorCode(-32005),
