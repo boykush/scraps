@@ -22,13 +22,30 @@ type McpService = StreamableHttpService<ScrapsServer, NeverSessionManager>;
 /// Build the MCP service in stateless mode, so one long-running process can
 /// back any number of clients without retaining per-client sessions. The cost
 /// is server-initiated notifications, which the read-only tools never send.
-pub fn build_service(scraps_dir: PathBuf, exclude_dirs: Vec<PathBuf>) -> McpService {
+pub fn build_service(
+    scraps_dir: PathBuf,
+    exclude_dirs: Vec<PathBuf>,
+    allowed_hosts: Vec<String>,
+) -> McpService {
+    let config = StreamableHttpServerConfig::default()
+        .with_legacy_session_mode(false)
+        .with_json_response(true);
+
+    // Extend rmcp's loopback default instead of replacing it, so a port-forward
+    // or local curl still reaches a server published under a public hostname.
+    // The list is never empty, which rmcp would read as "allow any host".
+    let allowed_hosts = config
+        .allowed_hosts
+        .iter()
+        .cloned()
+        .chain(allowed_hosts)
+        .collect::<Vec<_>>();
+    let config = config.with_allowed_hosts(allowed_hosts);
+
     StreamableHttpService::new(
         move || Ok(ScrapsServer::new(scraps_dir.clone(), exclude_dirs.clone())),
         Arc::new(NeverSessionManager::default()),
-        StreamableHttpServerConfig::default()
-            .with_legacy_session_mode(false)
-            .with_json_response(true),
+        config,
     )
 }
 
@@ -84,17 +101,34 @@ mod tests {
     async fn spawn_server(
         project: &TempScrapProject,
     ) -> (SocketAddr, JoinHandle<std::io::Result<()>>) {
+        spawn_server_with_allowed_hosts(project, vec![]).await
+    }
+
+    async fn spawn_server_with_allowed_hosts(
+        project: &TempScrapProject,
+        allowed_hosts: Vec<String>,
+    ) -> (SocketAddr, JoinHandle<std::io::Result<()>>) {
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
         let addr = listener.local_addr().unwrap();
         let service = build_service(
             project.scraps_dir.clone(),
             vec![project.static_dir.clone(), project.output_dir.clone()],
+            allowed_hosts,
         );
 
         (addr, tokio::spawn(serve(listener, service)))
     }
 
     async fn post(addr: SocketAddr, path: &str, body: serde_json::Value) -> (StatusCode, String) {
+        post_with_host(addr, path, &addr.to_string(), body).await
+    }
+
+    async fn post_with_host(
+        addr: SocketAddr,
+        path: &str,
+        host: &str,
+        body: serde_json::Value,
+    ) -> (StatusCode, String) {
         let stream = TcpStream::connect(addr).await.unwrap();
         let (mut sender, connection) = hyper::client::conn::http1::handshake(TokioIo::new(stream))
             .await
@@ -104,7 +138,7 @@ mod tests {
         let request = Request::builder()
             .method(Method::POST)
             .uri(path)
-            .header(HOST, addr.to_string())
+            .header(HOST, host)
             .header(CONTENT_TYPE, "application/json")
             .header(ACCEPT, "application/json, text/event-stream")
             .body(Full::new(Bytes::from(body.to_string())))
@@ -189,6 +223,70 @@ mod tests {
         let text = response["result"]["content"][0]["text"].as_str().unwrap();
         let result: serde_json::Value = serde_json::from_str(text).unwrap();
         assert!(result["count"].as_u64().unwrap() > 0);
+
+        server_handle.abort();
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_unconfigured_host_is_forbidden(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let (addr, server_handle) = spawn_server(&project).await;
+
+        let (status, _) = post_with_host(
+            addr,
+            ENDPOINT_PATH,
+            "mcp.example.com",
+            serde_json::json!({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}),
+        )
+        .await;
+
+        assert_eq!(status, StatusCode::FORBIDDEN);
+
+        server_handle.abort();
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_configured_host_is_allowed(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let (addr, server_handle) =
+            spawn_server_with_allowed_hosts(&project, vec!["mcp.example.com".to_string()]).await;
+
+        let (status, _) = post_with_host(
+            addr,
+            ENDPOINT_PATH,
+            "mcp.example.com",
+            serde_json::json!({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}),
+        )
+        .await;
+
+        assert_eq!(status, StatusCode::OK);
+
+        server_handle.abort();
+    }
+
+    /// The flag extends the loopback default instead of replacing it, so a
+    /// port-forward keeps reaching a server published under a public hostname.
+    #[rstest]
+    #[tokio::test]
+    async fn test_loopback_still_allowed_alongside_configured_host(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let (addr, server_handle) =
+            spawn_server_with_allowed_hosts(&project, vec!["mcp.example.com".to_string()]).await;
+
+        let (status, _) = post_with_host(
+            addr,
+            ENDPOINT_PATH,
+            &addr.to_string(),
+            serde_json::json!({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}),
+        )
+        .await;
+
+        assert_eq!(status, StatusCode::OK);
 
         server_handle.abort();
     }
