@@ -19,16 +19,37 @@ pub const ENDPOINT_PATH: &str = "/mcp";
 
 type McpService = StreamableHttpService<ScrapsServer, NeverSessionManager>;
 
+/// rmcp's own default allowlist, repeated because `with_allowed_hosts` replaces
+/// the list rather than extending it. An entry without a port matches any port.
+const LOOPBACK_HOSTS: [&str; 3] = ["localhost", "127.0.0.1", "::1"];
+
 /// Build the MCP service in stateless mode, so one long-running process can
 /// back any number of clients without retaining per-client sessions. The cost
 /// is server-initiated notifications, which the read-only tools never send.
-pub fn build_service(scraps_dir: PathBuf, exclude_dirs: Vec<PathBuf>) -> McpService {
+///
+/// `allowed_hosts` names the Host headers to accept on top of loopback, for
+/// servers reached through a proxy under its own hostname. Host validation is
+/// what stops DNS rebinding, so this extends the allowlist rather than lifting
+/// it — and loopback stays in regardless, because a deployed server is still
+/// reached directly when something needs debugging.
+pub fn build_service(
+    scraps_dir: PathBuf,
+    exclude_dirs: Vec<PathBuf>,
+    allowed_hosts: &[String],
+) -> McpService {
+    let allowed_hosts: Vec<String> = LOOPBACK_HOSTS
+        .iter()
+        .map(|host| (*host).to_string())
+        .chain(allowed_hosts.iter().cloned())
+        .collect();
+
     StreamableHttpService::new(
         move || Ok(ScrapsServer::new(scraps_dir.clone(), exclude_dirs.clone())),
         Arc::new(NeverSessionManager::default()),
         StreamableHttpServerConfig::default()
             .with_legacy_session_mode(false)
-            .with_json_response(true),
+            .with_json_response(true)
+            .with_allowed_hosts(allowed_hosts),
     )
 }
 
@@ -84,17 +105,34 @@ mod tests {
     async fn spawn_server(
         project: &TempScrapProject,
     ) -> (SocketAddr, JoinHandle<std::io::Result<()>>) {
+        spawn_server_with_allowed_hosts(project, &[]).await
+    }
+
+    async fn spawn_server_with_allowed_hosts(
+        project: &TempScrapProject,
+        allowed_hosts: &[String],
+    ) -> (SocketAddr, JoinHandle<std::io::Result<()>>) {
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
         let addr = listener.local_addr().unwrap();
         let service = build_service(
             project.scraps_dir.clone(),
             vec![project.static_dir.clone(), project.output_dir.clone()],
+            allowed_hosts,
         );
 
         (addr, tokio::spawn(serve(listener, service)))
     }
 
     async fn post(addr: SocketAddr, path: &str, body: serde_json::Value) -> (StatusCode, String) {
+        post_with_host(addr, path, body, &addr.to_string()).await
+    }
+
+    async fn post_with_host(
+        addr: SocketAddr,
+        path: &str,
+        body: serde_json::Value,
+        host: &str,
+    ) -> (StatusCode, String) {
         let stream = TcpStream::connect(addr).await.unwrap();
         let (mut sender, connection) = hyper::client::conn::http1::handshake(TokioIo::new(stream))
             .await
@@ -104,7 +142,7 @@ mod tests {
         let request = Request::builder()
             .method(Method::POST)
             .uri(path)
-            .header(HOST, addr.to_string())
+            .header(HOST, host)
             .header(CONTENT_TYPE, "application/json")
             .header(ACCEPT, "application/json, text/event-stream")
             .body(Full::new(Bytes::from(body.to_string())))
@@ -189,6 +227,66 @@ mod tests {
         let text = response["result"]["content"][0]["text"].as_str().unwrap();
         let result: serde_json::Value = serde_json::from_str(text).unwrap();
         assert!(result["count"].as_u64().unwrap() > 0);
+
+        server_handle.abort();
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_unknown_host_is_forbidden(#[from(temp_scrap_project)] project: TempScrapProject) {
+        let (addr, server_handle) = spawn_server(&project).await;
+
+        let (status, body) = post_with_host(
+            addr,
+            ENDPOINT_PATH,
+            serde_json::json!({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}),
+            "wiki.example.com",
+        )
+        .await;
+
+        assert_eq!(status, StatusCode::FORBIDDEN);
+        assert!(body.contains("Host header is not allowed"));
+
+        server_handle.abort();
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_allowed_host_is_accepted(#[from(temp_scrap_project)] project: TempScrapProject) {
+        let (addr, server_handle) =
+            spawn_server_with_allowed_hosts(&project, &["wiki.example.com".to_string()]).await;
+
+        let (status, _) = post_with_host(
+            addr,
+            ENDPOINT_PATH,
+            serde_json::json!({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}),
+            "wiki.example.com",
+        )
+        .await;
+
+        assert_eq!(status, StatusCode::OK);
+
+        server_handle.abort();
+    }
+
+    /// Naming a host extends the allowlist; it does not take loopback out, so
+    /// the deployed server stays reachable through a port-forward.
+    #[rstest]
+    #[tokio::test]
+    async fn test_loopback_survives_allowed_hosts(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let (addr, server_handle) =
+            spawn_server_with_allowed_hosts(&project, &["wiki.example.com".to_string()]).await;
+
+        let (status, _) = post(
+            addr,
+            ENDPOINT_PATH,
+            serde_json::json!({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}),
+        )
+        .await;
+
+        assert_eq!(status, StatusCode::OK);
 
         server_handle.abort();
     }

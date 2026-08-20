@@ -191,6 +191,14 @@ pub enum McpSubCommands {
             help = "Serve over Streamable HTTP at this address instead of stdio; the MCP endpoint is <addr>/mcp"
         )]
         http: Option<String>,
+
+        #[arg(
+            long = "allowed-host",
+            value_name = "HOST",
+            requires = "http",
+            help = "Accept this Host header in addition to loopback; repeat for more. Needed when a proxy forwards under its own hostname"
+        )]
+        allowed_host: Vec<String>,
     },
 }
 

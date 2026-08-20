@@ -12,13 +12,17 @@ use tokio::net::TcpListener;
 use tracing::{info, Level};
 use tracing_subscriber::FmtSubscriber;
 
-pub async fn run(project_path: Option<&Path>, http_addr: Option<&str>) -> ScrapsResult<()> {
+pub async fn run(
+    project_path: Option<&Path>,
+    http_addr: Option<&str>,
+    allowed_hosts: &[String],
+) -> ScrapsResult<()> {
     init_tracing()?;
 
     let (scraps_dir, exclude_dirs) = resolve_dirs(project_path)?;
 
     match http_addr {
-        Some(addr) => serve_http(addr, scraps_dir, exclude_dirs).await,
+        Some(addr) => serve_http(addr, scraps_dir, exclude_dirs, allowed_hosts).await,
         None => serve_stdio(scraps_dir, exclude_dirs).await,
     }
 }
@@ -73,6 +77,7 @@ async fn serve_http(
     addr: &str,
     scraps_dir: PathBuf,
     exclude_dirs: Vec<PathBuf>,
+    allowed_hosts: &[String],
 ) -> ScrapsResult<()> {
     let listener = TcpListener::bind(addr)
         .await
@@ -89,7 +94,11 @@ async fn serve_http(
         scraps_dir.display()
     );
 
-    let service = mcp::http::build_service(scraps_dir, exclude_dirs);
+    if !allowed_hosts.is_empty() {
+        info!("Also accepting Host: {}", allowed_hosts.join(", "));
+    }
+
+    let service = mcp::http::build_service(scraps_dir, exclude_dirs, allowed_hosts);
     tokio::select! {
         result = mcp::http::serve(listener, service) => {
             result.map_err(|e| McpError::ServiceError(e.to_string()))?;

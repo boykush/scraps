@@ -77,10 +77,14 @@ fn main() -> error::ScrapsResult<()> {
             cli::cmd::todo::run(status.into(), json, directory, &mut std::io::stdout())
         }
         cli::SubCommands::Mcp { mcp_command } => match mcp_command {
-            cli::McpSubCommands::Serve { http } => {
+            cli::McpSubCommands::Serve { http, allowed_host } => {
                 let runtime = tokio::runtime::Runtime::new()
                     .map_err(|e| McpError::RuntimeCreation(e.to_string()))?;
-                runtime.block_on(cli::cmd::mcp::serve::run(directory, http.as_deref()))
+                runtime.block_on(cli::cmd::mcp::serve::run(
+                    directory,
+                    http.as_deref(),
+                    &allowed_host,
+                ))
             }
         },
     }

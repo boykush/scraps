@@ -67,6 +67,26 @@ URL, so the wiki path is configured once — on the server — instead of in
 each repository. One process serves one wiki; run a second process on
 another port to serve another.
 
+### Behind a proxy or tunnel
+
+The HTTP transport accepts only loopback `Host` headers, which is what keeps
+a browser on a visited page from reaching a server bound to your machine. A
+reverse proxy or tunnel forwarding under its own hostname is refused with
+`403 Forbidden: Host header is not allowed`, so name that hostname when
+starting the server:
+
+```bash
+❯ scraps -C ~/path/to/your/wiki mcp serve --http 0.0.0.0:1113 \
+    --allowed-host wiki.example.com
+```
+
+Repeat `--allowed-host` for each hostname. Loopback stays allowed either
+way, so a port-forward or a local `curl` against the same process keeps
+working. Naming the hostname here is preferable to having the proxy rewrite
+`Host`: the allowlist stays as narrow as the deployment actually needs, and
+it stays next to the server it applies to rather than in proxy
+configuration.
+
 The server is bundled as a plugin so installation and tool specifications
 stay together:
 
