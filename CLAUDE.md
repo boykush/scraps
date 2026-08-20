@@ -15,5 +15,5 @@ For comprehensive guidelines, see @CONTRIBUTING.md
 1. **Plan**: Start in Plan mode to analyze requirements and design approach
 2. **Implement**: One TODO at a time, following TDD (Red -> Green -> Refactor)
    - PostToolUse hook auto-formats `.rs` files on Edit/Write
-   - Pre-commit hook runs `cargo:quality` (build + test + fmt + clippy) automatically
+   - Pre-commit hook runs `cargo:quality` (test + fmt + clippy) automatically
 3. **Commit & PR**: Use `/commit` or `/commit-push-pr` skill (see @CONTRIBUTING.md)

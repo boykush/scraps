@@ -6,6 +6,7 @@ on:
     paths-ignore:
       - 'scraps/**'
       - 'assets/**'
+      - '.github/workflows/claude-review-from-author.yml'
       - 'CONTRIBUTING.md'
       - 'LICENSE.md'
       - 'README.md'
@@ -13,6 +14,10 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   performance:
@@ -33,6 +38,8 @@ jobs:
         with:
           cache: false
           install_args: "rust"
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
 
       - name: Run performance test
         id: build
@@ -69,3 +76,4 @@ jobs:
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
+  MISE_AUTO_INSTALL: "false"
