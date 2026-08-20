@@ -67,6 +67,21 @@ URL, so the wiki path is configured once — on the server — instead of in
 each repository. One process serves one wiki; run a second process on
 another port to serve another.
 
+Only loopback `Host` headers are accepted by default, which is what stops
+DNS rebinding attacks against a server running on your machine. Reaching
+it through a reverse proxy or tunnel under a real hostname means naming
+that hostname:
+
+```bash
+❯ scraps -C ~/path/to/your/wiki mcp serve --http 0.0.0.0:1113 \
+    --allowed-host mcp.example.com
+```
+
+`--allowed-host` is repeatable, and it adds to the loopback default rather
+than replacing it, so a port-forward or a local `curl` still reaches the
+same process. Scraps itself has no authentication: whatever can reach the
+endpoint can read the wiki, so the access control belongs in the proxy.
+
 The server is bundled as a plugin so installation and tool specifications
 stay together:
 
