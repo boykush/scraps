@@ -22,7 +22,7 @@ jobs:
 
       - name: Review PR from Specific Author
         timeout-minutes: 60
-        uses: anthropics/claude-code-action@9d7150bc8a3dae8149739a88019d192b579ad90c # v1.0.193
+        uses: anthropics/claude-code-action@5ee796a55f92566ecd7e39d70dd613abcbea0d7c # v1.0.197
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
