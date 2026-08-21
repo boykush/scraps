@@ -84,7 +84,6 @@ This project uses [hk](https://hk.jdx.dev/) for managing git hooks. Pre-commit h
 
 The pre-commit hook runs quality checks on staged files:
 - **Rust files (*.rs)**: Runs `mise run cargo:quality` which includes:
-  - Build verification
   - All tests
   - Code formatting check (rustfmt)
   - Linter checks (clippy)
