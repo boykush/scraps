@@ -23,7 +23,7 @@ toml = "=1.1.4"
 rayon = "=1.12.0"
 clap = { version = "=4.6.6", features = ["derive", "env"] }
 config = { version = "=0.15.25", features = ["toml"] }
-tera = { version = "=2.1.1", features = ["glob_fs"] }
+tera = { version = "=2.2.0", features = ["glob_fs"] }
 once_cell = "=1.21.4"
 chrono = "=0.4.45"
 chrono-tz = { version = "=0.10.4", features = ["serde"] }
