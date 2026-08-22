@@ -1,6 +1,6 @@
 {
   "name": "mcp-server",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "MCP server for Scraps - Connect to a locally running scraps MCP server (scraps mcp serve --http) to browse and search interconnected Markdown documentation with Wiki-link notation",
   "author": {
     "name": "boykush",

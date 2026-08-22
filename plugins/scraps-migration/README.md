@@ -75,4 +75,4 @@ asks for the old version before making migration edits because v0
 ## Further Reading
 
 - v1 vision: `design/v1/vision.md`
-- v1 AI skills: `plugins/scraps/README.md`
+- v1 AI skills: `plugins/llm-wiki/README.md`

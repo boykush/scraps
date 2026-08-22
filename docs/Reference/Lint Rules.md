@@ -17,4 +17,4 @@ rules with dependencies are opt-in via `--rule` or `[lint.<rule>]` in
 
 Output follows the `cargo clippy`-style diagnostic format. For LLM-driven
 purpose-based rule selection, see the `lint-rule-handler` agent in the
-[scraps plugin](https://github.com/boykush/scraps/tree/main/plugins/scraps).
+[llm-wiki plugin](https://github.com/boykush/scraps/tree/main/plugins/llm-wiki).
