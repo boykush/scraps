@@ -1,6 +1,6 @@
-# Scraps Plugin
+# LLM Wiki Plugin
 
-Official AI skills bundle for [Scraps](https://github.com/boykush/scraps), the Wiki-link document compiler for the LLM era.
+Official LLM Wiki bundle for [Scraps](https://github.com/boykush/scraps), the Wiki-link document compiler for the LLM era.
 
 ## Overview
 
@@ -21,10 +21,15 @@ Add this to your project's `.claude/settings.json`:
 ```json
 {
   "enabledPlugins": {
-    "scraps@scraps-claude-code-plugins": true
+    "llm-wiki@scraps-claude-code-plugins": true
   }
 }
 ```
+
+> **Renamed in v0.2.0.** This plugin was previously published as `scraps`.
+> Replace `"scraps@scraps-claude-code-plugins": true` with
+> `"llm-wiki@scraps-claude-code-plugins": true` in your settings; skills
+> (`/ingest`, `/query`) and agents keep their names.
 
 The plugin operates against the current Scraps wiki. To target a different wiki, set `SCRAPS_DIRECTORY` in your environment or pass `-C` to scraps commands inside the skill workflows.
 

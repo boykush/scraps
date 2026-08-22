@@ -31,15 +31,15 @@ optional heading targets; `backlinks` stays a scrap-level inbound lookup.
 The full command map is in [[Reference/CLI Overview]]. Each command's `--help`
 documents flags and JSON shape.
 
-### Bundled AI skills and agents
+### Bundled LLM Wiki skills and agents
 
-For Claude Code and Codex users, the official **scraps plugin** packages
+For Claude Code and Codex users, the official **llm-wiki plugin** packages
 [Karpathy](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)-style
 *Ingest / Query / Lint* workflows around the CLI. The Claude Code agents add
 purpose-driven lint handling and a default Scraps LLM Wiki schema grounded in
 the official docs:
 
-<https://github.com/boykush/scraps/tree/main/plugins/scraps>
+<https://github.com/boykush/scraps/tree/main/plugins/llm-wiki>
 
 | Skill / Agent | Role |
 |---|---|

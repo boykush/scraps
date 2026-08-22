@@ -69,9 +69,9 @@ support `-C`.
 | project path config / `scraps_dir` style | `.scraps.toml` directory is wiki root | Move or rewrite config so the file sits at the wiki root. |
 | `public/` output assumptions | `_site/` default output | Migrate config, deploy workflows, and docs to `_site/`; do not preserve `public/` as a compatibility branch. |
 | `-p` / `--path` / `SCRAPS_PROJECT_PATH` | `-C` / `--directory` / `SCRAPS_DIRECTORY` | Update docs, scripts, CI, and agent settings. |
-| `scraps template generate` / `scraps template list` | removed | Delete template command usage from docs, scripts, aliases, and agent workflows; replace authoring with `scraps` plugin `/ingest` or normal markdown edits. |
+| `scraps template generate` / `scraps template list` | removed | Delete template command usage from docs, scripts, aliases, and agent workflows; replace authoring with `llm-wiki` plugin `/ingest` or normal markdown edits. |
 | template/frontmatter authoring path | skill-based authoring | Remove generated template files, frontmatter fields used only by templates, and workflow dependence on generated template scaffolds; keep ordinary markdown content. |
-| `scraps-writer` plugin | `scraps` plugin | Replace `/add-scrap`, `/web-to-scrap`, `/scraps-writer` with `/ingest`; use `/query` for read-side synthesis. |
+| `scraps-writer` plugin | `llm-wiki` plugin | Replace `/add-scrap`, `/web-to-scrap`, `/scraps-writer` with `/ingest`; use `/query` for read-side synthesis. |
 
 ## Workflow
 
@@ -153,7 +153,7 @@ Update `.scraps.toml` and surrounding automation:
   - Delete `scraps template generate` and `scraps template list` examples from
     docs, scripts, aliases, CI, and agent instructions.
   - Do not replace them with another CLI command; v1 authoring is markdown
-    editing plus the `scraps` plugin `/ingest` workflow.
+    editing plus the `llm-wiki` plugin `/ingest` workflow.
   - Remove generated template scaffolds only when they are clearly template
     artifacts. Preserve user-authored markdown content.
 - Update GitHub Pages deployment:

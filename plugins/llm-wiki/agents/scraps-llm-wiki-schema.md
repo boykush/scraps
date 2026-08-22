@@ -45,10 +45,10 @@ The spec lives in the official published docs — `WebFetch` them so guidance re
 | <https://boykush.github.io/scraps/scraps/reference/wiki-link-notation.html> | Wiki-link, ctx, tag, heading, and embed syntax |
 | <https://boykush.github.io/scraps/scraps/reference/wiki-link/normal-link.html> vs <https://boykush.github.io/scraps/scraps/reference/wiki-link/tag.html> | The `[[link]]` vs `#[[tag]]` distinction — disjoint namespaces |
 | <https://boykush.github.io/scraps/scraps/reference/lint-rules.html> | Lint rule meanings and when to use them |
-| `plugins/scraps/README.md` | Official Scraps skills and agents overview |
-| `plugins/scraps/skills/ingest/SKILL.md` | Ingest workflow details |
-| `plugins/scraps/skills/query/SKILL.md` | Query workflow details |
-| `plugins/scraps/agents/lint-rule-handler.md` | Purpose-driven lint workflow details |
+| `plugins/llm-wiki/README.md` | Official Scraps skills and agents overview |
+| `plugins/llm-wiki/skills/ingest/SKILL.md` | Ingest workflow details |
+| `plugins/llm-wiki/skills/query/SKILL.md` | Query workflow details |
+| `plugins/llm-wiki/agents/lint-rule-handler.md` | Purpose-driven lint workflow details |
 
 Prefer the official docs over memory. When the user's question depends on current Scraps behavior — especially syntax like the `[[link]]` vs `#[[tag]]` distinction — `WebFetch` the relevant page before answering.
 

@@ -2,7 +2,7 @@
 
 MCP server for browsing and searching [Scraps](https://github.com/boykush/scraps) wikis.
 
-This plugin points MCP-compatible clients at a locally running `scraps mcp serve --http`, so Scraps tools can be called from any repository on your machine. For most read-shaped agent workflows the simpler path is `scraps <cmd> --json` via the shell — see the [`scraps` plugin](../scraps/README.md) for the bundled CLI + JSON skills.
+This plugin points MCP-compatible clients at a locally running `scraps mcp serve --http`, so Scraps tools can be called from any repository on your machine. For most read-shaped agent workflows the simpler path is `scraps <cmd> --json` via the shell — see the [`llm-wiki` plugin](../llm-wiki/README.md) for the bundled CLI + JSON skills.
 
 ```text
  scraps -C ~/wiki mcp serve --http    ← one local server, holds the wiki
@@ -155,4 +155,4 @@ Replace `~/path/to/your/wiki` with the directory containing `.scraps.toml`. stdi
 
 - Scraps documentation: <https://boykush.github.io/scraps/>
 - AI integration overview: <https://boykush.github.io/scraps/scraps/how-to/integrate-with-ai-assistants.html>
-- CLI + JSON skills bundle: [`scraps` plugin](../scraps/README.md)
+- CLI + JSON skills bundle: [`llm-wiki` plugin](../llm-wiki/README.md)

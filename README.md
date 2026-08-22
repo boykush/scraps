@@ -53,7 +53,7 @@ Scraps reads `[[wiki-link]]`, `#[[tag]]`, `![[embed]]`, `[[Page#heading]]`, and 
 
 CLI + JSON is the primary path — any shell-capable agent can query Scraps without an MCP client implementation. Bundled plugins provide agent-facing workflows:
 
-- [`scraps`](plugins/scraps) — Karpathy-style *Ingest / Query / Lint* skills for Claude Code and Codex, plus Claude Code agents for purpose-driven lint and the default Scraps LLM Wiki schema
+- [`llm-wiki`](plugins/llm-wiki) — Karpathy-style *Ingest / Query / Lint* skills for Claude Code and Codex, plus Claude Code agents for purpose-driven lint and the default Scraps LLM Wiki schema
 - [`mcp-server`](plugins/mcp-server) — MCP server for MCP-compatible clients, shared across repositories via `scraps mcp serve --http`
 
 See the [AI integration guide](https://boykush.github.io/scraps/scraps/how-to/integrate-with-ai-assistants.html) for the trade-offs.
