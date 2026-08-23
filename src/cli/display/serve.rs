@@ -24,11 +24,7 @@ impl fmt::Display for DisplayServeInfo {
             String::new(),
             format!("{}  {}", "Serving:".bold(), self.title),
             format!("{}    {}", "Local:".bold(), self.url.cyan()),
-            format!(
-                "{}   {}",
-                "Scraps:".bold(),
-                format!("{} pages", self.scrap_count)
-            ),
+            format!("{}   {} pages", "Scraps:".bold(), self.scrap_count),
             String::new(),
             format!("Press {} to stop", "Ctrl+C".bold()),
             String::new(),

@@ -8,6 +8,13 @@ use scraps_libs::model::{context::Ctx, scrap::Scrap};
 
 use crate::error::{ScrapsError, ScrapsResult};
 
+/// A scrap paired with its last-commit unix timestamp, `None` when git
+/// lookup is disabled or unavailable.
+pub(crate) type ScrapWithTimestamp = (Scrap, Option<i64>);
+
+/// Every scrap of a project, plus the raw `README.md` text when present.
+pub(crate) type ScrapsWithReadme = (Vec<ScrapWithTimestamp>, Option<String>);
+
 /// Recursively walk `dir_path` collecting `*.md` files. Skips entries whose
 /// name starts with `.` (so `.git/`, `.scraps.toml`, etc. never enter the
 /// traversal) and any directory whose absolute path matches `exclude_dirs`
@@ -108,7 +115,7 @@ pub(crate) fn to_all_scraps_with_timestamps<
     scraps_dir_path: &Path,
     exclude_dirs: &[PathBuf],
     git_command: Option<GC>,
-) -> ScrapsResult<(Vec<(Scrap, Option<i64>)>, Option<String>)> {
+) -> ScrapsResult<ScrapsWithReadme> {
     use rayon::prelude::*;
 
     let paths = to_scrap_paths(scraps_dir_path, exclude_dirs)?;

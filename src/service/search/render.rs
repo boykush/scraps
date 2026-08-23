@@ -1,62 +1,40 @@
-use std::io::{BufWriter, Write};
-use std::{fs::File, path::PathBuf};
+use std::path::{Path, PathBuf};
 
-use crate::error::BuildError;
-use crate::error::{anyhow::Context, ScrapsResult};
+use crate::error::ScrapsResult;
+use crate::service::tera_render::{render_to_file, resolve_template, user_template_glob};
 use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::scrap::Scrap;
+use tera::Tera;
 
 use super::search_index_tera;
 use super::serde::search_index_scraps::SearchIndexScrapsTera;
 
 pub struct SearchIndexRender {
-    static_dir_path: PathBuf,
+    tera: Tera,
     output_dir_path: PathBuf,
 }
 
 impl SearchIndexRender {
-    pub fn new(
-        static_dir_path: &PathBuf,
-        output_dir_path: &PathBuf,
-    ) -> ScrapsResult<SearchIndexRender> {
-        std::fs::create_dir_all(output_dir_path).context(BuildError::CreateDir)?;
+    pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<SearchIndexRender> {
+        let tera = search_index_tera::tera(&user_template_glob(static_dir_path, "*.json"))?;
 
         Ok(SearchIndexRender {
-            static_dir_path: static_dir_path.to_owned(),
-            output_dir_path: output_dir_path.to_owned(),
+            tera,
+            output_dir_path: output_dir_path.to_path_buf(),
         })
     }
 
     pub fn run(&self, base_url: &BaseUrl, scraps: &[Scrap]) -> ScrapsResult<()> {
-        let serialize_scraps = SearchIndexScrapsTera::new(scraps);
+        let mut context = search_index_tera::context(base_url);
+        context.insert("scraps", &SearchIndexScrapsTera::new(scraps));
 
-        Self::render_search_index_json(self, base_url, &serialize_scraps)
-    }
-
-    fn render_search_index_json(
-        &self,
-        base_url: &BaseUrl,
-        scraps: &SearchIndexScrapsTera,
-    ) -> ScrapsResult<()> {
-        let (tera, mut context) = search_index_tera::base(
-            base_url,
-            self.static_dir_path.join("*.json").to_str().unwrap(),
-        )?;
-        let template_name = if tera.get_template_names().any(|t| t == "search_index.json") {
-            "search_index.json"
-        } else {
-            "__builtins/search_index.json"
-        };
-        context.insert("scraps", scraps);
-        let file_path = &self.output_dir_path.join("search_index.json");
-        // tera renders in many small writes, so buffer them into one file write.
-        let mut wtr = BufWriter::new(
-            File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?,
+        let template_name = resolve_template(
+            &self.tera,
+            "search_index.json",
+            "__builtins/search_index.json",
         );
-        tera.render_to(template_name, &context, &mut wtr)
-            .context(BuildError::WriteFailure(file_path.clone()))?;
-        wtr.flush()
-            .context(BuildError::WriteFailure(file_path.clone()))
+        let file_path = self.output_dir_path.join("search_index.json");
+        render_to_file(&self.tera, template_name, &context, &file_path)
     }
 }
 

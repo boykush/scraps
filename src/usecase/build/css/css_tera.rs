@@ -13,17 +13,22 @@ static CSS_TERA: Lazy<Tera> = Lazy::new(|| {
         "__builtins/main.css",
         include_str!("builtins/main.css"),
     )])
-    .unwrap();
+    .expect("builtin templates are compiled into the binary");
     tera
 });
 
-pub fn base(template_dir: &str, color_scheme: &ColorScheme) -> ScrapsResult<(Tera, tera::Context)> {
-    let mut tera = CSS_TERA.clone();
+/// Loading the glob re-parses every template, so build this once and reuse it.
+pub fn tera(template_dir: &str) -> ScrapsResult<Tera> {
+    let mut tera = Tera::clone(&CSS_TERA);
     tera.load_from_glob(template_dir)
         .context(BuildError::RenderCss)?;
 
+    Ok(tera)
+}
+
+pub fn context(color_scheme: &ColorScheme) -> tera::Context {
     let mut context = tera::Context::new();
     context.insert("color_scheme", &ColorSchemeTera::new(color_scheme));
 
-    Ok((tera, context))
+    context
 }

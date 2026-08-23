@@ -97,7 +97,9 @@ impl ScrapsServer {
     }
 }
 
-#[tool_handler]
+// Without `router = ...` the macro rebuilds the router (and every tool's
+// JSON schema) on each request; point it at the one built in `new`.
+#[tool_handler(router = self.tool_router)]
 impl ServerHandler for ScrapsServer {
     fn get_info(&self) -> ServerInfo {
         ServerInfo::new(ServerCapabilities::builder().enable_tools().build())

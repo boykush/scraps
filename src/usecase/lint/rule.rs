@@ -26,8 +26,9 @@ impl LintRuleName {
         }
     }
 
-    /// Rules selected when `scraps lint` is invoked without `--rule` or `--all`.
-    /// Excludes opt-in rules with external dependencies (e.g. `_by_git`).
+    /// Rules selected when `scraps lint` is invoked without `--rule`.
+    /// Excludes opt-in rules with external dependencies (e.g. `_by_git`),
+    /// which are enabled per-rule through the `[lint.*]` config sections.
     pub fn default_rules() -> Vec<LintRuleName> {
         vec![
             Self::DeadEnd,
@@ -37,13 +38,6 @@ impl LintRuleName {
             Self::BrokenLink,
             Self::BrokenHeadingRef,
         ]
-    }
-
-    /// All rules including opt-in ones. Used by `scraps lint --all`.
-    pub fn all_rules() -> Vec<LintRuleName> {
-        let mut rules = Self::default_rules();
-        rules.push(Self::StaleByGit);
-        rules
     }
 }
 

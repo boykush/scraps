@@ -10,17 +10,22 @@ static SEARCH_INDEX_TERA: Lazy<Tera> = Lazy::new(|| {
         "__builtins/search_index.json",
         include_str!("builtins/search_index.json"),
     )])
-    .unwrap();
+    .expect("builtin templates are compiled into the binary");
     tera
 });
 
-pub fn base(base_url: &BaseUrl, template_dir: &str) -> ScrapsResult<(Tera, tera::Context)> {
-    let mut tera = SEARCH_INDEX_TERA.clone();
+/// Loading the glob re-parses every template, so build this once and reuse it.
+pub fn tera(template_dir: &str) -> ScrapsResult<Tera> {
+    let mut tera = Tera::clone(&SEARCH_INDEX_TERA);
     tera.load_from_glob(template_dir)
         .context(BuildError::RenderJson)?;
 
+    Ok(tera)
+}
+
+pub fn context(base_url: &BaseUrl) -> tera::Context {
     let mut context = tera::Context::new();
     context.insert("base_url", base_url.as_url());
 
-    Ok((tera, context))
+    context
 }

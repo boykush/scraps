@@ -1,4 +1,4 @@
-pub extern crate anyhow;
+pub use anyhow;
 
 use std::path::PathBuf;
 

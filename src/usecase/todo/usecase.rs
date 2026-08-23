@@ -15,13 +15,13 @@ pub enum StatusFilter {
 
 impl StatusFilter {
     fn matches(self, status: &TaskStatus) -> bool {
-        match (self, status) {
-            (StatusFilter::All, _) => true,
-            (StatusFilter::Open, TaskStatus::Open) => true,
-            (StatusFilter::Done, TaskStatus::Done) => true,
-            (StatusFilter::Deferred, TaskStatus::Deferred) => true,
-            _ => false,
-        }
+        matches!(
+            (self, status),
+            (StatusFilter::All, _)
+                | (StatusFilter::Open, TaskStatus::Open)
+                | (StatusFilter::Done, TaskStatus::Done)
+                | (StatusFilter::Deferred, TaskStatus::Deferred)
+        )
     }
 }
 

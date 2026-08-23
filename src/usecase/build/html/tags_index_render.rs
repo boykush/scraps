@@ -1,33 +1,30 @@
-use std::fs;
-use std::io::{BufWriter, Write};
-use std::path::Path;
-use std::{fs::File, path::PathBuf};
+use std::path::{Path, PathBuf};
 
-use crate::error::BuildError;
-use crate::error::{anyhow::Context, ScrapsResult};
+use crate::error::ScrapsResult;
+use crate::service::tera_render::{render_to_file, resolve_template, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::tags::Tags;
+use tera::Tera;
 
-use crate::usecase::build::html::tera::tags_index_tera;
+use crate::usecase::build::html::templates;
 
 use super::serde::tags::TagsTera;
 
 pub struct TagsIndexRender {
-    static_dir_path: PathBuf,
+    tera: Tera,
     output_tags_dir_path: PathBuf,
 }
 
 impl TagsIndexRender {
     pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<TagsIndexRender> {
-        let output_tags_dir_path = &output_dir_path.join("tags");
-        fs::create_dir_all(output_tags_dir_path).context(BuildError::CreateDir)?;
+        let tera = templates::tags_index(&user_template_glob(static_dir_path, "*.html"))?;
 
         Ok(TagsIndexRender {
-            static_dir_path: static_dir_path.to_owned(),
-            output_tags_dir_path: output_tags_dir_path.to_owned(),
+            tera,
+            output_tags_dir_path: output_dir_path.join("tags"),
         })
     }
 
@@ -38,37 +35,13 @@ impl TagsIndexRender {
         scraps: &[Scrap],
         backlinks_map: &BacklinksMap,
     ) -> ScrapsResult<()> {
-        let stags = &TagsTera::new(&Tags::new(scraps), backlinks_map);
+        let mut context = templates::context(base_url, metadata);
+        context.insert("tags", &TagsTera::new(&Tags::new(scraps), backlinks_map));
 
-        Self::render_html(self, base_url, metadata, stags)
-    }
-
-    fn render_html(
-        &self,
-        base_url: &BaseUrl,
-        metadata: &HtmlMetadata,
-        tags: &TagsTera,
-    ) -> ScrapsResult<()> {
-        let (tera, mut context) = tags_index_tera::base(
-            base_url,
-            metadata,
-            self.static_dir_path.join("*.html").to_str().unwrap(),
-        )?;
-        let template_name = if tera.get_template_names().any(|t| t == "tags_index.html") {
-            "tags_index.html"
-        } else {
-            "__builtins/tags_index.html"
-        };
-        context.insert("tags", tags);
-        let file_path = &self.output_tags_dir_path.join("index.html");
-        // tera renders in many small writes, so buffer them into one file write.
-        let mut wtr = BufWriter::new(
-            File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?,
-        );
-        tera.render_to(template_name, &context, &mut wtr)
-            .context(BuildError::WriteFailure(file_path.clone()))?;
-        wtr.flush()
-            .context(BuildError::WriteFailure(file_path.clone()))
+        let template_name =
+            resolve_template(&self.tera, "tags_index.html", "__builtins/tags_index.html");
+        let file_path = self.output_tags_dir_path.join("index.html");
+        render_to_file(&self.tera, template_name, &context, &file_path)
     }
 }
 

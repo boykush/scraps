@@ -1,3 +1,5 @@
+use std::cmp::Reverse;
+
 use fuzzy_matcher::skim::SkimMatcherV2;
 use fuzzy_matcher::FuzzyMatcher;
 
@@ -66,7 +68,7 @@ impl SearchEngine for FuzzySearchEngine {
             })
             .collect();
 
-        results_with_scores.sort_by(|a, b| b.1.cmp(&a.1));
+        results_with_scores.sort_by_key(|(_, score)| Reverse(*score));
 
         results_with_scores
             .into_iter()

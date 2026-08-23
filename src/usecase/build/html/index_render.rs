@@ -1,18 +1,18 @@
 use std::fs;
-use std::io::{BufWriter, Write};
-use std::path::Path;
-use std::{fs::File, path::PathBuf};
+use std::path::{Path, PathBuf};
 
 use crate::error::BuildError;
 use crate::error::{anyhow::Context, ScrapsResult};
+use crate::service::tera_render::{render_to_file, resolve_template, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::list_view_configs::ListViewConfigs;
 use crate::usecase::build::model::scrap_detail::ScrapDetails;
 use scraps_libs::model::{base_url::BaseUrl, content::Content, tags::Tags};
+use tera::Tera;
 use tracing::{span, Level};
 
-use crate::usecase::build::html::tera::index_tera;
+use crate::usecase::build::html::templates;
 
 use super::page_pointer::PagePointer;
 use super::serde::content::ContentTera;
@@ -21,16 +21,17 @@ use super::serde::sort::SortKeyTera;
 use super::serde::tags::TagsTera;
 
 pub struct IndexRender {
-    static_dir_path: PathBuf,
+    tera: Tera,
     output_dir_path: PathBuf,
 }
 
 impl IndexRender {
     pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<IndexRender> {
         fs::create_dir_all(output_dir_path).context(BuildError::CreateDir)?;
+        let tera = templates::index(&user_template_glob(static_dir_path, "*.html"))?;
 
         Ok(IndexRender {
-            static_dir_path: static_dir_path.to_path_buf(),
+            tera,
             output_dir_path: output_dir_path.to_path_buf(),
         })
     }
@@ -47,23 +48,18 @@ impl IndexRender {
         let scraps = &scrap_details.to_scraps();
         let sorted_scraps = IndexScrapsTera::new_with_sort(
             scrap_details,
-            &backlinks_map,
+            backlinks_map,
             &list_view_configs.sort_key,
         );
-        let stags = &TagsTera::new(&Tags::new(scraps), &backlinks_map);
-        // setup tera
-        let (tera, base_context) = {
-            let (tera, mut context) = index_tera::base(
-                base_url,
-                metadata,
-                self.static_dir_path.join("*.html").to_str().unwrap(),
-            )?;
+        let stags = &TagsTera::new(&Tags::new(scraps), backlinks_map);
+        let base_context = {
+            let mut context = templates::context(base_url, metadata);
             context.insert(
                 "sort_key",
                 &SortKeyTera::from(list_view_configs.sort_key.clone()),
             );
             context.insert("build_search_index", &list_view_configs.build_search_index);
-            (tera, context)
+            context
         };
 
         // chunks by config
@@ -81,7 +77,7 @@ impl IndexRender {
                 total_pages,
                 readme_content,
             );
-            self.render_html(&tera, &context, &page_pointer)?;
+            self.render_html(&context, &page_pointer)?;
         }
 
         // generate paginated
@@ -99,7 +95,7 @@ impl IndexRender {
                     page_num,
                     total_pages,
                 );
-                self.render_html(&tera, &context, &page_pointer)?;
+                self.render_html(&context, &page_pointer)?;
                 ScrapsResult::Ok(())
             })?;
 
@@ -140,27 +136,10 @@ impl IndexRender {
         (context, pointer)
     }
 
-    fn render_html(
-        &self,
-        tera: &tera::Tera,
-        context: &tera::Context,
-        pointer: &PagePointer,
-    ) -> ScrapsResult<()> {
-        let template_name = if tera.get_template_names().any(|t| t == "index.html") {
-            "index.html"
-        } else {
-            "__builtins/index.html"
-        };
-        let file_path = &self.output_dir_path.join(pointer.current_file_name());
-        // tera renders in many small writes, so buffer them into one file write.
-        let mut wtr = BufWriter::new(
-            File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?,
-        );
-        tera.render_to(template_name, context, &mut wtr)
-            .context(BuildError::WriteFailure(file_path.clone()))?;
-        wtr.flush()
-            .context(BuildError::WriteFailure(file_path.clone()))?;
-        Ok(())
+    fn render_html(&self, context: &tera::Context, pointer: &PagePointer) -> ScrapsResult<()> {
+        let template_name = resolve_template(&self.tera, "index.html", "__builtins/index.html");
+        let file_path = self.output_dir_path.join(pointer.current_file_name());
+        render_to_file(&self.tera, template_name, context, &file_path)
     }
 }
 
