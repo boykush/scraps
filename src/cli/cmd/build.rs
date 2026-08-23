@@ -8,12 +8,6 @@ use crate::cli::progress::ProgressImpl;
 use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
 use crate::output::build_renderer::BuildRendererImpl;
-use crate::usecase::build::model::color_scheme::ColorScheme;
-use crate::usecase::build::model::css::CssMetadata;
-use crate::usecase::build::model::html::HtmlMetadata;
-use crate::usecase::build::model::list_view_configs::ListViewConfigs;
-use crate::usecase::build::model::paging::Paging;
-use crate::usecase::build::model::sort::SortKey;
 use crate::usecase::build::usecase::BuildUsecase;
 
 use crate::cli::config::scrap_config::ScrapConfig;
@@ -47,7 +41,7 @@ pub fn run(
 fn execute(git: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
     let path_resolver = PathResolver::new(project_path)?;
     let config = ScrapConfig::from_path(project_path)?;
-    let ssg = config.require_ssg()?;
+    let build_config = config.to_build_config(None)?;
     let scraps_dir_path = path_resolver.scraps_dir();
     let static_dir_path = path_resolver.static_dir();
     let output_dir_path = path_resolver.output_dir(&config);
@@ -60,49 +54,16 @@ fn execute(git: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
     let (scraps_with_ts, readme_text) =
         read_scraps::to_all_scraps_with_timestamps(&scraps_dir_path, &exclude_dirs, git_command)?;
 
-    let renderer = BuildRendererImpl::new(&static_dir_path, &output_dir_path);
+    let renderer = BuildRendererImpl::new(&static_dir_path, &output_dir_path)?;
     let usecase = BuildUsecase::new();
     let progress = ProgressImpl::init(Instant::now());
-    let base_url = ssg.base_url();
-    let title = &ssg.title;
-    let default_lang_code = scraps_libs::lang::LangCode::default();
-    let lang_code = ssg
-        .lang_code
-        .as_ref()
-        .map(|c| c.as_lang_code())
-        .unwrap_or(&default_lang_code);
-    let timezone = config.timezone.unwrap_or(chrono_tz::UTC);
-    let html_metadata = HtmlMetadata::new(lang_code, title, &ssg.description, &ssg.favicon);
-    let default_color_scheme = ColorScheme::OsSetting;
-    let css_metadata = CssMetadata::new(
-        ssg.color_scheme
-            .as_ref()
-            .map(|c| c.as_color_scheme())
-            .unwrap_or(&default_color_scheme),
-    );
-    let build_search_index = ssg.build_search_index.unwrap_or(true);
-    let default_sort_key = SortKey::CommittedDate;
-    let sort_key = ssg
-        .sort_key
-        .as_ref()
-        .map(|s| s.as_sort_key())
-        .unwrap_or(&default_sort_key);
-    let paging = match ssg.paginate_by {
-        None => Paging::Not,
-        Some(u) => Paging::By(u),
-    };
-    let list_view_configs = ListViewConfigs::new(&build_search_index, sort_key, &paging);
 
     usecase.execute(
         &scraps_with_ts,
         &readme_text,
         &progress,
         &renderer,
-        &base_url,
-        timezone,
-        &html_metadata,
-        &css_metadata,
-        &list_view_configs,
+        &build_config,
     )?;
     progress.end();
 

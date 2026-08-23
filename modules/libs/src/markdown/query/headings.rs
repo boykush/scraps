@@ -33,7 +33,7 @@ pub fn headings(text: &str) -> Vec<Heading> {
     let mut stack: Vec<(u8, String)> = Vec::new();
     for n in root.descendants() {
         if let NodeValue::Heading(h) = &n.data().value {
-            let level = h.level as u8;
+            let level = h.level;
             let label = collect_text(n);
             let line = n.data().sourcepos.start.line;
 

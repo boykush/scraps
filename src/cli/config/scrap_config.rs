@@ -1,7 +1,12 @@
 use crate::cli::path_resolver::PathResolver;
 use crate::error::{anyhow::Context, CliError, ScrapsResult};
+use crate::usecase::build::model::{
+    build_config::BuildConfig, color_scheme::ColorScheme, css::CssMetadata, html::HtmlMetadata,
+    list_view_configs::ListViewConfigs, paging::Paging, sort::SortKey,
+};
 use chrono_tz::Tz;
 use config::Config;
+use scraps_libs::lang::LangCode;
 use scraps_libs::model::base_url::BaseUrl;
 use serde::Deserialize;
 use std::path::{Path, PathBuf};
@@ -94,5 +99,50 @@ impl ScrapConfig {
     /// Gets optional base_url if ssg section is present
     pub fn get_base_url(&self) -> Option<BaseUrl> {
         self.ssg.as_ref().map(|s| s.base_url())
+    }
+
+    /// Resolve the settings a build run needs, applying the defaults for every
+    /// omitted `[ssg]` key. `base_url` overrides the configured one, which
+    /// `serve` needs so links point at the local address it listens on.
+    pub fn to_build_config(&self, base_url: Option<BaseUrl>) -> ScrapsResult<BuildConfig> {
+        let ssg = self.require_ssg()?;
+
+        let default_lang_code = LangCode::default();
+        let lang_code = ssg
+            .lang_code
+            .as_ref()
+            .map(|c| c.as_lang_code())
+            .unwrap_or(&default_lang_code);
+        let html_metadata =
+            HtmlMetadata::new(lang_code, &ssg.title, &ssg.description, &ssg.favicon);
+
+        let default_color_scheme = ColorScheme::OsSetting;
+        let css_metadata = CssMetadata::new(
+            ssg.color_scheme
+                .as_ref()
+                .map(|c| c.as_color_scheme())
+                .unwrap_or(&default_color_scheme),
+        );
+
+        let default_sort_key = SortKey::CommittedDate;
+        let sort_key = ssg
+            .sort_key
+            .as_ref()
+            .map(|s| s.as_sort_key())
+            .unwrap_or(&default_sort_key);
+        let paging = match ssg.paginate_by {
+            None => Paging::Not,
+            Some(u) => Paging::By(u),
+        };
+        let list_view_configs =
+            ListViewConfigs::new(&ssg.build_search_index.unwrap_or(true), sort_key, &paging);
+
+        Ok(BuildConfig {
+            base_url: base_url.unwrap_or_else(|| ssg.base_url()),
+            timezone: self.timezone.unwrap_or(chrono_tz::UTC),
+            html_metadata,
+            css_metadata,
+            list_view_configs,
+        })
     }
 }

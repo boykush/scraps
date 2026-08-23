@@ -1,20 +1,17 @@
 use super::renderer::BuildRenderer;
 use crate::error::ScrapsResult;
 use crate::usecase::progress::{Progress, Stage};
-use chrono_tz::Tz;
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use scraps_libs::{
     html::{self, EmbedMode},
-    model::{base_url::BaseUrl, scrap::Scrap, tags::Tags},
+    model::{scrap::Scrap, tags::Tags},
 };
 use tracing::{span, Level};
 
 use super::model::{
     backlinks_map::BacklinksMap,
-    css::CssMetadata,
-    html::HtmlMetadata,
-    list_view_configs::ListViewConfigs,
+    build_config::BuildConfig,
     scrap_detail::{ScrapDetail, ScrapDetails},
 };
 use std::collections::HashMap;
@@ -32,12 +29,17 @@ impl BuildUsecase {
         readme_text: &Option<String>,
         progress: &PG,
         renderer: &BR,
-        base_url: &BaseUrl,
-        timezone: Tz,
-        html_metadata: &HtmlMetadata,
-        css_metadata: &CssMetadata,
-        list_view_configs: &ListViewConfigs,
+        config: &BuildConfig,
     ) -> ScrapsResult<usize> {
+        let BuildConfig {
+            base_url,
+            timezone,
+            html_metadata,
+            css_metadata,
+            list_view_configs,
+        } = config;
+        let timezone = *timezone;
+
         progress.start_stage(&Stage::ReadScraps);
         let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
 
@@ -139,19 +141,42 @@ impl BuildUsecase {
 
 #[cfg(test)]
 mod tests {
-    use crate::usecase::build::model::{color_scheme::ColorScheme, paging::Paging, sort::SortKey};
+    use crate::usecase::build::model::{
+        color_scheme::ColorScheme, css::CssMetadata, html::HtmlMetadata,
+        list_view_configs::ListViewConfigs, paging::Paging, sort::SortKey,
+    };
     use crate::usecase::build::renderer::tests::BuildRendererTest;
     use crate::usecase::progress::tests::ProgressTest;
 
     use super::*;
     use scraps_libs::lang::LangCode;
+    use scraps_libs::model::base_url::BaseUrl;
     use url::Url;
+
+    fn build_config(build_search_index: bool) -> BuildConfig {
+        BuildConfig {
+            base_url: BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap(),
+            timezone: chrono_tz::UTC,
+            html_metadata: HtmlMetadata::new(
+                &LangCode::default(),
+                "Scrap",
+                &Some("Scrap Wiki".to_string()),
+                &Some(Url::parse("https://github.io/image.png").unwrap()),
+            ),
+            css_metadata: CssMetadata::new(&ColorScheme::OsSetting),
+            list_view_configs: ListViewConfigs::new(
+                &build_search_index,
+                &SortKey::LinkedCount,
+                &Paging::Not,
+            ),
+        }
+    }
 
     #[test]
     fn it_run() {
         let scraps_with_ts = vec![
             (
-                Scrap::new("test1", &None, &concat!("# header1\n", "## header2\n")),
+                Scrap::new("test1", &None, concat!("# header1\n", "## header2\n")),
                 Some(0i64),
             ),
             (Scrap::new("test2", &None, "[[test1]]\n"), Some(0i64)),
@@ -161,16 +186,6 @@ mod tests {
 
         let progress = ProgressTest::new();
         let renderer = BuildRendererTest::new();
-        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
-        let timezone = chrono_tz::UTC;
-        let html_metadata = &HtmlMetadata::new(
-            &LangCode::default(),
-            "Scrap",
-            &Some("Scrap Wiki".to_string()),
-            &Some(Url::parse("https://github.io/image.png").unwrap()),
-        );
-        let css_metadata = &CssMetadata::new(&ColorScheme::OsSetting);
-        let list_view_configs = ListViewConfigs::new(&true, &SortKey::LinkedCount, &Paging::Not);
 
         let usecase = BuildUsecase::new();
         let result = usecase
@@ -179,11 +194,7 @@ mod tests {
                 &readme_text,
                 &progress,
                 &renderer,
-                &base_url,
-                timezone,
-                html_metadata,
-                css_metadata,
-                &list_view_configs,
+                &build_config(true),
             )
             .unwrap();
         assert_eq!(result, 2);
@@ -193,7 +204,7 @@ mod tests {
     fn it_run_when_build_search_index_is_false() {
         let scraps_with_ts = vec![
             (
-                Scrap::new("test1", &None, &concat!("# header1\n", "## header2\n")),
+                Scrap::new("test1", &None, concat!("# header1\n", "## header2\n")),
                 Some(0i64),
             ),
             (Scrap::new("test2", &None, "[[test1]]\n"), Some(0i64)),
@@ -201,16 +212,6 @@ mod tests {
 
         let progress = ProgressTest::new();
         let renderer = BuildRendererTest::new();
-        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
-        let timezone = chrono_tz::UTC;
-        let html_metadata = &HtmlMetadata::new(
-            &LangCode::default(),
-            "Scrap",
-            &Some("Scrap Wiki".to_string()),
-            &Some(Url::parse("https://github.io/image.png").unwrap()),
-        );
-        let css_metadata = &CssMetadata::new(&ColorScheme::OsSetting);
-        let list_view_configs = ListViewConfigs::new(&false, &SortKey::LinkedCount, &Paging::Not);
 
         let usecase = BuildUsecase::new();
         let result = usecase
@@ -219,11 +220,7 @@ mod tests {
                 &None,
                 &progress,
                 &renderer,
-                &base_url,
-                timezone,
-                html_metadata,
-                css_metadata,
-                &list_view_configs,
+                &build_config(false),
             )
             .unwrap();
         assert_eq!(result, 2);

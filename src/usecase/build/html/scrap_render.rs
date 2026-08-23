@@ -1,10 +1,7 @@
-use std::fs;
-use std::io::{BufWriter, Write};
-use std::path::Path;
-use std::{fs::File, path::PathBuf};
+use std::path::{Path, PathBuf};
 
-use crate::error::BuildError;
-use crate::error::{anyhow::Context, ScrapsResult};
+use crate::error::ScrapsResult;
+use crate::service::tera_render::{render_to_file, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::scrap_detail::ScrapDetail;
@@ -13,7 +10,7 @@ use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::file::ScrapFileStem;
 use tera::Tera;
 
-use crate::usecase::build::html::tera::scrap_tera;
+use crate::usecase::build::html::templates;
 
 use super::serde::link_scraps::LinkScrapsTera;
 use super::serde::scrap_detail::ScrapDetailTera;
@@ -25,15 +22,11 @@ pub struct ScrapRender {
 
 impl ScrapRender {
     pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<ScrapRender> {
-        let output_scraps_dir_path = &output_dir_path.join("scraps");
-        fs::create_dir_all(output_scraps_dir_path).context(BuildError::CreateDir)?;
-        // Built once here rather than per scrap: loading the glob re-parses
-        // every template, which dominates the build on large wikis.
-        let tera = scrap_tera::tera(static_dir_path.join("*.html").to_str().unwrap())?;
+        let tera = templates::scrap(&user_template_glob(static_dir_path, "*.html"))?;
 
         Ok(ScrapRender {
             tera,
-            output_scraps_dir_path: output_scraps_dir_path.to_owned(),
+            output_scraps_dir_path: output_dir_path.join("scraps"),
         })
     }
 
@@ -45,7 +38,7 @@ impl ScrapRender {
         scrap_detail: &ScrapDetail,
         backlinks_map: &BacklinksMap,
     ) -> ScrapsResult<()> {
-        let mut context = scrap_tera::context(base_url, timezone, metadata);
+        let mut context = templates::scrap_context(base_url, timezone, metadata);
         let scrap = &scrap_detail.scrap();
 
         // insert to context for linked list
@@ -57,23 +50,12 @@ impl ScrapRender {
             &LinkScrapsTera::new(&linked_scraps, base_url),
         );
 
-        let file_path = &self
+        // The stem may contain `/`-separated context directories, which
+        // `render_to_file` creates on the way.
+        let file_path = self
             .output_scraps_dir_path
             .join(format!("{}.html", ScrapFileStem::from(scrap.self_key())));
-        // The stem may contain `/`-separated context directories; ensure the
-        // parent directory exists before creating the file.
-        if let Some(parent) = file_path.parent() {
-            fs::create_dir_all(parent).context(BuildError::CreateDir)?;
-        }
-        // tera renders in many small writes, so buffer them into one file write.
-        let mut wtr = BufWriter::new(
-            File::create(file_path).context(BuildError::WriteFailure(file_path.clone()))?,
-        );
-        self.tera
-            .render_to("__builtins/scrap.html", &context, &mut wtr)
-            .context(BuildError::WriteFailure(file_path.clone()))?;
-        wtr.flush()
-            .context(BuildError::WriteFailure(file_path.clone()))
+        render_to_file(&self.tera, "__builtins/scrap.html", &context, &file_path)
     }
 }
 

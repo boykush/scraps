@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 #MISE description="Run clippy linter"
-cargo clippy --all-targets --all-features
+# -D warnings: warnings accumulated unnoticed while this only reported them.
+cargo clippy --all-targets --all-features -- -D warnings

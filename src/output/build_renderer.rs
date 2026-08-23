@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use chrono_tz::Tz;
 use scraps_libs::model::{base_url::BaseUrl, content::Content, scrap::Scrap, tag::Tag};
@@ -24,17 +24,28 @@ use crate::usecase::build::{
     },
 };
 
+/// Owns one render per page kind. Each carries a Tera instance whose
+/// construction re-parses every template, so they are built once here rather
+/// than per rendered page.
 pub struct BuildRendererImpl {
-    static_dir_path: PathBuf,
-    output_dir_path: PathBuf,
+    index_render: IndexRender,
+    scrap_render: ScrapRender,
+    tags_index_render: TagsIndexRender,
+    tag_render: TagRender,
+    css_render: CSSRender,
+    search_index_render: SearchIndexRender,
 }
 
 impl BuildRendererImpl {
-    pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> BuildRendererImpl {
-        BuildRendererImpl {
-            static_dir_path: static_dir_path.to_path_buf(),
-            output_dir_path: output_dir_path.to_path_buf(),
-        }
+    pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<BuildRendererImpl> {
+        Ok(BuildRendererImpl {
+            index_render: IndexRender::new(static_dir_path, output_dir_path)?,
+            scrap_render: ScrapRender::new(static_dir_path, output_dir_path)?,
+            tags_index_render: TagsIndexRender::new(static_dir_path, output_dir_path)?,
+            tag_render: TagRender::new(static_dir_path, output_dir_path)?,
+            css_render: CSSRender::new(static_dir_path, output_dir_path)?,
+            search_index_render: SearchIndexRender::new(static_dir_path, output_dir_path)?,
+        })
     }
 }
 
@@ -48,8 +59,7 @@ impl HtmlIndexRenderer for BuildRendererImpl {
         backlinks_map: &BacklinksMap,
         readme_content: &Option<Content>,
     ) -> ScrapsResult<usize> {
-        let index_render = IndexRender::new(&self.static_dir_path, &self.output_dir_path)?;
-        index_render.run(
+        self.index_render.run(
             base_url,
             html_metadata,
             list_view_configs,
@@ -69,8 +79,7 @@ impl HtmlScrapRenderer for BuildRendererImpl {
         scrap_detail: &ScrapDetail,
         backlinks_map: &BacklinksMap,
     ) -> ScrapsResult<()> {
-        let scrap_render = ScrapRender::new(&self.static_dir_path, &self.output_dir_path)?;
-        scrap_render.run(
+        self.scrap_render.run(
             base_url,
             timezone,
             html_metadata,
@@ -88,8 +97,8 @@ impl HtmlTagsIndexRenderer for BuildRendererImpl {
         scraps: &[Scrap],
         backlinks_map: &BacklinksMap,
     ) -> ScrapsResult<()> {
-        let tags_index_render = TagsIndexRender::new(&self.static_dir_path, &self.output_dir_path)?;
-        tags_index_render.run(base_url, html_metadata, scraps, backlinks_map)
+        self.tags_index_render
+            .run(base_url, html_metadata, scraps, backlinks_map)
     }
 }
 
@@ -101,22 +110,19 @@ impl HtmlTagRenderer for BuildRendererImpl {
         tag: &Tag,
         backlinks_map: &BacklinksMap,
     ) -> ScrapsResult<()> {
-        let tag_render = TagRender::new(&self.static_dir_path, &self.output_dir_path)?;
-        tag_render.run(base_url, html_metadata, tag, backlinks_map)
+        self.tag_render
+            .run(base_url, html_metadata, tag, backlinks_map)
     }
 }
 
 impl CssRenderer for BuildRendererImpl {
     fn render_css(&self, css_metadata: &CssMetadata) -> ScrapsResult<()> {
-        let css_render = CSSRender::new(&self.static_dir_path, &self.output_dir_path);
-        css_render.render_main(css_metadata)
+        self.css_render.render_main(css_metadata)
     }
 }
 
 impl SearchIndexJsonRenderer for BuildRendererImpl {
     fn render_search_index(&self, base_url: &BaseUrl, scraps: &[Scrap]) -> ScrapsResult<()> {
-        let search_index_render =
-            SearchIndexRender::new(&self.static_dir_path, &self.output_dir_path)?;
-        search_index_render.run(base_url, scraps)
+        self.search_index_render.run(base_url, scraps)
     }
 }

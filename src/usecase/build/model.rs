@@ -1,4 +1,5 @@
 pub mod backlinks_map;
+pub mod build_config;
 pub mod color_scheme;
 pub mod css;
 pub mod html;

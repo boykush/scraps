@@ -35,7 +35,7 @@ impl LintUsecase {
         extra_rules: Vec<Box<dyn LintRule>>,
     ) -> ScrapsResult<Vec<LintWarning>> {
         let backlinks_map = BacklinksMap::new(scraps);
-        let tags = Tags::new(&scraps);
+        let tags = Tags::new(scraps);
 
         let mut rules: Vec<Box<dyn LintRule>> = vec![
             Box::new(DeadEndRule),
@@ -53,7 +53,7 @@ impl LintUsecase {
 
         let warnings: Vec<LintWarning> = rules
             .par_iter()
-            .flat_map(|rule| rule.check(&scraps, &backlinks_map, &tags))
+            .flat_map(|rule| rule.check(scraps, &backlinks_map, &tags))
             .collect();
 
         Ok(warnings)

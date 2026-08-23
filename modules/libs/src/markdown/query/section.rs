@@ -60,7 +60,7 @@ pub fn section<'a>(text: &'a str, heading_slug: &str) -> Option<&'a str> {
             hs.push(HeadingInfo {
                 start_line: pos.start.line,
                 end_line: pos.end.line,
-                level: h.level as u8,
+                level: h.level,
                 slug: gfm_slug(&label),
             });
         }
@@ -186,7 +186,7 @@ deep body
 
 s-body
 ";
-        assert_eq!(section(input, "top").unwrap().contains("intro"), true);
+        assert!(section(input, "top").unwrap().contains("intro"));
         let first = section(input, "first").unwrap();
         assert!(first.contains("f-body"));
         assert!(first.contains("### deep"));
