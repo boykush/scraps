@@ -4,7 +4,7 @@ use std::collections::{HashMap, HashSet};
 use comrak::{
     format_html,
     nodes::{AstNode, NodeCodeBlock, NodeLink, NodeValue, NodeWikiLink},
-    options::Extension,
+    options::{Extension, Render},
     parse_document, Arena, Options,
 };
 use url::Url;
@@ -35,6 +35,12 @@ fn options() -> Options<'static> {
             superscript: true,
             math_dollars: true,
             ..Extension::default()
+        },
+        render: Render {
+            // Scraps are authored by the site owner, so raw HTML such as
+            // <iframe> embeds is passed through rather than stripped.
+            r#unsafe: true,
+            ..Render::default()
         },
         ..Options::default()
     }
@@ -431,6 +437,17 @@ mod tests {
 
         assert!(content.to_string().contains("wanted"));
         assert!(!content.to_string().contains("ignored"));
+    }
+
+    #[rstest]
+    #[case::iframe(
+        "<iframe src=\"https://example.com\"></iframe>",
+        "<iframe src=\"https://example.com\"></iframe>\n"
+    )]
+    #[case::inline_html("text with <br> break", "<p>text with <br> break</p>\n")]
+    fn it_to_html_raw_html(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
+        let content = to_content(input, &base_url, EmbedMode::Preserve);
+        assert_eq!(content.to_string(), expected);
     }
 
     #[rstest]
