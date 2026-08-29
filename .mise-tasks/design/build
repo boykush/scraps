@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#MISE description="Build the design system site: Storybook plus the token page"
+set -euo pipefail
+
+# Storybook renders against the stylesheet the compiler actually emits, so the
+# binary is built and run first to produce it.
+cargo build --release
+./target/release/scraps build --directory docs
+python3 design/storybook/flatten-scheme.py docs/_site/main.css design/storybook/static
+
+mise run tokens:build
+cp tokens/dist/index.html design/storybook/static/tokens.html
+
+(cd design/storybook && npm install --no-fund --no-audit && npm run build)

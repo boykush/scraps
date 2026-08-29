@@ -1,0 +1,15 @@
+{
+  "name": "scraps-design-system",
+  "private": true,
+  "type": "module",
+  "description": "Storybook for the Scraps theme, rendered against the stylesheet the build emits.",
+  "scripts": {
+    "dev": "storybook dev -p 6006 --no-open",
+    "build": "storybook build --output-dir dist"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "^10.5.10",
+    "@storybook/html-vite": "^10.5.10",
+    "storybook": "^10.5.10"
+  }
+}
