@@ -18,6 +18,12 @@ static SCRAP: Lazy<Tera> =
     Lazy::new(|| builtins(("__builtins/scrap.html", include_str!("builtins/scrap.html"))));
 static TAG: Lazy<Tera> =
     Lazy::new(|| builtins(("__builtins/tag.html", include_str!("builtins/tag.html"))));
+static SCRAPS_INDEX: Lazy<Tera> = Lazy::new(|| {
+    builtins((
+        "__builtins/scraps_index.html",
+        include_str!("builtins/scraps_index.html"),
+    ))
+});
 static TAGS_INDEX: Lazy<Tera> = Lazy::new(|| {
     builtins((
         "__builtins/tags_index.html",
@@ -54,6 +60,10 @@ pub fn scrap(template_dir: &str) -> ScrapsResult<Tera> {
 
 pub fn tag(template_dir: &str) -> ScrapsResult<Tera> {
     with_user_templates(&TAG, template_dir)
+}
+
+pub fn scraps_index(template_dir: &str) -> ScrapsResult<Tera> {
+    with_user_templates(&SCRAPS_INDEX, template_dir)
 }
 
 pub fn tags_index(template_dir: &str) -> ScrapsResult<Tera> {

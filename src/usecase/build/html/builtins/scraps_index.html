@@ -1,0 +1,11 @@
+{% extends "__builtins/base.html" %}
+
+{% block main %}
+    <div class="scraps-index">
+        <p class="list-head">
+            <span class="count">{{ scraps | length }} scraps</span>
+            <span class="legend">title order &#183; backlinks</span>
+        </p>
+        {{ <scrap_index scraps={scraps} base_url={base_url} /> }}
+    </div>
+{% endblock %}

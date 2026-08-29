@@ -99,6 +99,12 @@ impl BuildUsecase {
             })?;
         span_generate_html_scraps.exit();
 
+        // generate html scraps index
+        let span_generate_html_scraps_index =
+            span!(Level::INFO, "generate_html_scraps_index").entered();
+        renderer.render_scraps_index(base_url, html_metadata, &scrap_details, &backlinks_map)?;
+        span_generate_html_scraps_index.exit();
+
         // generate html tags index
         let span_generate_html_tags_index =
             span!(Level::INFO, "generate_html_tags_index").entered();

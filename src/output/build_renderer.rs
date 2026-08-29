@@ -8,7 +8,8 @@ use crate::service::search::render::SearchIndexRender;
 use crate::usecase::build::{
     css::render::CSSRender,
     html::{
-        index_render::IndexRender, scrap_render::ScrapRender, tag_render::TagRender,
+        index_render::IndexRender, scrap_render::ScrapRender,
+        scraps_index_render::ScrapsIndexRender, tag_render::TagRender,
         tags_index_render::TagsIndexRender,
     },
     model::{
@@ -19,8 +20,8 @@ use crate::usecase::build::{
         scrap_detail::{ScrapDetail, ScrapDetails},
     },
     renderer::{
-        CssRenderer, HtmlIndexRenderer, HtmlScrapRenderer, HtmlTagRenderer, HtmlTagsIndexRenderer,
-        SearchIndexJsonRenderer,
+        CssRenderer, HtmlIndexRenderer, HtmlScrapRenderer, HtmlScrapsIndexRenderer,
+        HtmlTagRenderer, HtmlTagsIndexRenderer, SearchIndexJsonRenderer,
     },
 };
 
@@ -30,6 +31,7 @@ use crate::usecase::build::{
 pub struct BuildRendererImpl {
     index_render: IndexRender,
     scrap_render: ScrapRender,
+    scraps_index_render: ScrapsIndexRender,
     tags_index_render: TagsIndexRender,
     tag_render: TagRender,
     css_render: CSSRender,
@@ -41,6 +43,7 @@ impl BuildRendererImpl {
         Ok(BuildRendererImpl {
             index_render: IndexRender::new(static_dir_path, output_dir_path)?,
             scrap_render: ScrapRender::new(static_dir_path, output_dir_path)?,
+            scraps_index_render: ScrapsIndexRender::new(static_dir_path, output_dir_path)?,
             tags_index_render: TagsIndexRender::new(static_dir_path, output_dir_path)?,
             tag_render: TagRender::new(static_dir_path, output_dir_path)?,
             css_render: CSSRender::new(static_dir_path, output_dir_path)?,
@@ -86,6 +89,19 @@ impl HtmlScrapRenderer for BuildRendererImpl {
             scrap_detail,
             backlinks_map,
         )
+    }
+}
+
+impl HtmlScrapsIndexRenderer for BuildRendererImpl {
+    fn render_scraps_index(
+        &self,
+        base_url: &BaseUrl,
+        html_metadata: &HtmlMetadata,
+        scrap_details: &ScrapDetails,
+        backlinks_map: &BacklinksMap,
+    ) -> ScrapsResult<()> {
+        self.scraps_index_render
+            .run(base_url, html_metadata, scrap_details, backlinks_map)
     }
 }
 

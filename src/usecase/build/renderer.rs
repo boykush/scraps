@@ -33,6 +33,16 @@ pub trait HtmlScrapRenderer {
     ) -> ScrapsResult<()>;
 }
 
+pub trait HtmlScrapsIndexRenderer {
+    fn render_scraps_index(
+        &self,
+        base_url: &BaseUrl,
+        html_metadata: &HtmlMetadata,
+        scrap_details: &ScrapDetails,
+        backlinks_map: &BacklinksMap,
+    ) -> ScrapsResult<()>;
+}
+
 pub trait HtmlTagsIndexRenderer {
     fn render_tags_index(
         &self,
@@ -64,6 +74,7 @@ pub trait SearchIndexJsonRenderer {
 pub trait BuildRenderer:
     HtmlIndexRenderer
     + HtmlScrapRenderer
+    + HtmlScrapsIndexRenderer
     + HtmlTagsIndexRenderer
     + HtmlTagRenderer
     + CssRenderer
@@ -75,6 +86,7 @@ pub trait BuildRenderer:
 impl<T> BuildRenderer for T where
     T: HtmlIndexRenderer
         + HtmlScrapRenderer
+        + HtmlScrapsIndexRenderer
         + HtmlTagsIndexRenderer
         + HtmlTagRenderer
         + CssRenderer
@@ -116,6 +128,18 @@ pub mod tests {
             _timezone: Tz,
             _html_metadata: &HtmlMetadata,
             _scrap_detail: &ScrapDetail,
+            _backlinks_map: &BacklinksMap,
+        ) -> ScrapsResult<()> {
+            Ok(())
+        }
+    }
+
+    impl HtmlScrapsIndexRenderer for BuildRendererTest {
+        fn render_scraps_index(
+            &self,
+            _base_url: &BaseUrl,
+            _html_metadata: &HtmlMetadata,
+            _scrap_details: &ScrapDetails,
             _backlinks_map: &BacklinksMap,
         ) -> ScrapsResult<()> {
             Ok(())
