@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="640" height="640" role="img" aria-label="Scraps">
+  <title>Scraps</title>
+  <!-- Colours are the site's own semantic roles: the plate is `surface`, the
+       brackets `text`, the node `accent`, all in their dark-theme values.
+       Keep them in step with tokens/semantic.tokens.json. -->
+  <rect x="0" y="0" width="100" height="100" rx="22" fill="#2e3440"/>
+  <g fill="none" stroke="#eceff4" stroke-width="8">
+    <path d="M28 24 L19 24 L19 76 L28 76"/>
+    <path d="M46 24 L37 24 L37 76 L46 76"/>
+    <path d="M54 24 L63 24 L63 76 L54 76"/>
+    <path d="M72 24 L81 24 L81 76 L72 76"/>
+  </g>
+  <circle cx="50" cy="50" r="7.5" fill="#88c0d0"/>
+</svg>
