@@ -11,6 +11,7 @@ on:
       - 'modules/**'
       - 'Cargo.toml'
       - 'Cargo.lock'
+      - 'tokens/**'
       - '.mise-tasks/docs/**'
       - '.github/workflows/deploy-scraps-github-pages.yml'
   workflow_dispatch:
@@ -42,7 +43,7 @@ jobs:
         uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           cache: false
-          install_args: "rust"
+          install_args: "rust node"
 
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
 
@@ -52,13 +53,25 @@ jobs:
       - name: Build docs
         run: mise run docs:build
 
+      # The design token page is generated from tokens/, not authored as a
+      # scrap, so it is built separately and mounted beside the wiki rather
+      # than appearing in its index, search and lint.
+      - name: Build design token page
+        run: mise run tokens:build
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site/design-tokens
+          cp -r docs/_site/. _site/
+          cp tokens/dist/index.html _site/design-tokens/
+
       - name: Configure Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
-          path: docs/_site
+          path: _site
 
   deploy:
     needs: build
