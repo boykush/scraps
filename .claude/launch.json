@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "livt",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd livt && mise exec -- livt serve"],
+      "port": 3000
+    }
+  ]
+}

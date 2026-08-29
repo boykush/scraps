@@ -9,6 +9,7 @@ For comprehensive guidelines, see @CONTRIBUTING.md
 - Usecases: `src/usecase/<name>/usecase.rs`
 - Libs features: `error`, `git`, `lang`, `markdown`, `model`, `search` — gated in `modules/libs/src/lib.rs`
 - Config language: PKL (`*.pkl` files)
+- Discovery: `livt/` is the product discovery workspace ([livt](https://github.com/boykush/livt)); its content is written in Japanese by convention, while the rest of the repository is English
 
 ## Development Workflow
 
