@@ -44,10 +44,7 @@ impl TagRender {
         context.insert("tag", &TagTera::new(tag, backlinks_map));
 
         let linked_scraps = backlinks_map.get_tag(tag);
-        context.insert(
-            "linked_scraps",
-            &LinkScrapsTera::new(&linked_scraps, base_url),
-        );
+        context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
 
         // Build the slug-based path: `tags/<slug-segment>/<...>.html`. Each
         // segment of a hierarchical tag becomes a directory.

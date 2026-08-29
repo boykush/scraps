@@ -18,7 +18,6 @@ struct SerializeIndexScrap {
     ctx: Option<String>,
     title: String,
     html_file_name: String,
-    html_text: String,
     thumbnail: Option<Url>,
     summary: Option<String>,
     pub commited_ts: Option<i64>,
@@ -29,7 +28,6 @@ struct SerializeIndexScrap {
 impl SerializeIndexScrap {
     pub fn new(scrap_detail: &ScrapDetail, backlinks_map: &BacklinksMap) -> SerializeIndexScrap {
         let scrap = scrap_detail.scrap();
-        let content = scrap_detail.content();
         let commited_ts = scrap_detail.commited_ts();
         let backlinks_count = backlinks_map.get(&scrap.self_key()).len();
         let links_count = scrap.links().len();
@@ -40,7 +38,6 @@ impl SerializeIndexScrap {
             ctx: scrap.ctx().as_ref().map(|c| c.to_string()),
             title: scrap.title().to_string(),
             html_file_name,
-            html_text: content.to_string(),
             thumbnail: scrap.thumbnail(),
             summary,
             commited_ts,
