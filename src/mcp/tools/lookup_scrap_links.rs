@@ -46,6 +46,7 @@ pub struct LinkRefJson {
 pub struct LookupScrapLinksResponse {
     pub results: Vec<LinkRefJson>,
     pub count: usize,
+    pub next: String,
 }
 
 pub async fn lookup_scrap_links(
@@ -95,9 +96,15 @@ pub async fn lookup_scrap_links(
         .collect();
 
     let count = refs.len();
+    let next = if count == 0 {
+        "No outbound links. Try lookup_scrap_backlinks {title, ctx} for inbound references."
+    } else {
+        "Read a linked scrap with get_scrap {title, ctx} — add heading to jump to the referenced section."
+    };
     let response = LookupScrapLinksResponse {
         results: refs,
         count,
+        next: next.to_string(),
     };
 
     Ok(CallToolResult::success(vec![ContentBlock::text(
