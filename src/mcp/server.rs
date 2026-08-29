@@ -5,6 +5,7 @@ use super::tools::list_tags::list_tags;
 use super::tools::lookup_scrap_backlinks::{lookup_scrap_backlinks, LookupScrapBacklinksRequest};
 use super::tools::lookup_scrap_links::{lookup_scrap_links, LookupScrapLinksRequest};
 use super::tools::lookup_tag_backlinks::{lookup_tag_backlinks, LookupTagBacklinksRequest};
+use super::tools::orient::orient;
 use super::tools::search_scraps::{search_scraps, SearchRequest};
 use rmcp::handler::server::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
@@ -40,6 +41,16 @@ impl ScrapsServer {
         parameters: Parameters<GetScrapRequest>,
     ) -> Result<CallToolResult, ErrorData> {
         get_scrap(&self.scraps_dir, &self.exclude_dirs, context, parameters).await
+    }
+
+    #[tool(
+        description = "Use when you start a session on an unfamiliar wiki: returns its scale (scrap and tag counts), folder contexts, and top tags in one response, with no arguments. Continue with search_scraps for content, or expand a topic with lookup_tag_backlinks; the full tag list is list_tags."
+    )]
+    async fn orient(
+        &self,
+        context: RequestContext<RoleServer>,
+    ) -> Result<CallToolResult, ErrorData> {
+        orient(&self.scraps_dir, &self.exclude_dirs, context).await
     }
 
     #[tool(
@@ -149,9 +160,10 @@ mod tests {
 
         let tools = client.list_tools(Default::default()).await.unwrap();
 
-        assert_eq!(tools.tools.len(), 6);
+        assert_eq!(tools.tools.len(), 7);
 
         let tool_names: Vec<&str> = tools.tools.iter().map(|t| t.name.as_ref()).collect();
+        assert!(tool_names.contains(&"orient"));
         assert!(tool_names.contains(&"get_scrap"));
         assert!(tool_names.contains(&"search_scraps"));
         assert!(tool_names.contains(&"lookup_scrap_links"));
@@ -322,6 +334,7 @@ mod tests {
             ),
             ("list_tags", serde_json::json!({})),
             ("lookup_tag_backlinks", serde_json::json!({"tag": "rust"})),
+            ("orient", serde_json::json!({})),
         ];
 
         for (name, args) in calls {
@@ -337,6 +350,61 @@ mod tests {
         assert!(
             tags["results"].is_array() && tags["count"].is_u64(),
             "list_tags should use the results/count envelope: {tags}"
+        );
+    }
+
+    // Automates livt://mapping/orient-at-session-start/rule/R-01
+    #[rstest]
+    #[tokio::test]
+    async fn test_orient_gathers_scale_contexts_and_top_tags(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("a.md", b"# A\n\n#[[rust]] #[[go]]");
+        project.add_scrap("Kubernetes/b.md", b"# B\n\n#[[rust]]");
+        project.add_scrap("Book/c.md", b"# C\n\nplain");
+
+        let orient = call_tool_json(&project, "orient", serde_json::json!({})).await;
+
+        assert_eq!(orient["scrap_count"], 3);
+        assert_eq!(orient["tag_count"], 2);
+        assert_eq!(
+            orient["contexts"],
+            serde_json::json!(["Book", "Kubernetes"])
+        );
+        assert_eq!(orient["top_tags"][0]["title"], "rust");
+    }
+
+    // Automates livt://mapping/orient-at-session-start/rule/R-02
+    #[rstest]
+    #[tokio::test]
+    async fn test_orient_ranks_and_caps_top_tags(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let all_tags: String = (1..=12).map(|i| format!("#[[t{i:02}]] ")).collect();
+        project.add_scrap("a.md", format!("# A\n\n{all_tags}").as_bytes());
+        project.add_scrap("b.md", b"# B\n\n#[[t12]]");
+
+        let orient = call_tool_json(&project, "orient", serde_json::json!({})).await;
+
+        assert_eq!(orient["tag_count"], 12);
+        assert_eq!(orient["top_tags"].as_array().unwrap().len(), 10);
+        assert_eq!(orient["top_tags"][0]["title"], "t12");
+    }
+
+    // Automates livt://mapping/orient-at-session-start/rule/R-03
+    #[rstest]
+    #[tokio::test]
+    async fn test_orient_names_entry_tools_in_next(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("a.md", b"# A\n\nContent");
+
+        let orient = call_tool_json(&project, "orient", serde_json::json!({})).await;
+
+        let next = orient["next"].as_str().unwrap_or_default();
+        assert!(
+            next.contains("search_scraps") && next.contains("lookup_tag_backlinks"),
+            "orient next should name the entry tools: {orient}"
         );
     }
 

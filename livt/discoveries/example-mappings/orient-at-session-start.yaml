@@ -1,0 +1,31 @@
+story: orient-at-session-start
+
+rules:
+  - id: R-01
+    name: orient は引数なしの1応答で、規模・文脈・主要タグを揃えて返す
+    examples:
+      - id: EX-01
+        name: scrap_count / tag_count / contexts / top_tags が1回の呼び出しで揃う
+      - id: EX-02
+        name: contexts は名前順で安定している
+    automated: true
+  - id: R-02
+    name: 主要タグは被リンク数の降順で上位10件に絞る（全量は list_tags の仕事）
+    examples:
+      - id: EX-01
+        name: top_tags の先頭は最も被リンクの多いタグ
+      - id: EX-02
+        name: タグが10件を超えても top_tags は10件で止まり、tag_count は全量を示す
+    automated: true
+  - id: R-03
+    name: orient も既存ルールの下に入る — 定義は「いつ使うか」で始まり、応答は次の一手を運ぶ
+    examples:
+      - id: EX-01
+        name: 応答の next が search_scraps と lookup_tag_backlinks を名指す
+      - id: EX-02
+        name: learn-usage-from-tool-defs と follow-response-hints の既存テストが orient にもそのまま効く
+    automated: true
+
+questions:
+  - id: Q-01
+    text: git 由来の最近更新を orient に足すか（依存なしの決定論 core 方針との兼ね合い）
