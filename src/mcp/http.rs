@@ -166,7 +166,7 @@ mod tests {
         assert_eq!(status, StatusCode::OK);
         let response: serde_json::Value = serde_json::from_str(&body).unwrap();
         let tools = response["result"]["tools"].as_array().unwrap();
-        assert_eq!(tools.len(), 6);
+        assert_eq!(tools.len(), 7);
 
         server_handle.abort();
     }
