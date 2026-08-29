@@ -1,25 +1,35 @@
+{% component scrap_rows(scraps, base_url) %}
+    <ul class="scrap-rows">
+        {% for scrap in scraps %}
+            <li class="item">
+                <a class="row" href="{{ base_url }}scraps/{{ scrap.html_file_name }}">
+                    {% if scrap.thumbnail %}
+                        <img class="thumbnail" alt="" src="{{ scrap.thumbnail }}" loading="lazy" />
+                    {% endif %}
+                    <span class="body">
+                        <span class="head">
+                            <span class="title">{{ scrap.title }}</span>
+                            {% if scrap.ctx %}<span class="ctx">{{ scrap.ctx }}</span>{% endif %}
+                        </span>
+                        {% if scrap.summary %}<span class="summary">{{ scrap.summary }}</span>{% endif %}
+                    </span>
+                    <span class="graph">
+                        <span class="metric">{{ scrap.links_count }} ref{% if scrap.links_count != 1 %}s{% endif %}</span>
+                        <span class="metric">{{ scrap.backlinks_count }} backlink{% if scrap.backlinks_count != 1 %}s{% endif %}</span>
+                    </span>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endcomponent scrap_rows %}
+
 {% component scrap_links(scraps, base_url) %}
     <ul class="scrap-links">
         {% for scrap in scraps %}
             <li class="item">
-                <a href="{{ base_url }}scraps/{{ scrap.html_file_name }}">
-                    {% if scrap.ctx %}
-                        <div class="header">
-                            <div class="context">{{ scrap.ctx }}&#47;</div>
-                            <div class="title">{{ scrap.title }}</div>
-                        </div>
-                    {% else %}
-                        <div class="header">
-                            <div class="title">{{ scrap.title }}</div>
-                        </div>
-                    {% endif %}
-                    {% if scrap.thumbnail %}
-                        <div class="thumbnail">
-                            <img class="thumbnail-image" alt="thumbnail" src="{{ scrap.thumbnail }}" loading="lazy" />
-                        </div>
-                    {% else %}
-                        <div class="summary">{{ scrap.html_text | striptags }}</div>
-                    {% endif %}
+                <a class="link" href="{{ base_url }}scraps/{{ scrap.html_file_name }}">
+                    <span class="title">{{ scrap.title }}</span>
+                    {% if scrap.ctx %}<span class="ctx">{{ scrap.ctx }}</span>{% endif %}
                 </a>
             </li>
         {% endfor %}
@@ -30,16 +40,14 @@
     <ul class="tag-links">
         {% for tag in tags | slice(end=slice_size) %}
             <li class="item">
-                <a href="{{ base_url }}tags/{{ tag.slug }}.html">
-                    <span class="title">{{ tag.title }}</span>&nbsp;<span>({{ tag.backlinks_count }})</span>
+                <a class="link" href="{{ base_url }}tags/{{ tag.slug }}.html">
+                    <span class="title">#{{ tag.title }}</span><span class="count">{{ tag.backlinks_count }}</span>
                 </a>
             </li>
         {% endfor %}
         {% if tags | length > slice_size %}
             <li class="item">
-                <a href="{{ base_url }}tags/">
-                    <span class="more-link">More...</span>
-                </a>
+                <a class="link more" href="{{ base_url }}tags/">More&#8230;</a>
             </li>
         {% endif %}
     </ul>

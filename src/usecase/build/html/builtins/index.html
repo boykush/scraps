@@ -10,7 +10,6 @@
         {% endif %}
         {% if build_search_index == true %}
           <div class="search-block">
-              <span class="icon" />
               <input
                 type="text"
                 id="search-input"
@@ -24,15 +23,18 @@
             {{ <tag_links tags={tags} base_url={base_url} slice_size={15} /> }}
         </div>
         <div class="links-block">
-            <p class="sort-key">Sort by - {{ sort_key }}</p>
-            {{ <scrap_links scraps={scraps} base_url={base_url} /> }}
+            <p class="list-head">
+                <span class="sort-key">sorted by {{ sort_key }}</span>
+                <span class="legend">namespace &#183; graph</span>
+            </p>
+            {{ <scrap_rows scraps={scraps} base_url={base_url} /> }}
         </div>
         <div class="paging-arrows">
             {% if prev %}
-                <a class="prev" href="{{ prev }}">prev</a>
+                <a class="prev" href="{{ prev }}">&#8249; prev</a>
             {% endif %}
             {% if next %}
-                <a class="next" href="{{ next }}">next</a>
+                <a class="next" href="{{ next }}">next &#8250;</a>
             {% endif %}
         </div>
     </div>

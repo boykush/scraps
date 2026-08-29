@@ -9,10 +9,13 @@ use super::serde::color_scheme::ColorSchemeTera;
 static CSS_TERA: Lazy<Tera> = Lazy::new(|| {
     let mut tera = Tera::default();
     crate::service::tera_filters::register(&mut tera);
-    tera.add_raw_templates(vec![(
-        "__builtins/main.css",
-        include_str!("builtins/main.css"),
-    )])
+    tera.add_raw_templates(vec![
+        (
+            "__builtins/_tokens.css",
+            include_str!("builtins/_tokens.css"),
+        ),
+        ("__builtins/main.css", include_str!("builtins/main.css")),
+    ])
     .expect("builtin templates are compiled into the binary");
     tera
 });

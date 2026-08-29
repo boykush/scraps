@@ -6,7 +6,12 @@ use crate::usecase::build::model::{
     backlinks_map::BacklinksMap,
     scrap_detail::{ScrapDetail, ScrapDetails},
     sort::SortKey,
+    summary::Summary,
 };
+
+/// Long enough to be a useful gloss on an index row, short enough to stay on
+/// one line at the narrowest supported width.
+const SUMMARY_MAX_CHARS: usize = 90;
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeIndexScrap {
@@ -15,8 +20,10 @@ struct SerializeIndexScrap {
     html_file_name: String,
     html_text: String,
     thumbnail: Option<Url>,
+    summary: Option<String>,
     pub commited_ts: Option<i64>,
     pub backlinks_count: usize,
+    pub links_count: usize,
 }
 
 impl SerializeIndexScrap {
@@ -25,6 +32,9 @@ impl SerializeIndexScrap {
         let content = scrap_detail.content();
         let commited_ts = scrap_detail.commited_ts();
         let backlinks_count = backlinks_map.get(&scrap.self_key()).len();
+        let links_count = scrap.links().len();
+        let summary = Summary::from_md_text(scrap.md_text(), SUMMARY_MAX_CHARS)
+            .map(|s| s.as_str().to_string());
         let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_key().clone()));
         SerializeIndexScrap {
             ctx: scrap.ctx().as_ref().map(|c| c.to_string()),
@@ -32,8 +42,10 @@ impl SerializeIndexScrap {
             html_file_name,
             html_text: content.to_string(),
             thumbnail: scrap.thumbnail(),
+            summary,
             commited_ts,
             backlinks_count,
+            links_count,
         }
     }
 }

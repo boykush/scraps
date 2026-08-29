@@ -5,6 +5,9 @@ _site
 .claude/worktrees/
 .claude/scheduled_tasks.lock
 
+# Design tokens
+/tokens/node_modules
+
 # Playwright
 /tests/e2e/node_modules
 /tests/e2e/playwright-report

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#MISE description="Fail if the generated token CSS is stale, or a colour role misses WCAG AA"
+#MISE dir="tokens"
+set -euo pipefail
+
+python3 check-contrast.py
+
+generated="../src/usecase/build/css/builtins/_tokens.css"
+before="$(mktemp)"
+trap 'rm -f "$before"' EXIT
+cp "$generated" "$before"
+
+npm install --no-fund --no-audit
+npm run build
+
+# Compared against the file itself rather than against git, so the check also
+# holds before the generated CSS is first committed.
+if ! diff -q "$before" "$generated" >/dev/null; then
+  echo "error: $generated is out of date. Run 'mise run tokens:build' and commit the result." >&2
+  diff "$before" "$generated" >&2
+  exit 1
+fi

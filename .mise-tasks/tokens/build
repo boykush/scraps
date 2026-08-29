@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Generate the site's CSS custom properties from the design tokens"
+#MISE dir="tokens"
+set -euo pipefail
+npm install --no-fund --no-audit
+npm run build

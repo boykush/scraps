@@ -1,0 +1,12 @@
+{
+  "name": "scraps-tokens",
+  "private": true,
+  "type": "module",
+  "description": "Generates the site's CSS custom properties from the DTCG token files.",
+  "scripts": {
+    "build": "style-dictionary build --config style-dictionary.config.mjs"
+  },
+  "devDependencies": {
+    "style-dictionary": "^4.4.0"
+  }
+}
