@@ -23,6 +23,15 @@ a {
     }
 }
 
+/* Inside prose, colour alone does not separate a link from the text around it:
+   the accent and the body colour sit at 1.29:1, well under the 3:1 that would
+   make the hue difference dispensable. Underline them. */
+div.scrap .content a,
+div.index div.readme-block a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 hr {
     border: none;
     border-bottom: var(--border-hairline) solid var(--color-rule);

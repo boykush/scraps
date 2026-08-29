@@ -6,6 +6,12 @@
       "runtimeExecutable": "sh",
       "runtimeArgs": ["-c", "cd livt && mise exec -- livt serve"],
       "port": 3000
+    },
+    {
+      "name": "design",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd design/storybook && mise exec -- npm run dev"],
+      "port": 6006
     }
   ]
 }

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#MISE description="Serve Storybook on :6006 against the current theme"
+set -euo pipefail
+
+mise run design:css
+mise run tokens:build
+cp tokens/dist/index.html design/storybook/static/tokens.html
+
+# main.css is compiled into the binary, so a theme change needs `mise run
+# design:css` to reach Storybook; the story files themselves hot-reload.
+(cd design/storybook && npm install --no-fund --no-audit && npm run dev)
