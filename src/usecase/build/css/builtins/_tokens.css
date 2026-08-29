@@ -1,0 +1,58 @@
+    /* Generated from tokens/*.tokens.json — do not edit. `mise run tokens:build` */
+
+    --nord0: #2e3440;
+    --nord1: #3b4252;
+    --nord2: #434c5e;
+    --nord3: #4c566a;
+    --nord4: #d8dee9;
+    --nord5: #e5e9f0;
+    --nord6: #eceff4;
+    --nord7: #8fbcbb;
+    --nord8: #88c0d0;
+    --nord9: #81a1c1;
+    --nord10: #5e81ac;
+    --nord11: #bf616a;
+    --nord12: #d08770;
+    --nord13: #ebcb8b;
+    --nord14: #a3be8c;
+    --nord15: #b48ead;
+    --ext-frost-deep: #47698f;
+    --ext-slate-mid: #5d6a80;
+
+    --color-surface: light-dark(var(--nord6), var(--nord0));
+    --color-surface-raised: light-dark(#ffffff, var(--nord1));
+    --color-text: light-dark(var(--nord3), var(--nord6));
+    --color-text-muted: light-dark(var(--ext-slate-mid), var(--nord9));
+    --color-rule: light-dark(var(--nord4), var(--nord2));
+    --color-accent: light-dark(var(--ext-frost-deep), var(--nord8));
+
+    --font-family-sans: "Rubik", "Noto Sans JP", sans-serif;
+    --font-family-mono: ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;
+
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+
+    --font-size-xs: 12px;
+    --font-size-sm: 14px;
+    --font-size-base: 16px;
+    --font-size-lg: 20px;
+    --font-size-xl: 26px;
+    --font-size-2xl: 34px;
+
+    --font-line-height-tight: 1.25;
+    --font-line-height-body: 1.7;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+
+    --radius-none: 0px;
+    --radius-sm: 2px;
+    --radius-md: 4px;
+
+    --border-hairline: 1px;

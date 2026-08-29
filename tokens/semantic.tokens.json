@@ -1,0 +1,218 @@
+{
+  "color": {
+    "surface": {
+      "$description": "Page ground.",
+      "light": {
+        "$value": "{color.nord.6}"
+      },
+      "dark": {
+        "$value": "{color.nord.0}"
+      }
+    },
+    "surface-raised": {
+      "$description": "Separated from the ground without elevation: code blocks, inputs. No shadow — compiler output does not float.",
+      "light": {
+        "$value": "#ffffff"
+      },
+      "dark": {
+        "$value": "{color.nord.1}"
+      }
+    },
+    "text": {
+      "$description": "Body. 6.40:1 on light, 10.85:1 on dark.",
+      "light": {
+        "$value": "{color.nord.3}"
+      },
+      "dark": {
+        "$value": "{color.nord.6}"
+      }
+    },
+    "text-muted": {
+      "$description": "Metadata: namespace, counts, timestamps. 4.75:1 on light, 4.64:1 on dark — AA, unlike the 3.10:1 it replaces.",
+      "light": {
+        "$value": "{color.ext.slate-mid}"
+      },
+      "dark": {
+        "$value": "{color.nord.9}"
+      }
+    },
+    "rule": {
+      "$description": "Hairlines. Carries the separation that shadows used to. Has a dark value, which the horizontal-rule colour it replaces did not.",
+      "light": {
+        "$value": "{color.nord.4}"
+      },
+      "dark": {
+        "$value": "{color.nord.2}"
+      }
+    },
+    "accent": {
+      "$description": "Links, including wiki-links and tags. 4.94:1 on light, 6.24:1 on dark — replaces nord8's 1.74:1 on light.",
+      "light": {
+        "$value": "{color.ext.frost-deep}"
+      },
+      "dark": {
+        "$value": "{color.nord.8}"
+      }
+    },
+    "$description": "Semantic layer. Components reference only these; never a primitive directly. Each colour role carries a light and a dark value, emitted as CSS light-dark()."
+  },
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "sans": {
+        "$value": [
+          "Rubik",
+          "Noto Sans JP",
+          "sans-serif"
+        ]
+      },
+      "mono": {
+        "$value": [
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "Consolas",
+          "monospace"
+        ],
+        "$description": "New. Typed primitives — [[reference]], #[[tag]], ctx_path — are syntax, and the product's whole claim is that they are typed. Typography should say so."
+      }
+    },
+    "weight": {
+      "$type": "fontWeight",
+      "regular": {
+        "$value": 400
+      },
+      "medium": {
+        "$value": 500
+      },
+      "bold": {
+        "$value": 700
+      }
+    },
+    "size": {
+      "$type": "dimension",
+      "xs": {
+        "$value": {
+          "value": 12,
+          "unit": "px"
+        }
+      },
+      "sm": {
+        "$value": {
+          "value": 14,
+          "unit": "px"
+        }
+      },
+      "base": {
+        "$value": {
+          "value": 16,
+          "unit": "px"
+        }
+      },
+      "lg": {
+        "$value": {
+          "value": 20,
+          "unit": "px"
+        }
+      },
+      "xl": {
+        "$value": {
+          "value": 26,
+          "unit": "px"
+        }
+      },
+      "2xl": {
+        "$value": {
+          "value": 34,
+          "unit": "px"
+        }
+      }
+    },
+    "line-height": {
+      "$type": "number",
+      "tight": {
+        "$value": 1.25
+      },
+      "body": {
+        "$value": 1.7
+      }
+    }
+  },
+  "space": {
+    "$type": "dimension",
+    "$description": "4px base. Replaces the ad-hoc 32px used almost everywhere today.",
+    "1": {
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      }
+    },
+    "2": {
+      "$value": {
+        "value": 8,
+        "unit": "px"
+      }
+    },
+    "3": {
+      "$value": {
+        "value": 12,
+        "unit": "px"
+      }
+    },
+    "4": {
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      }
+    },
+    "5": {
+      "$value": {
+        "value": 24,
+        "unit": "px"
+      }
+    },
+    "6": {
+      "$value": {
+        "value": 32,
+        "unit": "px"
+      }
+    },
+    "7": {
+      "$value": {
+        "value": 48,
+        "unit": "px"
+      }
+    }
+  },
+  "radius": {
+    "$type": "dimension",
+    "$description": "Reduced from 2/4/8 to 2/4. Nothing in a compiler's output is pillowy.",
+    "none": {
+      "$value": {
+        "value": 0,
+        "unit": "px"
+      }
+    },
+    "sm": {
+      "$value": {
+        "value": 2,
+        "unit": "px"
+      }
+    },
+    "md": {
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      }
+    }
+  },
+  "border": {
+    "$type": "dimension",
+    "hairline": {
+      "$value": {
+        "value": 1,
+        "unit": "px"
+      }
+    }
+  }
+}

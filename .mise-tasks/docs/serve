@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
-#MISE description="Serve documentation locally with scraps"
-scraps serve --directory docs
+#MISE description="Serve documentation locally with the scraps binary from this checkout"
+set -euo pipefail
+cargo build --release
+./target/release/scraps serve --directory docs

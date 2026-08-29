@@ -1,0 +1,36 @@
+{
+  "$description": "Palette primitives. The only place raw hex appears — swap this file to change the palette without touching the semantic layer.",
+  "color": {
+    "$type": "color",
+    "nord": {
+      "$description": "Nord by Sven Greb / Arctic Ice Studio (MIT) — https://www.nordtheme.com/",
+      "0":  { "$value": "#2e3440" },
+      "1":  { "$value": "#3b4252" },
+      "2":  { "$value": "#434c5e" },
+      "3":  { "$value": "#4c566a" },
+      "4":  { "$value": "#d8dee9" },
+      "5":  { "$value": "#e5e9f0" },
+      "6":  { "$value": "#eceff4" },
+      "7":  { "$value": "#8fbcbb" },
+      "8":  { "$value": "#88c0d0" },
+      "9":  { "$value": "#81a1c1" },
+      "10": { "$value": "#5e81ac" },
+      "11": { "$value": "#bf616a" },
+      "12": { "$value": "#d08770" },
+      "13": { "$value": "#ebcb8b" },
+      "14": { "$value": "#a3be8c" },
+      "15": { "$value": "#b48ead" }
+    },
+    "ext": {
+      "$description": "Outside the Nord ramp. Added only where no Nord colour meets WCAG AA against a Nord surface.",
+      "frost-deep": {
+        "$value": "#47698f",
+        "$description": "Darkened nord10 for accents on light surfaces. 4.94:1 on nord6; nord10 reaches 3.50:1 and nord8 only 1.74:1."
+      },
+      "slate-mid": {
+        "$value": "#5d6a80",
+        "$description": "Muted text on light surfaces. 4.75:1 on nord6, sitting below text (nord3, 6.40:1) so the hierarchy still reads."
+      }
+    }
+  }
+}
