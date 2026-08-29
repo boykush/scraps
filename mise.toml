@@ -6,7 +6,6 @@ experimental = true
 "node" = "24.19.0"
 "hk" = "latest"
 "pkl" = "latest"
-"github:boykush/scraps" = "v1.1.0"
 "npm:markdownlint-cli2" = "latest"
 "cargo:cargo-llvm-cov" = "latest"
 "cargo:cargo-deny" = "latest"

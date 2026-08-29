@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
-#MISE description="Run E2E tests with Playwright"
+#MISE description="Run E2E tests with Playwright against the scraps binary from this checkout"
 #MISE dir="tests/e2e"
-npm install && npx playwright test
+set -euo pipefail
+
+# Built here rather than from playwright.config.ts's webServer command, whose
+# 30s timeout a cold release build would exceed.
+(cd ../.. && cargo build --release)
+
+npm install
+npx playwright test

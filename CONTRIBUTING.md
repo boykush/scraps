@@ -160,7 +160,9 @@ mise run e2e:test
 
 E2E tests are configured to:
 - Use three browsers: Chromium, Firefox, and WebKit
-- Automatically start `cargo run serve` on `http://127.0.0.1:1112`
+- Build `scraps` from this checkout and serve `docs/` with it on
+  `http://127.0.0.1:1112`, so template and CSS changes are what the suite
+  renders
 - Generate HTML reports for test results
 
 #### Writing E2E Tests
