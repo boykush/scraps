@@ -12,6 +12,8 @@ on:
       - 'Cargo.toml'
       - 'Cargo.lock'
       - 'tokens/**'
+      - 'design/storybook/**'
+      - '.mise-tasks/design/**'
       - '.mise-tasks/docs/**'
       - '.github/workflows/deploy-scraps-github-pages.yml'
   workflow_dispatch:
@@ -53,17 +55,17 @@ jobs:
       - name: Build docs
         run: mise run docs:build
 
-      # The design token page is generated from tokens/, not authored as a
-      # scrap, so it is built separately and mounted beside the wiki rather
-      # than appearing in its index, search and lint.
-      - name: Build design token page
-        run: mise run tokens:build
+      # The design system is its own Storybook, built separately and mounted
+      # beside the docs rather than authored as scraps in them, so it stays out
+      # of their index, search and lint.
+      - name: Build design system
+        run: mise run design:build
 
       - name: Assemble site
         run: |
-          mkdir -p _site/design-tokens
+          mkdir -p _site/design
           cp -r docs/_site/. _site/
-          cp tokens/dist/index.html _site/design-tokens/
+          cp -r design/storybook/dist/. _site/design/
 
       - name: Configure Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0

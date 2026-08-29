@@ -9,6 +9,11 @@ _site
 /tokens/node_modules
 /tokens/dist
 
+# Design system site
+/design/storybook/node_modules
+/design/storybook/dist
+/design/storybook/static
+
 # Playwright
 /tests/e2e/node_modules
 /tests/e2e/playwright-report
