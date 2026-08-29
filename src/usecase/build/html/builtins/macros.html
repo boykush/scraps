@@ -23,6 +23,20 @@
     </ul>
 {% endcomponent scrap_rows %}
 
+{% component scrap_index(scraps, base_url) %}
+    <ul class="scrap-index">
+        {% for scrap in scraps %}
+            <li class="item">
+                <a class="entry" href="{{ base_url }}scraps/{{ scrap.html_file_name }}">
+                    <span class="title">{{ scrap.title }}</span>
+                    {% if scrap.ctx %}<span class="ctx">{{ scrap.ctx }}</span>{% endif %}
+                    <span class="count">{{ scrap.backlinks_count }}</span>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endcomponent scrap_index %}
+
 {% component scrap_links(scraps, base_url) %}
     <ul class="scrap-links">
         {% for scrap in scraps %}

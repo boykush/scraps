@@ -286,6 +286,9 @@ div.index {
             justify-content: space-between;
             gap: var(--space-4);
             margin: 0 0 var(--space-2);
+            a.all-link {
+                color: var(--color-accent);
+            }
             padding-bottom: var(--space-2);
             border-bottom: var(--border-hairline) solid var(--color-rule);
             font-family: var(--font-family-mono);
@@ -430,6 +433,72 @@ ul.scrap-links {
         flex-shrink: 0;
         font-family: var(--font-family-mono);
         font-size: var(--font-size-xs);
+        color: var(--color-text-muted);
+    }
+}
+
+/* scraps index — the full listing, multi-column so it stays scannable */
+div.scraps-index {
+    p.list-head {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-4);
+        margin: 0 0 var(--space-3);
+        padding-bottom: var(--space-2);
+        border-bottom: var(--border-hairline) solid var(--color-rule);
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-xs);
+        color: var(--color-text-muted);
+    }
+}
+
+ul.scrap-index {
+    columns: 260px 4;
+    column-gap: var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li.item {
+        break-inside: avoid;
+        border-bottom: var(--border-hairline) solid var(--color-rule);
+    }
+
+    a.entry {
+        display: flex;
+        align-items: baseline;
+        gap: var(--space-2);
+        padding: var(--space-1) 0;
+
+        &:hover {
+            text-decoration: none;
+
+            .title {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    span.title {
+        font-size: var(--font-size-sm);
+        color: var(--color-accent);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    span.ctx {
+        flex-shrink: 0;
+        font-family: var(--font-family-mono);
+        font-size: 10px;
+        color: var(--color-text-muted);
+    }
+
+    span.count {
+        margin-left: auto;
+        flex-shrink: 0;
+        font-family: var(--font-family-mono);
+        font-size: 10px;
         color: var(--color-text-muted);
     }
 }
