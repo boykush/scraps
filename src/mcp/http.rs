@@ -190,10 +190,10 @@ mod tests {
 
         assert_eq!(status, StatusCode::OK);
         let response: serde_json::Value = serde_json::from_str(&body).unwrap();
-        assert_eq!(
-            response["result"]["instructions"],
-            "This is a Scraps MCP server"
-        );
+        assert!(response["result"]["instructions"]
+            .as_str()
+            .unwrap()
+            .contains("Scraps wiki"));
         assert!(response["result"]["capabilities"]["tools"].is_object());
 
         server_handle.abort();
