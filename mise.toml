@@ -6,7 +6,6 @@ experimental = true
 "node" = "24.19.0"
 "hk" = "latest"
 "pkl" = "latest"
-"npm:markdownlint-cli2" = "latest"
 "cargo:cargo-llvm-cov" = "latest"
 "cargo:cargo-deny" = "latest"
 

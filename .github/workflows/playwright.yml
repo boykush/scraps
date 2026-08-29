@@ -53,5 +53,5 @@ jobs:
 env:
   # rust and node are installed explicitly by the mise-action steps above; stop
   # the shims from also pulling in the rest of mise.toml (hk, pkl,
-  # markdownlint-cli2, cargo-llvm-cov, cargo-deny), which this job never runs.
+  # cargo-llvm-cov, cargo-deny), which this job never runs.
   MISE_AUTO_INSTALL: "false"

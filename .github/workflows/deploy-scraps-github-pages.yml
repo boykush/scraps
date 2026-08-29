@@ -17,8 +17,8 @@ on:
 
 env:
   # Only rust is installed below; keep the build from pulling the rest of
-  # mise.toml (node, hk, pkl, markdownlint-cli2, cargo-llvm-cov, cargo-deny),
-  # which this job never runs.
+  # mise.toml (node, hk, pkl, cargo-llvm-cov, cargo-deny), which this job
+  # never runs.
   MISE_AUTO_INSTALL: "false"
 
 permissions:
