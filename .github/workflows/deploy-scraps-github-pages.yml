@@ -5,6 +5,13 @@ on:
       - main
     paths:
       - 'docs/**'
+      # The site is built by the binary from this checkout, so a change to the
+      # compiler or its templates changes the published docs too.
+      - 'src/**'
+      - 'modules/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.mise-tasks/docs/**'
       - '.github/workflows/deploy-scraps-github-pages.yml'
   workflow_dispatch:
 
@@ -25,11 +32,19 @@ jobs:
           fetch-depth: 0 # For scraps git committed date
           persist-credentials: false
 
-      - name: Setup Scraps
-        uses: boykush/scraps@b8da11e2943a9c20bbc444a3061aab5ce7dbb752 # v1.1.0
+      - name: Setup mise
+        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          cache: false
+          install_args: "rust"
 
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+
+      # Built from source rather than from a release, so docs changes and
+      # compiler changes reach the published site in the same push instead of
+      # waiting on a release to cut a new binary.
       - name: Build docs
-        run: scraps build --directory docs
+        run: mise run docs:build
 
       - name: Configure Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
