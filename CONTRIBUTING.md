@@ -89,6 +89,7 @@ The pre-commit hook runs quality checks on staged files:
   - Linter checks (clippy)
 - **PKL files (*.pkl)**: Validates configuration syntax
 - **Plugin sources (`plugins/**`)**: Runs `mise run plugins:check-version`, which blocks the commit when a plugin's content (skills, agents, etc.) changes without also updating its `.claude-plugin/plugin.json` / `.codex-plugin/plugin.json` (i.e. bumping the `version`).
+- **Design tokens (`tokens/**`)**: Runs `mise run tokens:check-contrast`, which blocks the commit when a semantic colour role falls below WCAG AA against its surface. Only this half of `tokens:check` runs on commit — it needs nothing but `python3`. The other half, which regenerates `src/usecase/build/css/builtins/_tokens.css` and fails if the committed file is stale, needs Node and runs in CI (`.github/workflows/tokens-check.yml`). Run `mise run tokens:check` locally to get both.
 
 If any check fails, the commit will be blocked. Fix the issues and try again.
 

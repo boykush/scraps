@@ -1,0 +1,47 @@
+name: Design tokens
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'tokens/**'
+      - 'src/usecase/build/css/builtins/_tokens.css'
+      - '.mise-tasks/tokens/**'
+      - '.github/workflows/tokens-check.yml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'tokens/**'
+      - 'src/usecase/build/css/builtins/_tokens.css'
+      - '.mise-tasks/tokens/**'
+      - '.github/workflows/tokens-check.yml'
+
+env:
+  # Only node is installed below; keep the task from pulling the rest of the
+  # toolchain (rust, pkl, hk) that mise.toml declares.
+  MISE_AUTO_INSTALL: "false"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+      with:
+        cache: false
+        install_args: "node"
+    - name: Check design tokens
+      run: mise run tokens:check
+      # Runs tokens:check-contrast (python3, preinstalled) and
+      # tokens:check-generated (Style Dictionary, needs node)
