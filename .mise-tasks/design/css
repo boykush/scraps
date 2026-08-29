@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#MISE description="Refresh the stylesheet Storybook renders against, after a theme change"
+set -euo pipefail
+
+# Debug build: this runs in the edit loop, where compile time matters more than
+# the runtime of a build that emits one small site.
+cargo build
+./target/debug/scraps build --directory docs
+python3 design/storybook/flatten-scheme.py docs/_site/main.css design/storybook/static
