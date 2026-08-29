@@ -23,11 +23,18 @@ jobs:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
-    - name: Setup mise (install scraps)
+    - name: Setup mise (install rust)
       uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
       with:
         cache: false
-        install_args: "github:boykush/scraps"
+        install_args: "rust"
+    - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+    # Built from this checkout, so the suite renders the PR's templates and CSS
+    # instead of a released binary's. Ahead of the browser install so a compile
+    # error fails fast, and outside Playwright's webServer command, whose 30s
+    # timeout a cold release build would exceed.
+    - name: Build scraps
+      run: cargo build --release
     - name: Setup Node.js
       uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
       with:
@@ -41,10 +48,10 @@ jobs:
       run: npx playwright install --with-deps
     - name: Run Playwright tests
       working-directory: ./tests/e2e
-      env:
-        # Skip auto-install of dev-only tools (rust, cargo-deny, llvm-cov, hk,
-        # pkl, markdownlint-cli2) when the webServer subprocess invokes
-        # `mise run docs:serve`. Only scraps is required and is installed
-        # explicitly by the mise-action step above.
-        MISE_AUTO_INSTALL: "false"
       run: npx playwright test
+
+env:
+  # rust and node are installed explicitly by the mise-action steps above; stop
+  # the shims from also pulling in the rest of mise.toml (hk, pkl,
+  # markdownlint-cli2, cargo-llvm-cov, cargo-deny), which this job never runs.
+  MISE_AUTO_INSTALL: "false"
