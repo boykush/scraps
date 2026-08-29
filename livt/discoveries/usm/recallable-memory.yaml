@@ -1,0 +1,39 @@
+name: 記憶の引き出し
+
+activities:
+  - key: grasp-usage
+    name: 使い方を掴む
+    steps:
+      - key: learn-from-tool-defs
+        name: ツール定義から使い方を知る
+        stories:
+          - key: learn-usage-from-tool-defs
+            name: ツール定義から使い方を知る
+            release: teach-how-to-draw
+      - key: orient-at-start
+        name: セッション開始時に起点を掴む
+        stories:
+          - key: orient-at-session-start
+            name: 一枚のオリエンテーションで起点を掴む
+            release: teach-how-to-draw
+  - key: draw-out
+    name: 記憶のように引き出す
+    steps:
+      - key: recall-from-cue
+        name: 手掛かりから引き出す
+        stories:
+          - key: recall-in-one-call
+            name: 手掛かり1回で近傍ごと引き出す
+            release: do-the-drawing
+      - key: follow-relations
+        name: 関連へ深掘る
+        stories:
+          - key: follow-response-hints
+            name: 応答の次の一手で深掘る
+            release: teach-how-to-draw
+
+releases:
+  - id: teach-how-to-draw
+    name: 引き出し方を教える
+  - id: do-the-drawing
+    name: 引き出しを担う
