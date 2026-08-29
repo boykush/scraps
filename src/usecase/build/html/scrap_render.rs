@@ -45,10 +45,7 @@ impl ScrapRender {
         context.insert("scrap", &ScrapDetailTera::from(scrap_detail.clone()));
 
         let linked_scraps = backlinks_map.get(&scrap.self_key());
-        context.insert(
-            "linked_scraps",
-            &LinkScrapsTera::new(&linked_scraps, base_url),
-        );
+        context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
 
         // The stem may contain `/`-separated context directories, which
         // `render_to_file` creates on the way.
