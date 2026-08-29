@@ -32,7 +32,7 @@ impl ScrapsServer {
 #[tool_router]
 impl ScrapsServer {
     #[tool(
-        description = "Get a single scrap by title and optional context. Optionally restrict to a heading section via 'heading'. Optionally project specific fields via 'fields' (allowed: title, ctx, body, headings, code_blocks); defaults to ['title', 'ctx', 'body']."
+        description = "Use when you know which scrap to read, by title and optional context. Optionally restrict to a heading section via 'heading', and project specific fields via 'fields' (allowed: title, ctx, body, headings, code_blocks; defaults to ['title', 'ctx', 'body']) to keep the response small. Traverse onward with lookup_scrap_links or lookup_scrap_backlinks."
     )]
     async fn get_scrap(
         &self,
@@ -43,7 +43,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Search for scraps using fuzzy matching against title and body content. Space-separated keywords use OR logic by default (any keyword matches). Set logic to 'and' for all keywords to match. Returns matching scraps with titles and contexts. Use get_scrap to retrieve full content."
+        description = "Use when you have keywords or a rough cue but no exact title. Fuzzy-matches titles and body content; space-separated keywords use OR logic by default (any keyword matches). Start broad, then re-search with logic 'and' to require every keyword. Read promising hits with get_scrap."
     )]
     async fn search_scraps(
         &self,
@@ -54,7 +54,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Lookup outbound wiki links from a specific scrap. Returns all scraps that the specified scrap links to. Use get_scrap to retrieve full content."
+        description = "Use when you want what a scrap references: returns its outbound wiki links as scraps. Read any of them with get_scrap."
     )]
     async fn lookup_scrap_links(
         &self,
@@ -65,7 +65,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Lookup inbound wiki links (backlinks) to a specific scrap. Returns all scraps that link to the specified scrap. Use get_scrap to retrieve full content."
+        description = "Use when you want what references a scrap: returns the scraps linking to it (inbound wiki links). Read any of them with get_scrap."
     )]
     async fn lookup_scrap_backlinks(
         &self,
@@ -76,7 +76,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "List all available tags used across scraps in the documentation site. Useful for discovering content categories and topics."
+        description = "Use when you need the wiki's topic map before drilling in: lists all tags used across scraps. Expand a tag into its scraps with lookup_tag_backlinks."
     )]
     async fn list_tags(
         &self,
@@ -86,7 +86,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Lookup inbound references (backlinks) to a specific tag. Returns all scraps that reference the specified tag. Use get_scrap to retrieve full content."
+        description = "Use when you want everything filed under a topic: returns the scraps referencing a tag. Read individual results with get_scrap."
     )]
     async fn lookup_tag_backlinks(
         &self,
@@ -102,8 +102,14 @@ impl ScrapsServer {
 #[tool_handler(router = self.tool_router)]
 impl ServerHandler for ScrapsServer {
     fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
-            .with_instructions("This is a Scraps MCP server")
+        ServerInfo::new(ServerCapabilities::builder().enable_tools().build()).with_instructions(
+            "Read interface to a Scraps wiki: markdown scraps typed with wiki-links, tags, \
+                 and folder contexts. Recommended flow: start with search_scraps on broad OR \
+                 keywords and narrow with logic 'and'; read the best hits with get_scrap, \
+                 projecting fields to keep responses small; then traverse relations with \
+                 lookup_scrap_links and lookup_scrap_backlinks. For the topic map, list_tags \
+                 then lookup_tag_backlinks.",
+        )
     }
 }
 
@@ -123,10 +129,7 @@ mod tests {
         );
         let info = server.get_info();
 
-        assert_eq!(
-            info.instructions,
-            Some("This is a Scraps MCP server".into())
-        );
+        assert!(info.instructions.is_some());
         assert!(info.capabilities.tools.is_some());
     }
 
@@ -158,6 +161,116 @@ mod tests {
 
         client.cancel().await.unwrap();
         server_handle.abort();
+    }
+
+    async fn list_tools_of(project: &TempScrapProject) -> Vec<rmcp::model::Tool> {
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
+
+        let (client_stream, server_stream) = tokio::io::duplex(4096);
+
+        let server_handle = tokio::spawn(async move { server.serve(server_stream).await });
+
+        let client = ().serve(client_stream).await.unwrap();
+
+        let tools = client.list_tools(Default::default()).await.unwrap().tools;
+
+        client.cancel().await.unwrap();
+        server_handle.abort();
+        tools
+    }
+
+    // Automates livt://mapping/learn-usage-from-tool-defs/rule/R-01
+    #[rstest]
+    fn test_instructions_teach_the_drawing_flow(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
+        let instructions = server.get_info().instructions.unwrap();
+
+        assert_ne!(instructions, "This is a Scraps MCP server");
+
+        let search = instructions.find("search_scraps").unwrap();
+        let get = instructions.find("get_scrap").unwrap();
+        let links = instructions.find("lookup_scrap_links").unwrap();
+        assert!(
+            search < get && get < links,
+            "flow should read search -> get -> links: {instructions}"
+        );
+    }
+
+    // Automates livt://mapping/learn-usage-from-tool-defs/rule/R-02
+    #[rstest]
+    #[tokio::test]
+    async fn test_tool_descriptions_open_with_when_to_use(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        for tool in list_tools_of(&project).await {
+            let desc = tool.description.as_deref().unwrap_or_default();
+            assert!(
+                desc.starts_with("Use when"),
+                "{} should open with when to use it: {desc}",
+                tool.name
+            );
+        }
+    }
+
+    // Automates livt://mapping/learn-usage-from-tool-defs/rule/R-03
+    #[rstest]
+    #[tokio::test]
+    async fn test_tool_descriptions_name_a_follow_up_tool(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let tools = list_tools_of(&project).await;
+        let names: Vec<String> = tools.iter().map(|t| t.name.to_string()).collect();
+
+        for tool in &tools {
+            let desc = tool.description.as_deref().unwrap_or_default();
+            let names_another = names
+                .iter()
+                .any(|name| name != tool.name.as_ref() && desc.contains(name.as_str()));
+            assert!(
+                names_another,
+                "{} should point at a follow-up tool: {desc}",
+                tool.name
+            );
+        }
+    }
+
+    // Automates livt://mapping/learn-usage-from-tool-defs/rule/R-04
+    #[rstest]
+    #[tokio::test]
+    async fn test_tool_descriptions_carry_argument_etiquette(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let tools = list_tools_of(&project).await;
+        let desc_of = |name: &str| {
+            tools
+                .iter()
+                .find(|t| t.name.as_ref() == name)
+                .unwrap()
+                .description
+                .as_deref()
+                .unwrap_or_default()
+                .to_string()
+        };
+
+        let search = desc_of("search_scraps");
+        assert!(
+            search.contains("broad") && search.contains("logic 'and'"),
+            "search should teach broaden-then-narrow: {search}"
+        );
+
+        let get = desc_of("get_scrap");
+        assert!(
+            get.contains("fields") && get.contains("small"),
+            "get should teach field-projection thrift: {get}"
+        );
     }
 
     #[rstest]

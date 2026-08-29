@@ -1,0 +1,37 @@
+story: learn-usage-from-tool-defs
+
+rules:
+  - id: R-01
+    name: サーバーの instructions が推奨フロー（検索 → 本文取得 → リンク辿り）を教える
+    examples:
+      - id: EX-01
+        name: instructions に search_scraps → get_scrap → lookup_scrap_links がこの順で現れる
+      - id: EX-02
+        name: プレースホルダ文（This is a Scraps MCP server）のままではない
+    automated: true
+  - id: R-02
+    name: 各ツールの description は「いつ使うか」から始まる
+    examples:
+      - id: EX-01
+        name: 6ツールすべての description が Use when で始まる
+    automated: true
+  - id: R-03
+    name: 各ツールの description は次に呼ぶツールへの導線を含む
+    examples:
+      - id: EX-01
+        name: search_scraps は get_scrap を、list_tags は lookup_tag_backlinks を名指す
+      - id: EX-02
+        name: どのツールの description も、他のツール名を少なくとも1つ含む
+    automated: true
+  - id: R-04
+    name: 引数の作法（広げてから絞る・fields で節約）を definition が運ぶ
+    examples:
+      - id: EX-01
+        name: search_scraps が「broad に始めて logic 'and' で絞る」を含む
+      - id: EX-02
+        name: get_scrap が fields projection で応答を小さく保つ作法を含む
+    automated: true
+
+questions:
+  - id: Q-01
+    text: CLI の --help にも同じ作法（いつ使うか・次の一手）を映すか
