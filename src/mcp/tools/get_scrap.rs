@@ -159,6 +159,13 @@ pub async fn get_scrap(
             _ => unreachable!("validated by resolve_fields"),
         }
     }
+    out.insert(
+        "next".to_string(),
+        Value::String(
+            "Traverse onward with lookup_scrap_links or lookup_scrap_backlinks {title, ctx}."
+                .to_string(),
+        ),
+    );
 
     Ok(CallToolResult::success(vec![ContentBlock::text(
         serde_json::to_string(&Value::Object(out)).map_err(|e| {

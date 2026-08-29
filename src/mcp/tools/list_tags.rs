@@ -48,7 +48,19 @@ pub async fn list_tags(
         count_b.cmp(&count_a)
     });
 
+    let count = tags_with_backlinks.len();
+    let next = if count == 0 {
+        "No tags yet. Search content directly with search_scraps."
+    } else {
+        "Expand a tag into its scraps with lookup_tag_backlinks {tag}."
+    };
+    let response = json!({
+        "results": tags_with_backlinks,
+        "count": count,
+        "next": next,
+    });
+
     Ok(CallToolResult::success(vec![ContentBlock::text(
-        serde_json::to_string(&tags_with_backlinks).unwrap(),
+        serde_json::to_string(&response).unwrap(),
     )]))
 }

@@ -45,6 +45,7 @@ pub struct SearchRequest {
 pub struct SearchResponse {
     pub results: Vec<ScrapKeyJson>,
     pub count: usize,
+    pub next: String,
 }
 
 pub async fn search_scraps(
@@ -82,9 +83,15 @@ pub async fn search_scraps(
         .collect();
 
     let count = scrap_jsons.len();
+    let next = if count == 0 {
+        "No hits. Vary the keywords (default OR logic matches any), or start from the topic map with list_tags."
+    } else {
+        "Read a hit with get_scrap {title, ctx}; then traverse it with lookup_scrap_links."
+    };
     let response = SearchResponse {
         results: scrap_jsons,
         count,
+        next: next.to_string(),
     };
 
     Ok(CallToolResult::success(vec![ContentBlock::text(

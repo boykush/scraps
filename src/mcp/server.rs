@@ -273,6 +273,133 @@ mod tests {
         );
     }
 
+    async fn call_tool_json(
+        project: &TempScrapProject,
+        name: &str,
+        arguments: serde_json::Value,
+    ) -> serde_json::Value {
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
+
+        let (client_stream, server_stream) = tokio::io::duplex(4096);
+
+        let server_handle = tokio::spawn(async move { server.serve(server_stream).await });
+
+        let client = ().serve(client_stream).await.unwrap();
+
+        let mut params = CallToolRequestParams::new(name.to_string());
+        if let Some(args) = arguments.as_object() {
+            if !args.is_empty() {
+                params = params.with_arguments(args.clone());
+            }
+        }
+        let result = client.call_tool(params).await.unwrap();
+
+        client.cancel().await.unwrap();
+        server_handle.abort();
+
+        serde_json::from_str(&result.content[0].as_text().unwrap().text).unwrap()
+    }
+
+    // Automates livt://mapping/follow-response-hints/rule/R-01
+    #[rstest]
+    #[tokio::test]
+    async fn test_every_response_carries_a_next_hint(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("source.md", b"# Source\n\n[[target]] #[[rust]]");
+        project.add_scrap("target.md", b"# Target\n\nContent");
+
+        let calls = vec![
+            ("search_scraps", serde_json::json!({"query": "target"})),
+            ("get_scrap", serde_json::json!({"title": "target"})),
+            ("lookup_scrap_links", serde_json::json!({"title": "source"})),
+            (
+                "lookup_scrap_backlinks",
+                serde_json::json!({"title": "target"}),
+            ),
+            ("list_tags", serde_json::json!({})),
+            ("lookup_tag_backlinks", serde_json::json!({"tag": "rust"})),
+        ];
+
+        for (name, args) in calls {
+            let response = call_tool_json(&project, name, args).await;
+            let next = response["next"].as_str().unwrap_or_default();
+            assert!(
+                !next.is_empty(),
+                "{name} response should carry a next hint: {response}"
+            );
+        }
+
+        let tags = call_tool_json(&project, "list_tags", serde_json::json!({})).await;
+        assert!(
+            tags["results"].is_array() && tags["count"].is_u64(),
+            "list_tags should use the results/count envelope: {tags}"
+        );
+    }
+
+    // Automates livt://mapping/follow-response-hints/rule/R-02
+    #[rstest]
+    #[tokio::test]
+    async fn test_empty_responses_teach_another_way_in(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("target.md", b"# Target\n\nContent");
+
+        let search = call_tool_json(
+            &project,
+            "search_scraps",
+            serde_json::json!({"query": "zzzqqqxxx"}),
+        )
+        .await;
+        assert_eq!(search["count"], 0);
+        assert!(
+            search["next"]
+                .as_str()
+                .unwrap_or_default()
+                .contains("list_tags"),
+            "empty search should point at the topic map: {search}"
+        );
+
+        let links = call_tool_json(
+            &project,
+            "lookup_scrap_links",
+            serde_json::json!({"title": "target"}),
+        )
+        .await;
+        assert_eq!(links["count"], 0);
+        assert!(
+            links["next"]
+                .as_str()
+                .unwrap_or_default()
+                .contains("lookup_scrap_backlinks"),
+            "empty links should point at the inbound direction: {links}"
+        );
+    }
+
+    // Automates livt://mapping/follow-response-hints/rule/R-03
+    #[rstest]
+    #[tokio::test]
+    async fn test_next_stays_top_level_only(#[from(temp_scrap_project)] project: TempScrapProject) {
+        project.add_scrap("target.md", b"# Target\n\nContent");
+
+        let search = call_tool_json(
+            &project,
+            "search_scraps",
+            serde_json::json!({"query": "target"}),
+        )
+        .await;
+        assert!(search["count"].as_u64().unwrap() > 0);
+
+        let first = search["results"][0].as_object().unwrap();
+        assert!(
+            !first.contains_key("next"),
+            "result elements should stay lean: {search}"
+        );
+    }
+
     #[rstest]
     #[tokio::test]
     async fn test_call_search_scraps(#[from(temp_scrap_project)] project: TempScrapProject) {

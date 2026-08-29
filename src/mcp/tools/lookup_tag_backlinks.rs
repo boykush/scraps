@@ -21,6 +21,7 @@ pub struct LookupTagBacklinksRequest {
 pub struct LookupTagBacklinksResponse {
     pub results: Vec<ScrapKeyJson>,
     pub count: usize,
+    pub next: String,
 }
 
 pub async fn lookup_tag_backlinks(
@@ -62,9 +63,15 @@ pub async fn lookup_tag_backlinks(
         .collect();
 
     let count = scrap_jsons.len();
+    let next = if count == 0 {
+        "No scraps under this tag. List available tags with list_tags."
+    } else {
+        "Read a result with get_scrap {title, ctx}."
+    };
     let response = LookupTagBacklinksResponse {
         results: scrap_jsons,
         count,
+        next: next.to_string(),
     };
 
     Ok(CallToolResult::success(vec![ContentBlock::text(

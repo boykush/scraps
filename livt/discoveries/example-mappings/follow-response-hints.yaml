@@ -1,0 +1,29 @@
+story: follow-response-hints
+
+rules:
+  - id: R-01
+    name: すべてのツール応答がトップレベルの next で次の一手を示す
+    examples:
+      - id: EX-01
+        name: 6ツールすべての応答に next が1つ付く
+      - id: EX-02
+        name: list_tags は素の配列をやめ、results / count / next の封筒に揃える
+    automated: true
+  - id: R-02
+    name: 結果が空の応答は、別の辿り方を教える
+    examples:
+      - id: EX-01
+        name: search_scraps の0件応答は list_tags からの入り直しを勧める
+      - id: EX-02
+        name: lookup_scrap_links の0件応答は lookup_scrap_backlinks を勧める
+    automated: true
+  - id: R-03
+    name: next は応答に1つだけ置き、results の各要素を太らせない
+    examples:
+      - id: EX-01
+        name: search のヒット要素に next キーは付かない
+    automated: true
+
+questions:
+  - id: Q-01
+    text: CLI の --json 応答にも next を映すか

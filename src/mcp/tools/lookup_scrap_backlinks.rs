@@ -23,6 +23,7 @@ pub struct LookupScrapBacklinksRequest {
 pub struct LookupScrapBacklinksResponse {
     pub results: Vec<ScrapKeyJson>,
     pub count: usize,
+    pub next: String,
 }
 
 pub async fn lookup_scrap_backlinks(
@@ -70,9 +71,15 @@ pub async fn lookup_scrap_backlinks(
         .collect();
 
     let count = scrap_jsons.len();
+    let next = if count == 0 {
+        "No backlinks. Try lookup_scrap_links {title, ctx} for outbound references."
+    } else {
+        "Read a linking scrap with get_scrap {title, ctx}."
+    };
     let response = LookupScrapBacklinksResponse {
         results: scrap_jsons,
         count,
+        next: next.to_string(),
     };
 
     Ok(CallToolResult::success(vec![ContentBlock::text(
