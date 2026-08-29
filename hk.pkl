@@ -22,6 +22,15 @@ local linters = new Mapping<String, Step> {
         glob = "plugins/**/*"
         check = "mise run plugins:check-version"
     }
+
+    // Design token accessibility gate. Only the contrast half of tokens:check
+    // runs here: it is dependency-free and read-only, while the freshness half
+    // needs a Node install and rewrites the generated CSS in place, which a
+    // fix = false hook must not do. CI runs both.
+    ["tokens_contrast"] = new Step {
+        glob = "tokens/**"
+        check = "mise run tokens:check-contrast"
+    }
 }
 
 hooks {

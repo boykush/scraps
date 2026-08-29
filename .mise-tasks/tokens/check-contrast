@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#MISE description="Fail if a semantic colour role misses WCAG AA against its surface"
+#MISE dir="tokens"
+set -euo pipefail
+
+# Split out of tokens:check so the commit hook can gate accessibility without
+# paying for a Node install. Dependency-free and read-only, unlike the
+# generated-CSS half.
+python3 check-contrast.py
