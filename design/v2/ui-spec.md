@@ -101,14 +101,17 @@
   (rule or a nord step) — do not invent a new role unless contrast gates force
   it.
 - **Syntax highlighting is a token concern, not a CDN one.** Code blocks wear
-  `color.surface-raised`, and five roles — `color.syntax-comment` / `-keyword`
-  / `-entity` / `-string` / `-number` — carry the highlight.js palette from
-  `main.css`. Nord's own hljs theme painted the block nord0, the dark page
+  `color.surface-raised`, and seven roles — `color.syntax-comment` / `-keyword`
+  / `-entity` / `-string` / `-number` / `-added` / `-deleted` — carry the
+  highlight.js palette from `main.css`. Nord's own hljs theme painted the block nord0, the dark page
   ground itself, so the block had no edge; npm no longer ships that stylesheet
   at all. These roles are gated against `surface-raised`, not `surface`, since
   that is the ground code is read on. Nord's frost/aurora steps clear AA on the
   dark ground but not on the light one, so light mode uses darkened `ext.*`
   derivations, the same move `ext.frost-deep` already makes for accent.
+- Mermaid is themed from the page, not left on its default: the module reads
+  the resolved `color-scheme` and re-runs on a `prefers-color-scheme` change,
+  because a diagram left alone draws dark strokes onto the dark ground.
 - Typography and spacing scales unchanged (Rubik + Noto Sans JP, mono for
   metadata/syntax, 4px scale, radius 2/4).
 

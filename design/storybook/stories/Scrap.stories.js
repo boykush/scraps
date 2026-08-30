@@ -71,6 +71,22 @@ export const Code = {
 }</code></pre>`),
 };
 
+export const Diff = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'A fenced diff. Added and removed lines carry their own roles so the pairing survives on both grounds.',
+      },
+    },
+  },
+  render: () =>
+    wrap(`<pre><code class="hljs language-diff"><span class="hljs-meta">--- a/tokens/semantic.tokens.json</span>
+<span class="hljs-meta">+++ b/tokens/semantic.tokens.json</span>
+<span class="hljs-deletion">-      "$value": "{color.nord.8}"</span>
+<span class="hljs-addition">+      "$value": "{color.ext.frost-deep}"</span>
+</code></pre>`),
+};
+
 export const Table = {
   render: () =>
     wrap(`<table>

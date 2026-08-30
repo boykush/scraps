@@ -54,6 +54,14 @@
       "aurora-purple-soft": {
         "$value": "#c6a9c0",
         "$description": "Lightened nord15 for code numbers on the dark code ground. 4.71:1 on nord1; nord15 itself reaches 3.55:1."
+      },
+      "aurora-red-deep": {
+        "$value": "#b04752",
+        "$description": "Darkened nord11 for removed diff lines on light surfaces. 5.43:1 on white; nord11 itself reaches 4.09:1."
+      },
+      "aurora-red-soft": {
+        "$value": "#daa4a9",
+        "$description": "Lightened nord11 for removed diff lines on the dark code ground. 4.73:1 on nord1; nord11 itself reaches 2.46:1."
       }
     }
   }

@@ -109,13 +109,20 @@ p code {
 
 .hljs-string,
 .hljs-meta-string,
-.hljs-regexp,
-.hljs-addition {
+.hljs-regexp {
     color: var(--color-syntax-string);
 }
 
 .hljs-number {
     color: var(--color-syntax-number);
+}
+
+.hljs-addition {
+    color: var(--color-syntax-added);
+}
+
+.hljs-deletion {
+    color: var(--color-syntax-deleted);
 }
 
 .hljs-emphasis {

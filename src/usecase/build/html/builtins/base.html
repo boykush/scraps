@@ -89,7 +89,25 @@
         <script>hljs.highlightAll();</script>
         <!-- Mermaid -->
         <script type="module">
-            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@{{ cdn.mermaid }}/+esm'
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@{{ cdn.mermaid }}/+esm';
+            // A diagram carries its own colours, so it has to be told which
+            // scheme the page resolved to; left on the default it draws dark
+            // strokes onto the dark ground and the edges disappear.
+            const prefersDark = matchMedia('(prefers-color-scheme: dark)');
+            const isDark = () => {
+                const declared = getComputedStyle(document.documentElement).colorScheme;
+                return declared === 'dark' || (declared !== 'light' && prefersDark.matches);
+            };
+            const draw = () => {
+                mermaid.initialize({ startOnLoad: false, theme: isDark() ? 'dark' : 'default' });
+                document.querySelectorAll('code.mermaid').forEach((node) => {
+                    node.textContent = node.dataset.source ??= node.textContent;
+                    node.removeAttribute('data-processed');
+                });
+                mermaid.run({ querySelector: 'code.mermaid' });
+            };
+            draw();
+            prefersDark.addEventListener('change', draw);
         </script>
         {% if build_search_index == true %}
         <!-- For search scraps -->

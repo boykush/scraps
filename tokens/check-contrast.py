@@ -13,7 +13,8 @@ HERE = pathlib.Path(__file__).parent
 TEXT_ROLES = ("text", "text-muted", "accent")
 # Syntax roles never sit on the page ground — code blocks wear surface-raised —
 # so they are gated against that instead.
-SYNTAX_ROLES = ("syntax-comment", "syntax-keyword", "syntax-entity", "syntax-string", "syntax-number")
+SYNTAX_ROLES = ("syntax-comment", "syntax-keyword", "syntax-entity", "syntax-string",
+                "syntax-number", "syntax-added", "syntax-deleted")
 AA_BODY = 4.5
 
 

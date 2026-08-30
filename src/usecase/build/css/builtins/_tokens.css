@@ -24,6 +24,8 @@
     --ext-aurora-green-deep: #577140;
     --ext-aurora-purple-deep: #895b80;
     --ext-aurora-purple-soft: #c6a9c0;
+    --ext-aurora-red-deep: #b04752;
+    --ext-aurora-red-soft: #daa4a9;
 
     --color-surface: light-dark(var(--nord6), var(--nord0));
     --color-surface-raised: light-dark(#ffffff, var(--nord1));
@@ -37,6 +39,8 @@
     --color-syntax-entity: light-dark(var(--ext-frost-teal-deep), var(--nord7));
     --color-syntax-string: light-dark(var(--ext-aurora-green-deep), var(--nord14));
     --color-syntax-number: light-dark(var(--ext-aurora-purple-deep), var(--ext-aurora-purple-soft));
+    --color-syntax-added: light-dark(var(--ext-aurora-green-deep), var(--nord14));
+    --color-syntax-deleted: light-dark(var(--ext-aurora-red-deep), var(--ext-aurora-red-soft));
 
     --font-family-sans: "Rubik", "Noto Sans JP", sans-serif;
     --font-family-mono: ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;

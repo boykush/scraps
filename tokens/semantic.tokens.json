@@ -108,6 +108,24 @@
         "$value": "{color.ext.aurora-purple-soft}"
       }
     },
+    "syntax-added": {
+      "$description": "Added diff lines. Shares the string primitives — a role of its own so the diff pairing is legible next to syntax-deleted. 5.47:1 on light, 4.94:1 on dark.",
+      "light": {
+        "$value": "{color.ext.aurora-green-deep}"
+      },
+      "dark": {
+        "$value": "{color.nord.14}"
+      }
+    },
+    "syntax-deleted": {
+      "$description": "Removed diff lines. 5.43:1 on light, 4.73:1 on dark.",
+      "light": {
+        "$value": "{color.ext.aurora-red-deep}"
+      },
+      "dark": {
+        "$value": "{color.ext.aurora-red-soft}"
+      }
+    },
     "$description": "Semantic layer. Components reference only these; never a primitive directly. Each colour role carries a light and a dark value, emitted as CSS light-dark()."
   },
   "font": {
