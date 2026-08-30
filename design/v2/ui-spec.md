@@ -100,6 +100,15 @@
 - Bracket dimming for `[[ ]]` / `#[[ ]]` uses an existing low-emphasis color
   (rule or a nord step) — do not invent a new role unless contrast gates force
   it.
+- **Syntax highlighting is a token concern, not a CDN one.** Code blocks wear
+  `color.surface-raised`, and five roles — `color.syntax-comment` / `-keyword`
+  / `-entity` / `-string` / `-number` — carry the highlight.js palette from
+  `main.css`. Nord's own hljs theme painted the block nord0, the dark page
+  ground itself, so the block had no edge; npm no longer ships that stylesheet
+  at all. These roles are gated against `surface-raised`, not `surface`, since
+  that is the ground code is read on. Nord's frost/aurora steps clear AA on the
+  dark ground but not on the light one, so light mode uses darkened `ext.*`
+  derivations, the same move `ext.frost-deep` already makes for accent.
 - Typography and spacing scales unchanged (Rubik + Noto Sans JP, mono for
   metadata/syntax, 4px scale, radius 2/4).
 

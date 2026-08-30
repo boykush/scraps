@@ -11,6 +11,9 @@ import sys
 
 HERE = pathlib.Path(__file__).parent
 TEXT_ROLES = ("text", "text-muted", "accent")
+# Syntax roles never sit on the page ground — code blocks wear surface-raised —
+# so they are gated against that instead.
+SYNTAX_ROLES = ("syntax-comment", "syntax-keyword", "syntax-entity", "syntax-string", "syntax-number")
 AA_BODY = 4.5
 
 
@@ -70,6 +73,14 @@ def main():
         print(f"{status:4s} {mode:5s} {'text/wash':12s} {text_on_wash} on {wash}  {ratio:5.2f}:1")
         if ratio < AA_BODY:
             failures.append(f"{mode}/text-on-wash {ratio:.2f}:1 < {AA_BODY}")
+        raised = resolve(roles["surface-raised"][mode]["$value"], flat)
+        for name in SYNTAX_ROLES:
+            value = resolve(roles[name][mode]["$value"], flat)
+            ratio = contrast(value, raised)
+            status = "ok" if ratio >= AA_BODY else "FAIL"
+            print(f"{status:4s} {mode:5s} {name:12s} {value} on {raised}  {ratio:5.2f}:1")
+            if ratio < AA_BODY:
+                failures.append(f"{mode}/{name} {ratio:.2f}:1 < {AA_BODY}")
     if failures:
         print("\n" + "\n".join(failures), file=sys.stderr)
         return 1

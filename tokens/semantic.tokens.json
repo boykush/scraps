@@ -63,6 +63,51 @@
         "$value": "#3b4854"
       }
     },
+    "syntax-comment": {
+      "$description": "Code comments and quotes. Syntax roles are gated against surface-raised — the code ground — not the page. 5.47:1 on light, 4.71:1 on dark.",
+      "light": {
+        "$value": "{color.ext.slate-mid}"
+      },
+      "dark": {
+        "$value": "{color.ext.slate-soft}"
+      }
+    },
+    "syntax-keyword": {
+      "$description": "Keywords, literals, tag and selector names. 5.70:1 on light, 4.70:1 on dark.",
+      "light": {
+        "$value": "{color.ext.frost-deep}"
+      },
+      "dark": {
+        "$value": "{color.ext.frost-blue-soft}"
+      }
+    },
+    "syntax-entity": {
+      "$description": "Named things: titles, types, functions, attributes. 5.47:1 on light, 4.83:1 on dark.",
+      "light": {
+        "$value": "{color.ext.frost-teal-deep}"
+      },
+      "dark": {
+        "$value": "{color.nord.7}"
+      }
+    },
+    "syntax-string": {
+      "$description": "String and regexp literals. 5.47:1 on light, 4.94:1 on dark.",
+      "light": {
+        "$value": "{color.ext.aurora-green-deep}"
+      },
+      "dark": {
+        "$value": "{color.nord.14}"
+      }
+    },
+    "syntax-number": {
+      "$description": "Numeric literals. 5.42:1 on light, 4.71:1 on dark.",
+      "light": {
+        "$value": "{color.ext.aurora-purple-deep}"
+      },
+      "dark": {
+        "$value": "{color.ext.aurora-purple-soft}"
+      }
+    },
     "$description": "Semantic layer. Components reference only these; never a primitive directly. Each colour role carries a light and a dark value, emitted as CSS light-dark()."
   },
   "font": {
