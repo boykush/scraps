@@ -7,4 +7,3 @@ mod serde;
 pub mod tag_render;
 pub mod tags_index_render;
 mod templates;
-pub mod title_index_render;

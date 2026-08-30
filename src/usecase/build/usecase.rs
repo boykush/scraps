@@ -73,6 +73,7 @@ impl BuildUsecase {
             scraps.len(),
             Tags::new(&scraps),
             list_view_configs.build_search_index,
+            timezone,
         );
         span_read_scraps.exit();
         progress.complete_stage(&Stage::ReadScraps, &scrap_details.len());
@@ -102,7 +103,6 @@ impl BuildUsecase {
                 let _span_generate_html_scrap = span!(Level::INFO, "generate_html_scrap").entered();
                 renderer.render_scrap(
                     base_url,
-                    timezone,
                     html_metadata,
                     &scrap_detail,
                     &backlinks_map,
@@ -124,18 +124,6 @@ impl BuildUsecase {
         )?;
         span_generate_html_scraps_index.exit();
 
-        // generate html title index
-        let span_generate_html_title_index =
-            span!(Level::INFO, "generate_html_title_index").entered();
-        renderer.render_title_index(
-            base_url,
-            html_metadata,
-            &scrap_details,
-            &backlinks_map,
-            &site_nav,
-        )?;
-        span_generate_html_title_index.exit();
-
         // generate html tags index
         let span_generate_html_tags_index =
             span!(Level::INFO, "generate_html_tags_index").entered();
@@ -151,8 +139,7 @@ impl BuildUsecase {
         span_generate_html_tags.exit();
 
         progress.complete_stage(&Stage::GenerateHtml, &{
-            index_page_count + scrap_details.len() + 1 + // title index
-                1 + // tags index
+            index_page_count + scrap_details.len() + 1 + // tags index
                 site_nav.tags.len()
         });
 

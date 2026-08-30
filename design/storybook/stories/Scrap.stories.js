@@ -22,7 +22,7 @@ export const Header = {
       </p>
       <h3 class="context">Reference/Wiki-link<span>&#47;</span></h3>
       <h1 class="title">Heading Reference</h1>
-      <p class="commited-date">commited date: 2026-08-12</p>
+      <p class="commited-date">committed 2026-08-12</p>
     </div>`,
 };
 
@@ -84,8 +84,11 @@ export const LinkCard = {
   render: () =>
     wrap(`
       <a class="link-card" href="#">
-        <span class="host">www.nordtheme.com</span>
-        <span class="url">https://www.nordtheme.com/docs/colors-and-palettes</span>
+        <svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6.5 9.5 L9.5 6.5"></path><path d="M7.5 4.5 L9 3 A2.1 2.1 0 0 1 12 6 L10.5 7.5"></path><path d="M8.5 11.5 L7 13 A2.1 2.1 0 0 1 4 10 L5.5 8.5"></path></svg>
+        <span class="body">
+          <span class="host">www.nordtheme.com</span>
+          <span class="url">https://www.nordtheme.com/docs/colors-and-palettes</span>
+        </span>
       </a>`),
 };
 

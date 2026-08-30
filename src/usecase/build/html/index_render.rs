@@ -224,7 +224,7 @@ mod tests {
 
         let scraps = scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(&scraps);
-        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true);
+        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC);
 
         let render = IndexRender::new(&project.static_dir, &project.output_dir).unwrap();
         render
@@ -301,7 +301,7 @@ mod tests {
 
         let scraps = scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(&scraps);
-        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true);
+        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC);
 
         let render = IndexRender::new(&project.static_dir, &project.output_dir).unwrap();
         let readme_content: Option<Content> = None;
@@ -363,7 +363,7 @@ mod tests {
         let scrap_details = ScrapDetails::new(&vec![sc1]);
         let scraps = scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(&scraps);
-        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true);
+        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC);
 
         let render = IndexRender::new(&project.static_dir, &project.output_dir).unwrap();
         render

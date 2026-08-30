@@ -69,22 +69,6 @@ impl IndexScrapsTera {
         IndexScrapsTera(sorted)
     }
 
-    /// Title order rather than a `SortKey`: the full index is a reference
-    /// listing, and neither recency nor link count is what a reader scans by.
-    pub fn new_sorted_by_title(
-        scrap_details: &ScrapDetails,
-        backlinks_map: &BacklinksMap,
-    ) -> IndexScrapsTera {
-        let sorted = scrap_details
-            .to_vec()
-            .into_iter()
-            .map(|s| SerializeIndexScrap::new(&s, backlinks_map))
-            .sorted_by_key(|s| s.title.to_lowercase())
-            .collect_vec();
-
-        IndexScrapsTera(sorted)
-    }
-
     pub fn chunks(&self, chunk_size: usize) -> Vec<IndexScrapsTera> {
         self.0
             .chunks(chunk_size)

@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-use chrono_tz::Tz;
 use scraps_libs::model::{
     base_url::BaseUrl, content::Content, key::ScrapKey, scrap::Scrap, tag::Tag,
 };
@@ -13,7 +12,7 @@ use crate::usecase::build::{
     html::{
         index_render::IndexRender, scrap_render::ScrapRender,
         scraps_index_render::ScrapsIndexRender, tag_render::TagRender,
-        tags_index_render::TagsIndexRender, title_index_render::TitleIndexRender,
+        tags_index_render::TagsIndexRender,
     },
     model::{
         backlinks_map::BacklinksMap,
@@ -25,7 +24,7 @@ use crate::usecase::build::{
     },
     renderer::{
         CssRenderer, HtmlIndexRenderer, HtmlScrapRenderer, HtmlScrapsIndexRenderer,
-        HtmlTagRenderer, HtmlTagsIndexRenderer, HtmlTitleIndexRenderer, SearchIndexJsonRenderer,
+        HtmlTagRenderer, HtmlTagsIndexRenderer, SearchIndexJsonRenderer,
     },
 };
 
@@ -36,7 +35,6 @@ pub struct BuildRendererImpl {
     index_render: IndexRender,
     scrap_render: ScrapRender,
     scraps_index_render: ScrapsIndexRender,
-    title_index_render: TitleIndexRender,
     tags_index_render: TagsIndexRender,
     tag_render: TagRender,
     css_render: CSSRender,
@@ -49,7 +47,6 @@ impl BuildRendererImpl {
             index_render: IndexRender::new(static_dir_path, output_dir_path)?,
             scrap_render: ScrapRender::new(static_dir_path, output_dir_path)?,
             scraps_index_render: ScrapsIndexRender::new(static_dir_path, output_dir_path)?,
-            title_index_render: TitleIndexRender::new(static_dir_path, output_dir_path)?,
             tags_index_render: TagsIndexRender::new(static_dir_path, output_dir_path)?,
             tag_render: TagRender::new(static_dir_path, output_dir_path)?,
             css_render: CSSRender::new(static_dir_path, output_dir_path)?,
@@ -85,7 +82,6 @@ impl HtmlScrapRenderer for BuildRendererImpl {
     fn render_scrap(
         &self,
         base_url: &BaseUrl,
-        timezone: Tz,
         html_metadata: &HtmlMetadata,
         scrap_detail: &ScrapDetail,
         backlinks_map: &BacklinksMap,
@@ -94,7 +90,6 @@ impl HtmlScrapRenderer for BuildRendererImpl {
     ) -> ScrapsResult<()> {
         self.scrap_render.run(
             base_url,
-            timezone,
             html_metadata,
             scrap_detail,
             backlinks_map,
@@ -114,25 +109,6 @@ impl HtmlScrapsIndexRenderer for BuildRendererImpl {
         site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
         self.scraps_index_render.run(
-            base_url,
-            html_metadata,
-            scrap_details,
-            backlinks_map,
-            site_nav,
-        )
-    }
-}
-
-impl HtmlTitleIndexRenderer for BuildRendererImpl {
-    fn render_title_index(
-        &self,
-        base_url: &BaseUrl,
-        html_metadata: &HtmlMetadata,
-        scrap_details: &ScrapDetails,
-        backlinks_map: &BacklinksMap,
-        site_nav: &SiteNav,
-    ) -> ScrapsResult<()> {
-        self.title_index_render.run(
             base_url,
             html_metadata,
             scrap_details,

@@ -4,7 +4,6 @@ use crate::usecase::build::html::serde::tags::TagsTera;
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::site_nav::SiteNav;
-use chrono_tz::Tz;
 use once_cell::sync::Lazy;
 use scraps_libs::model::base_url::BaseUrl;
 use tera::Tera;
@@ -31,12 +30,6 @@ static TAGS_INDEX: Lazy<Tera> = Lazy::new(|| {
     builtins((
         "__builtins/tags_index.html",
         include_str!("builtins/tags_index.html"),
-    ))
-});
-static TITLES: Lazy<Tera> = Lazy::new(|| {
-    builtins((
-        "__builtins/titles.html",
-        include_str!("builtins/titles.html"),
     ))
 });
 
@@ -79,10 +72,6 @@ pub fn tags_index(template_dir: &str) -> ScrapsResult<Tera> {
     with_user_templates(&TAGS_INDEX, template_dir)
 }
 
-pub fn titles(template_dir: &str) -> ScrapsResult<Tera> {
-    with_user_templates(&TITLES, template_dir)
-}
-
 /// Context every HTML page starts from.
 pub fn context(base_url: &BaseUrl, metadata: &HtmlMetadata) -> tera::Context {
     let mut context = tera::Context::new();
@@ -109,12 +98,5 @@ pub fn insert_site_nav(
     context.insert("scrap_count", &site_nav.scrap_count);
     context.insert("nav_tags", &TagsTera::new(&site_nav.tags, backlinks_map));
     context.insert("build_search_index", &site_nav.build_search_index);
-}
-
-/// Scrap pages additionally render commit dates, which need the site timezone.
-pub fn scrap_context(base_url: &BaseUrl, timezone: Tz, metadata: &HtmlMetadata) -> tera::Context {
-    let mut context = context(base_url, metadata);
-    context.insert("timezone", &timezone);
-
-    context
+    context.insert("timezone", &site_nav.timezone);
 }

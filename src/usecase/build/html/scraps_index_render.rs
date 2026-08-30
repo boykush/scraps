@@ -10,11 +10,11 @@ use crate::usecase::build::model::site_nav::SiteNav;
 use scraps_libs::model::base_url::BaseUrl;
 use tera::Tera;
 
-use super::serde::index_scraps::IndexScrapsTera;
+use super::serde::title_index::TitleIndexTera;
 
 /// The paginated index answers "what changed lately"; this one answers "what
-/// is in here", which pagination actively gets in the way of once a wiki runs
-/// to hundreds of scraps.
+/// is in here": every scrap on a single page, grouped by the title's initial
+/// with a jump bar, so a reader who knows the name goes straight to it.
 pub struct ScrapsIndexRender {
     tera: Tera,
     output_scraps_dir_path: PathBuf,
@@ -40,10 +40,7 @@ impl ScrapsIndexRender {
     ) -> ScrapsResult<()> {
         let mut context = templates::context(base_url, metadata);
         templates::insert_site_nav(&mut context, "scraps", site_nav, backlinks_map);
-        context.insert(
-            "scraps",
-            &IndexScrapsTera::new_sorted_by_title(scrap_details, backlinks_map),
-        );
+        context.insert("groups", &TitleIndexTera::new(scrap_details, backlinks_map));
 
         let template_name = resolve_template(
             &self.tera,
@@ -72,16 +69,17 @@ mod tests {
     fn it_run(#[from(temp_scrap_project)] project: TempScrapProject) {
         project.add_static_file(
             "scraps_index.html",
-            b"{% for scrap in scraps %}<a>{{ scrap.title }}:{{ scrap.backlinks_count }}</a>{% endfor %}",
+            b"{% for group in groups %}[{{ group.label }}{% for scrap in group.scraps %} {{ scrap.title }}:{{ scrap.backlinks_count }}{% endfor %}]{% endfor %}",
         );
 
         let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let metadata = HtmlMetadata::new(&LangCode::default(), "Scrap", &None, &None);
 
-        // Deliberately out of title order, and mixed case, to pin the sort.
+        // Mixed initials and mixed case, to pin grouping and in-group order.
         let scrap1 = Scrap::new("beta", &None, "[[Alpha]]");
         let scrap2 = Scrap::new("Alpha", &None, "");
-        let scraps = [scrap1.clone(), scrap2.clone()];
+        let scrap3 = Scrap::new("デザイントークン", &None, "");
+        let scraps = [scrap1.clone(), scrap2.clone(), scrap3.clone()];
         let scrap_texts = scraps
             .iter()
             .map(|s| (s.self_key(), s.md_text().to_string()))
@@ -90,9 +88,10 @@ mod tests {
         let details = ScrapDetails::new(&vec![
             ScrapDetail::new(&scrap1, &None, &base_url, &scrap_texts),
             ScrapDetail::new(&scrap2, &None, &base_url, &scrap_texts),
+            ScrapDetail::new(&scrap3, &None, &base_url, &scrap_texts),
         ]);
         let backlinks_map = BacklinksMap::new(&scraps);
-        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true);
+        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC);
 
         let render = ScrapsIndexRender::new(&project.static_dir, &project.output_dir).unwrap();
         render
@@ -100,6 +99,37 @@ mod tests {
             .unwrap();
 
         let result = fs::read_to_string(project.output_path("scraps/index.html")).unwrap();
-        assert_eq!(result, "<a>Alpha:1</a><a>beta:0</a>");
+        assert_eq!(result, "[た デザイントークン:0][A Alpha:1][B beta:0]");
+    }
+
+    #[rstest]
+    fn builtin_template_renders_jump_bar(#[from(temp_scrap_project)] project: TempScrapProject) {
+        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
+        let metadata = HtmlMetadata::new(&LangCode::default(), "Scrap", &None, &None);
+
+        let scrap1 = Scrap::new("デザイントークン", &None, "");
+        let scraps = [scrap1.clone()];
+        let scrap_texts = scraps
+            .iter()
+            .map(|s| (s.self_key(), s.md_text().to_string()))
+            .collect();
+
+        let details = ScrapDetails::new(&vec![ScrapDetail::new(
+            &scrap1,
+            &None,
+            &base_url,
+            &scrap_texts,
+        )]);
+        let backlinks_map = BacklinksMap::new(&scraps);
+        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC);
+
+        let render = ScrapsIndexRender::new(&project.static_dir, &project.output_dir).unwrap();
+        render
+            .run(&base_url, &metadata, &details, &backlinks_map, &site_nav)
+            .unwrap();
+
+        let result = fs::read_to_string(project.output_path("scraps/index.html")).unwrap();
+        assert!(result.contains("class=\"jump\""));
+        assert!(result.contains("デザイントークン"));
     }
 }

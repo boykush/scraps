@@ -33,7 +33,6 @@ const sidebar = ({ activeView, results = [] }) => `
       <p class="nav-label">views</p>
       ${viewItem({ label: 'updated', active: activeView === 'updated' })}
       ${viewItem({ label: 'backlinks', active: activeView === 'backlinks' })}
-      ${viewItem({ label: 'titles', active: activeView === 'titles' })}
       ${viewItem({ label: 'all scraps', count: 764, active: activeView === 'scraps' })}
     </nav>
     <nav class="tags">
@@ -77,7 +76,7 @@ export const SearchOpen = {
     }),
 };
 
-export const TitlesActive = {
-  name: 'Titles view active',
-  render: () => sidebar({ activeView: 'titles' }),
+export const AllScrapsActive = {
+  name: 'All scraps active',
+  render: () => sidebar({ activeView: 'scraps' }),
 };

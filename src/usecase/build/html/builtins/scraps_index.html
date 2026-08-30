@@ -1,11 +1,26 @@
 {% extends "__builtins/base.html" %}
 
+{% block status_left %}{{ scrap_count }} scraps &#183; title order{% endblock status_left %}
+
 {% block main %}
     <div class="scraps-index">
         <p class="list-head">
-            <span class="count">{{ scraps | length }} scraps</span>
-            <span class="legend">title order &#183; backlinks</span>
+            <span class="view-name">all scraps</span>
+            <span class="stats">{{ scrap_count }} scraps</span>
         </p>
-        {{ <scrap_index scraps={scraps} base_url={base_url} /> }}
+        <p class="jump-bar">
+            {% for group in groups %}
+                <a class="jump" href="#title-group-{{ loop.index }}">{{ group.label }}</a>
+            {% endfor %}
+        </p>
+        {% for group in groups %}
+            <section class="title-group" id="title-group-{{ loop.index }}">
+                <h2 class="group-head">
+                    <span class="label">{{ group.label }}</span>
+                    <span class="count">{{ group.scraps | length }}</span>
+                </h2>
+                {{ <scrap_index scraps={group.scraps} base_url={base_url} /> }}
+            </section>
+        {% endfor %}
     </div>
 {% endblock %}

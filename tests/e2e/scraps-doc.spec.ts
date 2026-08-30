@@ -82,7 +82,8 @@ test('sort views are always generated', async ({ page }) => {
   await page.goto('/backlinks/', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('.sidebar nav.views .item.active')).toHaveText(/backlinks/);
 
-  await page.goto('/titles/', { waitUntil: 'domcontentloaded' });
+  await page.goto('/scraps/', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.sidebar nav.views .item.active')).toHaveText(/all scraps/);
   await expect(page.locator('.jump-bar .jump').first()).toBeVisible();
   await expect(page.locator('section.title-group').first()).toBeVisible();
 });
