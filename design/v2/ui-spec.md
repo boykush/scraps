@@ -32,9 +32,13 @@
 
 ## 2. Functional changes (v2, breaking)
 
-1. **Home no longer renders README.md.** Home is a designed page: view header,
-   stats line (`N scraps · M tags · K links · built T s`), scrap list. The SSG
-   stops consuming README.md entirely.
+1. **README stays on the home — the shell absorbs it.** v1's problem was that
+   the home's entire structure depended on README content. v2 fixes the
+   structure instead of dropping the feature: the sidebar (nav / search /
+   tags) and the view header + stats line are always present, and an optional
+   README block renders in the content column above the scrap list. No
+   config — the presence of README.md is the switch. The docs site's own home
+   relies on this. `mockups/home.html` shows the README-absent case.
 2. **`sort_key` config is removed.** Every sort view is always generated:
 
    | View | Route | Order | Pagination |
@@ -116,7 +120,7 @@ kanji-reading-based indexing (tokenizer = plugin candidate); RSS per view.
 | # | Branch | Content |
 |---|---|---|
 | 0 | `claude/v2-ui-00-goal` | this spec + mockups (docs only) |
-| 1 | `claude/v2-ui-01-views` | Rust/data layer: always-generated views (`/backlinks/`, `/titles/`), README de-injection, `sort_key` removal, scrap tags/links data, static autolink card, e2e updates — templates functional but v1-styled |
+| 1 | `claude/v2-ui-01-views` | Rust/data layer: always-generated views (`/backlinks/`, `/titles/`), `sort_key` removal, scrap tags/links data, static autolink card, e2e updates — templates functional but v1-styled |
 | 2 | `claude/v2-ui-02-shell` | `accent-wash` token, sidebar shell in `base.html`, home/list/tag pages restyled, responsive fallback |
 | 3 | `claude/v2-ui-03-pages` | scrap page + title index styled to the mockups |
 | 4 | `claude/v2-ui-04-design-sync` | Storybook stories, `/design/` + `/design-tokens/` pages, `docs/` Reference updates |
