@@ -30,6 +30,38 @@
       "slate-mid": {
         "$value": "#5d6a80",
         "$description": "Muted text on light surfaces. 4.75:1 on nord6, sitting below text (nord3, 6.40:1) so the hierarchy still reads."
+      },
+      "slate-soft": {
+        "$value": "#a9b2c2",
+        "$description": "Comments on the dark code ground. 4.71:1 on nord1, where nord3 — Nord's own comment colour — reaches 1.36:1."
+      },
+      "frost-teal-deep": {
+        "$value": "#447170",
+        "$description": "Darkened nord7 for code entities on light surfaces. 5.47:1 on white; nord7 itself reaches 2.08:1."
+      },
+      "frost-blue-soft": {
+        "$value": "#9bb4ce",
+        "$description": "Lightened nord9 for code keywords on the dark code ground. 4.70:1 on nord1; nord9 itself reaches 3.74:1."
+      },
+      "aurora-green-deep": {
+        "$value": "#577140",
+        "$description": "Darkened nord14 for code strings on light surfaces. 5.47:1 on white; nord14 itself reaches 2.04:1."
+      },
+      "aurora-purple-deep": {
+        "$value": "#895b80",
+        "$description": "Darkened nord15 for code numbers on light surfaces. 5.42:1 on white; nord15 itself reaches 2.83:1."
+      },
+      "aurora-purple-soft": {
+        "$value": "#c6a9c0",
+        "$description": "Lightened nord15 for code numbers on the dark code ground. 4.71:1 on nord1; nord15 itself reaches 3.55:1."
+      },
+      "aurora-red-deep": {
+        "$value": "#b04752",
+        "$description": "Darkened nord11 for removed diff lines on light surfaces. 5.43:1 on white; nord11 itself reaches 4.09:1."
+      },
+      "aurora-red-soft": {
+        "$value": "#daa4a9",
+        "$description": "Lightened nord11 for removed diff lines on the dark code ground. 4.73:1 on nord1; nord11 itself reaches 2.46:1."
       }
     }
   }

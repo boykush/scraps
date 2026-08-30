@@ -139,10 +139,14 @@ StyleDictionary.registerFormat({
     const scale = (prefix) => [...byName.entries()].filter(([n]) => n.startsWith(prefix));
 
     const surface = byName.get('--color-surface').modes;
+    const raised = byName.get('--color-surface-raised').modes;
     const rows = semantic.map(([name, entry]) => {
+      // Syntax roles are read on the code ground, so quote them against it —
+      // the same pairing tokens/check-contrast.py gates.
+      const ground = name.startsWith('--color-syntax-') ? raised : surface;
       const ratio = (mode) => {
         if (name === '--color-surface') return '&#8212;';
-        return `${contrast(entry.modes[mode], surface[mode]).toFixed(2)}:1`;
+        return `${contrast(entry.modes[mode], ground[mode]).toFixed(2)}:1`;
       };
       return `<tr><td><code>${name}</code></td><td><code>${entry.modes.light}</code></td><td><code>${entry.modes.dark}</code></td><td>${ratio('light')}</td><td>${ratio('dark')}</td></tr>`;
     });

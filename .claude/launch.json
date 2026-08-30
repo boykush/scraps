@@ -2,6 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "docs",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "mise exec -- mise run docs:serve"],
+      "port": 1112
+    },
+    {
       "name": "livt",
       "runtimeExecutable": "sh",
       "runtimeArgs": ["-c", "cd livt && mise exec -- livt serve"],

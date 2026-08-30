@@ -43,7 +43,6 @@
       "matchPackageNames": [
         "highlight.js",
         "mermaid",
-        "nord-highlightjs",
         "fuse.js"
       ]
     }

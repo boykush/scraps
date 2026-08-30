@@ -51,13 +51,40 @@ export const Quote = {
     ),
 };
 
+// Storybook renders against main.css alone, so the hljs-* spans are written by
+// hand here to stand in for what highlight.js emits at runtime.
 export const Code = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Code blocks wear surface-raised with a hairline, so the block keeps an edge on the dark ground where the page is nord0. The five syntax roles are gated against that ground, not the page.',
+      },
+    },
+  },
   render: () =>
-    wrap(`<pre><code>pub fn from_md_text(md_text: &amp;str, max_chars: usize) -&gt; Option&lt;Summary&gt; {
-    let mut lines = md_text.lines().map(str::trim);
-    let first = lines.find(|l| !l.is_empty())?;
-    Some(Summary(truncate(first, max_chars)))
+    wrap(`<pre><code class="hljs language-rust"><span class="hljs-comment">// The summary is a scrap's first non-empty line, truncated.</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">fn</span> <span class="hljs-title function_">from_md_text</span>(md_text: &amp;<span class="hljs-type">str</span>, max_chars: <span class="hljs-type">usize</span>) -&gt; <span class="hljs-type">Option</span>&lt;<span class="hljs-title class_">Summary</span>&gt; {
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> lines = md_text.<span class="hljs-title function_ invoke__">lines</span>().<span class="hljs-title function_ invoke__">map</span>(str::trim);
+    <span class="hljs-keyword">let</span> first = lines.<span class="hljs-title function_ invoke__">find</span>(|l| !l.<span class="hljs-title function_ invoke__">starts_with</span>(<span class="hljs-string">"#"</span>))?;
+    <span class="hljs-title function_ invoke__">Some</span>(<span class="hljs-title class_">Summary</span>(<span class="hljs-title function_ invoke__">truncate</span>(first, max_chars.<span class="hljs-title function_ invoke__">min</span>(<span class="hljs-number">120</span>))))
 }</code></pre>`),
+};
+
+export const Diff = {
+  parameters: {
+    docs: {
+      description: {
+        story: 'A fenced diff. Added and removed lines carry their own roles so the pairing survives on both grounds.',
+      },
+    },
+  },
+  render: () =>
+    wrap(`<pre><code class="hljs language-diff"><span class="hljs-meta">--- a/tokens/semantic.tokens.json</span>
+<span class="hljs-meta">+++ b/tokens/semantic.tokens.json</span>
+<span class="hljs-deletion">-      "$value": "{color.nord.8}"</span>
+<span class="hljs-addition">+      "$value": "{color.ext.frost-deep}"</span>
+</code></pre>`),
 };
 
 export const Table = {

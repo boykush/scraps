@@ -51,12 +51,15 @@ async function mockExternalRequests(page: Page) {
       return route.fulfill({ contentType: 'text/javascript', body: FUSE_STUB });
     }
     if (url.includes('cdn.jsdelivr.net/npm/mermaid')) {
-      return route.fulfill({ contentType: 'text/javascript', body: 'export default {};' });
+      return route.fulfill({
+        contentType: 'text/javascript',
+        body: 'export default { initialize() {}, run() {} };',
+      });
     }
     if (url.includes('cdnjs.cloudflare.com') && url.includes('highlight')) {
       return route.fulfill({ contentType: 'text/javascript', body: 'window.hljs = { highlightAll() {} };' });
     }
-    // Fonts, theme CSS, anything else external: empty 200 so nothing blocks.
+    // Fonts and anything else external: empty 200 so nothing blocks.
     return route.fulfill({ status: 200, contentType: 'text/css', body: '' });
   });
 }

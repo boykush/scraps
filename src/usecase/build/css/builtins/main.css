@@ -51,8 +51,17 @@ code {
     font-size: 0.92em;
 }
 
-pre code {
+/* Code blocks take the raised surface, like every other panel. Nord's
+   highlight.js theme painted them nord0 — the dark page ground itself — so the
+   block had no edge at all; npm no longer ships that stylesheet either, which
+   is why the token classes below live here now. */
+pre:not(:has(code.mermaid)) {
+    margin: var(--space-4) 0;
+    padding: var(--space-3) var(--space-4);
+    background-color: var(--color-surface-raised);
+    border: var(--border-hairline) solid var(--color-rule);
     border-radius: var(--radius-md);
+    overflow-x: auto;
 }
 
 p code {
@@ -60,6 +69,68 @@ p code {
     border: var(--border-hairline) solid var(--color-rule);
     border-radius: var(--radius-sm);
     padding: 1px 4px;
+}
+
+.hljs-comment,
+.hljs-quote {
+    color: var(--color-syntax-comment);
+}
+
+.hljs-keyword,
+.hljs-literal,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-tag,
+.hljs-name,
+.hljs-builtin-name,
+.hljs-selector-tag,
+.hljs-meta,
+.hljs-meta-keyword,
+.hljs-template-tag {
+    color: var(--color-syntax-keyword);
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-built_in,
+.hljs-type,
+.hljs-class,
+.hljs-function,
+.hljs-attr,
+.hljs-doctag,
+.hljs-formula,
+.hljs-code,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-selector-attr,
+.hljs-selector-pseudo {
+    color: var(--color-syntax-entity);
+}
+
+.hljs-string,
+.hljs-meta-string,
+.hljs-regexp {
+    color: var(--color-syntax-string);
+}
+
+.hljs-number {
+    color: var(--color-syntax-number);
+}
+
+.hljs-addition {
+    color: var(--color-syntax-added);
+}
+
+.hljs-deletion {
+    color: var(--color-syntax-deleted);
+}
+
+.hljs-emphasis {
+    font-style: italic;
+}
+
+.hljs-strong {
+    font-weight: var(--font-weight-bold);
 }
 
 blockquote {
