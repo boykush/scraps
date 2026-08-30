@@ -1,4 +1,4 @@
-**The Wiki-link doc compiler for the LLM era.**
+# The Wiki-link doc compiler for the LLM era
 
 Scraps treats documentation like a programming language. Wiki-linked
 markdown becomes a typed source, compiling into a static site for readers
