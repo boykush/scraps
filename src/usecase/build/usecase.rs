@@ -64,6 +64,10 @@ impl BuildUsecase {
 
         let scraps = scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(&scraps);
+        let scraps_by_key: HashMap<_, _> = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap.clone()))
+            .collect();
         span_read_scraps.exit();
         progress.complete_stage(&Stage::ReadScraps, &scrap_details.len());
 
@@ -95,6 +99,7 @@ impl BuildUsecase {
                     html_metadata,
                     &scrap_detail,
                     &backlinks_map,
+                    &scraps_by_key,
                 )
             })?;
         span_generate_html_scraps.exit();

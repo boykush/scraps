@@ -75,6 +75,18 @@ test('get home', async ({ page }) => {
   expect(readme_content).toContain('What is Scraps?');
 });
 
+test('sort views are always generated', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.view-nav .view.active')).toHaveText('updated');
+
+  await page.goto('/backlinks/', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.view-nav .view.active')).toHaveText('backlinks');
+
+  await page.goto('/titles/', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.jump-bar .jump').first()).toBeVisible();
+  await expect(page.locator('section.title-group').first()).toBeVisible();
+});
+
 test('search scraps', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
 

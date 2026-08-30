@@ -1,5 +1,9 @@
+use std::collections::HashMap;
+
 use chrono_tz::Tz;
-use scraps_libs::model::{base_url::BaseUrl, content::Content, scrap::Scrap, tag::Tag};
+use scraps_libs::model::{
+    base_url::BaseUrl, content::Content, key::ScrapKey, scrap::Scrap, tag::Tag,
+};
 
 use crate::error::ScrapsResult;
 use crate::usecase::build::model::{
@@ -30,6 +34,7 @@ pub trait HtmlScrapRenderer {
         html_metadata: &HtmlMetadata,
         scrap_detail: &ScrapDetail,
         backlinks_map: &BacklinksMap,
+        scraps_by_key: &HashMap<ScrapKey, Scrap>,
     ) -> ScrapsResult<()>;
 }
 
@@ -141,6 +146,7 @@ pub mod tests {
             _html_metadata: &HtmlMetadata,
             _scrap_detail: &ScrapDetail,
             _backlinks_map: &BacklinksMap,
+            _scraps_by_key: &HashMap<ScrapKey, Scrap>,
         ) -> ScrapsResult<()> {
             Ok(())
         }

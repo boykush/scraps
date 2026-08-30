@@ -1,7 +1,10 @@
+use std::collections::HashMap;
 use std::path::Path;
 
 use chrono_tz::Tz;
-use scraps_libs::model::{base_url::BaseUrl, content::Content, scrap::Scrap, tag::Tag};
+use scraps_libs::model::{
+    base_url::BaseUrl, content::Content, key::ScrapKey, scrap::Scrap, tag::Tag,
+};
 
 use crate::error::ScrapsResult;
 use crate::service::search::render::SearchIndexRender;
@@ -83,6 +86,7 @@ impl HtmlScrapRenderer for BuildRendererImpl {
         html_metadata: &HtmlMetadata,
         scrap_detail: &ScrapDetail,
         backlinks_map: &BacklinksMap,
+        scraps_by_key: &HashMap<ScrapKey, Scrap>,
     ) -> ScrapsResult<()> {
         self.scrap_render.run(
             base_url,
@@ -90,6 +94,7 @@ impl HtmlScrapRenderer for BuildRendererImpl {
             html_metadata,
             scrap_detail,
             backlinks_map,
+            scraps_by_key,
         )
     }
 }

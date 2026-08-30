@@ -61,11 +61,8 @@ color_scheme = "os_setting"
 # (optional, default=true, choices=true or false)
 build_search_index = true
 
-# Scraps sort key choice on index page
-# (optional, default=committed_date, choices=committed_date or linked_count)
-sort_key = "committed_date"
-
-# Scraps pagination on index page (optional, default=no pagination)
+# Scraps pagination on the updated and backlinks views
+# (optional, default=no pagination)
 paginate_by = 20
 ```
 

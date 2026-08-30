@@ -67,14 +67,9 @@
     </ul>
 {% endcomponent tag_links %}
 
-{% component ogp_card(autolink) %}
-<div class="ogp-card" data-url="{{ autolink.url }}" data-host="{{ autolink.host }}">
-    <a class="ogp-card-link" href="{{ autolink.url }}" target="_blank" rel="noopener noreferrer">
-        <img class="ogp-image" src="" alt="OGP Image" />
-        <div class="ogp-content">
-            <div class="ogp-title">Loading...</div>
-            <div class="ogp-description">Fetching description...</div>
-        </div>
-    </a>
-</div>
-{% endcomponent ogp_card %}
+{% component link_card(autolink) %}
+<a class="link-card" href="{{ autolink.url }}" target="_blank" rel="noopener noreferrer">
+    <span class="host">{{ autolink.host }}</span>
+    <span class="url">{{ autolink.url }}</span>
+</a>
+{% endcomponent link_card %}
