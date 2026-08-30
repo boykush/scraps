@@ -1,6 +1,9 @@
 use crate::error::{anyhow::Context, BuildError, ScrapsResult};
 use crate::usecase::build::html::cdn_versions::CDN_VERSIONS;
+use crate::usecase::build::html::serde::tags::TagsTera;
+use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
+use crate::usecase::build::model::site_nav::SiteNav;
 use chrono_tz::Tz;
 use once_cell::sync::Lazy;
 use scraps_libs::model::base_url::BaseUrl;
@@ -89,8 +92,23 @@ pub fn context(base_url: &BaseUrl, metadata: &HtmlMetadata) -> tera::Context {
     context.insert("description", &metadata.description());
     context.insert("favicon", &metadata.favicon());
     context.insert("cdn", &CDN_VERSIONS);
+    context.insert("scraps_version", env!("CARGO_PKG_VERSION"));
 
     context
+}
+
+/// The sidebar renders on every page, so every render inserts the same nav
+/// payload; `view` names the sidebar entry to mark active ("" for none).
+pub fn insert_site_nav(
+    context: &mut tera::Context,
+    view: &str,
+    site_nav: &SiteNav,
+    backlinks_map: &BacklinksMap,
+) {
+    context.insert("view", view);
+    context.insert("scrap_count", &site_nav.scrap_count);
+    context.insert("nav_tags", &TagsTera::new(&site_nav.tags, backlinks_map));
+    context.insert("build_search_index", &site_nav.build_search_index);
 }
 
 /// Scrap pages additionally render commit dates, which need the site timezone.

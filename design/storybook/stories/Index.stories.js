@@ -9,30 +9,14 @@ const tag = ({ title, count }) => `
 
 export default { title: 'Index' };
 
-export const Search = {
+export const Tags = {
   parameters: {
     docs: {
       description: {
-        story:
-          'Results are positioned by doSearch() with an inline `top`, the first at -16px, which the list margin compensates for.',
+        story: 'The tag_links component, used by the tags index page.',
       },
     },
   },
-  render: () => `
-    <div class="index">
-      <div class="search-block">
-        <input type="text" id="search-input" placeholder="Search by title..." />
-        <ul id="search-results">
-          <li style="top: -16px"><a href="#">Wiki-link Notation</a></li>
-          <li style="top: 14px"><a href="#">Configuration</a></li>
-          <li style="top: 44px"><a href="#">Lint Rules</a></li>
-        </ul>
-      </div>
-    </div>
-    <div style="height: 120px"></div>`,
-};
-
-export const Tags = {
   render: () =>
     `<ul class="tag-links">${[
       { title: 'Security', count: 170 },
@@ -52,12 +36,8 @@ export const ListHeadAndPaging = {
     <div class="index">
       <div class="links-block">
         <p class="list-head">
-          <span class="view-nav">
-            <span class="view active">updated</span>
-            <a class="view" href="#">backlinks</a>
-            <a class="view" href="#">titles</a>
-          </span>
-          <a class="all-link" href="#">all scraps &#8250;</a>
+          <span class="view-name">recently updated</span>
+          <span class="stats">764 scraps &#183; 41 tags</span>
         </p>
       </div>
       <div class="paging-arrows">

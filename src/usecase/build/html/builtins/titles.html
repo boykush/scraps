@@ -3,12 +3,8 @@
 {% block main %}
     <div class="titles">
         <p class="list-head">
-            <span class="view-nav">
-                <a class="view" href="{{ base_url }}">updated</a>
-                <a class="view" href="{{ base_url }}backlinks/">backlinks</a>
-                <span class="view active">titles</span>
-            </span>
-            <a class="all-link" href="{{ base_url }}scraps/">all scraps &#8250;</a>
+            <span class="view-name">titles</span>
+            <span class="stats">{{ scrap_count }} scraps</span>
         </p>
         <p class="jump-bar">
             {% for group in groups %}

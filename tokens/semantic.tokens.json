@@ -54,6 +54,15 @@
         "$value": "{color.nord.8}"
       }
     },
+    "accent-wash": {
+      "$description": "Selection ground: the active view in the sidebar, the active index group. Precomposed accent tints over surface (8% light, 14% dark) because light-dark() forbids runtime alpha mixing. Text on it wears the text role — accent itself falls under AA on the light wash.",
+      "light": {
+        "$value": "#dfe4ec"
+      },
+      "dark": {
+        "$value": "#3b4854"
+      }
+    },
     "$description": "Semantic layer. Components reference only these; never a primitive directly. Each colour role carries a light and a dark value, emitted as CSS light-dark()."
   },
   "font": {

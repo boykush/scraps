@@ -62,6 +62,14 @@ def main():
             print(f"{status:4s} {mode:5s} {name:12s} {value} on {surface}  {ratio:5.2f}:1")
             if ratio < AA_BODY:
                 failures.append(f"{mode}/{name} {ratio:.2f}:1 < {AA_BODY}")
+        # The selection ground carries body text, so that pairing is gated too.
+        wash = resolve(roles["accent-wash"][mode]["$value"], flat)
+        text_on_wash = resolve(roles["text"][mode]["$value"], flat)
+        ratio = contrast(text_on_wash, wash)
+        status = "ok" if ratio >= AA_BODY else "FAIL"
+        print(f"{status:4s} {mode:5s} {'text/wash':12s} {text_on_wash} on {wash}  {ratio:5.2f}:1")
+        if ratio < AA_BODY:
+            failures.append(f"{mode}/text-on-wash {ratio:.2f}:1 < {AA_BODY}")
     if failures:
         print("\n" + "\n".join(failures), file=sys.stderr)
         return 1

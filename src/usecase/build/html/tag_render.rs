@@ -4,6 +4,7 @@ use crate::error::ScrapsResult;
 use crate::service::tera_render::{render_to_file, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
+use crate::usecase::build::model::site_nav::SiteNav;
 use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::tag::Tag;
 use scraps_libs::slugify;
@@ -37,8 +38,10 @@ impl TagRender {
         metadata: &HtmlMetadata,
         tag: &Tag,
         backlinks_map: &BacklinksMap,
+        site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
         let mut context = templates::context(base_url, metadata);
+        templates::insert_site_nav(&mut context, "", site_nav, backlinks_map);
 
         // insert to context for linked list
         context.insert("tag", &TagTera::new(tag, backlinks_map));
@@ -69,6 +72,7 @@ mod tests {
     use scraps_libs::lang::LangCode;
     use scraps_libs::model::base_url::BaseUrl;
     use scraps_libs::model::scrap::Scrap;
+    use scraps_libs::model::tags::Tags;
     use std::fs;
     use url::Url;
 
@@ -95,6 +99,7 @@ mod tests {
         let scrap2 = &Scrap::new("scrap2", &None, "#[[tag 1]] #[[tag2]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
         let backlinks_map = BacklinksMap::new(&scraps);
+        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true);
         // tag
         let tag1: Tag = "tag 1".into();
 
@@ -105,7 +110,7 @@ mod tests {
         let render = TagRender::new(&static_dir_path, &output_dir_path).unwrap();
 
         render
-            .run(&base_url, &metadata, &tag1, &backlinks_map)
+            .run(&base_url, &metadata, &tag1, &backlinks_map, &site_nav)
             .unwrap();
 
         let result2 = fs::read_to_string(tag1_html_path).unwrap();
@@ -130,6 +135,7 @@ mod tests {
         let scrap = Scrap::new("paper", &None, "#[[ai/ml]]");
         let scraps = vec![scrap];
         let backlinks_map = BacklinksMap::new(&scraps);
+        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true);
 
         let tag: Tag = "ai/ml".into();
         // Expected path: public/tags/ai/ml.html
@@ -137,7 +143,7 @@ mod tests {
 
         let render = TagRender::new(&static_dir_path, &output_dir_path).unwrap();
         render
-            .run(&base_url, &metadata, &tag, &backlinks_map)
+            .run(&base_url, &metadata, &tag, &backlinks_map, &site_nav)
             .unwrap();
 
         let body = fs::read_to_string(html_path).unwrap();

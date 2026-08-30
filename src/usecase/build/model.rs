@@ -6,6 +6,7 @@ pub mod html;
 pub mod list_view_configs;
 pub mod paging;
 pub mod scrap_detail;
+pub mod site_nav;
 pub mod sort;
 pub mod summary;
 pub mod title_group;

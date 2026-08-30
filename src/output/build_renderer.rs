@@ -21,6 +21,7 @@ use crate::usecase::build::{
         html::HtmlMetadata,
         list_view_configs::ListViewConfigs,
         scrap_detail::{ScrapDetail, ScrapDetails},
+        site_nav::SiteNav,
     },
     renderer::{
         CssRenderer, HtmlIndexRenderer, HtmlScrapRenderer, HtmlScrapsIndexRenderer,
@@ -65,6 +66,7 @@ impl HtmlIndexRenderer for BuildRendererImpl {
         list_view_configs: &ListViewConfigs,
         scrap_details: &ScrapDetails,
         backlinks_map: &BacklinksMap,
+        site_nav: &SiteNav,
         readme_content: &Option<Content>,
     ) -> ScrapsResult<usize> {
         self.index_render.run(
@@ -73,6 +75,7 @@ impl HtmlIndexRenderer for BuildRendererImpl {
             list_view_configs,
             scrap_details,
             backlinks_map,
+            site_nav,
             readme_content,
         )
     }
@@ -87,6 +90,7 @@ impl HtmlScrapRenderer for BuildRendererImpl {
         scrap_detail: &ScrapDetail,
         backlinks_map: &BacklinksMap,
         scraps_by_key: &HashMap<ScrapKey, Scrap>,
+        site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
         self.scrap_render.run(
             base_url,
@@ -95,6 +99,7 @@ impl HtmlScrapRenderer for BuildRendererImpl {
             scrap_detail,
             backlinks_map,
             scraps_by_key,
+            site_nav,
         )
     }
 }
@@ -106,9 +111,15 @@ impl HtmlScrapsIndexRenderer for BuildRendererImpl {
         html_metadata: &HtmlMetadata,
         scrap_details: &ScrapDetails,
         backlinks_map: &BacklinksMap,
+        site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
-        self.scraps_index_render
-            .run(base_url, html_metadata, scrap_details, backlinks_map)
+        self.scraps_index_render.run(
+            base_url,
+            html_metadata,
+            scrap_details,
+            backlinks_map,
+            site_nav,
+        )
     }
 }
 
@@ -119,9 +130,15 @@ impl HtmlTitleIndexRenderer for BuildRendererImpl {
         html_metadata: &HtmlMetadata,
         scrap_details: &ScrapDetails,
         backlinks_map: &BacklinksMap,
+        site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
-        self.title_index_render
-            .run(base_url, html_metadata, scrap_details, backlinks_map)
+        self.title_index_render.run(
+            base_url,
+            html_metadata,
+            scrap_details,
+            backlinks_map,
+            site_nav,
+        )
     }
 }
 
@@ -132,9 +149,10 @@ impl HtmlTagsIndexRenderer for BuildRendererImpl {
         html_metadata: &HtmlMetadata,
         scraps: &[Scrap],
         backlinks_map: &BacklinksMap,
+        site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
         self.tags_index_render
-            .run(base_url, html_metadata, scraps, backlinks_map)
+            .run(base_url, html_metadata, scraps, backlinks_map, site_nav)
     }
 }
 
@@ -145,9 +163,10 @@ impl HtmlTagRenderer for BuildRendererImpl {
         html_metadata: &HtmlMetadata,
         tag: &Tag,
         backlinks_map: &BacklinksMap,
+        site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
         self.tag_render
-            .run(base_url, html_metadata, tag, backlinks_map)
+            .run(base_url, html_metadata, tag, backlinks_map, site_nav)
     }
 }
 
