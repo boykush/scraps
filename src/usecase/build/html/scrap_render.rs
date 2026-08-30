@@ -1,3 +1,4 @@
+use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 
 use crate::error::ScrapsResult;
@@ -8,12 +9,15 @@ use crate::usecase::build::model::scrap_detail::ScrapDetail;
 use chrono_tz::Tz;
 use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::file::ScrapFileStem;
+use scraps_libs::model::key::ScrapKey;
+use scraps_libs::model::scrap::Scrap;
 use tera::Tera;
 
 use crate::usecase::build::html::templates;
 
 use super::serde::link_scraps::LinkScrapsTera;
 use super::serde::scrap_detail::ScrapDetailTera;
+use super::serde::tag::TagTera;
 
 pub struct ScrapRender {
     tera: Tera,
@@ -37,6 +41,7 @@ impl ScrapRender {
         metadata: &HtmlMetadata,
         scrap_detail: &ScrapDetail,
         backlinks_map: &BacklinksMap,
+        scraps_by_key: &HashMap<ScrapKey, Scrap>,
     ) -> ScrapsResult<()> {
         let mut context = templates::scrap_context(base_url, timezone, metadata);
         let scrap = &scrap_detail.scrap();
@@ -44,8 +49,26 @@ impl ScrapRender {
         // insert to context for linked list
         context.insert("scrap", &ScrapDetailTera::from(scrap_detail.clone()));
 
+        let scrap_tags = scrap
+            .tags()
+            .iter()
+            .map(|tag| TagTera::new(tag, backlinks_map))
+            .collect::<Vec<_>>();
+        context.insert("scrap_tags", &scrap_tags);
+
         let linked_scraps = backlinks_map.get(&scrap.self_key());
         context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
+
+        // Outbound links resolve against the scrap set: a broken link is a
+        // lint concern, not a rendering one, so it simply drops out here.
+        let mut seen = HashSet::new();
+        let outbound_scraps = scrap
+            .links()
+            .iter()
+            .filter(|key| seen.insert((*key).clone()))
+            .filter_map(|key| scraps_by_key.get(key).cloned())
+            .collect::<Vec<_>>();
+        context.insert("outbound_scraps", &LinkScrapsTera::new(&outbound_scraps));
 
         // The stem may contain `/`-separated context directories, which
         // `render_to_file` creates on the way.
@@ -89,13 +112,21 @@ mod tests {
         // scraps
         let commited_ts1 = None;
         let scrap1 = &Scrap::new("scrap 1", &None, "# header1");
-        let scrap2 = &Scrap::new("scrap 2", &Some("Context".into()), "[[scrap1]]");
+        let scrap2 = &Scrap::new(
+            "scrap 2",
+            &Some("Context".into()),
+            "[[scrap 1]] #[[design]]",
+        );
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
         let scrap_texts = scraps
             .iter()
             .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
             .collect();
         let backlinks_map = BacklinksMap::new(&scraps);
+        let scraps_by_key: HashMap<_, _> = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap.clone()))
+            .collect();
 
         let scrap1_html_path = output_dir_path.join("scraps/scrap-1.html");
         // v1: nested ctx is a directory (`context/scrap-2.html`), not a
@@ -111,11 +142,14 @@ mod tests {
                 &metadata,
                 &ScrapDetail::new(scrap1, &commited_ts1, base_url, &scrap_texts),
                 &backlinks_map,
+                &scraps_by_key,
             )
             .unwrap();
 
         let result2 = fs::read_to_string(scrap1_html_path).unwrap();
-        assert!(!result2.is_empty());
+        assert!(result2.contains(">backlinks &#183; 1"));
+        assert!(!result2.contains(">links &#183;"));
+        assert!(!result2.contains("corsproxy"));
 
         render
             .run(
@@ -124,10 +158,13 @@ mod tests {
                 &metadata,
                 &ScrapDetail::new(scrap2, &commited_ts1, base_url, &scrap_texts),
                 &backlinks_map,
+                &scraps_by_key,
             )
             .unwrap();
 
         let result4 = fs::read_to_string(scrap2_html_path).unwrap();
-        assert!(!result4.is_empty());
+        assert!(result4.contains(">links &#183; 1"));
+        assert!(result4.contains("tags/design.html"));
+        assert!(result4.contains("#[["));
     }
 }

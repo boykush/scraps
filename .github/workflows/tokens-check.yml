@@ -8,8 +8,9 @@ on:
       - 'src/usecase/build/css/builtins/_tokens.css'
       - '.mise-tasks/tokens/**'
       - '.github/workflows/tokens-check.yml'
+  # No base-branch filter: stacked PRs target another feature branch and
+  # still need the same gate as a PR into main.
   pull_request:
-    branches: [ "main" ]
     paths:
       - 'tokens/**'
       - 'src/usecase/build/css/builtins/_tokens.css'

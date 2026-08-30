@@ -1,0 +1,28 @@
+{% extends "__builtins/base.html" %}
+
+{% block main %}
+    <div class="titles">
+        <p class="list-head">
+            <span class="view-nav">
+                <a class="view" href="{{ base_url }}">updated</a>
+                <a class="view" href="{{ base_url }}backlinks/">backlinks</a>
+                <span class="view active">titles</span>
+            </span>
+            <a class="all-link" href="{{ base_url }}scraps/">all scraps &#8250;</a>
+        </p>
+        <p class="jump-bar">
+            {% for group in groups %}
+                <a class="jump" href="#title-group-{{ loop.index }}">{{ group.label }}</a>
+            {% endfor %}
+        </p>
+        {% for group in groups %}
+            <section class="title-group" id="title-group-{{ loop.index }}">
+                <h2 class="group-head">
+                    <span class="label">{{ group.label }}</span>
+                    <span class="count">{{ group.scraps | length }}</span>
+                </h2>
+                {{ <scrap_index scraps={group.scraps} base_url={base_url} /> }}
+            </section>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -6,7 +6,11 @@ Build output is written to the directory configured by `output_dir`
 ```bash
 ❯ tree _site
 _site
-├── index.html              # README.md or scrap index
+├── index.html              # home: the updated view (plus README.md, when present)
+├── backlinks/
+│   └── index.html          # most linked first
+├── titles/
+│   └── index.html          # title index, grouped by initial
 ├── scraps/
 │   ├── index.html          # every scrap, in title order
 │   ├── getting-started.html
@@ -18,7 +22,8 @@ _site
 
 `scraps/index.html` lists every scrap in title order on a single page, with
 no pagination, so a wiki can be browsed whole however large it grows. The
-root index stays paginated and sorted by `sort_key`.
+root index and `backlinks/` stay paginated; see
+[[Reference/Static Site/Sort and Pagination]].
 
 Each Markdown file is converted to a slugified HTML file under `scraps/`.
 Folders become path segments — the same folders that form

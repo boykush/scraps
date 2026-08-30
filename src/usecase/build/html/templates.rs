@@ -30,6 +30,12 @@ static TAGS_INDEX: Lazy<Tera> = Lazy::new(|| {
         include_str!("builtins/tags_index.html"),
     ))
 });
+static TITLES: Lazy<Tera> = Lazy::new(|| {
+    builtins((
+        "__builtins/titles.html",
+        include_str!("builtins/titles.html"),
+    ))
+});
 
 /// Every page kind inherits `base.html` and `macros.html`; `page` is the
 /// template it renders through.
@@ -68,6 +74,10 @@ pub fn scraps_index(template_dir: &str) -> ScrapsResult<Tera> {
 
 pub fn tags_index(template_dir: &str) -> ScrapsResult<Tera> {
     with_user_templates(&TAGS_INDEX, template_dir)
+}
+
+pub fn titles(template_dir: &str) -> ScrapsResult<Tera> {
+    with_user_templates(&TITLES, template_dir)
 }
 
 /// Context every HTML page starts from.

@@ -1,5 +1,5 @@
 // Parts of the scrap detail page: src/usecase/build/html/builtins/scrap.html,
-// the `scrap_links` and `ogp_card` components in macros.html, and the block
+// the `scrap_links` and `link_card` components in macros.html, and the block
 // elements main.css styles directly. The whole page is under Scrap / Page.
 
 const wrap = (inner) => `<div class="scrap"><div class="content">${inner}</div></div>`;
@@ -17,6 +17,9 @@ export default { title: 'Scrap' };
 export const Header = {
   render: () => `
     <div class="scrap">
+      <p class="tags">
+        <a class="tag" href="#"><span class="syntax">#[[</span>notation<span class="syntax">]]</span></a>
+      </p>
       <h3 class="context">Reference/Wiki-link<span>&#47;</span></h3>
       <h1 class="title">Heading Reference</h1>
       <p class="commited-date">commited date: 2026-08-12</p>
@@ -69,48 +72,44 @@ export const Table = {
     </table>`),
 };
 
-export const OgpCard = {
-  name: 'OGP card',
+export const LinkCard = {
+  name: 'Link card',
   parameters: {
     docs: {
       description: {
-        story: 'A bare URL in a scrap becomes this card, filled in client side after the page loads.',
+        story: 'A bare URL in a scrap becomes this static card at build time: host and URL, nothing fetched client side.',
       },
     },
   },
   render: () =>
     wrap(`
-      <div class="ogp-card">
-        <a class="ogp-card-link" href="#">
-          <img class="ogp-image" alt="" src="data:image/svg+xml;utf8,${encodeURIComponent(
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 120"><rect width="240" height="120" fill="%235e81ac"/></svg>',
-          )}" />
-          <div class="ogp-content">
-            <div class="ogp-title">Nord Theme</div>
-            <div class="ogp-description">An arctic, north-bluish clean and elegant colour palette.</div>
-          </div>
-        </a>
-      </div>`),
+      <a class="link-card" href="#">
+        <span class="host">www.nordtheme.com</span>
+        <span class="url">https://www.nordtheme.com/docs/colors-and-palettes</span>
+      </a>`),
 };
 
-export const LinkedScraps = {
-  name: 'Linked scraps',
+export const Connections = {
+  name: 'Connections',
   parameters: {
     docs: {
       description: {
-        story: 'Closes every scrap page and every tag page: title and ctx only, no summary or counts.',
+        story: 'Labelled backlinks / links sections close every scrap page: title and ctx only, no summary.',
       },
     },
   },
-  render: () =>
-    `<ul class="scrap-links">${[
-      { title: 'Wiki-link Notation', ctx: 'Reference' },
-      { title: 'Lint Rules', ctx: 'Reference' },
-      { title: 'CLI Overview', ctx: 'Reference' },
-      { title: 'Normal Link', ctx: 'Reference/Wiki-link' },
-      { title: 'Getting Started', ctx: 'Tutorial' },
-      { title: 'What is Scraps?', ctx: 'Explanation' },
-    ]
-      .map(link)
-      .join('')}</ul>`,
+  render: () => `
+    <section class="connections">
+      <p class="section-head">backlinks &#183; 6</p>
+      <ul class="scrap-links">${[
+        { title: 'Wiki-link Notation', ctx: 'Reference' },
+        { title: 'Lint Rules', ctx: 'Reference' },
+        { title: 'CLI Overview', ctx: 'Reference' },
+        { title: 'Normal Link', ctx: 'Reference/Wiki-link' },
+        { title: 'Getting Started', ctx: 'Tutorial' },
+        { title: 'What is Scraps?', ctx: 'Explanation' },
+      ]
+        .map(link)
+        .join('')}</ul>
+    </section>`,
 };

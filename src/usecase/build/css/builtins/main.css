@@ -118,6 +118,23 @@ footer {
 
 /* scrap */
 div.scrap {
+    p.tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2) var(--space-4);
+        margin: 0 0 var(--space-2);
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-sm);
+
+        a.tag {
+            color: var(--color-accent);
+
+            span.syntax {
+                color: var(--color-text-muted);
+            }
+        }
+    }
+
     .context {
         margin: 0 0 var(--space-2);
         font-family: var(--font-family-mono);
@@ -145,47 +162,36 @@ div.scrap {
         border-top: var(--border-hairline) solid var(--color-rule);
         word-break: break-word;
 
-        .ogp-card {
+        .link-card {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-1);
             background-color: var(--color-surface-raised);
             border: var(--border-hairline) solid var(--color-rule);
             border-radius: var(--radius-md);
             margin: var(--space-4) 0;
-            height: 120px;
-            overflow: hidden;
+            padding: var(--space-3) var(--space-4);
 
-            .ogp-card-link {
-                display: flex;
-                flex-direction: row;
+            &:hover {
+                text-decoration: none;
 
-                &:hover {
-                    text-decoration: none;
+                .host {
+                    text-decoration: underline;
                 }
             }
 
-            .ogp-image {
-                max-width: 240px;
-                height: 100%;
-                object-fit: contain;
-                flex-grow: 1;
-                margin: auto 0;
+            .host {
+                font-weight: var(--font-weight-medium);
+                color: var(--color-text);
             }
 
-            .ogp-content {
-                height: 96px;
-                margin: var(--space-3) var(--space-4);
+            .url {
+                font-family: var(--font-family-mono);
+                font-size: var(--font-size-xs);
+                color: var(--color-text-muted);
                 overflow: hidden;
-
-                .ogp-title {
-                    max-height: 48px;
-                    overflow: hidden;
-                    font-weight: var(--font-weight-medium);
-                    color: var(--color-text);
-                }
-
-                .ogp-description {
-                    color: var(--color-text-muted);
-                    font-size: var(--font-size-xs);
-                }
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
         }
     }
@@ -401,6 +407,19 @@ ul.scrap-rows {
 }
 
 /* scrap links — compact list on scrap and tag pages */
+section.connections {
+    margin-top: var(--space-6);
+
+    p.section-head {
+        margin: 0 0 var(--space-2);
+        padding-bottom: var(--space-2);
+        border-bottom: var(--border-hairline) solid var(--color-rule);
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-xs);
+        color: var(--color-text-muted);
+    }
+}
+
 ul.scrap-links {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -447,6 +466,70 @@ ul.scrap-links {
 }
 
 /* scraps index — the full listing, multi-column so it stays scannable */
+/* The view nav appears on every sorted listing (home, backlinks, titles). */
+p.list-head span.view-nav {
+    display: flex;
+    gap: var(--space-4);
+
+    a.view {
+        color: var(--color-text-muted);
+    }
+
+    span.view.active {
+        color: var(--color-text);
+    }
+}
+
+div.titles {
+    p.list-head {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-4);
+        margin: 0 0 var(--space-3);
+        padding-bottom: var(--space-2);
+        border-bottom: var(--border-hairline) solid var(--color-rule);
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-xs);
+        color: var(--color-text-muted);
+
+        a.all-link {
+            color: var(--color-accent);
+        }
+    }
+
+    p.jump-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-1) var(--space-3);
+        margin: 0 0 var(--space-5);
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-sm);
+    }
+
+    section.title-group {
+        margin-bottom: var(--space-6);
+
+        h2.group-head {
+            display: flex;
+            align-items: baseline;
+            gap: var(--space-2);
+            margin: 0 0 var(--space-2);
+            padding-bottom: var(--space-2);
+            border-bottom: var(--border-hairline) solid var(--color-rule);
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-accent);
+
+            span.count {
+                font-size: var(--font-size-xs);
+                font-weight: var(--font-weight-regular);
+                color: var(--color-text-muted);
+            }
+        }
+    }
+}
+
 div.scraps-index {
     p.list-head {
         display: flex;

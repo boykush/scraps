@@ -10,8 +10,15 @@
 
 {% block main %}
     <div class="scrap">
+        {% if scrap_tags | length > 0 %}
+            <p class="tags">
+                {% for tag in scrap_tags %}
+                    <a class="tag" href="{{ base_url }}tags/{{ tag.slug }}.html"><span class="syntax">#[[</span>{{ tag.title }}<span class="syntax">]]</span></a>
+                {% endfor %}
+            </p>
+        {% endif %}
         {% if scrap.ctx %}
-          <h3 class="context">{{ scrap.ctx }}<span>&#47;</span></h2>
+          <h3 class="context">{{ scrap.ctx }}<span>&#47;</span></h3>
         {% endif %}
         <h1 class="title">{{ scrap.title }}</h1>
         {% if scrap.commited_ts %}
@@ -20,49 +27,19 @@
             </p>
         {% endif %}
         <div class="content">
-            {% for element in scrap.content.elements %}{% if element.raw %}{{ element.raw | safe }}{% elif element.autolink %}{{ <ogp_card autolink={element.autolink} /> }}{% endif %}{% endfor %}
+            {% for element in scrap.content.elements %}{% if element.raw %}{{ element.raw | safe }}{% elif element.autolink %}{{ <link_card autolink={element.autolink} /> }}{% endif %}{% endfor %}
         </div>
     </div>
-    {{ <scrap_links scraps={linked_scraps} base_url={base_url} /> }}
-{% endblock %}
-{% block script %}
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const ogpCards = document.querySelectorAll('.ogp-card');
-
-    ogpCards.forEach(async (card) => {
-      const url = card.dataset.url;
-
-      try {
-        const proxyUrl = 'https://corsproxy.io/?url=';
-        const response = await fetch(proxyUrl + url);
-        const html = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-
-        const title = doc.querySelector('meta[property="og:title"]')?.content ||
-          doc.querySelector('title')?.textContent ||
-          'No title';
-        card.querySelector('.ogp-title').textContent = title;
-
-        const description = doc.querySelector('meta[property="og:description"]')?.content ||
-          doc.querySelector('meta[name="description"]')?.content ||
-          'No description';
-        card.querySelector('.ogp-description').textContent = description;
-
-        const image = doc.querySelector('meta[property="og:image"]')?.content;
-        if (image) {
-          const imageUrl = image.startsWith('/')
-            ? `https://${card.dataset.host}/${image}`
-            : image;
-          card.querySelector('.ogp-image').src = imageUrl;
-        } else {
-          card.querySelector('.ogp-image').remove();
-        }
-      } catch (error) {
-        console.error('Failed to fetch OGP data:', error);
-      }
-    });
-  });
-</script>
+    {% if linked_scraps | length > 0 %}
+        <section class="connections">
+            <p class="section-head">backlinks &#183; {{ linked_scraps | length }}</p>
+            {{ <scrap_links scraps={linked_scraps} base_url={base_url} /> }}
+        </section>
+    {% endif %}
+    {% if outbound_scraps | length > 0 %}
+        <section class="connections">
+            <p class="section-head">links &#183; {{ outbound_scraps | length }}</p>
+            {{ <scrap_links scraps={outbound_scraps} base_url={base_url} /> }}
+        </section>
+    {% endif %}
 {% endblock %}

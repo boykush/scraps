@@ -24,7 +24,11 @@
         </div>
         <div class="links-block">
             <p class="list-head">
-                <span class="sort-key">sorted by {{ sort_key }}</span>
+                <span class="view-nav">
+                    {% if view == "updated" %}<span class="view active">updated</span>{% else %}<a class="view" href="{{ base_url }}">updated</a>{% endif %}
+                    {% if view == "backlinks" %}<span class="view active">backlinks</span>{% else %}<a class="view" href="{{ base_url }}backlinks/">backlinks</a>{% endif %}
+                    <a class="view" href="{{ base_url }}titles/">titles</a>
+                </span>
                 <a class="all-link" href="{{ base_url }}scraps/">all scraps &#8250;</a>
             </p>
             {{ <scrap_rows scraps={scraps} base_url={base_url} /> }}
@@ -52,7 +56,7 @@
   <script type="module">
     import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@{{ cdn.fusejs }}";
     window.Fuse = Fuse;
-    fetch('./search_index.json')
+    fetch('{{ base_url }}search_index.json')
       .then(response => response.json())
       .then(data => {
         const fuseOptions = {

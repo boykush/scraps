@@ -11,14 +11,33 @@ const link = ({ title, ctx }) => `
     </a>
   </li>`;
 
-const page = ({ ctx, title, date, content, linked = [] }) => `
+const section = (label, scraps) =>
+  scraps.length
+    ? `<section class="connections">
+        <p class="section-head">${label} &#183; ${scraps.length}</p>
+        <ul class="scrap-links">${scraps.map(link).join('')}</ul>
+      </section>`
+    : '';
+
+const page = ({ tags = [], ctx, title, date, content, backlinks = [], links = [] }) => `
   <div class="scrap">
+    ${
+      tags.length
+        ? `<p class="tags">${tags
+            .map(
+              (t) =>
+                `<a class="tag" href="#"><span class="syntax">#[[</span>${t}<span class="syntax">]]</span></a>`,
+            )
+            .join('')}</p>`
+        : ''
+    }
     ${ctx ? `<h3 class="context">${ctx}<span>&#47;</span></h3>` : ''}
     <h1 class="title">${title}</h1>
     ${date ? `<p class="commited-date">commited date: ${date}</p>` : ''}
     <div class="content">${content}</div>
   </div>
-  ${linked.length ? `<ul class="scrap-links">${linked.map(link).join('')}</ul>` : ''}`;
+  ${section('backlinks', backlinks)}
+  ${section('links', links)}`;
 
 const LINKED = [
   { title: 'Wiki-link Notation', ctx: 'Reference' },
@@ -73,11 +92,13 @@ export default {
 export const Full = {
   render: () =>
     page({
+      tags: ['notation', 'reference'],
       ctx: 'Reference/Wiki-link',
       title: 'Heading Reference',
       date: '2026-08-12',
       content: FULL_CONTENT,
-      linked: LINKED,
+      backlinks: LINKED,
+      links: LINKED.slice(0, 2),
     }),
 };
 
@@ -88,7 +109,7 @@ export const WithoutContext = {
       title: 'Getting Started',
       date: '2026-08-02',
       content: '<p>Install, create a wiki, compile it, then query the same source from a shell.</p>',
-      linked: LINKED.slice(0, 3),
+      backlinks: LINKED.slice(0, 3),
     }),
 };
 
@@ -106,7 +127,7 @@ export const WithoutGitMetadata = {
       ctx: 'Reference',
       title: 'Configuration',
       content: '<p><code>.scraps.toml</code> declares a Scraps wiki: the directory containing this file is the wiki root.</p>',
-      linked: LINKED.slice(0, 2),
+      backlinks: LINKED.slice(0, 2),
     }),
 };
 
@@ -135,6 +156,6 @@ export const LongTitle = {
       title: 'A Deliberately Long Scrap Title That Has To Wrap Across More Than One Line',
       date: '2026-08-20',
       content: '<p>The title above wraps rather than truncating, since a detail page has the room the index rows do not.</p>',
-      linked: LINKED.slice(0, 4),
+      backlinks: LINKED.slice(0, 4),
     }),
 };

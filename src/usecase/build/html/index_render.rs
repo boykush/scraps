@@ -8,6 +8,7 @@ use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::list_view_configs::ListViewConfigs;
 use crate::usecase::build::model::scrap_detail::ScrapDetails;
+use crate::usecase::build::model::sort::SortKey;
 use scraps_libs::model::{base_url::BaseUrl, content::Content, tags::Tags};
 use tera::Tera;
 use tracing::{span, Level};
@@ -17,7 +18,6 @@ use crate::usecase::build::html::templates;
 use super::page_pointer::PagePointer;
 use super::serde::content::ContentTera;
 use super::serde::index_scraps::IndexScrapsTera;
-use super::serde::sort::SortKeyTera;
 use super::serde::tags::TagsTera;
 
 pub struct IndexRender {
@@ -46,56 +46,93 @@ impl IndexRender {
         readme_content: &Option<Content>,
     ) -> ScrapsResult<usize> {
         let scraps = &scrap_details.to_scraps();
-        let sorted_scraps = IndexScrapsTera::new_with_sort(
-            scrap_details,
-            backlinks_map,
-            &list_view_configs.sort_key,
-        );
         let stags = &TagsTera::new(&Tags::new(scraps), backlinks_map);
-        let base_context = {
+        let paging_size = list_view_configs.paging.size_with(scraps);
+        let shared_context = {
             let mut context = templates::context(base_url, metadata);
-            context.insert(
-                "sort_key",
-                &SortKeyTera::from(list_view_configs.sort_key.clone()),
-            );
             context.insert("build_search_index", &list_view_configs.build_search_index);
             context
         };
 
-        // chunks by config
-        let chunks = sorted_scraps.chunks(list_view_configs.paging.size_with(scraps));
+        // Every sort view is always generated; a sort key is a URL, not a
+        // config. The home is the updated view, README included.
+        let updated_pages = {
+            let _span = span!(Level::INFO, "generate_updated_view").entered();
+            let sorted = IndexScrapsTera::new_with_sort(
+                scrap_details,
+                backlinks_map,
+                &SortKey::CommittedDate,
+            );
+            self.render_view(
+                &Self::view_context(&shared_context, "updated"),
+                &sorted,
+                stags,
+                paging_size,
+                readme_content,
+                &self.output_dir_path,
+            )?
+        };
+
+        let backlinks_pages = {
+            let _span = span!(Level::INFO, "generate_backlinks_view").entered();
+            let sorted =
+                IndexScrapsTera::new_with_sort(scrap_details, backlinks_map, &SortKey::LinkedCount);
+            self.render_view(
+                &Self::view_context(&shared_context, "backlinks"),
+                &sorted,
+                stags,
+                paging_size,
+                &None,
+                &self.output_dir_path.join("backlinks"),
+            )?
+        };
+
+        Ok(updated_pages + backlinks_pages)
+    }
+
+    fn view_context(shared_context: &tera::Context, view: &str) -> tera::Context {
+        let mut context = shared_context.clone();
+        context.insert("view", view);
+        context
+    }
+
+    fn render_view(
+        &self,
+        view_context: &tera::Context,
+        sorted_scraps: &IndexScrapsTera,
+        stags: &TagsTera,
+        paging_size: usize,
+        readme_content: &Option<Content>,
+        output_dir: &Path,
+    ) -> ScrapsResult<usize> {
+        let chunks = sorted_scraps.chunks(paging_size);
         let total_pages = chunks.len();
 
-        // generate index
-        let index_scraps = chunks.first();
-        if let Some(first_scraps) = index_scraps {
-            let _span_generate_index = span!(Level::INFO, "generate_index").entered();
+        if let Some(first_scraps) = chunks.first() {
             let (context, page_pointer) = Self::prepare_index_context(
-                &base_context,
+                view_context,
                 first_scraps,
                 stags,
                 total_pages,
                 readme_content,
             );
-            self.render_html(&context, &page_pointer)?;
+            self.render_html(&context, &page_pointer, output_dir)?;
         }
 
-        // generate paginated
         chunks
             .iter()
             .skip(1)
             .enumerate()
             .try_for_each(|(idx, page_scraps)| {
-                let _span_generate_paginated = span!(Level::INFO, "generate_paginated").entered();
                 let page_num = idx + 2;
                 let (context, page_pointer) = Self::prepare_paginated_context(
-                    &base_context,
+                    view_context,
                     page_scraps,
                     stags,
                     page_num,
                     total_pages,
                 );
-                self.render_html(&context, &page_pointer)?;
+                self.render_html(&context, &page_pointer, output_dir)?;
                 ScrapsResult::Ok(())
             })?;
 
@@ -136,9 +173,14 @@ impl IndexRender {
         (context, pointer)
     }
 
-    fn render_html(&self, context: &tera::Context, pointer: &PagePointer) -> ScrapsResult<()> {
+    fn render_html(
+        &self,
+        context: &tera::Context,
+        pointer: &PagePointer,
+        output_dir: &Path,
+    ) -> ScrapsResult<()> {
         let template_name = resolve_template(&self.tera, "index.html", "__builtins/index.html");
-        let file_path = self.output_dir_path.join(pointer.current_file_name());
+        let file_path = output_dir.join(pointer.current_file_name());
         render_to_file(&self.tera, template_name, context, &file_path)
     }
 }
@@ -154,7 +196,6 @@ mod tests {
     use crate::usecase::build::model::backlinks_map::BacklinksMap;
     use crate::usecase::build::model::paging::Paging;
     use crate::usecase::build::model::scrap_detail::ScrapDetail;
-    use crate::usecase::build::model::sort::SortKey;
     use scraps_libs::lang::LangCode;
     use scraps_libs::model::scrap::Scrap;
 
@@ -173,8 +214,7 @@ mod tests {
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
-        let list_view_configs =
-            ListViewConfigs::new(&true, &SortKey::CommittedDate, &Paging::By(2));
+        let list_view_configs = ListViewConfigs::new(&true, &Paging::By(2));
 
         // scraps
         let scrap1 = Scrap::new("scrap1", &None, "# header1");
@@ -208,6 +248,16 @@ mod tests {
             result,
             "true<a href=\"./scrap1.html\">scrap1</a><a href=\"./scrap2.html\">scrap2</a>"
         );
+
+        // The backlinks view is always generated alongside the home. Both
+        // scraps have zero backlinks, so the stable sort reversed flips the
+        // input order.
+        let backlinks_result =
+            fs::read_to_string(project.output_path("backlinks/index.html")).unwrap();
+        assert_eq!(
+            backlinks_result,
+            "true<a href=\"./scrap2.html\">scrap2</a><a href=\"./scrap1.html\">scrap1</a>"
+        );
     }
 
     #[rstest]
@@ -225,8 +275,7 @@ mod tests {
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
-        let list_view_configs =
-            ListViewConfigs::new(&true, &SortKey::CommittedDate, &Paging::By(2));
+        let list_view_configs = ListViewConfigs::new(&true, &Paging::By(2));
 
         // scraps
         let scrap1 = Scrap::new("scrap1", &None, "# header1");
@@ -305,8 +354,7 @@ mod tests {
             &Some("Scrap Wiki".to_string()),
             &Some(Url::parse("https://github.io/image.png").unwrap()),
         );
-        let list_view_configs =
-            ListViewConfigs::new(&true, &SortKey::CommittedDate, &Paging::By(10));
+        let list_view_configs = ListViewConfigs::new(&true, &Paging::By(10));
 
         let scrap1 = Scrap::new("scrap1", &None, "# header1");
         let scrap_texts = [&scrap1]
