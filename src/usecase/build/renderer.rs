@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use chrono_tz::Tz;
 use scraps_libs::model::{
     base_url::BaseUrl, content::Content, key::ScrapKey, scrap::Scrap, tag::Tag,
 };
@@ -30,11 +29,9 @@ pub trait HtmlIndexRenderer {
 }
 
 pub trait HtmlScrapRenderer {
-    #[allow(clippy::too_many_arguments)]
     fn render_scrap(
         &self,
         base_url: &BaseUrl,
-        timezone: Tz,
         html_metadata: &HtmlMetadata,
         scrap_detail: &ScrapDetail,
         backlinks_map: &BacklinksMap,
@@ -45,17 +42,6 @@ pub trait HtmlScrapRenderer {
 
 pub trait HtmlScrapsIndexRenderer {
     fn render_scraps_index(
-        &self,
-        base_url: &BaseUrl,
-        html_metadata: &HtmlMetadata,
-        scrap_details: &ScrapDetails,
-        backlinks_map: &BacklinksMap,
-        site_nav: &SiteNav,
-    ) -> ScrapsResult<()>;
-}
-
-pub trait HtmlTitleIndexRenderer {
-    fn render_title_index(
         &self,
         base_url: &BaseUrl,
         html_metadata: &HtmlMetadata,
@@ -99,7 +85,6 @@ pub trait BuildRenderer:
     HtmlIndexRenderer
     + HtmlScrapRenderer
     + HtmlScrapsIndexRenderer
-    + HtmlTitleIndexRenderer
     + HtmlTagsIndexRenderer
     + HtmlTagRenderer
     + CssRenderer
@@ -112,7 +97,6 @@ impl<T> BuildRenderer for T where
     T: HtmlIndexRenderer
         + HtmlScrapRenderer
         + HtmlScrapsIndexRenderer
-        + HtmlTitleIndexRenderer
         + HtmlTagsIndexRenderer
         + HtmlTagRenderer
         + CssRenderer
@@ -152,7 +136,6 @@ pub mod tests {
         fn render_scrap(
             &self,
             _base_url: &BaseUrl,
-            _timezone: Tz,
             _html_metadata: &HtmlMetadata,
             _scrap_detail: &ScrapDetail,
             _backlinks_map: &BacklinksMap,
@@ -165,19 +148,6 @@ pub mod tests {
 
     impl HtmlScrapsIndexRenderer for BuildRendererTest {
         fn render_scraps_index(
-            &self,
-            _base_url: &BaseUrl,
-            _html_metadata: &HtmlMetadata,
-            _scrap_details: &ScrapDetails,
-            _backlinks_map: &BacklinksMap,
-            _site_nav: &SiteNav,
-        ) -> ScrapsResult<()> {
-            Ok(())
-        }
-    }
-
-    impl HtmlTitleIndexRenderer for BuildRendererTest {
-        fn render_title_index(
             &self,
             _base_url: &BaseUrl,
             _html_metadata: &HtmlMetadata,

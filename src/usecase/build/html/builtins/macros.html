@@ -1,4 +1,4 @@
-{% component scrap_rows(scraps, base_url) %}
+{% component scrap_rows(scraps, base_url, timezone) %}
     <ul class="scrap-rows">
         {% for scrap in scraps %}
             <li class="item">
@@ -14,8 +14,8 @@
                         {% if scrap.summary %}<span class="summary">{{ scrap.summary }}</span>{% endif %}
                     </span>
                     <span class="graph">
-                        <span class="metric">{{ scrap.links_count }} ref{% if scrap.links_count != 1 %}s{% endif %}</span>
-                        <span class="metric">{{ scrap.backlinks_count }} backlink{% if scrap.backlinks_count != 1 %}s{% endif %}</span>
+                        {% if scrap.commited_ts %}<span class="metric date">{{ scrap.commited_ts | date(format="%Y-%m-%d", timezone=timezone) }}</span>{% endif %}
+                        <span class="metric">{{ scrap.links_count }} ref{% if scrap.links_count != 1 %}s{% endif %} &#183; {{ scrap.backlinks_count }} backlink{% if scrap.backlinks_count != 1 %}s{% endif %}</span>
                     </span>
                 </a>
             </li>
@@ -69,7 +69,10 @@
 
 {% component link_card(autolink) %}
 <a class="link-card" href="{{ autolink.url }}" target="_blank" rel="noopener noreferrer">
-    <span class="host">{{ autolink.host }}</span>
-    <span class="url">{{ autolink.url }}</span>
+    <svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6.5 9.5 L9.5 6.5"></path><path d="M7.5 4.5 L9 3 A2.1 2.1 0 0 1 12 6 L10.5 7.5"></path><path d="M8.5 11.5 L7 13 A2.1 2.1 0 0 1 4 10 L5.5 8.5"></path></svg>
+    <span class="body">
+        <span class="host">{{ autolink.host }}</span>
+        <span class="url">{{ autolink.url }}</span>
+    </span>
 </a>
 {% endcomponent link_card %}

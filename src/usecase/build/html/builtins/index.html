@@ -13,7 +13,7 @@
                 <span class="view-name">{% if view == "backlinks" %}most backlinked{% else %}recently updated{% endif %}</span>
                 <span class="stats">{{ scrap_count }} scraps &#183; {{ nav_tags | length }} tags</span>
             </p>
-            {{ <scrap_rows scraps={scraps} base_url={base_url} /> }}
+            {{ <scrap_rows scraps={scraps} base_url={base_url} timezone={timezone} /> }}
         </div>
         <div class="paging-arrows">
             {% if prev %}

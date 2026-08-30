@@ -33,7 +33,7 @@ const page = ({ tags = [], ctx, title, date, content, backlinks = [], links = []
     }
     ${ctx ? `<h3 class="context">${ctx}<span>&#47;</span></h3>` : ''}
     <h1 class="title">${title}</h1>
-    ${date ? `<p class="commited-date">commited date: ${date}</p>` : ''}
+    ${date ? `<p class="commited-date">committed ${date}</p>` : ''}
     <div class="content">${content}</div>
   </div>
   ${section('backlinks', backlinks)}

@@ -1,5 +1,7 @@
 {% extends "__builtins/base.html" %}
 
+{% block status_left %}scraps &#47; {% if scrap.ctx %}{{ scrap.ctx }}&#47;{% endif %}{{ scrap.title }}{% endblock status_left %}
+
 {% block head %}
 <meta property="og:url" content="{{ base_url }}scraps/{{ scrap.html_file_name }}" />
 {% if scrap.thumbnail %}
@@ -23,7 +25,7 @@
         <h1 class="title">{{ scrap.title }}</h1>
         {% if scrap.commited_ts %}
             <p class="commited-date">
-                commited date: {{ scrap.commited_ts | date(format="%Y-%m-%d", timezone=timezone) }}
+                committed {{ scrap.commited_ts | date(format="%Y-%m-%d", timezone=timezone) }}
             </p>
         {% endif %}
         <div class="content">

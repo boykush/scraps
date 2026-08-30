@@ -7,7 +7,6 @@ use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::scrap_detail::ScrapDetail;
 use crate::usecase::build::model::site_nav::SiteNav;
-use chrono_tz::Tz;
 use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::file::ScrapFileStem;
 use scraps_libs::model::key::ScrapKey;
@@ -35,18 +34,16 @@ impl ScrapRender {
         })
     }
 
-    #[allow(clippy::too_many_arguments)]
     pub fn run(
         &self,
         base_url: &BaseUrl,
-        timezone: Tz,
         metadata: &HtmlMetadata,
         scrap_detail: &ScrapDetail,
         backlinks_map: &BacklinksMap,
         scraps_by_key: &HashMap<ScrapKey, Scrap>,
         site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
-        let mut context = templates::scrap_context(base_url, timezone, metadata);
+        let mut context = templates::context(base_url, metadata);
         templates::insert_site_nav(&mut context, "", site_nav, backlinks_map);
         let scrap = &scrap_detail.scrap();
 
@@ -101,7 +98,6 @@ mod tests {
     fn it_run() {
         // args
         let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
-        let timezone = chrono_tz::UTC;
         let metadata = HtmlMetadata::new(
             &LangCode::default(),
             "Scrap",
@@ -128,7 +124,7 @@ mod tests {
             .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
             .collect();
         let backlinks_map = BacklinksMap::new(&scraps);
-        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true);
+        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC);
         let scraps_by_key: HashMap<_, _> = scraps
             .iter()
             .map(|scrap| (scrap.self_key(), scrap.clone()))
@@ -144,7 +140,6 @@ mod tests {
         render
             .run(
                 base_url,
-                timezone,
                 &metadata,
                 &ScrapDetail::new(scrap1, &commited_ts1, base_url, &scrap_texts),
                 &backlinks_map,
@@ -161,7 +156,6 @@ mod tests {
         render
             .run(
                 base_url,
-                timezone,
                 &metadata,
                 &ScrapDetail::new(scrap2, &commited_ts1, base_url, &scrap_texts),
                 &backlinks_map,

@@ -1,8 +1,15 @@
 {% extends "__builtins/base.html" %}
 
+{% block status_left %}tags &#47; {{ tag.title }}{% endblock status_left %}
+
 {% block main %}
     <div class="tag">
         <h1 class="title">{{ tag.title }}</h1>
     </div>
-    {{ <scrap_links scraps={linked_scraps} base_url={base_url} /> }}
+    {% if linked_scraps | length > 0 %}
+        <section class="connections">
+            <p class="section-head">tagged &#183; {{ linked_scraps | length }}</p>
+            {{ <scrap_links scraps={linked_scraps} base_url={base_url} /> }}
+        </section>
+    {% endif %}
 {% endblock %}

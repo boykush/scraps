@@ -3,7 +3,7 @@
 // deliberately: the templates are Tera, rendered by the Rust binary, so there
 // is no way to mount them here. Change one, change the other.
 
-const row = ({ title, ctx, summary, refs = 2, backlinks = 3, thumbnail }) => `
+const row = ({ title, ctx, summary, refs = 2, backlinks = 3, date = '2026-08-28', thumbnail }) => `
   <li class="item">
     <a class="row" href="#">
       ${thumbnail ? `<img class="thumbnail" alt="" src="${thumbnail}" />` : ''}
@@ -15,8 +15,8 @@ const row = ({ title, ctx, summary, refs = 2, backlinks = 3, thumbnail }) => `
         ${summary ? `<span class="summary">${summary}</span>` : ''}
       </span>
       <span class="graph">
-        <span class="metric">${refs} ref${refs === 1 ? '' : 's'}</span>
-        <span class="metric">${backlinks} backlink${backlinks === 1 ? '' : 's'}</span>
+        ${date ? `<span class="metric date">${date}</span>` : ''}
+        <span class="metric">${refs} ref${refs === 1 ? '' : 's'} &#183; ${backlinks} backlink${backlinks === 1 ? '' : 's'}</span>
       </span>
     </a>
   </li>`;

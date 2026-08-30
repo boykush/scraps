@@ -293,6 +293,9 @@ footer.status-bar {
 
 /* scrap */
 div.scrap {
+    /* Prose reads at a measure, not at the full content width. */
+    max-width: 760px;
+
     p.tags {
         display: flex;
         flex-wrap: wrap;
@@ -339,8 +342,8 @@ div.scrap {
 
         .link-card {
             display: flex;
-            flex-direction: column;
-            gap: var(--space-1);
+            align-items: center;
+            gap: var(--space-3);
             background-color: var(--color-surface-raised);
             border: var(--border-hairline) solid var(--color-rule);
             border-radius: var(--radius-md);
@@ -353,6 +356,18 @@ div.scrap {
                 .host {
                     text-decoration: underline;
                 }
+            }
+
+            svg.icon {
+                flex-shrink: 0;
+                color: var(--color-text-muted);
+            }
+
+            .body {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                min-width: 0;
             }
 
             .host {
@@ -512,6 +527,7 @@ ul.scrap-rows {
 
 /* scrap links — compact list on scrap and tag pages */
 section.connections {
+    max-width: 760px;
     margin-top: var(--space-6);
 
     p.section-head {
@@ -569,8 +585,8 @@ ul.scrap-links {
     }
 }
 
-/* titles — the grouped title index */
-div.titles {
+/* scraps index — every scrap on one page, grouped by the title's initial */
+div.scraps-index {
     p.list-head {
         display: flex;
         justify-content: space-between;
@@ -613,20 +629,6 @@ div.titles {
                 color: var(--color-text-muted);
             }
         }
-    }
-}
-
-div.scraps-index {
-    p.list-head {
-        display: flex;
-        justify-content: space-between;
-        gap: var(--space-4);
-        margin: 0 0 var(--space-3);
-        padding-bottom: var(--space-2);
-        border-bottom: var(--border-hairline) solid var(--color-rule);
-        font-family: var(--font-family-mono);
-        font-size: var(--font-size-xs);
-        color: var(--color-text-muted);
     }
 }
 
