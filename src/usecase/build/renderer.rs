@@ -15,7 +15,6 @@ use crate::usecase::build::model::{
 };
 
 pub trait HtmlIndexRenderer {
-    #[allow(clippy::too_many_arguments)]
     fn render_index(
         &self,
         base_url: &BaseUrl,
@@ -24,8 +23,18 @@ pub trait HtmlIndexRenderer {
         scrap_details: &ScrapDetails,
         backlinks_map: &BacklinksMap,
         site_nav: &SiteNav,
-        readme_content: &Option<Content>,
     ) -> ScrapsResult<usize>;
+}
+
+pub trait HtmlAboutRenderer {
+    fn render_about(
+        &self,
+        base_url: &BaseUrl,
+        html_metadata: &HtmlMetadata,
+        readme_content: &Content,
+        backlinks_map: &BacklinksMap,
+        site_nav: &SiteNav,
+    ) -> ScrapsResult<()>;
 }
 
 pub trait HtmlScrapRenderer {
@@ -83,6 +92,7 @@ pub trait SearchIndexJsonRenderer {
 
 pub trait BuildRenderer:
     HtmlIndexRenderer
+    + HtmlAboutRenderer
     + HtmlScrapRenderer
     + HtmlScrapsIndexRenderer
     + HtmlTagsIndexRenderer
@@ -95,6 +105,7 @@ pub trait BuildRenderer:
 
 impl<T> BuildRenderer for T where
     T: HtmlIndexRenderer
+        + HtmlAboutRenderer
         + HtmlScrapRenderer
         + HtmlScrapsIndexRenderer
         + HtmlTagsIndexRenderer
@@ -126,9 +137,21 @@ pub mod tests {
             _scrap_details: &ScrapDetails,
             _backlinks_map: &BacklinksMap,
             _site_nav: &SiteNav,
-            _readme_content: &Option<Content>,
         ) -> ScrapsResult<usize> {
             Ok(1)
+        }
+    }
+
+    impl HtmlAboutRenderer for BuildRendererTest {
+        fn render_about(
+            &self,
+            _base_url: &BaseUrl,
+            _html_metadata: &HtmlMetadata,
+            _readme_content: &Content,
+            _backlinks_map: &BacklinksMap,
+            _site_nav: &SiteNav,
+        ) -> ScrapsResult<()> {
+            Ok(())
         }
     }
 

@@ -71,8 +71,18 @@ test('get home', async ({ page }) => {
   // Expect a title "to contain" a substring.
   await expect(page).toHaveTitle(/Scraps Doc/);
 
-  const readme_content = await page.locator('[class="readme-block"]').textContent();
-  expect(readme_content).toContain('What is Scraps?');
+  // The home is a designed listing — the README renders at /about/ instead.
+  await expect(page.locator('div.index .links-block')).toBeVisible();
+  await expect(page.locator('.readme-block')).toHaveCount(0);
+});
+
+test('readme renders at its own about page', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.locator('.sidebar .brand-block a.about').click();
+
+  await expect(page).toHaveURL(/\/about\/$/);
+  const about_content = await page.locator('div.about .content').textContent();
+  expect(about_content).toContain('What is Scraps?');
 });
 
 test('sort views are always generated', async ({ page }) => {

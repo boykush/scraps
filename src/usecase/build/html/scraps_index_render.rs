@@ -91,7 +91,13 @@ mod tests {
             ScrapDetail::new(&scrap3, &None, &base_url, &scrap_texts),
         ]);
         let backlinks_map = BacklinksMap::new(&scraps);
-        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC);
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            true,
+            chrono_tz::UTC,
+            false,
+        );
 
         let render = ScrapsIndexRender::new(&project.static_dir, &project.output_dir).unwrap();
         render
@@ -121,7 +127,13 @@ mod tests {
             &scrap_texts,
         )]);
         let backlinks_map = BacklinksMap::new(&scraps);
-        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC);
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            true,
+            chrono_tz::UTC,
+            false,
+        );
 
         let render = ScrapsIndexRender::new(&project.static_dir, &project.output_dir).unwrap();
         render

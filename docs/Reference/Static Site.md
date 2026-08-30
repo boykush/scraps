@@ -14,9 +14,9 @@ fully supported.
 
 ![[Reference/Static Site/Output Structure]]
 
-## [[Reference/Static Site/README and Index|README and the index page]]
+## [[Reference/Static Site/README and About|README and the about page]]
 
-![[Reference/Static Site/README and Index]]
+![[Reference/Static Site/README and About]]
 
 ## [[Reference/Static Site/Search Index|Search index]]
 

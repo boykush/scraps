@@ -40,10 +40,15 @@
     <body>
         <div class="shell">
         <aside class="sidebar">
-            <a class="brand" href="{{ base_url }}">
-                <span class="mark">[[&nbsp;]]</span>
-                <span class="name">{{ title }}</span>
-            </a>
+            <div class="brand-block">
+                <a class="brand" href="{{ base_url }}">
+                    <span class="mark">[[&nbsp;]]</span>
+                    <span class="name">{{ title }}</span>
+                </a>
+                {% if has_readme %}
+                    {% if view == "about" %}<span class="about active">about</span>{% else %}<a class="about" href="{{ base_url }}about/">about</a>{% endif %}
+                {% endif %}
+            </div>
             {% if build_search_index == true %}
                 <div class="search">
                     <input

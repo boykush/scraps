@@ -16,6 +16,8 @@ const MACROS: (&str, &str) = (
 
 static INDEX: Lazy<Tera> =
     Lazy::new(|| builtins(("__builtins/index.html", include_str!("builtins/index.html"))));
+static ABOUT: Lazy<Tera> =
+    Lazy::new(|| builtins(("__builtins/about.html", include_str!("builtins/about.html"))));
 static SCRAP: Lazy<Tera> =
     Lazy::new(|| builtins(("__builtins/scrap.html", include_str!("builtins/scrap.html"))));
 static TAG: Lazy<Tera> =
@@ -54,6 +56,10 @@ fn with_user_templates(builtin: &Tera, template_dir: &str) -> ScrapsResult<Tera>
 
 pub fn index(template_dir: &str) -> ScrapsResult<Tera> {
     with_user_templates(&INDEX, template_dir)
+}
+
+pub fn about(template_dir: &str) -> ScrapsResult<Tera> {
+    with_user_templates(&ABOUT, template_dir)
 }
 
 pub fn scrap(template_dir: &str) -> ScrapsResult<Tera> {
@@ -99,4 +105,5 @@ pub fn insert_site_nav(
     context.insert("nav_tags", &TagsTera::new(&site_nav.tags, backlinks_map));
     context.insert("build_search_index", &site_nav.build_search_index);
     context.insert("timezone", &site_nav.timezone);
+    context.insert("has_readme", &site_nav.has_readme);
 }

@@ -10,7 +10,7 @@ use crate::service::search::render::SearchIndexRender;
 use crate::usecase::build::{
     css::render::CSSRender,
     html::{
-        index_render::IndexRender, scrap_render::ScrapRender,
+        about_render::AboutRender, index_render::IndexRender, scrap_render::ScrapRender,
         scraps_index_render::ScrapsIndexRender, tag_render::TagRender,
         tags_index_render::TagsIndexRender,
     },
@@ -23,8 +23,8 @@ use crate::usecase::build::{
         site_nav::SiteNav,
     },
     renderer::{
-        CssRenderer, HtmlIndexRenderer, HtmlScrapRenderer, HtmlScrapsIndexRenderer,
-        HtmlTagRenderer, HtmlTagsIndexRenderer, SearchIndexJsonRenderer,
+        CssRenderer, HtmlAboutRenderer, HtmlIndexRenderer, HtmlScrapRenderer,
+        HtmlScrapsIndexRenderer, HtmlTagRenderer, HtmlTagsIndexRenderer, SearchIndexJsonRenderer,
     },
 };
 
@@ -33,6 +33,7 @@ use crate::usecase::build::{
 /// than per rendered page.
 pub struct BuildRendererImpl {
     index_render: IndexRender,
+    about_render: AboutRender,
     scrap_render: ScrapRender,
     scraps_index_render: ScrapsIndexRender,
     tags_index_render: TagsIndexRender,
@@ -45,6 +46,7 @@ impl BuildRendererImpl {
     pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<BuildRendererImpl> {
         Ok(BuildRendererImpl {
             index_render: IndexRender::new(static_dir_path, output_dir_path)?,
+            about_render: AboutRender::new(static_dir_path, output_dir_path)?,
             scrap_render: ScrapRender::new(static_dir_path, output_dir_path)?,
             scraps_index_render: ScrapsIndexRender::new(static_dir_path, output_dir_path)?,
             tags_index_render: TagsIndexRender::new(static_dir_path, output_dir_path)?,
@@ -64,7 +66,6 @@ impl HtmlIndexRenderer for BuildRendererImpl {
         scrap_details: &ScrapDetails,
         backlinks_map: &BacklinksMap,
         site_nav: &SiteNav,
-        readme_content: &Option<Content>,
     ) -> ScrapsResult<usize> {
         self.index_render.run(
             base_url,
@@ -73,7 +74,25 @@ impl HtmlIndexRenderer for BuildRendererImpl {
             scrap_details,
             backlinks_map,
             site_nav,
+        )
+    }
+}
+
+impl HtmlAboutRenderer for BuildRendererImpl {
+    fn render_about(
+        &self,
+        base_url: &BaseUrl,
+        html_metadata: &HtmlMetadata,
+        readme_content: &Content,
+        backlinks_map: &BacklinksMap,
+        site_nav: &SiteNav,
+    ) -> ScrapsResult<()> {
+        self.about_render.run(
+            base_url,
+            html_metadata,
             readme_content,
+            backlinks_map,
+            site_nav,
         )
     }
 }
