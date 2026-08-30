@@ -32,13 +32,12 @@
 
 ## 2. Functional changes (v2, breaking)
 
-1. **README stays on the home — the shell absorbs it.** v1's problem was that
-   the home's entire structure depended on README content. v2 fixes the
-   structure instead of dropping the feature: the sidebar (nav / search /
-   tags) and the view header + stats line are always present, and an optional
-   README block renders in the content column above the scrap list. No
-   config — the presence of README.md is the switch. The docs site's own home
-   relies on this. `mockups/home.html` shows the README-absent case.
+1. **README gets its own page.** v1 injected README.md into the home, so the
+   home's height and rhythm depended on prose. v2 keeps the home fully
+   designed (view header, stats, list) and renders README.md at `/about/`
+   instead, linked from the sidebar brand block. No config — the presence of
+   README.md is the switch. Autolinks on the about page render as cards like
+   any scrap, retiring v1's plain-link fallback on the index.
 2. **`sort_key` config is removed.** Every sort view is always generated:
 
    | View | Route | Order | Pagination |

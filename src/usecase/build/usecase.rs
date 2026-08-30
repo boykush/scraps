@@ -74,6 +74,7 @@ impl BuildUsecase {
             Tags::new(&scraps),
             list_view_configs.build_search_index,
             timezone,
+            readme_content.is_some(),
         );
         span_read_scraps.exit();
         progress.complete_stage(&Stage::ReadScraps, &scrap_details.len());
@@ -90,9 +91,15 @@ impl BuildUsecase {
             &scrap_details,
             &backlinks_map,
             &site_nav,
-            &readme_content,
         )?;
         span_generate_html_indexes.exit();
+
+        // generate html about page from README, when present
+        if let Some(readme) = &readme_content {
+            let span_generate_html_about = span!(Level::INFO, "generate_html_about").entered();
+            renderer.render_about(base_url, html_metadata, readme, &backlinks_map, &site_nav)?;
+            span_generate_html_about.exit();
+        }
 
         // generate html scraps
         let span_generate_html_scraps = span!(Level::INFO, "generate_html_scraps").entered();

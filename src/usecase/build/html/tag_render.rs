@@ -99,7 +99,13 @@ mod tests {
         let scrap2 = &Scrap::new("scrap2", &None, "#[[tag 1]] #[[tag2]]");
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
         let backlinks_map = BacklinksMap::new(&scraps);
-        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC);
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            true,
+            chrono_tz::UTC,
+            false,
+        );
         // tag
         let tag1: Tag = "tag 1".into();
 
@@ -135,7 +141,13 @@ mod tests {
         let scrap = Scrap::new("paper", &None, "#[[ai/ml]]");
         let scraps = vec![scrap];
         let backlinks_map = BacklinksMap::new(&scraps);
-        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC);
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            true,
+            chrono_tz::UTC,
+            false,
+        );
 
         let tag: Tag = "ai/ml".into();
         // Expected path: public/tags/ai/ml.html

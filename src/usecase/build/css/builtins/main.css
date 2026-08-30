@@ -35,7 +35,7 @@ a {
    the accent and the body colour sit at 1.29:1, well under the 3:1 that would
    make the hue difference dispensable. Underline them. */
 div.scrap .content a,
-div.index div.readme-block a {
+div.about .content a {
     text-decoration: underline;
     text-underline-offset: 2px;
 }
@@ -101,27 +101,44 @@ aside.sidebar {
     background-color: var(--color-surface-raised);
     border-right: var(--border-hairline) solid var(--color-rule);
 
-    a.brand {
+    div.brand-block {
         display: flex;
-        align-items: center;
-        gap: var(--space-2);
+        flex-direction: column;
+        gap: var(--space-1);
         padding: 0 var(--space-2);
-        color: var(--color-text);
 
-        &:hover {
-            text-decoration: none;
+        a.brand {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            color: var(--color-text);
+
+            &:hover {
+                text-decoration: none;
+            }
+
+            span.mark {
+                font-family: var(--font-family-mono);
+                font-weight: var(--font-weight-medium);
+                color: var(--color-accent);
+            }
+
+            span.name {
+                font-size: var(--font-size-sm);
+                font-weight: var(--font-weight-bold);
+                line-height: var(--font-line-height-tight);
+            }
         }
 
-        span.mark {
+        .about {
+            align-self: flex-start;
             font-family: var(--font-family-mono);
-            font-weight: var(--font-weight-medium);
-            color: var(--color-accent);
+            font-size: var(--font-size-xs);
+            color: var(--color-text-muted);
         }
 
-        span.name {
-            font-size: var(--font-size-sm);
-            font-weight: var(--font-weight-bold);
-            line-height: var(--font-line-height-tight);
+        span.about.active {
+            color: var(--color-text);
         }
     }
 
@@ -340,54 +357,67 @@ div.scrap {
         border-top: var(--border-hairline) solid var(--color-rule);
         word-break: break-word;
 
-        .link-card {
-            display: flex;
-            align-items: center;
-            gap: var(--space-3);
-            background-color: var(--color-surface-raised);
-            border: var(--border-hairline) solid var(--color-rule);
-            border-radius: var(--radius-md);
-            margin: var(--space-4) 0;
-            padding: var(--space-3) var(--space-4);
-
-            &:hover {
-                text-decoration: none;
-
-                .host {
-                    text-decoration: underline;
-                }
-            }
-
-            svg.icon {
-                flex-shrink: 0;
-                color: var(--color-text-muted);
-            }
-
-            .body {
-                display: flex;
-                flex-direction: column;
-                gap: 2px;
-                min-width: 0;
-            }
-
-            .host {
-                font-weight: var(--font-weight-medium);
-                color: var(--color-text);
-            }
-
-            .url {
-                font-family: var(--font-family-mono);
-                font-size: var(--font-size-xs);
-                color: var(--color-text-muted);
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-        }
     }
 
     img {
         max-width: 100%;
+    }
+}
+
+/* Autolink card, shared by scrap content and the about page. Underlines from
+   the prose-link rule stay off it: the card is its own affordance. */
+.content a.link-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    background-color: var(--color-surface-raised);
+    border: var(--border-hairline) solid var(--color-rule);
+    border-radius: var(--radius-md);
+    margin: var(--space-4) 0;
+    padding: var(--space-3) var(--space-4);
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: none;
+
+        .host {
+            text-decoration: underline;
+        }
+    }
+
+    svg.icon {
+        flex-shrink: 0;
+        color: var(--color-text-muted);
+    }
+
+    .body {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    .host {
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text);
+    }
+
+    .url {
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-xs);
+        color: var(--color-text-muted);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+/* about — the README's own page */
+div.about {
+    max-width: 760px;
+
+    .content {
+        word-break: break-word;
     }
 }
 
@@ -409,13 +439,6 @@ div.tag {
 
 /* index */
 div.index {
-    /* readme block */
-    div.readme-block {
-        hr {
-            margin: var(--space-7) 0;
-        }
-    }
-
     /* links block */
     div.links-block {
         p.list-head {

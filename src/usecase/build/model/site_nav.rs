@@ -9,15 +9,25 @@ pub struct SiteNav {
     pub tags: Tags,
     pub build_search_index: bool,
     pub timezone: Tz,
+    /// A root README.md renders at its own /about/ page; the sidebar links
+    /// it only when the file exists.
+    pub has_readme: bool,
 }
 
 impl SiteNav {
-    pub fn new(scrap_count: usize, tags: Tags, build_search_index: bool, timezone: Tz) -> SiteNav {
+    pub fn new(
+        scrap_count: usize,
+        tags: Tags,
+        build_search_index: bool,
+        timezone: Tz,
+        has_readme: bool,
+    ) -> SiteNav {
         SiteNav {
             scrap_count,
             tags,
             build_search_index,
             timezone,
+            has_readme,
         }
     }
 }

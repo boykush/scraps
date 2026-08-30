@@ -15,10 +15,13 @@ const tagItem = ({ title, count }) => `
 
 const sidebar = ({ activeView, results = [] }) => `
   <aside class="sidebar" style="height: 640px; position: static;">
-    <a class="brand" href="#">
-      <span class="mark">[[&nbsp;]]</span>
-      <span class="name">Scraps Doc</span>
-    </a>
+    <div class="brand-block">
+      <a class="brand" href="#">
+        <span class="mark">[[&nbsp;]]</span>
+        <span class="name">Scraps Doc</span>
+      </a>
+      ${activeView === 'about' ? '<span class="about active">about</span>' : '<a class="about" href="#">about</a>'}
+    </div>
     <div class="search">
       <input type="search" id="search-input" placeholder="Search by title..." autocomplete="off" />
       ${

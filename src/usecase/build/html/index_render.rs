@@ -10,14 +10,13 @@ use crate::usecase::build::model::list_view_configs::ListViewConfigs;
 use crate::usecase::build::model::scrap_detail::ScrapDetails;
 use crate::usecase::build::model::site_nav::SiteNav;
 use crate::usecase::build::model::sort::SortKey;
-use scraps_libs::model::{base_url::BaseUrl, content::Content};
+use scraps_libs::model::base_url::BaseUrl;
 use tera::Tera;
 use tracing::{span, Level};
 
 use crate::usecase::build::html::templates;
 
 use super::page_pointer::PagePointer;
-use super::serde::content::ContentTera;
 use super::serde::index_scraps::IndexScrapsTera;
 
 pub struct IndexRender {
@@ -36,7 +35,6 @@ impl IndexRender {
         })
     }
 
-    #[allow(clippy::too_many_arguments)]
     pub fn run(
         &self,
         base_url: &BaseUrl,
@@ -45,14 +43,13 @@ impl IndexRender {
         scrap_details: &ScrapDetails,
         backlinks_map: &BacklinksMap,
         site_nav: &SiteNav,
-        readme_content: &Option<Content>,
     ) -> ScrapsResult<usize> {
         let scraps = &scrap_details.to_scraps();
         let paging_size = list_view_configs.paging.size_with(scraps);
         let shared_context = templates::context(base_url, metadata);
 
         // Every sort view is always generated; a sort key is a URL, not a
-        // config. The home is the updated view, README included.
+        // config. The home is the updated view.
         let updated_pages = {
             let _span = span!(Level::INFO, "generate_updated_view").entered();
             let sorted = IndexScrapsTera::new_with_sort(
@@ -64,7 +61,6 @@ impl IndexRender {
                 &Self::view_context(&shared_context, "updated", site_nav, backlinks_map),
                 &sorted,
                 paging_size,
-                readme_content,
                 &self.output_dir_path,
             )?
         };
@@ -77,7 +73,6 @@ impl IndexRender {
                 &Self::view_context(&shared_context, "backlinks", site_nav, backlinks_map),
                 &sorted,
                 paging_size,
-                &None,
                 &self.output_dir_path.join("backlinks"),
             )?
         };
@@ -101,19 +96,14 @@ impl IndexRender {
         view_context: &tera::Context,
         sorted_scraps: &IndexScrapsTera,
         paging_size: usize,
-        readme_content: &Option<Content>,
         output_dir: &Path,
     ) -> ScrapsResult<usize> {
         let chunks = sorted_scraps.chunks(paging_size);
         let total_pages = chunks.len();
 
         if let Some(first_scraps) = chunks.first() {
-            let (context, page_pointer) = Self::prepare_index_context(
-                view_context,
-                first_scraps,
-                total_pages,
-                readme_content,
-            );
+            let (context, page_pointer) =
+                Self::prepare_index_context(view_context, first_scraps, total_pages);
             self.render_html(&context, &page_pointer, output_dir)?;
         }
 
@@ -140,15 +130,11 @@ impl IndexRender {
         base_context: &tera::Context,
         scraps: &IndexScrapsTera,
         total_pages: usize,
-        readme_content: &Option<Content>,
     ) -> (tera::Context, PagePointer) {
         let pointer = PagePointer::new_index(total_pages);
         let mut context = base_context.clone();
         context.insert("scraps", &scraps);
         context.insert("next", &pointer.next);
-        if let Some(readme) = readme_content {
-            context.insert("readme_content", &ContentTera::from(readme.clone()));
-        }
         (context, pointer)
     }
 
@@ -224,7 +210,13 @@ mod tests {
 
         let scraps = scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(&scraps);
-        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC);
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            true,
+            chrono_tz::UTC,
+            false,
+        );
 
         let render = IndexRender::new(&project.static_dir, &project.output_dir).unwrap();
         render
@@ -235,7 +227,6 @@ mod tests {
                 &scrap_details,
                 &backlinks_map,
                 &site_nav,
-                &None,
             )
             .unwrap();
 
@@ -301,10 +292,15 @@ mod tests {
 
         let scraps = scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(&scraps);
-        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC);
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            true,
+            chrono_tz::UTC,
+            false,
+        );
 
         let render = IndexRender::new(&project.static_dir, &project.output_dir).unwrap();
-        let readme_content: Option<Content> = None;
         render
             .run(
                 base_url,
@@ -313,7 +309,6 @@ mod tests {
                 &scrap_details,
                 &backlinks_map,
                 &site_nav,
-                &readme_content,
             )
             .unwrap();
 
@@ -363,7 +358,13 @@ mod tests {
         let scrap_details = ScrapDetails::new(&vec![sc1]);
         let scraps = scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(&scraps);
-        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC);
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            true,
+            chrono_tz::UTC,
+            false,
+        );
 
         let render = IndexRender::new(&project.static_dir, &project.output_dir).unwrap();
         render
@@ -374,7 +375,6 @@ mod tests {
                 &scrap_details,
                 &backlinks_map,
                 &site_nav,
-                &None,
             )
             .unwrap();
 

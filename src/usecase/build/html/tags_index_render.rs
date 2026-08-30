@@ -82,7 +82,13 @@ mod tests {
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
         let backlinks_map = BacklinksMap::new(&scraps);
-        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC);
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            true,
+            chrono_tz::UTC,
+            false,
+        );
 
         let render = TagsIndexRender::new(&project.static_dir, &project.output_dir).unwrap();
         render

@@ -1,0 +1,11 @@
+{% extends "__builtins/base.html" %}
+
+{% block status_left %}about{% endblock status_left %}
+
+{% block main %}
+    <div class="about">
+        <div class="content">
+            {% for element in readme_content.elements %}{% if element.raw %}{{ element.raw | safe }}{% elif element.autolink %}{{ <link_card autolink={element.autolink} /> }}{% endif %}{% endfor %}
+        </div>
+    </div>
+{% endblock %}

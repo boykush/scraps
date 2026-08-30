@@ -6,7 +6,9 @@ Build output is written to the directory configured by `output_dir`
 ```bash
 ❯ tree _site
 _site
-├── index.html              # home: the updated view (plus README.md, when present)
+├── index.html              # home: the updated view
+├── about/
+│   └── index.html          # README.md, when present
 ├── backlinks/
 │   └── index.html          # most linked first
 ├── scraps/

@@ -2,12 +2,6 @@
 
 {% block main %}
     <div class="index">
-        {% if readme_content %}
-          <div class="readme-block">
-            {% for element in readme_content.elements %}{% if element.raw %}{{ element.raw | safe }}{% elif element.autolink %}<a href="{{ element.autolink.url }}">{{ element.autolink.url }}</a>{% endif %}{% endfor %}
-            <hr>
-          </div>
-        {% endif %}
         <div class="links-block">
             <p class="list-head">
                 <span class="view-name">{% if view == "backlinks" %}most backlinked{% else %}recently updated{% endif %}</span>

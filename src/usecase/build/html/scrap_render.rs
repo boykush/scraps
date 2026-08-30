@@ -124,7 +124,13 @@ mod tests {
             .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
             .collect();
         let backlinks_map = BacklinksMap::new(&scraps);
-        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC);
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            true,
+            chrono_tz::UTC,
+            false,
+        );
         let scraps_by_key: HashMap<_, _> = scraps
             .iter()
             .map(|scrap| (scrap.self_key(), scrap.clone()))
