@@ -52,8 +52,8 @@
    dakuten/handakuten so デ→て), then group into kana rows あ か さ た な は
    ま や ら わ; Latin initials into A–Z; CJK-ideograph initials into a 漢字
    group (codepoint order — no dictionary readings, per the lean-core
-   principle); digits and anything else into `#`. Empty groups are omitted
-   from sections and rendered dim in the jump bar.
+   principle); digits and anything else into `#`. A group with no scraps is
+   not rendered at all — neither as a section nor in the jump bar.
 3. **Scrap page** gains: its own tags (as `#[[tag]]` literals above the
    title), and two labeled sections after the content — `backlinks · N` and
    `links · N` (resolved outbound wiki-links). The trailing unlabeled
