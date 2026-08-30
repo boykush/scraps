@@ -6,6 +6,7 @@ use crate::service::tera_render::{render_to_file, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::scrap_detail::ScrapDetail;
+use crate::usecase::build::model::site_nav::SiteNav;
 use chrono_tz::Tz;
 use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::file::ScrapFileStem;
@@ -34,6 +35,7 @@ impl ScrapRender {
         })
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn run(
         &self,
         base_url: &BaseUrl,
@@ -42,8 +44,10 @@ impl ScrapRender {
         scrap_detail: &ScrapDetail,
         backlinks_map: &BacklinksMap,
         scraps_by_key: &HashMap<ScrapKey, Scrap>,
+        site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
         let mut context = templates::scrap_context(base_url, timezone, metadata);
+        templates::insert_site_nav(&mut context, "", site_nav, backlinks_map);
         let scrap = &scrap_detail.scrap();
 
         // insert to context for linked list
@@ -89,6 +93,7 @@ mod tests {
     use scraps_libs::lang::LangCode;
     use scraps_libs::model::base_url::BaseUrl;
     use scraps_libs::model::scrap::Scrap;
+    use scraps_libs::model::tags::Tags;
 
     use super::*;
 
@@ -123,6 +128,7 @@ mod tests {
             .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
             .collect();
         let backlinks_map = BacklinksMap::new(&scraps);
+        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true);
         let scraps_by_key: HashMap<_, _> = scraps
             .iter()
             .map(|scrap| (scrap.self_key(), scrap.clone()))
@@ -143,6 +149,7 @@ mod tests {
                 &ScrapDetail::new(scrap1, &commited_ts1, base_url, &scrap_texts),
                 &backlinks_map,
                 &scraps_by_key,
+                &site_nav,
             )
             .unwrap();
 
@@ -159,6 +166,7 @@ mod tests {
                 &ScrapDetail::new(scrap2, &commited_ts1, base_url, &scrap_texts),
                 &backlinks_map,
                 &scraps_by_key,
+                &site_nav,
             )
             .unwrap();
 

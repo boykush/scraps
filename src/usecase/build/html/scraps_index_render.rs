@@ -6,6 +6,7 @@ use crate::usecase::build::html::templates;
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::scrap_detail::ScrapDetails;
+use crate::usecase::build::model::site_nav::SiteNav;
 use scraps_libs::model::base_url::BaseUrl;
 use tera::Tera;
 
@@ -35,8 +36,10 @@ impl ScrapsIndexRender {
         metadata: &HtmlMetadata,
         scrap_details: &ScrapDetails,
         backlinks_map: &BacklinksMap,
+        site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
         let mut context = templates::context(base_url, metadata);
+        templates::insert_site_nav(&mut context, "scraps", site_nav, backlinks_map);
         context.insert(
             "scraps",
             &IndexScrapsTera::new_sorted_by_title(scrap_details, backlinks_map),
@@ -57,7 +60,9 @@ mod tests {
     use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
     use crate::usecase::build::model::scrap_detail::ScrapDetail;
     use rstest::rstest;
-    use scraps_libs::{lang::LangCode, model::base_url::BaseUrl, model::scrap::Scrap};
+    use scraps_libs::{
+        lang::LangCode, model::base_url::BaseUrl, model::scrap::Scrap, model::tags::Tags,
+    };
     use std::fs;
     use url::Url;
 
@@ -87,10 +92,11 @@ mod tests {
             ScrapDetail::new(&scrap2, &None, &base_url, &scrap_texts),
         ]);
         let backlinks_map = BacklinksMap::new(&scraps);
+        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true);
 
         let render = ScrapsIndexRender::new(&project.static_dir, &project.output_dir).unwrap();
         render
-            .run(&base_url, &metadata, &details, &backlinks_map)
+            .run(&base_url, &metadata, &details, &backlinks_map, &site_nav)
             .unwrap();
 
         let result = fs::read_to_string(project.output_path("scraps/index.html")).unwrap();

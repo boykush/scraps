@@ -77,10 +77,10 @@ test('get home', async ({ page }) => {
 
 test('sort views are always generated', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('.view-nav .view.active')).toHaveText('updated');
+  await expect(page.locator('.sidebar nav.views .item.active')).toHaveText(/updated/);
 
   await page.goto('/backlinks/', { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('.view-nav .view.active')).toHaveText('backlinks');
+  await expect(page.locator('.sidebar nav.views .item.active')).toHaveText(/backlinks/);
 
   await page.goto('/titles/', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('.jump-bar .jump').first()).toBeVisible();

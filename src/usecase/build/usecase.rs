@@ -13,6 +13,7 @@ use super::model::{
     backlinks_map::BacklinksMap,
     build_config::BuildConfig,
     scrap_detail::{ScrapDetail, ScrapDetails},
+    site_nav::SiteNav,
 };
 use std::collections::HashMap;
 
@@ -68,6 +69,11 @@ impl BuildUsecase {
             .iter()
             .map(|scrap| (scrap.self_key(), scrap.clone()))
             .collect();
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            list_view_configs.build_search_index,
+        );
         span_read_scraps.exit();
         progress.complete_stage(&Stage::ReadScraps, &scrap_details.len());
 
@@ -82,6 +88,7 @@ impl BuildUsecase {
             list_view_configs,
             &scrap_details,
             &backlinks_map,
+            &site_nav,
             &readme_content,
         )?;
         span_generate_html_indexes.exit();
@@ -100,6 +107,7 @@ impl BuildUsecase {
                     &scrap_detail,
                     &backlinks_map,
                     &scraps_by_key,
+                    &site_nav,
                 )
             })?;
         span_generate_html_scraps.exit();
@@ -107,34 +115,45 @@ impl BuildUsecase {
         // generate html scraps index
         let span_generate_html_scraps_index =
             span!(Level::INFO, "generate_html_scraps_index").entered();
-        renderer.render_scraps_index(base_url, html_metadata, &scrap_details, &backlinks_map)?;
+        renderer.render_scraps_index(
+            base_url,
+            html_metadata,
+            &scrap_details,
+            &backlinks_map,
+            &site_nav,
+        )?;
         span_generate_html_scraps_index.exit();
 
         // generate html title index
         let span_generate_html_title_index =
             span!(Level::INFO, "generate_html_title_index").entered();
-        renderer.render_title_index(base_url, html_metadata, &scrap_details, &backlinks_map)?;
+        renderer.render_title_index(
+            base_url,
+            html_metadata,
+            &scrap_details,
+            &backlinks_map,
+            &site_nav,
+        )?;
         span_generate_html_title_index.exit();
 
         // generate html tags index
         let span_generate_html_tags_index =
             span!(Level::INFO, "generate_html_tags_index").entered();
-        renderer.render_tags_index(base_url, html_metadata, &scraps, &backlinks_map)?;
+        renderer.render_tags_index(base_url, html_metadata, &scraps, &backlinks_map, &site_nav)?;
         span_generate_html_tags_index.exit();
 
         // generate html tags
         let span_generate_html_tags = span!(Level::INFO, "generate_html_tags").entered();
-        let tags = Tags::new(&scraps);
-        tags.iter().par_bridge().try_for_each(|tag| {
+        site_nav.tags.iter().par_bridge().try_for_each(|tag| {
             let _span_render_tag = span!(Level::INFO, "generate_html_tag").entered();
-            renderer.render_tag(base_url, html_metadata, tag, &backlinks_map)
+            renderer.render_tag(base_url, html_metadata, tag, &backlinks_map, &site_nav)
         })?;
         span_generate_html_tags.exit();
 
         progress.complete_stage(&Stage::GenerateHtml, &{
             index_page_count + scrap_details.len() + 1 + // title index
                 1 + // tags index
-                tags.len()
+                site_nav.tags.len()
         });
 
         // generate css

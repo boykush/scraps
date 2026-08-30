@@ -4,6 +4,7 @@ use crate::error::ScrapsResult;
 use crate::service::tera_render::{render_to_file, resolve_template, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
+use crate::usecase::build::model::site_nav::SiteNav;
 use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::tags::Tags;
@@ -34,8 +35,10 @@ impl TagsIndexRender {
         metadata: &HtmlMetadata,
         scraps: &[Scrap],
         backlinks_map: &BacklinksMap,
+        site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
         let mut context = templates::context(base_url, metadata);
+        templates::insert_site_nav(&mut context, "", site_nav, backlinks_map);
         context.insert("tags", &TagsTera::new(&Tags::new(scraps), backlinks_map));
 
         let template_name =
@@ -79,10 +82,11 @@ mod tests {
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
 
         let backlinks_map = BacklinksMap::new(&scraps);
+        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true);
 
         let render = TagsIndexRender::new(&project.static_dir, &project.output_dir).unwrap();
         render
-            .run(&base_url, &metadata, &scraps, &backlinks_map)
+            .run(&base_url, &metadata, &scraps, &backlinks_map, &site_nav)
             .unwrap();
 
         let result1 = fs::read_to_string(project.output_path("tags/index.html")).unwrap();

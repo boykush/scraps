@@ -12,9 +12,11 @@ use crate::usecase::build::model::{
     html::HtmlMetadata,
     list_view_configs::ListViewConfigs,
     scrap_detail::{ScrapDetail, ScrapDetails},
+    site_nav::SiteNav,
 };
 
 pub trait HtmlIndexRenderer {
+    #[allow(clippy::too_many_arguments)]
     fn render_index(
         &self,
         base_url: &BaseUrl,
@@ -22,11 +24,13 @@ pub trait HtmlIndexRenderer {
         list_view_configs: &ListViewConfigs,
         scrap_details: &ScrapDetails,
         backlinks_map: &BacklinksMap,
+        site_nav: &SiteNav,
         readme_content: &Option<Content>,
     ) -> ScrapsResult<usize>;
 }
 
 pub trait HtmlScrapRenderer {
+    #[allow(clippy::too_many_arguments)]
     fn render_scrap(
         &self,
         base_url: &BaseUrl,
@@ -35,6 +39,7 @@ pub trait HtmlScrapRenderer {
         scrap_detail: &ScrapDetail,
         backlinks_map: &BacklinksMap,
         scraps_by_key: &HashMap<ScrapKey, Scrap>,
+        site_nav: &SiteNav,
     ) -> ScrapsResult<()>;
 }
 
@@ -45,6 +50,7 @@ pub trait HtmlScrapsIndexRenderer {
         html_metadata: &HtmlMetadata,
         scrap_details: &ScrapDetails,
         backlinks_map: &BacklinksMap,
+        site_nav: &SiteNav,
     ) -> ScrapsResult<()>;
 }
 
@@ -55,6 +61,7 @@ pub trait HtmlTitleIndexRenderer {
         html_metadata: &HtmlMetadata,
         scrap_details: &ScrapDetails,
         backlinks_map: &BacklinksMap,
+        site_nav: &SiteNav,
     ) -> ScrapsResult<()>;
 }
 
@@ -65,6 +72,7 @@ pub trait HtmlTagsIndexRenderer {
         html_metadata: &HtmlMetadata,
         scraps: &[Scrap],
         backlinks_map: &BacklinksMap,
+        site_nav: &SiteNav,
     ) -> ScrapsResult<()>;
 }
 
@@ -75,6 +83,7 @@ pub trait HtmlTagRenderer {
         html_metadata: &HtmlMetadata,
         tag: &Tag,
         backlinks_map: &BacklinksMap,
+        site_nav: &SiteNav,
     ) -> ScrapsResult<()>;
 }
 
@@ -132,6 +141,7 @@ pub mod tests {
             _list_view_configs: &ListViewConfigs,
             _scrap_details: &ScrapDetails,
             _backlinks_map: &BacklinksMap,
+            _site_nav: &SiteNav,
             _readme_content: &Option<Content>,
         ) -> ScrapsResult<usize> {
             Ok(1)
@@ -147,6 +157,7 @@ pub mod tests {
             _scrap_detail: &ScrapDetail,
             _backlinks_map: &BacklinksMap,
             _scraps_by_key: &HashMap<ScrapKey, Scrap>,
+            _site_nav: &SiteNav,
         ) -> ScrapsResult<()> {
             Ok(())
         }
@@ -159,6 +170,7 @@ pub mod tests {
             _html_metadata: &HtmlMetadata,
             _scrap_details: &ScrapDetails,
             _backlinks_map: &BacklinksMap,
+            _site_nav: &SiteNav,
         ) -> ScrapsResult<()> {
             Ok(())
         }
@@ -171,6 +183,7 @@ pub mod tests {
             _html_metadata: &HtmlMetadata,
             _scrap_details: &ScrapDetails,
             _backlinks_map: &BacklinksMap,
+            _site_nav: &SiteNav,
         ) -> ScrapsResult<()> {
             Ok(())
         }
@@ -183,6 +196,7 @@ pub mod tests {
             _html_metadata: &HtmlMetadata,
             _scraps: &[Scrap],
             _backlinks_map: &BacklinksMap,
+            _site_nav: &SiteNav,
         ) -> ScrapsResult<()> {
             Ok(())
         }
@@ -195,6 +209,7 @@ pub mod tests {
             _html_metadata: &HtmlMetadata,
             _tag: &Tag,
             _backlinks_map: &BacklinksMap,
+            _site_nav: &SiteNav,
         ) -> ScrapsResult<()> {
             Ok(())
         }

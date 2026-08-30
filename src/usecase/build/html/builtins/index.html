@@ -1,35 +1,17 @@
 {% extends "__builtins/base.html" %}
 
 {% block main %}
-    <div class="index"> 
+    <div class="index">
         {% if readme_content %}
           <div class="readme-block">
             {% for element in readme_content.elements %}{% if element.raw %}{{ element.raw | safe }}{% elif element.autolink %}<a href="{{ element.autolink.url }}">{{ element.autolink.url }}</a>{% endif %}{% endfor %}
             <hr>
           </div>
         {% endif %}
-        {% if build_search_index == true %}
-          <div class="search-block">
-              <input
-                type="text"
-                id="search-input"
-                onkeyup="doSearch()"
-                placeholder="Search by title..."
-                />
-              <ul id="search-results"></ul>
-          </div>
-        {% endif %}
-        <div class="tags-block">
-            {{ <tag_links tags={tags} base_url={base_url} slice_size={15} /> }}
-        </div>
         <div class="links-block">
             <p class="list-head">
-                <span class="view-nav">
-                    {% if view == "updated" %}<span class="view active">updated</span>{% else %}<a class="view" href="{{ base_url }}">updated</a>{% endif %}
-                    {% if view == "backlinks" %}<span class="view active">backlinks</span>{% else %}<a class="view" href="{{ base_url }}backlinks/">backlinks</a>{% endif %}
-                    <a class="view" href="{{ base_url }}titles/">titles</a>
-                </span>
-                <a class="all-link" href="{{ base_url }}scraps/">all scraps &#8250;</a>
+                <span class="view-name">{% if view == "backlinks" %}most backlinked{% else %}recently updated{% endif %}</span>
+                <span class="stats">{{ scrap_count }} scraps &#183; {{ nav_tags | length }} tags</span>
             </p>
             {{ <scrap_rows scraps={scraps} base_url={base_url} /> }}
         </div>
@@ -42,59 +24,4 @@
             {% endif %}
         </div>
     </div>
-{% endblock %}
-
-{% block script %}
-  {% if build_search_index == true %}
-  <!-- For search scraps -->
-  <!--
-    fuse.js@7+ ships as ESM only; loading it through a classic <script src>
-    fails to evaluate the `export` and leaves window.Fuse undefined. Import it
-    from a module script and re-expose it as a global so the classic
-    doSearch() handler below can call `new Fuse(...)`.
-  -->
-  <script type="module">
-    import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@{{ cdn.fusejs }}";
-    window.Fuse = Fuse;
-    fetch('{{ base_url }}search_index.json')
-      .then(response => response.json())
-      .then(data => {
-        const fuseOptions = {
-          minMatchCharLength: 3,
-          keys: ["title"]
-        };
-        const fuse = new Fuse(data, fuseOptions);
-        window.search = function (query, numResults) {
-          return fuse.search(query).slice(0, numResults).map(result => [result.item.title, result.item.url]);
-        };
-      })
-  </script>
-  <script>
-    function doSearch() {
-      let value = document.getElementById("search-input").value;
-      console.log(`Search query: ${value}`);
-
-      // Retrieve 5 results
-      const results = search(value, 5);
-
-      console.log(`Results: ${results}`);
-
-      let ul = document.getElementById("search-results");
-      ul.innerHTML = "";
-
-      results.forEach((result, index) => {
-        var li = document.createElement("li");
-
-        let [title, url] = result;
-        console.log(`Title: ${title}, URL: ${url}`);
-        let elemlink = document.createElement('a');
-        elemlink.innerHTML = title;
-        elemlink.setAttribute('href', url);
-        li.appendChild(elemlink);
-        li.style.top = `${(index * 30) - 16}px`;
-        ul.appendChild(li);
-      })
-    }
-  </script>
-  {% endif %}
 {% endblock %}

@@ -25,6 +25,7 @@
     --color-text-muted: light-dark(var(--ext-slate-mid), var(--nord9));
     --color-rule: light-dark(var(--nord4), var(--nord2));
     --color-accent: light-dark(var(--ext-frost-deep), var(--nord8));
+    --color-accent-wash: light-dark(#dfe4ec, #3b4854);
 
     --font-family-sans: "Rubik", "Noto Sans JP", sans-serif;
     --font-family-mono: ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;
