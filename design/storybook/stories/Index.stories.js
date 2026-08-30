@@ -52,7 +52,11 @@ export const ListHeadAndPaging = {
     <div class="index">
       <div class="links-block">
         <p class="list-head">
-          <span class="sort-key">sorted by committed date</span>
+          <span class="view-nav">
+            <span class="view active">updated</span>
+            <a class="view" href="#">backlinks</a>
+            <a class="view" href="#">titles</a>
+          </span>
           <a class="all-link" href="#">all scraps &#8250;</a>
         </p>
       </div>

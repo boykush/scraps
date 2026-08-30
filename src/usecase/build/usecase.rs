@@ -105,6 +105,12 @@ impl BuildUsecase {
         renderer.render_scraps_index(base_url, html_metadata, &scrap_details, &backlinks_map)?;
         span_generate_html_scraps_index.exit();
 
+        // generate html title index
+        let span_generate_html_title_index =
+            span!(Level::INFO, "generate_html_title_index").entered();
+        renderer.render_title_index(base_url, html_metadata, &scrap_details, &backlinks_map)?;
+        span_generate_html_title_index.exit();
+
         // generate html tags index
         let span_generate_html_tags_index =
             span!(Level::INFO, "generate_html_tags_index").entered();
@@ -121,7 +127,8 @@ impl BuildUsecase {
         span_generate_html_tags.exit();
 
         progress.complete_stage(&Stage::GenerateHtml, &{
-            index_page_count + scrap_details.len() + 1 + // tags index
+            index_page_count + scrap_details.len() + 1 + // title index
+                1 + // tags index
                 tags.len()
         });
 
@@ -149,7 +156,7 @@ impl BuildUsecase {
 mod tests {
     use crate::usecase::build::model::{
         color_scheme::ColorScheme, css::CssMetadata, html::HtmlMetadata,
-        list_view_configs::ListViewConfigs, paging::Paging, sort::SortKey,
+        list_view_configs::ListViewConfigs, paging::Paging,
     };
     use crate::usecase::build::renderer::tests::BuildRendererTest;
     use crate::usecase::progress::tests::ProgressTest;
@@ -170,11 +177,7 @@ mod tests {
                 &Some(Url::parse("https://github.io/image.png").unwrap()),
             ),
             css_metadata: CssMetadata::new(&ColorScheme::OsSetting),
-            list_view_configs: ListViewConfigs::new(
-                &build_search_index,
-                &SortKey::LinkedCount,
-                &Paging::Not,
-            ),
+            list_view_configs: ListViewConfigs::new(&build_search_index, &Paging::Not),
         }
     }
 

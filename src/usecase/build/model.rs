@@ -8,3 +8,4 @@ pub mod paging;
 pub mod scrap_detail;
 pub mod sort;
 pub mod summary;
+pub mod title_group;

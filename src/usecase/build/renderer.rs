@@ -43,6 +43,16 @@ pub trait HtmlScrapsIndexRenderer {
     ) -> ScrapsResult<()>;
 }
 
+pub trait HtmlTitleIndexRenderer {
+    fn render_title_index(
+        &self,
+        base_url: &BaseUrl,
+        html_metadata: &HtmlMetadata,
+        scrap_details: &ScrapDetails,
+        backlinks_map: &BacklinksMap,
+    ) -> ScrapsResult<()>;
+}
+
 pub trait HtmlTagsIndexRenderer {
     fn render_tags_index(
         &self,
@@ -75,6 +85,7 @@ pub trait BuildRenderer:
     HtmlIndexRenderer
     + HtmlScrapRenderer
     + HtmlScrapsIndexRenderer
+    + HtmlTitleIndexRenderer
     + HtmlTagsIndexRenderer
     + HtmlTagRenderer
     + CssRenderer
@@ -87,6 +98,7 @@ impl<T> BuildRenderer for T where
     T: HtmlIndexRenderer
         + HtmlScrapRenderer
         + HtmlScrapsIndexRenderer
+        + HtmlTitleIndexRenderer
         + HtmlTagsIndexRenderer
         + HtmlTagRenderer
         + CssRenderer
@@ -136,6 +148,18 @@ pub mod tests {
 
     impl HtmlScrapsIndexRenderer for BuildRendererTest {
         fn render_scraps_index(
+            &self,
+            _base_url: &BaseUrl,
+            _html_metadata: &HtmlMetadata,
+            _scrap_details: &ScrapDetails,
+            _backlinks_map: &BacklinksMap,
+        ) -> ScrapsResult<()> {
+            Ok(())
+        }
+    }
+
+    impl HtmlTitleIndexRenderer for BuildRendererTest {
+        fn render_title_index(
             &self,
             _base_url: &BaseUrl,
             _html_metadata: &HtmlMetadata,

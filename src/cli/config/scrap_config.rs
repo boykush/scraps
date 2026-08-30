@@ -2,7 +2,7 @@ use crate::cli::path_resolver::PathResolver;
 use crate::error::{anyhow::Context, CliError, ScrapsResult};
 use crate::usecase::build::model::{
     build_config::BuildConfig, color_scheme::ColorScheme, css::CssMetadata, html::HtmlMetadata,
-    list_view_configs::ListViewConfigs, paging::Paging, sort::SortKey,
+    list_view_configs::ListViewConfigs, paging::Paging,
 };
 use chrono_tz::Tz;
 use config::Config;
@@ -12,10 +12,7 @@ use serde::Deserialize;
 use std::path::{Path, PathBuf};
 use url::Url;
 
-use super::{
-    base_url::BaseUrlConfig, color_scheme::ColorSchemeConfig, lang::LangCodeConfig,
-    sort_key::SortKeyConfig,
-};
+use super::{base_url::BaseUrlConfig, color_scheme::ColorSchemeConfig, lang::LangCodeConfig};
 
 /// SSG-specific configuration (site generation settings)
 #[derive(Debug, Deserialize)]
@@ -26,7 +23,6 @@ pub struct SsgConfig {
     pub description: Option<String>,
     pub favicon: Option<Url>,
     pub build_search_index: Option<bool>,
-    pub sort_key: Option<SortKeyConfig>,
     pub paginate_by: Option<usize>,
     pub color_scheme: Option<ColorSchemeConfig>,
 }
@@ -124,18 +120,12 @@ impl ScrapConfig {
                 .unwrap_or(&default_color_scheme),
         );
 
-        let default_sort_key = SortKey::CommittedDate;
-        let sort_key = ssg
-            .sort_key
-            .as_ref()
-            .map(|s| s.as_sort_key())
-            .unwrap_or(&default_sort_key);
         let paging = match ssg.paginate_by {
             None => Paging::Not,
             Some(u) => Paging::By(u),
         };
         let list_view_configs =
-            ListViewConfigs::new(&ssg.build_search_index.unwrap_or(true), sort_key, &paging);
+            ListViewConfigs::new(&ssg.build_search_index.unwrap_or(true), &paging);
 
         Ok(BuildConfig {
             base_url: base_url.unwrap_or_else(|| ssg.base_url()),

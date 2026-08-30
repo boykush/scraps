@@ -7,5 +7,4 @@ lang_code = "en"
 description = "A static site generator that makes it easy to write internal links (Wiki links) in Markdown files."
 favicon = "https://github.com/boykush/scraps/blob/main/assets/logo.png?raw=true"
 build_search_index = true
-sort_key = "committed_date"
 paginate_by = 10
