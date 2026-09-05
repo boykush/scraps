@@ -50,11 +50,14 @@ impl Scrap {
 
 impl Scrap {
     pub fn new(title: &str, ctx: &Option<Ctx>, text: &str) -> Scrap {
+        // Dedup through a HashSet used to leave the order to chance, which made
+        // every consumer of `links()` — backlink lists, rendered pages, the
+        // neighborhood walk — reshuffle on each read. Keep first occurrence.
+        let mut seen_links = HashSet::new();
         let links: Vec<ScrapKey> = markdown::query::wikilinks(text)
             .iter()
             .map(ScrapKey::from)
-            .collect::<HashSet<_>>()
-            .into_iter()
+            .filter(|key| seen_links.insert(key.clone()))
             .collect();
         let thumbnail = markdown::query::images(text).into_iter().next();
 
@@ -103,6 +106,24 @@ mod tests {
 
         assert_eq!(actual_links, expected);
         assert_eq!(scrap.thumbnail(), None);
+    }
+
+    #[test]
+    fn it_keeps_links_in_first_occurrence_order() {
+        let scrap = Scrap::new(
+            "scrap title",
+            &None,
+            "[[zulu]] [[alpha]] [[zulu]] [[Context/mike]]",
+        );
+
+        assert_eq!(
+            scrap.links().to_vec(),
+            vec![
+                ScrapKey::from(Title::from("zulu")),
+                ScrapKey::from(Title::from("alpha")),
+                ScrapKey::with_ctx(&"mike".into(), &"Context".into()),
+            ]
+        );
     }
 
     #[test]
