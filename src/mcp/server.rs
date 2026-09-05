@@ -920,6 +920,27 @@ mod tests {
         );
     }
 
+    // Automates livt://mapping/recall-in-one-call/rule/R-05
+    #[rstest]
+    #[tokio::test]
+    async fn test_neighborhood_opens_one_hop_when_depth_is_left_out(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("s0.md", b"# s0\n\n[[s1]]");
+        project.add_scrap("s1.md", b"# s1\n\n[[s2]]");
+        project.add_scrap("s2.md", b"# s2\n\nContent");
+
+        let map = call_tool_json(
+            &project,
+            "lookup_scrap_neighborhood",
+            serde_json::json!({"title": "s0"}),
+        )
+        .await;
+
+        assert_eq!(map["count"], 2);
+        assert_eq!(map["nodes"][1]["hop"], 1);
+    }
+
     // Automates livt://mapping/recall-in-one-call/rule/R-06
     #[rstest]
     #[tokio::test]

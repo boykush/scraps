@@ -337,6 +337,49 @@ mod tests {
         assert_eq!(result.edges.len(), 3);
     }
 
+    // Automates livt://mapping/recall-in-one-call/rule/R-04
+    #[test]
+    fn test_a_cycle_is_walked_once_and_ends() {
+        let scraps = vec![
+            scrap("a", "# a\n\n[[b]]"),
+            scrap("b", "# b\n\n[[c]]"),
+            scrap("c", "# c\n\n[[a]]"),
+        ];
+
+        let result = LookupScrapNeighborhoodUsecase::new()
+            .execute(&scraps, &Title::from("a"), &None, MAX_DEPTH, 50)
+            .unwrap();
+
+        assert_eq!(titles(&result.nodes), vec!["a", "b", "c"]);
+        assert_eq!(hop_of(&result, "b"), 1);
+        assert_eq!(hop_of(&result, "c"), 1);
+        assert_eq!(result.edges.len(), 3);
+    }
+
+    // Automates livt://mapping/recall-in-one-call/rule/R-04
+    #[test]
+    fn test_a_scrap_linking_to_itself_stays_one_node() {
+        let scraps = vec![
+            scrap("root", "# root\n\n[[root]] [[other]]"),
+            scrap("other", "# other\n\ncontent"),
+        ];
+
+        let result = LookupScrapNeighborhoodUsecase::new()
+            .execute(&scraps, &Title::from("root"), &None, MAX_DEPTH, 50)
+            .unwrap();
+
+        assert_eq!(titles(&result.nodes), vec!["root", "other"]);
+        assert_eq!(hop_of(&result, "root"), 0);
+        // The link is in the text, so it stays an edge — hiding it would make
+        // the map disagree with lookup_scrap_links.
+        let self_edge = result
+            .edges
+            .iter()
+            .filter(|e| e.from.title.to_string() == "root" && e.to.title.to_string() == "root")
+            .count();
+        assert_eq!(self_edge, 1);
+    }
+
     // Automates livt://mapping/recall-in-one-call/rule/R-05
     #[test]
     fn test_depth_opens_one_ring_at_a_time_and_stops_at_five() {
