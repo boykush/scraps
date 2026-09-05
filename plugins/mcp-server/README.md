@@ -123,6 +123,45 @@ Inbound wiki-links to a scrap.
 
 Returns: `{ results: [{ title, ctx }], count }`.
 
+### `lookup_scrap_neighborhood`
+
+The neighborhood around a scrap as a graph: everything within a few hops, in
+both link directions, with the links between them.
+
+| Parameter | Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `title` | string | yes | — | Scrap the map opens around |
+| `ctx` | string | no | — | Context folder/path |
+| `depth` | integer | no | 1 | Hops walked out from the scrap, capped at 5 |
+| `limit` | integer | no | 50 | Maximum nodes in the response |
+
+Returns:
+
+```json
+{
+  "nodes": [
+    { "title": "Microservices", "ctx": null, "hop": 0 },
+    { "title": "Strangler Fig", "ctx": null, "hop": 1 }
+  ],
+  "edges": [
+    {
+      "from": { "title": "Microservices", "ctx": null },
+      "to": { "title": "Strangler Fig", "ctx": null }
+    }
+  ],
+  "count": 2,
+  "truncated": false,
+  "dropped": 0
+}
+```
+
+`hop` is the shortest distance from the scrap you asked about, and `edges`
+covers every wiki-link between returned nodes, written in link direction. Tags
+are not edges — `lookup_tag_backlinks` expands those. Bodies stay out of the
+map: read a node with `get_scrap`. When `truncated` is true the node cap cut the
+walk short and `dropped` counts what it left out — raise `limit` or lower
+`depth`.
+
 ### `lookup_tag_backlinks`
 
 Scraps that reference a specific tag.

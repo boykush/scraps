@@ -1,0 +1,97 @@
+story: recall-in-one-call
+
+rules:
+  - id: R-01
+    name: 起点を1つ渡す1回の呼び出しで、その近傍のグラフが返る
+    examples:
+      - id: EX-01
+        name: 起点の title を渡した1応答に、近傍の scrap とその間の辺が揃う
+      - id: EX-02
+        name: lookup_scrap_links → lookup_scrap_backlinks と1関係ずつ辿って組み立てていた地図が1呼び出しで揃う
+      - id: EX-03
+        name: 関連が1本もない scrap は自分1件だけを返し、search_scraps / list_tags からの入り直しを勧める
+    automated: true
+  - id: R-02
+    name: 本文は運ばない — 見渡すのがこの呼び出し、読むのは get_scrap
+    examples:
+      - id: EX-01
+        name: ノードは title / ctx と繋がりだけを持ち、本文も抜粋も含まない
+      - id: EX-02
+        name: 各ノードの title / ctx をそのまま get_scrap に渡して本文へ進める
+      - id: EX-03
+        name: next が、読むのは get_scrap だと名指す
+    automated: true
+  - id: R-03
+    name: 起点は呼び出し側が渡す scrap ただ1つ
+    examples:
+      - id: EX-01
+        name: 渡した scrap だけが hop 0 に立ち、他は必ず1ホップ以上先になる
+      - id: EX-02
+        name: 存在しない scrap は空の地図ではなくエラーになる（lookup_* と同じ作法）
+    automated: true
+  - id: R-04
+    name: 辺は wiki-link の双方向だけで、タグは辺にしない
+    examples:
+      - id: EX-01
+        name: 起点が張るリンクと、起点を指す被リンクの両方が辺になる
+      - id: EX-02
+        name: 同じタグを共有するだけの scrap は近傍に入らない（タグ起点の展開は lookup_tag_backlinks の仕事）
+      - id: EX-03
+        name: 辺は edges の配列として、リンクを張る側（from）と張られる側（to）の title / ctx を書く
+      - id: EX-04
+        name: 各ノードは起点から何ホップ目かを持つ
+      - id: EX-05
+        name: 複数の経路で届く scrap は1ノードに畳まれ、最短ホップが残る
+      - id: EX-06
+        name: 循環（a→b→c→a）でも各 scrap は一度しか歩かず、深さに関係なく walk は終わる
+      - id: EX-07
+        name: 自分自身へのリンクはノードを増やさない（テキストにある以上、辺としては残る）
+    automated: true
+  - id: R-05
+    name: 深さは引数で開き、上限5ホップで止まる
+    examples:
+      - id: EX-01
+        name: 深さ1では起点の直接の隣だけが返る
+      - id: EX-02
+        name: 深さを上げた分だけ、遠いノードが最短ホップ順に加わる
+      - id: EX-03
+        name: 5を超える深さを要求されても5で止まる
+      - id: EX-04
+        name: 深さを指定しない呼び出しは1ホップだけ開く
+    automated: true
+  - id: R-06
+    name: 深さを開いても応答はノード数の上限で止まり、切り詰めたことを応答自身が示す
+    examples:
+      - id: EX-01
+        name: 数十の被リンクを持つハブ scrap を経由しても、ノード数は上限で止まる
+      - id: EX-02
+        name: 上限に達したら起点に近い順に残し、遠いノードから落とす
+      - id: EX-03
+        name: 切り詰めた応答は truncated と落とした件数を示し、next が続きの辿り方を名指す
+      - id: EX-04
+        name: 同じ引数の呼び出しは同じノードを同じ順で返す（上限で何が落ちるかが揺れない）
+    automated: true
+  - id: R-07
+    name: 新しい呼び出しも既存のインターフェース規則の下に入る
+    examples:
+      - id: EX-01
+        name: 定義は「いつ使うか」で始まり、次に呼ぶツールを名指す
+      - id: EX-02
+        name: 応答はトップレベルの next を1つだけ運ぶ
+      - id: EX-03
+        name: サーバーの instructions が、1関係ずつ辿る代わりの一手としてこの呼び出しを教える
+    automated: true
+
+questions:
+  - id: Q-01
+    text: ノード上限の既定50（辺の title 再掲で応答 ≈13KB）は、見渡す用途に対して妥当か
+  - id: Q-02
+    text: 手掛かり（キーワード）から地図を開く経路も要るか、search_scraps との2呼び出しで足りるか
+  - id: Q-03
+    text: ハブ（被リンクの多い scrap）は経由しても展開しない、といった抑制を入れるか
+  - id: Q-04
+    text: 同じ呼び出しを CLI にも出すか
+  - id: Q-05
+    text: 効果を今の手組み（lookup_scrap_links → lookup_scrap_backlinks）とどう比べて測るか
+  - id: Q-06
+    text: 埋め込み ![[...]] も辺にするか（いまは links() と被リンクの対称性を優先して除外）
