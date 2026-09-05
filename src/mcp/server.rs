@@ -4,6 +4,9 @@ use super::tools::get_scrap::{get_scrap, GetScrapRequest};
 use super::tools::list_tags::list_tags;
 use super::tools::lookup_scrap_backlinks::{lookup_scrap_backlinks, LookupScrapBacklinksRequest};
 use super::tools::lookup_scrap_links::{lookup_scrap_links, LookupScrapLinksRequest};
+use super::tools::lookup_scrap_neighborhood::{
+    lookup_scrap_neighborhood, LookupScrapNeighborhoodRequest,
+};
 use super::tools::lookup_tag_backlinks::{lookup_tag_backlinks, LookupTagBacklinksRequest};
 use super::tools::orient::orient;
 use super::tools::search_scraps::{search_scraps, SearchRequest};
@@ -76,6 +79,17 @@ impl ScrapsServer {
     }
 
     #[tool(
+        description = "Use when one relation at a time is too slow: returns the neighborhood around a scrap as a graph — the scraps within a few hops, each with its distance, and the wiki links between them in both directions. Bodies stay out; read any node with get_scrap. Widen with depth (up to 5 hops) and keep the response small with limit."
+    )]
+    async fn lookup_scrap_neighborhood(
+        &self,
+        context: RequestContext<RoleServer>,
+        parameters: Parameters<LookupScrapNeighborhoodRequest>,
+    ) -> Result<CallToolResult, ErrorData> {
+        lookup_scrap_neighborhood(&self.scraps_dir, &self.exclude_dirs, context, parameters).await
+    }
+
+    #[tool(
         description = "Use when you want what references a scrap: returns the scraps linking to it (inbound wiki links). Read any of them with get_scrap."
     )]
     async fn lookup_scrap_backlinks(
@@ -118,8 +132,10 @@ impl ServerHandler for ScrapsServer {
                  and folder contexts. Recommended flow: start with search_scraps on broad OR \
                  keywords and narrow with logic 'and'; read the best hits with get_scrap, \
                  projecting fields to keep responses small; then traverse relations with \
-                 lookup_scrap_links and lookup_scrap_backlinks. For the topic map, list_tags \
-                 then lookup_tag_backlinks.",
+                 lookup_scrap_links and lookup_scrap_backlinks. For the shape around a scrap \
+                 rather than one relation at a time, lookup_scrap_neighborhood returns its \
+                 neighborhood as a graph: nodes with their hop distance and the links between \
+                 them, no bodies. For the topic map, list_tags then lookup_tag_backlinks.",
         )
     }
 }
@@ -160,13 +176,14 @@ mod tests {
 
         let tools = client.list_tools(Default::default()).await.unwrap();
 
-        assert_eq!(tools.tools.len(), 7);
+        assert_eq!(tools.tools.len(), 8);
 
         let tool_names: Vec<&str> = tools.tools.iter().map(|t| t.name.as_ref()).collect();
         assert!(tool_names.contains(&"orient"));
         assert!(tool_names.contains(&"get_scrap"));
         assert!(tool_names.contains(&"search_scraps"));
         assert!(tool_names.contains(&"lookup_scrap_links"));
+        assert!(tool_names.contains(&"lookup_scrap_neighborhood"));
         assert!(tool_names.contains(&"lookup_scrap_backlinks"));
         assert!(tool_names.contains(&"list_tags"));
         assert!(tool_names.contains(&"lookup_tag_backlinks"));
@@ -335,6 +352,10 @@ mod tests {
             ("list_tags", serde_json::json!({})),
             ("lookup_tag_backlinks", serde_json::json!({"tag": "rust"})),
             ("orient", serde_json::json!({})),
+            (
+                "lookup_scrap_neighborhood",
+                serde_json::json!({"title": "source"}),
+            ),
         ];
 
         for (name, args) in calls {
@@ -810,5 +831,137 @@ mod tests {
 
         client.cancel().await.unwrap();
         server_handle.abort();
+    }
+
+    // Automates livt://mapping/recall-in-one-call/rule/R-01
+    #[rstest]
+    #[tokio::test]
+    async fn test_neighborhood_returns_the_map_in_one_call(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("microservices.md", b"# microservices\n\n[[ddd]]");
+        project.add_scrap("ddd.md", b"# ddd\n\nContent");
+        project.add_scrap("monolith.md", b"# monolith\n\n[[microservices]]");
+
+        let map = call_tool_json(
+            &project,
+            "lookup_scrap_neighborhood",
+            serde_json::json!({"title": "microservices"}),
+        )
+        .await;
+
+        assert_eq!(map["count"], 3);
+        assert_eq!(map["nodes"][0]["title"], "microservices");
+        assert_eq!(map["nodes"][0]["hop"], 0);
+        assert_eq!(map["edges"].as_array().unwrap().len(), 2);
+    }
+
+    // Automates livt://mapping/recall-in-one-call/rule/R-02
+    #[rstest]
+    #[tokio::test]
+    async fn test_neighborhood_leaves_bodies_to_get_scrap(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap(
+            "root.md",
+            b"# root\n\nbodytextthatshouldnotberepeated [[other]]",
+        );
+        project.add_scrap("other.md", b"# other\n\nContent");
+
+        let map = call_tool_json(
+            &project,
+            "lookup_scrap_neighborhood",
+            serde_json::json!({"title": "root"}),
+        )
+        .await;
+
+        assert!(
+            !map.to_string().contains("bodytextthatshouldnotberepeated"),
+            "the map should carry no bodies: {map}"
+        );
+        let node = map["nodes"][0].as_object().unwrap();
+        assert_eq!(
+            node.keys().cloned().collect::<Vec<_>>(),
+            vec!["ctx", "hop", "title"],
+            "a node carries only its key and distance"
+        );
+        assert!(
+            map["next"]
+                .as_str()
+                .unwrap_or_default()
+                .contains("get_scrap"),
+            "the map should send reading to get_scrap: {map}"
+        );
+    }
+
+    // Automates livt://mapping/recall-in-one-call/rule/R-01
+    #[rstest]
+    #[tokio::test]
+    async fn test_a_scrap_with_no_relations_teaches_another_way_in(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("lonely.md", b"# lonely\n\nContent");
+
+        let map = call_tool_json(
+            &project,
+            "lookup_scrap_neighborhood",
+            serde_json::json!({"title": "lonely"}),
+        )
+        .await;
+
+        assert_eq!(map["count"], 1);
+        assert!(map["edges"].as_array().unwrap().is_empty());
+        assert!(
+            map["next"]
+                .as_str()
+                .unwrap_or_default()
+                .contains("list_tags"),
+            "a map with no edges should point at another way in: {map}"
+        );
+    }
+
+    // Automates livt://mapping/recall-in-one-call/rule/R-06
+    #[rstest]
+    #[tokio::test]
+    async fn test_neighborhood_says_when_the_cap_cut_the_map(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let hub_links: String = (1..=20).map(|i| format!("[[n{i:02}]] ")).collect();
+        project.add_scrap("hub.md", format!("# hub\n\n{hub_links}").as_bytes());
+        for i in 1..=20 {
+            project.add_scrap(&format!("n{i:02}.md"), b"Content");
+        }
+
+        let map = call_tool_json(
+            &project,
+            "lookup_scrap_neighborhood",
+            serde_json::json!({"title": "hub", "depth": 2, "limit": 5}),
+        )
+        .await;
+
+        assert_eq!(map["count"], 5);
+        assert_eq!(map["truncated"], true);
+        assert_eq!(map["dropped"], 16);
+        assert!(
+            map["next"].as_str().unwrap_or_default().contains("limit"),
+            "a cut map should say how to see the rest: {map}"
+        );
+    }
+
+    // Automates livt://mapping/recall-in-one-call/rule/R-07
+    #[rstest]
+    fn test_instructions_teach_the_neighborhood_map(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
+        let instructions = server.get_info().instructions.unwrap();
+
+        assert!(
+            instructions.contains("lookup_scrap_neighborhood"),
+            "the flow should name the neighborhood map: {instructions}"
+        );
     }
 }
