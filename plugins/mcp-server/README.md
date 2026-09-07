@@ -226,6 +226,30 @@ is skipped, and items inside fenced code blocks are not tasks. Results are
 ordered by context, then title, then line, and carry the same shape as
 `scraps todo --json`. Read the scrap a task sits in with `get_scrap`.
 
+### `list_frontmatter`
+
+YAML frontmatter aggregated across every scrap that carries a block. Takes no
+parameters.
+
+Returns:
+
+```json
+{
+  "results": [
+    {
+      "scrap": { "title": "borrowing", "ctx": "Programming/Rust" },
+      "frontmatter": { "status": "review", "owner": "bob", "taxonomy": ["rust", "memory"] }
+    }
+  ],
+  "count": 1
+}
+```
+
+Keys are passed through in the order they were written and are **not**
+interpreted — scraps defines no frontmatter fields, so a `tags:` key there is
+not a scraps tag (`#[[tag]]` is, via `list_tags`). Scraps without a block are
+omitted, and a malformed block is skipped rather than failing the call.
+
 ## Manual setup (without the plugin)
 
 Register the shared server with any MCP-compatible client:

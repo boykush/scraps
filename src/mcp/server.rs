@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use super::tools::get_scrap::{get_scrap, GetScrapRequest};
+use super::tools::list_frontmatter::list_frontmatter;
 use super::tools::list_tags::list_tags;
 use super::tools::list_todos::{list_todos, ListTodosRequest};
 use super::tools::lookup_scrap_backlinks::{lookup_scrap_backlinks, LookupScrapBacklinksRequest};
@@ -132,6 +133,16 @@ impl ScrapsServer {
     ) -> Result<CallToolResult, ErrorData> {
         list_todos(&self.scraps_dir, &self.exclude_dirs, context, parameters).await
     }
+
+    #[tool(
+        description = "Use when the wiki was retrofitted from files carrying YAML frontmatter and you want that metadata across it: returns each scrap that has a frontmatter block together with its parsed keys. The keys are the author's own — scraps defines none of them and reads them as opaque data, so its own typed metadata is still #[[tag]] via list_tags. Read the scrap behind an entry with get_scrap."
+    )]
+    async fn list_frontmatter(
+        &self,
+        context: RequestContext<RoleServer>,
+    ) -> Result<CallToolResult, ErrorData> {
+        list_frontmatter(&self.scraps_dir, &self.exclude_dirs, context).await
+    }
 }
 
 // Without `router = ...` the macro rebuilds the router (and every tool's
@@ -148,7 +159,8 @@ impl ServerHandler for ScrapsServer {
                  rather than one relation at a time, lookup_scrap_neighborhood returns its \
                  neighborhood as a graph: nodes with their hop distance and the links between \
                  them, no bodies. For the topic map, list_tags then lookup_tag_backlinks. For \
-                 the work recorded across the wiki, list_todos.",
+                 the work recorded across the wiki, list_todos; for a wiki retrofitted from \
+                 files with YAML frontmatter, list_frontmatter.",
         )
     }
 }
@@ -189,7 +201,7 @@ mod tests {
 
         let tools = client.list_tools(Default::default()).await.unwrap();
 
-        assert_eq!(tools.tools.len(), 9);
+        assert_eq!(tools.tools.len(), 10);
 
         let tool_names: Vec<&str> = tools.tools.iter().map(|t| t.name.as_ref()).collect();
         assert!(tool_names.contains(&"orient"));
@@ -201,6 +213,7 @@ mod tests {
         assert!(tool_names.contains(&"list_tags"));
         assert!(tool_names.contains(&"lookup_tag_backlinks"));
         assert!(tool_names.contains(&"list_todos"));
+        assert!(tool_names.contains(&"list_frontmatter"));
 
         client.cancel().await.unwrap();
         server_handle.abort();
@@ -367,6 +380,7 @@ mod tests {
             ("lookup_tag_backlinks", serde_json::json!({"tag": "rust"})),
             ("orient", serde_json::json!({})),
             ("list_todos", serde_json::json!({})),
+            ("list_frontmatter", serde_json::json!({})),
             (
                 "lookup_scrap_neighborhood",
                 serde_json::json!({"title": "source"}),
@@ -683,6 +697,46 @@ mod tests {
 
     #[rstest]
     #[tokio::test]
+    async fn test_call_list_frontmatter_passes_keys_through(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap(
+            "Book/reading.md",
+            b"---\nstatus: draft\ntaxonomy:\n  - infra\n---\n\n# reading\n",
+        );
+        project.add_scrap("plain.md", b"# plain\n\nNo frontmatter.\n");
+
+        let response = call_tool_json(&project, "list_frontmatter", serde_json::json!({})).await;
+
+        assert_eq!(response["count"], 1);
+        let item = &response["results"][0];
+        assert_eq!(item["scrap"]["title"], "reading");
+        assert_eq!(item["scrap"]["ctx"], "Book");
+        assert_eq!(
+            item["frontmatter"],
+            serde_json::json!({"status": "draft", "taxonomy": ["infra"]})
+        );
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_call_list_frontmatter_empty_points_at_tags(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("plain.md", b"# plain\n\n#[[rust]]\n");
+
+        let response = call_tool_json(&project, "list_frontmatter", serde_json::json!({})).await;
+
+        assert_eq!(response["count"], 0);
+        let next = response["next"].as_str().unwrap_or_default();
+        assert!(
+            next.contains("list_tags"),
+            "empty frontmatter should point at scraps' own metadata: {response}"
+        );
+    }
+
+    #[rstest]
+    #[tokio::test]
     async fn test_call_lookup_scrap_links(#[from(temp_scrap_project)] project: TempScrapProject) {
         project.add_scrap("source.md", b"# Source\n\n[[target]]");
         project.add_scrap("target.md", b"# Target\n\nTarget content");
@@ -954,8 +1008,10 @@ mod tests {
             "the map should carry no bodies: {map}"
         );
         let node = map["nodes"][0].as_object().unwrap();
+        let mut keys = node.keys().cloned().collect::<Vec<_>>();
+        keys.sort();
         assert_eq!(
-            node.keys().cloned().collect::<Vec<_>>(),
+            keys,
             vec!["ctx", "hop", "title"],
             "a node carries only its key and distance"
         );

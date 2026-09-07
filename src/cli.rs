@@ -137,6 +137,12 @@ pub enum SubCommands {
         tag_command: TagSubCommands,
     },
 
+    #[command(about = "Aggregate YAML frontmatter across the wiki")]
+    Frontmatter {
+        #[arg(long, help = "Output as JSON")]
+        json: bool,
+    },
+
     #[command(about = "Aggregate markdown task list items across the wiki")]
     Todo {
         #[arg(
