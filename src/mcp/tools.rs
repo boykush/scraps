@@ -1,5 +1,6 @@
 pub mod get_scrap;
 pub mod list_tags;
+pub mod list_todos;
 pub mod lookup_scrap_backlinks;
 pub mod lookup_scrap_links;
 pub mod lookup_scrap_neighborhood;

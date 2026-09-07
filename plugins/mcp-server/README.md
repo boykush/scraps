@@ -172,6 +172,35 @@ Scraps that reference a specific tag.
 
 Returns: `{ results: [{ title, ctx }], count }`.
 
+### `list_todos`
+
+Markdown task list items aggregated across every scrap.
+
+| Parameter | Type | Required | Default | Notes |
+|---|---|---|---|---|
+| `status` | `"open"` \| `"done"` \| `"deferred"` \| `"all"` | no | `"open"` | Task status filter |
+
+Returns:
+
+```json
+{
+  "results": [
+    {
+      "scrap": { "title": "borrowing", "ctx": "Programming/Rust" },
+      "status": "open",
+      "text": "implement Drop for X",
+      "line": 3
+    }
+  ],
+  "count": 1
+}
+```
+
+`- [ ]` is `open`, `- [x]` is `done` and `- [-]` is `deferred`; any other symbol
+is skipped, and items inside fenced code blocks are not tasks. Results are
+ordered by context, then title, then line, and carry the same shape as
+`scraps todo --json`. Read the scrap a task sits in with `get_scrap`.
+
 ## Manual setup (without the plugin)
 
 Register the shared server with any MCP-compatible client:
