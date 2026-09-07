@@ -1,6 +1,8 @@
 mod code_blocks;
 mod common;
 mod embeds;
+#[cfg(feature = "frontmatter")]
+mod frontmatter;
 mod headings;
 mod images;
 mod section;
@@ -11,6 +13,8 @@ mod wikilinks;
 
 pub use code_blocks::{code_blocks, CodeBlock};
 pub use embeds::{embeds, EmbedRef};
+#[cfg(feature = "frontmatter")]
+pub use frontmatter::frontmatter;
 pub use headings::{headings, Heading};
 pub use images::images;
 pub use section::{heading_slug, section};

@@ -17,6 +17,7 @@ the authoritative reference for flags and arguments. This page is the
 | `scraps tag list` | List all tags with backlink counts | ✓ |
 | `scraps tag backlinks <tag>` | Scraps referencing a tag | ✓ |
 | `scraps todo` | Aggregate GFM task list items wiki-wide | ✓ |
+| `scraps frontmatter` | Aggregate YAML frontmatter wiki-wide | ✓ |
 | `scraps mcp serve` | Start an MCP server over stdio, or `--http` | – |
 
 `-C` / `--directory` (or `SCRAPS_DIRECTORY` env) runs as if started in the
@@ -50,5 +51,13 @@ directly to `scraps get <title> --ctx <ctx> --heading <heading>`.
 
 `scraps backlinks --json` remains scrap-level inbound discovery and returns
 the scraps that link to the requested scrap.
+
+`scraps frontmatter --json` returns every scrap that carries a YAML
+frontmatter block, with its keys parsed as-is. Scraps defines none of those
+keys and gives them no meaning: a scrap's title, context, tags and links still
+come only from the filesystem and Wiki-link syntax, never from frontmatter. A
+block that is absent, unclosed or malformed is skipped rather than raising an
+error, and frontmatter stays part of the scrap body — it is not stripped from
+`scraps get --json body` or from the built site.
 
 For agent integration, see [[How-to/Integrate with AI Assistants]].
