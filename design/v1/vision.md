@@ -66,9 +66,11 @@ the story.
 Scraps takes the position that per-file metadata belongs in markdown syntax
 (`#[[tag]]`, `[[link]]`, `![[embed]]`), not in a YAML/TOML frontmatter block:
 
-- **No native frontmatter.** A read-only Obsidian-style adapter is allowed
-  (passthrough only, no semantic interpretation; see #515) but scraps defines
-  no frontmatter fields of its own.
+- **No scraps-defined frontmatter.** The read-only adapter this exception
+  allows now exists as `scraps frontmatter` / `list_frontmatter` (#700): a YAML
+  block is parsed and handed back untouched. Scraps still defines no
+  frontmatter field and interprets no key — title, ctx, tags and links come
+  only from the filesystem and Wiki-link syntax.
 - **No page-level alias.** Filesystem identity is the unique key; if you need
   another name, create another scrap.
 - **Author / mtime / etc. is delegated to git** via the `GitCommand` trait —
@@ -169,7 +171,8 @@ keeps lint, search, build, and resolution free of `if archived` special cases.
 
 `scraps template generate / list` and `src/usecase/template/` are gone.
 `modules/libs/src/markdown/frontmatter.rs` is gone (templates were its only
-consumer). `TemplateError` and `templates_dir` are removed from `PathResolver`
+consumer); the read-only parser that returned later is a different thing at
+`markdown/query/frontmatter.rs`, per principle 2. `TemplateError` and `templates_dir` are removed from `PathResolver`
 and `TempScrapProject`. The replacement is the AI-skill authoring path
 (`scraps-writer`, planned `scraps-agent`). PR #490.
 
@@ -233,7 +236,9 @@ workspace orchestration is a v1.1+ question.
 The following are intentionally not v1, with the reasoning preserved here so
 that future contributors can re-evaluate from the right premises:
 
-- **Templates / frontmatter.** Removed. Authoring goes through skills (#490).
+- **Templates, and frontmatter as an authoring surface.** Removed; authoring
+  goes through skills (#490). Reading a block back as opaque passthrough is the
+  separate, allowed thing — see principle 2.
 - **Per-file `author` metadata.** Git plus a `GitCommand` extension covers it.
 - **`missing_ref` lint.** Requires a Japanese tokenizer; plugin candidate.
 - **`co_mention` lint.** Subsumed by `lookup_scrap_backlinks`.

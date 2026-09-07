@@ -20,6 +20,7 @@ server.
 ❯ scraps backlinks "Configuration" --json
 ❯ scraps tag list --json
 ❯ scraps todo --status all --json
+❯ scraps frontmatter --json
 ```
 
 `scraps get --json` defaults to `title`, `ctx`, and `body`. It can project
