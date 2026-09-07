@@ -679,6 +679,63 @@ ul.scrap-links {
     }
 }
 
+/* neighbourhood graph — direction is carried by which side a scrap sits on
+   (backlinks left, links right, mutual vertical) and by the arrowheads, so
+   the drawing needs no colour of its own to be read. */
+svg.scrap-graph {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: var(--space-5) auto 0;
+
+    line.edge {
+        stroke: var(--color-rule);
+        stroke-width: 1.2;
+        fill: none;
+    }
+
+    path.head {
+        fill: var(--color-text-muted);
+    }
+
+    circle.dot {
+        fill: var(--color-text-muted);
+    }
+
+    circle.dot.center {
+        fill: var(--color-accent);
+        stroke: var(--color-surface);
+        stroke-width: 2;
+    }
+
+    text.label {
+        font-size: var(--font-size-xs);
+        fill: var(--color-text);
+    }
+
+    text.label.center {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-medium);
+    }
+
+    text.more {
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-xs);
+        fill: var(--color-text-muted);
+    }
+
+    a.scrap:hover {
+        circle.dot {
+            fill: var(--color-accent);
+        }
+
+        text.label {
+            fill: var(--color-accent);
+            text-decoration: underline;
+        }
+    }
+}
+
 /* scraps index — every scrap on one page, grouped by the title's initial */
 div.scraps-index {
     p.list-head {

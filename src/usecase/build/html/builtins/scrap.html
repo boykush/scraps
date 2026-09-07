@@ -32,6 +32,12 @@
             {% for element in scrap.content.elements %}{% if element.raw %}{{ element.raw | safe }}{% elif element.autolink %}{{ <link_card autolink={element.autolink} /> }}{% endif %}{% endfor %}
         </div>
     </div>
+    {% if scrap_graph %}
+        <section class="connections graph">
+            <p class="section-head">neighbourhood</p>
+            {{ <scrap_graph graph={scrap_graph} base_url={base_url} center_title={scrap.title} /> }}
+        </section>
+    {% endif %}
     {% if linked_scraps | length > 0 %}
         <section class="connections">
             <p class="section-head">backlinks &#183; {{ linked_scraps | length }}</p>

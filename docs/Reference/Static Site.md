@@ -26,6 +26,10 @@ fully supported.
 
 ![[Reference/Static Site/Color Scheme]]
 
+## [[Reference/Static Site/Neighbourhood Graph|Neighbourhood graph]]
+
+![[Reference/Static Site/Neighbourhood Graph]]
+
 ## [[Reference/Static Site/Tag Pages|Tag pages]]
 
 ![[Reference/Static Site/Tag Pages]]

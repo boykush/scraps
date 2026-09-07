@@ -6,6 +6,7 @@ use crate::service::tera_render::{render_to_file, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::scrap_detail::ScrapDetail;
+use crate::usecase::build::model::scrap_graph::{ScrapGraph, MAX_NODES};
 use crate::usecase::build::model::site_nav::SiteNav;
 use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::file::ScrapFileStem;
@@ -17,6 +18,7 @@ use crate::usecase::build::html::templates;
 
 use super::serde::link_scraps::LinkScrapsTera;
 use super::serde::scrap_detail::ScrapDetailTera;
+use super::serde::scrap_graph::ScrapGraphTera;
 use super::serde::tag::TagTera;
 
 pub struct ScrapRender {
@@ -70,6 +72,17 @@ impl ScrapRender {
             .filter_map(|key| scraps_by_key.get(key).cloned())
             .collect::<Vec<_>>();
         context.insert("outbound_scraps", &LinkScrapsTera::new(&outbound_scraps));
+
+        // Both lists are already in hand, so the neighborhood costs no extra
+        // walk over the wiki.
+        if let Some(graph) = ScrapGraph::new(
+            &scrap.title().to_string(),
+            &linked_scraps,
+            &outbound_scraps,
+            MAX_NODES,
+        ) {
+            context.insert("scrap_graph", &ScrapGraphTera::from(&graph));
+        }
 
         // The stem may contain `/`-separated context directories, which
         // `render_to_file` creates on the way.
@@ -174,5 +187,68 @@ mod tests {
         assert!(result4.contains(">links &#183; 1"));
         assert!(result4.contains("tags/design.html"));
         assert!(result4.contains("#[["));
+    }
+
+    #[test]
+    fn it_draws_the_neighbourhood_only_when_there_is_one() {
+        let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
+        let metadata = HtmlMetadata::new(&LangCode::default(), "Scrap", &None, &None);
+
+        let linked = &Scrap::new("linked", &None, "");
+        let linking = &Scrap::new("linking", &None, "[[linked]]");
+        let alone = &Scrap::new("alone", &None, "no wiki links here");
+        let scraps = vec![linked.to_owned(), linking.to_owned(), alone.to_owned()];
+        let scrap_texts = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
+            .collect();
+        let backlinks_map = BacklinksMap::new(&scraps);
+        let scraps_by_key: HashMap<_, _> = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap.clone()))
+            .collect();
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            false,
+            chrono_tz::UTC,
+            false,
+        );
+
+        let project = crate::test_fixtures::TempScrapProject::new();
+        let render = ScrapRender::new(&project.static_dir, &project.output_dir).unwrap();
+        let render_one = |scrap: &Scrap| {
+            render
+                .run(
+                    base_url,
+                    &metadata,
+                    &ScrapDetail::new(scrap, &None, base_url, &scrap_texts),
+                    &backlinks_map,
+                    &scraps_by_key,
+                    &site_nav,
+                )
+                .unwrap();
+        };
+
+        render_one(linked);
+        render_one(linking);
+        render_one(alone);
+
+        let read = |stem: &str| {
+            fs::read_to_string(project.output_dir.join(format!("scraps/{stem}.html"))).unwrap()
+        };
+
+        // The backlink points at the scrap being read, so the arrow lands on
+        // the centre and no arrow is drawn at the neighbour.
+        let backlinked = read("linked");
+        assert!(backlinked.contains("<svg class=\"scrap-graph\""));
+        assert!(backlinked.contains("marker-start=\"url(#scrap-graph-arrow)\""));
+        assert!(!backlinked.contains("marker-end=\"url(#scrap-graph-arrow)\""));
+
+        let outbound = read("linking");
+        assert!(outbound.contains("marker-end=\"url(#scrap-graph-arrow)\""));
+        assert!(!outbound.contains("marker-start=\"url(#scrap-graph-arrow)\""));
+
+        assert!(!read("alone").contains("scrap-graph"));
     }
 }

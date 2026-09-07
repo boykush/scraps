@@ -50,6 +50,31 @@
     </ul>
 {% endcomponent scrap_links %}
 
+{% component scrap_graph(graph, base_url, center_title) %}
+    <svg class="scrap-graph" viewBox="0 0 {{ graph.width }} {{ graph.height }}" role="img" aria-label="{{ center_title }} and its neighbours">
+        <defs>
+            <marker id="scrap-graph-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path class="head" d="M0 0 L8 4 L0 8 z" />
+            </marker>
+        </defs>
+        {% for node in graph.nodes %}
+            <line class="edge {{ node.dir }}" x1="{{ node.x1 }}" y1="{{ node.y1 }}" x2="{{ node.x2 }}" y2="{{ node.y2 }}"{% if node.arrow_start %} marker-start="url(#scrap-graph-arrow)"{% endif %}{% if node.arrow_end %} marker-end="url(#scrap-graph-arrow)"{% endif %} />
+        {% endfor %}
+        {% for node in graph.nodes %}
+            <a class="scrap {{ node.dir }}" href="{{ base_url }}scraps/{{ node.html_file_name }}">
+                <title>{% if node.ctx %}{{ node.ctx }}&#47;{% endif %}{{ node.title }}</title>
+                <circle class="dot" cx="{{ node.x }}" cy="{{ node.y }}" r="{{ node.r }}" />
+                <text class="label" x="{{ node.label_x }}" y="{{ node.label_y }}" text-anchor="{{ node.anchor }}">{{ node.label }}</text>
+            </a>
+        {% endfor %}
+        <circle class="dot center" cx="{{ graph.center_x }}" cy="{{ graph.center_y }}" r="{{ graph.center_r }}" />
+        <text class="label center" x="{{ graph.center_x }}" y="{{ graph.center_label_y }}" text-anchor="middle">{{ graph.center_label }}</text>
+        {% if graph.dropped > 0 %}
+            <text class="more" x="{{ graph.more_x }}" y="{{ graph.more_y }}" text-anchor="end">+{{ graph.dropped }} more</text>
+        {% endif %}
+    </svg>
+{% endcomponent scrap_graph %}
+
 {% component tag_links(tags, base_url, slice_size=100) %}
     <ul class="tag-links">
         {% for tag in tags | slice(end=slice_size) %}
