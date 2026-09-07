@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use super::tools::get_scrap::{get_scrap, GetScrapRequest};
 use super::tools::list_tags::list_tags;
+use super::tools::list_todos::{list_todos, ListTodosRequest};
 use super::tools::lookup_scrap_backlinks::{lookup_scrap_backlinks, LookupScrapBacklinksRequest};
 use super::tools::lookup_scrap_links::{lookup_scrap_links, LookupScrapLinksRequest};
 use super::tools::lookup_scrap_neighborhood::{
@@ -120,6 +121,17 @@ impl ScrapsServer {
     ) -> Result<CallToolResult, ErrorData> {
         lookup_tag_backlinks(&self.scraps_dir, &self.exclude_dirs, context, parameters).await
     }
+
+    #[tool(
+        description = "Use when you want the work recorded across the wiki rather than one scrap's: returns the markdown task list items across every scrap, each with the scrap it sits in and its line. Filter with status — 'open' (default), 'done', 'deferred' or 'all'. Read the scrap around a task with get_scrap."
+    )]
+    async fn list_todos(
+        &self,
+        context: RequestContext<RoleServer>,
+        parameters: Parameters<ListTodosRequest>,
+    ) -> Result<CallToolResult, ErrorData> {
+        list_todos(&self.scraps_dir, &self.exclude_dirs, context, parameters).await
+    }
 }
 
 // Without `router = ...` the macro rebuilds the router (and every tool's
@@ -135,7 +147,8 @@ impl ServerHandler for ScrapsServer {
                  lookup_scrap_links and lookup_scrap_backlinks. For the shape around a scrap \
                  rather than one relation at a time, lookup_scrap_neighborhood returns its \
                  neighborhood as a graph: nodes with their hop distance and the links between \
-                 them, no bodies. For the topic map, list_tags then lookup_tag_backlinks.",
+                 them, no bodies. For the topic map, list_tags then lookup_tag_backlinks. For \
+                 the work recorded across the wiki, list_todos.",
         )
     }
 }
@@ -176,7 +189,7 @@ mod tests {
 
         let tools = client.list_tools(Default::default()).await.unwrap();
 
-        assert_eq!(tools.tools.len(), 8);
+        assert_eq!(tools.tools.len(), 9);
 
         let tool_names: Vec<&str> = tools.tools.iter().map(|t| t.name.as_ref()).collect();
         assert!(tool_names.contains(&"orient"));
@@ -187,6 +200,7 @@ mod tests {
         assert!(tool_names.contains(&"lookup_scrap_backlinks"));
         assert!(tool_names.contains(&"list_tags"));
         assert!(tool_names.contains(&"lookup_tag_backlinks"));
+        assert!(tool_names.contains(&"list_todos"));
 
         client.cancel().await.unwrap();
         server_handle.abort();
@@ -352,6 +366,7 @@ mod tests {
             ("list_tags", serde_json::json!({})),
             ("lookup_tag_backlinks", serde_json::json!({"tag": "rust"})),
             ("orient", serde_json::json!({})),
+            ("list_todos", serde_json::json!({})),
             (
                 "lookup_scrap_neighborhood",
                 serde_json::json!({"title": "source"}),
@@ -605,6 +620,65 @@ mod tests {
 
         client.cancel().await.unwrap();
         server_handle.abort();
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_call_list_todos_defaults_to_open(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap(
+            "Programming/Rust/borrowing.md",
+            b"# borrowing\n\n- [ ] implement Drop for X\n- [x] write tests\n- [-] revisit later\n",
+        );
+
+        let todos = call_tool_json(&project, "list_todos", serde_json::json!({})).await;
+
+        assert_eq!(todos["count"], 1);
+        let item = &todos["results"][0];
+        assert_eq!(item["scrap"]["title"], "borrowing");
+        assert_eq!(item["scrap"]["ctx"], "Programming/Rust");
+        assert_eq!(item["status"], "open");
+        assert_eq!(item["text"], "implement Drop for X");
+        assert_eq!(item["line"], 3);
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_call_list_todos_filters_by_status(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("a.md", b"- [ ] open\n- [x] done\n- [-] deferred\n");
+
+        let done = call_tool_json(
+            &project,
+            "list_todos",
+            serde_json::json!({"status": "done"}),
+        )
+        .await;
+        assert_eq!(done["count"], 1);
+        assert_eq!(done["results"][0]["status"], "done");
+
+        let all =
+            call_tool_json(&project, "list_todos", serde_json::json!({"status": "all"})).await;
+        assert_eq!(all["count"], 3);
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_call_list_todos_empty_points_elsewhere(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("a.md", b"# Just a heading, no tasks.\n");
+
+        let todos = call_tool_json(&project, "list_todos", serde_json::json!({})).await;
+
+        assert_eq!(todos["count"], 0);
+        let next = todos["next"].as_str().unwrap_or_default();
+        assert!(
+            next.contains("search_scraps"),
+            "empty todos should point at another way in: {todos}"
+        );
     }
 
     #[rstest]

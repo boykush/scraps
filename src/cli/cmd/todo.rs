@@ -10,8 +10,7 @@ use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 use crate::input::file::read_scraps;
-use crate::usecase::todo::usecase::{StatusFilter, TodoUsecase};
-use scraps_libs::markdown::query::TaskStatus;
+use crate::usecase::todo::usecase::{status_label, StatusFilter, TodoUsecase};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct TodoScrapJson {
@@ -31,14 +30,6 @@ struct TodoItemJson {
 struct TodoResponse {
     results: Vec<TodoItemJson>,
     count: usize,
-}
-
-fn status_label(status: &TaskStatus) -> &'static str {
-    match status {
-        TaskStatus::Open => "open",
-        TaskStatus::Done => "done",
-        TaskStatus::Deferred => "deferred",
-    }
 }
 
 fn scrap_label(title: &str, ctx: Option<&str>) -> String {

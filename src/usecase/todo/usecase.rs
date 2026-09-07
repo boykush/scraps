@@ -25,6 +25,16 @@ impl StatusFilter {
     }
 }
 
+/// The wire label for a status, shared by `scraps todo --json` and the MCP
+/// tool so both surfaces name the same thing the same way.
+pub fn status_label(status: &TaskStatus) -> &'static str {
+    match status {
+        TaskStatus::Open => "open",
+        TaskStatus::Done => "done",
+        TaskStatus::Deferred => "deferred",
+    }
+}
+
 /// One task list entry resolved back to its source scrap.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TodoResult {
