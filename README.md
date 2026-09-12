@@ -69,6 +69,10 @@ See the [AI integration guide](https://boykush.github.io/scraps/scraps/how-to/in
 
 *Search, pagination, and Wiki-link navigation, themed with [Nord](https://www.nordtheme.com/).*
 
+<img src="https://github.com/boykush/scraps/blob/main/assets/neighbourhood_graph.png?raw=true" alt="neighbourhood graph on a scrap page" width="800">
+
+*Each scrap page draws its neighbourhood: backlinks on the left, links on the right, arrows pointing at the referenced scrap.*
+
 <details>
 <summary>Light mode</summary>
 <img src="https://github.com/boykush/scraps/blob/main/assets/light_mode.png?raw=true" alt="static site light mode" width="800">

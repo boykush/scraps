@@ -14,13 +14,14 @@ on:
   # No base-branch filter: stacked PRs target another feature branch and
   # still need the same gate as a PR into main.
   pull_request:
+    # `build` is a required check on main, so a PR touching only an ignored
+    # path waits forever for a run that never starts. README and assets are
+    # edited on their own often enough for that to bite.
     paths-ignore:
       - 'scraps/**'
-      - 'assets/**'
       - '.github/workflows/claude-review-from-author.yml'
       - 'CONTRIBUTING.md'
       - 'LICENSE.md'
-      - 'README.md'
       - 'CLAUDE.md'
 
 env:
