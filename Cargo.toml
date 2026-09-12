@@ -21,7 +21,7 @@ serde = { version = "=1.0.229", features = ["derive"] }
 # preserve_order keeps frontmatter keys in the order the author wrote them,
 # which is the point of passing them through untouched.
 serde_json = { version = "=1.0.151", features = ["preserve_order"] }
-toml = "=1.1.5"
+toml = "=1.1.6"
 rayon = "=1.12.0"
 clap = { version = "=4.6.6", features = ["derive", "env"] }
 config = { version = "=0.15.25", features = ["toml"] }
