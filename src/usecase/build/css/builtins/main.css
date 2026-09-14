@@ -688,8 +688,12 @@ svg.scrap-graph {
     height: auto;
     margin: var(--space-5) auto 0;
 
+    /* One ink for the whole wiring: an arrowhead brighter than the line it
+       ends reads as a mark of its own rather than as that line's direction.
+       Rule is the hairline-divider tone and fades out over a span this long
+       (1.2:1 on the light ground), so both take the muted text tone. */
     line.edge {
-        stroke: var(--color-rule);
+        stroke: var(--color-text-muted);
         stroke-width: 1.2;
         fill: none;
     }
@@ -698,8 +702,14 @@ svg.scrap-graph {
         fill: var(--color-text-muted);
     }
 
+    /* Muted and accent are one Nord step apart — 1.35:1 dark, 1.04:1 light —
+       so a filled neighbour and the accent centre land on the same tone.
+       Form carries the difference instead: neighbours ring, the centre is the
+       only solid dot, and hovering one fills it. */
     circle.dot {
-        fill: var(--color-text-muted);
+        fill: var(--color-surface);
+        stroke: var(--color-text-muted);
+        stroke-width: 1.5;
     }
 
     circle.dot.center {
@@ -727,6 +737,7 @@ svg.scrap-graph {
     a.scrap:hover {
         circle.dot {
             fill: var(--color-accent);
+            stroke: var(--color-accent);
         }
 
         text.label {
