@@ -38,6 +38,11 @@ pub fn task_items(text: &str) -> Vec<TaskItem> {
     let arena = Arena::new();
     let opts = options();
     let root = parse_document(&arena, text, &opts);
+    task_items_in(root)
+}
+
+/// Walk an already-parsed document, so `ScrapFacts` can share one parse.
+pub(super) fn task_items_in<'a>(root: &'a AstNode<'a>) -> Vec<TaskItem> {
     let mut out = Vec::new();
     for node in root.descendants() {
         let NodeValue::TaskItem(item) = &node.data().value else {

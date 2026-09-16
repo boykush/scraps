@@ -1,4 +1,7 @@
-use comrak::{nodes::NodeValue, parse_document, Arena};
+use comrak::{
+    nodes::{AstNode, NodeValue},
+    parse_document, Arena,
+};
 use url::Url;
 
 use super::common::options;
@@ -7,6 +10,11 @@ pub fn images(text: &str) -> Vec<Url> {
     let arena = Arena::new();
     let opts = options();
     let root = parse_document(&arena, text, &opts);
+    images_in(root)
+}
+
+/// Walk an already-parsed document, so `ScrapFacts` can share one parse.
+pub(super) fn images_in<'a>(root: &'a AstNode<'a>) -> Vec<Url> {
     root.descendants()
         .filter_map(|node| match &node.data().value {
             NodeValue::Image(node_link) => Url::parse(&node_link.url).ok(),

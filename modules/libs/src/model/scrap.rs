@@ -1,19 +1,23 @@
 use std::collections::HashSet;
 
+use serde_json::Value;
 use url::Url;
 
-use crate::markdown;
+use crate::markdown::query::{CodeBlock, Heading, ScrapFacts, TaskItem, WikiRef};
 
 use super::{context::Ctx, key::ScrapKey, tag::Tag, title::Title};
 
+/// One scrap as the compiler sees it: identity, the source text, and every
+/// fact parsed out of that text. `links` and `tags` are the deduplicated
+/// views of `facts.refs` that most consumers want.
 #[derive(PartialEq, Clone, Debug)]
 pub struct Scrap {
     title: Title,
     ctx: Option<Ctx>,
+    md_text: String,
+    facts: ScrapFacts,
     links: Vec<ScrapKey>,
     tags: Vec<Tag>,
-    md_text: String,
-    thumbnail: Option<Url>,
 }
 
 impl Scrap {
@@ -44,40 +48,81 @@ impl Scrap {
     }
 
     pub fn thumbnail(&self) -> Option<Url> {
-        self.thumbnail.clone()
+        self.facts.images.first().cloned()
+    }
+
+    pub fn facts(&self) -> &ScrapFacts {
+        &self.facts
+    }
+
+    /// Every `[[]]`-family occurrence in source order, duplicates included.
+    pub fn refs(&self) -> &[WikiRef] {
+        &self.facts.refs
+    }
+
+    pub fn headings(&self) -> &[Heading] {
+        &self.facts.headings
+    }
+
+    pub fn code_blocks(&self) -> &[CodeBlock] {
+        &self.facts.code_blocks
+    }
+
+    pub fn images(&self) -> &[Url] {
+        &self.facts.images
+    }
+
+    pub fn task_items(&self) -> &[TaskItem] {
+        &self.facts.task_items
+    }
+
+    pub fn frontmatter(&self) -> Option<&Value> {
+        self.facts.frontmatter.as_ref()
     }
 }
 
 impl Scrap {
     pub fn new(title: &str, ctx: &Option<Ctx>, text: &str) -> Scrap {
+        Scrap::from_facts(title, ctx, text, ScrapFacts::parse(text))
+    }
+
+    /// Assemble a scrap from facts parsed earlier, so a source the on-disk IR
+    /// already knows is never parsed twice. The facts are trusted as given.
+    pub fn from_facts(title: &str, ctx: &Option<Ctx>, text: &str, facts: ScrapFacts) -> Scrap {
         // Dedup through a HashSet used to leave the order to chance, which made
         // every consumer of `links()` — backlink lists, rendered pages, the
         // neighborhood walk — reshuffle on each read. Keep first occurrence.
         let mut seen_links = HashSet::new();
-        let links: Vec<ScrapKey> = markdown::query::wikilinks(text)
+        let links: Vec<ScrapKey> = facts
+            .refs
             .iter()
-            .map(ScrapKey::from)
+            .filter_map(|r| match r {
+                WikiRef::Link(link) => Some(ScrapKey::from(link)),
+                _ => None,
+            })
             .filter(|key| seen_links.insert(key.clone()))
             .collect();
-        let thumbnail = markdown::query::images(text).into_iter().next();
 
-        // Build the tag list from explicit `#[[tag]]` occurrences. Preserve
-        // the first occurrence order and drop duplicates within this scrap;
+        // Tags dedup within this scrap in first-occurrence order;
         // cross-scrap aggregation is `Tags::new`'s job.
-        let mut seen = HashSet::new();
-        let tags: Vec<Tag> = markdown::query::tags(text)
-            .into_iter()
-            .map(|occ| Tag::from(occ.path.join("/").as_str()))
-            .filter(|tag| seen.insert(tag.clone()))
+        let mut seen_tags = HashSet::new();
+        let tags: Vec<Tag> = facts
+            .refs
+            .iter()
+            .filter_map(|r| match r {
+                WikiRef::Tag(tag) => Some(Tag::from(tag.path.join("/").as_str())),
+                _ => None,
+            })
+            .filter(|tag| seen_tags.insert(tag.clone()))
             .collect();
 
         Scrap {
             title: title.into(),
             ctx: ctx.clone(),
+            md_text: text.to_string(),
+            facts,
             links,
             tags,
-            md_text: text.to_string(),
-            thumbnail,
         }
     }
 }
@@ -189,5 +234,62 @@ mod tests {
         );
         let names: Vec<String> = scrap.tags().iter().map(|t| format!("{}", t)).collect();
         assert_eq!(names, vec!["ai".to_string()]);
+    }
+
+    #[test]
+    fn it_keeps_every_parsed_fact() {
+        let scrap = Scrap::new(
+            "foo",
+            &None,
+            "# Foo\n\n## Notes\n\n- [ ] todo\n\n```rust\nfn x() {}\n```\n\n![img](https://example.com/i.png) [[bar#Notes|Bar]] #[[ai]] ![[baz]]",
+        );
+        assert_eq!(scrap.headings().len(), 2);
+        assert_eq!(scrap.headings()[1].text, "Notes");
+        assert_eq!(scrap.code_blocks().len(), 1);
+        assert_eq!(scrap.code_blocks()[0].lang.as_deref(), Some("rust"));
+        assert_eq!(scrap.task_items().len(), 1);
+        assert_eq!(scrap.images().len(), 1);
+        assert_eq!(scrap.thumbnail(), scrap.images().first().cloned());
+        assert_eq!(scrap.refs().len(), 3);
+        assert_eq!(scrap.links(), &[ScrapKey::from(Title::from("bar"))]);
+        assert_eq!(scrap.tags(), &[Tag::from("ai")]);
+        assert!(scrap.frontmatter().is_none());
+    }
+
+    #[test]
+    fn it_reads_frontmatter() {
+        let scrap = Scrap::new("foo", &None, "---\nstatus: draft\n---\n\nbody\n");
+        assert_eq!(
+            scrap
+                .frontmatter()
+                .and_then(|v| v.get("status"))
+                .and_then(|v| v.as_str()),
+            Some("draft")
+        );
+    }
+
+    #[test]
+    fn it_from_facts_equals_new() {
+        let text = "# T\n\n[[a]] [[a]] #[[b]] ![[c]]\n\n- [x] done\n";
+        let facts = ScrapFacts::parse(text);
+        assert_eq!(
+            Scrap::from_facts("t", &Some("ctx".into()), text, facts),
+            Scrap::new("t", &Some("ctx".into()), text)
+        );
+    }
+
+    #[test]
+    fn it_from_facts_trusts_the_given_facts() {
+        let facts = ScrapFacts {
+            headings: vec![Heading {
+                level: 1,
+                text: "Ghost".to_string(),
+                line: 1,
+                parent: None,
+            }],
+            ..ScrapFacts::parse("")
+        };
+        let scrap = Scrap::from_facts("t", &None, "plain text without headings", facts);
+        assert_eq!(scrap.headings()[0].text, "Ghost");
     }
 }

@@ -8,6 +8,7 @@ pub struct WikiLinkRef {
     pub title: String,
     pub heading: Option<String>,
     pub alias: Option<String>,
+    pub line: usize,
 }
 
 /// Plain `[[link]]` occurrences from the body. `#[[tag]]` and `![[embed]]`
@@ -48,11 +49,22 @@ mod tests {
         heading: Option<&str>,
         alias: Option<&str>,
     ) -> WikiLinkRef {
+        link_at(ctx_path, title, heading, alias, 1)
+    }
+
+    fn link_at(
+        ctx_path: &[&str],
+        title: &str,
+        heading: Option<&str>,
+        alias: Option<&str>,
+        line: usize,
+    ) -> WikiLinkRef {
         WikiLinkRef {
             ctx_path: ctx_path.iter().map(|s| s.to_string()).collect(),
             title: title.to_string(),
             heading: heading.map(|s| s.to_string()),
             alias: alias.map(|s| s.to_string()),
+            line,
         }
     }
 
@@ -93,6 +105,8 @@ mod tests {
         let input = "[[a]]\n[[b]]\n[[c]]";
         let res = wikilinks(input);
         assert_eq!(res.len(), 3);
+        let lines: Vec<usize> = res.iter().map(|w| w.line).collect();
+        assert_eq!(lines, vec![1, 2, 3]);
     }
 
     #[test]
@@ -100,6 +114,8 @@ mod tests {
         let input = "[[a]]\r\n[[b]]\r\n[[c]]";
         let res = wikilinks(input);
         assert_eq!(res.len(), 3);
+        let lines: Vec<usize> = res.iter().map(|w| w.line).collect();
+        assert_eq!(lines, vec![1, 2, 3]);
     }
 
     #[test]
@@ -178,9 +194,9 @@ mod tests {
 ";
         let res = wikilinks(input);
         assert_eq!(res.len(), 3);
-        assert_eq!(res[0], link(&[], "plain", None, None));
-        assert_eq!(res[1], link(&["Book"], "TDD", None, Some("TDD book")));
-        assert_eq!(res[2], link(&["Person"], "Eric", Some("bio"), None));
+        assert_eq!(res[0], link_at(&[], "plain", None, None, 3));
+        assert_eq!(res[1], link_at(&["Book"], "TDD", None, Some("TDD book"), 3));
+        assert_eq!(res[2], link_at(&["Person"], "Eric", Some("bio"), None, 9));
     }
 
     #[rstest]

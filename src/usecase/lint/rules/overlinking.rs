@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use scraps_libs::markdown::query::wikilinks;
+use scraps_libs::markdown::query::WikiRef;
 use scraps_libs::model::{key::ScrapKey, scrap::Scrap, tags::Tags};
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
@@ -22,9 +22,13 @@ impl LintRule for OverlinkingRule {
         scraps
             .iter()
             .flat_map(|scrap| {
-                let all_links: Vec<ScrapKey> = wikilinks(scrap.md_text())
+                let all_links: Vec<ScrapKey> = scrap
+                    .refs()
                     .iter()
-                    .map(ScrapKey::from)
+                    .filter_map(|r| match r {
+                        WikiRef::Link(link) => Some(ScrapKey::from(link)),
+                        _ => None,
+                    })
                     .collect();
                 let mut counts: HashMap<ScrapKey, usize> = HashMap::new();
                 for link in &all_links {
