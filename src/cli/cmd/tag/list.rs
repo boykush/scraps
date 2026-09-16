@@ -8,7 +8,7 @@ use crate::cli::display::tag::{DisplayTag, DisplayTagTable};
 use crate::cli::json::tag::TagJson;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
-use crate::input::file::read_scraps;
+use crate::ir::loader;
 use crate::usecase::tag::list::usecase::ListTagUsecase;
 
 pub fn run(json: bool, project_path: Option<&Path>, writer: &mut impl Write) -> ScrapsResult<()> {
@@ -20,7 +20,7 @@ pub fn run(json: bool, project_path: Option<&Path>, writer: &mut impl Write) -> 
         path_resolver.output_dir(&config),
     ];
 
-    let scraps = read_scraps::to_all_scraps(&scraps_dir_path, &exclude_dirs)?;
+    let scraps = loader::load_scraps(&scraps_dir_path, &exclude_dirs)?;
     let usecase = ListTagUsecase::new();
 
     let (tags, backlinks_map) = usecase.execute(&scraps)?;

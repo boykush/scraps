@@ -5,7 +5,7 @@ use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::json::scrap::{CodeBlockJson, HeadingJson};
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
-use crate::input::file::read_scraps;
+use crate::ir::loader;
 use crate::usecase::scrap::get::usecase::GetScrapUsecase;
 use scraps_libs::markdown::query::{code_blocks, heading_slug, headings, images, section};
 use scraps_libs::model::context::Ctx;
@@ -81,7 +81,7 @@ pub fn run(
         path_resolver.output_dir(&config),
     ];
 
-    let scraps = read_scraps::to_all_scraps(&scraps_dir_path, &exclude_dirs)?;
+    let scraps = loader::load_scraps(&scraps_dir_path, &exclude_dirs)?;
     let target_title = Title::from(title);
     let target_ctx = ctx.map(Ctx::from);
 

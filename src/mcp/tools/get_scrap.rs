@@ -1,4 +1,4 @@
-use crate::input::file::read_scraps;
+use crate::ir::loader;
 use crate::mcp::json::scrap::{CodeBlockJson, HeadingJson};
 use crate::usecase::scrap::get::usecase::GetScrapUsecase;
 use rmcp::handler::server::wrapper::Parameters;
@@ -81,7 +81,7 @@ pub async fn get_scrap(
     _context: RequestContext<RoleServer>,
     Parameters(request): Parameters<GetScrapRequest>,
 ) -> Result<CallToolResult, ErrorData> {
-    let scraps = read_scraps::to_all_scraps(scraps_dir, exclude_dirs).map_err(|e| {
+    let scraps = loader::load_scraps(scraps_dir, exclude_dirs).map_err(|e| {
         ErrorData::new(
             ErrorCode(-32003),
             format!("Failed to load scraps: {e}"),

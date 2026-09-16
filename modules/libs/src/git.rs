@@ -13,6 +13,12 @@ pub trait GitCommand {
     /// tree. A missing `git` binary is also reported as `Ok(false)` so that
     /// callers can degrade gracefully without distinguishing the two cases.
     fn is_git_repository(&self, path: &Path) -> io::Result<bool>;
+    /// The commit `HEAD` names in the repository containing `path`, `None`
+    /// when there is no repository, no commit yet, or no git binary.
+    /// `commited_ts` only changes when HEAD does, so this keys its cache.
+    fn head_commit(&self, _path: &Path) -> io::Result<Option<String>> {
+        Ok(None)
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -71,6 +77,25 @@ impl GitCommand for GitCommandImpl {
             Err(e) => Err(e),
         }
     }
+
+    fn head_commit(&self, path: &Path) -> io::Result<Option<String>> {
+        let result = Command::new("git")
+            .current_dir(path)
+            .args(["rev-parse", "--verify", "HEAD"])
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output();
+
+        match result {
+            Ok(output) if output.status.success() => {
+                let head = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                Ok((!head.is_empty()).then_some(head))
+            }
+            Ok(_) => Ok(None),
+            Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(None),
+            Err(e) => Err(e),
+        }
+    }
 }
 
 #[cfg(feature = "git_test")]
@@ -95,6 +120,9 @@ pub mod tests {
         }
         fn is_git_repository(&self, _path: &Path) -> io::Result<bool> {
             Ok(true)
+        }
+        fn head_commit(&self, _path: &Path) -> io::Result<Option<String>> {
+            Ok(Some("test-head".to_string()))
         }
     }
 

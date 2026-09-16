@@ -1,5 +1,4 @@
 use crate::error::ScrapsResult;
-use scraps_libs::markdown::query::frontmatter;
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::title::Title;
@@ -24,7 +23,7 @@ impl FrontmatterUsecase {
         let mut results: Vec<FrontmatterResult> = scraps
             .iter()
             .filter_map(|scrap| {
-                frontmatter(scrap.md_text()).map(|value| FrontmatterResult {
+                scrap.frontmatter().cloned().map(|value| FrontmatterResult {
                     title: scrap.title().clone(),
                     ctx: scrap.ctx().clone(),
                     frontmatter: value,

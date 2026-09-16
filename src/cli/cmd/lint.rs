@@ -8,7 +8,7 @@ use scraps_libs::git::GitCommandImpl;
 use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
-use crate::input::file::read_scraps;
+use crate::ir::loader;
 use crate::usecase::lint::rule::{LintRule, LintRuleName, LintWarning};
 use crate::usecase::lint::rules::stale_by_git::StaleByGitRule;
 use crate::usecase::lint::usecase::LintUsecase;
@@ -20,7 +20,7 @@ pub fn run(project_path: Option<&Path>, rule_names: &[LintRuleName]) -> ScrapsRe
     let static_dir_path = path_resolver.static_dir();
     let output_dir_path = path_resolver.output_dir(&config);
     let exclude_dirs = vec![static_dir_path, output_dir_path];
-    let scraps = read_scraps::to_all_scraps(&scraps_dir_path, &exclude_dirs)?;
+    let scraps = loader::load_scraps(&scraps_dir_path, &exclude_dirs)?;
 
     // CLI `--rule X` overrides everything; otherwise default rules plus
     // opt-in rules whose config section enables them.

@@ -1,5 +1,5 @@
 use crate::error::ScrapsResult;
-use scraps_libs::markdown::query::{wiki_refs, WikiRef};
+use scraps_libs::markdown::query::WikiRef;
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
@@ -55,8 +55,9 @@ impl LookupScrapLinksUsecase {
             .map(|scrap| (scrap.self_key(), scrap))
             .collect();
 
-        let results: Vec<LookupScrapLinksResult> = wiki_refs(target_scrap.md_text())
-            .into_iter()
+        let results: Vec<LookupScrapLinksResult> = target_scrap
+            .refs()
+            .iter()
             .filter_map(|wref| match wref {
                 WikiRef::Link(r) => {
                     let key = ScrapKey::from_path_str(&join_path(&r.ctx_path, &r.title));
@@ -66,7 +67,7 @@ impl LookupScrapLinksUsecase {
                             kind: LinkRefKind::Link,
                             title: (&linked_key).into(),
                             ctx: (&linked_key).into(),
-                            heading: r.heading,
+                            heading: r.heading.clone(),
                         }
                     })
                 }
@@ -78,7 +79,7 @@ impl LookupScrapLinksUsecase {
                             kind: LinkRefKind::Embed,
                             title: (&linked_key).into(),
                             ctx: (&linked_key).into(),
-                            heading: r.heading,
+                            heading: r.heading.clone(),
                         }
                     })
                 }

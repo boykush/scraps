@@ -1,4 +1,7 @@
-use comrak::{nodes::NodeValue, parse_document, Arena};
+use comrak::{
+    nodes::{AstNode, NodeValue},
+    parse_document, Arena,
+};
 
 use super::common::{collect_text, options};
 
@@ -28,7 +31,11 @@ pub fn headings(text: &str) -> Vec<Heading> {
     let arena = Arena::new();
     let opts = options();
     let root = parse_document(&arena, text, &opts);
+    headings_in(root)
+}
 
+/// Walk an already-parsed document, so `ScrapFacts` can share one parse.
+pub(super) fn headings_in<'a>(root: &'a AstNode<'a>) -> Vec<Heading> {
     let mut out: Vec<Heading> = Vec::new();
     let mut stack: Vec<(u8, String)> = Vec::new();
     for n in root.descendants() {

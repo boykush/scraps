@@ -2,6 +2,7 @@ mod cli;
 mod constants;
 mod error;
 mod input;
+mod ir;
 mod mcp;
 mod output;
 mod service;

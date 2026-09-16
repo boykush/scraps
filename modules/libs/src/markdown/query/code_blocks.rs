@@ -1,5 +1,5 @@
 use comrak::{
-    nodes::{NodeCodeBlock, NodeValue},
+    nodes::{AstNode, NodeCodeBlock, NodeValue},
     parse_document, Arena,
 };
 
@@ -31,7 +31,11 @@ pub fn code_blocks(text: &str) -> Vec<CodeBlock> {
     let arena = Arena::new();
     let opts = options();
     let root = parse_document(&arena, text, &opts);
+    code_blocks_in(root)
+}
 
+/// Walk an already-parsed document, so `ScrapFacts` can share one parse.
+pub(super) fn code_blocks_in<'a>(root: &'a AstNode<'a>) -> Vec<CodeBlock> {
     let mut out = Vec::new();
     for n in root.descendants() {
         let NodeValue::CodeBlock(cb) = &n.data().value else {

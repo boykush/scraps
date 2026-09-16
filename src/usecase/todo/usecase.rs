@@ -1,5 +1,5 @@
 use crate::error::ScrapsResult;
-use scraps_libs::markdown::query::{task_items, TaskStatus};
+use scraps_libs::markdown::query::TaskStatus;
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::title::Title;
@@ -60,15 +60,15 @@ impl TodoUsecase {
         let mut results: Vec<TodoResult> = Vec::new();
 
         for scrap in scraps {
-            for item in task_items(scrap.md_text()) {
+            for item in scrap.task_items() {
                 if !status_filter.matches(&item.status) {
                     continue;
                 }
                 results.push(TodoResult {
                     title: scrap.title().clone(),
                     ctx: scrap.ctx().clone(),
-                    status: item.status,
-                    text: item.text,
+                    status: item.status.clone(),
+                    text: item.text.clone(),
                     line: item.line,
                 });
             }

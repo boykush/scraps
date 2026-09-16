@@ -1,4 +1,4 @@
-use crate::input::file::read_scraps;
+use crate::ir::loader;
 use crate::mcp::json::scrap::ScrapKeyJson;
 use crate::usecase::todo::usecase::{status_label, StatusFilter, TodoUsecase};
 use rmcp::handler::server::wrapper::Parameters;
@@ -64,7 +64,7 @@ pub async fn list_todos(
     _context: RequestContext<RoleServer>,
     Parameters(request): Parameters<ListTodosRequest>,
 ) -> Result<CallToolResult, ErrorData> {
-    let scraps = read_scraps::to_all_scraps(scraps_dir, exclude_dirs).map_err(|e| {
+    let scraps = loader::load_scraps(scraps_dir, exclude_dirs).map_err(|e| {
         ErrorData::new(
             ErrorCode(-32003),
             format!("Failed to load scraps: {e}"),

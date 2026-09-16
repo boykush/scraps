@@ -6,7 +6,7 @@ use tracing_subscriber::fmt::format::FmtSpan;
 
 use crate::cli::progress::ProgressImpl;
 use crate::error::ScrapsResult;
-use crate::input::file::read_scraps;
+use crate::ir::loader;
 use crate::output::build_renderer::BuildRendererImpl;
 use crate::usecase::build::usecase::BuildUsecase;
 
@@ -52,7 +52,7 @@ fn execute(git: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
     let git_command = git.then(GitCommandImpl::new);
     let exclude_dirs = vec![static_dir_path.clone(), output_dir_path.clone()];
     let (scraps_with_ts, readme_text) =
-        read_scraps::to_all_scraps_with_timestamps(&scraps_dir_path, &exclude_dirs, git_command)?;
+        loader::load_scraps_with_timestamps(&scraps_dir_path, &exclude_dirs, git_command)?;
 
     let renderer = BuildRendererImpl::new(&static_dir_path, &output_dir_path)?;
     let usecase = BuildUsecase::new();

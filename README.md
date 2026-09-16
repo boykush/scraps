@@ -47,7 +47,7 @@ graph LR
   IR --> JSON[CLI JSON]
 ```
 
-Scraps reads `[[wiki-link]]`, `#[[tag]]`, `![[embed]]`, `[[Page#heading]]`, and `ctx_path` as typed primitives. The same source compiles to an HTML site for human readers and to JSON for scripts and AI agents.
+Scraps reads `[[wiki-link]]`, `#[[tag]]`, `![[embed]]`, `[[Page#heading]]`, and `ctx_path` as typed primitives. The same source compiles to an HTML site for human readers and to JSON for scripts and AI agents. The IR is kept under `.scraps/` next to `.scraps.toml`, so every command reads the wiki through it and an unchanged source is never parsed twice.
 
 ## AI integration
 

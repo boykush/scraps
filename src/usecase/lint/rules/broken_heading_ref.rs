@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use scraps_libs::{
-    markdown,
+    markdown::query::WikiRef,
     model::{key::ScrapKey, scrap::Scrap, tags::Tags},
     slugify,
 };
@@ -39,8 +39,9 @@ impl LintRule for BrokenHeadingRefRule {
         let heading_slugs_cache: HashMap<ScrapKey, HashSet<String>> = scrap_by_key
             .iter()
             .map(|(key, scrap)| {
-                let slugs = markdown::query::headings(scrap.md_text())
-                    .into_iter()
+                let slugs = scrap
+                    .headings()
+                    .iter()
                     .map(|h| slugify::by_dash(&h.text))
                     .collect();
                 (key.clone(), slugs)
@@ -50,11 +51,15 @@ impl LintRule for BrokenHeadingRefRule {
         let mut warnings = Vec::new();
         for scrap in scraps {
             let path = scrap_relative_path(scrap);
-            for link in markdown::query::wikilinks(scrap.md_text()) {
+            let links = scrap.refs().iter().filter_map(|r| match r {
+                WikiRef::Link(link) => Some(link),
+                _ => None,
+            });
+            for link in links {
                 let Some(heading) = link.heading.as_ref() else {
                     continue;
                 };
-                let target_key = ScrapKey::from(&link);
+                let target_key = ScrapKey::from(link);
                 let Some(target_slugs) = heading_slugs_cache.get(&target_key) else {
                     continue;
                 };

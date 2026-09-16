@@ -14,7 +14,7 @@ This documentation follows the [Diátaxis](https://diataxis.fr/) framework.
 
 - **Tutorial** — learn Scraps: [[Tutorial/Getting Started]], [[Tutorial/Installation]]
 - **How-to** — solve problems: [[How-to/Deploy to GitHub Pages]], [[How-to/Integrate with AI Assistants]]
-- **Reference** — look up details: [[Reference/CLI Overview]], [[Reference/Configuration]], [[Reference/Lint Rules]], [[Reference/Wiki-link Notation]], [[Reference/Markdown Support]], [[Reference/Static Site]]
+- **Reference** — look up details: [[Reference/CLI Overview]], [[Reference/Configuration]], [[Reference/Lint Rules]], [[Reference/Wiki-link Notation]], [[Reference/Markdown Support]], [[Reference/Static Site]], [[Reference/IR]]
 - **Explanation** — understand the design: [[Explanation/What is Scraps?]]
 
 Browse by topic: #[[CLI]] #[[Notation/Wiki-link]] #[[Notation/Markdown]] #[[Emit/Static Site]] #[[Emit/CLI JSON]] #[[Configuration]] #[[Integration]] #[[Deployment]]

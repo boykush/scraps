@@ -46,6 +46,8 @@ Scraps focuses on two outputs:
 
 The static site is one important output, but the core artifact is structured
 documentation data that preserves links, tags, headings, tasks, and context.
+That artifact is kept on disk as the [[Reference/IR]]: every command reads
+the wiki through it, and a source that has not changed is never parsed twice.
 
 ## CLI-first for agents
 

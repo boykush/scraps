@@ -82,6 +82,7 @@ pub fn wiki_refs(text: &str) -> Vec<WikiRef> {
                     title,
                     heading,
                     alias,
+                    line,
                 })),
             }
         })
@@ -123,6 +124,7 @@ mod tests {
             title: title.to_string(),
             heading: None,
             alias: None,
+            line: 1,
         }
     }
 

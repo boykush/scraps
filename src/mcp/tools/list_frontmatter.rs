@@ -1,4 +1,4 @@
-use crate::input::file::read_scraps;
+use crate::ir::loader;
 use crate::mcp::json::scrap::ScrapKeyJson;
 use crate::usecase::frontmatter::usecase::FrontmatterUsecase;
 use rmcp::model::ErrorCode;
@@ -27,7 +27,7 @@ pub async fn list_frontmatter(
     exclude_dirs: &[std::path::PathBuf],
     _context: RequestContext<RoleServer>,
 ) -> Result<CallToolResult, ErrorData> {
-    let scraps = read_scraps::to_all_scraps(scraps_dir, exclude_dirs).map_err(|e| {
+    let scraps = loader::load_scraps(scraps_dir, exclude_dirs).map_err(|e| {
         ErrorData::new(
             ErrorCode(-32003),
             format!("Failed to load scraps: {e}"),
