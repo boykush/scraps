@@ -29,5 +29,6 @@ Each Markdown file is converted to a slugified HTML file under `scraps/`.
 Folders become path segments — the same folders that form
 [[Reference/Wiki-link/Context Link]].
 
-Files in `static/` and the build output directory are excluded from scrap
-traversal.
+Files in `static/`, the build output directory, and any directory whose name
+starts with a dot (such as `.git/` or the `.scraps/` [[Reference/IR]]) are
+excluded from scrap traversal.
