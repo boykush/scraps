@@ -2,7 +2,8 @@
 
 `.scraps.toml` declares a Scraps wiki: the directory containing this file is
 the wiki root, and every Markdown file under it is a scrap unless it lives in
-`static/` or the configured `output_dir`.
+`static/`, the configured `output_dir`, or a directory whose name starts with
+a dot (such as `.git/` or the `.scraps/` [[Reference/IR]]).
 
 See [[Explanation/What is Scraps?]] for why config discovery follows this shape,
 and [[Reference/CLI Overview]] for how `-C` selects between multiple

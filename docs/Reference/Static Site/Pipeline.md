@@ -10,4 +10,5 @@ graph LR
 
 The HTML emitter takes the Scraps IR and produces a static directory tree,
 which any Pages-class host can serve. See [[How-to/Deploy to GitHub Pages]]
-for one such recipe.
+for one such recipe. The IR itself is persisted under `.scraps/`; see
+[[Reference/IR]].

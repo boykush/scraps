@@ -2,7 +2,8 @@
 
 Scraps is a CLI-first compiler. Every command supports `--help`, which is
 the authoritative reference for flags and arguments. This page is the
-**map**.
+**map**. Every command that reads scraps goes through the on-disk
+[[Reference/IR]], so repeated queries never re-parse unchanged sources.
 
 | Command | Role | `--json` |
 |---|---|---|
