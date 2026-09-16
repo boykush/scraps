@@ -31,6 +31,31 @@ struct Loaded {
     rel_path: String,
 }
 
+/// The wiki as read through the IR, before anything is written back.
+/// `objects` runs parallel to `entries`; `dirty` means the file on disk no
+/// longer matches what is held here.
+struct LoadedWiki {
+    store: IrStore,
+    entries: Vec<Loaded>,
+    objects: Vec<ScrapObject>,
+    git_head: Option<String>,
+    dirty: bool,
+}
+
+impl LoadedWiki {
+    fn save(&self) {
+        let scraps: Vec<Scrap> = self.entries.iter().map(|l| l.scrap.clone()).collect();
+        let mut file = IrFile::new(self.objects.clone(), link_edges(&scraps));
+        file.git_head = self.git_head.clone();
+        if let Err(e) = self.store.save(&file) {
+            tracing::warn!(
+                "could not write the IR to {}: {e}",
+                self.store.file_path().display()
+            );
+        }
+    }
+}
+
 fn read_source(scraps_dir: &Path, path: &Path) -> ScrapsResult<Source> {
     let rel_path = read_scraps::relative_path(scraps_dir, path)?;
     let (title, ctx) = read_scraps::scrap_identity(scraps_dir, path)?;
@@ -48,8 +73,8 @@ fn read_source(scraps_dir: &Path, path: &Path) -> ScrapsResult<Source> {
 
 /// Every scrap of the wiki in path order, routed through the on-disk IR:
 /// a source whose hash the IR knows is rebuilt from its stored facts, the
-/// rest are parsed, and the IR is rewritten when anything changed.
-fn load(scraps_dir: &Path, exclude_dirs: &[PathBuf]) -> ScrapsResult<Vec<Loaded>> {
+/// rest are parsed. Nothing is written here; callers save when `dirty`.
+fn load(scraps_dir: &Path, exclude_dirs: &[PathBuf]) -> ScrapsResult<LoadedWiki> {
     let paths = read_scraps::to_scrap_paths(scraps_dir, exclude_dirs)?;
     let mut sources = paths
         .into_par_iter()
@@ -60,6 +85,7 @@ fn load(scraps_dir: &Path, exclude_dirs: &[PathBuf]) -> ScrapsResult<Vec<Loaded>
     let store = IrStore::new(scraps_dir);
     let stored = store.load();
     let had_file = stored.is_some();
+    let git_head = stored.as_ref().and_then(|file| file.git_head.clone());
     let known: HashMap<String, ScrapObject> = stored
         .map(|file| {
             file.scraps
@@ -72,7 +98,8 @@ fn load(scraps_dir: &Path, exclude_dirs: &[PathBuf]) -> ScrapsResult<Vec<Loaded>
     let entries: Vec<(Loaded, ScrapObject, bool)> = sources
         .into_par_iter()
         .map(|src| {
-            let (scrap, object, reused) = match known.get(&src.rel_path) {
+            let stored = known.get(&src.rel_path);
+            let (scrap, object, reused) = match stored {
                 Some(object) if object.hash == src.hash => {
                     let facts = object.to_facts();
                     let scrap = Scrap::from_facts(&src.title, &src.ctx, &src.text, facts);
@@ -80,7 +107,10 @@ fn load(scraps_dir: &Path, exclude_dirs: &[PathBuf]) -> ScrapsResult<Vec<Loaded>
                 }
                 _ => {
                     let scrap = Scrap::new(&src.title, &src.ctx, &src.text);
-                    let object = ScrapObject::from_scrap(&src.rel_path, &src.hash, &scrap);
+                    let mut object = ScrapObject::from_scrap(&src.rel_path, &src.hash, &scrap);
+                    // The timestamp follows HEAD, not the working tree, so an
+                    // edited source keeps the one already recorded.
+                    object.commited_ts = stored.and_then(|o| o.commited_ts);
                     (scrap, object, false)
                 }
             };
@@ -95,59 +125,100 @@ fn load(scraps_dir: &Path, exclude_dirs: &[PathBuf]) -> ScrapsResult<Vec<Loaded>
 
     let reused = entries.iter().filter(|(_, _, reused)| *reused).count();
     let dirty = !had_file || reused != entries.len() || known.len() != entries.len();
-    let (loaded, objects): (Vec<Loaded>, Vec<ScrapObject>) =
+    let (entries, objects): (Vec<Loaded>, Vec<ScrapObject>) =
         entries.into_iter().map(|(l, o, _)| (l, o)).unzip();
 
-    if dirty {
-        let scraps: Vec<Scrap> = loaded.iter().map(|l| l.scrap.clone()).collect();
-        let file = IrFile::new(objects, link_edges(&scraps));
-        if let Err(e) = store.save(&file) {
-            tracing::warn!(
-                "could not write the IR to {}: {e}",
-                store.file_path().display()
-            );
-        }
-    }
-
-    Ok(loaded)
+    Ok(LoadedWiki {
+        store,
+        entries,
+        objects,
+        git_head,
+        dirty,
+    })
 }
 
 /// All scraps, `README.md` included, as the query commands see the wiki.
 pub fn load_scraps(scraps_dir: &Path, exclude_dirs: &[PathBuf]) -> ScrapsResult<Vec<Scrap>> {
-    Ok(load(scraps_dir, exclude_dirs)?
-        .into_iter()
-        .map(|l| l.scrap)
-        .collect())
+    let wiki = load(scraps_dir, exclude_dirs)?;
+    if wiki.dirty {
+        wiki.save();
+    }
+    Ok(wiki.entries.into_iter().map(|l| l.scrap).collect())
 }
 
 /// Scraps plus the raw root `README.md`, which the site renders on its own
-/// page rather than as a scrap. Commit timestamps are looked up per scrap
-/// when `git_command` is given, as `build --git` asks for.
+/// page rather than as a scrap. With `git_command`, each scrap's last-commit
+/// timestamp comes from the IR while HEAD is the commit it was recorded
+/// under, and from git otherwise.
 pub fn load_scraps_with_timestamps<GC: GitCommand + Send + Sync + Copy>(
     scraps_dir: &Path,
     exclude_dirs: &[PathBuf],
     git_command: Option<GC>,
 ) -> ScrapsResult<ScrapsWithReadme> {
-    let (readme, scraps): (Vec<Loaded>, Vec<Loaded>) = load(scraps_dir, exclude_dirs)?
-        .into_iter()
-        .partition(|l| l.rel_path == README_PATH);
-    let readme_text = readme
-        .into_iter()
-        .next()
-        .map(|l| l.scrap.md_text().to_string());
+    let mut wiki = load(scraps_dir, exclude_dirs)?;
+    let timestamps = match git_command {
+        Some(gc) => stamp(&mut wiki, gc, scraps_dir)?,
+        None => vec![None; wiki.entries.len()],
+    };
+    if wiki.dirty {
+        wiki.save();
+    }
 
-    let scraps_with_ts = scraps
-        .into_par_iter()
-        .map(|loaded| {
-            let commited_ts = match git_command {
-                Some(gc) => commited_ts(gc, &loaded.path)?,
-                None => None,
-            };
-            Ok((loaded.scrap, commited_ts))
-        })
-        .collect::<ScrapsResult<Vec<_>>>()?;
-
+    let mut readme_text = None;
+    let mut scraps_with_ts = Vec::with_capacity(wiki.entries.len());
+    for (loaded, ts) in wiki.entries.into_iter().zip(timestamps) {
+        if loaded.rel_path == README_PATH {
+            readme_text = Some(loaded.scrap.md_text().to_string());
+        } else {
+            scraps_with_ts.push((loaded.scrap, ts));
+        }
+    }
     Ok((scraps_with_ts, readme_text))
+}
+
+/// Fill in `commited_ts` for every object: kept from the IR while HEAD is
+/// the commit it was recorded under, asked of git otherwise.
+fn stamp<GC: GitCommand + Send + Sync + Copy>(
+    wiki: &mut LoadedWiki,
+    git_command: GC,
+    scraps_dir: &Path,
+) -> ScrapsResult<Vec<Option<i64>>> {
+    let head = head_commit(git_command, scraps_dir)?;
+    let same_head = head.is_some() && head == wiki.git_head;
+
+    let looked_up: Vec<Option<Option<i64>>> = wiki
+        .entries
+        .par_iter()
+        .zip(wiki.objects.par_iter())
+        .map(|(loaded, object)| {
+            if loaded.rel_path == README_PATH || (same_head && object.commited_ts.is_some()) {
+                return Ok(None);
+            }
+            commited_ts(git_command, &loaded.path).map(Some)
+        })
+        .collect::<ScrapsResult<_>>()?;
+
+    for (object, looked_up) in wiki.objects.iter_mut().zip(&looked_up) {
+        if let Some(ts) = looked_up {
+            if object.commited_ts != *ts {
+                object.commited_ts = *ts;
+                wiki.dirty = true;
+            }
+        }
+    }
+    if wiki.git_head != head {
+        wiki.git_head = head;
+        wiki.dirty = true;
+    }
+    Ok(wiki.objects.iter().map(|o| o.commited_ts).collect())
+}
+
+fn head_commit<GC: GitCommand>(git_command: GC, scraps_dir: &Path) -> ScrapsResult<Option<String>> {
+    match git_command.head_commit(scraps_dir) {
+        Ok(head) => Ok(head),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(e) => Err(anyhow::Error::new(e).context(BuildError::GitCommitedTs)),
+    }
 }
 
 /// A `git not installed` failure is downgraded to `None` with a warning
@@ -355,5 +426,115 @@ mod tests {
         let scraps = load_scraps(&project.project_root, &excl).unwrap();
 
         assert_eq!(scraps.len(), 1);
+    }
+
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    /// Counts git lookups so a test can assert none happened.
+    #[derive(Clone, Copy)]
+    struct CountingGit {
+        head: Option<&'static str>,
+        calls: &'static AtomicUsize,
+    }
+
+    impl CountingGit {
+        fn new(head: Option<&'static str>) -> CountingGit {
+            CountingGit {
+                head,
+                calls: Box::leak(Box::new(AtomicUsize::new(0))),
+            }
+        }
+
+        fn calls(&self) -> usize {
+            self.calls.load(Ordering::SeqCst)
+        }
+    }
+
+    impl GitCommand for CountingGit {
+        fn init(&self, _path: &Path) -> std::io::Result<()> {
+            Ok(())
+        }
+        fn commited_ts(&self, _path: &Path) -> std::io::Result<Option<i64>> {
+            self.calls.fetch_add(1, Ordering::SeqCst);
+            Ok(Some(1_700_000_000))
+        }
+        fn is_git_repository(&self, _path: &Path) -> std::io::Result<bool> {
+            Ok(true)
+        }
+        fn head_commit(&self, _path: &Path) -> std::io::Result<Option<String>> {
+            Ok(self.head.map(String::from))
+        }
+    }
+
+    fn two_scrap_project() -> TempScrapProject {
+        let project = TempScrapProject::new();
+        project
+            .add_scrap("a.md", b"# A\n")
+            .add_scrap("b.md", b"[[a]]\n")
+            .add_scrap("README.md", b"# Readme\n");
+        project
+    }
+
+    #[test]
+    fn it_records_timestamps_under_the_head_they_were_read_at() {
+        let project = two_scrap_project();
+        let excl = exclude(&project);
+        let git = CountingGit::new(Some("h1"));
+
+        let (scraps, _) =
+            load_scraps_with_timestamps(&project.project_root, &excl, Some(git)).unwrap();
+
+        assert_eq!(git.calls(), 2, "README is not stamped");
+        assert!(scraps.iter().all(|(_, ts)| *ts == Some(1_700_000_000)));
+        let ir = read_ir(&project);
+        assert_eq!(ir.git_head.as_deref(), Some("h1"));
+        let stamped = ir.scraps.iter().filter(|o| o.commited_ts.is_some()).count();
+        assert_eq!(stamped, 2);
+    }
+
+    #[test]
+    fn it_reuses_timestamps_while_head_is_unchanged() {
+        let project = two_scrap_project();
+        let excl = exclude(&project);
+        let git = CountingGit::new(Some("h1"));
+        load_scraps_with_timestamps(&project.project_root, &excl, Some(git)).unwrap();
+
+        // A query load in between must not lose what was recorded.
+        load_scraps(&project.project_root, &excl).unwrap();
+        // Neither must an edit: the timestamp follows HEAD, not the file.
+        project.add_scrap("a.md", b"# A edited\n");
+        let (scraps, _) =
+            load_scraps_with_timestamps(&project.project_root, &excl, Some(git)).unwrap();
+
+        assert_eq!(git.calls(), 2);
+        assert!(scraps.iter().all(|(_, ts)| *ts == Some(1_700_000_000)));
+        assert_eq!(read_ir(&project).git_head.as_deref(), Some("h1"));
+    }
+
+    #[test]
+    fn it_asks_git_again_when_head_moves() {
+        let project = two_scrap_project();
+        let excl = exclude(&project);
+        let first = CountingGit::new(Some("h1"));
+        load_scraps_with_timestamps(&project.project_root, &excl, Some(first)).unwrap();
+
+        let second = CountingGit::new(Some("h2"));
+        load_scraps_with_timestamps(&project.project_root, &excl, Some(second)).unwrap();
+
+        assert_eq!(second.calls(), 2);
+        assert_eq!(read_ir(&project).git_head.as_deref(), Some("h2"));
+    }
+
+    #[test]
+    fn it_never_reuses_timestamps_without_a_head() {
+        let project = two_scrap_project();
+        let excl = exclude(&project);
+        let git = CountingGit::new(None);
+
+        load_scraps_with_timestamps(&project.project_root, &excl, Some(git)).unwrap();
+        load_scraps_with_timestamps(&project.project_root, &excl, Some(git)).unwrap();
+
+        assert_eq!(git.calls(), 4);
+        assert_eq!(read_ir(&project).git_head, None);
     }
 }
