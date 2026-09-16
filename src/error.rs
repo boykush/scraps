@@ -35,9 +35,6 @@ pub enum InitError {
 
 #[derive(Error, PartialEq, Debug)]
 pub enum BuildError {
-    #[error("Failed to read README file")]
-    ReadREADMEFile,
-
     #[error("Failed to get commited timestamp")]
     GitCommitedTs,
 

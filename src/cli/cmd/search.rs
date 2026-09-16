@@ -10,7 +10,7 @@ use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::json::scrap::ScrapKeyJson;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
-use crate::input::file::read_scraps;
+use crate::ir::loader;
 use crate::usecase::search::usecase::SearchUsecase;
 use scraps_libs::search::engine::SearchLogic;
 
@@ -36,7 +36,7 @@ pub fn run(
         path_resolver.output_dir(&config),
     ];
 
-    let scraps = read_scraps::to_all_scraps(&scraps_dir_path, &exclude_dirs)?;
+    let scraps = loader::load_scraps(&scraps_dir_path, &exclude_dirs)?;
 
     let usecase = SearchUsecase::new();
     let results = usecase.execute(&scraps, query, num, logic)?;

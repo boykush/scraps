@@ -1,4 +1,4 @@
-use crate::input::file::read_scraps;
+use crate::ir::loader;
 use crate::mcp::json::scrap::ScrapKeyJson;
 use crate::usecase::search::usecase::SearchUsecase;
 use rmcp::handler::server::wrapper::Parameters;
@@ -55,7 +55,7 @@ pub async fn search_scraps(
     Parameters(request): Parameters<SearchRequest>,
 ) -> Result<CallToolResult, ErrorData> {
     // Load scraps from directory
-    let scraps = read_scraps::to_all_scraps(scraps_dir, exclude_dirs).map_err(|e| {
+    let scraps = loader::load_scraps(scraps_dir, exclude_dirs).map_err(|e| {
         ErrorData::new(
             ErrorCode(-32003),
             format!("Failed to load scraps: {e}"),

@@ -57,10 +57,12 @@ pub(crate) fn to_scrap_paths(
     Ok(paths.into_iter().flatten().collect::<Vec<PathBuf>>())
 }
 
-pub(crate) fn to_scrap_by_path(
+/// Title and ctx a scrap file gets from where it sits: the file stem is the
+/// title and the directories below `scraps_dir_path` are the ctx.
+pub(crate) fn scrap_identity(
     scraps_dir_path: &Path,
     scrap_file_path: &Path,
-) -> ScrapsResult<Scrap> {
+) -> ScrapsResult<(String, Option<Ctx>)> {
     let file_prefix = scrap_file_path
         .file_stem()
         .ok_or(ScrapsError::ReadScrap(scrap_file_path.to_path_buf()))
@@ -85,13 +87,39 @@ pub(crate) fn to_scrap_by_path(
     } else {
         Some(Ctx::from(ctx_segments.join("/").as_str()))
     };
-    let md_text = fs::read_to_string(scrap_file_path)
-        .context(ScrapsError::ReadScrap(scrap_file_path.to_path_buf()))?;
-    let scrap = Scrap::new(file_prefix, &ctx, &md_text);
 
-    Ok(scrap)
+    Ok((file_prefix.to_string(), ctx))
 }
 
+/// Location of a scrap file relative to the wiki root, `/`-separated on
+/// every platform so the IR file stays portable.
+pub(crate) fn relative_path(
+    scraps_dir_path: &Path,
+    scrap_file_path: &Path,
+) -> ScrapsResult<String> {
+    let relative = scrap_file_path
+        .strip_prefix(scraps_dir_path)
+        .context(ScrapsError::ReadScrap(scrap_file_path.to_path_buf()))?;
+    Ok(relative
+        .components()
+        .map(|c| c.as_os_str().to_string_lossy().to_string())
+        .collect::<Vec<String>>()
+        .join("/"))
+}
+
+#[cfg(test)]
+pub(crate) fn to_scrap_by_path(
+    scraps_dir_path: &Path,
+    scrap_file_path: &Path,
+) -> ScrapsResult<Scrap> {
+    let (title, ctx) = scrap_identity(scraps_dir_path, scrap_file_path)?;
+    let md_text = fs::read_to_string(scrap_file_path)
+        .context(ScrapsError::ReadScrap(scrap_file_path.to_path_buf()))?;
+
+    Ok(Scrap::new(&title, &ctx, &md_text))
+}
+
+#[cfg(test)]
 pub(crate) fn to_all_scraps(
     scraps_dir_path: &Path,
     exclude_dirs: &[PathBuf],
@@ -101,64 +129,6 @@ pub(crate) fn to_all_scraps(
         .iter()
         .map(|path| to_scrap_by_path(scraps_dir_path, path))
         .collect()
-}
-
-/// Read all scraps with optional git commit timestamps, and README text separately.
-/// Used by build/serve commands that need both scraps+timestamps and README.
-///
-/// When `git_command` is `None`, no git subprocess is spawned and every scrap's
-/// `commited_ts` is returned as `None`. When `Some`, a `git not installed`
-/// failure is downgraded to `None` with a warning rather than an error.
-pub(crate) fn to_all_scraps_with_timestamps<
-    GC: scraps_libs::git::GitCommand + Send + Sync + Copy,
->(
-    scraps_dir_path: &Path,
-    exclude_dirs: &[PathBuf],
-    git_command: Option<GC>,
-) -> ScrapsResult<ScrapsWithReadme> {
-    use rayon::prelude::*;
-
-    let paths = to_scrap_paths(scraps_dir_path, exclude_dirs)?;
-
-    // Separate README.md from other scraps
-    let readme_path = scraps_dir_path.join("README.md");
-    let (readme_paths, scrap_paths): (Vec<_>, Vec<_>) =
-        paths.into_iter().partition(|path| path == &readme_path);
-
-    // Read README text
-    let readme_text = readme_paths
-        .first()
-        .map(|path| fs::read_to_string(path).context(crate::error::BuildError::ReadREADMEFile))
-        .transpose()?;
-
-    // Read scraps (with git timestamps if enabled) in parallel
-    let scraps_with_ts = scrap_paths
-        .into_par_iter()
-        .map(|path| {
-            let scrap = to_scrap_by_path(scraps_dir_path, &path)?;
-            let commited_ts = match git_command {
-                Some(gc) => match gc.commited_ts(&path) {
-                    Ok(ts) => ts,
-                    Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-                        tracing::warn!(
-                            "git binary not found; skipping commited_ts for {}",
-                            path.display()
-                        );
-                        None
-                    }
-                    Err(e) => {
-                        return Err(
-                            anyhow::Error::new(e).context(crate::error::BuildError::GitCommitedTs)
-                        );
-                    }
-                },
-                None => None,
-            };
-            Ok((scrap, commited_ts))
-        })
-        .collect::<ScrapsResult<Vec<(Scrap, Option<i64>)>>>()?;
-
-    Ok((scraps_with_ts, readme_text))
 }
 
 #[cfg(test)]
@@ -215,29 +185,5 @@ mod tests {
             titles,
             HashSet::from(["root".to_string(), "architecture/overview".to_string()])
         );
-    }
-
-    #[test]
-    fn readme_at_project_root_is_partitioned() {
-        let project = TempScrapProject::new();
-        project
-            .add_scrap("README.md", b"# Readme body")
-            .add_scrap("intro.md", b"# Intro");
-
-        let exclude = vec![project.static_dir.clone(), project.output_dir.clone()];
-        let (scraps_with_ts, readme) = to_all_scraps_with_timestamps::<
-            scraps_libs::git::GitCommandImpl,
-        >(&project.project_root, &exclude, None)
-        .unwrap();
-
-        // Only `intro.md` is a scrap; README is returned separately.
-        let titles = collect_titles(
-            &scraps_with_ts
-                .iter()
-                .map(|(s, _)| s.clone())
-                .collect::<Vec<_>>(),
-        );
-        assert_eq!(titles, HashSet::from(["intro".to_string()]));
-        assert_eq!(readme.as_deref(), Some("# Readme body"));
     }
 }

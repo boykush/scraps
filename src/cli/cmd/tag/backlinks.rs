@@ -10,7 +10,7 @@ use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::json::scrap::ScrapKeyJson;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
-use crate::input::file::read_scraps;
+use crate::ir::loader;
 use crate::usecase::tag::lookup_backlinks::usecase::LookupTagBacklinksUsecase;
 
 #[derive(Debug, Serialize, serde::Deserialize)]
@@ -33,7 +33,7 @@ pub fn run(
         path_resolver.output_dir(&config),
     ];
 
-    let scraps = read_scraps::to_all_scraps(&scraps_dir_path, &exclude_dirs)?;
+    let scraps = loader::load_scraps(&scraps_dir_path, &exclude_dirs)?;
     let usecase = LookupTagBacklinksUsecase::new();
     let tag_title = scraps_libs::model::title::Title::from(tag);
     let results = usecase.execute(&scraps, &tag_title)?;
