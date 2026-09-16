@@ -49,6 +49,10 @@ For the bigger picture of what Scraps is and why, see
 ❯ scraps serve      # serve at http://127.0.0.1:1112
 ```
 
+The first command also creates `.scraps/` next to `.scraps.toml`: the
+on-disk [[Reference/IR]] that every command reads the wiki through. It
+ignores itself in git and can be deleted at any time.
+
 The output structure, `README.md` handling, and search index are documented
 in [[Reference/Static Site]]. For deploying, see
 [[How-to/Deploy to GitHub Pages]].

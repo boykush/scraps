@@ -12,7 +12,7 @@ This plugin points MCP-compatible clients at a locally running `scraps mcp serve
         └── repo C  (mcp-server plugin)
 ```
 
-One server backs every repo: no per-repo wiki path, no MCP subprocess per client. The wiki is read per request, so edits are served live.
+One server backs every repo: no per-repo wiki path, no MCP subprocess per client. The wiki is read per request through the on-disk IR, so edits are served live and unchanged scraps are not re-parsed.
 
 ## Install
 
