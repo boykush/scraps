@@ -9,7 +9,7 @@ impl ListTagUsecase {
     pub fn new() -> ListTagUsecase {
         ListTagUsecase
     }
-    pub fn execute(&self, scraps: &[Scrap]) -> ScrapsResult<(Tags, BacklinksMap)> {
+    pub fn execute<'a>(&self, scraps: &'a [Scrap]) -> ScrapsResult<(Tags, BacklinksMap<'a>)> {
         let tags = Tags::new(scraps);
         let backlinks_map = BacklinksMap::new(scraps);
 
@@ -53,7 +53,7 @@ mod tests {
         assert_eq!(
             backlinks_map
                 .get_tag(&tag1)
-                .into_iter()
+                .iter()
                 .map(|s| s.title().clone())
                 .sorted_by_key(|t| t.to_string())
                 .collect_vec(),
@@ -62,7 +62,7 @@ mod tests {
         assert_eq!(
             backlinks_map
                 .get_tag(&tag2)
-                .into_iter()
+                .iter()
                 .map(|s| s.title().clone())
                 .collect_vec(),
             vec![scrap1.title().clone()]
@@ -70,7 +70,7 @@ mod tests {
         assert_eq!(
             backlinks_map
                 .get_tag(&tag3)
-                .into_iter()
+                .iter()
                 .map(|s| s.title().clone())
                 .collect_vec(),
             vec![scrap2.title().clone()]

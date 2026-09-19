@@ -85,7 +85,7 @@ mod tests {
             .map(|s| (s.self_key(), s.md_text().to_string()))
             .collect();
 
-        let details = ScrapDetails::new(&vec![
+        let details = ScrapDetails::new(vec![
             ScrapDetail::new(&scrap1, &None, &base_url, &scrap_texts),
             ScrapDetail::new(&scrap2, &None, &base_url, &scrap_texts),
             ScrapDetail::new(&scrap3, &None, &base_url, &scrap_texts),
@@ -120,7 +120,7 @@ mod tests {
             .map(|s| (s.self_key(), s.md_text().to_string()))
             .collect();
 
-        let details = ScrapDetails::new(&vec![ScrapDetail::new(
+        let details = ScrapDetails::new(vec![ScrapDetail::new(
             &scrap1,
             &None,
             &base_url,

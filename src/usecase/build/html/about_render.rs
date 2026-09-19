@@ -39,7 +39,7 @@ impl AboutRender {
     ) -> ScrapsResult<()> {
         let mut context = templates::context(base_url, metadata);
         templates::insert_site_nav(&mut context, "about", site_nav, backlinks_map);
-        context.insert("readme_content", &ContentTera::from(readme_content.clone()));
+        context.insert("readme_content", &ContentTera::from(readme_content));
 
         let template_name = resolve_template(&self.tera, "about.html", "__builtins/about.html");
         let file_path = self.output_about_dir_path.join("index.html");

@@ -103,9 +103,9 @@ mod tests {
 
     #[test]
     fn it_serializes_direction_and_link_target() {
-        let inbound = vec![Scrap::new("in", &Some(Ctx::from("guide")), "")];
-        let outbound = vec![Scrap::new("out", &None, "")];
-        let graph = ScrapGraph::new("center", &inbound, &outbound, MAX_NODES).unwrap();
+        let inbound = Scrap::new("in", &Some(Ctx::from("guide")), "");
+        let outbound = Scrap::new("out", &None, "");
+        let graph = ScrapGraph::new("center", &[&inbound], &[&outbound], MAX_NODES).unwrap();
 
         let tera = ScrapGraphTera::from(&graph);
 
@@ -124,8 +124,8 @@ mod tests {
 
     #[test]
     fn it_stops_edges_short_of_both_endpoints() {
-        let outbound = vec![Scrap::new("out", &None, "")];
-        let graph = ScrapGraph::new("center", &[], &outbound, MAX_NODES).unwrap();
+        let outbound = Scrap::new("out", &None, "");
+        let graph = ScrapGraph::new("center", &[], &[&outbound], MAX_NODES).unwrap();
 
         let tera = ScrapGraphTera::from(&graph);
 
@@ -141,7 +141,7 @@ mod tests {
     fn it_shortens_a_long_title_but_keeps_it_for_the_tooltip() {
         let long = "a very long scrap title that will not fit on one node";
         let graph =
-            ScrapGraph::new("center", &[], &[Scrap::new(long, &None, "")], MAX_NODES).unwrap();
+            ScrapGraph::new("center", &[], &[&Scrap::new(long, &None, "")], MAX_NODES).unwrap();
 
         let tera = ScrapGraphTera::from(&graph);
 

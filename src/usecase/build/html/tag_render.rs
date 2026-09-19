@@ -5,10 +5,12 @@ use crate::service::tera_render::{render_to_file, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::site_nav::SiteNav;
+use rayon::prelude::*;
 use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::tag::Tag;
 use scraps_libs::slugify;
 use tera::Tera;
+use tracing::{Level, span};
 
 use crate::usecase::build::html::templates;
 
@@ -32,22 +34,36 @@ impl TagRender {
         })
     }
 
+    /// Renders a page for every tag in `site_nav`, all sharing one shell.
     pub fn run(
         &self,
         base_url: &BaseUrl,
         metadata: &HtmlMetadata,
-        tag: &Tag,
         backlinks_map: &BacklinksMap,
         site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
-        let mut context = templates::context(base_url, metadata);
-        templates::insert_site_nav(&mut context, "", site_nav, backlinks_map);
+        let mut shell = templates::context(base_url, metadata);
+        templates::insert_site_nav(&mut shell, "", site_nav, backlinks_map);
+
+        site_nav.tags.iter().par_bridge().try_for_each(|tag| {
+            let _span = span!(Level::INFO, "generate_html_tag").entered();
+            self.render_page(&shell, tag, backlinks_map)
+        })
+    }
+
+    fn render_page(
+        &self,
+        shell: &tera::Context,
+        tag: &Tag,
+        backlinks_map: &BacklinksMap,
+    ) -> ScrapsResult<()> {
+        let mut context = shell.clone();
 
         // insert to context for linked list
         context.insert("tag", &TagTera::new(tag, backlinks_map));
 
         let linked_scraps = backlinks_map.get_tag(tag);
-        context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
+        context.insert("linked_scraps", &LinkScrapsTera::new(linked_scraps));
 
         // Build the slug-based path: `tags/<slug-segment>/<...>.html`. Each
         // segment of a hierarchical tag becomes a directory.
@@ -106,8 +122,6 @@ mod tests {
             chrono_tz::UTC,
             false,
         );
-        // tag
-        let tag1: Tag = "tag 1".into();
 
         // v1: tag pages live under `tags/` (not `scraps/`) and the slug is
         // built per-segment. "tag 1" slugifies to "tag-1".
@@ -116,7 +130,7 @@ mod tests {
         let render = TagRender::new(&static_dir_path, &output_dir_path).unwrap();
 
         render
-            .run(&base_url, &metadata, &tag1, &backlinks_map, &site_nav)
+            .run(&base_url, &metadata, &backlinks_map, &site_nav)
             .unwrap();
 
         let result2 = fs::read_to_string(tag1_html_path).unwrap();
@@ -149,13 +163,12 @@ mod tests {
             false,
         );
 
-        let tag: Tag = "ai/ml".into();
         // Expected path: public/tags/ai/ml.html
         let html_path = output_dir_path.join("tags/ai/ml.html");
 
         let render = TagRender::new(&static_dir_path, &output_dir_path).unwrap();
         render
-            .run(&base_url, &metadata, &tag, &backlinks_map, &site_nav)
+            .run(&base_url, &metadata, &backlinks_map, &site_nav)
             .unwrap();
 
         let body = fs::read_to_string(html_path).unwrap();

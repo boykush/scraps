@@ -29,36 +29,32 @@ impl ScrapDetail {
         }
     }
 
-    pub fn scrap(&self) -> Scrap {
-        self.v.clone()
+    pub fn scrap(&self) -> &Scrap {
+        &self.v
     }
 
     pub fn commited_ts(&self) -> Option<i64> {
         self.commited_ts
     }
 
-    pub fn content(&self) -> Content {
-        self.content.clone()
+    pub fn content(&self) -> &Content {
+        &self.content
     }
 }
 
 pub struct ScrapDetails(Vec<ScrapDetail>);
 
 impl ScrapDetails {
-    pub fn new(scraps: &Vec<ScrapDetail>) -> ScrapDetails {
-        ScrapDetails(scraps.to_owned())
+    pub fn new(scrap_details: Vec<ScrapDetail>) -> ScrapDetails {
+        ScrapDetails(scrap_details)
     }
 
-    pub fn to_vec(&self) -> Vec<ScrapDetail> {
-        self.0.clone()
+    pub fn as_slice(&self) -> &[ScrapDetail] {
+        &self.0
     }
 
     pub fn to_scraps(&self) -> Vec<Scrap> {
-        self.0
-            .clone()
-            .into_iter()
-            .map(|sc| sc.scrap())
-            .collect_vec()
+        self.0.iter().map(|sc| sc.scrap().clone()).collect_vec()
     }
 
     pub fn len(&self) -> usize {
