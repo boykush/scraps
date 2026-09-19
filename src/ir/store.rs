@@ -133,9 +133,11 @@ mod tests {
 
         store.save(&IrFile::new(vec![], vec![])).unwrap();
         assert_eq!(fs::read_to_string(dir.join(".gitignore")).unwrap(), "*\n");
-        assert!(fs::read_to_string(dir.join("CACHEDIR.TAG"))
-            .unwrap()
-            .starts_with("Signature: 8a477f597d28d172789f06886806bc55"));
+        assert!(
+            fs::read_to_string(dir.join("CACHEDIR.TAG"))
+                .unwrap()
+                .starts_with("Signature: 8a477f597d28d172789f06886806bc55")
+        );
 
         fs::write(dir.join(".gitignore"), "custom\n").unwrap();
         store.save(&IrFile::new(vec![], vec![])).unwrap();

@@ -40,7 +40,7 @@ impl SearchIndexRender {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use rstest::rstest;
     use std::fs;
     use url::Url;
@@ -69,7 +69,8 @@ mod tests {
         let result = fs::read_to_string(project.output_path("search_index.json")).unwrap();
         assert_eq!(
             result,
-            "[{ \"title\": \"scrap1\", \"url\": \"http://localhost:1112/scraps/scrap1.html\" },{ \"title\": \"Context/scrap2\", \"url\": \"http://localhost:1112/scraps/context/scrap2.html\" }]");
+            "[{ \"title\": \"scrap1\", \"url\": \"http://localhost:1112/scraps/scrap1.html\" },{ \"title\": \"Context/scrap2\", \"url\": \"http://localhost:1112/scraps/context/scrap2.html\" }]"
+        );
     }
 
     #[rstest]

@@ -1,5 +1,5 @@
-use chrono::format::StrftimeItems;
 use chrono::DateTime;
+use chrono::format::StrftimeItems;
 use chrono_tz::Tz;
 use tera::{Error, Kwargs, State, Tera, TeraResult, Value};
 

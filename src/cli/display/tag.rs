@@ -1,8 +1,8 @@
 use std::fmt;
 
-use crate::error::{anyhow::Context, CliError, ScrapsResult};
+use crate::error::{CliError, ScrapsResult, anyhow::Context};
 use colored::Colorize;
-use comfy_table::{presets::NOTHING, Cell, CellAlignment, Table};
+use comfy_table::{Cell, CellAlignment, Table, presets::NOTHING};
 use scraps_libs::{
     model::{base_url::BaseUrl, tag::Tag},
     slugify,

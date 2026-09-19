@@ -1,7 +1,7 @@
 use std::cmp::Reverse;
 
-use fuzzy_matcher::skim::SkimMatcherV2;
 use fuzzy_matcher::FuzzyMatcher;
+use fuzzy_matcher::skim::SkimMatcherV2;
 
 use super::engine::{SearchEngine, SearchLogic};
 use super::result::SearchItem;

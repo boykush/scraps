@@ -1,4 +1,4 @@
-use comrak::{nodes::NodeValue, parse_document, Arena};
+use comrak::{Arena, nodes::NodeValue, parse_document};
 use serde_json::{Map, Number, Value};
 use yaml_rust2::yaml::{Yaml, YamlLoader};
 

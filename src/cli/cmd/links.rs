@@ -117,7 +117,7 @@ pub fn run(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use rstest::rstest;
 
     #[rstest]
@@ -169,10 +169,12 @@ mod tests {
         let titles: Vec<&str> = response.results.iter().map(|r| r.title.as_str()).collect();
         assert!(titles.contains(&"cargo"));
         assert!(titles.contains(&"clippy"));
-        assert!(response
-            .results
-            .iter()
-            .all(|r| r.kind == LinkRefKindJson::Link));
+        assert!(
+            response
+                .results
+                .iter()
+                .all(|r| r.kind == LinkRefKindJson::Link)
+        );
         assert!(response.results.iter().all(|r| r.heading.is_none()));
     }
 

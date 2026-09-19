@@ -13,16 +13,16 @@ mod task_items;
 mod wiki_ref;
 mod wikilinks;
 
-pub use code_blocks::{code_blocks, CodeBlock};
-pub use embeds::{embeds, EmbedRef};
+pub use code_blocks::{CodeBlock, code_blocks};
+pub use embeds::{EmbedRef, embeds};
 #[cfg(feature = "frontmatter")]
 pub use facts::ScrapFacts;
 #[cfg(feature = "frontmatter")]
 pub use frontmatter::frontmatter;
-pub use headings::{headings, Heading};
+pub use headings::{Heading, headings};
 pub use images::images;
 pub use section::{heading_slug, section};
-pub use tags::{tags, TagRef};
-pub use task_items::{task_items, TaskItem, TaskStatus};
-pub use wiki_ref::{wiki_refs, WikiRef};
-pub use wikilinks::{wikilinks, WikiLinkRef};
+pub use tags::{TagRef, tags};
+pub use task_items::{TaskItem, TaskStatus, task_items};
+pub use wiki_ref::{WikiRef, wiki_refs};
+pub use wikilinks::{WikiLinkRef, wikilinks};

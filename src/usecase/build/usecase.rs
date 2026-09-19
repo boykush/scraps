@@ -7,7 +7,7 @@ use scraps_libs::{
     html::{self, EmbedMode},
     model::{scrap::Scrap, tags::Tags},
 };
-use tracing::{span, Level};
+use tracing::{Level, span};
 
 use super::model::{
     backlinks_map::BacklinksMap,

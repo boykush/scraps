@@ -1,9 +1,9 @@
-use crate::error::{anyhow::Context, BuildError, ScrapsResult};
-use once_cell::sync::Lazy;
+use crate::error::{BuildError, ScrapsResult, anyhow::Context};
 use scraps_libs::model::base_url::BaseUrl;
+use std::sync::LazyLock;
 use tera::Tera;
 
-static SEARCH_INDEX_TERA: Lazy<Tera> = Lazy::new(|| {
+static SEARCH_INDEX_TERA: LazyLock<Tera> = LazyLock::new(|| {
     let mut tera = Tera::default();
     crate::service::tera_filters::register(&mut tera);
     tera.add_raw_templates(vec![(

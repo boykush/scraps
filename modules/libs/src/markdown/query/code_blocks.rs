@@ -1,6 +1,7 @@
 use comrak::{
+    Arena,
     nodes::{AstNode, NodeCodeBlock, NodeValue},
-    parse_document, Arena,
+    parse_document,
 };
 
 use super::common::options;

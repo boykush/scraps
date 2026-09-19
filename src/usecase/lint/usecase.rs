@@ -128,9 +128,11 @@ mod tests {
             .execute(&scraps, &[LintRuleName::DeadEnd], Vec::new())
             .unwrap();
 
-        assert!(warnings
-            .iter()
-            .all(|w| w.rule_name == LintRuleName::DeadEnd));
+        assert!(
+            warnings
+                .iter()
+                .all(|w| w.rule_name == LintRuleName::DeadEnd)
+        );
         assert!(!warnings.is_empty());
     }
 
@@ -158,9 +160,11 @@ mod tests {
             .execute(&scraps, &[], vec![Box::new(stale_rule)])
             .unwrap();
 
-        assert!(warnings
-            .iter()
-            .all(|w| w.rule_name != LintRuleName::StaleByGit));
+        assert!(
+            warnings
+                .iter()
+                .all(|w| w.rule_name != LintRuleName::StaleByGit)
+        );
     }
 
     #[test]
@@ -192,8 +196,10 @@ mod tests {
             .unwrap();
 
         assert!(!warnings.is_empty());
-        assert!(warnings
-            .iter()
-            .all(|w| w.rule_name == LintRuleName::StaleByGit));
+        assert!(
+            warnings
+                .iter()
+                .all(|w| w.rule_name == LintRuleName::StaleByGit)
+        );
     }
 }

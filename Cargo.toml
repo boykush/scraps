@@ -1,6 +1,6 @@
 [workspace]
 [workspace.package]
-edition = "2021"
+edition = "2024"
 authors = ["boykush <boykush315@gmail.com>"]
 license = "MIT"
 version = "2.4.0"
@@ -8,7 +8,7 @@ description = "Scraps is a portable CLI knowledge hub for managing interconnecte
 homepage = "https://boykush.github.io/scraps"
 repository = "https://github.com/boykush/scraps"
 documentation = "https://boykush.github.io/scraps"
-rust-version = "1.92"
+rust-version = "1.98"
 [workspace.dependencies.scraps_libs]
 version = "2.4.0"
 path = "modules/libs"
@@ -21,12 +21,10 @@ serde = { version = "=1.0.229", features = ["derive"] }
 # preserve_order keeps frontmatter keys in the order the author wrote them,
 # which is the point of passing them through untouched.
 serde_json = { version = "=1.0.151", features = ["preserve_order"] }
-toml = "=1.1.6"
 rayon = "=1.12.0"
 clap = { version = "=4.6.7", features = ["derive", "env"] }
 config = { version = "=0.15.25", features = ["toml"] }
 tera = { version = "=2.4.0", features = ["glob_fs"] }
-once_cell = "=1.21.4"
 chrono = "=0.4.45"
 chrono-tz = { version = "=0.10.4", features = ["serde"] }
 colored = "=3.1.1"
@@ -46,8 +44,6 @@ rmcp = { version = "=3.3.0", features = [
 schemars = "=1.2.2"
 rstest = "=0.27.0"
 tempfile = "=3.27.0"
-tokio-util = "=0.7.19"
-futures = "=0.3.34"
 annotate-snippets = "=0.12.16"
 comfy-table = { version = "=8.0.0", features = ["custom_styling"] }
 
@@ -79,14 +75,12 @@ url.workspace = true
 itertools.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-toml.workspace = true
 rayon.workspace = true
 anyhow.workspace = true
 thiserror.workspace = true
 clap.workspace = true
 config.workspace = true
 tera.workspace = true
-once_cell.workspace = true
 chrono.workspace = true
 chrono-tz.workspace = true
 colored.workspace = true
@@ -110,5 +104,3 @@ scraps_libs.features = ["git_test"]
 rstest.workspace = true
 tempfile.workspace = true
 rmcp = { workspace = true, features = ["client", "server", "transport-async-rw"] }
-tokio-util.workspace = true
-futures.workspace = true

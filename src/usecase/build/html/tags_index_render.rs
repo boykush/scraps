@@ -50,7 +50,7 @@ impl TagsIndexRender {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use crate::usecase::build::model::backlinks_map::BacklinksMap;
     use rstest::rstest;
     use scraps_libs::{lang::LangCode, model::base_url::BaseUrl};

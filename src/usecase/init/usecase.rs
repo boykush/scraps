@@ -1,5 +1,5 @@
 use crate::constants::CONFIG_FILE_NAME;
-use crate::error::{anyhow::Context, InitError, ScrapsResult};
+use crate::error::{InitError, ScrapsResult, anyhow::Context};
 use std::{fs, path::Path};
 
 pub struct InitUsecase;
@@ -27,7 +27,7 @@ impl Default for InitUsecase {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_fixtures::{simple_temp_dir, SimpleTempDir};
+    use crate::test_fixtures::{SimpleTempDir, simple_temp_dir};
     use rstest::rstest;
 
     use super::*;

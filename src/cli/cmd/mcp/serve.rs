@@ -9,7 +9,7 @@ use crate::{
 use rmcp::ServiceExt;
 use tokio::io::{stdin, stdout};
 use tokio::net::TcpListener;
-use tracing::{info, Level};
+use tracing::{Level, info};
 use tracing_subscriber::FmtSubscriber;
 
 pub async fn run(

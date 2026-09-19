@@ -1,6 +1,6 @@
 use crate::ir::loader;
 use crate::mcp::json::scrap::ScrapKeyJson;
-use crate::usecase::todo::usecase::{status_label, StatusFilter, TodoUsecase};
+use crate::usecase::todo::usecase::{StatusFilter, TodoUsecase, status_label};
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
 use rmcp::model::{CallToolResult, ContentBlock};

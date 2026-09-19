@@ -4,7 +4,7 @@ use scraps_libs::markdown::query::WikiRef;
 use scraps_libs::model::{key::ScrapKey, scrap::Scrap, tags::Tags};
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
-use crate::usecase::lint::rule::{scrap_relative_path, LintRule, LintRuleName, LintWarning};
+use crate::usecase::lint::rule::{LintRule, LintRuleName, LintWarning, scrap_relative_path};
 
 pub struct OverlinkingRule;
 

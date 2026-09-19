@@ -49,7 +49,7 @@ impl AboutRender {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use rstest::rstest;
     use scraps_libs::html::{self, EmbedMode};
     use scraps_libs::{

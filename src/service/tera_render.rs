@@ -4,7 +4,7 @@ use std::path::Path;
 
 use tera::{Context, Tera};
 
-use crate::error::{anyhow::Context as _, BuildError, ScrapsResult};
+use crate::error::{BuildError, ScrapsResult, anyhow::Context as _};
 
 /// Render `template_name` into `file_path`, creating parent directories first
 /// so callers can write into nested context/tag paths.
@@ -46,7 +46,7 @@ pub fn resolve_template<'a>(tera: &Tera, user: &'a str, builtin: &'a str) -> &'a
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use rstest::rstest;
 
     fn tera_with(templates: Vec<(&str, &str)>) -> Tera {
@@ -79,10 +79,12 @@ mod tests {
         let result = render_to_file(&tera, "page.html", &Context::new(), &file_path);
 
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains(&file_path.to_string_lossy().to_string()));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains(&file_path.to_string_lossy().to_string())
+        );
     }
 
     #[rstest]

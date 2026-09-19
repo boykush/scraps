@@ -30,7 +30,7 @@ use tempfile::TempDir;
 /// }
 /// ```
 pub struct TempScrapProject {
-    #[allow(dead_code)]
+    #[expect(dead_code, reason = "held only so the directory is removed on drop")]
     temp_dir: TempDir,
     /// Wiki root. In v1 this is the project root itself.
     pub scraps_dir: PathBuf,
@@ -182,7 +182,7 @@ pub fn temp_scrap_project() -> TempScrapProject {
 /// }
 /// ```
 pub struct SimpleTempDir {
-    #[allow(dead_code)]
+    #[expect(dead_code, reason = "held only so the directory is removed on drop")]
     temp_dir: TempDir,
     pub path: PathBuf,
 }

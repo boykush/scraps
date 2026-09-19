@@ -6,7 +6,7 @@ use crate::service::tera_render::{render_to_file, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::scrap_detail::ScrapDetail;
-use crate::usecase::build::model::scrap_graph::{ScrapGraph, MAX_NODES};
+use crate::usecase::build::model::scrap_graph::{MAX_NODES, ScrapGraph};
 use crate::usecase::build::model::site_nav::SiteNav;
 use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::file::ScrapFileStem;

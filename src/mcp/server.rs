@@ -1,23 +1,23 @@
 use std::path::PathBuf;
 
-use super::tools::get_scrap::{get_scrap, GetScrapRequest};
+use super::tools::get_scrap::{GetScrapRequest, get_scrap};
 use super::tools::list_frontmatter::list_frontmatter;
 use super::tools::list_tags::list_tags;
-use super::tools::list_todos::{list_todos, ListTodosRequest};
-use super::tools::lookup_scrap_backlinks::{lookup_scrap_backlinks, LookupScrapBacklinksRequest};
-use super::tools::lookup_scrap_links::{lookup_scrap_links, LookupScrapLinksRequest};
+use super::tools::list_todos::{ListTodosRequest, list_todos};
+use super::tools::lookup_scrap_backlinks::{LookupScrapBacklinksRequest, lookup_scrap_backlinks};
+use super::tools::lookup_scrap_links::{LookupScrapLinksRequest, lookup_scrap_links};
 use super::tools::lookup_scrap_neighborhood::{
-    lookup_scrap_neighborhood, LookupScrapNeighborhoodRequest,
+    LookupScrapNeighborhoodRequest, lookup_scrap_neighborhood,
 };
-use super::tools::lookup_tag_backlinks::{lookup_tag_backlinks, LookupTagBacklinksRequest};
+use super::tools::lookup_tag_backlinks::{LookupTagBacklinksRequest, lookup_tag_backlinks};
 use super::tools::orient::orient;
-use super::tools::search_scraps::{search_scraps, SearchRequest};
+use super::tools::search_scraps::{SearchRequest, search_scraps};
+use rmcp::handler::server::ServerHandler;
 use rmcp::handler::server::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
-use rmcp::handler::server::ServerHandler;
 use rmcp::model::{CallToolResult, ServerCapabilities, ServerInfo};
 use rmcp::service::RequestContext;
-use rmcp::{tool, tool_handler, tool_router, ErrorData, RoleServer};
+use rmcp::{ErrorData, RoleServer, tool, tool_handler, tool_router};
 
 pub struct ScrapsServer {
     tool_router: ToolRouter<ScrapsServer>,
@@ -168,9 +168,9 @@ impl ServerHandler for ScrapsServer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
-    use rmcp::model::CallToolRequestParams;
+    use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use rmcp::ServiceExt;
+    use rmcp::model::CallToolRequestParams;
     use rstest::rstest;
 
     #[rstest]
@@ -346,10 +346,10 @@ mod tests {
         let client = ().serve(client_stream).await.unwrap();
 
         let mut params = CallToolRequestParams::new(name.to_string());
-        if let Some(args) = arguments.as_object() {
-            if !args.is_empty() {
-                params = params.with_arguments(args.clone());
-            }
+        if let Some(args) = arguments.as_object()
+            && !args.is_empty()
+        {
+            params = params.with_arguments(args.clone());
         }
         let result = client.call_tool(params).await.unwrap();
 

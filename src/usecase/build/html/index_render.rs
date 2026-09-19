@@ -2,7 +2,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use crate::error::BuildError;
-use crate::error::{anyhow::Context, ScrapsResult};
+use crate::error::{ScrapsResult, anyhow::Context};
 use crate::service::tera_render::{render_to_file, resolve_template, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
@@ -12,7 +12,7 @@ use crate::usecase::build::model::site_nav::SiteNav;
 use crate::usecase::build::model::sort::SortKey;
 use scraps_libs::model::base_url::BaseUrl;
 use tera::Tera;
-use tracing::{span, Level};
+use tracing::{Level, span};
 
 use crate::usecase::build::html::templates;
 
@@ -166,7 +166,7 @@ impl IndexRender {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use rstest::rstest;
     use std::fs;
     use url::Url;
