@@ -2,10 +2,10 @@ use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 
 use comrak::{
-    format_html,
+    Arena, Options, format_html,
     nodes::{AstNode, NodeCodeBlock, NodeLink, NodeValue, NodeWikiLink},
     options::{Extension, Render},
-    parse_document, Arena, Options,
+    parse_document,
 };
 use url::Url;
 
@@ -393,7 +393,10 @@ mod tests {
         "#[[Markdown]]",
         "<p>#<a href=\"http://localhost:1112/tags/markdown.html\">Markdown</a></p>\n"
     )]
-    #[case::nested("#[[Programming/Rust]]", "<p>#<a href=\"http://localhost:1112/tags/programming/rust.html\">Programming/Rust</a></p>\n")]
+    #[case::nested(
+        "#[[Programming/Rust]]",
+        "<p>#<a href=\"http://localhost:1112/tags/programming/rust.html\">Programming/Rust</a></p>\n"
+    )]
     fn it_to_html_tag_link(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
         let content = to_content(input, &base_url, EmbedMode::Preserve);
         assert_eq!(content.to_string(), expected);

@@ -1,6 +1,6 @@
 [package]
 name = "scraps_libs"
-edition = "2021"
+edition.workspace = true
 version = "2.4.0"
 authors.workspace = true
 license.workspace = true
@@ -12,7 +12,6 @@ rust-version.workspace = true
 
 [dependencies]
 url.workspace = true
-itertools.workspace = true
 comrak = { version = "=0.55.0", default-features = false }
 iso639_enum = "=0.6.0"
 fuzzy-matcher = { version = "=0.3.7", optional = true }

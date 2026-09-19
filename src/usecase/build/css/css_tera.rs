@@ -1,12 +1,12 @@
-use crate::error::{anyhow::Context, BuildError, ScrapsResult};
-use once_cell::sync::Lazy;
+use crate::error::{BuildError, ScrapsResult, anyhow::Context};
+use std::sync::LazyLock;
 use tera::Tera;
 
 use crate::usecase::build::model::color_scheme::ColorScheme;
 
 use super::serde::color_scheme::ColorSchemeTera;
 
-static CSS_TERA: Lazy<Tera> = Lazy::new(|| {
+static CSS_TERA: LazyLock<Tera> = LazyLock::new(|| {
     let mut tera = Tera::default();
     crate::service::tera_filters::register(&mut tera);
     tera.add_raw_templates(vec![

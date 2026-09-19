@@ -10,7 +10,7 @@ use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 use crate::ir::loader;
-use crate::usecase::todo::usecase::{status_label, StatusFilter, TodoUsecase};
+use crate::usecase::todo::usecase::{StatusFilter, TodoUsecase, status_label};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct TodoScrapJson {
@@ -108,7 +108,7 @@ pub fn run(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use rstest::rstest;
 
     #[rstest]

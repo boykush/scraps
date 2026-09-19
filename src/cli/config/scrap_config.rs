@@ -1,5 +1,5 @@
 use crate::cli::path_resolver::PathResolver;
-use crate::error::{anyhow::Context, CliError, ScrapsResult};
+use crate::error::{CliError, ScrapsResult, anyhow::Context};
 use crate::usecase::build::model::{
     build_config::BuildConfig, color_scheme::ColorScheme, css::CssMetadata, html::HtmlMetadata,
     list_view_configs::ListViewConfigs, paging::Paging,

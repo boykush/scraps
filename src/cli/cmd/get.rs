@@ -144,7 +144,7 @@ pub fn run(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use rstest::rstest;
     use serde_json::Value;
 
@@ -351,10 +351,12 @@ mod tests {
 
         let result = run_get("Guide", None, Some("Missing"), None, &project);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("Heading not found"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("Heading not found")
+        );
     }
 
     #[rstest]

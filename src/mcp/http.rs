@@ -2,7 +2,7 @@ use std::convert::Infallible;
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use http_body_util::{combinators::BoxBody, BodyExt, Full};
+use http_body_util::{BodyExt, Full, combinators::BoxBody};
 use hyper::body::{Bytes, Incoming};
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
@@ -88,7 +88,7 @@ fn not_found() -> Response<BoxBody<Bytes, Infallible>> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use http_body_util::{BodyExt, Full};
     use hyper::header::{ACCEPT, CONTENT_TYPE, HOST};
     use hyper::{Method, Request, StatusCode};
@@ -190,10 +190,12 @@ mod tests {
 
         assert_eq!(status, StatusCode::OK);
         let response: serde_json::Value = serde_json::from_str(&body).unwrap();
-        assert!(response["result"]["instructions"]
-            .as_str()
-            .unwrap()
-            .contains("Scraps wiki"));
+        assert!(
+            response["result"]["instructions"]
+                .as_str()
+                .unwrap()
+                .contains("Scraps wiki")
+        );
         assert!(response["result"]["capabilities"]["tools"].is_object());
 
         server_handle.abort();

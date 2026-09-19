@@ -285,11 +285,7 @@ impl GraphNode {
     /// above its node and spread both ways, which is the one shape the
     /// vertical declutter pass cannot keep clear of its neighbours.
     pub fn label_anchor(&self, center_x: f32) -> &'static str {
-        if self.x < center_x {
-            "end"
-        } else {
-            "start"
-        }
+        if self.x < center_x { "end" } else { "start" }
     }
 
     pub fn label_x(&self, center_x: f32) -> f32 {
@@ -412,12 +408,10 @@ mod tests {
             .map(|n| n.y)
             .collect();
         ys.sort_by(f32::total_cmp);
-        for pair in ys.windows(2) {
+        for [a, b] in ys.array_windows() {
             assert!(
-                pair[1] - pair[0] >= LABEL_GAP - 0.01,
-                "labels {} and {} are too close",
-                pair[0],
-                pair[1]
+                b - a >= LABEL_GAP - 0.01,
+                "labels {a} and {b} are too close"
             );
         }
     }

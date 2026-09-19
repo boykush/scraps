@@ -4,8 +4,9 @@
 //! occurrence by the prefix immediately attached to the `[[`.
 
 use comrak::{
+    Arena,
     nodes::{NodeValue, NodeWikiLink},
-    parse_document, Arena,
+    parse_document,
 };
 
 use super::common::{collect_text, line_col_to_byte, line_starts, options, parse_wikilink_url};
@@ -117,6 +118,7 @@ fn expose_embed_wikilinks(text: &str) -> String {
 mod tests {
     use super::*;
     use rstest::rstest;
+    use std::assert_matches;
 
     fn link(ctx_path: &[&str], title: &str) -> WikiLinkRef {
         WikiLinkRef {
@@ -143,7 +145,7 @@ mod tests {
         let expected: Vec<String> = path.iter().map(|s| s.to_string()).collect();
         let res = wiki_refs(input);
         assert_eq!(res.len(), 1);
-        assert!(matches!(&res[0], WikiRef::Tag(t) if t.path == expected));
+        assert_matches!(&res[0], WikiRef::Tag(t) if t.path == expected);
     }
 
     #[rstest]
@@ -152,7 +154,7 @@ mod tests {
     fn it_classifies_embed_only(#[case] input: &str, #[case] title: &str) {
         let res = wiki_refs(input);
         assert_eq!(res.len(), 1);
-        assert!(matches!(&res[0], WikiRef::Embed(e) if e.title == title));
+        assert_matches!(&res[0], WikiRef::Embed(e) if e.title == title);
     }
 
     #[rstest]
@@ -163,9 +165,9 @@ mod tests {
     fn it_disambiguates_link_tag_embed(#[case] input: &str) {
         let res = wiki_refs(input);
         assert_eq!(res.len(), 3);
-        assert!(matches!(&res[0], WikiRef::Link(r) if r.title == "scrap"));
-        assert!(matches!(&res[1], WikiRef::Tag(t) if t.path == vec!["ai".to_string()]));
-        assert!(matches!(&res[2], WikiRef::Embed(e) if e.title == "paper"));
+        assert_matches!(&res[0], WikiRef::Link(r) if r.title == "scrap");
+        assert_matches!(&res[1], WikiRef::Tag(t) if t.path == vec!["ai".to_string()]);
+        assert_matches!(&res[2], WikiRef::Embed(e) if e.title == "paper");
     }
 
     #[rstest]
@@ -182,9 +184,9 @@ mod tests {
     fn it_handles_unicode_inside_brackets() {
         let res = wiki_refs("[[日本語]] and #[[プログラミング]] and ![[論文]]");
         assert_eq!(res.len(), 3);
-        assert!(matches!(&res[0], WikiRef::Link(r) if r.title == "日本語"));
-        assert!(matches!(&res[1], WikiRef::Tag(t) if t.path == vec!["プログラミング".to_string()]));
-        assert!(matches!(&res[2], WikiRef::Embed(e) if e.title == "論文"));
+        assert_matches!(&res[0], WikiRef::Link(r) if r.title == "日本語");
+        assert_matches!(&res[1], WikiRef::Tag(t) if t.path == vec!["プログラミング".to_string()]);
+        assert_matches!(&res[2], WikiRef::Embed(e) if e.title == "論文");
     }
 
     #[test]

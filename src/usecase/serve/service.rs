@@ -6,13 +6,13 @@ use std::{
     pin::Pin,
 };
 
-use crate::error::{anyhow::Context, ScrapsError, ServeError};
+use crate::error::{ScrapsError, ServeError, anyhow::Context};
 use http_body_util::Full;
 use hyper::{
+    Request, Response,
     body::{Bytes, Incoming},
     header,
     service::Service,
-    Request, Response,
 };
 use percent_encoding::percent_decode_str;
 

@@ -1,11 +1,11 @@
-use crate::error::{anyhow::Context, BuildError, ScrapsResult};
+use crate::error::{BuildError, ScrapsResult, anyhow::Context};
 use crate::usecase::build::html::cdn_versions::CDN_VERSIONS;
 use crate::usecase::build::html::serde::tags::TagsTera;
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::site_nav::SiteNav;
-use once_cell::sync::Lazy;
 use scraps_libs::model::base_url::BaseUrl;
+use std::sync::LazyLock;
 use tera::Tera;
 
 const BASE: (&str, &str) = ("__builtins/base.html", include_str!("builtins/base.html"));
@@ -14,21 +14,21 @@ const MACROS: (&str, &str) = (
     include_str!("builtins/macros.html"),
 );
 
-static INDEX: Lazy<Tera> =
-    Lazy::new(|| builtins(("__builtins/index.html", include_str!("builtins/index.html"))));
-static ABOUT: Lazy<Tera> =
-    Lazy::new(|| builtins(("__builtins/about.html", include_str!("builtins/about.html"))));
-static SCRAP: Lazy<Tera> =
-    Lazy::new(|| builtins(("__builtins/scrap.html", include_str!("builtins/scrap.html"))));
-static TAG: Lazy<Tera> =
-    Lazy::new(|| builtins(("__builtins/tag.html", include_str!("builtins/tag.html"))));
-static SCRAPS_INDEX: Lazy<Tera> = Lazy::new(|| {
+static INDEX: LazyLock<Tera> =
+    LazyLock::new(|| builtins(("__builtins/index.html", include_str!("builtins/index.html"))));
+static ABOUT: LazyLock<Tera> =
+    LazyLock::new(|| builtins(("__builtins/about.html", include_str!("builtins/about.html"))));
+static SCRAP: LazyLock<Tera> =
+    LazyLock::new(|| builtins(("__builtins/scrap.html", include_str!("builtins/scrap.html"))));
+static TAG: LazyLock<Tera> =
+    LazyLock::new(|| builtins(("__builtins/tag.html", include_str!("builtins/tag.html"))));
+static SCRAPS_INDEX: LazyLock<Tera> = LazyLock::new(|| {
     builtins((
         "__builtins/scraps_index.html",
         include_str!("builtins/scraps_index.html"),
     ))
 });
-static TAGS_INDEX: Lazy<Tera> = Lazy::new(|| {
+static TAGS_INDEX: LazyLock<Tera> = LazyLock::new(|| {
     builtins((
         "__builtins/tags_index.html",
         include_str!("builtins/tags_index.html"),

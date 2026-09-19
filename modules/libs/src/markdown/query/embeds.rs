@@ -1,4 +1,4 @@
-use super::wiki_ref::{wiki_refs, WikiRef};
+use super::wiki_ref::{WikiRef, wiki_refs};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EmbedRef {

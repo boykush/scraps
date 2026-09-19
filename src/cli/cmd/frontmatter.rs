@@ -120,7 +120,7 @@ pub fn run(json: bool, project_path: Option<&Path>, writer: &mut impl Write) -> 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use rstest::rstest;
     use serde_json::json;
 

@@ -113,9 +113,11 @@ mod tests {
     fn it_returns_empty_when_no_scrap_has_frontmatter() {
         let scraps = vec![Scrap::new("a", &None, "# A\n\nJust prose.\n")];
 
-        assert!(FrontmatterUsecase::new()
-            .execute(&scraps)
-            .unwrap()
-            .is_empty());
+        assert!(
+            FrontmatterUsecase::new()
+                .execute(&scraps)
+                .unwrap()
+                .is_empty()
+        );
     }
 }

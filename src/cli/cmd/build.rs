@@ -1,7 +1,7 @@
-use clap_verbosity_flag::{log, Verbosity, WarnLevel};
+use clap_verbosity_flag::{Verbosity, WarnLevel, log};
 use std::path::Path;
 use std::time::Instant;
-use tracing::{span, Level};
+use tracing::{Level, span};
 use tracing_subscriber::fmt::format::FmtSpan;
 
 use crate::cli::progress::ProgressImpl;
@@ -73,7 +73,7 @@ fn execute(git: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_fixtures::{temp_scrap_project, TempScrapProject};
+    use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use rstest::rstest;
     use std::fs;
 

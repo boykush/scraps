@@ -1,6 +1,6 @@
 use scraps_libs::model::file::ScrapFileStem;
 
-use crate::usecase::build::model::scrap_graph::{GraphNode, LinkDir, ScrapGraph, NODE_R};
+use crate::usecase::build::model::scrap_graph::{GraphNode, LinkDir, NODE_R, ScrapGraph};
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeGraphNode {

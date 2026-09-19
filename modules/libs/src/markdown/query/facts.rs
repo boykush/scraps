@@ -1,14 +1,14 @@
-use comrak::{parse_document, Arena};
+use comrak::{Arena, parse_document};
 use serde_json::Value;
 use url::Url;
 
-use super::code_blocks::{code_blocks_in, CodeBlock};
+use super::code_blocks::{CodeBlock, code_blocks_in};
 use super::common::options;
 use super::frontmatter::frontmatter;
-use super::headings::{headings_in, Heading};
+use super::headings::{Heading, headings_in};
 use super::images::images_in;
-use super::task_items::{task_items_in, TaskItem};
-use super::wiki_ref::{wiki_refs, WikiRef};
+use super::task_items::{TaskItem, task_items_in};
+use super::wiki_ref::{WikiRef, wiki_refs};
 
 /// Everything Scraps reads out of one markdown body. Three parses, not one:
 /// wiki refs need the embed-exposed text, frontmatter needs the delimiter

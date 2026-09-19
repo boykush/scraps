@@ -1,6 +1,7 @@
 use comrak::{
+    Arena,
     nodes::{AstNode, NodeValue},
-    parse_document, Arena,
+    parse_document,
 };
 use url::Url;
 

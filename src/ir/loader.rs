@@ -199,11 +199,11 @@ fn stamp<GC: GitCommand + Send + Sync + Copy>(
         .collect::<ScrapsResult<_>>()?;
 
     for (object, looked_up) in wiki.objects.iter_mut().zip(&looked_up) {
-        if let Some(ts) = looked_up {
-            if object.commited_ts != *ts {
-                object.commited_ts = *ts;
-                wiki.dirty = true;
-            }
+        if let Some(ts) = looked_up
+            && object.commited_ts != *ts
+        {
+            object.commited_ts = *ts;
+            wiki.dirty = true;
         }
     }
     if wiki.git_head != head {
@@ -279,10 +279,11 @@ mod tests {
         assert_eq!(paths, vec!["a.md", "b.md"]);
         assert_eq!(ir.links.len(), 2);
         assert!(ir.links.iter().any(|e| e.to.title == "a" && e.resolved));
-        assert!(ir
-            .links
-            .iter()
-            .any(|e| e.to.title == "missing" && !e.resolved));
+        assert!(
+            ir.links
+                .iter()
+                .any(|e| e.to.title == "missing" && !e.resolved)
+        );
         let dir = project.project_root.join(IR_DIR_NAME);
         assert_eq!(fs::read_to_string(dir.join(".gitignore")).unwrap(), "*\n");
     }

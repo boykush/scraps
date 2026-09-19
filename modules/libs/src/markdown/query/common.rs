@@ -1,6 +1,6 @@
 use comrak::{
-    nodes::{AstNode, NodeValue},
     Options,
+    nodes::{AstNode, NodeValue},
 };
 
 pub(super) fn options() -> Options<'static> {

@@ -5,7 +5,7 @@ use scraps_libs::git::GitCommand;
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
-use crate::usecase::lint::rule::{scrap_relative_path, LintRule, LintRuleName, LintWarning};
+use crate::usecase::lint::rule::{LintRule, LintRuleName, LintWarning, scrap_relative_path};
 
 const SECONDS_PER_DAY: i64 = 86_400;
 

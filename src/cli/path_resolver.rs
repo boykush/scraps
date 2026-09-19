@@ -80,7 +80,7 @@ impl PathResolver {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_fixtures::{simple_temp_dir, SimpleTempDir};
+    use crate::test_fixtures::{SimpleTempDir, simple_temp_dir};
     use rstest::rstest;
     use std::env;
 

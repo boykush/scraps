@@ -7,7 +7,7 @@ use scraps_libs::{
 };
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
-use crate::usecase::lint::rule::{scrap_relative_path, LintRule, LintRuleName, LintWarning};
+use crate::usecase::lint::rule::{LintRule, LintRuleName, LintWarning, scrap_relative_path};
 
 /// Detect `[[name#heading]]` references whose `#heading` part doesn't match any
 /// heading in the target scrap.

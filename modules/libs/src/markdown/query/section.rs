@@ -1,4 +1,4 @@
-use comrak::{nodes::NodeValue, parse_document, Arena};
+use comrak::{Arena, nodes::NodeValue, parse_document};
 
 use super::common::{collect_text, line_byte_offset, line_starts, options};
 

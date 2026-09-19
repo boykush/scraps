@@ -92,11 +92,12 @@ fn drop_prefixed_links(line: &str, prefix: char) -> String {
     let mut out = String::new();
     let mut i = 0;
     while i < chars.len() {
-        if chars[i] == prefix && chars.get(i + 1..i + 3) == Some(&['[', '[']) {
-            if let Some(end) = find_close(&chars, i + 3) {
-                i = end + 2;
-                continue;
-            }
+        if chars[i] == prefix
+            && chars.get(i + 1..i + 3) == Some(&['[', '['])
+            && let Some(end) = find_close(&chars, i + 3)
+        {
+            i = end + 2;
+            continue;
         }
         out.push(chars[i]);
         i += 1;
@@ -116,11 +117,7 @@ fn heading_text(line: &str) -> Option<&str> {
     let level = line.len() - rest.len();
     if (1..=6).contains(&level) && rest.starts_with(char::is_whitespace) {
         let text = rest.trim();
-        if text.is_empty() {
-            None
-        } else {
-            Some(text)
-        }
+        if text.is_empty() { None } else { Some(text) }
     } else {
         None
     }
