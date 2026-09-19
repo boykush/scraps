@@ -1,17 +1,11 @@
 use std::collections::HashMap;
 
-use scraps_libs::model::{
-    base_url::BaseUrl, content::Content, key::ScrapKey, scrap::Scrap, tag::Tag,
-};
+use scraps_libs::model::{base_url::BaseUrl, content::Content, key::ScrapKey, scrap::Scrap};
 
 use crate::error::ScrapsResult;
 use crate::usecase::build::model::{
-    backlinks_map::BacklinksMap,
-    css::CssMetadata,
-    html::HtmlMetadata,
-    list_view_configs::ListViewConfigs,
-    scrap_detail::{ScrapDetail, ScrapDetails},
-    site_nav::SiteNav,
+    backlinks_map::BacklinksMap, css::CssMetadata, html::HtmlMetadata,
+    list_view_configs::ListViewConfigs, scrap_detail::ScrapDetails, site_nav::SiteNav,
 };
 
 pub trait HtmlIndexRenderer {
@@ -38,13 +32,13 @@ pub trait HtmlAboutRenderer {
 }
 
 pub trait HtmlScrapRenderer {
-    fn render_scrap(
+    fn render_scraps(
         &self,
         base_url: &BaseUrl,
         html_metadata: &HtmlMetadata,
-        scrap_detail: &ScrapDetail,
+        scrap_details: &ScrapDetails,
         backlinks_map: &BacklinksMap,
-        scraps_by_key: &HashMap<ScrapKey, Scrap>,
+        scraps_by_key: &HashMap<ScrapKey, &Scrap>,
         site_nav: &SiteNav,
     ) -> ScrapsResult<()>;
 }
@@ -72,11 +66,10 @@ pub trait HtmlTagsIndexRenderer {
 }
 
 pub trait HtmlTagRenderer {
-    fn render_tag(
+    fn render_tags(
         &self,
         base_url: &BaseUrl,
         html_metadata: &HtmlMetadata,
-        tag: &Tag,
         backlinks_map: &BacklinksMap,
         site_nav: &SiteNav,
     ) -> ScrapsResult<()>;
@@ -156,13 +149,13 @@ pub mod tests {
     }
 
     impl HtmlScrapRenderer for BuildRendererTest {
-        fn render_scrap(
+        fn render_scraps(
             &self,
             _base_url: &BaseUrl,
             _html_metadata: &HtmlMetadata,
-            _scrap_detail: &ScrapDetail,
+            _scrap_details: &ScrapDetails,
             _backlinks_map: &BacklinksMap,
-            _scraps_by_key: &HashMap<ScrapKey, Scrap>,
+            _scraps_by_key: &HashMap<ScrapKey, &Scrap>,
             _site_nav: &SiteNav,
         ) -> ScrapsResult<()> {
             Ok(())
@@ -196,11 +189,10 @@ pub mod tests {
     }
 
     impl HtmlTagRenderer for BuildRendererTest {
-        fn render_tag(
+        fn render_tags(
             &self,
             _base_url: &BaseUrl,
             _html_metadata: &HtmlMetadata,
-            _tag: &Tag,
             _backlinks_map: &BacklinksMap,
             _site_nav: &SiteNav,
         ) -> ScrapsResult<()> {

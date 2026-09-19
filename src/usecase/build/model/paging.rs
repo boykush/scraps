@@ -1,5 +1,3 @@
-use scraps_libs::model::scrap::Scrap;
-
 #[derive(Clone)]
 pub enum Paging {
     Not,
@@ -7,9 +5,9 @@ pub enum Paging {
 }
 
 impl Paging {
-    pub fn size_with(&self, scraps: &[Scrap]) -> usize {
+    pub fn size_with(&self, scrap_count: usize) -> usize {
         match self {
-            Paging::Not => scraps.len(),
+            Paging::Not => scrap_count,
             Paging::By(size) => size.to_owned(),
         }
     }

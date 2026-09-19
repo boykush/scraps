@@ -30,30 +30,28 @@ struct ContentElementAutolink {
 }
 
 #[derive(Serialize)]
-struct ContentElementTera(#[serde(serialize_with = "serialize_content_element")] ContentElement);
+struct ContentElementTera<'a>(
+    #[serde(serialize_with = "serialize_content_element")] &'a ContentElement,
+);
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct ContentTera(Content);
+pub struct ContentTera<'a>(&'a Content);
 
-impl Serialize for ContentTera {
+impl Serialize for ContentTera<'_> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         let mut state = serializer.serialize_struct("Content", 1)?;
-        let elements: Vec<ContentElementTera> = self
-            .0
-            .elements()
-            .iter()
-            .map(|element| ContentElementTera(element.clone()))
-            .collect();
+        let elements: Vec<ContentElementTera> =
+            self.0.elements().iter().map(ContentElementTera).collect();
         state.serialize_field("elements", &elements)?;
         state.end()
     }
 }
 
-impl From<Content> for ContentTera {
-    fn from(content: Content) -> Self {
+impl<'a> From<&'a Content> for ContentTera<'a> {
+    fn from(content: &'a Content) -> Self {
         ContentTera(content)
     }
 }

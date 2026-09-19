@@ -1,43 +1,57 @@
+/// Built in one pass into one buffer: the build slugifies every link and
+/// tag on every page it renders.
 pub fn by_dash(v: &str) -> String {
-    let trimmed = v.trim();
-    if trimmed.is_empty() {
-        return String::new();
+    let lower = v.trim().to_lowercase();
+    let mut slug = String::with_capacity(lower.len());
+    let mut in_word = false;
+    for c in lower.chars() {
+        if let Some(word) = reserved_word(c) {
+            push_separator(&mut slug);
+            slug.push_str(word);
+            in_word = false;
+        } else if c.is_whitespace() || c == '-' {
+            in_word = false;
+        } else {
+            if !in_word {
+                push_separator(&mut slug);
+                in_word = true;
+            }
+            slug.push(c);
+        }
     }
+    slug
+}
 
-    let lower = trimmed.to_lowercase();
-    // Refer to RFC 3986 for URI encoding https://datatracker.ietf.org/doc/html/rfc3986#section-2.2
-    let with_replacements = lower
-        .replace(':', " colon ")
-        .replace('/', " slash ")
-        .replace('?', " question ")
-        .replace('#', " hash ")
-        .replace('[', " left-bracket ")
-        .replace(']', " right-bracket ")
-        .replace('@', " at ")
-        .replace('!', " exclamation ")
-        .replace('$', " dollar ")
-        .replace('&', " and ")
-        .replace('\'', " single-quote ")
-        .replace('(', " left-parenthesis ")
-        .replace(')', " right-parenthesis ")
-        .replace('*', " asterisk ")
-        .replace('+', " plus ")
-        .replace(',', " comma ")
-        .replace(';', " semicolon ")
-        .replace('=', " equal ");
+fn push_separator(slug: &mut String) {
+    if !slug.is_empty() {
+        slug.push('-');
+    }
+}
 
-    // Replace multiple spaces with single space, then replace space with dash
-    let normalized_spaces = with_replacements
-        .split_whitespace()
-        .collect::<Vec<&str>>()
-        .join("-");
-
-    // Clean up multiple consecutive dashes that might result from adjacent special chars
-    normalized_spaces
-        .split('-')
-        .filter(|s| !s.is_empty())
-        .collect::<Vec<&str>>()
-        .join("-")
+// Refer to RFC 3986 for URI encoding https://datatracker.ietf.org/doc/html/rfc3986#section-2.2
+fn reserved_word(c: char) -> Option<&'static str> {
+    let word = match c {
+        ':' => "colon",
+        '/' => "slash",
+        '?' => "question",
+        '#' => "hash",
+        '[' => "left-bracket",
+        ']' => "right-bracket",
+        '@' => "at",
+        '!' => "exclamation",
+        '$' => "dollar",
+        '&' => "and",
+        '\'' => "single-quote",
+        '(' => "left-parenthesis",
+        ')' => "right-parenthesis",
+        '*' => "asterisk",
+        '+' => "plus",
+        ',' => "comma",
+        ';' => "semicolon",
+        '=' => "equal",
+        _ => return None,
+    };
+    Some(word)
 }
 
 #[cfg(test)]
@@ -61,6 +75,11 @@ mod tests {
         "Hello!!  @@World",
         "hello-exclamation-exclamation-at-at-world"
     )]
+    #[case::dashes_and_spaces_collapse("a - b", "a-b")]
+    #[case::edge_dashes("--a--", "a")]
+    #[case::only_dashes("---", "")]
+    #[case::dashed_replacement_words("[x]", "left-bracket-x-right-bracket")]
+    #[case::ideographic_space("日本\u{3000}語", "日本-語")]
     fn test_by_dash(#[case] input: &str, #[case] expected: &str) {
         assert_eq!(by_dash(input), expected);
     }

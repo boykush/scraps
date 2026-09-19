@@ -111,8 +111,8 @@ impl ScrapGraph {
     /// over the wiki happens here.
     pub fn new(
         center_title: &str,
-        inbound: &[Scrap],
-        outbound: &[Scrap],
+        inbound: &[&Scrap],
+        outbound: &[&Scrap],
         limit: usize,
     ) -> Option<ScrapGraph> {
         let ins: HashSet<ScrapKey> = inbound.iter().map(|scrap| scrap.self_key()).collect();
@@ -323,6 +323,10 @@ mod tests {
         Scrap::new(title, &None, text)
     }
 
+    fn refs(scraps: &[Scrap]) -> Vec<&Scrap> {
+        scraps.iter().collect()
+    }
+
     fn dir_of(graph: &ScrapGraph, title: &str) -> LinkDir {
         graph
             .nodes
@@ -342,7 +346,8 @@ mod tests {
         let inbound = vec![scrap("in", ""), scrap("mutual", "")];
         let outbound = vec![scrap("out", ""), scrap("mutual", "")];
 
-        let graph = ScrapGraph::new("center", &inbound, &outbound, MAX_NODES).unwrap();
+        let graph =
+            ScrapGraph::new("center", &refs(&inbound), &refs(&outbound), MAX_NODES).unwrap();
 
         assert_eq!(graph.nodes.len(), 3);
         assert_eq!(dir_of(&graph, "in"), LinkDir::In);
@@ -356,7 +361,8 @@ mod tests {
         let inbound = vec![scrap("in", "")];
         let outbound = vec![scrap("out", "")];
 
-        let graph = ScrapGraph::new("center", &inbound, &outbound, MAX_NODES).unwrap();
+        let graph =
+            ScrapGraph::new("center", &refs(&inbound), &refs(&outbound), MAX_NODES).unwrap();
 
         let node = |title: &str| {
             graph
@@ -377,7 +383,8 @@ mod tests {
         let inbound: Vec<Scrap> = (0..30).map(|i| scrap(&format!("a{i:02}"), "")).collect();
         let outbound = vec![scrap("zzz", "")];
 
-        let graph = ScrapGraph::new("center", &inbound, &outbound, MAX_NODES).unwrap();
+        let graph =
+            ScrapGraph::new("center", &refs(&inbound), &refs(&outbound), MAX_NODES).unwrap();
 
         assert_eq!(graph.nodes.len(), MAX_NODES);
         assert_eq!(graph.dropped, 31 - MAX_NODES);
@@ -389,8 +396,8 @@ mod tests {
         let forward = vec![scrap("a", ""), scrap("b", ""), scrap("c", "")];
         let reversed = vec![scrap("c", ""), scrap("b", ""), scrap("a", "")];
 
-        let one = ScrapGraph::new("center", &forward, &[], MAX_NODES).unwrap();
-        let other = ScrapGraph::new("center", &reversed, &[], MAX_NODES).unwrap();
+        let one = ScrapGraph::new("center", &refs(&forward), &[], MAX_NODES).unwrap();
+        let other = ScrapGraph::new("center", &refs(&reversed), &[], MAX_NODES).unwrap();
 
         assert_eq!(one, other);
     }
@@ -399,7 +406,7 @@ mod tests {
     fn it_separates_labels_that_share_a_height() {
         let inbound: Vec<Scrap> = (0..12).map(|i| scrap(&format!("in{i:02}"), "")).collect();
 
-        let graph = ScrapGraph::new("center", &inbound, &[], MAX_NODES).unwrap();
+        let graph = ScrapGraph::new("center", &refs(&inbound), &[], MAX_NODES).unwrap();
 
         let mut ys: Vec<f32> = graph
             .nodes
@@ -420,7 +427,7 @@ mod tests {
     fn it_sizes_the_viewbox_around_the_nodes() {
         let inbound: Vec<Scrap> = (0..16).map(|i| scrap(&format!("in{i:02}"), "")).collect();
 
-        let graph = ScrapGraph::new("center", &inbound, &[], MAX_NODES).unwrap();
+        let graph = ScrapGraph::new("center", &refs(&inbound), &[], MAX_NODES).unwrap();
 
         for node in &graph.nodes {
             assert!(node.x > 0.0 && node.x < graph.width);
@@ -433,7 +440,8 @@ mod tests {
         let inbound = vec![scrap("in", ""), scrap("mutual", "")];
         let outbound = vec![scrap("out", ""), scrap("mutual", "")];
 
-        let graph = ScrapGraph::new("center", &inbound, &outbound, MAX_NODES).unwrap();
+        let graph =
+            ScrapGraph::new("center", &refs(&inbound), &refs(&outbound), MAX_NODES).unwrap();
 
         let node = |title: &str| {
             graph

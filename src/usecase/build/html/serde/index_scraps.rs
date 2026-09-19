@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use rayon::prelude::*;
 use scraps_libs::model::file::ScrapFileStem;
 use url::Url;
 
@@ -57,9 +58,11 @@ impl IndexScrapsTera {
         sort_key: &SortKey,
     ) -> IndexScrapsTera {
         let serialize_scraps = scrap_details
-            .to_vec()
-            .into_iter()
-            .map(|s| SerializeIndexScrap::new(&s, backlinks_map));
+            .as_slice()
+            .par_iter()
+            .map(|s| SerializeIndexScrap::new(s, backlinks_map))
+            .collect::<Vec<_>>()
+            .into_iter();
         let sorted = (match sort_key {
             SortKey::CommittedDate => serialize_scraps.sorted_by_key(|s| s.commited_ts).rev(),
             SortKey::LinkedCount => serialize_scraps.sorted_by_key(|s| s.backlinks_count).rev(),
@@ -107,8 +110,7 @@ mod tests {
         let sc2 = ScrapDetail::new(&scrap2, &Some(3), base_url, &scrap_texts);
         let sc3 = ScrapDetail::new(&scrap3, &Some(2), base_url, &scrap_texts);
         let sc4 = ScrapDetail::new(&scrap4, &Some(1), base_url, &scrap_texts);
-        let backlinks_map =
-            BacklinksMap::new(&[sc1.scrap(), sc2.scrap(), sc3.scrap(), sc4.scrap()]);
+        let backlinks_map = BacklinksMap::new(&scraps);
 
         let sscrap1 = SerializeIndexScrap::new(&sc1.clone(), &backlinks_map);
         let sscrap2 = SerializeIndexScrap::new(&sc2.clone(), &backlinks_map);
@@ -117,7 +119,7 @@ mod tests {
 
         // Sort by commited date
         let result1 = IndexScrapsTera::new_with_sort(
-            &ScrapDetails::new(&vec![sc1.clone(), sc2.clone(), sc3.clone(), sc4.clone()]),
+            &ScrapDetails::new(vec![sc1.clone(), sc2.clone(), sc3.clone(), sc4.clone()]),
             &backlinks_map,
             &SortKey::CommittedDate,
         );
@@ -134,7 +136,7 @@ mod tests {
 
         // Sort by linked count
         let result2 = IndexScrapsTera::new_with_sort(
-            &ScrapDetails::new(&vec![sc1.clone(), sc2.clone(), sc3.clone(), sc4.clone()]),
+            &ScrapDetails::new(vec![sc1.clone(), sc2.clone(), sc3.clone(), sc4.clone()]),
             &backlinks_map,
             &SortKey::LinkedCount,
         );

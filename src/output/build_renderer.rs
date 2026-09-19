@@ -1,9 +1,7 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-use scraps_libs::model::{
-    base_url::BaseUrl, content::Content, key::ScrapKey, scrap::Scrap, tag::Tag,
-};
+use scraps_libs::model::{base_url::BaseUrl, content::Content, key::ScrapKey, scrap::Scrap};
 
 use crate::error::ScrapsResult;
 use crate::service::search::render::SearchIndexRender;
@@ -15,12 +13,8 @@ use crate::usecase::build::{
         tags_index_render::TagsIndexRender,
     },
     model::{
-        backlinks_map::BacklinksMap,
-        css::CssMetadata,
-        html::HtmlMetadata,
-        list_view_configs::ListViewConfigs,
-        scrap_detail::{ScrapDetail, ScrapDetails},
-        site_nav::SiteNav,
+        backlinks_map::BacklinksMap, css::CssMetadata, html::HtmlMetadata,
+        list_view_configs::ListViewConfigs, scrap_detail::ScrapDetails, site_nav::SiteNav,
     },
     renderer::{
         CssRenderer, HtmlAboutRenderer, HtmlIndexRenderer, HtmlScrapRenderer,
@@ -98,19 +92,19 @@ impl HtmlAboutRenderer for BuildRendererImpl {
 }
 
 impl HtmlScrapRenderer for BuildRendererImpl {
-    fn render_scrap(
+    fn render_scraps(
         &self,
         base_url: &BaseUrl,
         html_metadata: &HtmlMetadata,
-        scrap_detail: &ScrapDetail,
+        scrap_details: &ScrapDetails,
         backlinks_map: &BacklinksMap,
-        scraps_by_key: &HashMap<ScrapKey, Scrap>,
+        scraps_by_key: &HashMap<ScrapKey, &Scrap>,
         site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
         self.scrap_render.run(
             base_url,
             html_metadata,
-            scrap_detail,
+            scrap_details,
             backlinks_map,
             scraps_by_key,
             site_nav,
@@ -152,16 +146,15 @@ impl HtmlTagsIndexRenderer for BuildRendererImpl {
 }
 
 impl HtmlTagRenderer for BuildRendererImpl {
-    fn render_tag(
+    fn render_tags(
         &self,
         base_url: &BaseUrl,
         html_metadata: &HtmlMetadata,
-        tag: &Tag,
         backlinks_map: &BacklinksMap,
         site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
         self.tag_render
-            .run(base_url, html_metadata, tag, backlinks_map, site_nav)
+            .run(base_url, html_metadata, backlinks_map, site_nav)
     }
 }
 

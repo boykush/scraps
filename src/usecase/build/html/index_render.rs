@@ -10,6 +10,7 @@ use crate::usecase::build::model::list_view_configs::ListViewConfigs;
 use crate::usecase::build::model::scrap_detail::ScrapDetails;
 use crate::usecase::build::model::site_nav::SiteNav;
 use crate::usecase::build::model::sort::SortKey;
+use rayon::prelude::*;
 use scraps_libs::model::base_url::BaseUrl;
 use tera::Tera;
 use tracing::{Level, span};
@@ -44,8 +45,7 @@ impl IndexRender {
         backlinks_map: &BacklinksMap,
         site_nav: &SiteNav,
     ) -> ScrapsResult<usize> {
-        let scraps = &scrap_details.to_scraps();
-        let paging_size = list_view_configs.paging.size_with(scraps);
+        let paging_size = list_view_configs.paging.size_with(scrap_details.len());
         let shared_context = templates::context(base_url, metadata);
 
         // Every sort view is always generated; a sort key is a URL, not a
@@ -108,7 +108,7 @@ impl IndexRender {
         }
 
         chunks
-            .iter()
+            .par_iter()
             .skip(1)
             .enumerate()
             .try_for_each(|(idx, page_scraps)| {
@@ -206,7 +206,7 @@ mod tests {
             .collect();
         let sc1 = ScrapDetail::new(&scrap1, &Some(1), base_url, &scrap_texts);
         let sc2 = ScrapDetail::new(&scrap2, &Some(0), base_url, &scrap_texts);
-        let scrap_details = ScrapDetails::new(&vec![sc1.to_owned(), sc2.to_owned()]);
+        let scrap_details = ScrapDetails::new(vec![sc1.to_owned(), sc2.to_owned()]);
 
         let scraps = scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(&scraps);
@@ -283,7 +283,7 @@ mod tests {
         let sc2 = ScrapDetail::new(&scrap2, &Some(2), base_url, &scrap_texts);
         let sc3 = ScrapDetail::new(&scrap3, &Some(1), base_url, &scrap_texts);
         let sc4 = ScrapDetail::new(&scrap4, &Some(0), base_url, &scrap_texts);
-        let scrap_details = ScrapDetails::new(&vec![
+        let scrap_details = ScrapDetails::new(vec![
             sc1.to_owned(),
             sc2.to_owned(),
             sc3.to_owned(),
@@ -355,7 +355,7 @@ mod tests {
             .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
             .collect();
         let sc1 = ScrapDetail::new(&scrap1, &Some(0), base_url, &scrap_texts);
-        let scrap_details = ScrapDetails::new(&vec![sc1]);
+        let scrap_details = ScrapDetails::new(vec![sc1]);
         let scraps = scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(&scraps);
         let site_nav = SiteNav::new(

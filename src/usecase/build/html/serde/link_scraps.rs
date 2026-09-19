@@ -24,8 +24,11 @@ impl SerializeLinkScrap {
 pub struct LinkScrapsTera(Vec<SerializeLinkScrap>);
 
 impl LinkScrapsTera {
-    pub fn new(scraps: &[Scrap]) -> LinkScrapsTera {
-        let serialize_scraps = scraps.iter().map(SerializeLinkScrap::new).collect_vec();
+    pub fn new(scraps: &[&Scrap]) -> LinkScrapsTera {
+        let serialize_scraps = scraps
+            .iter()
+            .map(|scrap| SerializeLinkScrap::new(scrap))
+            .collect_vec();
 
         LinkScrapsTera(serialize_scraps)
     }

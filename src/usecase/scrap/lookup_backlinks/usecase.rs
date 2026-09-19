@@ -47,7 +47,7 @@ impl LookupScrapBacklinksUsecase {
 
         // Convert each linking scrap to LookupScrapBacklinksResult
         let results: Vec<LookupScrapBacklinksResult> = linking_scraps
-            .into_iter()
+            .iter()
             .map(|linking_scrap| {
                 let scrap_key = &linking_scrap.self_key();
                 let title: Title = scrap_key.into();

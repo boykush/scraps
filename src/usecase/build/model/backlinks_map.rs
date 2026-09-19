@@ -8,13 +8,15 @@ use scraps_libs::model::{key::ScrapKey, scrap::Scrap, tag::Tag};
 /// aggregation: a scrap tagged `#[[a/b/c]]` appears in the backlinks of
 /// `a/b` and `a` as well.
 #[derive(PartialEq, Debug)]
-pub struct BacklinksMap {
-    scrap_backlinks: HashMap<ScrapKey, Vec<Scrap>>,
-    tag_backlinks: HashMap<Tag, Vec<Scrap>>,
+pub struct BacklinksMap<'a> {
+    scrap_backlinks: HashMap<ScrapKey, Vec<&'a Scrap>>,
+    tag_backlinks: HashMap<Tag, Vec<&'a Scrap>>,
 }
 
-impl BacklinksMap {
-    pub fn new(scraps: &[Scrap]) -> BacklinksMap {
+impl<'a> BacklinksMap<'a> {
+    /// Borrows rather than clones: every rendered page asks for backlinks,
+    /// and a cloned `Scrap` copies its whole parsed body.
+    pub fn new(scraps: &'a [Scrap]) -> BacklinksMap<'a> {
         BacklinksMap {
             scrap_backlinks: Self::gen_scrap_backlinks(scraps),
             tag_backlinks: Self::gen_tag_backlinks(scraps),
@@ -22,30 +24,26 @@ impl BacklinksMap {
     }
 
     /// Backlinks that come from `[[wikilink]]` references between scraps.
-    pub fn get(&self, key: &ScrapKey) -> Vec<Scrap> {
-        self.scrap_backlinks
-            .get(key)
-            .map_or_else(Vec::new, Vec::clone)
+    pub fn get(&self, key: &ScrapKey) -> &[&'a Scrap] {
+        self.scrap_backlinks.get(key).map_or(&[], Vec::as_slice)
     }
 
     /// Backlinks that come from `#[[tag]]` declarations. Includes scraps
     /// tagged at any descendant level via Logseq-style auto-aggregation.
-    pub fn get_tag(&self, tag: &Tag) -> Vec<Scrap> {
-        self.tag_backlinks
-            .get(tag)
-            .map_or_else(Vec::new, Vec::clone)
+    pub fn get_tag(&self, tag: &Tag) -> &[&'a Scrap] {
+        self.tag_backlinks.get(tag).map_or(&[], Vec::as_slice)
     }
 
-    fn gen_scrap_backlinks(scraps: &[Scrap]) -> HashMap<ScrapKey, Vec<Scrap>> {
+    fn gen_scrap_backlinks(scraps: &'a [Scrap]) -> HashMap<ScrapKey, Vec<&'a Scrap>> {
         scraps.iter().fold(HashMap::new(), |mut acc, scrap| {
             for key in scrap.links() {
-                acc.entry(key.clone()).or_default().push(scrap.to_owned());
+                acc.entry(key.clone()).or_default().push(scrap);
             }
             acc
         })
     }
 
-    fn gen_tag_backlinks(scraps: &[Scrap]) -> HashMap<Tag, Vec<Scrap>> {
+    fn gen_tag_backlinks(scraps: &'a [Scrap]) -> HashMap<Tag, Vec<&'a Scrap>> {
         // For each scrap, collect the union of its declared tags and their
         // ancestors (deduped at the scrap level so a scrap tagged with both
         // `#[[a]]` and `#[[a/b]]` is only listed once under `a`).
@@ -58,7 +56,7 @@ impl BacklinksMap {
                 }
             }
             for tag in keys {
-                acc.entry(tag).or_default().push(scrap.to_owned());
+                acc.entry(tag).or_default().push(scrap);
             }
             acc
         })
@@ -85,7 +83,7 @@ mod tests {
         let backlinks_map = BacklinksMap::new(&scraps);
         assert_eq!(
             backlinks_map.get(&Title::from("scrap1").into()),
-            vec![scrap2]
+            vec![&scrap2]
         );
     }
 
@@ -99,13 +97,13 @@ mod tests {
         let backlinks_map = BacklinksMap::new(&scraps);
         assert_eq!(
             backlinks_map.get(&ScrapKey::with_ctx(&"scrap1".into(), &"Context".into())),
-            vec![scrap2.clone(), scrap3.clone()]
+            vec![&scrap2, &scrap3]
         );
         assert_eq!(
             backlinks_map.get(&ScrapKey::with_ctx(&"scrap2".into(), &"Context".into())),
-            vec![scrap3.clone()]
+            vec![&scrap3]
         );
-        assert_eq!(backlinks_map.get(&Title::from("scrap3").into()), vec![]);
+        assert!(backlinks_map.get(&Title::from("scrap3").into()).is_empty());
     }
 
     #[test]
@@ -116,9 +114,9 @@ mod tests {
         let scraps = vec![scrap1.clone(), scrap2.clone(), scrap3];
 
         let backlinks_map = BacklinksMap::new(&scraps);
-        let mut got = backlinks_map.get_tag(&Tag::from("ai"));
+        let mut got = backlinks_map.get_tag(&Tag::from("ai")).to_vec();
         got.sort_by_key(|s| s.title().to_string());
-        assert_eq!(got, vec![scrap1, scrap2]);
+        assert_eq!(got, vec![&scrap1, &scrap2]);
     }
 
     #[test]
@@ -131,19 +129,16 @@ mod tests {
         let backlinks_map = BacklinksMap::new(&scraps);
         assert_eq!(
             backlinks_map.get_tag(&Tag::from("ai/ml/transformer")),
-            vec![scrap.clone()]
+            vec![&scrap]
         );
-        assert_eq!(
-            backlinks_map.get_tag(&Tag::from("ai/ml")),
-            vec![scrap.clone()]
-        );
-        assert_eq!(backlinks_map.get_tag(&Tag::from("ai")), vec![scrap]);
+        assert_eq!(backlinks_map.get_tag(&Tag::from("ai/ml")), vec![&scrap]);
+        assert_eq!(backlinks_map.get_tag(&Tag::from("ai")), vec![&scrap]);
     }
 
     #[test]
     fn it_get_tag_unrelated_returns_empty() {
-        let scrap = Scrap::new("a", &None, "#[[ai]]");
-        let backlinks_map = BacklinksMap::new(&[scrap]);
+        let scraps = [Scrap::new("a", &None, "#[[ai]]")];
+        let backlinks_map = BacklinksMap::new(&scraps);
         assert!(backlinks_map.get_tag(&Tag::from("unrelated")).is_empty());
     }
 
@@ -155,6 +150,6 @@ mod tests {
         let scraps = vec![scrap.clone()];
 
         let backlinks_map = BacklinksMap::new(&scraps);
-        assert_eq!(backlinks_map.get_tag(&Tag::from("ai")), vec![scrap]);
+        assert_eq!(backlinks_map.get_tag(&Tag::from("ai")), vec![&scrap]);
     }
 }

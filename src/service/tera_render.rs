@@ -1,5 +1,4 @@
-use std::fs::{self, File};
-use std::io::{BufWriter, Write};
+use std::fs;
 use std::path::Path;
 
 use tera::{Context, Tera};
@@ -9,7 +8,8 @@ use crate::error::{BuildError, ScrapsResult, anyhow::Context as _};
 /// Render `template_name` into `file_path`, creating parent directories first
 /// so callers can write into nested context/tag paths.
 ///
-/// tera renders in many small writes, so buffer them into one file write.
+/// Rendered in memory first so each page lands in one write: tera emits many
+/// small writes, and most pages outgrow a default-sized write buffer.
 pub fn render_to_file(
     tera: &Tera,
     template_name: &str,
@@ -21,10 +21,10 @@ pub fn render_to_file(
     }
     let write_failure = || BuildError::WriteFailure(file_path.to_path_buf());
 
-    let mut wtr = BufWriter::new(File::create(file_path).context(write_failure())?);
-    tera.render_to(template_name, context, &mut wtr)
+    let html = tera
+        .render(template_name, context)
         .context(write_failure())?;
-    wtr.flush().context(write_failure())
+    fs::write(file_path, html).context(write_failure())
 }
 
 /// The `static/` glob tera loads user overrides from. A path that is not valid

@@ -41,7 +41,7 @@ impl LookupTagBacklinksUsecase {
         let linking_scraps = backlinks_map.get_tag(&requested_tag);
 
         let results: Vec<LookupTagBacklinksResult> = linking_scraps
-            .into_iter()
+            .iter()
             .map(|linking_scrap| {
                 let scrap_key = &linking_scrap.self_key();
                 let title: Title = scrap_key.into();

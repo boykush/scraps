@@ -26,7 +26,7 @@ pub struct TitleIndexTera(Vec<TitleIndexGroupTera>);
 impl TitleIndexTera {
     pub fn new(scrap_details: &ScrapDetails, backlinks_map: &BacklinksMap) -> TitleIndexTera {
         let mut grouped: BTreeMap<TitleGroup, Vec<SerializeTitleIndexScrap>> = BTreeMap::new();
-        for scrap_detail in scrap_details.to_vec() {
+        for scrap_detail in scrap_details.as_slice() {
             let scrap = scrap_detail.scrap();
             let title = scrap.title().to_string();
             let entry = SerializeTitleIndexScrap {
@@ -83,7 +83,7 @@ mod tests {
             .map(|s| (s.self_key(), s.md_text().to_string()))
             .collect();
 
-        let details = ScrapDetails::new(&vec![
+        let details = ScrapDetails::new(vec![
             ScrapDetail::new(&scrap1, &None, base_url, &scrap_texts),
             ScrapDetail::new(&scrap2, &None, base_url, &scrap_texts),
             ScrapDetail::new(&scrap3, &None, base_url, &scrap_texts),

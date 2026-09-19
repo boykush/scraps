@@ -61,13 +61,13 @@ impl BuildUsecase {
                 ScrapDetail::new(scrap, commited_ts, base_url, &scrap_texts)
             })
             .collect::<Vec<ScrapDetail>>();
-        let scrap_details = ScrapDetails::new(&scrap_details);
+        let scrap_details = ScrapDetails::new(scrap_details);
 
         let scraps = scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(&scraps);
         let scraps_by_key: HashMap<_, _> = scraps
             .iter()
-            .map(|scrap| (scrap.self_key(), scrap.clone()))
+            .map(|scrap| (scrap.self_key(), scrap))
             .collect();
         let site_nav = SiteNav::new(
             scraps.len(),
@@ -103,20 +103,14 @@ impl BuildUsecase {
 
         // generate html scraps
         let span_generate_html_scraps = span!(Level::INFO, "generate_html_scraps").entered();
-        scrap_details
-            .to_vec()
-            .into_par_iter()
-            .try_for_each(|scrap_detail| {
-                let _span_generate_html_scrap = span!(Level::INFO, "generate_html_scrap").entered();
-                renderer.render_scrap(
-                    base_url,
-                    html_metadata,
-                    &scrap_detail,
-                    &backlinks_map,
-                    &scraps_by_key,
-                    &site_nav,
-                )
-            })?;
+        renderer.render_scraps(
+            base_url,
+            html_metadata,
+            &scrap_details,
+            &backlinks_map,
+            &scraps_by_key,
+            &site_nav,
+        )?;
         span_generate_html_scraps.exit();
 
         // generate html scraps index
@@ -139,10 +133,7 @@ impl BuildUsecase {
 
         // generate html tags
         let span_generate_html_tags = span!(Level::INFO, "generate_html_tags").entered();
-        site_nav.tags.iter().par_bridge().try_for_each(|tag| {
-            let _span_render_tag = span!(Level::INFO, "generate_html_tag").entered();
-            renderer.render_tag(base_url, html_metadata, tag, &backlinks_map, &site_nav)
-        })?;
+        renderer.render_tags(base_url, html_metadata, &backlinks_map, &site_nav)?;
         span_generate_html_tags.exit();
 
         progress.complete_stage(&Stage::GenerateHtml, &{

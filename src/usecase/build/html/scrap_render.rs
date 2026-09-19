@@ -1,18 +1,20 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use crate::error::ScrapsResult;
 use crate::service::tera_render::{render_to_file, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
-use crate::usecase::build::model::scrap_detail::ScrapDetail;
+use crate::usecase::build::model::scrap_detail::{ScrapDetail, ScrapDetails};
 use crate::usecase::build::model::scrap_graph::{MAX_NODES, ScrapGraph};
 use crate::usecase::build::model::site_nav::SiteNav;
+use rayon::prelude::*;
 use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::file::ScrapFileStem;
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
 use tera::Tera;
+use tracing::{Level, span};
 
 use crate::usecase::build::html::templates;
 
@@ -40,17 +42,37 @@ impl ScrapRender {
         &self,
         base_url: &BaseUrl,
         metadata: &HtmlMetadata,
-        scrap_detail: &ScrapDetail,
+        scrap_details: &ScrapDetails,
         backlinks_map: &BacklinksMap,
-        scraps_by_key: &HashMap<ScrapKey, Scrap>,
+        scraps_by_key: &HashMap<ScrapKey, &Scrap>,
         site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
-        let mut context = templates::context(base_url, metadata);
-        templates::insert_site_nav(&mut context, "", site_nav, backlinks_map);
-        let scrap = &scrap_detail.scrap();
+        // The shell is identical on every page and its tag list grows with the
+        // wiki, so it is built once and each page clones it.
+        let mut shell = templates::context(base_url, metadata);
+        templates::insert_site_nav(&mut shell, "", site_nav, backlinks_map);
+
+        scrap_details
+            .as_slice()
+            .par_iter()
+            .try_for_each(|scrap_detail| {
+                let _span = span!(Level::INFO, "generate_html_scrap").entered();
+                self.render_page(&shell, scrap_detail, backlinks_map, scraps_by_key)
+            })
+    }
+
+    fn render_page(
+        &self,
+        shell: &tera::Context,
+        scrap_detail: &ScrapDetail,
+        backlinks_map: &BacklinksMap,
+        scraps_by_key: &HashMap<ScrapKey, &Scrap>,
+    ) -> ScrapsResult<()> {
+        let mut context = shell.clone();
+        let scrap = scrap_detail.scrap();
 
         // insert to context for linked list
-        context.insert("scrap", &ScrapDetailTera::from(scrap_detail.clone()));
+        context.insert("scrap", &ScrapDetailTera::from(scrap_detail));
 
         let scrap_tags = scrap
             .tags()
@@ -60,16 +82,14 @@ impl ScrapRender {
         context.insert("scrap_tags", &scrap_tags);
 
         let linked_scraps = backlinks_map.get(&scrap.self_key());
-        context.insert("linked_scraps", &LinkScrapsTera::new(&linked_scraps));
+        context.insert("linked_scraps", &LinkScrapsTera::new(linked_scraps));
 
         // Outbound links resolve against the scrap set: a broken link is a
         // lint concern, not a rendering one, so it simply drops out here.
-        let mut seen = HashSet::new();
         let outbound_scraps = scrap
             .links()
             .iter()
-            .filter(|key| seen.insert((*key).clone()))
-            .filter_map(|key| scraps_by_key.get(key).cloned())
+            .filter_map(|key| scraps_by_key.get(key).copied())
             .collect::<Vec<_>>();
         context.insert("outbound_scraps", &LinkScrapsTera::new(&outbound_scraps));
 
@@ -77,7 +97,7 @@ impl ScrapRender {
         // walk over the wiki.
         if let Some(graph) = ScrapGraph::new(
             &scrap.title().to_string(),
-            &linked_scraps,
+            linked_scraps,
             &outbound_scraps,
             MAX_NODES,
         ) {
@@ -146,7 +166,7 @@ mod tests {
         );
         let scraps_by_key: HashMap<_, _> = scraps
             .iter()
-            .map(|scrap| (scrap.self_key(), scrap.clone()))
+            .map(|scrap| (scrap.self_key(), scrap))
             .collect();
 
         let scrap1_html_path = output_dir_path.join("scraps/scrap-1.html");
@@ -154,13 +174,17 @@ mod tests {
         // dot-suffix on the file stem.
         let scrap2_html_path = output_dir_path.join("scraps/context/scrap-2.html");
 
+        let scrap_details = ScrapDetails::new(vec![
+            ScrapDetail::new(scrap1, &commited_ts1, base_url, &scrap_texts),
+            ScrapDetail::new(scrap2, &commited_ts1, base_url, &scrap_texts),
+        ]);
         let render = ScrapRender::new(&static_dir_path, &output_dir_path).unwrap();
 
         render
             .run(
                 base_url,
                 &metadata,
-                &ScrapDetail::new(scrap1, &commited_ts1, base_url, &scrap_texts),
+                &scrap_details,
                 &backlinks_map,
                 &scraps_by_key,
                 &site_nav,
@@ -171,17 +195,6 @@ mod tests {
         assert!(result2.contains(">backlinks &#183; 1"));
         assert!(!result2.contains(">links &#183;"));
         assert!(!result2.contains("corsproxy"));
-
-        render
-            .run(
-                base_url,
-                &metadata,
-                &ScrapDetail::new(scrap2, &commited_ts1, base_url, &scrap_texts),
-                &backlinks_map,
-                &scraps_by_key,
-                &site_nav,
-            )
-            .unwrap();
 
         let result4 = fs::read_to_string(scrap2_html_path).unwrap();
         assert!(result4.contains(">links &#183; 1"));
@@ -205,7 +218,7 @@ mod tests {
         let backlinks_map = BacklinksMap::new(&scraps);
         let scraps_by_key: HashMap<_, _> = scraps
             .iter()
-            .map(|scrap| (scrap.self_key(), scrap.clone()))
+            .map(|scrap| (scrap.self_key(), scrap))
             .collect();
         let site_nav = SiteNav::new(
             scraps.len(),
@@ -215,24 +228,25 @@ mod tests {
             false,
         );
 
+        let scrap_details = ScrapDetails::new(
+            [linked, linking, alone]
+                .into_iter()
+                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &scrap_texts))
+                .collect(),
+        );
+
         let project = crate::test_fixtures::TempScrapProject::new();
         let render = ScrapRender::new(&project.static_dir, &project.output_dir).unwrap();
-        let render_one = |scrap: &Scrap| {
-            render
-                .run(
-                    base_url,
-                    &metadata,
-                    &ScrapDetail::new(scrap, &None, base_url, &scrap_texts),
-                    &backlinks_map,
-                    &scraps_by_key,
-                    &site_nav,
-                )
-                .unwrap();
-        };
-
-        render_one(linked);
-        render_one(linking);
-        render_one(alone);
+        render
+            .run(
+                base_url,
+                &metadata,
+                &scrap_details,
+                &backlinks_map,
+                &scraps_by_key,
+                &site_nav,
+            )
+            .unwrap();
 
         let read = |stem: &str| {
             fs::read_to_string(project.output_dir.join(format!("scraps/{stem}.html"))).unwrap()
