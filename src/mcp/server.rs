@@ -15,7 +15,7 @@ use super::tools::search_scraps::{SearchRequest, search_scraps};
 use rmcp::handler::server::ServerHandler;
 use rmcp::handler::server::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
-use rmcp::model::{CallToolResult, ServerCapabilities, ServerInfo};
+use rmcp::model::{CallToolResult, Implementation, ServerCapabilities, ServerInfo};
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer, tool, tool_handler, tool_router};
 
@@ -150,8 +150,15 @@ impl ScrapsServer {
 #[tool_handler(router = self.tool_router)]
 impl ServerHandler for ScrapsServer {
     fn get_info(&self) -> ServerInfo {
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build()).with_instructions(
-            "Read interface to a Scraps wiki: markdown scraps typed with wiki-links, tags, \
+        // rmcp's default identity expands `env!` inside rmcp itself, so it would
+        // report the SDK's name and version instead of the running scraps.
+        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
+            .with_server_info(Implementation::new(
+                env!("CARGO_PKG_NAME"),
+                env!("CARGO_PKG_VERSION"),
+            ))
+            .with_instructions(
+                "Read interface to a Scraps wiki: markdown scraps typed with wiki-links, tags, \
                  and folder contexts. Recommended flow: start with search_scraps on broad OR \
                  keywords and narrow with logic 'and'; read the best hits with get_scrap, \
                  projecting fields to keep responses small; then traverse relations with \
@@ -161,7 +168,7 @@ impl ServerHandler for ScrapsServer {
                  them, no bodies. For the topic map, list_tags then lookup_tag_backlinks. For \
                  the work recorded across the wiki, list_todos; for a wiki retrofitted from \
                  files with YAML frontmatter, list_frontmatter.",
-        )
+            )
     }
 }
 
@@ -183,6 +190,20 @@ mod tests {
 
         assert!(info.instructions.is_some());
         assert!(info.capabilities.tools.is_some());
+    }
+
+    #[rstest]
+    fn test_server_info_identifies_scraps_and_its_version(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
+        let implementation = server.get_info().server_info;
+
+        assert_eq!(implementation.name, "scraps");
+        assert_eq!(implementation.version, env!("CARGO_PKG_VERSION"));
     }
 
     #[rstest]
