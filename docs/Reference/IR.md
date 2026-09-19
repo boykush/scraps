@@ -83,7 +83,7 @@ command.
 - `commited_ts` on an object and `git_head` at the top appear once
   `build --git` has run: the last-commit timestamp of each source and the
   HEAD it was read under. While HEAD is unchanged the next `--git` build
-  reuses them instead of asking git once per file.
+  reuses them instead of reading the history again.
 - Bodies are not stored. The Markdown files stay the only source of truth;
   the IR is a read model derived from them.
 
