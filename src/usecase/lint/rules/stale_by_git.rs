@@ -1,6 +1,5 @@
 use std::path::PathBuf;
 
-use rayon::prelude::*;
 use scraps_libs::git::GitCommand;
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 
@@ -54,22 +53,34 @@ impl<GC: GitCommand + Send + Sync> LintRule for StaleByGitRule<GC> {
         let threshold_secs = (self.threshold_days as i64).saturating_mul(SECONDS_PER_DAY);
         let cutoff = self.now_ts.saturating_sub(threshold_secs);
 
-        scraps
-            .par_iter()
-            .filter_map(|scrap| {
-                let path = self.scraps_dir.join(scrap_relative_path(scrap));
-                let ts = match self.git_command.commited_ts(&path) {
-                    Ok(Some(ts)) => ts,
-                    Ok(None) => return None,
-                    Err(_) => return None,
-                };
+        let scrap_paths: Vec<String> = scraps.iter().map(scrap_relative_path).collect();
+        let rel_paths: Vec<&str> = scrap_paths.iter().map(String::as_str).collect();
+        let timestamps = match self
+            .git_command
+            .commited_ts_many(&self.scraps_dir, &rel_paths)
+        {
+            Ok(timestamps) => timestamps,
+            Err(e) => {
+                eprintln!(
+                    "info: stale-by-git: git unavailable ({}), skipping stale check",
+                    e
+                );
+                return Vec::new();
+            }
+        };
+
+        scrap_paths
+            .into_iter()
+            .zip(timestamps)
+            .filter_map(|(scrap_path, ts)| {
+                let ts = ts?;
                 if ts >= cutoff {
                     return None;
                 }
                 let age_days = (self.now_ts - ts) / SECONDS_PER_DAY;
                 Some(LintWarning {
                     rule_name: LintRuleName::StaleByGit,
-                    scrap_path: scrap_relative_path(scrap),
+                    scrap_path,
                     message: format!("scrap not updated in {} days", age_days),
                     source: None,
                     span: None,
@@ -85,6 +96,7 @@ mod tests {
     use scraps_libs::git::tests::GitCommandTest;
     use std::io;
     use std::path::Path;
+    use std::sync::Mutex;
 
     /// Stub git command that returns scripted timestamps and repo status.
     #[derive(Clone, Copy)]
@@ -214,6 +226,61 @@ mod tests {
         let warnings = rule.check(&scraps, &backlinks_map, &tags);
         assert_eq!(warnings.len(), 1);
         assert_eq!(warnings[0].scrap_path, "ai/note.md");
+    }
+
+    /// Answers a whole batch per call, as `GitCommandImpl` does, and keeps
+    /// every batch it was asked for.
+    #[derive(Clone, Copy)]
+    struct BatchGitStub {
+        asked: &'static Mutex<Vec<Vec<String>>>,
+        ts: Option<i64>,
+    }
+
+    impl GitCommand for BatchGitStub {
+        fn init(&self, _path: &Path) -> io::Result<()> {
+            Ok(())
+        }
+        fn commited_ts(&self, _path: &Path) -> io::Result<Option<i64>> {
+            Ok(None)
+        }
+        fn commited_ts_many(
+            &self,
+            _dir: &Path,
+            rel_paths: &[&str],
+        ) -> io::Result<Vec<Option<i64>>> {
+            let batch = rel_paths.iter().map(|p| p.to_string()).collect();
+            self.asked.lock().unwrap().push(batch);
+            Ok(vec![self.ts; rel_paths.len()])
+        }
+        fn is_git_repository(&self, _path: &Path) -> io::Result<bool> {
+            Ok(true)
+        }
+    }
+
+    #[test]
+    fn ask_git_once_for_every_scrap() {
+        let now = now_ts();
+        let asked: &'static Mutex<Vec<Vec<String>>> = Box::leak(Box::new(Mutex::new(Vec::new())));
+        let rule = StaleByGitRule {
+            git_command: BatchGitStub {
+                asked,
+                ts: Some(now - 365 * SECONDS_PER_DAY),
+            },
+            scraps_dir: PathBuf::from("/tmp"),
+            threshold_days: 180,
+            now_ts: now,
+        };
+        let scraps = vec![
+            Scrap::new("a", &None, "body"),
+            Scrap::new("note", &Some("ai".into()), "body"),
+        ];
+        let backlinks_map = BacklinksMap::new(&scraps);
+        let tags = Tags::new(&scraps);
+
+        let warnings = rule.check(&scraps, &backlinks_map, &tags);
+
+        assert_eq!(*asked.lock().unwrap(), vec![vec!["a.md", "ai/note.md"]]);
+        assert_eq!(warnings.len(), 2);
     }
 
     #[test]
