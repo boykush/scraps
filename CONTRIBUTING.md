@@ -188,6 +188,8 @@ test('example test', async ({ page }) => {
 
 The performance test runs automatically on every pull request and:
 - Builds Scraps in release mode (`cargo build --release`)
-- Tests against the [boykush/wiki](https://github.com/boykush/wiki) repository
+- Tests against the [boykush/wiki](https://github.com/boykush/wiki) repository,
+  cloned with its full history so the git-derived commit dates are read as
+  they are in a real deploy
 - Measures `scraps build -v` execution time
 - **Fails the PR if build time reaches 4 seconds**

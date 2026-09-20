@@ -10,7 +10,9 @@ echo "📦 Building scraps in release mode..."
 cargo build --release
 
 echo "📥 Cloning boykush/wiki..."
-git clone --depth 1 https://github.com/boykush/wiki.git "$WIKI_DIR"
+# Full history: the build reads commit dates from git, and a shallow clone
+# would leave it nothing to walk.
+git clone https://github.com/boykush/wiki.git "$WIKI_DIR"
 
 echo "⏱️ Running scraps build..."
 cd "$WIKI_DIR"
