@@ -4,9 +4,20 @@ use std::{
     process::{Command, Stdio},
 };
 
+mod last_commit;
+
 pub trait GitCommand {
     fn init(&self, path: &Path) -> io::Result<()>;
     fn commited_ts(&self, path: &Path) -> io::Result<Option<i64>>;
+    /// `commited_ts` of each of `rel_paths` (relative to `dir`), in order.
+    /// The default asks once per path; an implementation can instead read
+    /// the history once for all of them.
+    fn commited_ts_many(&self, dir: &Path, rel_paths: &[&str]) -> io::Result<Vec<Option<i64>>> {
+        rel_paths
+            .iter()
+            .map(|rel_path| self.commited_ts(&dir.join(rel_path)))
+            .collect()
+    }
     /// Whether `path` lives inside a git working tree.
     ///
     /// Returns `Ok(false)` when git reports the path is not inside a working
@@ -57,6 +68,29 @@ impl GitCommand for GitCommandImpl {
         let output_str = String::from_utf8_lossy(&output.stdout);
         let commited_ts = output_str.trim().parse::<i64>().ok();
         Ok(commited_ts)
+    }
+
+    fn commited_ts_many(&self, dir: &Path, rel_paths: &[&str]) -> io::Result<Vec<Option<i64>>> {
+        let prefix = Command::new("git")
+            .current_dir(dir)
+            .args(["rev-parse", "--show-prefix"])
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output()?;
+        let prefix = String::from_utf8_lossy(&prefix.stdout);
+        let prefix = prefix.trim_end_matches(['\r', '\n']);
+        let log = Command::new("git")
+            .current_dir(dir)
+            .args(last_commit::LOG_ARGS)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output()?;
+
+        let timestamps = last_commit::timestamps(&log.stdout);
+        Ok(rel_paths
+            .iter()
+            .map(|rel_path| timestamps.get(&format!("{prefix}{rel_path}")).copied())
+            .collect())
     }
 
     fn is_git_repository(&self, path: &Path) -> io::Result<bool> {

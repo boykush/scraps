@@ -17,7 +17,6 @@ use super::store::IrStore;
 const README_PATH: &str = "README.md";
 
 struct Source {
-    path: PathBuf,
     rel_path: String,
     title: String,
     ctx: Option<Ctx>,
@@ -27,7 +26,6 @@ struct Source {
 
 struct Loaded {
     scrap: Scrap,
-    path: PathBuf,
     rel_path: String,
 }
 
@@ -62,7 +60,6 @@ fn read_source(scraps_dir: &Path, path: &Path) -> ScrapsResult<Source> {
     let text = std::fs::read_to_string(path).context(ScrapsError::ReadScrap(path.to_path_buf()))?;
     let hash = content_hash(text.as_bytes());
     Ok(Source {
-        path: path.to_path_buf(),
         rel_path,
         title,
         ctx,
@@ -116,7 +113,6 @@ fn load(scraps_dir: &Path, exclude_dirs: &[PathBuf]) -> ScrapsResult<LoadedWiki>
             };
             let loaded = Loaded {
                 scrap,
-                path: src.path,
                 rel_path: src.rel_path,
             };
             (loaded, object, reused)
@@ -150,7 +146,7 @@ pub fn load_scraps(scraps_dir: &Path, exclude_dirs: &[PathBuf]) -> ScrapsResult<
 /// page rather than as a scrap. With `git_command`, each scrap's last-commit
 /// timestamp comes from the IR while HEAD is the commit it was recorded
 /// under, and from git otherwise.
-pub fn load_scraps_with_timestamps<GC: GitCommand + Send + Sync + Copy>(
+pub fn load_scraps_with_timestamps<GC: GitCommand + Copy>(
     scraps_dir: &Path,
     exclude_dirs: &[PathBuf],
     git_command: Option<GC>,
@@ -178,7 +174,7 @@ pub fn load_scraps_with_timestamps<GC: GitCommand + Send + Sync + Copy>(
 
 /// Fill in `commited_ts` for every object: kept from the IR while HEAD is
 /// the commit it was recorded under, asked of git otherwise.
-fn stamp<GC: GitCommand + Send + Sync + Copy>(
+fn stamp<GC: GitCommand + Copy>(
     wiki: &mut LoadedWiki,
     git_command: GC,
     scraps_dir: &Path,
@@ -186,23 +182,26 @@ fn stamp<GC: GitCommand + Send + Sync + Copy>(
     let head = head_commit(git_command, scraps_dir)?;
     let same_head = head.is_some() && head == wiki.git_head;
 
-    let looked_up: Vec<Option<Option<i64>>> = wiki
+    let pending: Vec<usize> = wiki
         .entries
-        .par_iter()
-        .zip(wiki.objects.par_iter())
-        .map(|(loaded, object)| {
-            if loaded.rel_path == README_PATH || (same_head && object.commited_ts.is_some()) {
-                return Ok(None);
-            }
-            commited_ts(git_command, &loaded.path).map(Some)
+        .iter()
+        .zip(&wiki.objects)
+        .enumerate()
+        .filter(|(_, (loaded, object))| {
+            loaded.rel_path != README_PATH && !(same_head && object.commited_ts.is_some())
         })
-        .collect::<ScrapsResult<_>>()?;
+        .map(|(i, _)| i)
+        .collect();
+    let rel_paths: Vec<&str> = pending
+        .iter()
+        .map(|&i| wiki.entries[i].rel_path.as_str())
+        .collect();
+    let looked_up = commited_ts_many(git_command, scraps_dir, &rel_paths)?;
 
-    for (object, looked_up) in wiki.objects.iter_mut().zip(&looked_up) {
-        if let Some(ts) = looked_up
-            && object.commited_ts != *ts
-        {
-            object.commited_ts = *ts;
+    for (i, ts) in pending.into_iter().zip(looked_up) {
+        let object = &mut wiki.objects[i];
+        if object.commited_ts != ts {
+            object.commited_ts = ts;
             wiki.dirty = true;
         }
     }
@@ -223,15 +222,22 @@ fn head_commit<GC: GitCommand>(git_command: GC, scraps_dir: &Path) -> ScrapsResu
 
 /// A `git not installed` failure is downgraded to `None` with a warning
 /// rather than an error, so `--git` degrades instead of failing the build.
-fn commited_ts<GC: GitCommand>(git_command: GC, path: &Path) -> ScrapsResult<Option<i64>> {
-    match git_command.commited_ts(path) {
-        Ok(ts) => Ok(ts),
+fn commited_ts_many<GC: GitCommand>(
+    git_command: GC,
+    scraps_dir: &Path,
+    rel_paths: &[&str],
+) -> ScrapsResult<Vec<Option<i64>>> {
+    if rel_paths.is_empty() {
+        return Ok(Vec::new());
+    }
+    match git_command.commited_ts_many(scraps_dir, rel_paths) {
+        Ok(timestamps) => Ok(timestamps),
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
             tracing::warn!(
-                "git binary not found; skipping commited_ts for {}",
-                path.display()
+                "git binary not found; skipping commited_ts under {}",
+                scraps_dir.display()
             );
-            Ok(None)
+            Ok(vec![None; rel_paths.len()])
         }
         Err(e) => Err(anyhow::Error::new(e).context(BuildError::GitCommitedTs)),
     }
@@ -537,5 +543,169 @@ mod tests {
 
         assert_eq!(git.calls(), 4);
         assert_eq!(read_ir(&project).git_head, None);
+    }
+
+    use std::sync::Mutex;
+
+    /// Answers a whole batch per call, as `GitCommandImpl` does, and keeps
+    /// every batch it was asked for.
+    #[derive(Clone, Copy)]
+    struct BatchGit {
+        asked: &'static Mutex<Vec<Vec<String>>>,
+    }
+
+    impl BatchGit {
+        fn new() -> BatchGit {
+            BatchGit {
+                asked: Box::leak(Box::new(Mutex::new(Vec::new()))),
+            }
+        }
+
+        fn asked(&self) -> Vec<Vec<String>> {
+            self.asked.lock().unwrap().clone()
+        }
+    }
+
+    impl GitCommand for BatchGit {
+        fn init(&self, _path: &Path) -> std::io::Result<()> {
+            Ok(())
+        }
+        fn commited_ts(&self, _path: &Path) -> std::io::Result<Option<i64>> {
+            Ok(None)
+        }
+        fn commited_ts_many(
+            &self,
+            _dir: &Path,
+            rel_paths: &[&str],
+        ) -> std::io::Result<Vec<Option<i64>>> {
+            let batch = rel_paths.iter().map(|p| p.to_string()).collect();
+            self.asked.lock().unwrap().push(batch);
+            Ok(rel_paths
+                .iter()
+                .map(|rel_path| match *rel_path {
+                    "a.md" => Some(1),
+                    "ctx/b.md" => Some(2),
+                    _ => None,
+                })
+                .collect())
+        }
+        fn is_git_repository(&self, _path: &Path) -> std::io::Result<bool> {
+            Ok(true)
+        }
+        fn head_commit(&self, _path: &Path) -> std::io::Result<Option<String>> {
+            Ok(Some("h1".to_string()))
+        }
+    }
+
+    #[test]
+    fn it_asks_git_once_for_every_scrap_to_stamp() {
+        let project = TempScrapProject::new();
+        project
+            .add_scrap("a.md", b"# A\n")
+            .add_scrap_with_context("ctx", "b.md", b"[[a]]\n")
+            .add_scrap("README.md", b"# Readme\n");
+        let excl = exclude(&project);
+        let git = BatchGit::new();
+
+        let (scraps, _) =
+            load_scraps_with_timestamps(&project.project_root, &excl, Some(git)).unwrap();
+        // Everything is recorded under the same HEAD now: nothing to ask.
+        load_scraps_with_timestamps(&project.project_root, &excl, Some(git)).unwrap();
+
+        assert_eq!(git.asked(), vec![vec!["a.md", "ctx/b.md"]]);
+        let stamped: Vec<(String, Option<i64>)> = scraps
+            .iter()
+            .map(|(scrap, ts)| (scrap.title().to_string(), *ts))
+            .collect();
+        assert_eq!(
+            stamped,
+            vec![("a".to_string(), Some(1)), ("b".to_string(), Some(2))]
+        );
+    }
+
+    use crate::test_fixtures::SimpleTempDir;
+    use std::process::Command;
+
+    const BASE_TS: i64 = 1_700_000_000;
+
+    /// Runs git in `repo` at unix time `ts`, away from the developer's config
+    /// and from the `GIT_*` variables a git hook exports.
+    fn git_at(repo: &Path, ts: i64, args: &[&str]) {
+        let mut command = Command::new("git");
+        for (key, _) in std::env::vars_os() {
+            if key.to_string_lossy().starts_with("GIT_") {
+                command.env_remove(key);
+            }
+        }
+        let date = format!("@{ts} +0000");
+        let output = command
+            .current_dir(repo)
+            .env("GIT_CONFIG_GLOBAL", "/dev/null")
+            .env("GIT_CONFIG_NOSYSTEM", "1")
+            .env("GIT_AUTHOR_DATE", &date)
+            .env("GIT_COMMITTER_DATE", &date)
+            .args([
+                "-c",
+                "user.name=scraps",
+                "-c",
+                "user.email=scraps@example.com",
+            ])
+            .args(args)
+            .output()
+            .unwrap();
+        assert!(
+            output.status.success(),
+            "git {args:?}: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+    }
+
+    #[test]
+    fn it_reads_last_commit_times_from_a_real_repository() {
+        // A worktree's git hook exports GIT_DIR, which would send the lookup
+        // to the repository running the hook instead of this one.
+        if std::env::var_os("GIT_DIR").is_some() {
+            eprintln!("skipped: GIT_DIR is set");
+            return;
+        }
+        let repo = SimpleTempDir::new();
+        let root = repo.path.as_path();
+        repo.add_file("wiki/a.md", b"# A\n")
+            .add_file("wiki/b.md", b"1\n2\n3\n4\n5\n");
+        git_at(root, BASE_TS, &["init", "-q"]);
+        git_at(root, BASE_TS, &["add", "."]);
+        git_at(root, BASE_TS, &["commit", "-q", "-m", "init"]);
+        git_at(root, BASE_TS, &["checkout", "-q", "-b", "side"]);
+        repo.add_file("wiki/b.md", b"1\n2\n3\n4\nside\n");
+        git_at(root, BASE_TS + 20, &["commit", "-q", "-am", "side"]);
+        git_at(root, BASE_TS + 20, &["checkout", "-q", "-"]);
+        repo.add_file("wiki/b.md", b"main\n2\n3\n4\n5\n");
+        git_at(root, BASE_TS + 10, &["commit", "-q", "-am", "main"]);
+        // b.md now differs from both parents, so `git log -1` stops here.
+        git_at(
+            root,
+            BASE_TS + 30,
+            &["merge", "-q", "--no-ff", "-m", "merge", "side"],
+        );
+        repo.add_file("wiki/ctx/c.md", b"# C\n");
+        git_at(root, BASE_TS + 40, &["add", "."]);
+        git_at(root, BASE_TS + 40, &["commit", "-q", "-m", "c"]);
+
+        let (scraps, _) =
+            load_scraps_with_timestamps(&root.join("wiki"), &[], Some(GitCommandImpl::new()))
+                .unwrap();
+
+        let stamped: Vec<(String, Option<i64>)> = scraps
+            .iter()
+            .map(|(scrap, ts)| (scrap.title().to_string(), *ts))
+            .collect();
+        assert_eq!(
+            stamped,
+            vec![
+                ("a".to_string(), Some(BASE_TS)),
+                ("b".to_string(), Some(BASE_TS + 30)),
+                ("c".to_string(), Some(BASE_TS + 40)),
+            ]
+        );
     }
 }
