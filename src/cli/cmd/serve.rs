@@ -31,7 +31,7 @@ pub fn run(git: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
     let static_dir_path = path_resolver.static_dir();
     let output_dir_path = path_resolver.output_dir(&config);
 
-    // Input: read scraps (with git timestamps if --git is set) and README.
+    // Input: read scraps (with git timestamps unless --no-git) and README.
     // The wiki root is the project root, so skip `static/` and the configured
     // output directory at the top level.
     let git_command = git.then(GitCommandImpl::new);

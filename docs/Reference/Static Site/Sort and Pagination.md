@@ -13,6 +13,6 @@ Every sort view is always generated — a sort order is a URL, not a config:
 The `/` and `/backlinks/` views share the same pagination, configured by
 `paginate_by` under `[ssg]` in [[Reference/Configuration]].
 
-Committed dates are read from git only by `scraps build --git` (or
-`scraps serve --git`). Without it no scrap has a date, and the updated view
-has nothing to sort by.
+Committed dates come from git, which every build reads unless `--no-git`.
+With `--no-git`, or outside a git repository, no scrap has a date and the
+updated view has nothing to sort by.
