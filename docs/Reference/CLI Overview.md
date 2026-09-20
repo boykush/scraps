@@ -24,6 +24,10 @@ the authoritative reference for flags and arguments. This page is the
 `-C` / `--directory` (or `SCRAPS_DIRECTORY` env) runs as if started in the
 given directory.
 
+`scraps build` and `scraps serve` read each scrap's last commit date from
+git only with `--git`; the home sorts by it (see
+[[Reference/Static Site/Sort and Pagination]]).
+
 ## JSON Reads
 
 `scraps get` reads one scrap, optionally scoped by context and heading:

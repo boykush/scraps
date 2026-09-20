@@ -47,7 +47,7 @@ jobs:
         uses: boykush/scraps@v1
 
       - name: Build
-        run: scraps build
+        run: scraps build --git
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
@@ -71,6 +71,10 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 ```
+
+`--git` reads each scrap's last commit date from git, and the home lists
+scraps newest first by it. It needs the whole history, hence
+`fetch-depth: 0`: a shallow clone gives every scrap the same date.
 
 The [`boykush/scraps`](https://github.com/marketplace/actions/setup-scraps)
 action installs the matching CLI binary from GitHub Releases. Pin to a
