@@ -30,6 +30,28 @@ pub struct Cli {
     pub command: SubCommands,
 }
 
+/// `--git` predates git-derived metadata being read by default. It is still
+/// accepted, so workflows written for it keep working; only `--no-git` turns
+/// the lookup off.
+#[derive(clap::Args)]
+pub struct GitFlags {
+    #[arg(
+        long,
+        overrides_with = "git",
+        help = "Skip git-derived metadata (commited_ts): the updated view then has no dates to sort by"
+    )]
+    no_git: bool,
+
+    #[arg(long, hide = true, overrides_with = "no_git")]
+    git: bool,
+}
+
+impl GitFlags {
+    pub fn enabled(&self) -> bool {
+        self.git || !self.no_git
+    }
+}
+
 #[derive(Subcommand)]
 pub enum SubCommands {
     #[command(about = "Build scraps")]
@@ -37,11 +59,8 @@ pub enum SubCommands {
         #[command(flatten)]
         verbose: Verbosity<WarnLevel>,
 
-        #[arg(
-            long,
-            help = "Include git-derived metadata (commited_ts) in HTML output and template variables"
-        )]
-        git: bool,
+        #[command(flatten)]
+        git: GitFlags,
     },
 
     #[command(about = "Get the markdown body of a scrap by title")]
@@ -124,11 +143,8 @@ pub enum SubCommands {
 
     #[command(about = "Serve the site with build scraps")]
     Serve {
-        #[arg(
-            long,
-            help = "Include git-derived metadata (commited_ts) in HTML output and template variables"
-        )]
-        git: bool,
+        #[command(flatten)]
+        git: GitFlags,
     },
 
     #[command(about = "Tag commands")]
@@ -277,5 +293,39 @@ impl From<CliLintRuleName> for LintRuleName {
             CliLintRuleName::BrokenHeadingRef => LintRuleName::BrokenHeadingRef,
             CliLintRuleName::StaleByGit => LintRuleName::StaleByGit,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn build_reads_git(args: &[&str]) -> bool {
+        match Cli::try_parse_from(args).unwrap().command {
+            SubCommands::Build { git, .. } => git.enabled(),
+            _ => panic!("not a build"),
+        }
+    }
+
+    fn serve_reads_git(args: &[&str]) -> bool {
+        match Cli::try_parse_from(args).unwrap().command {
+            SubCommands::Serve { git } => git.enabled(),
+            _ => panic!("not a serve"),
+        }
+    }
+
+    #[test]
+    fn it_reads_git_unless_told_not_to() {
+        assert!(build_reads_git(&["scraps", "build"]));
+        assert!(!build_reads_git(&["scraps", "build", "--no-git"]));
+        assert!(serve_reads_git(&["scraps", "serve"]));
+        assert!(!serve_reads_git(&["scraps", "serve", "--no-git"]));
+    }
+
+    #[test]
+    fn it_still_takes_the_git_flag_written_before_the_default() {
+        assert!(build_reads_git(&["scraps", "build", "--git"]));
+        assert!(!build_reads_git(&["scraps", "build", "--git", "--no-git"]));
+        assert!(build_reads_git(&["scraps", "build", "--no-git", "--git"]));
     }
 }

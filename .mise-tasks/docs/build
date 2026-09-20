@@ -2,4 +2,4 @@
 #MISE description="Build documentation with the scraps binary from this checkout"
 set -euo pipefail
 cargo build --release
-./target/release/scraps build --directory docs --git
+./target/release/scraps build --directory docs

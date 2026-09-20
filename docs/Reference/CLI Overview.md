@@ -25,8 +25,7 @@ the authoritative reference for flags and arguments. This page is the
 given directory.
 
 `scraps build` and `scraps serve` read each scrap's last commit date from
-git only with `--git`; the home sorts by it (see
-[[Reference/Static Site/Sort and Pagination]]).
+git; `--no-git` skips it (see [[Reference/Static Site/Sort and Pagination]]).
 
 ## JSON Reads
 

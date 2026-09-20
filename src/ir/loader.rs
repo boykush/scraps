@@ -221,7 +221,7 @@ fn head_commit<GC: GitCommand>(git_command: GC, scraps_dir: &Path) -> ScrapsResu
 }
 
 /// A `git not installed` failure is downgraded to `None` with a warning
-/// rather than an error, so `--git` degrades instead of failing the build.
+/// rather than an error, so the build degrades instead of failing.
 fn commited_ts_many<GC: GitCommand>(
     git_command: GC,
     scraps_dir: &Path,

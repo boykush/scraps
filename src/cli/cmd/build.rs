@@ -46,7 +46,7 @@ fn execute(git: bool, project_path: Option<&Path>) -> ScrapsResult<()> {
     let static_dir_path = path_resolver.static_dir();
     let output_dir_path = path_resolver.output_dir(&config);
 
-    // Input: read scraps (with git timestamps if --git is set) and README.
+    // Input: read scraps (with git timestamps unless --no-git) and README.
     // The wiki root is the project root, so skip `static/` and the configured
     // output directory at the top level.
     let git_command = git.then(GitCommandImpl::new);
@@ -172,7 +172,7 @@ mod tests {
         assert!(result.is_ok());
 
         // Outside a git repo `commited_ts` is None so the conditional block
-        // is omitted; this test just asserts that --git does not error out.
+        // is omitted; this test just asserts that the git read does not error out.
         let html = fs::read_to_string(project.output_path("scraps/test1.html")).unwrap();
         assert!(!html.is_empty());
     }

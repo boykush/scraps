@@ -80,10 +80,10 @@ command.
 - `links` is the link table: one edge per link or embed occurrence, with
   `resolved: false` when the target names no scrap. Tags are attributes of
   the object, not edges, matching the `[[ ]]` / `#[[ ]]` namespace split.
-- `commited_ts` on an object and `git_head` at the top appear once
-  `build --git` has run: the last-commit timestamp of each source and the
-  HEAD it was read under. While HEAD is unchanged the next `--git` build
-  reuses them instead of reading the history again.
+- `commited_ts` on an object and `git_head` at the top appear once a
+  build has read git, which it does unless `--no-git`: the last-commit
+  timestamp of each source and the HEAD it was read under. While HEAD is
+  unchanged the next build reuses them instead of reading the history again.
 - Bodies are not stored. The Markdown files stay the only source of truth;
   the IR is a read model derived from them.
 

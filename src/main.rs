@@ -20,7 +20,9 @@ fn main() -> error::ScrapsResult<()> {
 
     match command {
         cli::SubCommands::Init => cli::cmd::init::run(directory),
-        cli::SubCommands::Build { verbose, git } => cli::cmd::build::run(verbose, git, directory),
+        cli::SubCommands::Build { verbose, git } => {
+            cli::cmd::build::run(verbose, git.enabled(), directory)
+        }
         cli::SubCommands::Get {
             title,
             ctx,
@@ -65,7 +67,7 @@ fn main() -> error::ScrapsResult<()> {
             directory,
             &mut std::io::stdout(),
         ),
-        cli::SubCommands::Serve { git } => cli::cmd::serve::run(git, directory),
+        cli::SubCommands::Serve { git } => cli::cmd::serve::run(git.enabled(), directory),
         cli::SubCommands::Tag { tag_command } => match tag_command {
             cli::TagSubCommands::List { json } => {
                 cli::cmd::tag::list::run(json, directory, &mut std::io::stdout())
