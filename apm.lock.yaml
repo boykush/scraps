@@ -1,0 +1,47 @@
+lockfile_version: '1'
+apm_version: 0.31.0
+dependencies:
+- repo_url: boykush/ai-plugins
+  name: adr-remote-mcp
+  host: github.com
+  resolved_commit: 4b9ae00c41111225446cd063da0f38a89ae76164
+  resolved_ref: 4b9ae00c41111225446cd063da0f38a89ae76164
+  version: 0.1.0
+  virtual_path: plugins/adr-remote-mcp
+  is_virtual: true
+  package_type: apm_package
+  content_hash: sha256:6745a096e1cc71a877b44ad80a430b066a5939c20103dccf83f419ad194b61ed
+deployments:
+- kind: uri
+  target: mcp
+  value: adr
+  runtime: claude
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: uri
+  target: mcp
+  value: adr
+  runtime: codex
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+mcp_servers:
+- adr
+mcp_configs:
+  adr:
+    name: adr
+    transport: http
+    registry: false
+    url: https://adr-mcp.boykush.com/mcp
+mcp_target_servers:
+  claude:
+  - adr
+  codex:
+  - adr
+mcp_config_provenance:
+  adr: adr-remote-mcp

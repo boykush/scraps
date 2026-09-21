@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "adr": {
+      "type": "http",
+      "url": "https://adr-mcp.boykush.com/mcp"
+    }
+  }
+}
