@@ -29,7 +29,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Run setup-scraps action
-        uses: ./
+        uses: $/
         with:
           version: 1.0.0-rc.1
       - name: Verify scraps is on PATH
