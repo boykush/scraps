@@ -23,7 +23,7 @@ serde = { version = "=1.0.229", features = ["derive"] }
 serde_json = { version = "=1.0.151", features = ["preserve_order"] }
 rayon = "=1.12.0"
 clap = { version = "=4.6.7", features = ["derive", "env"] }
-config = { version = "=0.15.25", features = ["toml"] }
+config = { version = "=0.15.26", features = ["toml"] }
 tera = { version = "=2.4.0", features = ["glob_fs"] }
 chrono = "=0.4.45"
 chrono-tz = { version = "=0.10.4", features = ["serde"] }
