@@ -6,7 +6,6 @@ on:
     paths-ignore:
       - 'scraps/**'
       - 'assets/**'
-      - '.github/workflows/claude-review-from-author.yml'
       - 'CONTRIBUTING.md'
       - 'LICENSE.md'
       - 'README.md'
