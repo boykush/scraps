@@ -20,11 +20,19 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
+      # Reads the token from Parameter Store with this run's OIDC identity, so
+      # this repository keeps no Claude credential of its own. Keep the pin on a
+      # revision that refuses a token containing whitespace: with a line break in
+      # it, the part after the break would print unmasked in this public log.
+      - name: Fetch the Claude Code token
+        id: claude-token
+        uses: boykush/infrastructure-as-code/.github/actions/claude-code-token@63d18b9ca8f6efd275126605a9b35acb921f8fe7
+
       - name: Review PR from Specific Author
         timeout-minutes: 60
         uses: anthropics/claude-code-action@5ee796a55f92566ecd7e39d70dd613abcbea0d7c # v1.0.197
         with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_code_oauth_token: ${{ steps.claude-token.outputs.token }}
           prompt: |
             Please provide a thorough review of this pull request.
 
