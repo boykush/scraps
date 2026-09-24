@@ -9,7 +9,7 @@ on:
       - 'CONTRIBUTING.md'
       - 'LICENSE.md'
       - 'README.md'
-      - 'CLAUDE.md'
+      - 'AGENTS.md'
   # No base-branch filter: stacked PRs target another feature branch and
   # still need the same gate as a PR into main. No paths filter either,
   # unlike push: `build` is a required check on main, so a PR touching only

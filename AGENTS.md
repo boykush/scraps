@@ -1,6 +1,6 @@
-# Scraps Development with Claude Code
+# Scraps Development with Coding Agents
 
-For comprehensive guidelines, see @CONTRIBUTING.md
+For comprehensive guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Project Structure
 
@@ -18,4 +18,4 @@ For comprehensive guidelines, see @CONTRIBUTING.md
 2. **Implement**: One TODO at a time, following TDD (Red -> Green -> Refactor)
    - PostToolUse hook auto-formats `.rs` files on Edit/Write
    - Pre-commit hook runs `cargo:quality` (test + fmt + clippy) automatically
-3. **Commit & PR**: Use `/commit` or `/commit-push-pr` skill (see @CONTRIBUTING.md)
+3. **Commit & PR**: Use `/commit` or `/commit-push-pr` skill (see [CONTRIBUTING.md](CONTRIBUTING.md))
