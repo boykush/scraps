@@ -12,17 +12,10 @@ on:
       - 'README.md'
       - 'CLAUDE.md'
   # No base-branch filter: stacked PRs target another feature branch and
-  # still need the same gate as a PR into main.
+  # still need the same gate as a PR into main. No paths filter either,
+  # unlike push: `build` is a required check on main, so a PR touching only
+  # ignored paths would wait forever for a run that never starts.
   pull_request:
-    # `build` is a required check on main, so a PR touching only an ignored
-    # path waits forever for a run that never starts. README and assets are
-    # edited on their own often enough for that to bite.
-    paths-ignore:
-      - 'scraps/**'
-      - '.github/workflows/claude-review-from-author.yml'
-      - 'CONTRIBUTING.md'
-      - 'LICENSE.md'
-      - 'CLAUDE.md'
 
 env:
   CARGO_TERM_COLOR: always
