@@ -13,3 +13,10 @@ dependencies:
   apm:
     - boykush/ai-plugins/plugins/adr-remote-mcp#4b9ae00c41111225446cd063da0f38a89ae76164
   mcp: []
+  # claude-plugins-official's rust-analyzer-lsp keeps this server in its marketplace entry and
+  # ships no manifest, so apm can't install it by path. apm writes LSP config for Claude Code only.
+  lsp:
+    - name: rust-analyzer
+      command: rust-analyzer
+      extensionToLanguage:
+        ".rs": rust

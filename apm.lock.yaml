@@ -85,6 +85,15 @@ deployments:
   active_owner: .
   content_hash: sha256:a20897a726fbeb37b1befb42d66e5828efe642692a771c170b57e24749fdfcfa
 - kind: uri
+  target: lsp
+  value: rust-analyzer
+  runtime: claude
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: uri
   target: mcp
   value: adr
   runtime: claude
@@ -117,6 +126,19 @@ mcp_target_servers:
   - adr
 mcp_config_provenance:
   adr: adr-remote-mcp
+lsp_servers:
+- rust-analyzer
+lsp_configs:
+  rust-analyzer:
+    name: rust-analyzer
+    command: rust-analyzer
+    extensionToLanguage:
+      .rs: rust
+lsp_target_servers:
+  claude:
+  - rust-analyzer
+lsp_config_provenance:
+  rust-analyzer: project:.
 local_deployed_files:
 - .agents/skills/doc-update
 - .agents/skills/doc-update/SKILL.md

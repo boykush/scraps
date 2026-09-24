@@ -39,12 +39,9 @@ Help us make Scraps more accessible by:
 
 ---
 
-## Claude Code Plugins
+## Commit Messages
 
-This project uses [Claude Code](https://claude.com/claude-code) plugins for development workflow:
-
-- `/commit` — Create a conventional commit
-- `/commit-push-pr` — Create branch, commit, push, and open a PR in one step
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `chore:`, …). A `!` after the type marks a breaking change.
 
 ---
 
