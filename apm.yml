@@ -4,7 +4,11 @@ description: Agent config for working in this repository
 targets:
   - claude
   - codex
-# apm install generates .mcp.json and .codex/config.toml from this file; don't edit them by hand.
+# Consent to deploy this repository's own skills from .apm/skills/; without it apm audit warns
+# that the consent is only implicit.
+includes: auto
+# apm install generates .mcp.json, .codex/config.toml, .claude/skills/ and .agents/skills/ from
+# this file and .apm/; edit those sources, not the generated files.
 dependencies:
   apm:
     - boykush/ai-plugins/plugins/adr-remote-mcp#4b9ae00c41111225446cd063da0f38a89ae76164

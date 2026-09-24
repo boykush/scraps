@@ -12,6 +12,78 @@ dependencies:
   package_type: apm_package
   content_hash: sha256:6745a096e1cc71a877b44ad80a430b066a5939c20103dccf83f419ad194b61ed
 deployments:
+- kind: project-relative
+  target: claude
+  value: .claude/skills/doc-update
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/doc-update/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:3799d7b8ff782173d1a57d1ccb78c735170c80d057c893488fee0aa365c3cf8f
+- kind: project-relative
+  target: claude
+  value: .claude/skills/release
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/release/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:a20897a726fbeb37b1befb42d66e5828efe642692a771c170b57e24749fdfcfa
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/doc-update
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/doc-update/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:3799d7b8ff782173d1a57d1ccb78c735170c80d057c893488fee0aa365c3cf8f
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/release
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/release/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:a20897a726fbeb37b1befb42d66e5828efe642692a771c170b57e24749fdfcfa
 - kind: uri
   target: mcp
   value: adr
@@ -45,3 +117,17 @@ mcp_target_servers:
   - adr
 mcp_config_provenance:
   adr: adr-remote-mcp
+local_deployed_files:
+- .agents/skills/doc-update
+- .agents/skills/doc-update/SKILL.md
+- .agents/skills/release
+- .agents/skills/release/SKILL.md
+- .claude/skills/doc-update
+- .claude/skills/doc-update/SKILL.md
+- .claude/skills/release
+- .claude/skills/release/SKILL.md
+local_deployed_file_hashes:
+  .agents/skills/doc-update/SKILL.md: sha256:3799d7b8ff782173d1a57d1ccb78c735170c80d057c893488fee0aa365c3cf8f
+  .agents/skills/release/SKILL.md: sha256:a20897a726fbeb37b1befb42d66e5828efe642692a771c170b57e24749fdfcfa
+  .claude/skills/doc-update/SKILL.md: sha256:3799d7b8ff782173d1a57d1ccb78c735170c80d057c893488fee0aa365c3cf8f
+  .claude/skills/release/SKILL.md: sha256:a20897a726fbeb37b1befb42d66e5828efe642692a771c170b57e24749fdfcfa

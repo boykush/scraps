@@ -10,18 +10,6 @@
           }
         ]
       }
-    ],
-    "SessionStart": [
-      {
-        "matcher": "startup",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "'/Users/boykush/github/boykush/repositories/scraps/.codex/hooks/setup-remote.sh'",
-            "timeout": 300
-          }
-        ]
-      }
     ]
   }
 }

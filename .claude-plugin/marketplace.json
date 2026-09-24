@@ -5,17 +5,13 @@
     "email": "boykush315@gmail.com"
   },
   "metadata": {
-    "description": "Claude Code plugins for Scraps - LLM Wiki skills, migration workflows, and MCP integration for interconnected Markdown documentation",
-    "version": "1.3.0"
+    "description": "Claude Code plugins for Scraps - LLM Wiki skills and MCP integration for interconnected Markdown documentation",
+    "version": "1.4.0"
   },
   "plugins": [
     {
       "name": "llm-wiki",
       "source": "./plugins/llm-wiki"
-    },
-    {
-      "name": "scraps-migration",
-      "source": "./plugins/scraps-migration"
     },
     {
       "name": "mcp-server",
