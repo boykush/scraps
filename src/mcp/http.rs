@@ -183,7 +183,7 @@ mod tests {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "initialize",
-                "params": serde_json::to_value(rmcp::model::ClientInfo::default()).unwrap(),
+                "params": serde_json::to_value(rmcp::model::ClientConfig::default()).unwrap(),
             }),
         )
         .await;
