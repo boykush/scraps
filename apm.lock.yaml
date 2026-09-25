@@ -147,7 +147,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:a20897a726fbeb37b1befb42d66e5828efe642692a771c170b57e24749fdfcfa
+  content_hash: sha256:c202f102ef01a9f2ea7ad111ce37f753a84f5ca78e71669ed4606bee0b05497c
 - kind: project-relative
   target: codex
   value: .agents/skills/ade-rule-dsl
@@ -255,7 +255,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:a20897a726fbeb37b1befb42d66e5828efe642692a771c170b57e24749fdfcfa
+  content_hash: sha256:c202f102ef01a9f2ea7ad111ce37f753a84f5ca78e71669ed4606bee0b05497c
 - kind: uri
   target: lsp
   value: rust-analyzer
@@ -322,6 +322,6 @@ local_deployed_files:
 - .claude/skills/release/SKILL.md
 local_deployed_file_hashes:
   .agents/skills/doc-update/SKILL.md: sha256:3799d7b8ff782173d1a57d1ccb78c735170c80d057c893488fee0aa365c3cf8f
-  .agents/skills/release/SKILL.md: sha256:a20897a726fbeb37b1befb42d66e5828efe642692a771c170b57e24749fdfcfa
+  .agents/skills/release/SKILL.md: sha256:c202f102ef01a9f2ea7ad111ce37f753a84f5ca78e71669ed4606bee0b05497c
   .claude/skills/doc-update/SKILL.md: sha256:3799d7b8ff782173d1a57d1ccb78c735170c80d057c893488fee0aa365c3cf8f
-  .claude/skills/release/SKILL.md: sha256:a20897a726fbeb37b1befb42d66e5828efe642692a771c170b57e24749fdfcfa
+  .claude/skills/release/SKILL.md: sha256:c202f102ef01a9f2ea7ad111ce37f753a84f5ca78e71669ed4606bee0b05497c
