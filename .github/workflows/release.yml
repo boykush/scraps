@@ -49,6 +49,7 @@ jobs:
     if: ${{ !contains(github.ref, '-') }} # skip prereleases
     permissions:
       contents: read
+      id-token: write # assume the signing role, see the token step
     steps:
       - name: Extract version
         id: version
@@ -116,9 +117,19 @@ jobs:
           EOF
           sed -i 's/^          //' scraps.rb
 
+      # GITHUB_TOKEN cannot write to another repository, so the push to the tap
+      # goes out as the repo-writer App, with a token that reaches the tap alone.
+      - name: Generate the repo-writer App token
+        id: app-token
+        uses: boykush/workflows/.github/actions/github-app-token@e4ebfe434375430d1d53a5b4d431d67192da6a58
+        with:
+          app: repo-writer
+          repositories: homebrew-tap
+          permission-contents: write
+
       - name: Push to homebrew-tap
         env:
-          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_COMMITTER_TOKEN }}
+          COMMITTER_TOKEN: ${{ steps.app-token.outputs.token }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           git clone https://x-access-token:${COMMITTER_TOKEN}@github.com/boykush/homebrew-tap.git
