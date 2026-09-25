@@ -1,0 +1,19 @@
+# Reviews the owner's pull requests against the rules in boykush/adr, and approves the
+# ones that pass as the Claude GitHub App: the approval the default branch's ruleset asks
+# for. The reusable workflow lives in boykush/workflows, whose README lists what adopting
+# it takes.
+name: ai-review
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions: {}
+
+jobs:
+  ai-review:
+    uses: boykush/workflows/.github/workflows/ai-review.yml@cadbe230d368dc8a1869731c1d5eb7128ad278a5
+    permissions:
+      contents: read
+      pull-requests: read
+      id-token: write
