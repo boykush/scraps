@@ -15,7 +15,7 @@ use super::tools::search_scraps::{SearchRequest, search_scraps};
 use rmcp::handler::server::ServerHandler;
 use rmcp::handler::server::tool::ToolRouter;
 use rmcp::handler::server::wrapper::Parameters;
-use rmcp::model::{CallToolResult, Implementation, ServerCapabilities, ServerInfo};
+use rmcp::model::{CallToolResult, Implementation, ServerCapabilities, ServerConfig};
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer, tool, tool_handler, tool_router};
 
@@ -149,10 +149,10 @@ impl ScrapsServer {
 // JSON schema) on each request; point it at the one built in `new`.
 #[tool_handler(router = self.tool_router)]
 impl ServerHandler for ScrapsServer {
-    fn get_info(&self) -> ServerInfo {
+    fn get_info(&self) -> ServerConfig {
         // rmcp's default identity expands `env!` inside rmcp itself, so it would
         // report the SDK's name and version instead of the running scraps.
-        ServerInfo::new(ServerCapabilities::builder().enable_tools().build())
+        ServerConfig::new(ServerCapabilities::builder().enable_tools().build())
             .with_server_info(Implementation::new(
                 env!("CARGO_PKG_NAME"),
                 env!("CARGO_PKG_VERSION"),
