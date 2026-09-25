@@ -1,15 +1,10 @@
 name: Performance Test
 
 on:
+  # No paths or types filter: this job is a required check on main, so a PR that
+  # skipped it — touching only ignored paths, or reopened without a push — would
+  # wait forever for a run that never starts. Same reason as cargo-test-and-lint.
   pull_request:
-    types: [opened, synchronize]
-    paths-ignore:
-      - 'scraps/**'
-      - 'assets/**'
-      - 'CONTRIBUTING.md'
-      - 'LICENSE.md'
-      - 'README.md'
-      - 'AGENTS.md'
 
 permissions:
   contents: read
