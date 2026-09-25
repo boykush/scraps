@@ -53,7 +53,15 @@ The diff should touch those two manifests and `Cargo.lock`, nothing else. Commit
 ## 3. Merge it
 
 1. `gh pr checks <number> --watch --required` waits for `build` and `zizmor`.
-2. The approval comes from the `approve-pr` workflow, which approves PRs by `boykush` as soon as they open. Check `gh pr view <number> --json reviewDecision`. If it stays `REVIEW_REQUIRED`, look at that workflow's run and tell the user. Don't look for another way to approve.
+2. The approval comes from ai-review. Its `ai-review / review` check reviews the PR against the rules in boykush/adr and submits the verdict as a `claude[bot]` review: an approval when nothing is violated, a request for changes otherwise. The check isn't required, so the first command doesn't wait for it:
+
+   ```bash
+   gh run list --workflow=ai-review.yml --branch release/v<version> --limit 1 --json databaseId,status
+   gh run watch <run-id> --exit-status
+   gh pr view <number> --json reviewDecision
+   ```
+
+   If the run fails, or the decision is `CHANGES_REQUESTED` or `REVIEW_REQUIRED`, look at the run and the review, and tell the user. Don't look for another way to approve. The owner can bypass the approval, but that is for the user to do: never run `gh pr merge --admin`.
 3. With both in place, ask the user whether to merge.
 4. On a yes, run `gh pr merge <number> --merge`. A merge commit keeps the release as one commit on `main`, and the tag goes on it.
 
