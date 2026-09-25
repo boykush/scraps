@@ -1,26 +1,30 @@
 ---
 name: release
-description: Release a new version of Scraps from start to finish. Opens and merges the version-bump PR, publishes the GitHub Release with categorized notes, then follows the workflow that ships the binaries, crates.io, Homebrew and the floating tags. Use this whenever the user asks to release, cut, ship or publish a Scraps version (e.g. "release 3.1.0", "v3.0.1 をリリースして"), or to finish a release that stopped halfway, such as a merged release PR with no GitHub Release yet.
+description: Release a new version of Scraps from start to finish. Opens and merges the version-bump PR, publishes the GitHub Release with categorized notes, follows the workflow that ships the binaries, crates.io and Homebrew, then moves the floating v{major} / v{major}.{minor} tags. Use this whenever the user asks to release, cut, ship or publish a Scraps version (e.g. "release 3.1.0", "v3.0.1 をリリースして"), or to finish a release that stopped halfway, such as a merged release PR with no GitHub Release yet or floating tags still on the previous version.
 ---
 
 # Release
 
 Takes a version such as `3.1.0` (semver, no `v`); the tag is `v3.1.0`. If the user gave none, propose one from what is shipping (step 1): a breaking change means major, a feature means minor, anything else patch. Confirm it before going on.
 
-Two constraints shape the flow:
+Three constraints shape the flow:
 
 - `main` takes changes only through a PR that passes the `build` and `zizmor` checks and has one approval, so the version bump travels as a release PR.
-- Publishing the GitHub Release runs `.github/workflows/release.yml`. It uploads the binaries, publishes both crates to crates.io, updates `boykush/homebrew-tap` and moves the `v{major}` / `v{major}.{minor}` tags. None of that can be taken back.
+- Publishing the GitHub Release runs `.github/workflows/release.yml`. It uploads the binaries, publishes both crates to crates.io and updates `boykush/homebrew-tap`. None of that can be taken back.
+- The floating `v{major}` / `v{major}.{minor}` tags are moved from this checkout with the user's credentials. `GITHUB_TOKEN` can't move them: GitHub refuses a tag whose commit has different `.github/workflows/` from the default branch, and any workflow change merged after the release commit makes them differ.
 
-Get the user's go-ahead before merging and before publishing. In between, keep going without stopping. Draft the release notes yourself: the user reviews them as a whole before publishing.
+Get the user's go-ahead before merging, before publishing and before moving the floating tags. In between, keep going without stopping. Draft the release notes yourself: the user reviews them as a whole before publishing.
 
 A release can stop halfway, for example when a PR is waiting on checks or a session ends. Check what already exists before starting, and resume from the first step that hasn't happened:
 
 ```bash
-git fetch origin main --tags
+git fetch origin main --tags --force
 gh pr list --head release/v<version> --state all --json number,state,mergeCommit
 gh release view v<version>
+git ls-remote origin refs/tags/v<version> refs/tags/v<major> refs/tags/v<major>.<minor>
 ```
+
+Without `--force`, git refuses to update a tag it already has, so the fetch fails once the floating tags have moved. The floating tags are done when they point where `v<version>` does.
 
 ## 1. See what is shipping
 
@@ -71,7 +75,7 @@ The release commit is the PR's merge commit, not the tip of `main`, which may ha
 
 ```bash
 sha=$(gh pr view <number> --json mergeCommit --jq .mergeCommit.oid)
-git fetch origin main --tags
+git fetch origin main --tags --force
 git show "$sha:Cargo.toml" | grep -m1 '^version'   # must be <version>
 ```
 
@@ -108,10 +112,30 @@ gh run list --workflow=release.yml --limit 3 --json databaseId,headBranch,status
 gh run watch <run-id> --exit-status
 ```
 
-Use the run whose `headBranch` is `v<version>`. `Build` uploads the five binaries. `Update homebrew formula`, `Update v{major} and v{major}.{minor} tags` and `Publish to crates.io` each start after `Build`. Any of them can fail alone and leave the release half-published, so report every job.
+Use the run whose `headBranch` is `v<version>`. `Build` uploads the five binaries. `Update homebrew formula` and `Publish to crates.io` each start after `Build`. Any of them can fail alone and leave the release half-published, so report every job.
 
 When one fails, show `gh run view <run-id> --log-failed` and let the user decide. Re-running is not always safe. `cargo publish` rejects a version that is already on crates.io, so a re-run fails after `scraps_libs` has gone out.
 
-## 6. Hand off
+## 6. Move the floating tags
+
+Skip this for a pre-release. Users of the setup action pin `boykush/scraps@v<major>` or `@v<major>.<minor>`, and the action installs the binaries of the version its ref carries. Move the tags once `Build` has succeeded, whatever happened to the other jobs. Check where they point now:
+
+```bash
+git ls-remote origin refs/tags/v<major> refs/tags/v<major>.<minor>
+```
+
+Show the user both tags' current commits and `$sha` from step 4. On a yes, move both in one atomic push. Each lease is the commit its tag points at now, or empty for a tag that doesn't exist yet, so nothing moves if either tag changed after you looked:
+
+```bash
+git push --atomic \
+  --force-with-lease=refs/tags/v<major>:<current commit> \
+  --force-with-lease=refs/tags/v<major>.<minor>:<current commit, or empty> \
+  origin "${sha}:refs/tags/v<major>" "${sha}:refs/tags/v<major>.<minor>"
+git fetch origin --tags --force
+```
+
+Keep the braces in `${sha}`: zsh reads the `:r` after a bare `$sha` as a modifier and mangles the refspec.
+
+## 7. Hand off
 
 Give the user the release URL. Then suggest the `doc-update` skill to check the docs against what shipped.
