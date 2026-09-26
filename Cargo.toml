@@ -45,7 +45,7 @@ schemars = "=1.2.2"
 rstest = "=0.27.0"
 tempfile = "=3.27.0"
 annotate-snippets = "=0.12.16"
-comfy-table = { version = "=8.0.0", features = ["custom_styling"] }
+comfy-table = { version = "=8.0.1", features = ["custom_styling"] }
 
 [package]
 edition.workspace = true
