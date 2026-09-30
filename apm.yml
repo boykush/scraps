@@ -11,7 +11,7 @@ includes: auto
 # this file and .apm/; edit those sources, not the generated files.
 dependencies:
   apm:
-    - boykush/ai-plugins/plugins/adr-remote-mcp#2c6adc3d77734b72a9882d8c8184b8c8c016e332
+    - boykush/ai-plugins/plugins/adr-remote-mcp#a29aa379e5a893c66f0f9ed7a597490bc7841628
   mcp: []
   # claude-plugins-official's rust-analyzer-lsp keeps this server in its marketplace entry and
   # ships no manifest, so apm can't install it by path. apm writes LSP config for Claude Code only.
