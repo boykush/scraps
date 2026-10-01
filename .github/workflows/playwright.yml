@@ -24,7 +24,7 @@ jobs:
       with:
         persist-credentials: false
     - name: Setup mise (install rust)
-      uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+      uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
       with:
         cache: false
         install_args: "rust"
@@ -36,7 +36,7 @@ jobs:
     - name: Build scraps
       run: cargo build --release
     - name: Setup Node.js
-      uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+      uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
       with:
         working_directory: ./tests/e2e
         install_args: "node"
