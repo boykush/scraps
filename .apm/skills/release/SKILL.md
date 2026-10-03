@@ -29,11 +29,13 @@ Without `--force`, git refuses to update a tag it already has, so the fetch fail
 ## 1. See what is shipping
 
 ```bash
-prev=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --merged origin/main --sort=-v:refname | grep -v -- - | grep -vx 'v<version>' | head -1)
-gh api repos/boykush/scraps/releases/generate-notes -f tag_name=v<version> -f target_commitish=main -f previous_tag_name="$prev" --jq .body
+prev=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --merged origin/main --sort=-v:refname | grep -v -e - | grep -vx 'v<version>' | head -1)
+gh api repos/boykush/scraps/releases/generate-notes -f tag_name=v<version> -f target_commitish=main -f previous_tag_name="${prev:?no previous tag found}" --jq .body
 ```
 
-The tag pattern skips the floating `v3` / `v3.0` tags, and `grep -v -- -` skips pre-releases. `generate-notes` returns every PR merged since `$prev`, whether it was merged or squashed (Renovate's are squashed), and only formats text: it creates nothing. Read the PRs that matter with `gh pr view <N> --json title,body`. A `!` in the title or `BREAKING CHANGE` in the body marks a breaking change.
+The tag pattern skips the floating `v3` / `v3.0` tags, and `grep -v -e -` skips pre-releases. Keep the `-e`: Claude Code's shell wraps `grep` with ugrep, which finds no pattern in `grep -v -- -` and leaves `$prev` empty. The `:?` stops the call when `$prev` is empty, because GitHub would guess the previous tag rather than fail. If it stops, find out why before going on: don't call `generate-notes` without a previous tag.
+
+`generate-notes` returns every PR merged since `$prev`, whether it was merged or squashed (Renovate's are squashed), and only formats text: it creates nothing. Read the PRs that matter with `gh pr view <N> --json title,body`. A `!` in the title or `BREAKING CHANGE` in the body marks a breaking change.
 
 ## 2. Open the release PR
 
