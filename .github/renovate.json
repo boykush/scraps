@@ -27,6 +27,17 @@
       ]
     },
     {
+      "description": "tracing-opentelemetry is built against exactly one opentelemetry minor, so a bump of either alone does not compile. Grouped, the pull request simply waits until both have released.",
+      "groupName": "OpenTelemetry",
+      "matchManagers": [
+        "cargo"
+      ],
+      "matchPackageNames": [
+        "/^opentelemetry/",
+        "tracing-opentelemetry"
+      ]
+    },
+    {
       "groupName": "Rust toolchain",
       "matchManagers": [
         "mise"

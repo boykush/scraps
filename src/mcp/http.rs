@@ -13,11 +13,12 @@ use rmcp::transport::{StreamableHttpServerConfig, StreamableHttpService};
 use tokio::net::TcpListener;
 
 use crate::mcp::server::ScrapsServer;
+use crate::mcp::traced::{SpanOptions, Traced};
 
 /// Path the MCP endpoint is served at, relative to the bind address.
 pub const ENDPOINT_PATH: &str = "/mcp";
 
-type McpService = StreamableHttpService<ScrapsServer, NeverSessionManager>;
+type McpService = StreamableHttpService<Traced<ScrapsServer>, NeverSessionManager>;
 
 /// Build the MCP service in stateless mode, so one long-running process can
 /// back any number of clients without retaining per-client sessions. The cost
@@ -26,6 +27,7 @@ pub fn build_service(
     scraps_dir: PathBuf,
     exclude_dirs: Vec<PathBuf>,
     allowed_hosts: Vec<String>,
+    spans: Option<SpanOptions>,
 ) -> McpService {
     let config = StreamableHttpServerConfig::default()
         .with_legacy_session_mode(false)
@@ -43,7 +45,10 @@ pub fn build_service(
     let config = config.with_allowed_hosts(allowed_hosts);
 
     StreamableHttpService::new(
-        move || Ok(ScrapsServer::new(scraps_dir.clone(), exclude_dirs.clone())),
+        move || {
+            let server = ScrapsServer::new(scraps_dir.clone(), exclude_dirs.clone());
+            Ok(Traced::new(server, spans))
+        },
         Arc::new(NeverSessionManager::default()),
         config,
     )
@@ -88,11 +93,14 @@ fn not_found() -> Response<BoxBody<Bytes, Infallible>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::mcp::telemetry::capture_spans;
     use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use http_body_util::{BodyExt, Full};
     use hyper::header::{ACCEPT, CONTENT_TYPE, HOST};
     use hyper::{Method, Request, StatusCode};
     use hyper_util::rt::TokioIo;
+    use opentelemetry::trace::{SpanKind, Status};
+    use opentelemetry_sdk::trace::{InMemorySpanExporter, SpanData};
     use rstest::rstest;
     use std::net::SocketAddr;
     use tokio::net::TcpStream;
@@ -108,15 +116,45 @@ mod tests {
         project: &TempScrapProject,
         allowed_hosts: Vec<String>,
     ) -> (SocketAddr, JoinHandle<std::io::Result<()>>) {
+        spawn_server_with(project, allowed_hosts, None).await
+    }
+
+    async fn spawn_server_with(
+        project: &TempScrapProject,
+        allowed_hosts: Vec<String>,
+        spans: Option<SpanOptions>,
+    ) -> (SocketAddr, JoinHandle<std::io::Result<()>>) {
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
         let addr = listener.local_addr().unwrap();
         let service = build_service(
             project.scraps_dir.clone(),
             vec![project.static_dir.clone(), project.output_dir.clone()],
             allowed_hosts,
+            spans,
         );
 
         (addr, tokio::spawn(serve(listener, service)))
+    }
+
+    async fn spawn_traced_server(
+        project: &TempScrapProject,
+        capture_content: bool,
+    ) -> (SocketAddr, JoinHandle<std::io::Result<()>>) {
+        let spans = SpanOptions { capture_content };
+        spawn_server_with(project, vec![], Some(spans)).await
+    }
+
+    fn only_span(exporter: &InMemorySpanExporter) -> SpanData {
+        let mut spans = exporter.get_finished_spans().unwrap();
+        assert_eq!(spans.len(), 1, "expected one span per request: {spans:?}");
+        spans.remove(0)
+    }
+
+    fn attribute(span: &SpanData, key: &str) -> Option<String> {
+        span.attributes
+            .iter()
+            .find(|attribute| attribute.key.as_str() == key)
+            .map(|attribute| attribute.value.to_string())
     }
 
     async fn post(addr: SocketAddr, path: &str, body: serde_json::Value) -> (StatusCode, String) {
@@ -308,6 +346,297 @@ mod tests {
         .await;
 
         assert_eq!(status, StatusCode::NOT_FOUND);
+
+        server_handle.abort();
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_tool_call_emits_a_server_span(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("test.md", b"# Test Scrap\n\nContent here");
+        let (exporter, _subscriber) = capture_spans();
+        let (addr, server_handle) = spawn_traced_server(&project, false).await;
+
+        let (status, _) = post(
+            addr,
+            ENDPOINT_PATH,
+            serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": 7,
+                "method": "tools/call",
+                "params": {"name": "search_scraps", "arguments": {"query": "test"}},
+            }),
+        )
+        .await;
+
+        assert_eq!(status, StatusCode::OK);
+        let span = only_span(&exporter);
+        assert_eq!(span.name, "tools/call search_scraps");
+        assert_eq!(span.span_kind, SpanKind::Server);
+        assert_eq!(span.status, Status::Unset);
+        assert_eq!(
+            attribute(&span, "mcp.method.name").as_deref(),
+            Some("tools/call")
+        );
+        assert_eq!(
+            attribute(&span, "gen_ai.operation.name").as_deref(),
+            Some("execute_tool")
+        );
+        assert_eq!(
+            attribute(&span, "gen_ai.tool.name").as_deref(),
+            Some("search_scraps")
+        );
+        assert_eq!(attribute(&span, "jsonrpc.request.id").as_deref(), Some("7"));
+        assert_eq!(attribute(&span, "gen_ai.tool.call.arguments"), None);
+
+        server_handle.abort();
+    }
+
+    /// Tracing is opt-in: a server that was given no span options opens no
+    /// span, whichever subscriber is listening.
+    #[rstest]
+    #[tokio::test]
+    async fn test_server_without_span_options_opens_no_span(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let (exporter, _subscriber) = capture_spans();
+        let (addr, server_handle) = spawn_server(&project).await;
+
+        let (status, _) = post(
+            addr,
+            ENDPOINT_PATH,
+            serde_json::json!({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}),
+        )
+        .await;
+
+        assert_eq!(status, StatusCode::OK);
+        assert!(exporter.get_finished_spans().unwrap().is_empty());
+
+        server_handle.abort();
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_request_without_a_tool_is_named_after_its_method(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let (exporter, _subscriber) = capture_spans();
+        let (addr, server_handle) = spawn_traced_server(&project, false).await;
+
+        post(
+            addr,
+            ENDPOINT_PATH,
+            serde_json::json!({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}),
+        )
+        .await;
+
+        let span = only_span(&exporter);
+        assert_eq!(span.name, "tools/list");
+        assert_eq!(span.span_kind, SpanKind::Server);
+        assert_eq!(
+            attribute(&span, "mcp.method.name").as_deref(),
+            Some("tools/list")
+        );
+        assert_eq!(attribute(&span, "gen_ai.operation.name"), None);
+        assert_eq!(attribute(&span, "gen_ai.tool.name"), None);
+
+        server_handle.abort();
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_span_records_the_http_transport(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let (exporter, _subscriber) = capture_spans();
+        let (addr, server_handle) = spawn_traced_server(&project, false).await;
+
+        post(
+            addr,
+            ENDPOINT_PATH,
+            serde_json::json!({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}),
+        )
+        .await;
+
+        let span = only_span(&exporter);
+        assert_eq!(
+            attribute(&span, "network.transport").as_deref(),
+            Some("tcp")
+        );
+        assert_eq!(
+            attribute(&span, "network.protocol.name").as_deref(),
+            Some("http")
+        );
+        assert_eq!(
+            attribute(&span, "network.protocol.version").as_deref(),
+            Some("1.1")
+        );
+
+        server_handle.abort();
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_failed_tool_call_marks_the_span_as_error(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let (exporter, _subscriber) = capture_spans();
+        let (addr, server_handle) = spawn_traced_server(&project, false).await;
+
+        let (_, body) = post(
+            addr,
+            ENDPOINT_PATH,
+            serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "tools/call",
+                "params": {"name": "get_scrap", "arguments": {"title": "missing"}},
+            }),
+        )
+        .await;
+
+        let response: serde_json::Value = serde_json::from_str(&body).unwrap();
+        assert_eq!(response["error"]["code"], -32004);
+        let span = only_span(&exporter);
+        assert_eq!(span.name, "tools/call get_scrap");
+        assert_eq!(attribute(&span, "error.type").as_deref(), Some("-32004"));
+        assert_eq!(
+            attribute(&span, "rpc.response.status_code").as_deref(),
+            Some("-32004")
+        );
+        // The message names the scrap that was asked for, so it stays off the
+        // span until content capture is opted into.
+        assert_eq!(span.status, Status::error(""));
+
+        server_handle.abort();
+    }
+
+    /// The conventions do not count a request the server could not serve as
+    /// sent, such as a call to a tool that does not exist, as a server error.
+    #[rstest]
+    #[tokio::test]
+    async fn test_caller_mistake_is_not_a_span_error(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let (exporter, _subscriber) = capture_spans();
+        let (addr, server_handle) = spawn_traced_server(&project, false).await;
+
+        post(
+            addr,
+            ENDPOINT_PATH,
+            serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "tools/call",
+                "params": {"name": "no_such_tool"},
+            }),
+        )
+        .await;
+
+        let span = only_span(&exporter);
+        assert_eq!(
+            attribute(&span, "rpc.response.status_code").as_deref(),
+            Some("-32602")
+        );
+        assert_eq!(attribute(&span, "error.type"), None);
+        assert_eq!(span.status, Status::Unset);
+
+        server_handle.abort();
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_content_capture_records_tool_arguments(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("test.md", b"# Test Scrap\n\nContent here");
+        let (exporter, _subscriber) = capture_spans();
+        let (addr, server_handle) = spawn_traced_server(&project, true).await;
+
+        post(
+            addr,
+            ENDPOINT_PATH,
+            serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "tools/call",
+                "params": {"name": "search_scraps", "arguments": {"query": "test"}},
+            }),
+        )
+        .await;
+
+        let span = only_span(&exporter);
+        assert_eq!(
+            attribute(&span, "gen_ai.tool.call.arguments").as_deref(),
+            Some(r#"{"query":"test"}"#)
+        );
+
+        server_handle.abort();
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_content_capture_records_the_error_message(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let (exporter, _subscriber) = capture_spans();
+        let (addr, server_handle) = spawn_traced_server(&project, true).await;
+
+        let (_, body) = post(
+            addr,
+            ENDPOINT_PATH,
+            serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "tools/call",
+                "params": {"name": "get_scrap", "arguments": {"title": "missing"}},
+            }),
+        )
+        .await;
+
+        let response: serde_json::Value = serde_json::from_str(&body).unwrap();
+        let message = response["error"]["message"].as_str().unwrap().to_string();
+        assert!(message.contains("missing"), "{message}");
+        assert_eq!(only_span(&exporter).status, Status::error(message));
+
+        server_handle.abort();
+    }
+
+    /// MCP carries the caller's trace context in `params._meta`, not in HTTP
+    /// headers, so the server span joins the trace of the client's span.
+    #[rstest]
+    #[tokio::test]
+    async fn test_span_continues_the_trace_in_request_meta(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let (exporter, _subscriber) = capture_spans();
+        let (addr, server_handle) = spawn_traced_server(&project, false).await;
+
+        post(
+            addr,
+            ENDPOINT_PATH,
+            serde_json::json!({
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "tools/call",
+                "params": {
+                    "name": "list_tags",
+                    "_meta": {
+                        "traceparent": "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+                    },
+                },
+            }),
+        )
+        .await;
+
+        let span = only_span(&exporter);
+        assert_eq!(
+            span.span_context.trace_id().to_string(),
+            "4bf92f3577b34da6a3ce929d0e0e4736"
+        );
+        assert_eq!(span.parent_span_id.to_string(), "00f067aa0ba902b7");
 
         server_handle.abort();
     }

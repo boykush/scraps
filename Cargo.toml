@@ -41,6 +41,27 @@ rmcp = { version = "=3.5.0", features = [
     "server",
     "transport-streamable-http-server",
 ] }
+opentelemetry = { version = "=0.33.0", default-features = false, features = [
+    "trace",
+    "internal-logs",
+] }
+# hyper needs a Tokio runtime, which the SDK's default thread-based batch
+# processor does not provide; the async-runtime one is still feature-gated.
+opentelemetry_sdk = { version = "=0.33.0", default-features = false, features = [
+    "trace",
+    "internal-logs",
+    "rt-tokio",
+    "experimental_trace_batch_span_processor_with_async_runtime",
+] }
+# OTLP/HTTP over the hyper already in the tree, rather than gRPC or reqwest.
+opentelemetry-otlp = { version = "=0.33.0", default-features = false, features = [
+    "trace",
+    "http-proto",
+    "hyper-client",
+    "internal-logs",
+] }
+# Built against one opentelemetry minor: the two only move together.
+tracing-opentelemetry = { version = "=0.34.0", default-features = false }
 schemars = "=1.2.2"
 rstest = "=0.27.0"
 tempfile = "=3.27.0"
@@ -94,6 +115,10 @@ tracing-subscriber.workspace = true
 clap-verbosity-flag.workspace = true
 indicatif.workspace = true
 rmcp.workspace = true
+opentelemetry.workspace = true
+opentelemetry_sdk.workspace = true
+opentelemetry-otlp.workspace = true
+tracing-opentelemetry.workspace = true
 schemars.workspace = true
 annotate-snippets.workspace = true
 comfy-table.workspace = true
@@ -104,3 +129,4 @@ scraps_libs.features = ["git_test"]
 rstest.workspace = true
 tempfile.workspace = true
 rmcp = { workspace = true, features = ["client", "server", "transport-async-rw"] }
+opentelemetry_sdk = { workspace = true, features = ["testing"] }
