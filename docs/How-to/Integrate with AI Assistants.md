@@ -109,3 +109,28 @@ nothing to keep running, no MCP client implementation required, works with
 any shell-capable agent. MCP is the right choice when your agent already
 expects MCP tools as its integration surface, and `--http` is the right
 transport when several repositories share one wiki.
+
+### Tracing
+
+A server that others reach can report what it serves. Name an OTLP endpoint
+in its environment and it exports one OpenTelemetry span per MCP request;
+leave it unset and nothing is exported:
+
+```bash
+❯ OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318 \
+  OTEL_SERVICE_NAME=wiki \
+    scraps -C ~/path/to/your/wiki mcp serve --http
+```
+
+The spans follow OpenTelemetry's
+[semantic conventions for MCP](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/mcp.md),
+so a tool call shows up as `tools/call search_scraps` rather than as an
+anonymous `POST /mcp`. The exporter reads the SDK's standard
+[`OTEL_*` variables](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/)
+and speaks OTLP over plain HTTP only — no TLS and no gRPC — so point it at
+a collector next to the server rather than at a backend across the
+internet.
+
+Tool arguments and error messages stay off the spans, because a search
+query says what a session was working on. Setting
+`OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true` records them.

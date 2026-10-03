@@ -4,38 +4,68 @@ use crate::{
     cli::config::scrap_config::ScrapConfig,
     cli::path_resolver::PathResolver,
     error::{McpError, ScrapsResult},
-    mcp::{self, server::ScrapsServer},
+    mcp::{
+        self,
+        server::ScrapsServer,
+        telemetry::Telemetry,
+        traced::{SpanOptions, Traced},
+    },
 };
 use rmcp::ServiceExt;
 use tokio::io::{stdin, stdout};
 use tokio::net::TcpListener;
-use tracing::{Level, info};
-use tracing_subscriber::FmtSubscriber;
+use tracing::info;
+use tracing_subscriber::filter::LevelFilter;
+use tracing_subscriber::layer::SubscriberExt;
 
 pub async fn run(
     project_path: Option<&Path>,
     http_addr: Option<&str>,
     allowed_hosts: Vec<String>,
 ) -> ScrapsResult<()> {
-    init_tracing()?;
+    let telemetry = init_tracing()?;
+    let spans = telemetry.as_ref().map(Telemetry::span_options);
 
-    let (scraps_dir, exclude_dirs) = resolve_dirs(project_path)?;
+    let served = serve(project_path, http_addr, allowed_hosts, spans).await;
 
-    match http_addr {
-        Some(addr) => serve_http(addr, scraps_dir, exclude_dirs, allowed_hosts).await,
-        None => serve_stdio(scraps_dir, exclude_dirs).await,
+    // `main` drops the runtime the exporter runs on as soon as this returns.
+    if let Some(telemetry) = telemetry {
+        telemetry.shutdown().await;
     }
+    served
 }
 
 /// Logs go to stderr because the stdio transport owns stdout for JSON-RPC.
-fn init_tracing() -> ScrapsResult<()> {
-    let subscriber = FmtSubscriber::builder()
-        .with_max_level(Level::INFO)
-        .with_writer(std::io::stderr)
-        .finish();
+/// Spans are exported as well when the environment asks for it.
+fn init_tracing() -> ScrapsResult<Option<Telemetry>> {
+    let logs = || {
+        tracing_subscriber::registry()
+            .with(LevelFilter::INFO)
+            .with(tracing_subscriber::fmt::layer().with_writer(std::io::stderr))
+    };
+
+    // Telemetry says what it makes of the environment through the logs, which
+    // cannot be installed for good until its layer exists.
+    let telemetry = tracing::subscriber::with_default(logs(), Telemetry::from_env);
+    let subscriber = logs().with(telemetry.as_ref().map(Telemetry::layer));
     tracing::subscriber::set_global_default(subscriber)
         .map_err(|e| McpError::TracingSetup(e.to_string()))?;
-    Ok(())
+
+    Ok(telemetry)
+}
+
+async fn serve(
+    project_path: Option<&Path>,
+    http_addr: Option<&str>,
+    allowed_hosts: Vec<String>,
+    spans: Option<SpanOptions>,
+) -> ScrapsResult<()> {
+    let (scraps_dir, exclude_dirs) = resolve_dirs(project_path)?;
+
+    match http_addr {
+        Some(addr) => serve_http(addr, scraps_dir, exclude_dirs, allowed_hosts, spans).await,
+        None => serve_stdio(scraps_dir, exclude_dirs, spans).await,
+    }
 }
 
 /// Resolve the wiki root. The root is the directory containing `.scraps.toml`
@@ -55,10 +85,14 @@ fn resolve_dirs(project_path: Option<&Path>) -> ScrapsResult<(PathBuf, Vec<PathB
     Ok((path_resolver.scraps_dir(), exclude_dirs))
 }
 
-async fn serve_stdio(scraps_dir: PathBuf, exclude_dirs: Vec<PathBuf>) -> ScrapsResult<()> {
+async fn serve_stdio(
+    scraps_dir: PathBuf,
+    exclude_dirs: Vec<PathBuf>,
+    spans: Option<SpanOptions>,
+) -> ScrapsResult<()> {
     info!("Starting Scraps MCP server...");
 
-    let service = ScrapsServer::new(scraps_dir, exclude_dirs)
+    let service = Traced::new(ScrapsServer::new(scraps_dir, exclude_dirs), spans)
         .serve((stdin(), stdout()))
         .await
         .inspect_err(|e| {
@@ -78,6 +112,7 @@ async fn serve_http(
     scraps_dir: PathBuf,
     exclude_dirs: Vec<PathBuf>,
     allowed_hosts: Vec<String>,
+    spans: Option<SpanOptions>,
 ) -> ScrapsResult<()> {
     let listener = TcpListener::bind(addr)
         .await
@@ -94,7 +129,7 @@ async fn serve_http(
         scraps_dir.display()
     );
 
-    let service = mcp::http::build_service(scraps_dir, exclude_dirs, allowed_hosts);
+    let service = mcp::http::build_service(scraps_dir, exclude_dirs, allowed_hosts, spans);
     tokio::select! {
         result = mcp::http::serve(listener, service) => {
             result.map_err(|e| McpError::ServiceError(e.to_string()))?;
