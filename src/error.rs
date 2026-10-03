@@ -94,4 +94,7 @@ pub enum McpError {
 
     #[error("Failed to bind MCP server to {0}")]
     Bind(String),
+
+    #[error("Failed to install the shutdown signal handler for MCP server: {0}")]
+    SignalSetup(String),
 }
