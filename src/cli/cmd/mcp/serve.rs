@@ -14,6 +14,8 @@ use crate::{
 use rmcp::ServiceExt;
 use tokio::io::{stdin, stdout};
 use tokio::net::TcpListener;
+#[cfg(unix)]
+use tokio::signal::unix::{SignalKind, signal};
 use tracing::info;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::layer::SubscriberExt;
@@ -123,6 +125,10 @@ async fn serve_http(
     let local_addr = listener
         .local_addr()
         .map_err(|e| McpError::Bind(format!("{addr}: {e}")))?;
+
+    // Armed before the address is announced, so whatever started the server
+    // can stop it as soon as it reads that line.
+    let shutdown = shutdown_signal().map_err(|e| McpError::SignalSetup(e.to_string()))?;
     info!(
         "Scraps MCP server listening on http://{local_addr}{} (wiki: {})",
         mcp::http::ENDPOINT_PATH,
@@ -134,9 +140,30 @@ async fn serve_http(
         result = mcp::http::serve(listener, service) => {
             result.map_err(|e| McpError::ServiceError(e.to_string()))?;
         }
-        _ = tokio::signal::ctrl_c() => {
+        _ = shutdown => {
             info!("Shutting down Scraps MCP server");
         }
     }
     Ok(())
+}
+
+/// Completes on Ctrl-C and, on Unix, on SIGTERM. Unhandled, SIGTERM skips the
+/// shutdown path, and as PID 1 in a container the kernel drops it outright, so
+/// stopping the container waits out its grace period and ends in SIGKILL.
+fn shutdown_signal() -> std::io::Result<impl Future<Output = ()>> {
+    // `signal` installs the handler here; `ctrl_c` waits for its first poll.
+    #[cfg(unix)]
+    let mut sigterm = signal(SignalKind::terminate())?;
+
+    Ok(async move {
+        #[cfg(unix)]
+        let terminate = sigterm.recv();
+        #[cfg(not(unix))]
+        let terminate = std::future::pending::<()>();
+
+        tokio::select! {
+            _ = tokio::signal::ctrl_c() => {}
+            _ = terminate => {}
+        }
+    })
 }
