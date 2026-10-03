@@ -9,7 +9,7 @@ Takes a version such as `3.1.0` (semver, no `v`); the tag is `v3.1.0`. If the us
 
 Three constraints shape the flow:
 
-- `main` takes changes only through a PR that passes the `build` and `zizmor` checks and has one approval, so the version bump travels as a release PR.
+- `main` takes changes only through a PR that passes the checks and has the approval its rulesets require, so the version bump travels as a release PR.
 - Publishing the GitHub Release runs `.github/workflows/release.yml`. It uploads the binaries, publishes both crates to crates.io and updates `boykush/homebrew-tap`. None of that can be taken back.
 - The floating `v{major}` / `v{major}.{minor}` tags are moved from this checkout with the user's credentials. `GITHUB_TOKEN` can't move them: GitHub refuses a tag whose commit has different `.github/workflows/` from the default branch, and any workflow change merged after the release commit makes them differ.
 
@@ -58,7 +58,7 @@ The diff should touch those two manifests and `Cargo.lock`, nothing else. Commit
 
 ## 3. Merge it
 
-1. `gh pr checks <number> --watch --required` waits for `build` and `zizmor`.
+1. `gh pr checks <number> --watch --required` waits for the checks the rulesets on `main` require.
 2. The approval comes from ai-review. Its `ai-review / review` check reviews the PR against the rules in boykush/adr and submits the verdict as a `claude[bot]` review: an approval when nothing is violated, a request for changes otherwise. The check isn't required, so the first command doesn't wait for it:
 
    ```bash
