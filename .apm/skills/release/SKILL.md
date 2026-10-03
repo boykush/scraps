@@ -9,7 +9,7 @@ Takes a version such as `3.1.0` (semver, no `v`); the tag is `v3.1.0`. If the us
 
 Three constraints shape the flow:
 
-- `main` takes changes only through a PR that passes the `build` and `zizmor` checks and has one approval, so the version bump travels as a release PR.
+- `main` takes changes only through a PR that passes the checks and has the approval its rulesets require, so the version bump travels as a release PR.
 - Publishing the GitHub Release runs `.github/workflows/release.yml`. It uploads the binaries, publishes both crates to crates.io and updates `boykush/homebrew-tap`. None of that can be taken back.
 - The floating `v{major}` / `v{major}.{minor}` tags are moved from this checkout with the user's credentials. `GITHUB_TOKEN` can't move them: GitHub refuses a tag whose commit has different `.github/workflows/` from the default branch, and any workflow change merged after the release commit makes them differ.
 
@@ -29,11 +29,13 @@ Without `--force`, git refuses to update a tag it already has, so the fetch fail
 ## 1. See what is shipping
 
 ```bash
-prev=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --merged origin/main --sort=-v:refname | grep -v -- - | grep -vx 'v<version>' | head -1)
-gh api repos/boykush/scraps/releases/generate-notes -f tag_name=v<version> -f target_commitish=main -f previous_tag_name="$prev" --jq .body
+prev=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --merged origin/main --sort=-v:refname | grep -v -e - | grep -vx 'v<version>' | head -1)
+gh api repos/boykush/scraps/releases/generate-notes -f tag_name=v<version> -f target_commitish=main -f previous_tag_name="${prev:?no previous tag found}" --jq .body
 ```
 
-The tag pattern skips the floating `v3` / `v3.0` tags, and `grep -v -- -` skips pre-releases. `generate-notes` returns every PR merged since `$prev`, whether it was merged or squashed (Renovate's are squashed), and only formats text: it creates nothing. Read the PRs that matter with `gh pr view <N> --json title,body`. A `!` in the title or `BREAKING CHANGE` in the body marks a breaking change.
+The tag pattern skips the floating `v3` / `v3.0` tags, and `grep -v -e -` skips pre-releases. Keep the `-e`: Claude Code's shell wraps `grep` with ugrep, which finds no pattern in `grep -v -- -` and leaves `$prev` empty. The `:?` stops the call when `$prev` is empty, because GitHub would guess the previous tag rather than fail. If it stops, find out why before going on: don't call `generate-notes` without a previous tag.
+
+`generate-notes` returns every PR merged since `$prev`, whether it was merged or squashed (Renovate's are squashed), and only formats text: it creates nothing. Read the PRs that matter with `gh pr view <N> --json title,body`. A `!` in the title or `BREAKING CHANGE` in the body marks a breaking change.
 
 ## 2. Open the release PR
 
@@ -56,7 +58,7 @@ The diff should touch those two manifests and `Cargo.lock`, nothing else. Commit
 
 ## 3. Merge it
 
-1. `gh pr checks <number> --watch --required` waits for `build` and `zizmor`.
+1. `gh pr checks <number> --watch --required` waits for the checks the rulesets on `main` require.
 2. The approval comes from ai-review. Its `ai-review / review` check reviews the PR against the rules in boykush/adr and submits the verdict as a `claude[bot]` review: an approval when nothing is violated, a request for changes otherwise. The check isn't required, so the first command doesn't wait for it:
 
    ```bash
