@@ -37,7 +37,7 @@ pub struct SearchRequest {
     pub query: String,
     /// Maximum number of results to return (default: 100)
     pub num: Option<usize>,
-    /// Search logic: "and" (default, all keywords must match) or "or" (any keyword matches)
+    /// Search logic: "or" (default, any keyword matches) or "and" (all keywords must match)
     pub logic: Option<SearchLogic>,
 }
 
