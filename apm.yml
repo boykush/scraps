@@ -11,7 +11,7 @@ includes: auto
 # this file and .apm/; edit those sources, not the generated files.
 dependencies:
   apm:
-    - boykush/ai-plugins/plugins/adr-remote-mcp#a29aa379e5a893c66f0f9ed7a597490bc7841628
+    - boykush/ai-plugins/plugins/adr-remote-mcp#29425edfbdcd3832defaaf720ac21744aee832fd
     # Owner only: the server sits behind the owner's login, so it connects for no one else. In
     # this repository it is called from the dogfood skill (.apm/skills/dogfood/) and nowhere else.
     - boykush/ai-plugins/plugins/jaeger-remote-mcp#29425edfbdcd3832defaaf720ac21744aee832fd
