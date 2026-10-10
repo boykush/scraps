@@ -41,20 +41,20 @@ rmcp = { version = "=3.5.1", features = [
     "server",
     "transport-streamable-http-server",
 ] }
-opentelemetry = { version = "=0.33.0", default-features = false, features = [
+opentelemetry = { version = "=0.33.1", default-features = false, features = [
     "trace",
     "internal-logs",
 ] }
 # hyper needs a Tokio runtime, which the SDK's default thread-based batch
 # processor does not provide; the async-runtime one is still feature-gated.
-opentelemetry_sdk = { version = "=0.33.0", default-features = false, features = [
+opentelemetry_sdk = { version = "=0.33.1", default-features = false, features = [
     "trace",
     "internal-logs",
     "rt-tokio",
     "experimental_trace_batch_span_processor_with_async_runtime",
 ] }
 # OTLP/HTTP over the hyper already in the tree, rather than gRPC or reqwest.
-opentelemetry-otlp = { version = "=0.33.0", default-features = false, features = [
+opentelemetry-otlp = { version = "=0.33.1", default-features = false, features = [
     "trace",
     "http-proto",
     "hyper-client",
