@@ -10,6 +10,7 @@ For comprehensive guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md)
 - IR: `src/ir/` (schema, store, loader) persists the compiled wiki under `.scraps/` next to `.scraps.toml`; every command loads scraps through `ir::loader`
 - Libs features: `error`, `git`, `lang`, `markdown`, `model`, `search` — gated in `modules/libs/src/lib.rs`
 - Config language: PKL (`*.pkl` files)
+- Dogfooding: the `jaeger` MCP server reads the traces of the owner's own Scraps deployment. It is owner-only and called only from the `dogfood` skill; in any other work, leave `mcp__jaeger__*` alone
 - Discovery: `livt/` is the product discovery workspace ([livt](https://github.com/boykush/livt)); its content is written in Japanese by convention, while the rest of the repository is English
 
 ## Development Workflow

@@ -1,5 +1,5 @@
 lockfile_version: '1'
-apm_version: 0.31.0
+apm_version: 0.32.0
 dependencies:
 - repo_url: boykush/ai-plugins
   name: adr-remote-mcp
@@ -39,6 +39,16 @@ dependencies:
     .claude/skills/adr-check/SKILL.md: sha256:0a96dea6cda4f3dc8e3a570befa669a5d81e506960ad19e4b61325a5c409b26d
     .claude/skills/adr-review/SKILL.md: sha256:7db35c60c4f6922baaf1118445ef6282dc4ed01454ea1ebab4ef6f358790eb67
   content_hash: sha256:c0afe43bc905f9f6c56e6120468c8886b623b605b158fdf8c36512440d7f7ffc
+- repo_url: boykush/ai-plugins
+  name: jaeger-remote-mcp
+  host: github.com
+  resolved_commit: 29425edfbdcd3832defaaf720ac21744aee832fd
+  resolved_ref: 29425edfbdcd3832defaaf720ac21744aee832fd
+  version: 0.1.0
+  virtual_path: plugins/jaeger-remote-mcp
+  is_virtual: true
+  package_type: apm_package
+  content_hash: sha256:c82500129f7986849888e13f92df37ee4e50cb10d8d163e21a8d99c2a473f5fa
 deployments:
 - kind: project-relative
   target: claude
@@ -130,6 +140,24 @@ deployments:
   - .
   active_owner: .
   content_hash: sha256:3799d7b8ff782173d1a57d1ccb78c735170c80d057c893488fee0aa365c3cf8f
+- kind: project-relative
+  target: claude
+  value: .claude/skills/dogfood
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/dogfood/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:812d8898ae588b5ca58fbe2781de04237fe444cc21837e804aac5501fc373992
 - kind: project-relative
   target: claude
   value: .claude/skills/release
@@ -240,6 +268,24 @@ deployments:
   content_hash: sha256:3799d7b8ff782173d1a57d1ccb78c735170c80d057c893488fee0aa365c3cf8f
 - kind: project-relative
   target: legacy
+  value: .agents/skills/dogfood
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/dogfood/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:812d8898ae588b5ca58fbe2781de04237fe444cc21837e804aac5501fc373992
+- kind: project-relative
+  target: legacy
   value: .agents/skills/release
   runtime: null
   scope: project
@@ -276,7 +322,25 @@ deployments:
   content_hash: null
 - kind: uri
   target: mcp
+  value: jaeger
+  runtime: claude
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: uri
+  target: mcp
   value: adr
+  runtime: codex
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: uri
+  target: mcp
+  value: jaeger
   runtime: codex
   scope: project
   owners:
@@ -285,19 +349,28 @@ deployments:
   content_hash: null
 mcp_servers:
 - adr
+- jaeger
 mcp_configs:
   adr:
     name: adr
     transport: http
     registry: false
     url: https://adr-mcp.boykush.com/mcp
+  jaeger:
+    name: jaeger
+    transport: http
+    registry: false
+    url: https://jaeger.boykush.com/api/ai/mcp/
 mcp_target_servers:
   claude:
   - adr
+  - jaeger
   codex:
   - adr
+  - jaeger
 mcp_config_provenance:
   adr: adr-remote-mcp
+  jaeger: jaeger-remote-mcp
 lsp_servers:
 - rust-analyzer
 lsp_configs:
@@ -314,14 +387,20 @@ lsp_config_provenance:
 local_deployed_files:
 - .agents/skills/doc-update
 - .agents/skills/doc-update/SKILL.md
+- .agents/skills/dogfood
+- .agents/skills/dogfood/SKILL.md
 - .agents/skills/release
 - .agents/skills/release/SKILL.md
 - .claude/skills/doc-update
 - .claude/skills/doc-update/SKILL.md
+- .claude/skills/dogfood
+- .claude/skills/dogfood/SKILL.md
 - .claude/skills/release
 - .claude/skills/release/SKILL.md
 local_deployed_file_hashes:
   .agents/skills/doc-update/SKILL.md: sha256:3799d7b8ff782173d1a57d1ccb78c735170c80d057c893488fee0aa365c3cf8f
+  .agents/skills/dogfood/SKILL.md: sha256:812d8898ae588b5ca58fbe2781de04237fe444cc21837e804aac5501fc373992
   .agents/skills/release/SKILL.md: sha256:dabb5baf0d67f4285f2e6b57418e87c437360a12a03e8a95d8591a189a9133b2
   .claude/skills/doc-update/SKILL.md: sha256:3799d7b8ff782173d1a57d1ccb78c735170c80d057c893488fee0aa365c3cf8f
+  .claude/skills/dogfood/SKILL.md: sha256:812d8898ae588b5ca58fbe2781de04237fe444cc21837e804aac5501fc373992
   .claude/skills/release/SKILL.md: sha256:dabb5baf0d67f4285f2e6b57418e87c437360a12a03e8a95d8591a189a9133b2

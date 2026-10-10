@@ -3,6 +3,10 @@
     "adr": {
       "type": "http",
       "url": "https://adr-mcp.boykush.com/mcp"
+    },
+    "jaeger": {
+      "type": "http",
+      "url": "https://jaeger.boykush.com/api/ai/mcp/"
     }
   }
 }
