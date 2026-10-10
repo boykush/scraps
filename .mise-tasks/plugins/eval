@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#MISE description="Run the pkm plugin's eval suite against the scraps built from this checkout"
+set -euo pipefail
+
+cargo build --quiet
+
+# The fixtures and both skills call `scraps`, so the build under test goes first on PATH.
+# Extra arguments sit before --allow-tools because that flag reads everything after it.
+PATH="$PWD/target/debug:$PATH" claude plugin eval plugins/pkm "$@" \
+  --scaffold \
+  --allow-tools Bash Write Edit "WebFetch(domain:www.anthropic.com)"
