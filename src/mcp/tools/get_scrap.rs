@@ -162,7 +162,7 @@ pub async fn get_scrap(
     out.insert(
         "next".to_string(),
         Value::String(
-            "Traverse onward with lookup_scrap_links or lookup_scrap_backlinks {title, ctx}."
+            "Traverse onward with lookup_scrap_links or lookup_scrap_backlinks {title, ctx}, or see everything around this scrap in one call with lookup_scrap_neighborhood {title, ctx}."
                 .to_string(),
         ),
     );
