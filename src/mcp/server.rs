@@ -38,7 +38,7 @@ impl ScrapsServer {
 #[tool_router]
 impl ScrapsServer {
     #[tool(
-        description = "Use when you know which scrap to read, by title and optional context. Optionally restrict to a heading section via 'heading', and project specific fields via 'fields' (allowed: title, ctx, body, headings, code_blocks; defaults to ['title', 'ctx', 'body']) to keep the response small. Traverse onward with lookup_scrap_links or lookup_scrap_backlinks."
+        description = "Use when you know which scrap to read, by title and optional context. Optionally restrict to a heading section via 'heading', and project specific fields via 'fields' (allowed: title, ctx, body, headings, code_blocks; defaults to ['title', 'ctx', 'body']) to keep the response small. Traverse onward with lookup_scrap_links or lookup_scrap_backlinks, or see everything around the scrap in one call with lookup_scrap_neighborhood."
     )]
     async fn get_scrap(
         &self,
@@ -1100,6 +1100,29 @@ mod tests {
                 .unwrap_or_default()
                 .contains("list_tags"),
             "a map with no edges should point at another way in: {map}"
+        );
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_reading_a_scrap_points_at_the_neighborhood_map(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("target.md", b"# Target\n\nContent");
+
+        let scrap = call_tool_json(
+            &project,
+            "get_scrap",
+            serde_json::json!({"title": "target"}),
+        )
+        .await;
+
+        assert!(
+            scrap["next"]
+                .as_str()
+                .unwrap_or_default()
+                .contains("lookup_scrap_neighborhood"),
+            "a read should name the one-call way to see around the scrap: {scrap}"
         );
     }
 
