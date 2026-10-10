@@ -350,6 +350,38 @@ mod tests {
         );
     }
 
+    #[rstest]
+    #[tokio::test]
+    async fn test_search_schema_names_the_logic_it_defaults_to(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("rust_doc.md", b"# Rust Documentation\n\nRust content");
+        project.add_scrap("python_doc.md", b"# Python Documentation\n\nPython content");
+
+        let tools = list_tools_of(&project).await;
+        let search = tools
+            .iter()
+            .find(|t| t.name.as_ref() == "search_scraps")
+            .unwrap();
+        let schema = serde_json::to_value(&*search.input_schema).unwrap();
+        let described = schema["properties"]["logic"]["description"]
+            .as_str()
+            .unwrap_or_default();
+
+        // Leaving logic out matches either keyword, so that is the default to name.
+        let unset = call_tool_json(
+            &project,
+            "search_scraps",
+            serde_json::json!({"query": "rust python"}),
+        )
+        .await;
+        assert_eq!(unset["count"], 2);
+        assert!(
+            described.contains("\"or\" (default"),
+            "the schema should name the default it applies: {described}"
+        );
+    }
+
     async fn call_tool_json(
         project: &TempScrapProject,
         name: &str,
@@ -878,7 +910,7 @@ mod tests {
         server_handle.abort();
     }
 
-    /// Test: search_scraps with AND logic (default) - all keywords must match
+    /// Test: search_scraps with AND logic - all keywords must match
     #[rstest]
     #[tokio::test]
     async fn test_call_search_scraps_and_logic(
