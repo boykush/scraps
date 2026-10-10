@@ -64,7 +64,9 @@ fn to_content_inner(
     };
     let root = parse_document(&arena, &parse_text, &opts);
 
+    let heading_ids = heading_ids(root);
     transform_wiki_refs(root, text, base_url, embed_mode, visited_embeds);
+    attach_heading_ids(heading_ids, &opts);
 
     let mut elements = Vec::new();
     for child in root.children() {
@@ -164,10 +166,14 @@ fn transform_wiki_refs<'a>(
             continue;
         }
 
-        let scrap_link = ScrapKey::from_path_str(&url);
+        let (path, heading) = match url.split_once('#') {
+            Some((path, heading)) => (path, Some(heading)),
+            None => (url.as_str(), None),
+        };
+        let scrap_link = ScrapKey::from_path_str(path);
         let file_stem = ScrapFileStem::from(scrap_link.clone());
         let mut new_url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
-        if let Some((_, heading)) = url.split_once('#') {
+        if let Some(heading) = heading {
             new_url.push('#');
             new_url.push_str(&slugify::by_dash(heading));
         }
@@ -184,6 +190,31 @@ fn transform_wiki_refs<'a>(
             let new_label = Title::from(&scrap_link).to_string();
             replace_first_text(node, &new_label);
         }
+    }
+}
+
+// Ids come from the heading text as authored, before wiki-links are
+// relabelled, so they equal the slugs the broken-heading-ref lint compares.
+fn heading_ids<'a>(root: &'a AstNode<'a>) -> Vec<(&'a AstNode<'a>, String)> {
+    root.descendants()
+        .filter(|node| matches!(node.data().value, NodeValue::Heading(_)))
+        .map(|node| (node, slugify::by_dash(&collect_text(node))))
+        .filter(|(_, id)| !id.is_empty())
+        .collect()
+}
+
+// comrak's own header ids use its anchorizer, whose slugs differ from
+// `slugify::by_dash`, so the id is written into the rendered tag instead.
+fn attach_heading_ids<'a>(heading_ids: Vec<(&'a AstNode<'a>, String)>, opts: &Options) {
+    for (node, id) in heading_ids {
+        let mut html = String::new();
+        let _ = format_html(node, opts, &mut html);
+        let Some(tag_end) = html.find('>') else {
+            continue;
+        };
+        html.insert_str(tag_end, &format!(" id=\"{}\"", escape_html(&id)));
+        detach_children(node);
+        node.data_mut().value = NodeValue::Raw(html);
     }
 }
 
@@ -384,6 +415,55 @@ mod tests {
         "<p><a href=\"http://localhost:1112/scraps/expect-slugify.html\">expect slugify</a></p>\n"
     )]
     fn it_to_html_link(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
+        let content = to_content(input, &base_url, EmbedMode::Preserve);
+        assert_eq!(content.to_string(), expected);
+    }
+
+    #[rstest]
+    #[case::heading(
+        "[[Home#Welcome]]",
+        "<p><a href=\"http://localhost:1112/scraps/home.html#welcome\">Home</a></p>\n"
+    )]
+    #[case::heading_slugify(
+        "[[Configuration#SSG section]]",
+        "<p><a href=\"http://localhost:1112/scraps/configuration.html#ssg-section\">Configuration</a></p>\n"
+    )]
+    #[case::context_heading(
+        "[[Ctx/Title#Heading]]",
+        "<p><a href=\"http://localhost:1112/scraps/ctx/title.html#heading\">Title</a></p>\n"
+    )]
+    #[case::context_heading_display(
+        "[[Ctx/Title#Heading|alias]]",
+        "<p><a href=\"http://localhost:1112/scraps/ctx/title.html#heading\">alias</a></p>\n"
+    )]
+    fn it_to_html_heading_link(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
+        let content = to_content(input, &base_url, EmbedMode::Preserve);
+        assert_eq!(content.to_string(), expected);
+    }
+
+    #[rstest]
+    #[case::h1("# Welcome", "<h1 id=\"welcome\">Welcome</h1>\n")]
+    #[case::spaces("## SSG section", "<h2 id=\"ssg-section\">SSG section</h2>\n")]
+    #[case::reserved_char(
+        "## Hello, World!",
+        "<h2 id=\"hello-comma-world-exclamation\">Hello, World!</h2>\n"
+    )]
+    #[case::inline_markup(
+        "## Hello **bold** world",
+        "<h2 id=\"hello-bold-world\">Hello <strong>bold</strong> world</h2>\n"
+    )]
+    #[case::setext("Title\n=====", "<h1 id=\"title\">Title</h1>\n")]
+    #[case::japanese("## 見出し", "<h2 id=\"見出し\">見出し</h2>\n")]
+    #[case::nested_in_blockquote(
+        "> ## Quoted",
+        "<blockquote>\n<h2 id=\"quoted\">Quoted</h2>\n</blockquote>\n"
+    )]
+    #[case::wikilink(
+        "## [[Ctx/topic]]",
+        "<h2 id=\"ctx-slash-topic\"><a href=\"http://localhost:1112/scraps/ctx/topic.html\">topic</a></h2>\n"
+    )]
+    #[case::attribute_escape("## a \"b\"", "<h2 id=\"a-&quot;b&quot;\">a &quot;b&quot;</h2>\n")]
+    fn it_to_html_heading_id(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
         let content = to_content(input, &base_url, EmbedMode::Preserve);
         assert_eq!(content.to_string(), expected);
     }
