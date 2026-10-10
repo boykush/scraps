@@ -190,3 +190,19 @@ The performance test runs automatically on every pull request and:
   they are in a real deploy
 - Measures `scraps build -v` execution time
 - **Fails the PR if build time reaches 4 seconds**
+
+### Plugin Evals
+
+The `pkm` plugin carries an eval suite under `plugins/pkm/evals/`, run with [`claude plugin eval`](https://code.claude.com/docs/en/plugin-evals). Each case starts from a small fixture wiki and grades what the skill did.
+
+```bash
+# Run the whole suite (each case three times, with and without the plugin)
+mise run plugins:eval
+
+# One quick pass while editing a skill
+mise run plugins:eval --case digest-article --runs 1 --ablation none
+```
+
+The task builds scraps from the checkout and puts it first on `PATH`, so the skills are graded against the CLI under development. Runs call the model with your own Claude Code credentials and count against your usage; the suite is not run in CI. On Linux the granted `Bash` tool needs `bubblewrap` and `socat` for the sandbox.
+
+Run it when you change a skill under `plugins/pkm/`, or a CLI command those skills call.

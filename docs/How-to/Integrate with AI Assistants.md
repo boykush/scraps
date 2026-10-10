@@ -52,6 +52,19 @@ the official docs:
 Install instructions live in the plugin README so that marketplace browsers
 have everything in one place.
 
+### Personal knowledge management skills
+
+Where llm-wiki has the model maintain the wiki, the **pkm plugin** is for a
+wiki you write for yourself. Its skills keep what the model summarized apart
+from what you understood:
+
+<https://github.com/boykush/scraps/tree/main/plugins/pkm>
+
+| Skill | Role |
+|---|---|
+| `/learn` | Explain a source on the pages you already have, check comprehension, and write only what passed |
+| `/digest` | Record an article or talk as one short linked page, without dialogue |
+
 ## MCP (for MCP-compatible clients)
 
 Scraps ships an MCP server for clients that prefer the Model Context
