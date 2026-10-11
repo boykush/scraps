@@ -29,10 +29,17 @@ The existing pages are the list of what the user already understands. Reading th
 1. Read the source and identify its central terms and claims. For a URL, fetch the primary source; given only a term, find a primary source for it. If only part of a source can be read (slide hosts such as Speaker Deck often yield just the title and abstract), work from what you could read and say what was missing instead of filling the gap by guessing.
 2. Search with varied wording using `scraps search "<query>" --json`, then read the 3–8 most related pages with `scraps get "<title>" [--ctx "<ctx>"] --json`.
 3. Split the central terms into those that already have a page and those that do not. A term has a page only when that thing is the page's subject. A page about a source (an article, a talk, one entry of a report or catalog) is not the page for the term in its title, even when the title is exactly the term; read the body to tell, and link such a page only when you mean that source. The former are known ground to build on. Fill in the latter only as far as this run needs, and keep them as candidates for later runs.
-4. Decide the points that may be recorded: one gist saying what the thing is, and up to three connections saying how it relates to existing pages. With no related pages, the gist alone is enough.
+4. Settle the context: the part of the wiki the user is learning this source for, named by the existing page at its center. This is not a context folder. A source usually touches several parts of the wiki, and the user came for one of them. A gateway for agent traffic sits next to both the pages on agent protocols and the pages on cluster networking; a user who came for the first does not want to be quizzed on the second. Decide it in this order:
+   - what the user said when asking, or earlier in the conversation
+   - the pages the user added or changed lately, when the wiki is a git repository (`git log --since="1 month ago" --name-only --format=`)
+   - if more than one context is still possible, ask which with one `AskUserQuestion` before explaining, offering the possible contexts as options
+
+   Do not settle it by which part has the most pages or backlinks. A hub the user filled in long ago would outweigh what they are learning now.
+5. Decide the points that may be recorded: one gist saying what the thing is, and up to three connections saying how it relates to existing pages inside the context. Fewer is fine. A connection outside the context is not a point, however much room the source gives it; name it as a candidate for a later run. With no related pages, the gist alone is enough.
 
 ## 2. Explain
 
+- Open by naming the context in one line, so the user can redirect before the explanation is spent on the wrong one.
 - Start from terms that already have pages and place the new concept next to them. Use known terms as they are, marked `[[Title]]`, without explaining them again.
 - Stay on the points. Do not summarize the source, and leave out detail the points do not need.
 - Put one diagram at the center of the explanation. Relations, flows, layers, and comparisons are taken in faster at a glance than in prose. Draw existing pages as known landmarks and place the new concept among them. Use a diagram-rendering tool when the client has one (for example the visualize tool in the Claude desktop app); otherwise use a table or a text diagram.
@@ -50,6 +57,8 @@ A question that can be answered by remembering the wording of the explanation do
 - apply the concept to a concrete case the explanation did not use
 - tell it apart from a nearby concept
 - ask how it relates to an existing page
+
+Set every question inside the context: take the concrete cases from it and the nearby concepts from its pages. What the user asked about during the pause tells you more about the context than your read in step 1 did, so follow it.
 
 Ask one multiple-choice question per point, all in one `AskUserQuestion` call. Without that tool, ask in the message body.
 
