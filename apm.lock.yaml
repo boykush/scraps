@@ -1,11 +1,11 @@
 lockfile_version: '1'
-apm_version: 0.31.0
+apm_version: 0.32.0
 dependencies:
 - repo_url: boykush/ai-plugins
   name: adr-remote-mcp
   host: github.com
-  resolved_commit: 868d0cdb830fc794ee657146a4d6ead129a6e25c
-  resolved_ref: 868d0cdb830fc794ee657146a4d6ead129a6e25c
+  resolved_commit: c1bb99f37c25ebe11432be84fb37ada18d4f8367
+  resolved_ref: c1bb99f37c25ebe11432be84fb37ada18d4f8367
   version: 0.1.0
   virtual_path: plugins/adr-remote-mcp
   is_virtual: true
@@ -42,13 +42,13 @@ dependencies:
 - repo_url: boykush/ai-plugins
   name: jaeger-remote-mcp
   host: github.com
-  resolved_commit: 868d0cdb830fc794ee657146a4d6ead129a6e25c
-  resolved_ref: 868d0cdb830fc794ee657146a4d6ead129a6e25c
+  resolved_commit: c1bb99f37c25ebe11432be84fb37ada18d4f8367
+  resolved_ref: c1bb99f37c25ebe11432be84fb37ada18d4f8367
   version: 0.1.0
   virtual_path: plugins/jaeger-remote-mcp
   is_virtual: true
   package_type: apm_package
-  content_hash: sha256:c82500129f7986849888e13f92df37ee4e50cb10d8d163e21a8d99c2a473f5fa
+  content_hash: sha256:071c6a846f648ca853ec08a9f1d078baacc5f675c432d6548c92e98df3a94268
 deployments:
 - kind: project-relative
   target: claude
@@ -360,7 +360,7 @@ mcp_configs:
     name: jaeger
     transport: http
     registry: false
-    url: https://jaeger.boykush.com/api/ai/mcp/
+    url: https://jaeger-mcp.boykush.com/mcp
 mcp_target_servers:
   claude:
   - adr
