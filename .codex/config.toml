@@ -3,5 +3,5 @@ url = "https://adr-mcp.boykush.com/mcp"
 id = ""
 
 [mcp_servers.jaeger]
-url = "https://jaeger.boykush.com/api/ai/mcp/"
+url = "https://jaeger-mcp.boykush.com/mcp"
 id = ""

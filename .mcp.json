@@ -6,7 +6,7 @@
     },
     "jaeger": {
       "type": "http",
-      "url": "https://jaeger.boykush.com/api/ai/mcp/"
+      "url": "https://jaeger-mcp.boykush.com/mcp"
     }
   }
 }
