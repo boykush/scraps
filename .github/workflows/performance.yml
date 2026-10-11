@@ -3,7 +3,8 @@ name: Performance Test
 on:
   # No paths or types filter: this job is a required check on main, so a PR that
   # skipped it — touching only ignored paths, or reopened without a push — would
-  # wait forever for a run that never starts. Same reason as cargo-test-and-lint.
+  # wait forever for a run that never starts. Irrelevant changes are skipped by
+  # the steps below instead, which still lets the job report success.
   pull_request:
 
 permissions:
@@ -26,21 +27,42 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          # The PR is checked out as its merge commit; its first parent is the base.
+          fetch-depth: 2
+
+      - name: Detect changes that can affect build time
+        id: changes
+        run: |
+          # Fail open: without a readable diff, measure rather than skip.
+          if ! files=$(git diff --name-only HEAD^1 HEAD); then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          pattern='^(src/|modules/|Cargo\.(toml|lock)$|mise\.toml$|\.mise-tasks/perf/|\.github/workflows/performance\.yml$)'
+          if grep -qE "$pattern" <<< "$files"; then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "relevant=false" >> "$GITHUB_OUTPUT"
+            echo "No change under the paths that feed the release build; skipping." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Setup mise
+        if: steps.changes.outputs.relevant == 'true'
         uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           cache: false
           install_args: "rust"
 
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        if: steps.changes.outputs.relevant == 'true'
 
       - name: Run performance test
         id: build
+        if: steps.changes.outputs.relevant == 'true'
         run: mise run perf:test
-      
+
       - name: Comment PR
-        if: always()
+        if: always() && steps.changes.outputs.relevant == 'true'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           BUILD_DURATION: ${{ steps.build.outputs.duration }}
