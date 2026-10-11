@@ -183,7 +183,9 @@ test('example test', async ({ page }) => {
 
 **Critical Requirement**: All changes must maintain build times under 4 seconds.
 
-The performance test runs automatically on every pull request and:
+The performance test runs automatically on every pull request that touches
+what goes into the release build (the paths are listed in
+[performance.yml](.github/workflows/performance.yml)) and:
 - Builds Scraps in release mode (`cargo build --release`)
 - Tests against the [boykush/wiki](https://github.com/boykush/wiki) repository,
   cloned with its full history so the git-derived commit dates are read as
