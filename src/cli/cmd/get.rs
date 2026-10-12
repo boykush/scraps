@@ -19,6 +19,7 @@ const FIELD_HEADINGS: &str = "headings";
 const FIELD_CODE_BLOCKS: &str = "code_blocks";
 const FIELD_IMAGES: &str = "images";
 const FIELD_TYPE: &str = "type";
+const FIELD_DESCRIPTION: &str = "description";
 
 const DEFAULT_FIELDS: &[&str] = &[FIELD_TITLE, FIELD_CTX, FIELD_BODY];
 const ALLOWED_FIELDS: &[&str] = &[
@@ -29,6 +30,7 @@ const ALLOWED_FIELDS: &[&str] = &[
     FIELD_CODE_BLOCKS,
     FIELD_IMAGES,
     FIELD_TYPE,
+    FIELD_DESCRIPTION,
 ];
 
 fn parse_fields(spec: &str) -> ScrapsResult<Vec<&'static str>> {
@@ -141,6 +143,16 @@ pub fn run(
                                 .scrap_type
                                 .as_ref()
                                 .map(|t| Value::String(t.clone()))
+                                .unwrap_or(Value::Null),
+                        );
+                    }
+                    FIELD_DESCRIPTION => {
+                        out.insert(
+                            field.to_string(),
+                            result
+                                .description
+                                .as_ref()
+                                .map(|d| Value::String(d.clone()))
                                 .unwrap_or(Value::Null),
                         );
                     }
@@ -324,6 +336,42 @@ mod tests {
         let v: Value = serde_json::from_str(output.trim()).unwrap();
 
         assert!(!v.as_object().unwrap().contains_key("type"));
+    }
+
+    #[rstest]
+    fn run_json_field_projection_supports_description(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(b"")
+            .add_scrap(
+                "orders.md",
+                b"---\ndescription: One row per completed customer order.\n---\n\n# Orders\n",
+            )
+            .add_scrap("note.md", b"# Note\n");
+
+        let described = run_get("orders", None, None, Some("title,description"), &project).unwrap();
+        assert_eq!(
+            described.trim(),
+            r#"{"title":"orders","description":"One row per completed customer order."}"#
+        );
+
+        let plain = run_get("note", None, None, Some("title,description"), &project).unwrap();
+        assert_eq!(plain.trim(), r#"{"title":"note","description":null}"#);
+    }
+
+    #[rstest]
+    fn run_default_json_leaves_the_description_out(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(b"")
+            .add_scrap("orders.md", b"---\ndescription: Orders.\n---\n\n# Orders\n");
+
+        let output = run_get("orders", None, None, Some(""), &project).unwrap();
+        let v: Value = serde_json::from_str(output.trim()).unwrap();
+
+        assert!(!v.as_object().unwrap().contains_key("description"));
     }
 
     #[rstest]

@@ -7,7 +7,7 @@ use comfy_table::{Cell, Table};
 use serde::{Deserialize, Serialize};
 
 use crate::cli::config::scrap_config::ScrapConfig;
-use crate::cli::json::scrap::ScrapKeyJson;
+use crate::cli::json::scrap::SearchHitJson;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 use crate::ir::loader;
@@ -16,7 +16,7 @@ use scraps_libs::search::engine::SearchLogic;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct SearchResponse {
-    results: Vec<ScrapKeyJson>,
+    results: Vec<SearchHitJson>,
     count: usize,
 }
 
@@ -41,11 +41,12 @@ pub fn run(
     let usecase = SearchUsecase::new();
     let results = usecase.execute(&scraps, query, num, logic)?;
 
-    let scrap_keys: Vec<ScrapKeyJson> = results
+    let scrap_keys: Vec<SearchHitJson> = results
         .into_iter()
-        .map(|r| ScrapKeyJson {
+        .map(|r| SearchHitJson {
             title: r.title.to_string(),
             ctx: r.ctx.map(|c| c.to_string()),
+            description: r.description,
         })
         .collect();
 
@@ -132,6 +133,41 @@ mod tests {
         assert!(titles.contains(&"rust-basics"));
         assert!(titles.contains(&"ownership"));
         assert!(!titles.contains(&"python"));
+    }
+
+    #[rstest]
+    fn run_json_carries_a_description_only_where_there_is_one(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_config(b"").add_scrap(
+            "orders.md",
+            b"---\ndescription: One row per completed customer order.\n---\n\n# Orders\n",
+        );
+
+        let search = |query: &str| {
+            let mut buf = Vec::new();
+            run(
+                query,
+                100,
+                SearchLogic::Or,
+                true,
+                Some(project.project_root.as_path()),
+                &mut buf,
+            )
+            .unwrap();
+            String::from_utf8(buf).unwrap()
+        };
+
+        assert_eq!(
+            search("orders").trim(),
+            r#"{"results":[{"title":"orders","ctx":null,"description":"One row per completed customer order."}],"count":1}"#
+        );
+
+        project.add_scrap("orders.md", b"# Orders\n");
+        assert_eq!(
+            search("orders").trim(),
+            r#"{"results":[{"title":"orders","ctx":null}],"count":1}"#
+        );
     }
 
     #[rstest]

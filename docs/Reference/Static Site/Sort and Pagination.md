@@ -1,5 +1,6 @@
 ---
 type: Reference
+description: The sort views the static site always generates, and how they paginate.
 ---
 
 #[[Emit/Static Site]]

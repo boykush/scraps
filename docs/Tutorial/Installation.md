@@ -1,5 +1,6 @@
 ---
 type: Tutorial
+description: Install the Scraps CLI with Homebrew, Cargo or a prebuilt binary.
 ---
 
 #[[CLI]]
