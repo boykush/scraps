@@ -31,8 +31,8 @@ impl LintRuleName {
     }
 
     /// Rules selected when `scraps lint` is invoked without `--rule`.
-    /// Excludes the opt-in rules, which are enabled per-rule through the
-    /// `[lint.*]` config sections.
+    /// Excludes the opt-in rules: each checks a policy the wiki chooses and is
+    /// enabled through its `[lint.*]` config section.
     pub fn default_rules() -> Vec<LintRuleName> {
         vec![
             Self::DeadEnd,

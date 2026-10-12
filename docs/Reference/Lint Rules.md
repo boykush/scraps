@@ -5,9 +5,11 @@ type: Reference
 #[[CLI]]
 
 Link quality rules used by [[Reference/CLI Overview]]'s `lint`
-command. Default rules need nothing outside the wiki and apply to any wiki;
-the others are opt-in via `--rule` or `[lint.<rule>]` in
-[[Reference/Configuration]]. A link is a `[[wiki-link]]` or a Markdown link
+command. Default rules report what is a defect in any wiki: a link that does
+not resolve, a scrap that cannot be linked. Opt-in rules check a policy the
+wiki chooses for itself, such as how old is stale or which filesystems it
+must port to; writing the rule's `[lint.<rule>]` section in
+[[Reference/Configuration]] turns it on, and `--rule` runs it once. A link is a `[[wiki-link]]` or a Markdown link
 to a scrap's `.md` file ([[Reference/Markdown Link]]); the rules treat both
 alike and quote each as it was written.
 
@@ -20,8 +22,8 @@ alike and quote each as it was written.
 | `broken-link` | link that does not resolve to a scrap | on |
 | `broken-heading-ref` | `[[Page#Heading]]` or `page.md#heading` heading missing | on |
 | `unlinkable-key` | scrap whose file path cannot be written inside `[[ ]]` | on |
-| `stale-by-git` | last commit older than threshold (git-dependent) | opt-in |
-| `unportable-key` | scrap whose file path does not port across filesystems | opt-in |
+| `stale-by-git` | policy: last commit older than the threshold the wiki sets | opt-in |
+| `unportable-key` | policy: file path that does not port across filesystems | opt-in |
 
 ## Key rules
 
@@ -37,8 +39,8 @@ its file, percent-encoded where needed (`[C#](C%23.md)`); renaming the file
 removes the warning.
 
 `unportable-key` reports a scrap whose path cannot exist on every common
-filesystem. It is opt-in, for a wiki that is cloned onto more than one
-system:
+filesystem. Whether a wiki must port is its own policy, so the rule is
+opt-in:
 
 ```toml:.scraps.toml
 [lint.unportable_key]

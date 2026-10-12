@@ -14,8 +14,8 @@ const SECONDS_PER_DAY: i64 = 86_400;
 /// content that was once accurate but rots when left untouched. The default
 /// 180-day threshold matches Notion's default re-verification cycle.
 ///
-/// Opt-in by rule name (`--rule stale-by-git` or `--all`) so that the default
-/// `scraps lint` invocation stays git-free and fast.
+/// Opt-in (`[lint.stale_by_git]` or `--rule stale-by-git`): how old is
+/// stale is a policy each wiki sets, not a defect in any wiki.
 pub struct StaleByGitRule<GC: GitCommand> {
     pub git_command: GC,
     pub scraps_dir: PathBuf,

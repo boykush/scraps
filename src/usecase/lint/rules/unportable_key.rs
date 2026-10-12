@@ -8,7 +8,7 @@ use crate::usecase::lint::rule::{LintRule, LintRuleName, LintWarning, scrap_rela
 /// Flag scraps whose key cannot exist on every common filesystem: a name
 /// Windows rejects, or keys that collide on a case-insensitive volume.
 ///
-/// Opt-in, because a wiki that lives on one system has nothing to port.
+/// Opt-in: which filesystems a wiki must port to is a policy it sets.
 pub struct UnportableKeyRule;
 
 /// A check on one path segment of a key: `finds` says what is wrong with the
