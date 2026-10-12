@@ -1,3 +1,5 @@
+use scraps_libs::markdown::query::body;
+
 /// One-line summary shown for a scrap on index and tag pages.
 ///
 /// A leading heading is the term's expanded name (`ADR` → `Architectural
@@ -9,7 +11,7 @@ pub struct Summary(String);
 
 impl Summary {
     pub fn from_md_text(md_text: &str, max_chars: usize) -> Option<Summary> {
-        let mut lines = md_text.lines().map(str::trim);
+        let mut lines = body(md_text).lines().map(str::trim);
 
         let first = lines.find(|l| !l.is_empty())?;
         let text = match heading_text(first) {
@@ -240,6 +242,13 @@ mod tests {
         "![[Page#Heading]] embeds a single section from another scrap.",
         "Page#Heading embeds a single section from another scrap."
     )]
+    // A frontmatter block is metadata, not the scrap's opening.
+    #[case(
+        "---\ntype: BigQuery Table\ntitle: Customer Orders\n---\n\n# Schema\n\nBody text.",
+        "Schema"
+    )]
+    #[case("---\ntags: [sales]\n---\nBody text.", "Body text.")]
+    #[case("---\ntags: [sales\n---\n\nBody text.", "tags: [sales")]
     fn it_summarizes(#[case] md: &str, #[case] expected: &str) {
         let summary = Summary::from_md_text(md, 120).unwrap();
         assert_eq!(summary.as_str(), expected);

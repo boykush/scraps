@@ -5,6 +5,7 @@ use comrak::{
 };
 
 use super::common::{collect_text, options};
+use super::frontmatter::mask;
 
 /// Structural information for a single markdown heading.
 ///
@@ -31,7 +32,7 @@ pub fn headings(text: &str) -> Vec<Heading> {
     }
     let arena = Arena::new();
     let opts = options();
-    let root = parse_document(&arena, text, &opts);
+    let root = parse_document(&arena, &mask(text), &opts);
     headings_in(root)
 }
 

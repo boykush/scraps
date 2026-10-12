@@ -5,6 +5,7 @@ use comrak::{
 };
 
 use super::common::options;
+use super::frontmatter::mask;
 
 /// A fenced code block extracted from a markdown document.
 ///
@@ -31,7 +32,7 @@ pub fn code_blocks(text: &str) -> Vec<CodeBlock> {
     }
     let arena = Arena::new();
     let opts = options();
-    let root = parse_document(&arena, text, &opts);
+    let root = parse_document(&arena, &mask(text), &opts);
     code_blocks_in(root)
 }
 

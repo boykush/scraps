@@ -11,6 +11,7 @@ use comrak::{
 
 use super::common::{collect_text, line_col_to_byte, line_starts, options, parse_wikilink_url};
 use super::embeds::EmbedRef;
+use super::frontmatter::mask;
 use super::tags::TagRef;
 use super::wikilinks::WikiLinkRef;
 
@@ -31,7 +32,7 @@ pub enum WikiRef {
 pub fn wiki_refs(text: &str) -> Vec<WikiRef> {
     let arena = Arena::new();
     let opts = options();
-    let parse_text = expose_embed_wikilinks(text);
+    let parse_text = expose_embed_wikilinks(&mask(text));
     let root = parse_document(&arena, &parse_text, &opts);
     let starts = line_starts(text);
 

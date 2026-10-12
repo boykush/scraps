@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crate::error::ScrapsResult;
+use scraps_libs::markdown::query::body;
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::title::Title;
@@ -40,7 +41,7 @@ impl SearchUsecase {
             .map(|scrap| {
                 scraps_libs::search::result::SearchItem::new(
                     &scrap.self_key().to_string(),
-                    scrap.md_text(),
+                    body(scrap.md_text()),
                 )
             })
             .collect();
@@ -98,6 +99,24 @@ mod tests {
         assert!(results.iter().any(|r| r.title.to_string().contains("test")));
         // Verify md_text is present
         assert!(results.iter().all(|r| !r.md_text.is_empty()));
+    }
+
+    #[test]
+    fn it_does_not_match_the_frontmatter_block() {
+        let text = "---\nowner: zebra\n---\n\n# Orders\n";
+        let scraps = vec![Scrap::new("orders", &None, text)];
+        let usecase = SearchUsecase::new();
+
+        let in_block = usecase
+            .execute(&scraps, "zebra", 100, SearchLogic::And)
+            .unwrap();
+        assert!(in_block.is_empty());
+
+        let in_body = usecase
+            .execute(&scraps, "Orders", 100, SearchLogic::And)
+            .unwrap();
+        assert_eq!(in_body.len(), 1);
+        assert_eq!(in_body[0].md_text, text);
     }
 
     #[test]

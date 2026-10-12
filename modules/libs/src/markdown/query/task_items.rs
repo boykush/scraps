@@ -5,6 +5,7 @@ use comrak::{
 };
 
 use super::common::options;
+use super::frontmatter::mask;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TaskStatus {
@@ -38,7 +39,7 @@ fn task_item_body<'a>(node: &'a AstNode<'a>) -> String {
 pub fn task_items(text: &str) -> Vec<TaskItem> {
     let arena = Arena::new();
     let opts = options();
-    let root = parse_document(&arena, text, &opts);
+    let root = parse_document(&arena, &mask(text), &opts);
     task_items_in(root)
 }
 
