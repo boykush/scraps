@@ -22,6 +22,15 @@ Hold the dialogue and write the page in the user's language.
 - Change existing pages only by turning literal mentions the user approved into links.
 - Do not widen the work into tidying or auditing the wiki.
 
+## Asking the user
+
+Several steps put choices to the user. How depends on the client, so decide it from the tools you actually have:
+
+- When the client has a tool for asking multiple-choice questions (for example `AskUserQuestion` in Claude Code), use it. Its definition says how many questions a call takes, how many options a question takes, and whether several options can be picked; stay inside those.
+- When there is no such tool, or what you need to ask does not fit it, ask in the message body: number the questions, letter the options, say how to reply (for example `1b 2d`), then stop and wait.
+
+Either way the user can always answer in their own words. Take such an answer as it is rather than forcing it onto an option.
+
 ## 1. Find where the user stands
 
 The existing pages are the list of what the user already understands. Reading them decides where the explanation starts and what it can skip.
@@ -32,7 +41,7 @@ The existing pages are the list of what the user already understands. Reading th
 4. Settle the context: the part of the wiki the user is learning this source for, named by the existing page at its center. This is not a context folder. A source usually touches several parts of the wiki, and the user came for one of them. A gateway for agent traffic sits next to both the pages on agent protocols and the pages on cluster networking; a user who came for the first does not want to be quizzed on the second. Decide it in this order:
    - what the user said when asking, or earlier in the conversation
    - the pages the user added or changed lately, when the wiki is a git repository (`git log --since="1 month ago" --name-only --format=`)
-   - if more than one context is still possible, ask which with one `AskUserQuestion` before explaining, offering the possible contexts as options
+   - if more than one context is still possible, ask which with one question before explaining, offering the possible contexts as options
 
    Do not settle it by which part has the most pages or backlinks. A hub the user filled in long ago would outweigh what they are learning now.
 5. Decide the points that may be recorded: one gist saying what the thing is, and up to three connections saying how it relates to existing pages inside the context. Fewer is fine. A connection outside the context is not a point, however much room the source gives it; name it as a candidate for a later run. With no related pages, the gist alone is enough.
@@ -60,13 +69,17 @@ A question that can be answered by remembering the wording of the explanation do
 
 Set every question inside the context: take the concrete cases from it and the nearby concepts from its pages. What the user asked about during the pause tells you more about the context than your read in step 1 did, so follow it.
 
-Ask one multiple-choice question per point, all in one `AskUserQuestion` call. Without that tool, ask in the message body.
+Ask one multiple-choice question per point, all at once.
 
-- Build wrong options from the mix-ups people actually make.
+- Give every question two ways out besides answering, so the user never has to guess to get past it:
+  - "I don't know": the user wants this point and does not have it yet. Without this option the only move left is a guess, and a point passed by a lucky guess gets recorded as understood.
+  - "Not interested": the user did not come for this point. Whether they could answer it does not matter.
+- Beside them, offer the correct answer and one to three wrong ones, most common mix-up first. A question needs at least four options to hold all of this; if the question tool takes fewer, ask in the message body.
 - Vary the position of the correct option and never mark one as recommended. Do not hint at correctness in the option descriptions.
-- Include an "I don't know" option. A point passed by a lucky guess gets recorded as understood.
 
 When the answers come back, say for each question whether it was right and why. For a wrong answer or "I don't know", explain again from a different angle (another example, a redrawn diagram) rather than repeating yourself, and check again with a different question. Repeating the same question lets a memorized answer pass.
+
+For "Not interested", drop the point from this run without explaining it again or asking why. It is not a failed point and not a candidate for a later run. It does say your read of the context was off: if most of the points come back this way, stop and ask what the user came for instead of checking further. If the gist itself comes back this way, there is no page to write; end the run there.
 
 Once the multiple-choice questions are settled, ask the user to write what the thing is in one or two sentences. That text becomes the basis of the page's gist. If it disagrees with the source, point out where and ask them to restate it.
 
@@ -78,7 +91,7 @@ If the gist did not pass, say where understanding stopped and end without writin
 
 Otherwise, without writing any file yet, present:
 
-- which points passed, which did not, and the candidates for later runs
+- which points passed, which did not, which were dropped as not of interest, and the candidates for later runs
 - the gist, based on the user's own sentences. Tidy the style, but do not rephrase beyond that
 - a title, and a context folder only if the title collides with an existing page (check with `scraps get "<title>" --json`)
 - the connections that passed, as links to existing pages with their direction
@@ -86,11 +99,10 @@ Otherwise, without writing any file yet, present:
 
 A page's subject is either a thing (a term, tool, or product) or the source itself (an article or talk: who said what, and where). A tool's official site yields a page about the tool. An article or talk yields a page titled with the source's own title, neither translated nor shortened.
 
-Then ask only about the items where judgment could go either way, using `AskUserQuestion`. The recommended plan passes by default, so do not turn settled items into questions.
+Then ask only about the items where judgment could go either way. The recommended plan passes by default, so do not turn settled items into questions.
 
-- For items that can coexist, such as tags and link targets, set `multiSelect: true`, put the recommended option first, and mark it as recommended.
-- A question holds at most four options. With more candidates, list them all in the message body and ask only about those that need judgment.
-- Keep a call to four questions. Beyond that, go back to confirming in the message body.
+- For items that can coexist, such as tags and link targets, let the user pick several, put the recommended option first, and mark it as recommended.
+- With more candidates than one question holds, list them all in the message body and ask only about those that need judgment.
 
 Wait for the user to confirm or correct the plan.
 
@@ -110,7 +122,7 @@ Wait for the user to confirm or correct the plan.
 
 1. Search again with the new title and read the `body` of each candidate to find literal mentions that are not yet links.
 2. Drop mentions already inside a link, the new page itself, and candidates with no literal mention.
-3. Present the remaining mentions with their context and your read of each, and let the user pick which to link with `AskUserQuestion` (`multiSelect: true`). With more than four candidates, list them all in the message body and ask only about those that need judgment.
+3. Present the remaining mentions with their context and your read of each, and let the user pick which to link, several at once. With more candidates than one question holds, list them all in the message body and ask only about those that need judgment.
 4. Convert only the chosen mentions to `[[Title]]` or `[[Title|surface form]]`.
 
 With no candidates, leave existing pages untouched. Backlinks are computed automatically, so do not add reverse links.
