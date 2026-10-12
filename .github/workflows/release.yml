@@ -121,7 +121,7 @@ jobs:
       # goes out as the repo-writer App, with a token that reaches the tap alone.
       - name: Generate the repo-writer App token
         id: app-token
-        uses: boykush/workflows/.github/actions/github-app-token@e2c7b3f0b06970e4aaddeb8d99453e5e63bc68d0
+        uses: boykush/workflows/.github/actions/github-app-token@7e3f7182afe50c0ebf1834cd62302582a0c45531
         with:
           app: repo-writer
           repositories: homebrew-tap
