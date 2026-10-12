@@ -40,7 +40,7 @@ impl ScrapsServer {
 #[tool_router]
 impl ScrapsServer {
     #[tool(
-        description = "Use when you know which scrap to read, by title and optional context. Optionally restrict to a heading section via 'heading', and project specific fields via 'fields' (allowed: title, ctx, body, headings, code_blocks, type, description, frontmatter; defaults to ['title', 'ctx', 'body']) to keep the response small. 'body' is the scrap's content without its YAML frontmatter block; ask for 'frontmatter' to get that block as parsed data (null when there is none). Line numbers in headings and code_blocks count lines of the source file, frontmatter block included, so they are not offsets into body. Traverse onward with lookup_scrap_links or lookup_scrap_backlinks, or see everything around the scrap in one call with lookup_scrap_neighborhood."
+        description = "Use when you know which scrap to read: pass the `key` of a result back (the scrap's path under the wiki root without `.md`, e.g. 'tables/orders'). The older `title` (file stem) with optional `ctx` is still accepted. Optionally restrict to a heading section via 'heading', and project specific fields via 'fields' (allowed: key, title, ctx, body, headings, code_blocks, type, description, frontmatter; defaults to ['key', 'title', 'ctx', 'body']) to keep the response small. 'body' is the scrap's content without its YAML frontmatter block; ask for 'frontmatter' to get that block as parsed data (null when there is none). Line numbers in headings and code_blocks count lines of the source file, frontmatter block included, so they are not offsets into body. Traverse onward with lookup_scrap_links or lookup_scrap_backlinks, or see everything around the scrap in one call with lookup_scrap_neighborhood."
     )]
     async fn get_scrap(
         &self,
@@ -61,7 +61,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Use when you have keywords or a rough cue but no exact title. Fuzzy-matches titles and body content; space-separated keywords use OR logic by default (any keyword matches). Start broad, then re-search with logic 'and' to require every keyword. Read promising hits with get_scrap."
+        description = "Use when you have keywords or a rough cue but no exact key. Fuzzy-matches keys, titles and body content; space-separated keywords use OR logic by default (any keyword matches). Start broad, then re-search with logic 'and' to require every keyword. Read promising hits by passing their `key` to get_scrap."
     )]
     async fn search_scraps(
         &self,
@@ -72,7 +72,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Use when you want what a scrap references: returns its outbound wiki links as scraps. Read any of them with get_scrap."
+        description = "Use when you want what a scrap references: returns its outbound wiki links as scraps. Name the scrap by `key`; read any result by passing its `key` to get_scrap."
     )]
     async fn lookup_scrap_links(
         &self,
@@ -83,7 +83,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Use when one relation at a time is too slow: returns the neighborhood around a scrap as a graph — the scraps within a few hops, each with its distance, and the wiki links between them in both directions. Bodies stay out; read any node with get_scrap. Widen with depth (up to 5 hops) and keep the response small with limit."
+        description = "Use when one relation at a time is too slow: returns the neighborhood around a scrap as a graph — the scraps within a few hops, each with its distance, and the wiki links between them in both directions. Bodies stay out; name the scrap by `key` and read any node by passing its `key` to get_scrap. Widen with depth (up to 5 hops) and keep the response small with limit."
     )]
     async fn lookup_scrap_neighborhood(
         &self,
@@ -94,7 +94,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Use when you want what references a scrap: returns the scraps linking to it (inbound wiki links). Read any of them with get_scrap."
+        description = "Use when you want what references a scrap: returns the scraps linking to it (inbound wiki links). Name the scrap by `key`; read any result by passing its `key` to get_scrap."
     )]
     async fn lookup_scrap_backlinks(
         &self,
@@ -185,7 +185,10 @@ impl ServerHandler for ScrapsServer {
                  and folder contexts. Recommended flow: start with search_scraps on broad OR \
                  keywords and narrow with logic 'and'; read the best hits with get_scrap, \
                  projecting fields to keep responses small; then traverse relations with \
-                 lookup_scrap_links and lookup_scrap_backlinks. For the shape around a scrap \
+                 lookup_scrap_links and lookup_scrap_backlinks. Every result names a scrap by \
+                 its `key` (its path under the wiki root without `.md`, the same string a \
+                 wiki-link holds) next to the `title` readers see: pass the `key` back to \
+                 reach that scrap. For the shape around a scrap \
                  rather than one relation at a time, lookup_scrap_neighborhood returns its \
                  neighborhood as a graph: nodes with their hop distance and the links between \
                  them, no bodies. For the topic map, list_tags then lookup_tag_backlinks; for \
@@ -1197,7 +1200,7 @@ mod tests {
         keys.sort();
         assert_eq!(
             keys,
-            vec!["ctx", "hop", "title"],
+            vec!["ctx", "hop", "key", "title"],
             "a node carries only its key and distance"
         );
         assert!(
@@ -1344,7 +1347,7 @@ mod tests {
             .await;
             assert_eq!(
                 blogs["results"],
-                serde_json::json!([{"title": "post", "ctx": null}])
+                serde_json::json!([{"key": "post", "title": "post", "ctx": null}])
             );
             assert_eq!(blogs["count"], 1);
             assert!(
@@ -1541,7 +1544,7 @@ mod tests {
         );
         assert_eq!(
             hit("orders log"),
-            &serde_json::json!({"title": "orders log", "ctx": null})
+            &serde_json::json!({"key": "orders log", "title": "orders log", "ctx": null})
         );
     }
 
@@ -1576,5 +1579,202 @@ mod tests {
             instructions.contains("lookup_scrap_neighborhood"),
             "the flow should name the neighborhood map: {instructions}"
         );
+    }
+
+    async fn call_tool_error(
+        project: &TempScrapProject,
+        name: &str,
+        arguments: serde_json::Value,
+    ) -> String {
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
+        let (client_stream, server_stream) = tokio::io::duplex(4096);
+        let server_handle = tokio::spawn(async move { server.serve(server_stream).await });
+        let client = ().serve(client_stream).await.unwrap();
+
+        let params = CallToolRequestParams::new(name.to_string())
+            .with_arguments(arguments.as_object().unwrap().clone());
+        let error = client.call_tool(params).await.unwrap_err();
+
+        client.cancel().await.unwrap();
+        server_handle.abort();
+        error.to_string()
+    }
+
+    const SCRAP_TOOLS: [&str; 4] = [
+        "get_scrap",
+        "lookup_scrap_links",
+        "lookup_scrap_backlinks",
+        "lookup_scrap_neighborhood",
+    ];
+
+    fn add_titled_wiki(project: &TempScrapProject) {
+        project.add_scrap(
+            "tables/orders.md",
+            b"---\ntitle: Customer Orders\n---\n\nOne row per order.\n",
+        );
+        project.add_scrap(
+            "metrics/revenue.md",
+            b"See [[tables/orders]] and [[tables/orders|the orders table]].\n",
+        );
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_get_scrap_takes_a_key_and_returns_key_title_and_ctx(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        add_titled_wiki(&project);
+
+        let by_key = call_tool_json(
+            &project,
+            "get_scrap",
+            serde_json::json!({"key": "tables/orders"}),
+        )
+        .await;
+        assert_eq!(by_key["key"], "tables/orders");
+        assert_eq!(by_key["title"], "Customer Orders");
+        assert_eq!(by_key["ctx"], "tables");
+
+        let by_stem = call_tool_json(
+            &project,
+            "get_scrap",
+            serde_json::json!({"title": "orders", "ctx": "tables"}),
+        )
+        .await;
+        assert_eq!(by_stem, by_key);
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_the_older_title_stays_a_file_stem(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        add_titled_wiki(&project);
+
+        for name in SCRAP_TOOLS {
+            let error = call_tool_error(
+                &project,
+                name,
+                serde_json::json!({"title": "Customer Orders", "ctx": "tables"}),
+            )
+            .await;
+            assert!(error.contains("Scrap not found"), "{name}: {error}");
+        }
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_scrap_tools_require_exactly_one_of_key_and_title(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        add_titled_wiki(&project);
+
+        for name in SCRAP_TOOLS {
+            let neither = call_tool_error(&project, name, serde_json::json!({"depth": 1})).await;
+            assert!(neither.contains("Missing `key`"), "{name}: {neither}");
+
+            let both = call_tool_error(
+                &project,
+                name,
+                serde_json::json!({"key": "tables/orders", "title": "orders"}),
+            )
+            .await;
+            assert!(both.contains("not both"), "{name}: {both}");
+        }
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_a_search_hit_is_found_by_title_and_its_key_reaches_the_scrap(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        add_titled_wiki(&project);
+
+        let response = call_tool_json(
+            &project,
+            "search_scraps",
+            serde_json::json!({"query": "Customer"}),
+        )
+        .await;
+        let hit = &response["results"][0];
+        assert_eq!(hit["key"], "tables/orders");
+        assert_eq!(hit["title"], "Customer Orders");
+        assert_eq!(hit["ctx"], "tables");
+
+        let read = call_tool_json(
+            &project,
+            "get_scrap",
+            serde_json::json!({"key": hit["key"]}),
+        )
+        .await;
+        assert_eq!(read["title"], "Customer Orders");
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_relations_name_each_scrap_by_key_and_title(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        add_titled_wiki(&project);
+        let orders = serde_json::json!({"key": "tables/orders", "title": "Customer Orders", "ctx": "tables"});
+        let revenue =
+            serde_json::json!({"key": "metrics/revenue", "title": "revenue", "ctx": "metrics"});
+
+        let links = call_tool_json(
+            &project,
+            "lookup_scrap_links",
+            serde_json::json!({"key": "metrics/revenue"}),
+        )
+        .await;
+        assert_eq!(links["count"], 2);
+        assert_eq!(links["results"][0]["key"], orders["key"]);
+        assert_eq!(links["results"][0]["title"], orders["title"]);
+
+        let backlinks = call_tool_json(
+            &project,
+            "lookup_scrap_backlinks",
+            serde_json::json!({"key": "tables/orders"}),
+        )
+        .await;
+        assert_eq!(backlinks["results"], serde_json::json!([revenue]));
+
+        let map = call_tool_json(
+            &project,
+            "lookup_scrap_neighborhood",
+            serde_json::json!({"key": "metrics/revenue"}),
+        )
+        .await;
+        assert_eq!(map["nodes"][1]["key"], orders["key"]);
+        assert_eq!(map["nodes"][1]["title"], orders["title"]);
+        assert_eq!(
+            map["edges"],
+            serde_json::json!([{"from": revenue, "to": orders}])
+        );
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_scrap_tool_schemas_offer_key_and_the_older_pair(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let tools = list_tools_of(&project).await;
+        for name in SCRAP_TOOLS {
+            let tool = tools.iter().find(|t| t.name.as_ref() == name).unwrap();
+            let schema = serde_json::to_value(&*tool.input_schema).unwrap();
+            let properties = schema["properties"].as_object().unwrap();
+            let described = properties["key"]["description"].as_str().unwrap();
+            assert!(described.contains("Pass the `key`"), "{name}: {described}");
+            let older = properties["title"]["description"].as_str().unwrap();
+            assert!(older.contains("Still accepted"), "{name}: {older}");
+            assert!(
+                schema
+                    .get("required")
+                    .is_none_or(|r| r.as_array().unwrap().is_empty()),
+                "{name} should require neither key nor title by schema: {schema}"
+            );
+        }
     }
 }

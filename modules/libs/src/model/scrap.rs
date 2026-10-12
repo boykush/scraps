@@ -36,6 +36,7 @@ pub struct Scrap {
     scrap_type: Option<String>,
 }
 
+const FRONTMATTER_TITLE_KEY: &str = "title";
 const FRONTMATTER_TYPE_KEY: &str = "type";
 const FRONTMATTER_DESCRIPTION_KEY: &str = "description";
 
@@ -104,6 +105,23 @@ impl Scrap {
 
     pub fn frontmatter(&self) -> Option<&Value> {
         self.facts.frontmatter.as_ref()
+    }
+
+    /// What readers see as the scrap's name: its frontmatter title, or the
+    /// file stem when it has none. A title names a scrap and never identifies
+    /// it; links resolve by `self_key()`.
+    pub fn title(&self) -> &str {
+        self.frontmatter_title().unwrap_or(self.stem.as_str())
+    }
+
+    /// The frontmatter `title` string, trimmed and otherwise as written. None
+    /// when the key is missing, blank or not a string.
+    pub fn frontmatter_title(&self) -> Option<&str> {
+        self.frontmatter()?
+            .get(FRONTMATTER_TITLE_KEY)?
+            .as_str()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
     }
 
     /// What kind of thing the scrap is: the frontmatter `type` string,
@@ -482,6 +500,47 @@ mod tests {
     #[case::boolean("---\ndescription: true\n---\n")]
     fn it_has_no_description_without_a_non_empty_string(#[case] text: &str) {
         assert_eq!(Scrap::new("foo", &None, text).description(), None);
+    }
+
+    #[rstest::rstest]
+    #[case::plain("---\ntitle: Customer Orders\n---\n", "Customer Orders")]
+    #[case::trimmed("---\ntitle: '  Customer Orders  '\n---\n", "Customer Orders")]
+    #[case::symbols(
+        "---\ntitle: 'What is C#? [draft] | 50%'\n---\n",
+        "What is C#? [draft] | 50%"
+    )]
+    #[case::among_other_keys("---\ntype: Table\ntitle: Orders\ntags: [a]\n---\n\nbody\n", "Orders")]
+    fn it_reads_the_frontmatter_title(#[case] text: &str, #[case] expected: &str) {
+        let scrap = Scrap::new("orders", &Some("tables".into()), text);
+        assert_eq!(scrap.title(), expected);
+        assert_eq!(scrap.frontmatter_title(), Some(expected));
+    }
+
+    #[rstest::rstest]
+    #[case::no_frontmatter("# Body\n")]
+    #[case::no_title_key("---\ntype: Blog\n---\n")]
+    #[case::empty("---\ntitle: ''\n---\n")]
+    #[case::blank("---\ntitle: '   '\n---\n")]
+    #[case::null("---\ntitle:\n---\n")]
+    #[case::list("---\ntitle: [a, b]\n---\n")]
+    #[case::mapping("---\ntitle:\n  text: a\n---\n")]
+    #[case::number("---\ntitle: 3\n---\n")]
+    #[case::boolean("---\ntitle: true\n---\n")]
+    fn it_is_titled_by_its_stem_without_a_non_empty_string(#[case] text: &str) {
+        let scrap = Scrap::new("orders", &Some("tables".into()), text);
+        assert_eq!(scrap.title(), "orders");
+        assert_eq!(scrap.frontmatter_title(), None);
+    }
+
+    #[test]
+    fn it_keeps_its_key_whatever_the_title() {
+        let scrap = Scrap::new(
+            "orders",
+            &Some("tables".into()),
+            "---\ntitle: Customer Orders\n---\n",
+        );
+        assert_eq!(scrap.self_key(), ScrapKey::from_path_str("tables/orders"));
+        assert_eq!(scrap.stem(), &"orders".into());
     }
 
     #[test]

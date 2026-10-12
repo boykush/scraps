@@ -1,18 +1,32 @@
+use crate::usecase::scrap::scrap_ref::ScrapRef;
 use scraps_libs::markdown::query::{CodeBlock, Heading};
 use serde::Serialize;
 
+/// A scrap as a tool result names it: `key` is what to pass back to a tool,
+/// `title` is what readers see, and `ctx` is the folder part of the key.
 #[derive(Debug, Serialize)]
-pub struct ScrapKeyJson {
+pub struct ScrapRefJson {
+    pub key: String,
     pub title: String,
     pub ctx: Option<String>,
 }
 
-/// A search hit: the scrap's key, plus its description when it has one so an
+impl From<&ScrapRef> for ScrapRefJson {
+    fn from(scrap: &ScrapRef) -> Self {
+        ScrapRefJson {
+            key: scrap.key.to_string(),
+            title: scrap.title.clone(),
+            ctx: scrap.ctx().as_ref().map(|c| c.to_string()),
+        }
+    }
+}
+
+/// A search hit: the scrap, plus its description when it has one so an
 /// agent can choose what to read without fetching bodies.
 #[derive(Debug, Serialize)]
 pub struct SearchHitJson {
-    pub title: String,
-    pub ctx: Option<String>,
+    #[serde(flatten)]
+    pub scrap: ScrapRefJson,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }

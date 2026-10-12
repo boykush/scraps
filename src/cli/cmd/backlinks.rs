@@ -7,22 +7,21 @@ use comfy_table::{Cell, Table};
 use serde::{Deserialize, Serialize};
 
 use crate::cli::config::scrap_config::ScrapConfig;
-use crate::cli::json::scrap::ScrapKeyJson;
+use crate::cli::json::scrap::ScrapRefJson;
 use crate::cli::path_resolver::PathResolver;
+use crate::cli::scrap_arg::scrap_key;
 use crate::error::ScrapsResult;
 use crate::ir::loader;
 use crate::usecase::scrap::lookup_backlinks::usecase::LookupScrapBacklinksUsecase;
-use scraps_libs::model::context::Ctx;
-use scraps_libs::model::stem::Stem;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct BacklinksResponse {
-    results: Vec<ScrapKeyJson>,
+    results: Vec<ScrapRefJson>,
     count: usize,
 }
 
 pub fn run(
-    title: &str,
+    key: &str,
     ctx: Option<&str>,
     json: bool,
     project_path: Option<&Path>,
@@ -37,40 +36,38 @@ pub fn run(
     ];
 
     let scraps = loader::load_scraps(&scraps_dir_path, &exclude_dirs)?;
-    let target_title = Stem::from(title);
-    let target_ctx = ctx.map(Ctx::from);
+    let target_key = scrap_key(key, ctx);
 
     let usecase = LookupScrapBacklinksUsecase::new();
-    let results = usecase.execute(&scraps, &target_title, &target_ctx)?;
+    let results = usecase.execute(&scraps, &target_key)?;
 
-    let scrap_keys: Vec<ScrapKeyJson> = results
-        .into_iter()
-        .map(|r| ScrapKeyJson {
-            title: r.title.to_string(),
-            ctx: r.ctx.map(|c| c.to_string()),
-        })
-        .collect();
+    let scrap_refs: Vec<ScrapRefJson> = results.iter().map(|r| (&r.scrap).into()).collect();
 
     if json {
-        let count = scrap_keys.len();
+        let count = scrap_refs.len();
         let response = BacklinksResponse {
-            results: scrap_keys,
+            results: scrap_refs,
             count,
         };
         writeln!(writer, "{}", serde_json::to_string(&response)?)?;
     } else {
-        if scrap_keys.is_empty() {
+        if scrap_refs.is_empty() {
             return Ok(());
         }
 
         let mut table = Table::new();
         table.load_style(NOTHING);
-        table.set_header(vec![Cell::new("Title".bold()), Cell::new("Context".bold())]);
+        table.set_header(vec![
+            Cell::new("Key".bold()),
+            Cell::new("Title".bold()),
+            Cell::new("Context".bold()),
+        ]);
 
-        for key in &scrap_keys {
+        for scrap in &scrap_refs {
             table.add_row(vec![
-                Cell::new(&key.title),
-                Cell::new(key.ctx.as_deref().unwrap_or("")),
+                Cell::new(&scrap.key),
+                Cell::new(&scrap.title),
+                Cell::new(scrap.ctx.as_deref().unwrap_or("")),
             ]);
         }
         writeln!(writer, "{table}")?;
@@ -239,5 +236,41 @@ mod tests {
             &mut buf,
         );
         assert!(result.is_err());
+    }
+
+    #[rstest]
+    fn run_json_takes_a_key_and_names_each_backlink_by_key(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(b"")
+            .add_scrap(
+                "tables/orders.md",
+                b"---\ntitle: Customer Orders\n---\n\nOne row per order.\n",
+            )
+            .add_scrap(
+                "metrics/revenue.md",
+                b"See [[tables/orders]] and [[tables/orders|the orders table]].\n",
+            );
+
+        let backlinks = |key: &str, ctx: Option<&str>| {
+            let mut buf = Vec::new();
+            run(
+                key,
+                ctx,
+                true,
+                Some(project.project_root.as_path()),
+                &mut buf,
+            )
+            .unwrap();
+            String::from_utf8(buf).unwrap()
+        };
+
+        let by_key = backlinks("tables/orders", None);
+        assert_eq!(
+            by_key.trim(),
+            r#"{"results":[{"key":"metrics/revenue","title":"revenue","ctx":"metrics"}],"count":1}"#
+        );
+        assert_eq!(backlinks("orders", Some("tables")), by_key);
     }
 }

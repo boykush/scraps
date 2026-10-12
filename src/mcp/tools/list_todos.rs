@@ -1,5 +1,5 @@
 use crate::ir::loader;
-use crate::mcp::json::scrap::ScrapKeyJson;
+use crate::mcp::json::scrap::ScrapRefJson;
 use crate::usecase::todo::usecase::{StatusFilter, TodoUsecase, status_label};
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
@@ -45,7 +45,7 @@ pub struct ListTodosRequest {
 
 #[derive(Debug, Serialize)]
 pub struct TodoItemJson {
-    pub scrap: ScrapKeyJson,
+    pub scrap: ScrapRefJson,
     pub status: String,
     pub text: String,
     pub line: usize,
@@ -82,10 +82,7 @@ pub async fn list_todos(
     let items: Vec<TodoItemJson> = results
         .into_iter()
         .map(|result| TodoItemJson {
-            scrap: ScrapKeyJson {
-                title: result.title.to_string(),
-                ctx: result.ctx.map(|c| c.to_string()),
-            },
+            scrap: (&result.scrap).into(),
             status: status_label(&result.status).to_string(),
             text: result.text,
             line: result.line,
@@ -96,7 +93,7 @@ pub async fn list_todos(
     let next = if count == 0 {
         "No task items with that status. Widen it with status 'all', or look for the work in prose with search_scraps."
     } else {
-        "Read the scrap a task sits in with get_scrap {title, ctx}."
+        "Read the scrap a task sits in with get_scrap {key}."
     };
     let response = ListTodosResponse {
         results: items,

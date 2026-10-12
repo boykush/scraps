@@ -7,12 +7,12 @@ use comfy_table::{Cell, Table};
 use serde::{Deserialize, Serialize};
 
 use crate::cli::config::scrap_config::ScrapConfig;
+use crate::cli::json::scrap::ScrapRefJson;
 use crate::cli::path_resolver::PathResolver;
+use crate::cli::scrap_arg::scrap_key;
 use crate::error::ScrapsResult;
 use crate::ir::loader;
 use crate::usecase::scrap::lookup_links::usecase::{LinkRefKind, LookupScrapLinksUsecase};
-use scraps_libs::model::context::Ctx;
-use scraps_libs::model::stem::Stem;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
@@ -33,8 +33,8 @@ impl From<LinkRefKind> for LinkRefKindJson {
 #[derive(Debug, Serialize, Deserialize)]
 struct LinkRefJson {
     kind: LinkRefKindJson,
-    title: String,
-    ctx: Option<String>,
+    #[serde(flatten)]
+    scrap: ScrapRefJson,
     heading: Option<String>,
 }
 
@@ -45,7 +45,7 @@ struct LinksResponse {
 }
 
 pub fn run(
-    title: &str,
+    key: &str,
     ctx: Option<&str>,
     json: bool,
     project_path: Option<&Path>,
@@ -60,18 +60,16 @@ pub fn run(
     ];
 
     let scraps = loader::load_scraps(&scraps_dir_path, &exclude_dirs)?;
-    let target_title = Stem::from(title);
-    let target_ctx = ctx.map(Ctx::from);
+    let target_key = scrap_key(key, ctx);
 
     let usecase = LookupScrapLinksUsecase::new();
-    let results = usecase.execute(&scraps, &target_title, &target_ctx)?;
+    let results = usecase.execute(&scraps, &target_key)?;
 
     let refs: Vec<LinkRefJson> = results
         .into_iter()
         .map(|r| LinkRefJson {
             kind: r.kind.into(),
-            title: r.title.to_string(),
-            ctx: r.ctx.map(|c| c.to_string()),
+            scrap: (&r.scrap).into(),
             heading: r.heading,
         })
         .collect();
@@ -92,6 +90,7 @@ pub fn run(
         table.load_style(NOTHING);
         table.set_header(vec![
             Cell::new("Kind".bold()),
+            Cell::new("Key".bold()),
             Cell::new("Title".bold()),
             Cell::new("Context".bold()),
             Cell::new("Heading".bold()),
@@ -104,8 +103,9 @@ pub fn run(
             };
             table.add_row(vec![
                 Cell::new(kind_str),
-                Cell::new(&r.title),
-                Cell::new(r.ctx.as_deref().unwrap_or("")),
+                Cell::new(&r.scrap.key),
+                Cell::new(&r.scrap.title),
+                Cell::new(r.scrap.ctx.as_deref().unwrap_or("")),
                 Cell::new(r.heading.as_deref().unwrap_or("")),
             ]);
         }
@@ -166,7 +166,11 @@ mod tests {
         assert_eq!(response.count, 2);
         assert_eq!(response.results.len(), 2);
 
-        let titles: Vec<&str> = response.results.iter().map(|r| r.title.as_str()).collect();
+        let titles: Vec<&str> = response
+            .results
+            .iter()
+            .map(|r| r.scrap.title.as_str())
+            .collect();
         assert!(titles.contains(&"cargo"));
         assert!(titles.contains(&"clippy"));
         assert!(
@@ -222,7 +226,7 @@ mod tests {
         let output = String::from_utf8(buf).unwrap();
         let response: LinksResponse = serde_json::from_str(output.trim()).unwrap();
         assert_eq!(response.count, 1);
-        assert_eq!(response.results[0].title, "Token");
+        assert_eq!(response.results[0].scrap.title, "Token");
     }
 
     #[rstest]
@@ -353,7 +357,7 @@ mod tests {
         let output = String::from_utf8(buf).unwrap();
         let response: LinksResponse = serde_json::from_str(output.trim()).unwrap();
         assert_eq!(response.count, 1);
-        assert_eq!(response.results[0].title, "Target");
+        assert_eq!(response.results[0].scrap.title, "Target");
     }
 
     #[rstest]
@@ -379,5 +383,44 @@ mod tests {
         let output = String::from_utf8(buf).unwrap();
         assert!(output.contains("\"kind\":\"link\""));
         assert!(output.contains("\"kind\":\"embed\""));
+    }
+
+    #[rstest]
+    fn run_json_names_each_link_by_key_and_title(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(b"")
+            .add_scrap(
+                "tables/orders.md",
+                b"---\ntitle: Customer Orders\n---\n\nOne row per order.\n",
+            )
+            .add_scrap(
+                "metrics/revenue.md",
+                b"See [[tables/orders]] and [[tables/orders|the orders table]].\n",
+            );
+
+        let links = |key: &str, ctx: Option<&str>| {
+            let mut buf = Vec::new();
+            run(
+                key,
+                ctx,
+                true,
+                Some(project.project_root.as_path()),
+                &mut buf,
+            )
+            .unwrap();
+            String::from_utf8(buf).unwrap()
+        };
+
+        let by_key = links("metrics/revenue", None);
+        let response: LinksResponse = serde_json::from_str(by_key.trim()).unwrap();
+        assert_eq!(response.count, 2);
+        for link in &response.results {
+            assert_eq!(link.scrap.key, "tables/orders");
+            assert_eq!(link.scrap.title, "Customer Orders");
+            assert_eq!(link.scrap.ctx.as_deref(), Some("tables"));
+        }
+        assert_eq!(links("revenue", Some("metrics")), by_key);
     }
 }

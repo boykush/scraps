@@ -1,5 +1,5 @@
 use crate::ir::loader;
-use crate::mcp::json::scrap::ScrapKeyJson;
+use crate::mcp::json::scrap::ScrapRefJson;
 use crate::usecase::tag::lookup_backlinks::usecase::LookupTagBacklinksUsecase;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
@@ -19,7 +19,7 @@ pub struct LookupTagBacklinksRequest {
 
 #[derive(Debug, Serialize)]
 pub struct LookupTagBacklinksResponse {
-    pub results: Vec<ScrapKeyJson>,
+    pub results: Vec<ScrapRefJson>,
     pub count: usize,
     pub next: String,
 }
@@ -56,19 +56,16 @@ pub async fn lookup_tag_backlinks(
         })?;
 
     // Convert results to structured response
-    let scrap_jsons: Vec<ScrapKeyJson> = results
-        .into_iter()
-        .map(|result| ScrapKeyJson {
-            title: result.title.to_string(),
-            ctx: result.ctx.map(|c| c.to_string()),
-        })
+    let scrap_jsons: Vec<ScrapRefJson> = results
+        .iter()
+        .map(|result| (&result.scrap).into())
         .collect();
 
     let count = scrap_jsons.len();
     let next = if count == 0 {
         "No scraps under this tag. List available tags with list_tags."
     } else {
-        "Read a result with get_scrap {title, ctx}."
+        "Read a result by passing its key back: get_scrap {key}."
     };
     let response = LookupTagBacklinksResponse {
         results: scrap_jsons,

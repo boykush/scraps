@@ -1,14 +1,13 @@
 use crate::error::ScrapsResult;
-use scraps_libs::model::context::Ctx;
+use crate::usecase::scrap::scrap_ref::ScrapRef;
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::model::stem::Stem;
+
 use scraps_libs::nfc::nfc;
 
 /// Result for type scraps lookup operation
 #[derive(Debug, Clone, PartialEq)]
 pub struct LookupTypeScrapsResult {
-    pub title: Stem,
-    pub ctx: Option<Ctx>,
+    pub scrap: ScrapRef,
 }
 
 pub struct LookupTypeScrapsUsecase;
@@ -31,18 +30,11 @@ impl LookupTypeScrapsUsecase {
             .iter()
             .filter(|scrap| scrap.scrap_type() == Some(requested.as_ref()))
             .map(|scrap| LookupTypeScrapsResult {
-                title: scrap.stem().clone(),
-                ctx: scrap.ctx().clone(),
+                scrap: scrap.into(),
             })
             .collect();
 
-        results.sort_by(|a, b| {
-            let a_ctx = a.ctx.as_ref().map(|c| c.to_string()).unwrap_or_default();
-            let b_ctx = b.ctx.as_ref().map(|c| c.to_string()).unwrap_or_default();
-            a_ctx
-                .cmp(&b_ctx)
-                .then_with(|| a.title.to_string().cmp(&b.title.to_string()))
-        });
+        results.sort_by_key(|result| result.scrap.sort_key());
 
         Ok(results)
     }
@@ -51,9 +43,10 @@ impl LookupTypeScrapsUsecase {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use scraps_libs::model::context::Ctx;
 
     fn titles(results: &[LookupTypeScrapsResult]) -> Vec<String> {
-        results.iter().map(|r| r.title.to_string()).collect()
+        results.iter().map(|r| r.scrap.title.clone()).collect()
     }
 
     #[test]
@@ -95,7 +88,7 @@ mod tests {
             .unwrap();
 
         assert_eq!(titles(&results), vec!["z", "a", "b"]);
-        assert_eq!(results[1].ctx, Some(Ctx::from("Posts")));
+        assert_eq!(*results[1].scrap.ctx(), Some(Ctx::from("Posts")));
     }
 
     #[test]

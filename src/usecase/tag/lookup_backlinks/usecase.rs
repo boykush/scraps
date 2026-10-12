@@ -1,16 +1,16 @@
 use crate::error::ScrapsResult;
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
-use scraps_libs::model::context::Ctx;
+use crate::usecase::scrap::scrap_ref::ScrapRef;
+
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::model::stem::Stem;
+
 use scraps_libs::model::tag::Tag;
 use scraps_libs::model::tags::Tags;
 
 /// Result for tag backlinks lookup operation
 #[derive(Debug, Clone, PartialEq)]
 pub struct LookupTagBacklinksResult {
-    pub title: Stem,
-    pub ctx: Option<Ctx>,
+    pub scrap: ScrapRef,
     pub md_text: String,
 }
 
@@ -39,16 +39,9 @@ impl LookupTagBacklinksUsecase {
 
         let results: Vec<LookupTagBacklinksResult> = linking_scraps
             .iter()
-            .map(|linking_scrap| {
-                let scrap_key = &linking_scrap.self_key();
-                let title: Stem = scrap_key.into();
-                let ctx: Option<Ctx> = scrap_key.into();
-
-                LookupTagBacklinksResult {
-                    title,
-                    ctx,
-                    md_text: linking_scrap.md_text().to_string(),
-                }
+            .map(|linking_scrap| LookupTagBacklinksResult {
+                scrap: (*linking_scrap).into(),
+                md_text: linking_scrap.md_text().to_string(),
             })
             .collect();
 
@@ -82,7 +75,7 @@ mod tests {
 
         assert_eq!(results.len(), 2);
 
-        let titles: Vec<String> = results.iter().map(|r| r.title.to_string()).collect();
+        let titles: Vec<String> = results.iter().map(|r| r.scrap.title.clone()).collect();
         assert!(titles.contains(&"scrap1".to_string()));
         assert!(titles.contains(&"scrap2".to_string()));
         assert!(!titles.contains(&"scrap3".to_string()));
@@ -109,7 +102,12 @@ mod tests {
 
         let scrap_keys: Vec<(String, Option<String>)> = results
             .iter()
-            .map(|r| (r.title.to_string(), r.ctx.as_ref().map(|c| c.to_string())))
+            .map(|r| {
+                (
+                    r.scrap.title.clone(),
+                    r.scrap.ctx().as_ref().map(|c| c.to_string()),
+                )
+            })
             .collect();
 
         assert!(scrap_keys.contains(&("scrap1".to_string(), None)));
@@ -174,7 +172,7 @@ mod tests {
             1,
             "Should return results for actual tags"
         );
-        assert_eq!(tag_results[0].title.to_string(), "scrap1");
+        assert_eq!(tag_results[0].scrap.title, "scrap1");
     }
 
     #[test]

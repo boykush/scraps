@@ -1,17 +1,16 @@
 use std::collections::HashMap;
 
 use crate::error::ScrapsResult;
+use crate::usecase::scrap::scrap_ref::ScrapRef;
 use scraps_libs::markdown::query::body;
-use scraps_libs::model::context::Ctx;
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::model::stem::Stem;
+
 use scraps_libs::search::engine::{SearchEngine, SearchLogic};
 use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct SearchResult {
-    pub title: Stem,
-    pub ctx: Option<Ctx>,
+    pub scrap: ScrapRef,
     pub md_text: String,
     pub description: Option<String>,
 }
@@ -30,18 +29,20 @@ impl SearchUsecase {
         num: usize,
         logic: SearchLogic,
     ) -> ScrapsResult<Vec<SearchResult>> {
-        // Create title-to-scrap mapping for efficient lookup
+        // Create key-to-scrap mapping for efficient lookup
         let scrap_map: HashMap<String, &Scrap> = scraps
             .iter()
             .map(|scrap| (scrap.self_key().to_string(), scrap))
             .collect();
 
-        // Create search items in memory (title + body for search)
+        // Create search items in memory: key and body, and the title when the
+        // scrap has one of its own
         let lib_items: Vec<scraps_libs::search::result::SearchItem> = scraps
             .iter()
             .map(|scrap| {
                 scraps_libs::search::result::SearchItem::new(
                     &scrap.self_key().to_string(),
+                    scrap.frontmatter_title(),
                     body(scrap.md_text()),
                 )
             })
@@ -55,18 +56,10 @@ impl SearchUsecase {
         let results: Vec<SearchResult> = search_results
             .into_iter()
             .filter_map(|result| {
-                // Find the corresponding scrap by title using HashMap
-                scrap_map.get(&result.title).map(|scrap| {
-                    let scrap_key = &scrap.self_key();
-                    let title: Stem = scrap_key.into();
-                    let ctx: Option<Ctx> = scrap_key.into();
-
-                    SearchResult {
-                        title,
-                        ctx,
-                        md_text: scrap.md_text().to_string(),
-                        description: scrap.description().map(str::to_string),
-                    }
+                scrap_map.get(&result.key).map(|scrap| SearchResult {
+                    scrap: (*scrap).into(),
+                    md_text: scrap.md_text().to_string(),
+                    description: scrap.description().map(str::to_string),
                 })
             })
             .collect();
@@ -98,7 +91,7 @@ mod tests {
 
         // Should find documents containing "test"
         assert!(!results.is_empty());
-        assert!(results.iter().any(|r| r.title.to_string().contains("test")));
+        assert!(results.iter().any(|r| r.scrap.title.contains("test")));
         // Verify md_text is present
         assert!(results.iter().all(|r| !r.md_text.is_empty()));
     }
@@ -166,7 +159,7 @@ mod tests {
         // One result should have ctx: Some("ctx"), the other should have ctx: None
         let ctx_values: std::collections::HashSet<Option<String>> = results
             .iter()
-            .map(|r| r.ctx.as_ref().map(|c| c.to_string()))
+            .map(|r| r.scrap.ctx().as_ref().map(|c| c.to_string()))
             .collect();
         assert_eq!(
             ctx_values.len(),
@@ -189,7 +182,7 @@ mod tests {
 
         // Verify that both results have the same title "Duplicate"
         let titles: std::collections::HashSet<String> =
-            results.iter().map(|r| r.title.to_string()).collect();
+            results.iter().map(|r| r.scrap.title.clone()).collect();
         assert_eq!(
             titles.len(),
             1,
@@ -220,6 +213,6 @@ mod tests {
             .unwrap();
 
         assert_eq!(results.len(), 1, "Body keyword should match scrap");
-        assert_eq!(results[0].title.to_string(), "mydoc");
+        assert_eq!(results[0].scrap.title, "mydoc");
     }
 }
