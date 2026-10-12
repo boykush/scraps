@@ -135,7 +135,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Use when the wiki was retrofitted from files carrying YAML frontmatter and you want that metadata across it: returns each scrap that has a frontmatter block together with its parsed keys. The keys are the author's own — scraps defines none of them and reads them as opaque data, so its own typed metadata is still #[[tag]] via list_tags. Read the scrap behind an entry with get_scrap."
+        description = "Use when the wiki was retrofitted from files carrying YAML frontmatter and you want that metadata across it: returns each scrap that has a frontmatter block together with its parsed keys. The keys are the author's own and scraps reads them as opaque data, with one exception: the strings of a `tags` list are scraps tags alongside #[[tag]], so list_tags and lookup_tag_backlinks already cover them. Read the scrap behind an entry with get_scrap."
     )]
     async fn list_frontmatter(
         &self,
@@ -769,6 +769,41 @@ mod tests {
             item["frontmatter"],
             serde_json::json!({"status": "draft", "taxonomy": ["infra"]})
         );
+    }
+
+    // Called twice so the second read rebuilds the scrap from the stored IR.
+    #[rstest]
+    #[tokio::test]
+    async fn test_frontmatter_tags_are_tags(#[from(temp_scrap_project)] project: TempScrapProject) {
+        project.add_scrap(
+            "orders.md",
+            b"---\ntags: [sales, a/b]\n---\n\n# Orders\n\n#[[sales]]\n",
+        );
+
+        for _ in 0..2 {
+            let tags = call_tool_json(&project, "list_tags", serde_json::json!({})).await;
+            let text = tags.to_string();
+            assert_eq!(text.matches(r#""sales""#).count(), 1, "{text}");
+            assert!(
+                text.contains(r#""a""#) && text.contains(r#""a/b""#),
+                "{text}"
+            );
+
+            let backlinks = call_tool_json(
+                &project,
+                "lookup_tag_backlinks",
+                serde_json::json!({"tag": "a"}),
+            )
+            .await;
+            assert!(backlinks.to_string().contains("orders"), "{backlinks}");
+
+            let frontmatter =
+                call_tool_json(&project, "list_frontmatter", serde_json::json!({})).await;
+            assert_eq!(
+                frontmatter["results"][0]["frontmatter"],
+                serde_json::json!({"tags": ["sales", "a/b"]})
+            );
+        }
     }
 
     #[rstest]

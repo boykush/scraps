@@ -76,7 +76,9 @@ command.
   (`path`, `title`, `ctx`), the `hash` of its content, and everything the
   parser found — `refs` (every `[[link]]`, `![[embed]]` and `#[[tag]]`
   occurrence with its line), `headings`, `code_blocks`, `images`,
-  `task_items`, and the passthrough `frontmatter`.
+  `task_items`, and the `frontmatter` block as written. A tag from the
+  frontmatter `tags` list is not a `refs` entry, since it has no line in the
+  body; it is read from `frontmatter` when the object is loaded.
 - `links` is the link table: one edge per link or embed occurrence, with
   `resolved: false` when the target names no scrap. Tags are attributes of
   the object, not edges, matching the `[[ ]]` / `#[[ ]]` namespace split.

@@ -7,9 +7,11 @@ use crate::markdown::query::{CodeBlock, Heading, ScrapFacts, TaskItem, WikiRef};
 
 use super::{context::Ctx, key::ScrapKey, tag::Tag, title::Title};
 
+const FRONTMATTER_TAGS_KEY: &str = "tags";
+
 /// One scrap as the compiler sees it: identity, the source text, and every
-/// fact parsed out of that text. `links` and `tags` are the deduplicated
-/// views of `facts.refs` that most consumers want.
+/// fact parsed out of that text. `links` is the deduplicated view of
+/// `facts.refs`; `tags` is the one of its tag refs and the frontmatter `tags`.
 #[derive(PartialEq, Clone, Debug)]
 pub struct Scrap {
     title: Title,
@@ -37,8 +39,9 @@ impl Scrap {
         &self.links
     }
 
-    /// Explicitly-declared `#[[tag]]` tags found in the body, in occurrence
-    /// order with duplicates removed (first occurrence kept).
+    /// The scrap's tags: `#[[tag]]` occurrences in the body, then the strings
+    /// of the frontmatter `tags` list, with duplicates removed (first
+    /// occurrence kept).
     pub fn tags(&self) -> &[Tag] {
         &self.tags
     }
@@ -103,8 +106,8 @@ impl Scrap {
             .filter(|key| seen_links.insert(key.clone()))
             .collect();
 
-        // Tags dedup within this scrap in first-occurrence order;
-        // cross-scrap aggregation is `Tags::new`'s job.
+        // Tags dedup within this scrap in first-occurrence order, body before
+        // frontmatter; cross-scrap aggregation is `Tags::new`'s job.
         let mut seen_tags = HashSet::new();
         let tags: Vec<Tag> = facts
             .refs
@@ -113,6 +116,7 @@ impl Scrap {
                 WikiRef::Tag(tag) => Some(Tag::from(tag.path.join("/").as_str())),
                 _ => None,
             })
+            .chain(frontmatter_tags(facts.frontmatter.as_ref()))
             .filter(|tag| seen_tags.insert(tag.clone()))
             .collect();
 
@@ -127,9 +131,26 @@ impl Scrap {
     }
 }
 
+/// The strings of the frontmatter `tags` list, read as tag paths. Frontmatter
+/// is the author's own data, so anything else there (no such key, a non-list
+/// value, a non-string entry) is skipped rather than reported. An entry with
+/// an empty path segment is no tag, as `#[[a/]]` is none in the body.
+fn frontmatter_tags(frontmatter: Option<&Value>) -> impl Iterator<Item = Tag> + '_ {
+    frontmatter
+        .and_then(|fm| fm.get(FRONTMATTER_TAGS_KEY))
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_str)
+        .filter(|path| path.split('/').all(|segment| !segment.is_empty()))
+        .map(Tag::from)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::rstest;
+    use serde_json::json;
 
     // v1 shape: `Scrap::new` takes `ctx: &Option<Ctx>`. None = root scrap,
     // Some(ctx) carries a multi-segment context.
@@ -234,6 +255,44 @@ mod tests {
         );
         let names: Vec<String> = scrap.tags().iter().map(|t| format!("{}", t)).collect();
         assert_eq!(names, vec!["ai".to_string()]);
+    }
+
+    #[test]
+    fn it_tags_union_body_and_frontmatter() {
+        let scrap = Scrap::new(
+            "foo",
+            &None,
+            "---\ntags: [sales, a/b]\n---\n\n#[[body]] and #[[sales]]\n",
+        );
+        assert_eq!(
+            scrap.tags(),
+            &[Tag::from("body"), Tag::from("sales"), Tag::from("a/b")]
+        );
+    }
+
+    #[rstest]
+    #[case::no_tags_key("---\nstatus: draft\n---\n")]
+    #[case::scalar("---\ntags: sales\n---\n")]
+    #[case::mapping("---\ntags:\n  sales: true\n---\n")]
+    #[case::null("---\ntags:\n---\n")]
+    #[case::sequence_root("---\n- tags\n---\n")]
+    #[case::non_string_entries("---\ntags: [1, true, null, [nested], {k: v}]\n---\n")]
+    #[case::empty_segments("---\ntags: ['', '/', 'a/', '/a', 'a//b']\n---\n")]
+    fn it_ignores_frontmatter_tags_it_cannot_read(#[case] text: &str) {
+        assert!(Scrap::new("foo", &None, text).tags().is_empty());
+    }
+
+    #[test]
+    fn it_keeps_the_readable_frontmatter_tags_among_unreadable_ones() {
+        let scrap = Scrap::new("foo", &None, "---\ntags: [1, sales, 'a/', sales]\n---\n");
+        assert_eq!(scrap.tags(), &[Tag::from("sales")]);
+    }
+
+    #[test]
+    fn it_leaves_frontmatter_and_refs_untouched_by_frontmatter_tags() {
+        let scrap = Scrap::new("foo", &None, "---\ntags: [sales]\n---\n\nbody\n");
+        assert_eq!(scrap.frontmatter(), Some(&json!({"tags": ["sales"]})));
+        assert!(scrap.refs().is_empty());
     }
 
     #[test]

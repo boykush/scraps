@@ -8,8 +8,8 @@ const DELIMITER: &str = "---";
 
 /// The YAML frontmatter block of a scrap, as opaque structured data.
 ///
-/// Scraps assigns no meaning to any key — this is passthrough, so the caller
-/// sees exactly what the author wrote. A block that is absent, empty, unclosed
+/// No key is given a meaning here — this is passthrough, so the caller sees
+/// exactly what the author wrote. A block that is absent, empty, unclosed
 /// or malformed reads as `None`, so a retrofit wiki still builds.
 pub fn frontmatter(text: &str) -> Option<Value> {
     let arena = Arena::new();
