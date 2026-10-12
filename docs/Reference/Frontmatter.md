@@ -78,7 +78,8 @@ Frontmatter never fails a command and never raises a lint warning.
 ## What frontmatter does not change
 
 A scrap's title and context come from its file path, and its links from
-[[Reference/Wiki-link Notation]]. No frontmatter key overrides them.
+[[Reference/Wiki-link Notation]] and the Markdown links to scrap files in
+its body. No frontmatter key overrides them.
 
 ## Where the block appears
 
@@ -87,9 +88,9 @@ A block Scraps reads is metadata, not content:
 - The static site leaves it out of the scrap's page, of the summary derived
   for index pages, and of any page that embeds the scrap. Only a
   `description` is shown, where the key says so above.
-- Nothing in it is read as structure: no heading, code block, image, task
-  or `[[ ]]` reference comes out of the YAML, and `scraps search` does not
-  match its text.
+- Nothing in it is read as structure: no heading, code block, image, task,
+  `[[ ]]` reference or Markdown link comes out of the YAML, and
+  `scraps search` does not match its text.
 - Line numbers reported for the rest of the file still count the block's
   lines, so they are the lines of the file.
 
@@ -105,9 +106,12 @@ descriptions with them.
 The reverse is not asked for: OKF requires `type` on every document, Scraps
 on none.
 
+OKF connects files with ordinary Markdown links to their `.md` paths, and
+those are links between scraps: see [[Reference/Markdown Link]].
+
 The rest of OKF is not interpreted. Its other keys, `title` among them, are
-passed through like any author-defined key, links between files written as ordinary Markdown
-links are not Scraps links, and `index.md` and `log.md` are ordinary scraps.
+passed through like any author-defined key, and `index.md` and `log.md` are
+ordinary scraps.
 
 ## Reading the whole block
 

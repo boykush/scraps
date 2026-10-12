@@ -1,21 +1,24 @@
 //! Unified retrieval of wiki-shaped inline syntax: `[[link]]`, `#[[tag]]`,
 //! and `![[embed]]` are all variants of the same `[[]]` family. This module
 //! lets comrak extract the bracketed shape first, then classifies each
-//! occurrence by the prefix immediately attached to the `[[`.
+//! occurrence by the prefix immediately attached to the `[[`. A Markdown
+//! link to a `.md` path is read alongside them as one more reference.
 
 use comrak::{
     Arena,
-    nodes::{NodeValue, NodeWikiLink},
+    nodes::{NodeLink, NodeValue, NodeWikiLink},
     parse_document,
 };
 
 use super::common::{collect_text, line_col_to_byte, line_starts, options, parse_wikilink_url};
 use super::embeds::EmbedRef;
 use super::frontmatter::mask;
+use super::md_links::MdLinkRef;
 use super::tags::TagRef;
 use super::wikilinks::WikiLinkRef;
 
-/// One occurrence of a `[[]]`-family construct.
+/// One occurrence of a `[[]]`-family construct, or of a Markdown link that
+/// points at a scrap file.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WikiRef {
     /// Plain wikilink `[[name]]` / `[[a/b/name#h|alias]]`.
@@ -24,6 +27,8 @@ pub enum WikiRef {
     Tag(TagRef),
     /// Inline embed `![[name]]` / `![[name#heading]]`.
     Embed(EmbedRef),
+    /// Markdown link to a scrap file `[text](/ctx/name.md#heading)`.
+    MdLink(MdLinkRef),
 }
 
 /// Extract every `[[]]`-family occurrence from the markdown body in source
@@ -38,6 +43,11 @@ pub fn wiki_refs(text: &str) -> Vec<WikiRef> {
 
     root.descendants()
         .filter_map(|node| {
+            if let NodeValue::Link(link) = &node.data().value {
+                let NodeLink { url, .. } = link.as_ref();
+                let line = node.data().sourcepos.start.line;
+                return MdLinkRef::new(url, collect_text(node), line).map(WikiRef::MdLink);
+            }
             let NodeValue::WikiLink(NodeWikiLink { url }) = &node.data().value else {
                 return None;
             };
@@ -179,6 +189,64 @@ mod tests {
     fn it_excludes_non_refs(#[case] input: &str) {
         let res = wiki_refs(input);
         assert!(res.is_empty());
+    }
+
+    fn md_link(dest: &str, alias: &str, line: usize) -> WikiRef {
+        WikiRef::MdLink(MdLinkRef {
+            dest: dest.to_string(),
+            alias: Some(alias.to_string()),
+            line,
+        })
+    }
+
+    #[rstest]
+    #[case::absolute(
+        "[customers](/tables/customers.md)",
+        "/tables/customers.md",
+        "customers"
+    )]
+    #[case::relative("[other](./other.md)", "./other.md", "other")]
+    #[case::fragment(
+        "[r](../metrics/revenue.md#definition)",
+        "../metrics/revenue.md#definition",
+        "r"
+    )]
+    #[case::percent_encoded("[p](Static%20Site/Pipeline.md)", "Static%20Site/Pipeline.md", "p")]
+    #[case::angle_brackets("[p](<Static Site/Pipeline.md>)", "Static Site/Pipeline.md", "p")]
+    #[case::reference(
+        "[customers][c]\n\n[c]: /tables/customers.md",
+        "/tables/customers.md",
+        "customers"
+    )]
+    #[case::formatted_text("[**bold** text](/a.md)", "/a.md", "bold text")]
+    fn it_reads_a_markdown_link_to_a_scrap_file(
+        #[case] input: &str,
+        #[case] dest: &str,
+        #[case] alias: &str,
+    ) {
+        assert_eq!(wiki_refs(input), vec![md_link(dest, alias, 1)]);
+    }
+
+    #[rstest]
+    #[case::scheme("[a](https://example.com/a.md)")]
+    #[case::mailto("[a](mailto:a@example.com)")]
+    #[case::not_markdown("[a](/tables/customers.html)")]
+    #[case::image("![a](/img/a.md)")]
+    #[case::inline_code("`[a](/a.md)`")]
+    #[case::fenced_code("```\n[a](/a.md)\n```")]
+    #[case::frontmatter("---\nsee: \"[a](/a.md)\"\n---\n\nbody")]
+    fn it_excludes_markdown_links_that_are_not_scrap_links(#[case] input: &str) {
+        assert!(wiki_refs(input).is_empty(), "input was: {input:?}");
+    }
+
+    #[test]
+    fn it_keeps_markdown_and_wiki_links_in_source_order() {
+        let res = wiki_refs("[[a]] then [b](/b.md)\n\nthen [[c]] and [d](./d.md)");
+        assert_eq!(res.len(), 4);
+        assert_matches!(&res[0], WikiRef::Link(r) if r.title == "a");
+        assert_eq!(res[1], md_link("/b.md", "b", 1));
+        assert_matches!(&res[2], WikiRef::Link(r) if r.title == "c");
+        assert_eq!(res[3], md_link("./d.md", "d", 3));
     }
 
     #[test]

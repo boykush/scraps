@@ -77,6 +77,7 @@ mod tests {
             .collect();
         let readme_content = html::to_content(
             "# About this wiki\n\nhttps://example.com/\n",
+            &None,
             &base_url,
             EmbedMode::Expand(&scrap_texts),
         );

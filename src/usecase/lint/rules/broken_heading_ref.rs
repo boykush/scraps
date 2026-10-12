@@ -1,7 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
 use scraps_libs::{
-    markdown::query::WikiRef,
     model::{key::ScrapKey, scrap::Scrap, tags::Tags},
     slugify,
 };
@@ -9,8 +8,9 @@ use scraps_libs::{
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::lint::rule::{LintRule, LintRuleName, LintWarning, scrap_relative_path};
 
-/// Detect `[[name#heading]]` references whose `#heading` part doesn't match any
-/// heading in the target scrap.
+/// Detect `[[name#heading]]` references, and Markdown links to
+/// `name.md#heading`, whose `#heading` part doesn't match any heading in the
+/// target scrap.
 ///
 /// Heading resolution (v1): the referenced heading and each candidate heading
 /// in the target scrap are normalized with `slugify::by_dash` before comparison.
@@ -51,28 +51,26 @@ impl LintRule for BrokenHeadingRefRule {
         let mut warnings = Vec::new();
         for scrap in scraps {
             let path = scrap_relative_path(scrap);
-            let links = scrap.refs().iter().filter_map(|r| match r {
-                WikiRef::Link(link) => Some(link),
-                _ => None,
-            });
-            for link in links {
-                let Some(heading) = link.heading.as_ref() else {
+            for link in scrap.link_occurrences() {
+                let (Some(heading), Some(target_key)) = (&link.heading, &link.target) else {
                     continue;
                 };
-                let target_key = ScrapKey::from(link);
-                let Some(target_slugs) = heading_slugs_cache.get(&target_key) else {
+                let Some(target_slugs) = heading_slugs_cache.get(target_key) else {
                     continue;
                 };
                 let ref_slug = slugify::by_dash(heading);
                 if ref_slug.is_empty() || target_slugs.contains(&ref_slug) {
                     continue;
                 }
+                let written = link
+                    .markdown
+                    .clone()
+                    .unwrap_or_else(|| format!("[[{}#{}]]", target_key, heading));
                 warnings.push(LintWarning {
                     rule_name: LintRuleName::BrokenHeadingRef,
                     scrap_path: path.clone(),
                     message: format!(
-                        "broken heading reference: [[{}#{}]] (heading not found in target scrap)",
-                        target_key, heading
+                        "broken heading reference: {written} (heading not found in target scrap)"
                     ),
                     source: None,
                     span: None,
@@ -101,6 +99,28 @@ mod tests {
         assert_eq!(warnings[0].scrap_path, "a.md");
         assert!(warnings[0].message.contains("target"));
         assert!(warnings[0].message.contains("missing"));
+    }
+
+    #[test]
+    fn detect_broken_heading_in_a_markdown_link() {
+        let target = Scrap::new("revenue", &Some("metrics".into()), "# Definition\n");
+        let referrer = Scrap::new(
+            "orders",
+            &Some("tables".into()),
+            "[ok](../metrics/revenue.md#definition) [bad](../metrics/revenue.md#missing)",
+        );
+        let scraps = vec![target, referrer];
+        let backlinks_map = BacklinksMap::new(&scraps);
+        let tags = Tags::new(&scraps);
+
+        let warnings = BrokenHeadingRefRule.check(&scraps, &backlinks_map, &tags);
+        assert_eq!(warnings.len(), 1);
+        assert_eq!(warnings[0].scrap_path, "tables/orders.md");
+        assert!(
+            warnings[0]
+                .message
+                .contains("[bad](../metrics/revenue.md#missing)")
+        );
     }
 
     #[test]

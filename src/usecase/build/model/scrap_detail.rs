@@ -21,7 +21,12 @@ impl ScrapDetail {
         base_url: &BaseUrl,
         scrap_texts: &HashMap<ScrapKey, String>,
     ) -> ScrapDetail {
-        let content = html::to_content(scrap.md_text(), base_url, EmbedMode::Expand(scrap_texts));
+        let content = html::to_content(
+            scrap.md_text(),
+            scrap.ctx(),
+            base_url,
+            EmbedMode::Expand(scrap_texts),
+        );
         ScrapDetail {
             v: scrap.to_owned(),
             content,

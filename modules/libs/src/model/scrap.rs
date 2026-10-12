@@ -9,6 +9,18 @@ use super::{context::Ctx, key::ScrapKey, tag::Tag, title::Title};
 
 const FRONTMATTER_TAGS_KEY: &str = "tags";
 
+/// One link to a scrap as it occurs in a source: a `[[wiki-link]]`, or a
+/// Markdown link to a `.md` path resolved against the scrap that holds it.
+#[derive(PartialEq, Eq, Clone, Debug)]
+pub struct LinkOccurrence {
+    /// `None` when a Markdown link's path climbs out of the wiki root.
+    pub target: Option<ScrapKey>,
+    pub heading: Option<String>,
+    pub line: usize,
+    /// The link as written, for a Markdown link; `None` for a wiki-link.
+    pub markdown: Option<String>,
+}
+
 /// One scrap as the compiler sees it: identity, the source text, and every
 /// fact parsed out of that text. `links` is the deduplicated view of
 /// `facts.refs`; `tags` is the one of its tag refs and the frontmatter `tags`.
@@ -61,9 +73,15 @@ impl Scrap {
         &self.facts
     }
 
-    /// Every `[[]]`-family occurrence in source order, duplicates included.
+    /// Every reference occurrence in source order, duplicates included.
     pub fn refs(&self) -> &[WikiRef] {
         &self.facts.refs
+    }
+
+    /// Every link occurrence in source order, duplicates included, each with
+    /// the scrap it points at from this scrap's context.
+    pub fn link_occurrences(&self) -> impl Iterator<Item = LinkOccurrence> + '_ {
+        link_occurrences(&self.facts.refs, &self.ctx)
     }
 
     pub fn headings(&self) -> &[Heading] {
@@ -121,13 +139,8 @@ impl Scrap {
         // every consumer of `links()` — backlink lists, rendered pages, the
         // neighborhood walk — reshuffle on each read. Keep first occurrence.
         let mut seen_links = HashSet::new();
-        let links: Vec<ScrapKey> = facts
-            .refs
-            .iter()
-            .filter_map(|r| match r {
-                WikiRef::Link(link) => Some(ScrapKey::from(link)),
-                _ => None,
-            })
+        let links: Vec<ScrapKey> = link_occurrences(&facts.refs, ctx)
+            .filter_map(|occurrence| occurrence.target)
             .filter(|key| seen_links.insert(key.clone()))
             .collect();
 
@@ -154,6 +167,27 @@ impl Scrap {
             tags,
         }
     }
+}
+
+fn link_occurrences<'a>(
+    refs: &'a [WikiRef],
+    ctx: &'a Option<Ctx>,
+) -> impl Iterator<Item = LinkOccurrence> + 'a {
+    refs.iter().filter_map(move |r| match r {
+        WikiRef::Link(link) => Some(LinkOccurrence {
+            target: Some(ScrapKey::from(link)),
+            heading: link.heading.clone(),
+            line: link.line,
+            markdown: None,
+        }),
+        WikiRef::MdLink(link) => Some(LinkOccurrence {
+            target: link.resolve(ctx),
+            heading: link.heading(),
+            line: link.line,
+            markdown: Some(link.written()),
+        }),
+        WikiRef::Embed(_) | WikiRef::Tag(_) => None,
+    })
 }
 
 /// The strings of the frontmatter `tags` list, read as tag paths. Frontmatter
@@ -197,6 +231,35 @@ mod tests {
 
         assert_eq!(actual_links, expected);
         assert_eq!(scrap.thumbnail(), None);
+    }
+
+    #[test]
+    fn it_links_through_markdown_links_to_scrap_files() {
+        let scrap = Scrap::new(
+            "orders",
+            &Some("tables".into()),
+            "[customers](/tables/customers.md) [[tables/customers]] \
+             [revenue](../metrics/revenue.md#definition) [out](../../out.md) \
+             [web](https://example.com/a.md)",
+        );
+
+        assert_eq!(
+            scrap.links().to_vec(),
+            vec![
+                ScrapKey::from_path_str("tables/customers"),
+                ScrapKey::from_path_str("metrics/revenue"),
+            ]
+        );
+
+        let occurrences: Vec<LinkOccurrence> = scrap.link_occurrences().collect();
+        assert_eq!(occurrences.len(), 4);
+        assert_eq!(
+            occurrences[0].markdown.as_deref(),
+            Some("[customers](/tables/customers.md)")
+        );
+        assert_eq!(occurrences[1].markdown, None);
+        assert_eq!(occurrences[2].heading.as_deref(), Some("definition"));
+        assert_eq!(occurrences[3].target, None);
     }
 
     #[test]

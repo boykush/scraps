@@ -34,8 +34,20 @@ fn find_self_link_span(scrap: &Scrap) -> Option<(usize, usize)> {
     let self_key_str = scrap.self_key().to_string();
     let pattern = format!("[[{}]]", self_key_str);
     let text = scrap.md_text();
+    let self_key = scrap.self_key();
+    let markdown = || {
+        scrap
+            .link_occurrences()
+            .filter(|link| link.target.as_ref() == Some(&self_key))
+            .find_map(|link| link.markdown)
+    };
     text.find(&pattern)
         .map(|start| (start, start + pattern.len()))
+        .or_else(|| {
+            let written = markdown()?;
+            text.find(&written)
+                .map(|start| (start, start + written.len()))
+        })
 }
 
 #[cfg(test)]
@@ -70,6 +82,22 @@ mod tests {
         let warnings = SelfLinkRule.check(&scraps, &backlinks_map, &tags);
         assert_eq!(warnings.len(), 1);
         assert_eq!(warnings[0].scrap_path, "Context/title.md");
+    }
+
+    #[test]
+    fn detect_self_link_written_as_a_markdown_link() {
+        let scrap = Scrap::new(
+            "title",
+            &Some("Context".into()),
+            "text [me](./title.md) more",
+        );
+        let scraps = vec![scrap];
+        let backlinks_map = BacklinksMap::new(&scraps);
+        let tags = Tags::new(&scraps);
+
+        let warnings = SelfLinkRule.check(&scraps, &backlinks_map, &tags);
+        assert_eq!(warnings.len(), 1);
+        assert_eq!(warnings[0].span, Some((5, 21)));
     }
 
     #[test]
