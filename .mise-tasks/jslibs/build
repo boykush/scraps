@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Copy the site's browser libraries from their npm packages into the crate"
+#MISE dir="jslibs"
+set -euo pipefail
+pnpm install
+pnpm run build

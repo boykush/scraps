@@ -1,5 +1,4 @@
 use crate::error::{BuildError, ScrapsResult, anyhow::Context};
-use crate::usecase::build::html::cdn_versions::CDN_VERSIONS;
 use crate::usecase::build::html::serde::scrap_type::{TypeTera, TypesTera};
 use crate::usecase::build::html::serde::tags::TagsTera;
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
@@ -87,7 +86,6 @@ pub fn context(base_url: &BaseUrl, metadata: &HtmlMetadata) -> tera::Context {
     context.insert("title", &metadata.title());
     context.insert("description", &metadata.description());
     context.insert("favicon", &metadata.favicon());
-    context.insert("cdn", &CDN_VERSIONS);
     context.insert("scraps_version", env!("CARGO_PKG_VERSION"));
 
     context

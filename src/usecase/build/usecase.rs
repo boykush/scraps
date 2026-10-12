@@ -150,6 +150,11 @@ impl BuildUsecase {
         span_generate_css.exit();
         progress.complete_stage(&Stage::GenerateCss, &1);
 
+        // generate js
+        let span_generate_js = span!(Level::INFO, "generate_js").entered();
+        renderer.render_js()?;
+        span_generate_js.exit();
+
         // generate search index json when build_search_index is true
         if list_view_configs.build_search_index {
             progress.start_stage(&Stage::GenerateJson);

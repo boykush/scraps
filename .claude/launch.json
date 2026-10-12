@@ -16,7 +16,7 @@
     {
       "name": "design",
       "runtimeExecutable": "sh",
-      "runtimeArgs": ["-c", "cd design/storybook && mise exec -- npm run dev"],
+      "runtimeArgs": ["-c", "cd design/storybook && mise exec -- pnpm run dev"],
       "port": 6006
     }
   ]

@@ -7,5 +7,5 @@ set -euo pipefail
 # 30s timeout a cold release build would exceed.
 (cd ../.. && cargo build --release)
 
-npm install
-npx playwright test
+pnpm install
+pnpm exec playwright test

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+#MISE description="Fail if the bundled browser libraries are stale against jslibs/package.json"
+#MISE dir="jslibs"
+set -euo pipefail
+
+generated="../src/usecase/build/js/builtins"
+before="$(mktemp -d)"
+trap 'rm -rf "$before"' EXIT
+cp -R "$generated/." "$before"
+
+pnpm install
+pnpm run build
+
+# Compared against the files themselves rather than against git, so the check
+# also holds before the copies are first committed.
+if ! diff -rq "$before" "$generated" >&2; then
+  echo "error: $generated is out of date. Run 'mise run jslibs:build' and commit the result." >&2
+  exit 1
+fi

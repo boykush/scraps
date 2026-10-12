@@ -8,8 +8,8 @@ before="$(mktemp)"
 trap 'rm -f "$before"' EXIT
 cp "$generated" "$before"
 
-npm install --no-fund --no-audit
-npm run build
+pnpm install
+pnpm run build
 
 # Compared against the file itself rather than against git, so the check also
 # holds before the generated CSS is first committed.

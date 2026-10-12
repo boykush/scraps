@@ -39,19 +39,19 @@ jobs:
       uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
       with:
         working_directory: ./tests/e2e
-        install_args: "node"
+        install_args: "node pnpm"
     - name: Install dependencies
       working-directory: ./tests/e2e
-      run: npm ci
+      run: pnpm install --frozen-lockfile
     - name: Install Playwright Browsers
       working-directory: ./tests/e2e
-      run: npx playwright install --with-deps
+      run: pnpm exec playwright install --with-deps
     - name: Run Playwright tests
       working-directory: ./tests/e2e
-      run: npx playwright test
+      run: pnpm exec playwright test
 
 env:
-  # rust and node are installed explicitly by the mise-action steps above; stop
+  # rust, node and pnpm are installed explicitly by the mise-action steps above; stop
   # the shims from also pulling in the rest of mise.toml (hk, pkl,
   # cargo-llvm-cov, cargo-deny), which this job never runs.
   MISE_AUTO_INSTALL: "false"

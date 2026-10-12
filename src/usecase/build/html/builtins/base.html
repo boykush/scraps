@@ -90,29 +90,40 @@
         </div>
         </div>
         <!-- Code syntax highlight -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/{{ cdn.highlightjs }}/highlight.min.js"></script>
+        <script src="{{ base_url }}js/highlight.min.js?v={{ scraps_version }}"></script>
         <script>hljs.highlightAll();</script>
         <!-- Mermaid -->
         <script type="module">
-            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@{{ cdn.mermaid }}/+esm';
-            // A diagram carries its own colours, so it has to be told which
-            // scheme the page resolved to; left on the default it draws dark
-            // strokes onto the dark ground and the edges disappear.
-            const prefersDark = matchMedia('(prefers-color-scheme: dark)');
-            const isDark = () => {
-                const declared = getComputedStyle(document.documentElement).colorScheme;
-                return declared === 'dark' || (declared !== 'light' && prefersDark.matches);
-            };
-            const draw = () => {
-                mermaid.initialize({ startOnLoad: false, theme: isDark() ? 'dark' : 'default' });
-                document.querySelectorAll('code.mermaid').forEach((node) => {
-                    node.textContent = node.dataset.source ??= node.textContent;
-                    node.removeAttribute('data-processed');
+            // Mermaid outweighs the rest of the page many times over, so only
+            // a page that draws a diagram fetches it. Its browser build is a
+            // classic script that defines a global, which import() cannot load.
+            if (document.querySelector('code.mermaid')) {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = '{{ base_url }}js/mermaid.min.js?v={{ scraps_version }}';
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.append(script);
                 });
-                mermaid.run({ querySelector: 'code.mermaid' });
-            };
-            draw();
-            prefersDark.addEventListener('change', draw);
+                // A diagram carries its own colours, so it has to be told which
+                // scheme the page resolved to; left on the default it draws dark
+                // strokes onto the dark ground and the edges disappear.
+                const prefersDark = matchMedia('(prefers-color-scheme: dark)');
+                const isDark = () => {
+                    const declared = getComputedStyle(document.documentElement).colorScheme;
+                    return declared === 'dark' || (declared !== 'light' && prefersDark.matches);
+                };
+                const draw = () => {
+                    mermaid.initialize({ startOnLoad: false, theme: isDark() ? 'dark' : 'default' });
+                    document.querySelectorAll('code.mermaid').forEach((node) => {
+                        node.textContent = node.dataset.source ??= node.textContent;
+                        node.removeAttribute('data-processed');
+                    });
+                    mermaid.run({ querySelector: 'code.mermaid' });
+                };
+                draw();
+                prefersDark.addEventListener('change', draw);
+            }
         </script>
         {% if build_search_index == true %}
         <!-- For search scraps -->
@@ -123,7 +134,7 @@
             doSearch() handler below can call `new Fuse(...)`.
         -->
         <script type="module">
-            import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@{{ cdn.fusejs }}";
+            import Fuse from "{{ base_url }}js/fuse.min.js?v={{ scraps_version }}";
             window.Fuse = Fuse;
             fetch('{{ base_url }}search_index.json')
                 .then(response => response.json())

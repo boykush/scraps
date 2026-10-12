@@ -47,27 +47,25 @@
       ]
     },
     {
-      "groupName": "CDN dependencies",
-      "matchManagers": [
-        "custom.regex"
+      "description": "The libraries a generated site serves. Their files are copied into the crate, so the bump regenerates the copies in the same commit; jslibs-check.yml fails a pull request whose copies are stale.",
+      "groupName": "Browser libraries",
+      "matchFileNames": [
+        "jslibs/**"
       ],
-      "matchPackageNames": [
-        "highlight.js",
-        "mermaid",
-        "fuse.js"
-      ]
-    }
-  ],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/src/usecase/build/html/cdn_versions\\.rs$/"
-      ],
-      "matchStrings": [
-        "\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\",\\s*// renovate: datasource=npm depName=(?<depName>[^\\s]+)"
-      ],
-      "datasourceTemplate": "npm"
+      "postUpgradeTasks": {
+        "installTools": {
+          "node": {},
+          "pnpm": {}
+        },
+        "commands": [
+          "pnpm --dir jslibs install",
+          "pnpm --dir jslibs run build"
+        ],
+        "fileFilters": [
+          "src/usecase/build/js/builtins/**"
+        ],
+        "executionMode": "branch"
+      }
     }
   ]
 }

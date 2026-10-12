@@ -34,6 +34,10 @@ _site
 │       │   └── index.html
 │       └── all-scraps/
 │           └── index.html
+├── js/                     # the libraries the pages load, with their licenses
+│   ├── fuse.min.js
+│   ├── highlight.min.js
+│   └── mermaid.min.js
 ├── main.css
 └── search_index.json       # when build_search_index = true
 ```
