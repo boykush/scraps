@@ -58,11 +58,12 @@ directly to `scraps get <title> --ctx <ctx> --heading <heading>`.
 the scraps that link to the requested scrap.
 
 `scraps frontmatter --json` returns every scrap that carries a YAML
-frontmatter block, with its keys parsed as-is. Scraps defines none of those
-keys and gives them no meaning: a scrap's title, context, tags and links still
-come only from the filesystem and Wiki-link syntax, never from frontmatter. A
-block that is absent, unclosed or malformed is skipped rather than raising an
-error, and frontmatter stays part of the scrap body — it is not stripped from
-`scraps get --json body` or from the built site.
+frontmatter block, with its keys parsed as-is. Scraps requires none of those
+keys and reads a meaning into only one, `tags`, whose strings join the scrap's
+tags — see [[Reference/Wiki-link/Tag]]. A scrap's title, context and links
+still come only from the filesystem and Wiki-link syntax, never from
+frontmatter. A block that is absent, unclosed or malformed is skipped rather
+than raising an error, and frontmatter stays part of the scrap body — it is
+not stripped from `scraps get --json body` or from the built site.
 
 For agent integration, see [[How-to/Integrate with AI Assistants]].

@@ -77,6 +77,14 @@ fn main() -> error::ScrapsResult<()> {
                 cli::cmd::tag::backlinks::run(&tag, json, directory, &mut std::io::stdout())
             }
         },
+        cli::SubCommands::Type { type_command } => match type_command {
+            cli::TypeSubCommands::List { json } => {
+                cli::cmd::scrap_type::list::run(json, directory, &mut std::io::stdout())
+            }
+            cli::TypeSubCommands::Scraps { name, json } => {
+                cli::cmd::scrap_type::scraps::run(&name, json, directory, &mut std::io::stdout())
+            }
+        },
         cli::SubCommands::Frontmatter { json } => {
             cli::cmd::frontmatter::run(json, directory, &mut std::io::stdout())
         }

@@ -58,9 +58,9 @@ pub async fn list_frontmatter(
 
     let count = items.len();
     let next = if count == 0 {
-        "No scrap carries frontmatter. A scraps wiki types its own metadata as #[[tag]] instead — start from list_tags."
+        "No scrap carries frontmatter. The wiki's tags are all #[[tag]] in scrap bodies — start from list_tags."
     } else {
-        "Keys are the author's own; scraps gives them no meaning. Read the scrap behind an entry with get_scrap {title, ctx}."
+        "Keys are the author's own; scraps gives them no meaning, except that the strings of a `tags` list are tags (list_tags) and a `type` string is the scrap's kind (list_types). Read the scrap behind an entry with get_scrap {title, ctx}."
     };
     let response = ListFrontmatterResponse {
         results: items,

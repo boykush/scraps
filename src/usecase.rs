@@ -4,6 +4,7 @@ pub mod init;
 pub mod lint;
 pub mod progress;
 pub mod scrap;
+pub mod scrap_type;
 pub mod search;
 pub mod serve;
 pub mod tag;

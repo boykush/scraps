@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 
 use super::{scrap::Scrap, tag::Tag};
 
-/// The set of tags that exist in a wiki, aggregated from explicit `#[[tag]]`
-/// occurrences across all scraps. Hierarchical tags are auto-aggregated:
+/// The set of tags that exist in a wiki, aggregated from every scrap's tags
+/// (`#[[tag]]` occurrences and the frontmatter `tags` list). Hierarchical tags are auto-aggregated:
 /// a `#[[a/b/c]]` occurrence implicitly creates `a/b` and `a` as well
 /// (Logseq-style).
 ///
@@ -23,9 +23,8 @@ impl IntoIterator for Tags {
 }
 
 impl Tags {
-    /// Build the tag set by aggregating each scrap's explicit `#[[tag]]`
-    /// declarations and folding in their proper ancestors for hierarchical
-    /// tags.
+    /// Build the tag set by aggregating each scrap's tags and folding in
+    /// their proper ancestors for hierarchical tags.
     pub fn new(scraps: &[Scrap]) -> Tags {
         let mut all = BTreeSet::new();
         for scrap in scraps {
@@ -96,6 +95,22 @@ mod tests {
                 "ai".to_string(),
                 "ai/ml".to_string(),
                 "ai/ml/transformer".to_string(),
+            ]
+        );
+    }
+
+    #[test]
+    fn it_aggregates_frontmatter_tags_with_their_ancestors() {
+        let scrap1 = Scrap::new("s1", &None, "---\ntags: [sales, a/b]\n---\n\n#[[sales]]\n");
+        let scrap2 = Scrap::new("s2", &None, "#[[a/c]]");
+        let tags = Tags::new(&[scrap1, scrap2]);
+        assert_eq!(
+            collect_sorted(&tags),
+            vec![
+                "a".to_string(),
+                "a/b".to_string(),
+                "a/c".to_string(),
+                "sales".to_string(),
             ]
         );
     }
