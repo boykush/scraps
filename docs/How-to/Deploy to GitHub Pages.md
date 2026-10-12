@@ -1,3 +1,7 @@
+---
+type: How-to
+---
+
 #[[Deployment]] #[[Emit/Static Site]]
 
 Deploy a Scraps site to GitHub Pages using GitHub Actions. The build output

@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Notation/Wiki-link]]
 
 `[[Title|Display]]` shows custom display text while linking to `Title`.

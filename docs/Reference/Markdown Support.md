@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Notation/Markdown]]
 
 Scraps compiles standard Markdown plus

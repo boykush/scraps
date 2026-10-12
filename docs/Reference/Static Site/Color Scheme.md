@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Emit/Static Site]]
 
 The site adapts to the OS color scheme by default. Override the

@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Notation/Wiki-link]]
 
 `#[[a/b/c]]` is a nested tag with **max depth 3**. Nested tags

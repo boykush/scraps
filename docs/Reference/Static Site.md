@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Emit/Static Site]]
 
 The static site is one of the emit targets Scraps compiles to. The other

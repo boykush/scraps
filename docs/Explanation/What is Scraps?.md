@@ -1,3 +1,7 @@
+---
+type: Explanation
+---
+
 #[[Notation/Wiki-link]] #[[Emit/Static Site]] #[[Emit/CLI JSON]]
 
 ![Scraps Logo](https://github.com/boykush/scraps/raw/main/assets/logo_opacity.png?raw=true)

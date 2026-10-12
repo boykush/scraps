@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Notation/Wiki-link]]
 
 `#[[tag]]` marks a tag. Tags and scraps live in **separate namespaces**: a

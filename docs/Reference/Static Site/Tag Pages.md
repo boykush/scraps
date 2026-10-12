@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Emit/Static Site]]
 
 Each tag carried by at least one scrap, as `#[[tag]]` in its body or in its

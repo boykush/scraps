@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Notation/Wiki-link]]
 
 `[[Ctx/Title]]` resolves a scrap whose title is shared with another in a

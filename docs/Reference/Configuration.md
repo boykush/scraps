@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Configuration]]
 
 `.scraps.toml` declares a Scraps wiki: the directory containing this file is
