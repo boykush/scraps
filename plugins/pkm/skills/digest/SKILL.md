@@ -34,7 +34,7 @@ When the URL points at the official site of a tool or product, the subject is th
 3. Identify the central terms and claims.
 4. Search for related pages with varied wording using `scraps search "<query>" --json`.
 5. Check the existing tags with `scraps tag list --json`.
-6. Read the 3–8 most related pages with `scraps get "<title>" [--ctx "<ctx>"] --json`.
+6. Read the 3–8 most related pages by passing each hit's `key` back: `scraps get "<key>" --json`.
 7. Split the central terms into those that have a page and those that do not. A term has a page only when that thing is the page's subject. A page about a source (an article, a talk, one entry of a report or catalog) is not the page for the term in its title, even when the title is exactly the term; read the body to tell, and link such a page only when you mean that source. Link the former and leave the latter out of this page.
 8. Look up the source's title with `scraps get "<source title>" --json` to see whether a page of that name exists.
 

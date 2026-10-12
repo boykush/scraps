@@ -35,8 +35,9 @@ in a path; these rules say what a given path costs.
 its path there reads back as something else: `#` starts a heading reference
 and `|` an alias, so `[[C#]]` links to `C`, and surrounding whitespace is
 trimmed. Such a scrap still builds and can be linked with a Markdown link to
-its file, percent-encoded where needed (`[C#](C%23.md)`); renaming the file
-removes the warning.
+its file, percent-encoded where needed (`[C#](C%23.md)`). Renaming the file
+removes the warning, and a frontmatter `title` keeps the name readers see:
+`c-sharp.md` with `title: "C#"`.
 
 `unportable-key` reports a scrap whose path cannot exist on every common
 filesystem. Whether a wiki must port is its own policy, so the rule is

@@ -52,15 +52,16 @@ paginated; see [[Reference/Static Site/Sort and Pagination]].
 
 ## Page paths
 
-A page's path is its name as written. A scrap's name is its key: the folders
-that form its [[Reference/Wiki-link/Context Link]] and the file name without
-`.md`, with case, spaces and symbols kept. `Reference/CLI Overview.md` is
-written to `scraps/Reference/CLI Overview.html`.
+A page's path is its name as written. A scrap's page is named by its key
+([[Reference/Wiki-link Notation#Key, title and context]]), with case, spaces
+and symbols kept: `Reference/CLI Overview.md` is written to
+`scraps/Reference/CLI Overview.html`. The title never enters a path.
 
 Nothing is slugified, so two Markdown files the filesystem keeps apart are two
 pages: `a b.md` and `a-b.md` never share one. A tidy URL comes from a tidy
-file name; the keys a scrap can set for itself are in
-[[Reference/Frontmatter]].
+file name, and a frontmatter `title` keeps the free-text name on the page:
+`tables/orders.md` with `title: Customer Orders` is served at
+`scraps/tables/orders.html` and headed "Customer Orders".
 
 Names are compared in Unicode NFC, so the name of a scrap, a tag or a type
 matches however the filesystem or an editor composed it, and its page path is

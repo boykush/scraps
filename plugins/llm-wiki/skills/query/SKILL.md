@@ -35,12 +35,12 @@ Implements Karpathy's *Query* primitive for Scraps: search the wiki, read releva
    - Prefer scraps that span the question (different ctx, different tags) over many near-duplicates
 
 4. **Read selected scraps**
-   - `scraps get "<title>" [--ctx <ctx>] --json` for each candidate
+   - `scraps get "<key>" --json` for each candidate, passing the hit's `key` back
    - Use field projection to save context when appropriate, e.g. `--json body`, `--json headings`, or `--json code_blocks`
-   - If a link result includes `heading`, read just that section with `scraps get "<title>" [--ctx <ctx>] --heading "<heading>" --json body`
+   - If a link result includes `heading`, read just that section with `scraps get "<key>" --heading "<heading>" --json body`
    - For graph-shaped questions, also use:
-     - `scraps links "<title>" --json` (outbound)
-     - `scraps backlinks "<title>" --json` (inbound)
+     - `scraps links "<key>" --json` (outbound)
+     - `scraps backlinks "<key>" --json` (inbound)
 
 5. **Synthesize with citations**
    - Write the answer in plain Markdown
@@ -59,16 +59,16 @@ Implements Karpathy's *Query* primitive for Scraps: search the wiki, read releva
 
 - Every non-trivial claim should trace to a `[[Title]]` citation.
 - If a claim has no source in the wiki, mark it as outside the wiki ("not in the current scraps"); do not bluff.
-- Use the exact `title` value returned by `scraps search --json` / `scraps get --json` so the citation resolves cleanly.
-- For ctx-disambiguated scraps, use `[[Ctx/Title]]`.
+- Cite with the exact `key` value returned by `scraps search --json` / `scraps get --json`, as `[[key]]`, so the citation resolves cleanly. The `title` is what readers see and is not a link target.
+- A key already carries its context folder (`[[Ctx/Name]]`).
 - `scraps links --json` may return a `heading`; use it for targeted reads, but cite the scrap as `[[Title]]` or `[[Ctx/Title]]` unless the answer specifically needs a heading reference.
 
 ## CLI used
 
 - `scraps search <query> [--logic and|or] --json`
-- `scraps get <title> [--ctx <ctx>] [--heading <heading>] --json [fields]`
-- `scraps links <title> [--ctx <ctx>] --json` (returns `{ kind, title, ctx, heading }` refs)
-- `scraps backlinks <title> [--ctx <ctx>] --json`
+- `scraps get <key> [--heading <heading>] --json [fields]` (`<key>` is the scrap's path without `.md`, as results return it; `<name> --ctx <ctx>` is still accepted)
+- `scraps links <key> --json` (returns `{ kind, key, title, ctx, heading }` refs)
+- `scraps backlinks <key> --json`
 - `scraps tag list --json`
 - `scraps tag backlinks <tag> --json`
 - `scraps todo [--status open|done|deferred|all] --json`

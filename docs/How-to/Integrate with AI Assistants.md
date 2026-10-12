@@ -16,20 +16,24 @@ server.
 
 ```bash
 ❯ scraps search "rust cli" --logic and --json
-❯ scraps get "Getting Started" --json
-❯ scraps get "Getting Started" --heading "Install" --json body
-❯ scraps get "Getting Started" --json code_blocks
-❯ scraps get "Getting Started" --json images
-❯ scraps links "Getting Started" --json
-❯ scraps backlinks "Configuration" --json
+❯ scraps get "Tutorial/Getting Started" --json
+❯ scraps get "Tutorial/Getting Started" --heading "Install" --json body
+❯ scraps get "Tutorial/Getting Started" --json code_blocks
+❯ scraps get "Tutorial/Getting Started" --json images
+❯ scraps links "Tutorial/Getting Started" --json
+❯ scraps backlinks "Reference/Configuration" --json
 ❯ scraps tag list --json
 ❯ scraps type list --json
 ❯ scraps todo --status all --json
 ❯ scraps frontmatter --json
 ```
 
-`scraps get --json` defaults to `title`, `ctx`, and `body`. It can project
-specific fields (`title`, `ctx`, `body`, `headings`, `code_blocks`, `images`, `type`,
+Every result names a scrap by its `key`, next to the `title` readers see and
+its `ctx`; pass the `key` back to read or traverse that scrap. The older
+`scraps get <name> --ctx <ctx>` form is still supported.
+
+`scraps get --json` defaults to `key`, `title`, `ctx`, and `body`. It can project
+specific fields (`key`, `title`, `ctx`, `body`, `headings`, `code_blocks`, `images`, `type`,
 `description`, `frontmatter`) so an
 agent can avoid loading full bodies when it only needs structure or examples.
 `scraps links --json` returns outbound `link` and `embed` references with

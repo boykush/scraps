@@ -36,8 +36,8 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
 2. **Research existing wiki state**
    - `scraps search "<keyword>" --json` to find related scraps
    - `scraps tag list --json` to find relevant tags
-   - Read 3–8 of the most related scraps via `scraps get "<title>" --json`
-   - Use `scraps get "<title>" --json headings` first when only the outline is needed
+   - Read 3–8 of the most related scraps by passing each hit's `key` back: `scraps get "<key>" --json`
+   - Use `scraps get "<key>" --json headings` first when only the outline is needed
 
 3. **Decide title and ctx**
    - Pick a clear, atomic title
@@ -61,7 +61,7 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
 
 6. **Cross-link inbound mentions** (Karpathy's "update related entity and concept pages")
    - Existing scraps that already name the new title in plain text should link IN to it. This is the reverse of step 5's outbound links — here you edit the *existing* scraps. Discover candidates with Grep, judge each in context, then convert.
-   - **Discover (Grep, high recall)**: now that the title is fixed (step 3), `Grep` the wiki for the literal title across `*.md`, with surrounding context. `scraps search` is fuzzy over title+body and returns no match location, so it misses and mislocates mentions — do not use it for discovery.
+   - **Discover (Grep, high recall)**: now that the title is fixed (step 3), `Grep` the wiki for the literal title across `*.md`, with surrounding context. `scraps search` is fuzzy over key, title and body and returns no match location, so it misses and mislocates mentions — do not use it for discovery.
    - **Judge each hit (review, high precision)**: Grep is a substring match, so review every hit in context and keep only a *standalone-term* occurrence of the title. Skip a hit that is merely part of a longer term — title `GitHub` inside `GitHub App` / `GitHub Actions`, or title `状態` inside `状態管理` (Japanese has no word boundaries, so context judgement is mandatory, not a regex `\b`). If that longer term is itself a scrap or should be one, leave it intact rather than splitting it.
    - **Convert**: turn each surviving plain-text mention into `[[new title]]` (use `[[new title|surface form]]` for an inflected or aliased form). Skip occurrences already inside `[[...]]`/`#[[...]]` and skip the new scrap's own file. Do not invent mentions Grep did not find.
    - Cover **every** scrap that survives review — do not stop at the first one or two.
@@ -88,7 +88,7 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
 ## CLI used
 
 - `scraps search <query> --json`
-- `scraps get <title> [--ctx <ctx>] [--heading <heading>] --json [fields]`
+- `scraps get <key> [--heading <heading>] --json [fields]` (`<key>` is the scrap's path without `.md`, as results return it; `<name> --ctx <ctx>` is still accepted)
 - `scraps tag list --json`
 - `scraps tag backlinks <tag> --json`
 - `scraps lint --rule <rule>`
