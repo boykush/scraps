@@ -25,6 +25,20 @@ rules:
       - id: EX-02
         name: learn-usage-from-tool-defs と follow-response-hints の既存テストが orient にもそのまま効く
     automated: true
+  - id: R-04
+    name: 使われている type も主要タグと同じ形で返す — 件数の降順で上位10件に絞る（全量は list_types の仕事）
+    examples:
+      - id: EX-01
+        name: top_types は scraps の多い順、同数なら名前順で並び、next が lookup_type_scraps と list_types を名指す
+      - id: EX-02
+        name: type が10件を超えても top_types は10件で止まり、type_count は全量を示す
+    automated: true
+  - id: R-05
+    name: type を持たない wiki の orient は type で散らからない
+    examples:
+      - id: EX-01
+        name: type_count は 0、top_types は空で、next は type の道具を名指さない
+    automated: true
 
 questions:
   - id: Q-01
