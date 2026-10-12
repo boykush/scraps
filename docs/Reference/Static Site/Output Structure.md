@@ -55,6 +55,12 @@ pages: `a b.md` and `a-b.md` never share one. A tidy URL comes from a tidy
 file name; the keys a scrap can set for itself are in
 [[Reference/Frontmatter]].
 
+Names are compared in Unicode NFC, so the name of a scrap, a tag or a type
+matches however the filesystem or an editor composed it, and its page path is
+the same on every machine. Content is left as written. Two files whose names
+differ only in normalization form are one name, so a wiki holding both does
+not load.
+
 A link to a page percent-encodes each path segment, so the page above is
 served at `scraps/Reference/CLI%20Overview.html`.
 

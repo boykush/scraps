@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use crate::nfc::nfc;
+
 /// The context in which a scrap lives. A context represents a non-empty
 /// hierarchical path (one or more segments). The "no context" / root case is
 /// represented externally via `Option<Ctx> = None` — a `Ctx` value itself is
@@ -63,7 +65,7 @@ impl From<&str> for Ctx {
             segments: s
                 .split('/')
                 .filter(|seg| !seg.is_empty())
-                .map(String::from)
+                .map(|seg| nfc(seg).into_owned())
                 .collect(),
         }
     }
@@ -129,6 +131,14 @@ mod tests {
         set.insert(a.clone());
         assert!(set.contains(&b));
         assert!(!set.contains(&c));
+    }
+
+    #[test]
+    fn it_is_the_same_ctx_in_either_normalization_form() {
+        let nfd: Ctx = "\u{30ab}\u{3099}/cafe\u{301}".into();
+        let nfc: Ctx = "\u{30ac}/caf\u{e9}".into();
+        assert_eq!(nfd, nfc);
+        assert_eq!(nfd.segments(), ["\u{30ac}", "caf\u{e9}"]);
     }
 
     #[test]

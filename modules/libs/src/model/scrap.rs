@@ -4,6 +4,7 @@ use serde_json::Value;
 use url::Url;
 
 use crate::markdown::query::{CodeBlock, Heading, ScrapFacts, TaskItem, WikiRef};
+use crate::nfc::nfc;
 
 use super::{context::Ctx, key::ScrapKey, tag::Tag, title::Title};
 
@@ -32,6 +33,7 @@ pub struct Scrap {
     facts: ScrapFacts,
     links: Vec<ScrapKey>,
     tags: Vec<Tag>,
+    scrap_type: Option<String>,
 }
 
 const FRONTMATTER_TYPE_KEY: &str = "type";
@@ -105,14 +107,11 @@ impl Scrap {
     }
 
     /// What kind of thing the scrap is: the frontmatter `type` string,
-    /// trimmed. A scrap has at most one, and none when the key is missing,
-    /// blank or not a string. The value is the author's own vocabulary.
+    /// trimmed and in NFC. A scrap has at most one, and none when the key is
+    /// missing, blank or not a string. The value is the author's own
+    /// vocabulary.
     pub fn scrap_type(&self) -> Option<&str> {
-        self.frontmatter()?
-            .get(FRONTMATTER_TYPE_KEY)?
-            .as_str()
-            .map(str::trim)
-            .filter(|value| !value.is_empty())
+        self.scrap_type.as_deref()
     }
 
     /// The author's one-line summary of the scrap: the frontmatter
@@ -158,6 +157,8 @@ impl Scrap {
             .filter(|tag| seen_tags.insert(tag.clone()))
             .collect();
 
+        let scrap_type = frontmatter_type(facts.frontmatter.as_ref());
+
         Scrap {
             title: title.into(),
             ctx: ctx.clone(),
@@ -165,6 +166,7 @@ impl Scrap {
             facts,
             links,
             tags,
+            scrap_type,
         }
     }
 }
@@ -188,6 +190,16 @@ fn link_occurrences<'a>(
         }),
         WikiRef::Embed(_) | WikiRef::Tag(_) => None,
     })
+}
+
+/// A type is a name like a tag: compared for identity and written as a path.
+fn frontmatter_type(frontmatter: Option<&Value>) -> Option<String> {
+    frontmatter?
+        .get(FRONTMATTER_TYPE_KEY)?
+        .as_str()
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(|value| nfc(value).into_owned())
 }
 
 /// The strings of the frontmatter `tags` list, read as tag paths. Frontmatter
@@ -480,6 +492,47 @@ mod tests {
             Some(&Value::String("Blog".to_string()))
         );
         assert_eq!(scrap.tags(), &[Tag::from("ai")]);
+    }
+
+    // ガイド and タグ, once decomposed (as macOS tools name files) and once
+    // composed (as text is typed).
+    const GUIDE_NFD: &str = "\u{30ab}\u{3099}\u{30a4}\u{30c8}\u{3099}";
+    const GUIDE_NFC: &str = "\u{30ac}\u{30a4}\u{30c9}";
+    const TAG_NFD: &str = "\u{30bf}\u{30af}\u{3099}";
+    const TAG_NFC: &str = "\u{30bf}\u{30b0}";
+
+    #[test]
+    fn it_links_to_one_key_from_either_normalization_form() {
+        let text = format!(
+            "[[{GUIDE_NFD}]] [[{GUIDE_NFC}]] [a](/{GUIDE_NFD}.md) [b](/{GUIDE_NFC}.md) \
+             [c](/%E3%82%AB%E3%82%99%E3%82%A4%E3%83%88%E3%82%99.md)"
+        );
+        let scrap = Scrap::new("from", &None, &text);
+        assert_eq!(scrap.links(), &[ScrapKey::from(Title::from(GUIDE_NFC))]);
+        assert_eq!(
+            Scrap::new(GUIDE_NFD, &None, "").self_key(),
+            scrap.links()[0]
+        );
+    }
+
+    #[test]
+    fn it_tags_once_from_either_normalization_form() {
+        let text = format!("---\ntags: [{TAG_NFD}]\n---\n\n#[[{TAG_NFD}]] #[[{TAG_NFC}]]\n");
+        let scrap = Scrap::new("foo", &None, &text);
+        assert_eq!(scrap.tags(), &[Tag::from(TAG_NFC)]);
+        assert_eq!(scrap.tags()[0].to_string(), TAG_NFC);
+    }
+
+    #[test]
+    fn it_reads_the_type_in_nfc_and_leaves_the_frontmatter_as_written() {
+        let text = format!("---\ntype: {GUIDE_NFD}\nowner: {GUIDE_NFD}\n---\n\n{GUIDE_NFD}\n");
+        let scrap = Scrap::new("foo", &None, &text);
+        assert_eq!(scrap.scrap_type(), Some(GUIDE_NFC));
+        assert_eq!(
+            scrap.frontmatter(),
+            Some(&json!({"type": GUIDE_NFD, "owner": GUIDE_NFD}))
+        );
+        assert_eq!(scrap.md_text(), text);
     }
 
     #[test]

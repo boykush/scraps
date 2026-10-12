@@ -1,3 +1,4 @@
+use crate::nfc::nfc;
 use comrak::{
     Options,
     nodes::{AstNode, NodeValue},
@@ -21,12 +22,14 @@ pub(super) fn collect_text<'a>(node: &'a AstNode<'a>) -> String {
     s
 }
 
+/// Splits a wiki-link target into context path, title and heading. The path
+/// segments are names, so they come back in NFC; the heading is as written.
 pub(super) fn parse_wikilink_url(url: &str) -> (Vec<String>, String, Option<String>) {
     let (path, heading) = match url.split_once('#') {
         Some((p, h)) => (p.to_string(), Some(h.to_string())),
         None => (url.to_string(), None),
     };
-    let mut parts: Vec<String> = path.split('/').map(|s| s.to_string()).collect();
+    let mut parts: Vec<String> = path.split('/').map(|s| nfc(s).into_owned()).collect();
     let title = parts.pop().unwrap_or_default();
     (parts, title, heading)
 }

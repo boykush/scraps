@@ -68,6 +68,20 @@ fn read_source(scraps_dir: &Path, path: &Path) -> ScrapsResult<Source> {
     })
 }
 
+/// Keys are NFC, so two files a filesystem keeps apart by normalization form
+/// alone are one scrap. Failing beats letting one silently replace the other:
+/// to a reader they have the same name, and macOS cannot check out both.
+fn reject_same_key(scraps_dir: &Path, sources: &[Source]) -> ScrapsResult<()> {
+    let mut seen: HashMap<(&Option<Ctx>, &str), &str> = HashMap::with_capacity(sources.len());
+    for src in sources {
+        if let Some(first) = seen.insert((&src.ctx, &src.title), &src.rel_path) {
+            let path = |rel_path: &str| scraps_dir.join(rel_path);
+            return Err(ScrapsError::SameKey(path(first), path(&src.rel_path)).into());
+        }
+    }
+    Ok(())
+}
+
 /// Every scrap of the wiki in path order, routed through the on-disk IR:
 /// a source whose hash the IR knows is rebuilt from its stored facts, the
 /// rest are parsed. Nothing is written here; callers save when `dirty`.
@@ -78,6 +92,7 @@ fn load(scraps_dir: &Path, exclude_dirs: &[PathBuf]) -> ScrapsResult<LoadedWiki>
         .map(|path| read_source(scraps_dir, &path))
         .collect::<ScrapsResult<Vec<Source>>>()?;
     sources.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
+    reject_same_key(scraps_dir, &sources)?;
 
     let store = IrStore::new(scraps_dir);
     let stored = store.load();
@@ -707,5 +722,88 @@ mod tests {
                 ("c".to_string(), Some(BASE_TS + 40)),
             ]
         );
+    }
+
+    const GUIDE_NFD: &str = "\u{30ab}\u{3099}\u{30a4}\u{30c8}\u{3099}";
+    const GUIDE_NFC: &str = "\u{30ac}\u{30a4}\u{30c9}";
+
+    #[test]
+    fn it_keys_a_decomposed_file_name_in_nfc_and_stores_the_path_as_read() {
+        let project = TempScrapProject::new();
+        project
+            .add_scrap(&format!("{GUIDE_NFD}.md"), b"# Guide\n")
+            .add_scrap("a.md", format!("[[{GUIDE_NFC}]]").as_bytes());
+
+        let scraps = load_scraps(&project.project_root, &exclude(&project)).unwrap();
+
+        assert!(scraps.iter().any(|s| s.title().to_string() == GUIDE_NFC));
+        let ir = read_ir(&project);
+        let guide = ir.scraps.iter().find(|o| o.title == GUIDE_NFC).unwrap();
+        assert_eq!(guide.path, format!("{GUIDE_NFD}.md"));
+        assert!(ir.links.iter().all(|e| e.resolved));
+    }
+
+    fn source(rel_path: &str) -> Source {
+        let root = Path::new("/wiki");
+        let (title, ctx) = read_scraps::scrap_identity(root, &root.join(rel_path)).unwrap();
+        Source {
+            rel_path: rel_path.to_string(),
+            title,
+            ctx,
+            text: String::new(),
+            hash: String::new(),
+        }
+    }
+
+    #[test]
+    fn it_rejects_two_sources_whose_names_normalize_to_one_key() {
+        let nfd = format!("guide/{GUIDE_NFD}.md");
+        let nfc = format!("guide/{GUIDE_NFC}.md");
+        let sources = vec![source("a.md"), source(&nfc), source(&nfd)];
+
+        let err = reject_same_key(Path::new("/wiki"), &sources).unwrap_err();
+
+        assert_eq!(
+            err.downcast_ref::<ScrapsError>(),
+            Some(&ScrapsError::SameKey(
+                Path::new("/wiki").join(&nfc),
+                Path::new("/wiki").join(&nfd)
+            ))
+        );
+        let message = err.to_string();
+        assert!(
+            message.contains(&nfc) && message.contains(&nfd),
+            "{message}"
+        );
+    }
+
+    #[test]
+    fn it_fails_to_load_a_wiki_holding_a_name_in_both_normalization_forms() {
+        let project = TempScrapProject::new();
+        project
+            .add_scrap(&format!("{GUIDE_NFC}.md"), b"# Composed\n")
+            .add_scrap(&format!("{GUIDE_NFD}.md"), b"# Decomposed\n");
+        // macOS filesystems fold the two forms into one file; nothing to load twice.
+        let md_files = read_scraps::to_scrap_paths(&project.project_root, &exclude(&project));
+        if md_files.unwrap().len() < 2 {
+            return;
+        }
+
+        let err = load_scraps(&project.project_root, &exclude(&project)).unwrap_err();
+
+        // Path order: the decomposed name sorts first.
+        assert_eq!(
+            err.downcast_ref::<ScrapsError>(),
+            Some(&ScrapsError::SameKey(
+                project.project_root.join(format!("{GUIDE_NFD}.md")),
+                project.project_root.join(format!("{GUIDE_NFC}.md"))
+            ))
+        );
+    }
+
+    #[test]
+    fn it_accepts_the_same_title_under_different_contexts() {
+        let sources = vec![source("a/t.md"), source("b/t.md"), source("t.md")];
+        assert!(reject_same_key(Path::new("/wiki"), &sources).is_ok());
     }
 }

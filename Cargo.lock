@@ -2048,6 +2048,7 @@ dependencies = [
  "iso639_enum",
  "rstest",
  "serde_json",
+ "unicode-normalization",
  "url",
  "yaml-rust2 0.13.0",
 ]

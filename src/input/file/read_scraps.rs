@@ -5,6 +5,7 @@ use std::{
 
 use anyhow::Context;
 use scraps_libs::model::{context::Ctx, scrap::Scrap};
+use scraps_libs::nfc::nfc;
 
 use crate::error::{ScrapsError, ScrapsResult};
 
@@ -58,7 +59,8 @@ pub(crate) fn to_scrap_paths(
 }
 
 /// Title and ctx a scrap file gets from where it sits: the file stem is the
-/// title and the directories below `scraps_dir_path` are the ctx.
+/// title and the directories below `scraps_dir_path` are the ctx. Both are
+/// NFC, whichever form the filesystem stores the name in.
 pub(crate) fn scrap_identity(
     scraps_dir_path: &Path,
     scrap_file_path: &Path,
@@ -88,7 +90,7 @@ pub(crate) fn scrap_identity(
         Some(Ctx::from(ctx_segments.join("/").as_str()))
     };
 
-    Ok((file_prefix.to_string(), ctx))
+    Ok((nfc(file_prefix).into_owned(), ctx))
 }
 
 /// Location of a scrap file relative to the wiki root, `/`-separated on
@@ -169,6 +171,22 @@ mod tests {
         let titles = collect_titles(&scraps);
 
         assert_eq!(titles, HashSet::from(["intro".to_string()]));
+    }
+
+    #[test]
+    fn derives_the_key_in_nfc_and_keeps_the_path_as_read() {
+        let root = Path::new("/wiki");
+        let file = root.join("cafe\u{301}/\u{30ab}\u{3099}\u{30a4}\u{30c8}\u{3099}.md");
+
+        let (title, ctx) = scrap_identity(root, &file).unwrap();
+
+        assert_eq!(title, "\u{30ac}\u{30a4}\u{30c9}");
+        assert_eq!(ctx, Some(Ctx::from("caf\u{e9}")));
+        assert_eq!(ctx.unwrap().to_string(), "caf\u{e9}");
+        assert_eq!(
+            relative_path(root, &file).unwrap(),
+            "cafe\u{301}/\u{30ab}\u{3099}\u{30a4}\u{30c8}\u{3099}.md"
+        );
     }
 
     #[test]

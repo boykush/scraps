@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use crate::nfc::nfc;
+
 /// A tag is a hierarchical label attached to a scrap via the `#[[a/b/c]]`
 /// syntax. A tag is non-empty by convention; constructing an empty tag via
 /// `From<&str>` is possible but should be avoided by callers.
@@ -43,7 +45,7 @@ impl From<&str> for Tag {
             segments: s
                 .split('/')
                 .filter(|seg| !seg.is_empty())
-                .map(String::from)
+                .map(|seg| nfc(seg).into_owned())
                 .collect(),
         }
     }
@@ -133,6 +135,14 @@ mod tests {
         set.insert(a.clone());
         assert!(set.contains(&b));
         assert!(!set.contains(&c));
+    }
+
+    #[test]
+    fn it_is_the_same_tag_in_either_normalization_form() {
+        let nfd: Tag = "\u{30bf}\u{30af}\u{3099}/cafe\u{301}".into();
+        let nfc: Tag = "\u{30bf}\u{30b0}/caf\u{e9}".into();
+        assert_eq!(nfd, nfc);
+        assert_eq!(nfd.to_string(), "\u{30bf}\u{30b0}/caf\u{e9}");
     }
 
     #[test]

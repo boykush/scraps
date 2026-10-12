@@ -48,7 +48,7 @@ command.
 
 ```json
 {
-  "format_version": 3,
+  "format_version": 4,
   "scraps_version": "2.3.0",
   "scraps": [
     {
