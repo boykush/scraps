@@ -51,7 +51,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Use when you start a session on an unfamiliar wiki: returns its scale (scrap and tag counts), folder contexts, and top tags in one response, with no arguments. Continue with search_scraps for content, or expand a topic with lookup_tag_backlinks; the full tag list is list_tags."
+        description = "Use when you start a session on an unfamiliar wiki: returns its scale (scrap, tag and type counts), folder contexts, top tags, and top types in one response, with no arguments. Continue with search_scraps for content, expand a topic with lookup_tag_backlinks, or expand a kind of scrap with lookup_type_scraps; the full lists are list_tags and list_types."
     )]
     async fn orient(
         &self,
@@ -536,6 +536,75 @@ mod tests {
         assert!(
             next.contains("search_scraps") && next.contains("lookup_tag_backlinks"),
             "orient next should name the entry tools: {orient}"
+        );
+    }
+
+    // Automates livt://mapping/orient-at-session-start/rule/R-04
+    #[rstest]
+    #[tokio::test]
+    async fn test_orient_reports_the_types_in_use(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("a.md", b"---\ntype: Blog\n---\n# A\n\n#[[rust]]");
+        project.add_scrap("b.md", b"---\ntype: Book\n---\n# B");
+        project.add_scrap("c.md", b"---\ntype: Book\n---\n# C");
+        project.add_scrap("d.md", b"---\ntype: Area\n---\n# D");
+        project.add_scrap("e.md", b"# E\n\nuntyped");
+
+        let orient = call_tool_json(&project, "orient", serde_json::json!({})).await;
+
+        assert_eq!(orient["type_count"], 3);
+        assert_eq!(
+            orient["top_types"],
+            serde_json::json!([
+                { "type": "Book", "scraps_count": 2 },
+                { "type": "Area", "scraps_count": 1 },
+                { "type": "Blog", "scraps_count": 1 }
+            ])
+        );
+        let next = orient["next"].as_str().unwrap_or_default();
+        assert!(
+            next.contains("lookup_tag_backlinks")
+                && next.contains("lookup_type_scraps {type}")
+                && next.contains("list_types"),
+            "orient next should name the type tools beside the tag tools: {orient}"
+        );
+    }
+
+    // Automates livt://mapping/orient-at-session-start/rule/R-04
+    #[rstest]
+    #[tokio::test]
+    async fn test_orient_caps_top_types(#[from(temp_scrap_project)] project: TempScrapProject) {
+        for i in 1..=12 {
+            project.add_scrap(
+                &format!("s{i:02}.md"),
+                format!("---\ntype: T{i:02}\n---\n# S{i:02}").as_bytes(),
+            );
+        }
+        project.add_scrap("extra.md", b"---\ntype: T12\n---\n# Extra");
+
+        let orient = call_tool_json(&project, "orient", serde_json::json!({})).await;
+
+        assert_eq!(orient["type_count"], 12);
+        assert_eq!(orient["top_types"].as_array().unwrap().len(), 10);
+        assert_eq!(orient["top_types"][0]["type"], "T12");
+    }
+
+    // Automates livt://mapping/orient-at-session-start/rule/R-05
+    #[rstest]
+    #[tokio::test]
+    async fn test_orient_keeps_an_untyped_wiki_free_of_type_hints(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("a.md", b"# A\n\n#[[rust]]");
+
+        let orient = call_tool_json(&project, "orient", serde_json::json!({})).await;
+
+        assert_eq!(orient["type_count"], 0);
+        assert_eq!(orient["top_types"], serde_json::json!([]));
+        assert_eq!(
+            orient["next"],
+            "Search content with search_scraps, or expand a top tag with lookup_tag_backlinks {tag}; the full tag list is list_tags."
         );
     }
 

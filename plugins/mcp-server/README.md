@@ -61,8 +61,9 @@ All operations run against the current state of the Scraps wiki. Search uses fuz
 
 ### `orient`
 
-Where to start on an unfamiliar wiki: its scale, its folder contexts, and the
-head of its topic map in one call. Takes no parameters.
+Where to start on an unfamiliar wiki: its scale, its folder contexts, the head
+of its topic map, and the kinds of scraps it holds in one call. Takes no
+parameters.
 
 Returns:
 
@@ -70,19 +71,28 @@ Returns:
 {
   "scrap_count": 128,
   "tag_count": 24,
+  "type_count": 2,
   "contexts": ["Book", "Kubernetes"],
   "top_tags": [
     { "title": "rust", "backlinks_count": 31 },
     { "title": "go", "backlinks_count": 12 }
   ],
-  "next": "Search content with search_scraps, or expand a top tag with lookup_tag_backlinks {tag}; the full tag list is list_tags."
+  "top_types": [
+    { "type": "Book", "scraps_count": 40 },
+    { "type": "Blog", "scraps_count": 9 }
+  ],
+  "next": "Search content with search_scraps, expand a top tag with lookup_tag_backlinks {tag}, or expand a top type with lookup_type_scraps {type}; the full lists are list_tags and list_types."
 }
 ```
 
 `contexts` lists every folder context in the wiki, sorted by name. `top_tags`
 is capped at 10, ranked by backlink count and tie-broken by title — the whole
-list is `list_tags`' job. Bodies stay out: read a scrap with `get_scrap`. On an
-empty wiki `next` says so instead of naming tools.
+list is `list_tags`' job. `top_types` is capped at 10 the same way, in
+`list_types`' order (most scraps first, then by name), and the whole list is
+`list_types`' job. On a wiki where no scrap declares a type, `type_count` is 0,
+`top_types` is empty, and `next` names only the search and tag tools. Bodies
+stay out: read a scrap with `get_scrap`. On an empty wiki `next` says so
+instead of naming tools.
 
 ### `search_scraps`
 
