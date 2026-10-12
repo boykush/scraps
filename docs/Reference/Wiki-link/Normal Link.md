@@ -1,5 +1,6 @@
 ---
 type: Reference
+description: "`[[Title]]` links to the scrap with that title."
 ---
 
 #[[Notation/Wiki-link]]

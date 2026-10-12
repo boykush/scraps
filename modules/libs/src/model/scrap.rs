@@ -35,6 +35,7 @@ pub struct Scrap {
 }
 
 const FRONTMATTER_TYPE_KEY: &str = "type";
+const FRONTMATTER_DESCRIPTION_KEY: &str = "description";
 
 impl Scrap {
     pub fn self_key(&self) -> ScrapKey {
@@ -109,6 +110,17 @@ impl Scrap {
     pub fn scrap_type(&self) -> Option<&str> {
         self.frontmatter()?
             .get(FRONTMATTER_TYPE_KEY)?
+            .as_str()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+    }
+
+    /// The author's one-line summary of the scrap: the frontmatter
+    /// `description` string, trimmed. None when the key is missing, blank or
+    /// not a string.
+    pub fn description(&self) -> Option<&str> {
+        self.frontmatter()?
+            .get(FRONTMATTER_DESCRIPTION_KEY)?
             .as_str()
             .map(str::trim)
             .filter(|value| !value.is_empty())
@@ -426,6 +438,38 @@ mod tests {
     #[case::sequence_root("---\n- type\n---\n")]
     fn it_has_no_type_without_a_non_empty_string(#[case] text: &str) {
         assert_eq!(Scrap::new("foo", &None, text).scrap_type(), None);
+    }
+
+    #[rstest::rstest]
+    #[case::plain(
+        "---\ndescription: One row per completed customer order.\n---\n",
+        "One row per completed customer order."
+    )]
+    #[case::trimmed("---\ndescription: '  A summary.  '\n---\n", "A summary.")]
+    #[case::folded(
+        "---\ndescription: >\n  A folded\n  summary.\n---\n",
+        "A folded summary."
+    )]
+    #[case::among_other_keys(
+        "---\ntype: Table\ndescription: Orders.\ntags: [a]\n---\n\nbody\n",
+        "Orders."
+    )]
+    fn it_reads_the_frontmatter_description(#[case] text: &str, #[case] expected: &str) {
+        assert_eq!(Scrap::new("foo", &None, text).description(), Some(expected));
+    }
+
+    #[rstest::rstest]
+    #[case::no_frontmatter("# Body\n")]
+    #[case::no_description_key("---\ntype: Blog\n---\n")]
+    #[case::empty("---\ndescription: ''\n---\n")]
+    #[case::blank("---\ndescription: '   '\n---\n")]
+    #[case::null("---\ndescription:\n---\n")]
+    #[case::list("---\ndescription: [a, b]\n---\n")]
+    #[case::mapping("---\ndescription:\n  text: a\n---\n")]
+    #[case::number("---\ndescription: 3\n---\n")]
+    #[case::boolean("---\ndescription: true\n---\n")]
+    fn it_has_no_description_without_a_non_empty_string(#[case] text: &str) {
+        assert_eq!(Scrap::new("foo", &None, text).description(), None);
     }
 
     #[test]

@@ -32,8 +32,12 @@ impl SerializeIndexScrap {
         let commited_ts = scrap_detail.commited_ts();
         let backlinks_count = backlinks_map.get(&scrap.self_key()).len();
         let links_count = scrap.links().len();
-        let summary = Summary::from_md_text(scrap.md_text(), SUMMARY_MAX_CHARS)
-            .map(|s| s.as_str().to_string());
+        // The author's own sentence is shown as written; only a summary
+        // derived from the body needs cutting down to a row.
+        let summary = scrap.description().map(str::to_string).or_else(|| {
+            Summary::from_md_text(scrap.md_text(), SUMMARY_MAX_CHARS)
+                .map(|s| s.as_str().to_string())
+        });
         let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_key().clone()));
         SerializeIndexScrap {
             ctx: scrap.ctx().as_ref().map(|c| c.to_string()),
@@ -87,6 +91,36 @@ mod tests {
     use scraps_libs::model::{base_url::BaseUrl, scrap::Scrap};
 
     use super::*;
+
+    fn summary_of(md_text: &str) -> Option<String> {
+        let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
+        let scrap = Scrap::new("orders", &None, md_text);
+        let scrap_texts = [(scrap.self_key(), scrap.md_text().to_string())]
+            .into_iter()
+            .collect();
+        let detail = ScrapDetail::new(&scrap, &None, base_url, &scrap_texts);
+        let backlinks_map = BacklinksMap::new(std::slice::from_ref(&scrap));
+
+        SerializeIndexScrap::new(&detail, &backlinks_map).summary
+    }
+
+    #[test]
+    fn it_summarises_with_the_description_when_the_scrap_has_one() {
+        let described =
+            "---\ndescription: One row per completed customer order.\n---\n\n# Orders table\n";
+        assert_eq!(
+            summary_of(described).as_deref(),
+            Some("One row per completed customer order.")
+        );
+    }
+
+    #[rstest::rstest]
+    #[case::no_frontmatter("# Orders table\n")]
+    #[case::no_description("---\ntype: Table\n---\n\n# Orders table\n")]
+    #[case::blank_description("---\ndescription: ''\n---\n\n# Orders table\n")]
+    fn it_summarises_from_the_body_without_a_description(#[case] md_text: &str) {
+        assert_eq!(summary_of(md_text).as_deref(), Some("Orders table"));
+    }
 
     #[test]
     fn it_new_with_sort() {

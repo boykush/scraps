@@ -1,5 +1,6 @@
 ---
 type: Reference
+description: "`[[Title|Display]]` links to `Title` while showing custom display text."
 ---
 
 #[[Notation/Wiki-link]]

@@ -13,6 +13,7 @@ pub struct SearchResult {
     pub title: Title,
     pub ctx: Option<Ctx>,
     pub md_text: String,
+    pub description: Option<String>,
 }
 
 pub struct SearchUsecase;
@@ -64,6 +65,7 @@ impl SearchUsecase {
                         title,
                         ctx,
                         md_text: scrap.md_text().to_string(),
+                        description: scrap.description().map(str::to_string),
                     }
                 })
             })
