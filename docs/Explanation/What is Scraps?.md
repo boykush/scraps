@@ -21,6 +21,8 @@ syntax clear meaning:
 - `![[embed]]` embeds content from another scrap
 - folders provide context, so `DDD/Service.md` and `Kubernetes/Service.md` are
   different scraps
+- YAML frontmatter is optional; when present, its `tags` and `type` are read
+  ([[Reference/Frontmatter]])
 
 Because these are typed, Scraps can lint broken references, render navigation,
 and expose structured documentation data to other tools. See

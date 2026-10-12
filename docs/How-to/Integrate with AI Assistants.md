@@ -19,12 +19,13 @@ server.
 ❯ scraps links "Getting Started" --json
 ❯ scraps backlinks "Configuration" --json
 ❯ scraps tag list --json
+❯ scraps type list --json
 ❯ scraps todo --status all --json
 ❯ scraps frontmatter --json
 ```
 
 `scraps get --json` defaults to `title`, `ctx`, and `body`. It can project
-specific fields (`title`, `ctx`, `body`, `headings`, `code_blocks`, `images`) so an
+specific fields (`title`, `ctx`, `body`, `headings`, `code_blocks`, `images`, `type`) so an
 agent can avoid loading full bodies when it only needs structure or examples.
 `scraps links --json` returns outbound `link` and `embed` references with
 optional heading targets; `backlinks` stays a scrap-level inbound lookup.

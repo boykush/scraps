@@ -18,6 +18,8 @@ the authoritative reference for flags and arguments. This page is the
 | `scraps backlinks <title>` | Inbound wiki-links to a scrap | ✓ |
 | `scraps tag list` | List all tags with backlink counts | ✓ |
 | `scraps tag backlinks <tag>` | Scraps referencing a tag | ✓ |
+| `scraps type list` | List all types with scrap counts | ✓ |
+| `scraps type scraps <type>` | Scraps of a type | ✓ |
 | `scraps todo` | Aggregate GFM task list items wiki-wide | ✓ |
 | `scraps frontmatter` | Aggregate YAML frontmatter wiki-wide | ✓ |
 | `scraps mcp serve` | Start an MCP server over stdio, or `--http` | – |
@@ -46,7 +48,8 @@ scraps get "Title" --json images
 scraps get "Title" --heading "Install" --json body,headings
 ```
 
-Allowed fields are `title`, `ctx`, `body`, `headings`, `code_blocks`, and `images`.
+Allowed fields are `title`, `ctx`, `body`, `headings`, `code_blocks`, `images`,
+and `type`. `type` is the scrap's frontmatter type, or `null` when it has none.
 Reference navigation stays separate: use `scraps links`, `scraps backlinks`,
 and `scraps tag ...`.
 
@@ -57,13 +60,12 @@ directly to `scraps get <title> --ctx <ctx> --heading <heading>`.
 `scraps backlinks --json` remains scrap-level inbound discovery and returns
 the scraps that link to the requested scrap.
 
+`scraps type list --json` returns each type in use with its `scraps_count`,
+most used first. `scraps type scraps <type> --json` returns the scraps of one
+type; the type is matched exactly and case-sensitively.
+
 `scraps frontmatter --json` returns every scrap that carries a YAML
-frontmatter block, with its keys parsed as-is. Scraps requires none of those
-keys and reads a meaning into only one, `tags`, whose strings join the scrap's
-tags — see [[Reference/Wiki-link/Tag]]. A scrap's title, context and links
-still come only from the filesystem and Wiki-link syntax, never from
-frontmatter. A block that is absent, unclosed or malformed is skipped rather
-than raising an error, and frontmatter stays part of the scrap body — it is
-not stripped from `scraps get --json body` or from the built site.
+frontmatter block, with all of its keys as written. Which keys Scraps reads,
+and how, is in [[Reference/Frontmatter]].
 
 For agent integration, see [[How-to/Integrate with AI Assistants]].
