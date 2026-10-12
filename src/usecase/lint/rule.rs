@@ -1,6 +1,7 @@
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
+pub use crate::usecase::build::model::output_path::scrap_relative_path;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum LintRuleName {
@@ -10,6 +11,7 @@ pub enum LintRuleName {
     Overlinking,
     BrokenLink,
     BrokenHeadingRef,
+    PathCollision,
     StaleByGit,
 }
 
@@ -22,6 +24,7 @@ impl LintRuleName {
             Self::Overlinking => "overlinking",
             Self::BrokenLink => "broken-link",
             Self::BrokenHeadingRef => "broken-heading-ref",
+            Self::PathCollision => "path-collision",
             Self::StaleByGit => "stale-by-git",
         }
     }
@@ -37,6 +40,7 @@ impl LintRuleName {
             Self::Overlinking,
             Self::BrokenLink,
             Self::BrokenHeadingRef,
+            Self::PathCollision,
         ]
     }
 }
@@ -47,13 +51,6 @@ pub struct LintWarning {
     pub message: String,
     pub source: Option<String>,
     pub span: Option<(usize, usize)>,
-}
-
-pub fn scrap_relative_path(scrap: &Scrap) -> String {
-    match scrap.ctx() {
-        Some(ctx) => format!("{}/{}.md", ctx, scrap.title()),
-        None => format!("{}.md", scrap.title()),
-    }
 }
 
 pub trait LintRule: Send + Sync {

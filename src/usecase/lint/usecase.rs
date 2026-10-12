@@ -8,7 +8,7 @@ use super::{
     rules::{
         broken_heading_ref::BrokenHeadingRefRule, broken_link::BrokenLinkRule,
         dead_end::DeadEndRule, lonely::LonelyRule, overlinking::OverlinkingRule,
-        self_link::SelfLinkRule,
+        path_collision::PathCollisionRule, self_link::SelfLinkRule,
     },
 };
 
@@ -44,6 +44,7 @@ impl LintUsecase {
             Box::new(OverlinkingRule),
             Box::new(BrokenLinkRule),
             Box::new(BrokenHeadingRefRule),
+            Box::new(PathCollisionRule),
         ];
 
         if !rule_names.is_empty() {

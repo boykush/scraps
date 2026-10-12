@@ -1,5 +1,5 @@
 use super::renderer::BuildRenderer;
-use crate::error::ScrapsResult;
+use crate::error::{BuildError, ScrapsResult};
 use crate::usecase::progress::{Progress, Stage};
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
@@ -12,6 +12,7 @@ use tracing::{Level, span};
 use super::model::{
     backlinks_map::BacklinksMap,
     build_config::BuildConfig,
+    output_path::PathCollisions,
     scrap_detail::{ScrapDetail, ScrapDetails},
     scrap_types::ScrapTypes,
     site_nav::SiteNav,
@@ -41,6 +42,13 @@ impl BuildUsecase {
             list_view_configs,
         } = config;
         let timezone = *timezone;
+
+        // Two pages on one path would overwrite each other silently, so the
+        // whole set is refused before anything is rendered.
+        let collisions = PathCollisions::find(scraps_with_ts.iter().map(|(scrap, _)| scrap));
+        if !collisions.is_empty() {
+            return Err(BuildError::OutputPathCollision(collisions).into());
+        }
 
         progress.start_stage(&Stage::ReadScraps);
         let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
@@ -244,5 +252,38 @@ mod tests {
             )
             .unwrap();
         assert_eq!(result, 2);
+    }
+
+    #[test]
+    fn it_fails_before_rendering_when_scraps_share_an_output_path() {
+        let scraps_with_ts = vec![
+            (Scrap::new("a b", &None, ""), None),
+            (Scrap::new("a-b", &None, ""), None),
+            (Scrap::new("index", &None, ""), None),
+        ];
+
+        let progress = ProgressTest::new();
+        let renderer = BuildRendererTest::new();
+
+        let error = BuildUsecase::new()
+            .execute(
+                &scraps_with_ts,
+                &None,
+                &progress,
+                &renderer,
+                &build_config(false),
+            )
+            .unwrap_err();
+
+        let message = error.to_string();
+        for expected in [
+            "scraps/a-b.html",
+            "a b.md",
+            "a-b.md",
+            "scraps/index.html",
+            "index.md",
+        ] {
+            assert!(message.contains(expected), "{expected} not in {message}");
+        }
     }
 }

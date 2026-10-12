@@ -4,6 +4,8 @@ use std::path::PathBuf;
 
 use thiserror::Error;
 
+use crate::usecase::build::model::output_path::PathCollisions;
+
 pub type ScrapsResult<T> = anyhow::Result<T>;
 
 #[derive(Error, PartialEq, Debug)]
@@ -55,6 +57,9 @@ pub enum BuildError {
 
     #[error("Failed to render json")]
     RenderJson,
+
+    #[error("{0}")]
+    OutputPathCollision(PathCollisions),
 }
 
 #[derive(Error, PartialEq, Debug)]

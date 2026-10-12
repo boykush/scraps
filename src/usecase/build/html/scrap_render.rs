@@ -5,12 +5,12 @@ use crate::error::ScrapsResult;
 use crate::service::tera_render::{RenderOutput, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
+use crate::usecase::build::model::output_path::{SCRAPS_DIR, scrap_page_file};
 use crate::usecase::build::model::scrap_detail::{ScrapDetail, ScrapDetails};
 use crate::usecase::build::model::scrap_graph::{MAX_NODES, ScrapGraph};
 use crate::usecase::build::model::site_nav::SiteNav;
 use rayon::prelude::*;
 use scraps_libs::model::base_url::BaseUrl;
-use scraps_libs::model::file::ScrapFileStem;
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
 use tera::Tera;
@@ -35,7 +35,7 @@ impl ScrapRender {
 
         Ok(ScrapRender {
             tera,
-            output: output.join("scraps"),
+            output: output.join(SCRAPS_DIR),
         })
     }
 
@@ -122,7 +122,7 @@ impl ScrapRender {
             &self.tera,
             "__builtins/scrap.html",
             &context,
-            format!("{}.html", ScrapFileStem::from(scrap.self_key())),
+            scrap_page_file(&scrap.self_key()),
         )
     }
 }

@@ -4,6 +4,7 @@ pub mod color_scheme;
 pub mod css;
 pub mod html;
 pub mod list_view_configs;
+pub mod output_path;
 pub mod paging;
 pub mod scrap_detail;
 pub mod scrap_graph;

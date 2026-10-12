@@ -176,4 +176,20 @@ mod tests {
         let html = fs::read_to_string(project.output_path("scraps/test1.html")).unwrap();
         assert!(!html.is_empty());
     }
+
+    #[rstest]
+    fn run_fails_without_writing_when_scraps_share_an_output_path(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(b"[ssg]\nbase_url = \"http://localhost:1112/\"\ntitle = \"Test\"")
+            .add_scrap("index.md", b"# a scrap named index\n")
+            .add_scrap("other.md", b"# other\n");
+
+        let error = execute(false, Some(project.project_root.as_path())).unwrap_err();
+        let message = error.to_string();
+        assert!(message.contains("scraps/index.html"));
+        assert!(message.contains("index.md"));
+        assert!(!project.output_path("scraps").exists());
+    }
 }

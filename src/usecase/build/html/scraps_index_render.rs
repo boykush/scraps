@@ -5,6 +5,7 @@ use crate::service::tera_render::{RenderOutput, resolve_template, user_template_
 use crate::usecase::build::html::templates;
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
+use crate::usecase::build::model::output_path::{SCRAPS_DIR, SCRAPS_INDEX_FILE};
 use crate::usecase::build::model::scrap_detail::ScrapDetails;
 use crate::usecase::build::model::site_nav::SiteNav;
 use scraps_libs::model::base_url::BaseUrl;
@@ -27,7 +28,7 @@ impl ScrapsIndexRender {
 
         Ok(ScrapsIndexRender {
             tera,
-            output: output.join("scraps"),
+            output: output.join(SCRAPS_DIR),
             types_output: output.join("types"),
         })
     }
@@ -52,7 +53,7 @@ impl ScrapsIndexRender {
         templates::insert_type_filter(&mut context, "scraps/", site_nav, None);
         context.insert("groups", &TitleIndexTera::new(scrap_details, backlinks_map));
         self.output
-            .render(&self.tera, template_name, &context, "index.html")?;
+            .render(&self.tera, template_name, &context, SCRAPS_INDEX_FILE)?;
 
         // The same index again for each type, under `types/<slug>/scraps/`.
         site_nav.types.iter().try_for_each(|scrap_type| {

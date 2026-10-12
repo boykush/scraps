@@ -45,6 +45,14 @@ Each Markdown file is converted to a slugified HTML file under `scraps/`.
 Folders become path segments — the same folders that form
 [[Reference/Wiki-link/Context Link]].
 
+Two pages on one output path is a build error. Slugifying folds case,
+spaces and hyphens together, so `a b.md` and `a-b.md` both map to
+`scraps/a-b.html`, and a root-level `index.md` maps to the path of
+`scraps/index.html` itself. `scraps build`, `scraps check` and `scraps serve`
+write nothing and exit non-zero, listing every contested path with the files
+mapped to it; rename a file to resolve it. `scraps lint` reports the same
+files as `path-collision` ([[Reference/Lint Rules]]).
+
 Tags and types each get a directory of their own, so a tag and a type of the
 same name never share a path; see [[Reference/Static Site/Tag Pages]] and
 [[Reference/Static Site/Type Filter]].

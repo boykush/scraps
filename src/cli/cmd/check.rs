@@ -98,4 +98,17 @@ mod tests {
         let result = run(Some(project.project_root.as_path()));
         assert!(result.is_err());
     }
+
+    #[rstest]
+    fn run_fails_when_scraps_share_an_output_path(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(SSG_CONFIG)
+            .add_scrap("a b.md", b"# one\n")
+            .add_scrap("a-b.md", b"# other\n");
+
+        let error = run(Some(project.project_root.as_path())).unwrap_err();
+        assert!(error.to_string().contains("scraps/a-b.html"));
+    }
 }
