@@ -81,9 +81,13 @@ enables the rule for `scraps lint` without requiring `--rule`.
 [lint.stale_by_git]
 enabled = true
 threshold_days = 180
+
+# Enables unportable-key during `scraps lint`.
+[lint.unportable_key]
+enabled = true
 ```
 
-Default (graph-mechanical) rules are always on; see [[Reference/Lint Rules]].
+Default rules are always on; see [[Reference/Lint Rules]].
 
 ## Project Root
 

@@ -22,12 +22,12 @@ impl LintUsecase {
     /// Run lint rules over `scraps` and return collected warnings.
     ///
     /// `rule_names` selects which rules to run:
-    /// - empty: default rules only (excludes opt-in rules like `stale-by-git`)
+    /// - empty: default rules only (excludes the opt-in rules)
     /// - non-empty: only the listed rules, drawn from default and `extra_rules`
     ///
-    /// `extra_rules` lets the caller register opt-in rules (e.g. `StaleByGitRule`)
-    /// whose construction depends on resources the usecase does not own
-    /// (git command, project path, current time).
+    /// `extra_rules` lets the caller register the opt-in rules, some of which
+    /// (e.g. `StaleByGitRule`) are built from resources the usecase does not
+    /// own (git command, project path, current time).
     pub fn execute(
         &self,
         scraps: &[Scrap],
@@ -166,6 +166,31 @@ mod tests {
                 .iter()
                 .all(|w| w.rule_name != LintRuleName::StaleByGit)
         );
+    }
+
+    #[test]
+    fn unportable_key_is_opt_in() {
+        use crate::usecase::lint::rules::unportable_key::UnportableKeyRule;
+
+        let scraps = vec![
+            Scrap::new("a?", &None, "[b](b.md)"),
+            Scrap::new("b", &None, "[a](a%3F.md)"),
+        ];
+        let usecase = LintUsecase::new();
+
+        let default = usecase
+            .execute(&scraps, &[], vec![Box::new(UnportableKeyRule)])
+            .unwrap();
+        assert!(default.is_empty());
+
+        let selected = usecase
+            .execute(
+                &scraps,
+                &[LintRuleName::UnportableKey],
+                vec![Box::new(UnportableKeyRule)],
+            )
+            .unwrap();
+        assert_eq!(selected.len(), 1);
     }
 
     #[test]

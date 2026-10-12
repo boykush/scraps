@@ -22,6 +22,8 @@ Pick the smallest rule set that serves the stated purpose.
 | "audit graph isolation" (orphans + dead-ends) | `lonely`, `dead-end` |
 | "trim graph noise" / "link 重複" | `overlinking` |
 | "find stale scraps" / "更新ない scrap" | `stale-by-git` |
+| "find scraps a wiki-link cannot reach" / "リンクできない scrap" | `unlinkable-key` |
+| "check the wiki ports to Windows / other filesystems" | `unportable-key` |
 | "wiki health 全般" (vague) | ask for narrowing first |
 
 Reject requests like "run all default rules" without a stated purpose.
@@ -36,6 +38,8 @@ Reject requests like "run all default rules" without a stated purpose.
 | `dead-end` | judgment | read the scrap, report whether it is a natural atom or genuinely incomplete |
 | `lonely` | judgment | read the scrap, report whether it is a natural root/source note or an orphan that should be linked |
 | `overlinking` | judgment | report which repetitions are structural emphasis vs. noise (graph dedupes; this is about HTML readability) |
+| `unlinkable-key` | judgment | report the file and why `[[ ]]` cannot reach it; renaming is the user's call |
+| `unportable-key` | judgment | report the file and what does not port; renaming is the user's call |
 | `stale-by-git` | informational | list stale scraps with last-modified dates |
 
 ## Workflow
@@ -67,7 +71,7 @@ For each violation:
 - Apply on user confirmation (or directly when invoked from a trusted skill context)
 - Re-run the same rule to verify the fix
 
-### Judgment rules (dead-end, lonely, overlinking)
+### Judgment rules (dead-end, lonely, overlinking, unlinkable-key, unportable-key)
 
 For each violation:
 - Read the offending scrap via `scraps get <title> [--ctx <ctx>] --json`
@@ -75,6 +79,7 @@ For each violation:
   - `dead-end` → atomic definition (signal: keep) vs. genuinely incomplete (signal: extend)
   - `lonely` → natural root/source note (signal: accept) vs. orphan (signal: link from a related scrap)
   - `overlinking` → structural emphasis (signal: keep) vs. visual noise (signal: trim duplicates)
+  - `unlinkable-key` / `unportable-key` → the warning is about the file's path, not its body; never rename a file yourself, since every link to it would have to follow. Until it is renamed, an unlinkable scrap is reached with a Markdown link to its file
 - Report findings; do not auto-fix
 - Suggest concrete next actions where appropriate
 

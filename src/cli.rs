@@ -269,6 +269,8 @@ pub enum CliLintRuleName {
     UnlinkableKey,
     #[value(name = "stale-by-git")]
     StaleByGit,
+    #[value(name = "unportable-key")]
+    UnportableKey,
 }
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
@@ -322,6 +324,7 @@ impl From<CliLintRuleName> for LintRuleName {
             CliLintRuleName::BrokenHeadingRef => LintRuleName::BrokenHeadingRef,
             CliLintRuleName::UnlinkableKey => LintRuleName::UnlinkableKey,
             CliLintRuleName::StaleByGit => LintRuleName::StaleByGit,
+            CliLintRuleName::UnportableKey => LintRuleName::UnportableKey,
         }
     }
 }

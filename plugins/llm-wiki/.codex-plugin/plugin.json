@@ -1,6 +1,6 @@
 {
   "name": "llm-wiki",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Official Scraps LLM Wiki skills bundle. Use this plugin when a user wants to ingest sources into a Scraps wiki, query existing scraps, synthesize wiki-backed answers, or understand the Karpathy-style Ingest / Query / Lint workflow model through the scraps CLI.",
   "author": {
     "name": "boykush",

@@ -49,3 +49,9 @@ title = "My Site"
 # [lint.stale_by_git]
 # enabled = true
 # threshold_days = 180
+
+# unportable_key: flag scraps whose file path does not port across filesystems
+# (names Windows rejects, paths that differ only in case).
+# Opt-in because a wiki kept on one system has nothing to port.
+# [lint.unportable_key]
+# enabled = true

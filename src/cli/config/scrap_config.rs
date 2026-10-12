@@ -43,6 +43,7 @@ impl SsgConfig {
 #[derive(Debug, Deserialize, Default)]
 pub struct LintConfig {
     pub stale_by_git: Option<StaleByGitConfig>,
+    pub unportable_key: Option<UnportableKeyConfig>,
 }
 
 /// Configuration for the `stale_by_git` lint rule.
@@ -55,6 +56,14 @@ pub struct StaleByGitConfig {
     #[serde(default = "default_true")]
     pub enabled: bool,
     pub threshold_days: Option<u64>,
+}
+
+/// Configuration for the `unportable_key` lint rule, opted into the same way
+/// as `stale_by_git`: a bare `[lint.unportable_key]` enables it.
+#[derive(Debug, Deserialize)]
+pub struct UnportableKeyConfig {
+    #[serde(default = "default_true")]
+    pub enabled: bool,
 }
 
 fn default_true() -> bool {
