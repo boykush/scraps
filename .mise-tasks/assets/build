@@ -2,5 +2,5 @@
 #MISE description="Render the brand PNGs from assets/logo.svg"
 set -euo pipefail
 # Playwright lives with the e2e suite; install it there before rendering.
-(cd tests/e2e && npm install --no-fund --no-audit)
+(cd tests/e2e && pnpm install)
 node assets/render.mjs

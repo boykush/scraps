@@ -3,7 +3,7 @@
 //
 // Playwright is borrowed from the e2e suite rather than added as a second
 // dependency; it is the only headless browser the repo already installs.
-import { chromium } from '../tests/e2e/node_modules/playwright/index.mjs';
+import { chromium } from '../tests/e2e/node_modules/@playwright/test/index.mjs';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

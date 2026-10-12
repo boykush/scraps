@@ -18,8 +18,8 @@ on:
       - '.github/workflows/tokens-check.yml'
 
 env:
-  # Only node is installed below; keep the task from pulling the rest of the
-  # toolchain (rust, pkl, hk) that mise.toml declares.
+  # Only node and pnpm are installed below; keep the task from pulling the
+  # rest of the toolchain (rust, pkl, hk) that mise.toml declares.
   MISE_AUTO_INSTALL: "false"
 
 concurrency:
@@ -41,7 +41,7 @@ jobs:
     - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
       with:
         cache: false
-        install_args: "node"
+        install_args: "node pnpm"
     - name: Check design tokens
       run: mise run tokens:check
       # Runs tokens:check-contrast (python3, preinstalled) and

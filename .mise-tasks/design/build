@@ -11,4 +11,4 @@ python3 design/storybook/flatten-scheme.py docs/_site/main.css design/storybook/
 mise run tokens:build
 cp tokens/dist/index.html design/storybook/static/tokens.html
 
-(cd design/storybook && npm install --no-fund --no-audit && npm run build)
+(cd design/storybook && pnpm install && pnpm run build)
