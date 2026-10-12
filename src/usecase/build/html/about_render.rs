@@ -52,11 +52,10 @@ mod tests {
     use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use crate::usecase::build::model::scrap_types::ScrapTypes;
     use rstest::rstest;
-    use scraps_libs::html::{self, EmbedMode};
+    use scraps_libs::html::{self, EmbedMode, LinkTargets};
     use scraps_libs::{
         lang::LangCode, model::base_url::BaseUrl, model::scrap::Scrap, model::tags::Tags,
     };
-    use std::collections::HashMap;
     use std::fs;
     use url::Url;
 
@@ -79,15 +78,12 @@ mod tests {
             true,
         );
 
-        let scrap_texts: HashMap<_, _> = scraps
-            .iter()
-            .map(|s| (s.self_key(), s.md_text().to_string()))
-            .collect();
+        let link_targets = LinkTargets::new(&scraps);
         let readme_content = html::to_content(
             "# About this wiki\n\nhttps://example.com/\n",
             &None,
             &base_url,
-            EmbedMode::Expand(&scrap_texts),
+            EmbedMode::Expand(&link_targets),
         );
 
         let render = AboutRender::new(

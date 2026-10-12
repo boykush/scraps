@@ -5,6 +5,8 @@ use scraps_libs::model::{page_path::PagePath, scrap::Scrap};
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeLinkScrap {
     ctx: Option<String>,
+    /// What a wiki-link to the scrap holds: its path without `.md`.
+    key: String,
     title: String,
     /// Page URL relative to `base_url`, already percent-encoded.
     url_path: String,
@@ -15,7 +17,8 @@ impl SerializeLinkScrap {
         let url_path = PagePath::of_scrap(&scrap.self_key()).to_url_path();
         SerializeLinkScrap {
             ctx: scrap.ctx().as_ref().map(|c| c.to_string()),
-            title: scrap.stem().to_string(),
+            key: scrap.self_key().to_string(),
+            title: scrap.title().to_string(),
             url_path,
         }
     }

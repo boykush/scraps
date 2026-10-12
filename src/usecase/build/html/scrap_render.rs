@@ -107,12 +107,9 @@ impl ScrapRender {
 
         // Both lists are already in hand, so the neighborhood costs no extra
         // walk over the wiki.
-        if let Some(graph) = ScrapGraph::new(
-            &scrap.stem().to_string(),
-            linked_scraps,
-            &outbound_scraps,
-            MAX_NODES,
-        ) {
+        if let Some(graph) =
+            ScrapGraph::new(scrap.title(), linked_scraps, &outbound_scraps, MAX_NODES)
+        {
             context.insert("scrap_graph", &ScrapGraphTera::from(&graph));
         }
 
@@ -168,10 +165,7 @@ mod tests {
             "[[scrap 1]] #[[design]]",
         );
         let scraps = vec![scrap1.to_owned(), scrap2.to_owned()];
-        let scrap_texts = scraps
-            .iter()
-            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
-            .collect();
+        let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
         let backlinks_map = BacklinksMap::new(&scraps);
         let site_nav = SiteNav::new(
             scraps.len(),
@@ -191,8 +185,8 @@ mod tests {
         let scrap2_html_path = output_dir_path.join("scraps/Context/scrap 2.html");
 
         let scrap_details = ScrapDetails::new(vec![
-            ScrapDetail::new(scrap1, &commited_ts1, base_url, &scrap_texts),
-            ScrapDetail::new(scrap2, &commited_ts1, base_url, &scrap_texts),
+            ScrapDetail::new(scrap1, &commited_ts1, base_url, &link_targets),
+            ScrapDetail::new(scrap2, &commited_ts1, base_url, &link_targets),
         ]);
         let render = ScrapRender::new(
             &static_dir_path,
@@ -239,10 +233,7 @@ mod tests {
         );
         let plain = &Scrap::new("plain", &None, "body");
         let scraps = vec![described.to_owned(), plain.to_owned()];
-        let scrap_texts = scraps
-            .iter()
-            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
-            .collect();
+        let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
         let backlinks_map = BacklinksMap::new(&scraps);
         let scraps_by_key: HashMap<_, _> = scraps
             .iter()
@@ -259,7 +250,7 @@ mod tests {
         let scrap_details = ScrapDetails::new(
             [described, plain]
                 .into_iter()
-                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &scrap_texts))
+                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &link_targets))
                 .collect(),
         );
 
@@ -306,10 +297,7 @@ mod tests {
         let typed = &Scrap::new("typed", &None, "---\ntype: BigQuery Table\n---\nbody");
         let untyped = &Scrap::new("untyped", &None, "#[[BigQuery Table]]");
         let scraps = vec![typed.to_owned(), untyped.to_owned()];
-        let scrap_texts = scraps
-            .iter()
-            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
-            .collect();
+        let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
         let backlinks_map = BacklinksMap::new(&scraps);
         let scraps_by_key: HashMap<_, _> = scraps
             .iter()
@@ -326,7 +314,7 @@ mod tests {
         let scrap_details = ScrapDetails::new(
             [typed, untyped]
                 .into_iter()
-                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &scrap_texts))
+                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &link_targets))
                 .collect(),
         );
 
@@ -368,10 +356,7 @@ mod tests {
         let linking = &Scrap::new("linking", &None, "[[linked]]");
         let alone = &Scrap::new("alone", &None, "no wiki links here");
         let scraps = vec![linked.to_owned(), linking.to_owned(), alone.to_owned()];
-        let scrap_texts = scraps
-            .iter()
-            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
-            .collect();
+        let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
         let backlinks_map = BacklinksMap::new(&scraps);
         let scraps_by_key: HashMap<_, _> = scraps
             .iter()
@@ -389,7 +374,7 @@ mod tests {
         let scrap_details = ScrapDetails::new(
             [linked, linking, alone]
                 .into_iter()
-                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &scrap_texts))
+                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &link_targets))
                 .collect(),
         );
 
@@ -426,5 +411,85 @@ mod tests {
         assert!(!outbound.contains("marker-start=\"url(#scrap-graph-arrow)\""));
 
         assert!(!read("alone").contains("scrap-graph"));
+    }
+
+    #[test]
+    fn it_shows_the_title_and_keeps_the_key_for_paths() {
+        let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
+        let metadata = HtmlMetadata::new(&LangCode::default(), "Wiki", &None, &None);
+
+        let orders = &Scrap::new(
+            "orders",
+            &Some("tables".into()),
+            "---\ntitle: Customer Orders\n---\n\nUsed by [[metrics/revenue]].\n",
+        );
+        let revenue = &Scrap::new(
+            "revenue",
+            &Some("metrics".into()),
+            "See [[tables/orders]] and [[tables/orders|the orders table]].\n",
+        );
+        let scraps = vec![orders.to_owned(), revenue.to_owned()];
+        let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
+        let backlinks_map = BacklinksMap::new(&scraps);
+        let scraps_by_key: HashMap<_, _> = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap))
+            .collect();
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
+            false,
+            chrono_tz::UTC,
+            false,
+        );
+        let scrap_details = ScrapDetails::new(
+            [orders, revenue]
+                .into_iter()
+                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &link_targets))
+                .collect(),
+        );
+
+        let project = crate::test_fixtures::TempScrapProject::new();
+        let render = ScrapRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap();
+        render
+            .run(
+                base_url,
+                &metadata,
+                &scrap_details,
+                &backlinks_map,
+                &scraps_by_key,
+                &site_nav,
+            )
+            .unwrap();
+        let read = |key: &str| {
+            fs::read_to_string(project.output_dir.join(format!("scraps/{key}.html"))).unwrap()
+        };
+
+        // The page sits at the key and is named by the title.
+        let orders_page = read("tables/orders");
+        assert!(orders_page.contains("<h1 class=\"title\">Customer Orders</h1>"));
+        assert!(orders_page.contains("<title>Customer Orders - Wiki</title>"));
+        assert!(
+            orders_page
+                .contains("<meta property=\"og:title\" content=\"Customer Orders - Wiki\" />")
+        );
+        assert!(orders_page.contains("scraps &#47; tables&#47;Customer Orders"));
+        assert!(orders_page.contains("<span class=\"title\">revenue</span>"));
+
+        // A link names its target by title unless the author wrote an alias;
+        // the link lists and the graph name it the same way.
+        let revenue_page = read("metrics/revenue");
+        let href = "http://localhost:1112/scraps/tables/orders.html";
+        assert!(revenue_page.contains(&format!("<a href=\"{href}\">Customer Orders</a>")));
+        assert!(revenue_page.contains(&format!("<a href=\"{href}\">the orders table</a>")));
+        assert!(revenue_page.contains("<span class=\"title\">Customer Orders</span>"));
+        assert!(revenue_page.contains("<title>tables&#47;Customer Orders</title>"));
+        assert!(revenue_page.contains(">Customer Orders</text>"));
+        assert!(revenue_page.contains("<h1 class=\"title\">revenue</h1>"));
     }
 }

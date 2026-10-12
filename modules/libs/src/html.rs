@@ -16,12 +16,46 @@ use crate::model::{
     context::Ctx,
     key::ScrapKey,
     page_path::PagePath,
-    stem::Stem,
+    scrap::Scrap,
 };
 use crate::{model::tag::Tag, slugify};
 
+/// The scraps a rendered text may link to or embed: each one's source text,
+/// and its title where the scrap has one of its own.
+#[derive(Default)]
+pub struct LinkTargets {
+    texts: HashMap<ScrapKey, String>,
+    titles: HashMap<ScrapKey, String>,
+}
+
+impl LinkTargets {
+    pub fn new<'a>(scraps: impl IntoIterator<Item = &'a Scrap>) -> LinkTargets {
+        let mut targets = LinkTargets::default();
+        for scrap in scraps {
+            let key = scrap.self_key();
+            if let Some(title) = scrap.frontmatter_title() {
+                targets.titles.insert(key.clone(), title.to_string());
+            }
+            targets.texts.insert(key, scrap.md_text().to_string());
+        }
+        targets
+    }
+
+    fn contains(&self, key: &ScrapKey) -> bool {
+        self.texts.contains_key(key)
+    }
+
+    fn text(&self, key: &ScrapKey) -> Option<&str> {
+        self.texts.get(key).map(String::as_str)
+    }
+
+    fn title(&self, key: &ScrapKey) -> Option<&str> {
+        self.titles.get(key).map(String::as_str)
+    }
+}
+
 pub enum EmbedMode<'a> {
-    Expand(&'a HashMap<ScrapKey, String>),
+    Expand(&'a LinkTargets),
     Preserve,
 }
 
@@ -75,8 +109,8 @@ fn to_content_inner(
     let root = parse_document(&arena, &parse_text, &opts);
 
     let heading_ids = heading_ids(root);
-    if let EmbedMode::Expand(scrap_texts) = embed_mode {
-        transform_md_links(root, ctx, base_url, scrap_texts);
+    if let EmbedMode::Expand(targets) = embed_mode {
+        transform_md_links(root, ctx, base_url, targets);
     }
     transform_wiki_refs(root, text, base_url, embed_mode, visited_embeds);
     attach_heading_ids(heading_ids, &opts);
@@ -149,7 +183,7 @@ fn transform_md_links<'a>(
     root: &'a AstNode<'a>,
     ctx: &Option<Ctx>,
     base_url: &BaseUrl,
-    scrap_texts: &HashMap<ScrapKey, String>,
+    targets: &LinkTargets,
 ) {
     for node in root.descendants() {
         let NodeValue::Link(link) = &mut node.data_mut().value else {
@@ -158,7 +192,7 @@ fn transform_md_links<'a>(
         let Some((key, heading)) = resolve_scrap_dest(&link.url, ctx) else {
             continue;
         };
-        if scrap_texts.contains_key(&key) {
+        if targets.contains(&key) {
             link.url = scrap_page_url(base_url, key, heading.as_deref());
         }
     }
@@ -203,8 +237,8 @@ fn transform_wiki_refs<'a>(
         }
 
         if prefix == Some(&b'!') {
-            if let EmbedMode::Expand(scrap_texts) = embed_mode {
-                transform_embed(node, base_url, &url, scrap_texts, visited_embeds);
+            if let EmbedMode::Expand(targets) = embed_mode {
+                transform_embed(node, base_url, &url, targets, visited_embeds);
             }
             continue;
         }
@@ -224,9 +258,15 @@ fn transform_wiki_refs<'a>(
             title: String::new(),
         }));
 
+        // A link written without an alias reads as the scrap's name: its
+        // title when the target has one, its stem otherwise.
         if !has_pothole {
-            let new_label = Stem::from(&scrap_link).to_string();
-            replace_first_text(node, &new_label);
+            let title = match embed_mode {
+                EmbedMode::Expand(targets) => targets.title(&scrap_link),
+                EmbedMode::Preserve => None,
+            };
+            let new_label = title.unwrap_or(scrap_link.stem().as_str());
+            replace_first_text(node, new_label);
         }
     }
 }
@@ -273,7 +313,7 @@ fn transform_embed<'a>(
     node: &'a AstNode<'a>,
     base_url: &BaseUrl,
     url: &str,
-    scrap_texts: &HashMap<ScrapKey, String>,
+    targets: &LinkTargets,
     visited_embeds: &mut HashSet<ScrapKey>,
 ) {
     let (path, heading) = match url.split_once('#') {
@@ -282,7 +322,7 @@ fn transform_embed<'a>(
     };
     let scrap_key = ScrapKey::from_path_str(path);
 
-    let Some(text) = scrap_texts.get(&scrap_key) else {
+    let Some(text) = targets.text(&scrap_key) else {
         detach_children(node);
         node.data_mut().value = NodeValue::Raw(format!(
             "<div class=\"scrap-embed scrap-embed-missing\">{}</div>",
@@ -309,7 +349,7 @@ fn transform_embed<'a>(
         embed_text,
         scrap_key.ctx(),
         base_url,
-        &EmbedMode::Expand(scrap_texts),
+        &EmbedMode::Expand(targets),
         visited_embeds,
     );
     visited_embeds.remove(&scrap_key);
@@ -398,7 +438,6 @@ fn escape_html(input: &str) -> String {
 mod tests {
     use super::*;
     use rstest::{fixture, rstest};
-    use std::collections::HashMap;
 
     #[fixture]
     fn base_url() -> BaseUrl {
@@ -536,11 +575,7 @@ mod tests {
     #[test]
     fn it_to_html_embed() {
         let base_url = base_url();
-        let mut scrap_texts = HashMap::new();
-        scrap_texts.insert(
-            ScrapKey::from_path_str("target"),
-            "embedded **body**".to_string(),
-        );
+        let scrap_texts = LinkTargets::new(&[scrap("target", "embedded **body**")]);
 
         let content = to_content(
             "before ![[target]] after",
@@ -555,10 +590,13 @@ mod tests {
         );
     }
 
-    fn wiki(keys: &[&str]) -> HashMap<ScrapKey, String> {
-        keys.iter()
-            .map(|k| (ScrapKey::from_path_str(k), String::new()))
-            .collect()
+    fn scrap(key: &str, text: &str) -> Scrap {
+        let key = ScrapKey::from_path_str(key);
+        Scrap::new(key.stem().as_str(), key.ctx(), text)
+    }
+
+    fn wiki(keys: &[&str]) -> Vec<Scrap> {
+        keys.iter().map(|key| scrap(key, "")).collect()
     }
 
     #[rstest]
@@ -598,7 +636,11 @@ mod tests {
         #[case] input: &str,
         #[case] expected: &str,
     ) {
-        let scrap_texts = wiki(&["tables/customers", "tables/All Orders", "metrics/revenue"]);
+        let scrap_texts = LinkTargets::new(&wiki(&[
+            "tables/customers",
+            "tables/All Orders",
+            "metrics/revenue",
+        ]));
         let content = to_content(
             input,
             &Some("tables".into()),
@@ -610,7 +652,7 @@ mod tests {
 
     #[rstest]
     fn it_gives_a_markdown_link_the_url_of_the_wiki_link(base_url: BaseUrl) {
-        let scrap_texts = wiki(&["metrics/revenue"]);
+        let scrap_texts = LinkTargets::new(&wiki(&["metrics/revenue"]));
         let render = |input: &str| {
             to_content(input, &None, &base_url, EmbedMode::Expand(&scrap_texts)).to_string()
         };
@@ -622,11 +664,10 @@ mod tests {
 
     #[rstest]
     fn it_resolves_a_markdown_link_from_the_embedded_scrap(base_url: BaseUrl) {
-        let mut scrap_texts = wiki(&["tables/customers"]);
-        scrap_texts.insert(
-            ScrapKey::from_path_str("tables/orders"),
-            "[c](./customers.md)".to_string(),
-        );
+        let scrap_texts = LinkTargets::new(&[
+            scrap("tables/customers", ""),
+            scrap("tables/orders", "[c](./customers.md)"),
+        ]);
         let content = to_content(
             "![[tables/orders]]",
             &None,
@@ -640,14 +681,53 @@ mod tests {
         );
     }
 
+    #[rstest]
+    #[case::unaliased(
+        "[[tables/orders]]",
+        "<p><a href=\"http://localhost:1112/scraps/tables/orders.html\">Customer Orders</a></p>\n"
+    )]
+    #[case::unaliased_with_heading(
+        "[[tables/orders#Columns]]",
+        "<p><a href=\"http://localhost:1112/scraps/tables/orders.html#columns\">Customer Orders</a></p>\n"
+    )]
+    #[case::alias_kept(
+        "[[tables/orders|the orders table]]",
+        "<p><a href=\"http://localhost:1112/scraps/tables/orders.html\">the orders table</a></p>\n"
+    )]
+    #[case::markdown_link_text_kept(
+        "[orders](/tables/orders.md)",
+        "<p><a href=\"http://localhost:1112/scraps/tables/orders.html\">orders</a></p>\n"
+    )]
+    #[case::untitled_target_reads_as_its_stem(
+        "[[tables/customers]]",
+        "<p><a href=\"http://localhost:1112/scraps/tables/customers.html\">customers</a></p>\n"
+    )]
+    #[case::missing_target_reads_as_its_stem(
+        "[[tables/gone]]",
+        "<p><a href=\"http://localhost:1112/scraps/tables/gone.html\">gone</a></p>\n"
+    )]
+    #[case::a_title_is_not_a_link_target(
+        "[[Customer Orders]]",
+        "<p><a href=\"http://localhost:1112/scraps/Customer%20Orders.html\">Customer Orders</a></p>\n"
+    )]
+    fn it_labels_an_unaliased_wiki_link_with_the_title(
+        base_url: BaseUrl,
+        #[case] input: &str,
+        #[case] expected: &str,
+    ) {
+        let targets = LinkTargets::new(&[
+            scrap("tables/orders", "---\ntitle: Customer Orders\n---\n"),
+            scrap("tables/customers", ""),
+        ]);
+        let content = to_content(input, &None, &base_url, EmbedMode::Expand(&targets));
+        assert_eq!(content.to_string(), expected);
+    }
+
     #[test]
     fn it_to_html_embed_section() {
         let base_url = base_url();
-        let mut scrap_texts = HashMap::new();
-        scrap_texts.insert(
-            ScrapKey::from_path_str("target"),
-            "## Keep\n\nwanted\n\n## Skip\n\nignored\n".to_string(),
-        );
+        let scrap_texts =
+            LinkTargets::new(&[scrap("target", "## Keep\n\nwanted\n\n## Skip\n\nignored\n")]);
 
         let content = to_content(
             "![[target#Keep]]",
@@ -709,8 +789,7 @@ mod tests {
     #[case::whole("![[target]]")]
     #[case::missing_heading("![[target#Nowhere]]")]
     fn it_to_html_embed_without_the_frontmatter_block(base_url: BaseUrl, #[case] input: &str) {
-        let mut scrap_texts = HashMap::new();
-        scrap_texts.insert(ScrapKey::from_path_str("target"), FRONTED.to_string());
+        let scrap_texts = LinkTargets::new(&[scrap("target", FRONTED)]);
 
         let content = to_content(input, &None, &base_url, EmbedMode::Expand(&scrap_texts));
 
@@ -722,11 +801,7 @@ mod tests {
 
     #[rstest]
     fn it_to_html_embed_section_starting_with_a_rule(base_url: BaseUrl) {
-        let mut scrap_texts = HashMap::new();
-        scrap_texts.insert(
-            ScrapKey::from_path_str("target"),
-            "# Keep\n---\nkey: value\n---\n".to_string(),
-        );
+        let scrap_texts = LinkTargets::new(&[scrap("target", "# Keep\n---\nkey: value\n---\n")]);
 
         let content = to_content(
             "![[target#Keep]]",

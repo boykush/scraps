@@ -1,10 +1,8 @@
 use itertools::Itertools;
 
-use std::collections::HashMap;
-
 use scraps_libs::{
-    html::{self, EmbedMode},
-    model::{base_url::BaseUrl, content::Content, key::ScrapKey, scrap::Scrap},
+    html::{self, EmbedMode, LinkTargets},
+    model::{base_url::BaseUrl, content::Content, scrap::Scrap},
 };
 
 #[derive(Clone)]
@@ -19,13 +17,13 @@ impl ScrapDetail {
         scrap: &Scrap,
         commited_ts: &Option<i64>,
         base_url: &BaseUrl,
-        scrap_texts: &HashMap<ScrapKey, String>,
+        link_targets: &LinkTargets,
     ) -> ScrapDetail {
         let content = html::to_content(
             scrap.md_text(),
             scrap.ctx(),
             base_url,
-            EmbedMode::Expand(scrap_texts),
+            EmbedMode::Expand(link_targets),
         );
         ScrapDetail {
             v: scrap.to_owned(),
