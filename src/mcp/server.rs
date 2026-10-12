@@ -40,7 +40,7 @@ impl ScrapsServer {
 #[tool_router]
 impl ScrapsServer {
     #[tool(
-        description = "Use when you know which scrap to read, by title and optional context. Optionally restrict to a heading section via 'heading', and project specific fields via 'fields' (allowed: title, ctx, body, headings, code_blocks, type; defaults to ['title', 'ctx', 'body']) to keep the response small. Traverse onward with lookup_scrap_links or lookup_scrap_backlinks, or see everything around the scrap in one call with lookup_scrap_neighborhood."
+        description = "Use when you know which scrap to read, by title and optional context. Optionally restrict to a heading section via 'heading', and project specific fields via 'fields' (allowed: title, ctx, body, headings, code_blocks, type, description, frontmatter; defaults to ['title', 'ctx', 'body']) to keep the response small. 'body' is the scrap's content without its YAML frontmatter block; ask for 'frontmatter' to get that block as parsed data (null when there is none). Line numbers in headings and code_blocks count lines of the source file, frontmatter block included, so they are not offsets into body. Traverse onward with lookup_scrap_links or lookup_scrap_backlinks, or see everything around the scrap in one call with lookup_scrap_neighborhood."
     )]
     async fn get_scrap(
         &self,
@@ -1417,6 +1417,62 @@ mod tests {
         let default =
             call_tool_json(&project, "get_scrap", serde_json::json!({"title": "post"})).await;
         assert!(!default.as_object().unwrap().contains_key("type"));
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_get_scrap_body_leaves_the_frontmatter_block_out(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap(
+            "post.md",
+            b"---\ntype: Blog\ntags: [a, b]\nowner: alice\n---\n\n\n# Post\n\ntext\n",
+        );
+        project.add_scrap("open.md", b"---\ntype: Blog\n\n# Open\n");
+
+        let post = call_tool_json(
+            &project,
+            "get_scrap",
+            serde_json::json!({"title": "post", "fields": ["body", "frontmatter", "headings"]}),
+        )
+        .await;
+        assert_eq!(post["body"], "# Post\n\ntext\n");
+        assert_eq!(
+            post["frontmatter"].to_string(),
+            r#"{"type":"Blog","tags":["a","b"],"owner":"alice"}"#
+        );
+        assert_eq!(post["headings"][0]["line"], 8);
+
+        let open = call_tool_json(
+            &project,
+            "get_scrap",
+            serde_json::json!({"title": "open", "fields": ["body", "frontmatter"]}),
+        )
+        .await;
+        assert_eq!(open["body"], "---\ntype: Blog\n\n# Open\n");
+        assert!(open["frontmatter"].is_null());
+        assert!(open.as_object().unwrap().contains_key("frontmatter"));
+
+        let default =
+            call_tool_json(&project, "get_scrap", serde_json::json!({"title": "post"})).await;
+        assert!(!default.as_object().unwrap().contains_key("frontmatter"));
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_get_scrap_says_lines_are_file_lines(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let tools = list_tools_of(&project).await;
+        let get = tools
+            .iter()
+            .find(|t| t.name.as_ref() == "get_scrap")
+            .unwrap();
+        let desc = get.description.as_deref().unwrap_or_default();
+        assert!(
+            desc.contains("frontmatter") && desc.contains("not offsets into body"),
+            "get should say what its line numbers count: {desc}"
+        );
     }
 
     #[rstest]

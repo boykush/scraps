@@ -94,11 +94,16 @@ A block Scraps reads is metadata, not content:
 - Nothing in it is read as structure: no heading, code block, image, task,
   `[[ ]]` reference or Markdown link comes out of the YAML, and
   `scraps search` does not match its text.
+- The `body` of `scraps get`, with or without `--json`, and of the MCP
+  `get_scrap` tool is the content without the block: it starts at the first
+  content line, and the blank lines after the block go with it.
 - Line numbers reported for the rest of the file still count the block's
-  lines, so they are the lines of the file.
+  lines, so they are the lines of the file. They are not offsets into
+  `body`, which is shorter by the block.
 
-The `body` of `scraps get --json` and of the MCP `get_scrap` tool is the
-exception: it is the file's text, block included.
+`scraps get --json frontmatter`, or `fields: ["frontmatter"]` on `get_scrap`,
+returns the block of one scrap as data: its keys in the order they were
+written, or `null` when the scrap has none.
 
 ## Open Knowledge Format
 
@@ -119,4 +124,5 @@ ordinary scraps.
 ## Reading the whole block
 
 `scraps frontmatter --json` returns every scrap that carries a block with
-all of its keys, read or not — see [[Reference/CLI Overview]].
+all of its keys, read or not, and `scraps get --json frontmatter` the block
+of a single scrap — see [[Reference/CLI Overview]].

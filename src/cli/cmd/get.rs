@@ -7,7 +7,7 @@ use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 use crate::ir::loader;
 use crate::usecase::scrap::get::usecase::GetScrapUsecase;
-use scraps_libs::markdown::query::{code_blocks, heading_slug, headings, images, section};
+use scraps_libs::markdown::query::{body, code_blocks, heading_slug, headings, images, section};
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::title::Title;
 use serde_json::{Map, Value};
@@ -20,6 +20,7 @@ const FIELD_CODE_BLOCKS: &str = "code_blocks";
 const FIELD_IMAGES: &str = "images";
 const FIELD_TYPE: &str = "type";
 const FIELD_DESCRIPTION: &str = "description";
+const FIELD_FRONTMATTER: &str = "frontmatter";
 
 const DEFAULT_FIELDS: &[&str] = &[FIELD_TITLE, FIELD_CTX, FIELD_BODY];
 const ALLOWED_FIELDS: &[&str] = &[
@@ -31,6 +32,7 @@ const ALLOWED_FIELDS: &[&str] = &[
     FIELD_IMAGES,
     FIELD_TYPE,
     FIELD_DESCRIPTION,
+    FIELD_FRONTMATTER,
 ];
 
 fn parse_fields(spec: &str) -> ScrapsResult<Vec<&'static str>> {
@@ -61,7 +63,7 @@ fn parse_fields(spec: &str) -> ScrapsResult<Vec<&'static str>> {
     Ok(out)
 }
 
-fn scoped_body<'a>(md_text: &'a str, heading: Option<&str>) -> ScrapsResult<&'a str> {
+fn scoped_text<'a>(md_text: &'a str, heading: Option<&str>) -> ScrapsResult<&'a str> {
     match heading {
         None => Ok(md_text),
         Some(h) => section(md_text, &heading_slug(h))
@@ -92,7 +94,10 @@ pub fn run(
     let usecase = GetScrapUsecase::new();
     let result = usecase.execute(&scraps, &target_title, &target_ctx)?;
 
-    let body_text = scoped_body(&result.md_text, heading)?;
+    // Structure is read from the scoped file text so its lines stay file
+    // lines; only the body drops the frontmatter block.
+    let scoped = scoped_text(&result.md_text, heading)?;
+    let body_text = body(scoped);
 
     match json {
         None => {
@@ -121,16 +126,16 @@ pub fn run(
                     }
                     FIELD_HEADINGS => {
                         let v: Vec<HeadingJson> =
-                            headings(body_text).into_iter().map(Into::into).collect();
+                            headings(scoped).into_iter().map(Into::into).collect();
                         out.insert(field.to_string(), serde_json::to_value(v)?);
                     }
                     FIELD_CODE_BLOCKS => {
                         let v: Vec<CodeBlockJson> =
-                            code_blocks(body_text).into_iter().map(Into::into).collect();
+                            code_blocks(scoped).into_iter().map(Into::into).collect();
                         out.insert(field.to_string(), serde_json::to_value(v)?);
                     }
                     FIELD_IMAGES => {
-                        let v: Vec<String> = images(body_text)
+                        let v: Vec<String> = images(scoped)
                             .into_iter()
                             .map(|url| url.to_string())
                             .collect();
@@ -154,6 +159,12 @@ pub fn run(
                                 .as_ref()
                                 .map(|d| Value::String(d.clone()))
                                 .unwrap_or(Value::Null),
+                        );
+                    }
+                    FIELD_FRONTMATTER => {
+                        out.insert(
+                            field.to_string(),
+                            result.frontmatter.clone().unwrap_or(Value::Null),
                         );
                     }
                     _ => unreachable!("validated by parse_fields"),
@@ -372,6 +383,107 @@ mod tests {
         let v: Value = serde_json::from_str(output.trim()).unwrap();
 
         assert!(!v.as_object().unwrap().contains_key("description"));
+    }
+
+    const WITH_BLOCK: &[u8] =
+        b"---\ntype: Blog\ntags: [a, b]\nowner: alice\n---\n\n\n# Post\n\ntext\n\n## More\n\nmore\n";
+
+    #[rstest]
+    fn run_json_body_leaves_the_frontmatter_block_out(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_config(b"").add_scrap("post.md", WITH_BLOCK);
+
+        let output = run_get("post", None, None, Some("body"), &project).unwrap();
+        let v: Value = serde_json::from_str(output.trim()).unwrap();
+
+        assert_eq!(v["body"], "# Post\n\ntext\n\n## More\n\nmore\n");
+    }
+
+    #[rstest]
+    fn run_text_leaves_the_frontmatter_block_out(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_config(b"").add_scrap("post.md", WITH_BLOCK);
+
+        let output = run_get("post", None, None, None, &project).unwrap();
+
+        assert_eq!(output, "# Post\n\ntext\n\n## More\n\nmore\n");
+    }
+
+    #[rstest]
+    #[case::unclosed("---\ntype: Blog\n\n# Post\n")]
+    #[case::malformed("---\ntype: [unclosed\n---\n\n# Post\n")]
+    #[case::absent("# Post\n\ntext\n")]
+    fn run_json_body_keeps_text_that_is_not_frontmatter(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+        #[case] text: &str,
+    ) {
+        project
+            .add_config(b"")
+            .add_scrap("post.md", text.as_bytes());
+
+        let output = run_get("post", None, None, Some("body,frontmatter"), &project).unwrap();
+        let v: Value = serde_json::from_str(output.trim()).unwrap();
+
+        assert_eq!(v["body"], text);
+        assert!(v["frontmatter"].is_null());
+    }
+
+    #[rstest]
+    fn run_json_field_projection_supports_frontmatter(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_config(b"").add_scrap("post.md", WITH_BLOCK);
+
+        let output = run_get("post", None, None, Some("frontmatter"), &project).unwrap();
+
+        assert_eq!(
+            output.trim(),
+            r#"{"frontmatter":{"type":"Blog","tags":["a","b"],"owner":"alice"}}"#
+        );
+    }
+
+    #[rstest]
+    fn run_default_json_leaves_the_frontmatter_out(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_config(b"").add_scrap("post.md", WITH_BLOCK);
+
+        let output = run_get("post", None, None, Some(""), &project).unwrap();
+        let v: Value = serde_json::from_str(output.trim()).unwrap();
+
+        assert!(!v.as_object().unwrap().contains_key("frontmatter"));
+    }
+
+    #[rstest]
+    fn run_json_structure_keeps_file_line_numbers(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_config(b"").add_scrap("post.md", WITH_BLOCK);
+
+        let output = run_get("post", None, None, Some("headings"), &project).unwrap();
+        let v: Value = serde_json::from_str(output.trim()).unwrap();
+
+        let lines: Vec<u64> = v["headings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|h| h["line"].as_u64().unwrap())
+            .collect();
+        assert_eq!(lines, vec![8, 12]);
+    }
+
+    #[rstest]
+    fn run_json_with_heading_is_the_section_as_before(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_config(b"").add_scrap("post.md", WITH_BLOCK);
+
+        let output = run_get("post", None, Some("More"), Some("body"), &project).unwrap();
+        let v: Value = serde_json::from_str(output.trim()).unwrap();
+
+        assert_eq!(v["body"], "\nmore\n");
     }
 
     #[rstest]

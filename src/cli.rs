@@ -66,7 +66,10 @@ pub enum SubCommands {
     #[command(about = "Check that scraps build without writing the site")]
     Check,
 
-    #[command(about = "Get the markdown body of a scrap by title")]
+    #[command(
+        about = "Get the markdown body of a scrap by title",
+        long_about = "Get the markdown body of a scrap by title.\n\nThe body is the scrap's content: a YAML frontmatter block is left out, and `--json frontmatter` returns it as data. Line numbers in `headings` and `code_blocks` count lines of the source file, block included, so they are not offsets into the body."
+    )]
     Get {
         title: String,
 
@@ -85,7 +88,7 @@ pub enum SubCommands {
             value_name = "FIELDS",
             num_args = 0..=1,
             default_missing_value = "",
-            help = "Output as JSON. Optionally accepts a comma-separated field projection (title,ctx,body,headings,code_blocks,images,type)."
+            help = "Output as JSON. Optionally accepts a comma-separated field projection (title,ctx,body,headings,code_blocks,images,type,description,frontmatter)."
         )]
         json: Option<String>,
     },
