@@ -5,3 +5,4 @@ pub mod lonely;
 pub mod overlinking;
 pub mod self_link;
 pub mod stale_by_git;
+pub mod unlinkable_key;

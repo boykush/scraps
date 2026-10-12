@@ -52,3 +52,6 @@ rationale.
   always `broken-link`, even if a `#[[name]]` tag exists.
 - **Heading match.** `[[Title#Heading]]` matches by slug against the
   target's rendered headings.
+- **`#` and `|` are syntax.** A scrap whose file or folder name contains
+  either cannot be the target of a `[[…]]`; [[Reference/Lint Rules]] reports
+  it as `unlinkable-key`.
