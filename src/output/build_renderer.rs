@@ -5,6 +5,7 @@ use scraps_libs::model::{base_url::BaseUrl, content::Content, key::ScrapKey, scr
 
 use crate::error::ScrapsResult;
 use crate::service::search::render::SearchIndexRender;
+use crate::service::tera_render::RenderOutput;
 use crate::usecase::build::{
     css::render::CSSRender,
     html::{
@@ -38,15 +39,30 @@ pub struct BuildRendererImpl {
 
 impl BuildRendererImpl {
     pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<BuildRendererImpl> {
+        Self::with_output(
+            static_dir_path,
+            &RenderOutput::Dir(output_dir_path.to_path_buf()),
+        )
+    }
+
+    /// Renders every page and keeps none, for checking that a build passes.
+    pub fn discarding(static_dir_path: &Path) -> ScrapsResult<BuildRendererImpl> {
+        Self::with_output(static_dir_path, &RenderOutput::Discard)
+    }
+
+    fn with_output(
+        static_dir_path: &Path,
+        output: &RenderOutput,
+    ) -> ScrapsResult<BuildRendererImpl> {
         Ok(BuildRendererImpl {
-            index_render: IndexRender::new(static_dir_path, output_dir_path)?,
-            about_render: AboutRender::new(static_dir_path, output_dir_path)?,
-            scrap_render: ScrapRender::new(static_dir_path, output_dir_path)?,
-            scraps_index_render: ScrapsIndexRender::new(static_dir_path, output_dir_path)?,
-            tags_index_render: TagsIndexRender::new(static_dir_path, output_dir_path)?,
-            tag_render: TagRender::new(static_dir_path, output_dir_path)?,
-            css_render: CSSRender::new(static_dir_path, output_dir_path)?,
-            search_index_render: SearchIndexRender::new(static_dir_path, output_dir_path)?,
+            index_render: IndexRender::new(static_dir_path, output)?,
+            about_render: AboutRender::new(static_dir_path, output)?,
+            scrap_render: ScrapRender::new(static_dir_path, output)?,
+            scraps_index_render: ScrapsIndexRender::new(static_dir_path, output)?,
+            tags_index_render: TagsIndexRender::new(static_dir_path, output)?,
+            tag_render: TagRender::new(static_dir_path, output)?,
+            css_render: CSSRender::new(static_dir_path, output)?,
+            search_index_render: SearchIndexRender::new(static_dir_path, output)?,
         })
     }
 }

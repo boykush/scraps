@@ -1,7 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use crate::error::ScrapsResult;
-use crate::service::tera_render::{render_to_file, resolve_template, user_template_glob};
+use crate::service::tera_render::{RenderOutput, resolve_template, user_template_glob};
 use crate::usecase::build::html::templates;
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
@@ -17,16 +17,16 @@ use super::serde::title_index::TitleIndexTera;
 /// with a jump bar, so a reader who knows the name goes straight to it.
 pub struct ScrapsIndexRender {
     tera: Tera,
-    output_scraps_dir_path: PathBuf,
+    output: RenderOutput,
 }
 
 impl ScrapsIndexRender {
-    pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<ScrapsIndexRender> {
+    pub fn new(static_dir_path: &Path, output: &RenderOutput) -> ScrapsResult<ScrapsIndexRender> {
         let tera = templates::scraps_index(&user_template_glob(static_dir_path, "*.html"))?;
 
         Ok(ScrapsIndexRender {
             tera,
-            output_scraps_dir_path: output_dir_path.join("scraps"),
+            output: output.join("scraps"),
         })
     }
 
@@ -47,8 +47,8 @@ impl ScrapsIndexRender {
             "scraps_index.html",
             "__builtins/scraps_index.html",
         );
-        let file_path = self.output_scraps_dir_path.join("index.html");
-        render_to_file(&self.tera, template_name, &context, &file_path)
+        self.output
+            .render(&self.tera, template_name, &context, "index.html")
     }
 }
 
@@ -99,7 +99,11 @@ mod tests {
             false,
         );
 
-        let render = ScrapsIndexRender::new(&project.static_dir, &project.output_dir).unwrap();
+        let render = ScrapsIndexRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap();
         render
             .run(&base_url, &metadata, &details, &backlinks_map, &site_nav)
             .unwrap();
@@ -135,7 +139,11 @@ mod tests {
             false,
         );
 
-        let render = ScrapsIndexRender::new(&project.static_dir, &project.output_dir).unwrap();
+        let render = ScrapsIndexRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap();
         render
             .run(&base_url, &metadata, &details, &backlinks_map, &site_nav)
             .unwrap();

@@ -63,6 +63,9 @@ pub enum SubCommands {
         git: GitFlags,
     },
 
+    #[command(about = "Check that scraps build without writing the site")]
+    Check,
+
     #[command(about = "Get the markdown body of a scrap by title")]
     Get {
         title: String,

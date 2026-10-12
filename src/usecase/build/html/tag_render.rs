@@ -1,7 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use crate::error::ScrapsResult;
-use crate::service::tera_render::{render_to_file, user_template_glob};
+use crate::service::tera_render::{RenderOutput, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::site_nav::SiteNav;
@@ -19,18 +19,18 @@ use super::serde::tag::TagTera;
 
 pub struct TagRender {
     tera: Tera,
-    output_tags_dir_path: PathBuf,
+    output: RenderOutput,
 }
 
 impl TagRender {
-    pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<TagRender> {
+    pub fn new(static_dir_path: &Path, output: &RenderOutput) -> ScrapsResult<TagRender> {
         let tera = templates::tag(&user_template_glob(static_dir_path, "*.html"))?;
 
         Ok(TagRender {
             tera,
             // Tag pages live in their own `tags/` directory, separate from
             // `scraps/`, to keep the two namespaces isolated (v1 design).
-            output_tags_dir_path: output_dir_path.join("tags"),
+            output: output.join("tags"),
         })
     }
 
@@ -67,10 +67,12 @@ impl TagRender {
 
         // Build the slug-based path: `tags/<slug-segment>/<...>.html`. Each
         // segment of a hierarchical tag becomes a directory.
-        let file_path = self
-            .output_tags_dir_path
-            .join(format!("{}.html", tag_slug_path(tag)));
-        render_to_file(&self.tera, "__builtins/tag.html", &context, &file_path)
+        self.output.render(
+            &self.tera,
+            "__builtins/tag.html",
+            &context,
+            format!("{}.html", tag_slug_path(tag)),
+        )
     }
 }
 
@@ -90,6 +92,7 @@ mod tests {
     use scraps_libs::model::scrap::Scrap;
     use scraps_libs::model::tags::Tags;
     use std::fs;
+    use std::path::PathBuf;
     use url::Url;
 
     use super::*;
@@ -127,7 +130,11 @@ mod tests {
         // built per-segment. "tag 1" slugifies to "tag-1".
         let tag1_html_path = output_dir_path.join("tags/tag-1.html");
 
-        let render = TagRender::new(&static_dir_path, &output_dir_path).unwrap();
+        let render = TagRender::new(
+            &static_dir_path,
+            &RenderOutput::Dir(output_dir_path.clone()),
+        )
+        .unwrap();
 
         render
             .run(&base_url, &metadata, &backlinks_map, &site_nav)
@@ -166,7 +173,11 @@ mod tests {
         // Expected path: public/tags/ai/ml.html
         let html_path = output_dir_path.join("tags/ai/ml.html");
 
-        let render = TagRender::new(&static_dir_path, &output_dir_path).unwrap();
+        let render = TagRender::new(
+            &static_dir_path,
+            &RenderOutput::Dir(output_dir_path.clone()),
+        )
+        .unwrap();
         render
             .run(&base_url, &metadata, &backlinks_map, &site_nav)
             .unwrap();

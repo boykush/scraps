@@ -1,7 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use crate::error::ScrapsResult;
-use crate::service::tera_render::{render_to_file, resolve_template, user_template_glob};
+use crate::service::tera_render::{RenderOutput, resolve_template, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::site_nav::SiteNav;
@@ -16,16 +16,16 @@ use super::serde::tags::TagsTera;
 
 pub struct TagsIndexRender {
     tera: Tera,
-    output_tags_dir_path: PathBuf,
+    output: RenderOutput,
 }
 
 impl TagsIndexRender {
-    pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<TagsIndexRender> {
+    pub fn new(static_dir_path: &Path, output: &RenderOutput) -> ScrapsResult<TagsIndexRender> {
         let tera = templates::tags_index(&user_template_glob(static_dir_path, "*.html"))?;
 
         Ok(TagsIndexRender {
             tera,
-            output_tags_dir_path: output_dir_path.join("tags"),
+            output: output.join("tags"),
         })
     }
 
@@ -43,8 +43,8 @@ impl TagsIndexRender {
 
         let template_name =
             resolve_template(&self.tera, "tags_index.html", "__builtins/tags_index.html");
-        let file_path = self.output_tags_dir_path.join("index.html");
-        render_to_file(&self.tera, template_name, &context, &file_path)
+        self.output
+            .render(&self.tera, template_name, &context, "index.html")
     }
 }
 
@@ -90,7 +90,11 @@ mod tests {
             false,
         );
 
-        let render = TagsIndexRender::new(&project.static_dir, &project.output_dir).unwrap();
+        let render = TagsIndexRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap();
         render
             .run(&base_url, &metadata, &scraps, &backlinks_map, &site_nav)
             .unwrap();

@@ -1,7 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use crate::error::ScrapsResult;
-use crate::service::tera_render::{render_to_file, resolve_template, user_template_glob};
+use crate::service::tera_render::{RenderOutput, resolve_template, user_template_glob};
 use crate::usecase::build::html::templates;
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
@@ -16,16 +16,16 @@ use super::serde::content::ContentTera;
 /// README grows into.
 pub struct AboutRender {
     tera: Tera,
-    output_about_dir_path: PathBuf,
+    output: RenderOutput,
 }
 
 impl AboutRender {
-    pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<AboutRender> {
+    pub fn new(static_dir_path: &Path, output: &RenderOutput) -> ScrapsResult<AboutRender> {
         let tera = templates::about(&user_template_glob(static_dir_path, "*.html"))?;
 
         Ok(AboutRender {
             tera,
-            output_about_dir_path: output_dir_path.join("about"),
+            output: output.join("about"),
         })
     }
 
@@ -42,8 +42,8 @@ impl AboutRender {
         context.insert("readme_content", &ContentTera::from(readme_content));
 
         let template_name = resolve_template(&self.tera, "about.html", "__builtins/about.html");
-        let file_path = self.output_about_dir_path.join("index.html");
-        render_to_file(&self.tera, template_name, &context, &file_path)
+        self.output
+            .render(&self.tera, template_name, &context, "index.html")
     }
 }
 
@@ -81,7 +81,11 @@ mod tests {
             EmbedMode::Expand(&scrap_texts),
         );
 
-        let render = AboutRender::new(&project.static_dir, &project.output_dir).unwrap();
+        let render = AboutRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap();
         render
             .run(
                 &base_url,

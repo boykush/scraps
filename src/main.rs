@@ -23,6 +23,7 @@ fn main() -> error::ScrapsResult<()> {
         cli::SubCommands::Build { verbose, git } => {
             cli::cmd::build::run(verbose, git.enabled(), directory)
         }
+        cli::SubCommands::Check => cli::cmd::check::run(directory),
         cli::SubCommands::Get {
             title,
             ctx,

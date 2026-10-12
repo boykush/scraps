@@ -1,9 +1,9 @@
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use crate::error::BuildError;
 use crate::error::{ScrapsResult, anyhow::Context};
-use crate::service::tera_render::{render_to_file, resolve_template, user_template_glob};
+use crate::service::tera_render::{RenderOutput, resolve_template, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::list_view_configs::ListViewConfigs;
@@ -22,17 +22,19 @@ use super::serde::index_scraps::IndexScrapsTera;
 
 pub struct IndexRender {
     tera: Tera,
-    output_dir_path: PathBuf,
+    output: RenderOutput,
 }
 
 impl IndexRender {
-    pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<IndexRender> {
-        fs::create_dir_all(output_dir_path).context(BuildError::CreateDir)?;
+    pub fn new(static_dir_path: &Path, output: &RenderOutput) -> ScrapsResult<IndexRender> {
+        if let RenderOutput::Dir(output_dir_path) = output {
+            fs::create_dir_all(output_dir_path).context(BuildError::CreateDir)?;
+        }
         let tera = templates::index(&user_template_glob(static_dir_path, "*.html"))?;
 
         Ok(IndexRender {
             tera,
-            output_dir_path: output_dir_path.to_path_buf(),
+            output: output.clone(),
         })
     }
 
@@ -61,7 +63,7 @@ impl IndexRender {
                 &Self::view_context(&shared_context, "updated", site_nav, backlinks_map),
                 &sorted,
                 paging_size,
-                &self.output_dir_path,
+                &self.output,
             )?
         };
 
@@ -73,7 +75,7 @@ impl IndexRender {
                 &Self::view_context(&shared_context, "backlinks", site_nav, backlinks_map),
                 &sorted,
                 paging_size,
-                &self.output_dir_path.join("backlinks"),
+                &self.output.join("backlinks"),
             )?
         };
 
@@ -96,7 +98,7 @@ impl IndexRender {
         view_context: &tera::Context,
         sorted_scraps: &IndexScrapsTera,
         paging_size: usize,
-        output_dir: &Path,
+        output: &RenderOutput,
     ) -> ScrapsResult<usize> {
         let chunks = sorted_scraps.chunks(paging_size);
         let total_pages = chunks.len();
@@ -104,7 +106,7 @@ impl IndexRender {
         if let Some(first_scraps) = chunks.first() {
             let (context, page_pointer) =
                 Self::prepare_index_context(view_context, first_scraps, total_pages);
-            self.render_html(&context, &page_pointer, output_dir)?;
+            self.render_html(&context, &page_pointer, output)?;
         }
 
         chunks
@@ -119,7 +121,7 @@ impl IndexRender {
                     page_num,
                     total_pages,
                 );
-                self.render_html(&context, &page_pointer, output_dir)?;
+                self.render_html(&context, &page_pointer, output)?;
                 ScrapsResult::Ok(())
             })?;
 
@@ -156,11 +158,15 @@ impl IndexRender {
         &self,
         context: &tera::Context,
         pointer: &PagePointer,
-        output_dir: &Path,
+        output: &RenderOutput,
     ) -> ScrapsResult<()> {
         let template_name = resolve_template(&self.tera, "index.html", "__builtins/index.html");
-        let file_path = output_dir.join(pointer.current_file_name());
-        render_to_file(&self.tera, template_name, context, &file_path)
+        output.render(
+            &self.tera,
+            template_name,
+            context,
+            pointer.current_file_name(),
+        )
     }
 }
 
@@ -218,7 +224,11 @@ mod tests {
             false,
         );
 
-        let render = IndexRender::new(&project.static_dir, &project.output_dir).unwrap();
+        let render = IndexRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap();
         render
             .run(
                 base_url,
@@ -300,7 +310,11 @@ mod tests {
             false,
         );
 
-        let render = IndexRender::new(&project.static_dir, &project.output_dir).unwrap();
+        let render = IndexRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap();
         render
             .run(
                 base_url,
@@ -366,7 +380,11 @@ mod tests {
             false,
         );
 
-        let render = IndexRender::new(&project.static_dir, &project.output_dir).unwrap();
+        let render = IndexRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap();
         render
             .run(
                 base_url,
