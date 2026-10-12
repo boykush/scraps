@@ -1,6 +1,7 @@
 use comrak::{Arena, nodes::NodeValue, parse_document};
 
 use super::common::{collect_text, line_byte_offset, line_starts, options};
+use super::frontmatter::mask;
 
 /// Slugify a heading text using GitHub Flavored Markdown rules.
 ///
@@ -48,7 +49,7 @@ pub fn section<'a>(text: &'a str, heading_slug: &str) -> Option<&'a str> {
     }
     let arena = Arena::new();
     let opts = options();
-    let root = parse_document(&arena, text, &opts);
+    let root = parse_document(&arena, &mask(text), &opts);
     let starts = line_starts(text);
     let total = text.len();
 
@@ -193,5 +194,12 @@ s-body
         assert!(!first.contains("s-body"));
         let second = section(input, "second").unwrap();
         assert!(second.contains("s-body"));
+    }
+
+    #[test]
+    fn it_section_ignores_a_heading_shaped_frontmatter_block() {
+        let input = "---\ntitle: Orders\n---\n\n## Schema\n\nbody\n";
+        assert_eq!(section(input, "title-orders"), None);
+        assert_eq!(section(input, "schema"), Some("\nbody\n"));
     }
 }

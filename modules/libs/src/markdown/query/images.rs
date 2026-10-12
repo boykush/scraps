@@ -6,11 +6,12 @@ use comrak::{
 use url::Url;
 
 use super::common::options;
+use super::frontmatter::mask;
 
 pub fn images(text: &str) -> Vec<Url> {
     let arena = Arena::new();
     let opts = options();
-    let root = parse_document(&arena, text, &opts);
+    let root = parse_document(&arena, &mask(text), &opts);
     images_in(root)
 }
 

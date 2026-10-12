@@ -9,6 +9,7 @@ use comrak::{
 };
 use url::Url;
 
+use crate::markdown::query::{body, section};
 use crate::model::{
     base_url::BaseUrl,
     content::{Content, ContentElement},
@@ -47,7 +48,7 @@ fn options() -> Options<'static> {
 }
 
 pub fn to_content(text: &str, base_url: &BaseUrl, embed_mode: EmbedMode<'_>) -> Content {
-    to_content_inner(text, base_url, &embed_mode, &mut HashSet::new())
+    to_content_inner(body(text), base_url, &embed_mode, &mut HashSet::new())
 }
 
 fn to_content_inner(
@@ -268,9 +269,11 @@ fn transform_embed<'a>(
         return;
     }
 
+    // Only a whole scrap can open with a frontmatter block; a section that
+    // happens to start with `---` is content.
     let embed_text = heading
-        .and_then(|h| crate::markdown::query::section(text, &slugify::by_dash(h)))
-        .unwrap_or(text);
+        .and_then(|h| section(text, &slugify::by_dash(h)))
+        .unwrap_or_else(|| body(text));
     let embedded = to_content_inner(
         embed_text,
         base_url,
@@ -545,5 +548,57 @@ mod tests {
                 ContentElement::Raw("</p>\n".to_string()),
             ])
         )
+    }
+
+    const FRONTED: &str =
+        "---\ntype: BigQuery Table\ntitle: Customer Orders\n---\n\n# Schema\n\nBody text.\n";
+
+    #[rstest]
+    fn it_to_html_without_the_frontmatter_block(base_url: BaseUrl) {
+        let content = to_content(FRONTED, &base_url, EmbedMode::Preserve);
+        assert_eq!(
+            content.to_string(),
+            "<h1 id=\"schema\">Schema</h1>\n<p>Body text.</p>\n"
+        );
+    }
+
+    #[rstest]
+    #[case::unclosed("---\ntype: Blog\n\n# Schema\n")]
+    #[case::malformed("---\ntype: [Blog\n---\n\n# Schema\n")]
+    fn it_to_html_keeps_an_unrecognised_block(base_url: BaseUrl, #[case] input: &str) {
+        let content = to_content(input, &base_url, EmbedMode::Preserve).to_string();
+        assert!(content.starts_with("<hr />\n"), "{content}");
+    }
+
+    #[rstest]
+    #[case::whole("![[target]]")]
+    #[case::missing_heading("![[target#Nowhere]]")]
+    fn it_to_html_embed_without_the_frontmatter_block(base_url: BaseUrl, #[case] input: &str) {
+        let mut scrap_texts = HashMap::new();
+        scrap_texts.insert(ScrapKey::from_path_str("target"), FRONTED.to_string());
+
+        let content = to_content(input, &base_url, EmbedMode::Expand(&scrap_texts));
+
+        assert_eq!(
+            content.to_string(),
+            "<p><div class=\"scrap-embed\"><h1 id=\"schema\">Schema</h1>\n<p>Body text.</p>\n</div></p>\n"
+        );
+    }
+
+    #[rstest]
+    fn it_to_html_embed_section_starting_with_a_rule(base_url: BaseUrl) {
+        let mut scrap_texts = HashMap::new();
+        scrap_texts.insert(
+            ScrapKey::from_path_str("target"),
+            "# Keep\n---\nkey: value\n---\n".to_string(),
+        );
+
+        let content = to_content(
+            "![[target#Keep]]",
+            &base_url,
+            EmbedMode::Expand(&scrap_texts),
+        );
+
+        assert!(content.to_string().contains("key: value"));
     }
 }
