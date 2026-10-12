@@ -45,7 +45,7 @@ the scraps of one; `scraps get --json type` returns a single scrap's type.
 Frontmatter never fails a command and never raises a lint warning.
 
 - A block that is absent, unclosed or not valid YAML is skipped; the scrap is
-  read as if it had none.
+  read as if it had none, and the lines stay ordinary Markdown.
 - A key whose value has the wrong shape is ignored: `tags` that is not a
   list, a `tags` entry that is not a string, a `type` that is not a non-empty
   string.
@@ -57,8 +57,20 @@ Frontmatter never fails a command and never raises a lint warning.
 A scrap's title and context come from its file path, and its links from
 [[Reference/Wiki-link Notation]]. No frontmatter key overrides them.
 
-The block also stays part of the scrap's text: it is not removed from
-`scraps get --json body` or from the page the static site renders.
+## Where the block appears
+
+A block Scraps reads is metadata, not content:
+
+- The static site leaves it out of the scrap's page, of the summary on index
+  and tag pages, and of any page that embeds the scrap.
+- Nothing in it is read as structure: no heading, code block, image, task
+  or `[[ ]]` reference comes out of the YAML, and `scraps search` does not
+  match its text.
+- Line numbers reported for the rest of the file still count the block's
+  lines, so they are the lines of the file.
+
+The `body` of `scraps get --json` and of the MCP `get_scrap` tool is the
+exception: it is the file's text, block included.
 
 ## Open Knowledge Format
 
