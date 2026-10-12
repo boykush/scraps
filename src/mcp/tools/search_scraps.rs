@@ -1,5 +1,5 @@
 use crate::ir::loader;
-use crate::mcp::json::scrap::ScrapKeyJson;
+use crate::mcp::json::scrap::SearchHitJson;
 use crate::usecase::search::usecase::SearchUsecase;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
@@ -43,7 +43,7 @@ pub struct SearchRequest {
 
 #[derive(Debug, Serialize)]
 pub struct SearchResponse {
-    pub results: Vec<ScrapKeyJson>,
+    pub results: Vec<SearchHitJson>,
     pub count: usize,
     pub next: String,
 }
@@ -74,11 +74,12 @@ pub async fn search_scraps(
         .map_err(|e| ErrorData::new(ErrorCode(-32004), format!("Search failed: {e}"), None))?;
 
     // Convert results to structured response
-    let scrap_jsons: Vec<ScrapKeyJson> = results
+    let scrap_jsons: Vec<SearchHitJson> = results
         .into_iter()
-        .map(|result| ScrapKeyJson {
+        .map(|result| SearchHitJson {
             title: result.title.to_string(),
             ctx: result.ctx.map(|c| c.to_string()),
+            description: result.description,
         })
         .collect();
 

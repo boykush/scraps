@@ -1,5 +1,6 @@
 ---
 type: Explanation
+description: Scraps compiles wiki-linked Markdown into a static site for readers and JSON for agents.
 ---
 
 #[[Notation/Wiki-link]] #[[Emit/Static Site]] #[[Emit/CLI JSON]]

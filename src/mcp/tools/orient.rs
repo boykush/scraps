@@ -1,4 +1,5 @@
 use crate::ir::loader;
+use crate::usecase::scrap_type::list::usecase::ListTypeUsecase;
 use crate::usecase::tag::list::usecase::ListTagUsecase;
 use rmcp::model::ErrorCode;
 use rmcp::model::{CallToolResult, ContentBlock};
@@ -9,6 +10,8 @@ use std::path::Path;
 
 // Head of the topic map only; the full list stays list_tags' job.
 const TOP_TAGS_LIMIT: usize = 10;
+// Same split for the kinds of scraps; the full list stays list_types' job.
+const TOP_TYPES_LIMIT: usize = 10;
 
 pub async fn orient(
     scraps_dir: &Path,
@@ -59,18 +62,39 @@ pub async fn orient(
         })
         .collect();
 
+    let types = ListTypeUsecase::new()
+        .execute(&scraps)
+        .map_err(|e| ErrorData::new(ErrorCode(-32004), format!("List types failed: {e}"), None))?;
+
+    let type_count = types.len();
+    let top_types: Vec<_> = types
+        .into_iter()
+        .take(TOP_TYPES_LIMIT)
+        .map(|result| {
+            json!({
+                "type": result.name,
+                "scraps_count": result.scraps_count
+            })
+        })
+        .collect();
+
     let scrap_count = scraps.len();
+    // An untyped wiki keeps the tag-only hint, so types never clutter it.
     let next = if scrap_count == 0 {
         "The wiki has no scraps yet."
-    } else {
+    } else if type_count == 0 {
         "Search content with search_scraps, or expand a top tag with lookup_tag_backlinks {tag}; the full tag list is list_tags."
+    } else {
+        "Search content with search_scraps, expand a top tag with lookup_tag_backlinks {tag}, or expand a top type with lookup_type_scraps {type}; the full lists are list_tags and list_types."
     };
 
     let response = json!({
         "scrap_count": scrap_count,
         "tag_count": tag_count,
+        "type_count": type_count,
         "contexts": contexts,
         "top_tags": top_tags,
+        "top_types": top_types,
         "next": next,
     });
 

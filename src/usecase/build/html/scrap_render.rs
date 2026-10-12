@@ -73,6 +73,12 @@ impl ScrapRender {
         let mut context = shell.clone();
         let scrap = scrap_detail.scrap();
 
+        // A scrap that describes itself replaces the site-wide description
+        // the shell carries, in every tag `base.html` fills from it.
+        if let Some(description) = scrap.description() {
+            context.insert("description", description);
+        }
+
         // insert to context for linked list
         context.insert("scrap", &ScrapDetailTera::from(scrap_detail));
 
@@ -215,6 +221,82 @@ mod tests {
         assert!(result4.contains(">links &#183; 1"));
         assert!(result4.contains("tags/design.html"));
         assert!(result4.contains("#[["));
+    }
+
+    #[test]
+    fn it_describes_a_page_by_its_scrap_and_falls_back_to_the_site() {
+        let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
+        let metadata = HtmlMetadata::new(
+            &LangCode::default(),
+            "Scrap",
+            &Some("Site wide".to_string()),
+            &None,
+        );
+
+        let described = &Scrap::new(
+            "described",
+            &None,
+            "---\ndescription: One row per \"completed\" order.\n---\n\nbody",
+        );
+        let plain = &Scrap::new("plain", &None, "body");
+        let scraps = vec![described.to_owned(), plain.to_owned()];
+        let scrap_texts = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
+            .collect();
+        let backlinks_map = BacklinksMap::new(&scraps);
+        let scraps_by_key: HashMap<_, _> = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap))
+            .collect();
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
+            false,
+            chrono_tz::UTC,
+            false,
+        );
+        let scrap_details = ScrapDetails::new(
+            [described, plain]
+                .into_iter()
+                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &scrap_texts))
+                .collect(),
+        );
+
+        let project = crate::test_fixtures::TempScrapProject::new();
+        let render = ScrapRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap();
+        render
+            .run(
+                base_url,
+                &metadata,
+                &scrap_details,
+                &backlinks_map,
+                &scraps_by_key,
+                &site_nav,
+            )
+            .unwrap();
+
+        let read = |stem: &str| {
+            fs::read_to_string(project.output_dir.join(format!("scraps/{stem}.html"))).unwrap()
+        };
+
+        let own = "One row per &quot;completed&quot; order.";
+        let described_html = read("described");
+        for tag in [
+            format!(r#"<meta name="description" content="{own}" />"#),
+            format!(r#"<meta property="og:description" content="{own}" />"#),
+            format!(r#"<meta name="twitter:description" content="{own}" />"#),
+        ] {
+            assert!(described_html.contains(&tag), "missing {tag}");
+        }
+        assert!(!described_html.contains("Site wide"));
+
+        assert!(read("plain").contains(r#"<meta name="description" content="Site wide" />"#));
     }
 
     #[test]
