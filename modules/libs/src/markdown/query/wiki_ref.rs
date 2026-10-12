@@ -61,11 +61,7 @@ pub fn wiki_refs(text: &str) -> Vec<WikiRef> {
             let prefix = byte.checked_sub(1).and_then(|i| text.as_bytes().get(i));
             let (ctx_path, title, heading) = parse_wikilink_url(url);
             let label = collect_text(node);
-            let display = match &heading {
-                Some(h) => format!("{}#{}", url_path(&ctx_path, &title), h),
-                None => url_path(&ctx_path, &title),
-            };
-            let alias = if label == display { None } else { Some(label) };
+            let alias = (label != *url).then_some(label);
 
             match prefix {
                 Some(b'#') => {
@@ -99,14 +95,6 @@ pub fn wiki_refs(text: &str) -> Vec<WikiRef> {
             }
         })
         .collect()
-}
-
-fn url_path(ctx_path: &[String], title: &str) -> String {
-    if ctx_path.is_empty() {
-        title.to_string()
-    } else {
-        format!("{}/{}", ctx_path.join("/"), title)
-    }
 }
 
 /// Comrak treats `![[x]]` as image-shaped Markdown, not as a WikiLink node.
@@ -256,6 +244,25 @@ mod tests {
         assert_matches!(&res[0], WikiRef::Link(r) if r.title == "日本語");
         assert_matches!(&res[1], WikiRef::Tag(t) if t.path == vec!["プログラミング".to_string()]);
         assert_matches!(&res[2], WikiRef::Embed(e) if e.title == "論文");
+    }
+
+    #[test]
+    fn it_reads_targets_in_nfc_and_keeps_alias_and_heading_as_written() {
+        // `e` + U+0301 composes to U+00E9 in the target only.
+        let res = wiki_refs(
+            "[[cafe\u{301}/cafe\u{301}#cafe\u{301}|cafe\u{301}]] #[[cafe\u{301}]] ![[cafe\u{301}]] [[cafe\u{301}]]",
+        );
+        assert_eq!(res.len(), 4);
+        let WikiRef::Link(r) = &res[0] else {
+            panic!("expected Link");
+        };
+        assert_eq!(r.ctx_path, vec!["caf\u{e9}".to_string()]);
+        assert_eq!(r.title, "caf\u{e9}");
+        assert_eq!(r.heading.as_deref(), Some("cafe\u{301}"));
+        assert_eq!(r.alias.as_deref(), Some("cafe\u{301}"));
+        assert_matches!(&res[1], WikiRef::Tag(t) if t.path == vec!["caf\u{e9}".to_string()]);
+        assert_matches!(&res[2], WikiRef::Embed(e) if e.title == "caf\u{e9}");
+        assert_matches!(&res[3], WikiRef::Link(r) if r.title == "caf\u{e9}" && r.alias.is_none());
     }
 
     #[test]

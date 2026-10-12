@@ -1,3 +1,5 @@
+use crate::nfc::nfc;
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct SearchItem {
     pub title: String,
@@ -8,7 +10,7 @@ impl SearchItem {
     pub fn new(title: &str, body: &str) -> Self {
         Self {
             title: title.to_string(),
-            search_text: format!("{} {}", title, body),
+            search_text: nfc(&format!("{} {}", title, body)).into_owned(),
         }
     }
 }

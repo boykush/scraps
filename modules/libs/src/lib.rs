@@ -8,6 +8,7 @@ pub mod lang;
 pub mod markdown;
 #[cfg(feature = "model")]
 pub mod model;
+pub mod nfc;
 #[cfg(feature = "search")]
 pub mod search;
 #[cfg(feature = "slugify")]

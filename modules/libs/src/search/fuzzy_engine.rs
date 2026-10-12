@@ -3,6 +3,8 @@ use std::cmp::Reverse;
 use fuzzy_matcher::FuzzyMatcher;
 use fuzzy_matcher::skim::SkimMatcherV2;
 
+use crate::nfc::nfc;
+
 use super::engine::{SearchEngine, SearchLogic};
 use super::result::SearchItem;
 
@@ -36,6 +38,7 @@ impl SearchEngine for FuzzySearchEngine {
             return items.iter().take(num).cloned().collect();
         }
 
+        let query = nfc(query);
         // Split query by whitespace
         let keywords: Vec<&str> = query.split_whitespace().collect();
 
@@ -182,6 +185,21 @@ mod tests {
 
         assert_eq!(results.len(), 1);
         assert_eq!(results[0].title, "Test Document");
+    }
+
+    #[rstest]
+    #[case::composed_query("caf\u{e9}", "cafe\u{301} menu")]
+    #[case::decomposed_query("cafe\u{301}", "caf\u{e9} menu")]
+    fn test_matches_across_normalization_forms(
+        engine: FuzzySearchEngine,
+        #[case] query: &str,
+        #[case] body: &str,
+    ) {
+        let items = vec![SearchItem::new("note", body), SearchItem::new("other", "")];
+        let results = engine.search(&items, query, 100, SearchLogic::Or);
+
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].title, "note");
     }
 
     #[rstest]

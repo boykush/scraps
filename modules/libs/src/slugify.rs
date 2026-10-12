@@ -1,9 +1,11 @@
+use crate::nfc::nfc;
+
 /// The id of a heading, and what a `#heading` reference is matched by. Page
 /// paths are not slugified: see `model::page_path`.
 /// Built in one pass into one buffer: the build slugifies every heading and
 /// heading reference on every page it renders.
 pub fn by_dash(v: &str) -> String {
-    let lower = v.trim().to_lowercase();
+    let lower = nfc(v.trim()).to_lowercase();
     let mut slug = String::with_capacity(lower.len());
     let mut in_word = false;
     for c in lower.chars() {
@@ -82,6 +84,7 @@ mod tests {
     #[case::only_dashes("---", "")]
     #[case::dashed_replacement_words("[x]", "left-bracket-x-right-bracket")]
     #[case::ideographic_space("日本\u{3000}語", "日本-語")]
+    #[case::decomposed("cafe\u{301} \u{30ab}\u{3099}", "caf\u{e9}-\u{30ac}")]
     fn test_by_dash(#[case] input: &str, #[case] expected: &str) {
         assert_eq!(by_dash(input), expected);
     }

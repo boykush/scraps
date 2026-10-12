@@ -15,6 +15,7 @@ url.workspace = true
 comrak = { version = "=0.56.0", default-features = false }
 iso639_enum = "=0.6.0"
 fuzzy-matcher = { version = "=0.3.7", optional = true }
+unicode-normalization = "=0.1.25"
 yaml-rust2 = { version = "=0.13.0", optional = true }
 serde_json = { workspace = true, optional = true }
 

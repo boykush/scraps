@@ -142,6 +142,8 @@ mod tests {
     )]
     #[case::unicode_percent("/%E6%97%A5%E6%9C%AC.md", None, "日本")]
     #[case::dotted_title("/notes/v1.2.md", None, "notes/v1.2")]
+    #[case::decomposed("/cafe\u{301}/cafe\u{301}.md", None, "caf\u{e9}/caf\u{e9}")]
+    #[case::decomposed_percent("/cafe%CC%81.md", None, "caf\u{e9}")]
     fn it_resolves_a_scrap_path(
         #[case] dest: &str,
         #[case] ctx: Option<&str>,

@@ -25,6 +25,13 @@ pub enum ScrapsError {
 
     #[error("Failed to read scraps")]
     ReadScraps,
+
+    #[error(
+        "{} and {} are the same scrap: their names differ only in Unicode normalization form. Keep one of them.",
+        .0.display(),
+        .1.display()
+    )]
+    SameKey(PathBuf, PathBuf),
 }
 
 #[derive(Error, PartialEq, Debug)]
