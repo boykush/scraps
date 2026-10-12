@@ -867,7 +867,6 @@ ul.tag-links {
         font-size: var(--font-size-xs);
     }
 }
-{%- if has_types %}
 
 /* types — a type says what a scrap is, a tag what it is about. A type takes
    no wiki-link syntax marks, so the two never read alike. */
@@ -924,7 +923,6 @@ p.type-filter {
         color: var(--color-text-muted);
     }
 }
-{%- endif %}
 
 /* The sidebar collapses to a top block on narrow screens: no drawer, no JS,
    the nav simply stacks above the content. */

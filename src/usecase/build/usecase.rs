@@ -146,7 +146,7 @@ impl BuildUsecase {
         // generate css
         progress.start_stage(&Stage::GenerateCss);
         let span_generate_css = span!(Level::INFO, "generate_css").entered();
-        renderer.render_css(css_metadata, &site_nav)?;
+        renderer.render_css(css_metadata)?;
         span_generate_css.exit();
         progress.complete_stage(&Stage::GenerateCss, &1);
 

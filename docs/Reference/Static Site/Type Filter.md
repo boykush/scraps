@@ -13,8 +13,8 @@ label narrows an issue list; `all` returns to the whole view.
 A scrap's own page names its type under the title and links to the updated
 view narrowed to it. An untyped scrap's page shows nothing.
 
-A wiki in which no scrap has a type gets none of this: no filter, no `types/`
-directory, and the same `main.css` as before.
+A wiki in which no scrap has a type gets none of this: no filter and no
+`types/` directory.
 
 ## Paths
 

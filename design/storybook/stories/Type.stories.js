@@ -36,7 +36,7 @@ export default {
     docs: {
       description: {
         component:
-          'The frontmatter `type` of a scrap: at most one per scrap. It narrows a list view the way a label narrows an issue list. These styles are emitted only for a wiki in which some scrap has a type.',
+          'The frontmatter `type` of a scrap: at most one per scrap. It narrows a list view the way a label narrows an issue list.',
       },
     },
   },

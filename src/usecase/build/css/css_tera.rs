@@ -29,10 +29,9 @@ pub fn tera(template_dir: &str) -> ScrapsResult<Tera> {
     Ok(tera)
 }
 
-pub fn context(color_scheme: &ColorScheme, has_types: bool) -> tera::Context {
+pub fn context(color_scheme: &ColorScheme) -> tera::Context {
     let mut context = tera::Context::new();
     context.insert("color_scheme", &ColorSchemeTera::new(color_scheme));
-    context.insert("has_types", &has_types);
 
     context
 }

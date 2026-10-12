@@ -23,10 +23,8 @@ impl CSSRender {
         })
     }
 
-    /// `has_types` gates the type styles, so a wiki that uses no `type`
-    /// keeps the stylesheet it had before types reached the site.
-    pub fn render_main(&self, css_metadata: &CssMetadata, has_types: bool) -> ScrapsResult<()> {
-        let context = css_tera::context(&css_metadata.color_scheme, has_types);
+    pub fn render_main(&self, css_metadata: &CssMetadata) -> ScrapsResult<()> {
+        let context = css_tera::context(&css_metadata.color_scheme);
         let template_name = resolve_template(&self.tera, "main.css", "__builtins/main.css");
         self.output
             .render(&self.tera, template_name, &context, "main.css")
@@ -55,36 +53,9 @@ mod tests {
             &RenderOutput::Dir(project.output_dir.clone()),
         )
         .unwrap();
-        render.render_main(css_metadata, false).unwrap();
+        render.render_main(css_metadata).unwrap();
 
         let result = fs::read_to_string(project.output_path("main.css")).unwrap();
         assert_eq!(result, ":root { color-scheme: light dark;}");
-    }
-
-    fn builtin_main(project: &TempScrapProject, has_types: bool) -> String {
-        let render = CSSRender::new(
-            &project.static_dir,
-            &RenderOutput::Dir(project.output_dir.clone()),
-        )
-        .unwrap();
-        render
-            .render_main(&CssMetadata::new(&ColorScheme::OsSetting), has_types)
-            .unwrap();
-
-        fs::read_to_string(project.output_path("main.css")).unwrap()
-    }
-
-    #[rstest]
-    fn it_styles_types_only_when_the_wiki_has_them(
-        #[from(temp_scrap_project)] project: TempScrapProject,
-    ) {
-        let without = builtin_main(&project, false);
-        for selector in ["p.type", "p.type-filter"] {
-            assert!(!without.contains(selector), "{selector} leaked");
-        }
-
-        let with = builtin_main(&project, true);
-        assert!(with.contains("div.scrap p.type"));
-        assert!(with.contains("p.type-filter"));
     }
 }
