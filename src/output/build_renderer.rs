@@ -13,13 +13,15 @@ use crate::usecase::build::{
         scraps_index_render::ScrapsIndexRender, tag_render::TagRender,
         tags_index_render::TagsIndexRender,
     },
+    js::JsRender,
     model::{
         backlinks_map::BacklinksMap, css::CssMetadata, html::HtmlMetadata,
         list_view_configs::ListViewConfigs, scrap_detail::ScrapDetails, site_nav::SiteNav,
     },
     renderer::{
         CssRenderer, HtmlAboutRenderer, HtmlIndexRenderer, HtmlScrapRenderer,
-        HtmlScrapsIndexRenderer, HtmlTagRenderer, HtmlTagsIndexRenderer, SearchIndexJsonRenderer,
+        HtmlScrapsIndexRenderer, HtmlTagRenderer, HtmlTagsIndexRenderer, JsRenderer,
+        SearchIndexJsonRenderer,
     },
 };
 
@@ -34,6 +36,7 @@ pub struct BuildRendererImpl {
     tags_index_render: TagsIndexRender,
     tag_render: TagRender,
     css_render: CSSRender,
+    js_render: JsRender,
     search_index_render: SearchIndexRender,
 }
 
@@ -62,6 +65,7 @@ impl BuildRendererImpl {
             tags_index_render: TagsIndexRender::new(static_dir_path, output)?,
             tag_render: TagRender::new(static_dir_path, output)?,
             css_render: CSSRender::new(static_dir_path, output)?,
+            js_render: JsRender::new(output),
             search_index_render: SearchIndexRender::new(static_dir_path, output)?,
         })
     }
@@ -177,6 +181,12 @@ impl HtmlTagRenderer for BuildRendererImpl {
 impl CssRenderer for BuildRendererImpl {
     fn render_css(&self, css_metadata: &CssMetadata) -> ScrapsResult<()> {
         self.css_render.render_main(css_metadata)
+    }
+}
+
+impl JsRenderer for BuildRendererImpl {
+    fn render_js(&self) -> ScrapsResult<()> {
+        self.js_render.run()
     }
 }
 

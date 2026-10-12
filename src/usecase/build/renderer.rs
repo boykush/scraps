@@ -79,6 +79,10 @@ pub trait CssRenderer {
     fn render_css(&self, css_metadata: &CssMetadata) -> ScrapsResult<()>;
 }
 
+pub trait JsRenderer {
+    fn render_js(&self) -> ScrapsResult<()>;
+}
+
 pub trait SearchIndexJsonRenderer {
     fn render_search_index(&self, base_url: &BaseUrl, scraps: &[Scrap]) -> ScrapsResult<()>;
 }
@@ -91,6 +95,7 @@ pub trait BuildRenderer:
     + HtmlTagsIndexRenderer
     + HtmlTagRenderer
     + CssRenderer
+    + JsRenderer
     + SearchIndexJsonRenderer
     + Sync
 {
@@ -104,6 +109,7 @@ impl<T> BuildRenderer for T where
         + HtmlTagsIndexRenderer
         + HtmlTagRenderer
         + CssRenderer
+        + JsRenderer
         + SearchIndexJsonRenderer
         + Sync
 {
@@ -202,6 +208,12 @@ pub mod tests {
 
     impl CssRenderer for BuildRendererTest {
         fn render_css(&self, _css_metadata: &CssMetadata) -> ScrapsResult<()> {
+            Ok(())
+        }
+    }
+
+    impl JsRenderer for BuildRendererTest {
+        fn render_js(&self) -> ScrapsResult<()> {
             Ok(())
         }
     }

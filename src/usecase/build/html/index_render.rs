@@ -349,13 +349,13 @@ mod tests {
 
     /// Regression test for the v1.0.0-rc.1 Fuse.js loading bug.
     ///
-    /// fuse.js@7+ ships only an ES module from cdn.jsdelivr.net. Loading it
+    /// fuse.js@7+ ships only an ES module. Loading it
     /// with a classic `<script src=...>` tag makes the browser fail on the
     /// `export` statement, so `window.Fuse` never gets defined and the
     /// in-page search dies.
     ///
     /// We must (a) load fuse.js inside a `type="module"` script via `import`,
-    /// and (b) avoid emitting a classic `<script src=".../fuse.js@...">` tag.
+    /// and (b) avoid emitting a classic `<script src=".../fuse.min.js">` tag.
     #[rstest]
     fn fusejs_loads_as_es_module_in_builtin_index(
         #[from(temp_scrap_project)] project: TempScrapProject,
@@ -408,12 +408,12 @@ mod tests {
         let html = fs::read_to_string(project.output_path("index.html")).unwrap();
 
         assert!(
-            !html.contains(r#"<script src="https://cdn.jsdelivr.net/npm/fuse.js@"#),
+            !html.contains(r#"<script src="http://localhost:1112/js/fuse.min.js"#),
             "fuse.js@7+ is ESM-only: a classic <script src> tag fails to evaluate it. \
              Got HTML:\n{html}"
         );
         assert!(
-            html.contains(r#"import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@"#),
+            html.contains(r#"import Fuse from "http://localhost:1112/js/fuse.min.js"#),
             "fuse.js must be imported inside a `type=\"module\"` script. Got HTML:\n{html}"
         );
     }

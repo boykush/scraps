@@ -62,6 +62,18 @@ impl RenderOutput {
                 .context(BuildError::RenderFailure(file_path.to_path_buf())),
         }
     }
+
+    /// Write `contents` as they are to `file_path`, relative to this output.
+    pub fn write(&self, file_path: impl AsRef<Path>, contents: &[u8]) -> ScrapsResult<()> {
+        let RenderOutput::Dir(dir) = self else {
+            return Ok(());
+        };
+        let file_path = dir.join(file_path);
+        if let Some(parent) = file_path.parent() {
+            fs::create_dir_all(parent).context(BuildError::CreateDir)?;
+        }
+        fs::write(&file_path, contents).context(BuildError::WriteFailure(file_path))
+    }
 }
 
 /// The `static/` glob tera loads user overrides from. A path that is not valid
