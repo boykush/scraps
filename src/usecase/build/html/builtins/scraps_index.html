@@ -6,8 +6,9 @@
     <div class="scraps-index">
         <p class="list-head">
             <span class="view-name">all scraps</span>
-            <span class="stats">{{ scrap_count }} scraps</span>
-        </p>
+            <span class="stats">{% if active_type %}{{ active_type.scraps_count }} of {% endif %}{{ scrap_count }} scraps</span>
+        </p>{% if filter_types %}
+        {% if active_type %}{{ <type_filter types={filter_types} base_url={base_url} view_path={view_path} active_name={active_type.name} /> }}{% else %}{{ <type_filter types={filter_types} base_url={base_url} view_path={view_path} /> }}{% endif %}{% endif %}
         <p class="jump-bar">
             {% for group in groups %}
                 <a class="jump" href="#title-group-{{ loop.index }}">{{ group.label }}</a>

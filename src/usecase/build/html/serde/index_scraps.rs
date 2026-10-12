@@ -24,6 +24,8 @@ struct SerializeIndexScrap {
     pub commited_ts: Option<i64>,
     pub backlinks_count: usize,
     pub links_count: usize,
+    #[serde(skip)]
+    scrap_type: Option<String>,
 }
 
 impl SerializeIndexScrap {
@@ -48,6 +50,7 @@ impl SerializeIndexScrap {
             commited_ts,
             backlinks_count,
             links_count,
+            scrap_type: scrap.scrap_type().map(str::to_string),
         }
     }
 }
@@ -74,6 +77,15 @@ impl IndexScrapsTera {
         .collect_vec();
 
         IndexScrapsTera(sorted)
+    }
+
+    /// The rows of one type, in the order this view already sorted them.
+    pub fn of_type(&self, name: &str) -> IndexScrapsTera {
+        let typed = self
+            .0
+            .iter()
+            .filter(|scrap| scrap.scrap_type.as_deref() == Some(name));
+        IndexScrapsTera(typed.cloned().collect_vec())
     }
 
     pub fn chunks(&self, chunk_size: usize) -> Vec<IndexScrapsTera> {

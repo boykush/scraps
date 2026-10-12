@@ -3,7 +3,9 @@ use std::collections::BTreeMap;
 use scraps_libs::model::file::ScrapFileStem;
 
 use crate::usecase::build::model::{
-    backlinks_map::BacklinksMap, scrap_detail::ScrapDetails, title_group::TitleGroup,
+    backlinks_map::BacklinksMap,
+    scrap_detail::{ScrapDetail, ScrapDetails},
+    title_group::TitleGroup,
 };
 
 #[derive(serde::Serialize, PartialEq, Debug)]
@@ -25,8 +27,28 @@ pub struct TitleIndexTera(Vec<TitleIndexGroupTera>);
 
 impl TitleIndexTera {
     pub fn new(scrap_details: &ScrapDetails, backlinks_map: &BacklinksMap) -> TitleIndexTera {
+        Self::of(scrap_details.as_slice().iter(), backlinks_map)
+    }
+
+    /// The same index over the scraps of one type only.
+    pub fn of_type(
+        scrap_details: &ScrapDetails,
+        backlinks_map: &BacklinksMap,
+        name: &str,
+    ) -> TitleIndexTera {
+        let typed = scrap_details
+            .as_slice()
+            .iter()
+            .filter(|scrap_detail| scrap_detail.scrap().scrap_type() == Some(name));
+        Self::of(typed, backlinks_map)
+    }
+
+    fn of<'a>(
+        scrap_details: impl Iterator<Item = &'a ScrapDetail>,
+        backlinks_map: &BacklinksMap,
+    ) -> TitleIndexTera {
         let mut grouped: BTreeMap<TitleGroup, Vec<SerializeTitleIndexScrap>> = BTreeMap::new();
-        for scrap_detail in scrap_details.as_slice() {
+        for scrap_detail in scrap_details {
             let scrap = scrap_detail.scrap();
             let title = scrap.title().to_string();
             let entry = SerializeTitleIndexScrap {

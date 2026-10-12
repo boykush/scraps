@@ -20,6 +20,18 @@ _site
 │   ├── getting-started.html
 │   └── guide/
 │       └── links.html
+├── tags/
+│   ├── index.html          # every tag, most used first
+│   ├── markdown.html
+│   └── notation/
+│       └── wiki-link.html
+├── types/                  # only when a scrap has a type
+│   └── how-to/             # the views again, narrowed to one type
+│       ├── index.html
+│       ├── backlinks/
+│       │   └── index.html
+│       └── scraps/
+│           └── index.html
 ├── main.css
 └── search_index.json       # when build_search_index = true
 ```
@@ -32,6 +44,10 @@ paginated; see [[Reference/Static Site/Sort and Pagination]].
 Each Markdown file is converted to a slugified HTML file under `scraps/`.
 Folders become path segments — the same folders that form
 [[Reference/Wiki-link/Context Link]].
+
+Tags and types each get a directory of their own, so a tag and a type of the
+same name never share a path; see [[Reference/Static Site/Tag Pages]] and
+[[Reference/Static Site/Type Filter]].
 
 Files in `static/`, the build output directory, and any directory whose name
 starts with a dot (such as `.git/` or the `.scraps/` [[Reference/IR]]) are

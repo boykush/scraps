@@ -52,45 +52,50 @@ impl IndexRender {
 
         // Every sort view is always generated; a sort key is a URL, not a
         // config. The home is the updated view.
-        let updated_pages = {
+        let updated = {
             let _span = span!(Level::INFO, "generate_updated_view").entered();
-            let sorted = IndexScrapsTera::new_with_sort(
-                scrap_details,
-                backlinks_map,
-                &SortKey::CommittedDate,
-            );
-            self.render_view(
-                &Self::view_context(&shared_context, "updated", site_nav, backlinks_map),
-                &sorted,
-                paging_size,
-                &self.output,
-            )?
+            IndexScrapsTera::new_with_sort(scrap_details, backlinks_map, &SortKey::CommittedDate)
         };
-
-        let backlinks_pages = {
+        let backlinks = {
             let _span = span!(Level::INFO, "generate_backlinks_view").entered();
-            let sorted =
-                IndexScrapsTera::new_with_sort(scrap_details, backlinks_map, &SortKey::LinkedCount);
-            self.render_view(
-                &Self::view_context(&shared_context, "backlinks", site_nav, backlinks_map),
-                &sorted,
-                paging_size,
-                &self.output.join("backlinks"),
-            )?
+            IndexScrapsTera::new_with_sort(scrap_details, backlinks_map, &SortKey::LinkedCount)
         };
 
-        Ok(updated_pages + backlinks_pages)
-    }
+        // A type narrows a view the way a sort key orders it: as a URL. Each
+        // type gets the same views again under `types/<slug>/`.
+        let scopes = std::iter::once(None).chain(site_nav.types.iter().map(Some));
+        let mut pages = 0;
+        for active in scopes {
+            let output = match active {
+                Some(scrap_type) => self.output.join("types").join(&scrap_type.slug),
+                None => self.output.clone(),
+            };
+            let of_scope = |sorted: &IndexScrapsTera| match active {
+                Some(scrap_type) => sorted.of_type(&scrap_type.name),
+                None => sorted.clone(),
+            };
+            let view_context = |view: &str, view_path: &str| {
+                let mut context = shared_context.clone();
+                templates::insert_site_nav(&mut context, view, site_nav, backlinks_map);
+                templates::insert_type_filter(&mut context, view_path, site_nav, active);
+                context
+            };
 
-    fn view_context(
-        shared_context: &tera::Context,
-        view: &str,
-        site_nav: &SiteNav,
-        backlinks_map: &BacklinksMap,
-    ) -> tera::Context {
-        let mut context = shared_context.clone();
-        templates::insert_site_nav(&mut context, view, site_nav, backlinks_map);
-        context
+            pages += self.render_view(
+                &view_context("updated", ""),
+                &of_scope(&updated),
+                paging_size,
+                &output,
+            )?;
+            pages += self.render_view(
+                &view_context("backlinks", "backlinks/"),
+                &of_scope(&backlinks),
+                paging_size,
+                &output.join("backlinks"),
+            )?;
+        }
+
+        Ok(pages)
     }
 
     fn render_view(
@@ -173,6 +178,7 @@ impl IndexRender {
 #[cfg(test)]
 mod tests {
     use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
+    use crate::usecase::build::model::scrap_types::ScrapTypes;
     use rstest::rstest;
     use std::fs;
     use url::Url;
@@ -219,6 +225,7 @@ mod tests {
         let site_nav = SiteNav::new(
             scraps.len(),
             Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
             true,
             chrono_tz::UTC,
             false,
@@ -305,6 +312,7 @@ mod tests {
         let site_nav = SiteNav::new(
             scraps.len(),
             Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
             true,
             chrono_tz::UTC,
             false,
@@ -375,6 +383,7 @@ mod tests {
         let site_nav = SiteNav::new(
             scraps.len(),
             Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
             true,
             chrono_tz::UTC,
             false,
@@ -407,5 +416,121 @@ mod tests {
             html.contains(r#"import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@"#),
             "fuse.js must be imported inside a `type=\"module\"` script. Got HTML:\n{html}"
         );
+    }
+
+    fn typed(title: &str, scrap_type: &str, body: &str) -> Scrap {
+        Scrap::new(
+            title,
+            &None,
+            &format!("---\ntype: {scrap_type}\n---\n{body}"),
+        )
+    }
+
+    fn render_builtin(project: &TempScrapProject, scraps: &[Scrap], paging: Paging) -> usize {
+        let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
+        let metadata = HtmlMetadata::new(&LangCode::default(), "Scrap", &None, &None);
+        let scrap_texts = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
+            .collect();
+        let scrap_details = ScrapDetails::new(
+            scraps
+                .iter()
+                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &scrap_texts))
+                .collect(),
+        );
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(scraps),
+            ScrapTypes::new(scraps),
+            false,
+            chrono_tz::UTC,
+            false,
+        );
+
+        IndexRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap()
+        .run(
+            base_url,
+            &metadata,
+            &ListViewConfigs::new(&false, &paging),
+            &scrap_details,
+            &BacklinksMap::new(scraps),
+            &site_nav,
+        )
+        .unwrap()
+    }
+
+    #[rstest]
+    fn it_narrows_each_view_to_a_type(#[from(temp_scrap_project)] project: TempScrapProject) {
+        let scraps = [
+            typed("orders", "BigQuery Table", ""),
+            typed("users", "BigQuery Table", "[[orders]]"),
+            typed("setup", "How-to", "[[orders]]"),
+            Scrap::new("untyped", &None, "[[orders]]"),
+        ];
+
+        let pages = render_builtin(&project, &scraps, Paging::Not);
+        // updated and backlinks, unfiltered and once per type
+        assert_eq!(pages, 6);
+
+        let read = |path: &str| fs::read_to_string(project.output_path(path)).unwrap();
+
+        // The unfiltered view offers every type, with "all" as the active one.
+        let home = read("index.html");
+        assert!(home.contains("<span class=\"option active\">all</span>"));
+        assert!(home.contains(
+            "href=\"http://localhost:1112/types/bigquery-table/\">BigQuery Table<span class=\"count\">2</span>"
+        ));
+        assert!(home.contains("scraps/untyped.html"));
+
+        let tables = read("types/bigquery-table/index.html");
+        assert!(tables.contains("scraps/orders.html"));
+        assert!(tables.contains("scraps/users.html"));
+        assert!(!tables.contains("scraps/setup.html"));
+        assert!(!tables.contains("scraps/untyped.html"));
+        assert!(tables.contains("<span class=\"stats\">2 of 4 scraps</span>"));
+        assert!(tables.contains("<a class=\"option\" href=\"http://localhost:1112/\">all</a>"));
+        assert!(tables.contains(
+            "<span class=\"option active\">BigQuery Table<span class=\"count\">2</span></span>"
+        ));
+        // Changing the sort order keeps the filter.
+        assert!(tables.contains("href=\"http://localhost:1112/types/bigquery-table/backlinks/\""));
+
+        let most_linked = read("types/bigquery-table/backlinks/index.html");
+        assert!(most_linked.contains("<span class=\"item active\">backlinks</span>"));
+        assert!(most_linked.contains("href=\"http://localhost:1112/backlinks/\">all</a>"));
+        assert!(most_linked.find("scraps/orders.html") < most_linked.find("scraps/users.html"));
+    }
+
+    #[rstest]
+    fn it_paginates_a_narrowed_view(#[from(temp_scrap_project)] project: TempScrapProject) {
+        let scraps = [
+            typed("a", "Blog", ""),
+            typed("b", "Blog", ""),
+            typed("c", "Blog", ""),
+        ];
+
+        render_builtin(&project, &scraps, Paging::By(2));
+
+        assert!(project.output_path("types/blog/index.html").exists());
+        assert!(project.output_path("types/blog/2.html").exists());
+        assert!(!project.output_path("types/blog/3.html").exists());
+    }
+
+    #[rstest]
+    fn it_offers_no_filter_when_no_scrap_has_a_type(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let scraps = [Scrap::new("untyped", &None, "#[[Blog]]")];
+
+        assert_eq!(render_builtin(&project, &scraps, Paging::Not), 2);
+
+        let home = fs::read_to_string(project.output_path("index.html")).unwrap();
+        assert!(!home.contains("type-filter"));
+        assert!(!project.output_path("types").exists());
     }
 }

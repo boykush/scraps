@@ -868,6 +868,62 @@ ul.tag-links {
     }
 }
 
+/* types — a type says what a scrap is, a tag what it is about. A type takes
+   no wiki-link syntax marks, so the two never read alike. */
+div.scrap p.type {
+    display: inline-block;
+    margin: var(--space-3) var(--space-4) 0 0;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+
+    /* The committed date shares the type's line instead of stacking under it. */
+    & + p.commited-date {
+        display: inline-block;
+    }
+}
+
+/* The type filter narrows a list view, the way a label narrows an issue
+   list. One option is always active; "all" is the unfiltered view. */
+p.type-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-1) var(--space-2);
+    margin: 0 0 var(--space-3);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+
+    span.label {
+        margin-right: var(--space-1);
+    }
+
+    .option {
+        display: inline-flex;
+        align-items: baseline;
+        gap: var(--space-2);
+        padding: var(--space-1) var(--space-2);
+        border-radius: var(--radius-md);
+        color: var(--color-text);
+
+        &:hover {
+            text-decoration: none;
+            background-color: var(--color-accent-wash);
+        }
+    }
+
+    span.option.active {
+        background-color: var(--color-accent-wash);
+        font-weight: var(--font-weight-medium);
+    }
+
+    span.count {
+        font-weight: var(--font-weight-regular);
+        color: var(--color-text-muted);
+    }
+}
+
 /* The sidebar collapses to a top block on narrow screens: no drawer, no JS,
    the nav simply stacks above the content. */
 @media (max-width: 768px) {

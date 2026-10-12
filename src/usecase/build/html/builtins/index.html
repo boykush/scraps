@@ -5,8 +5,9 @@
         <div class="links-block">
             <p class="list-head">
                 <span class="view-name">{% if view == "backlinks" %}most backlinked{% else %}recently updated{% endif %}</span>
-                <span class="stats">{{ scrap_count }} scraps &#183; {{ nav_tags | length }} tags</span>
-            </p>
+                <span class="stats">{% if active_type %}{{ active_type.scraps_count }} of {{ scrap_count }} scraps{% else %}{{ scrap_count }} scraps &#183; {{ nav_tags | length }} tags{% endif %}</span>
+            </p>{% if filter_types %}
+            {% if active_type %}{{ <type_filter types={filter_types} base_url={base_url} view_path={view_path} active_name={active_type.name} /> }}{% else %}{{ <type_filter types={filter_types} base_url={base_url} view_path={view_path} /> }}{% endif %}{% endif %}
             {{ <scrap_rows scraps={scraps} base_url={base_url} timezone={timezone} /> }}
         </div>
         <div class="paging-arrows">

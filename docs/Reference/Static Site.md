@@ -42,6 +42,10 @@ fully supported.
 
 ![[Reference/Static Site/Sort and Pagination]]
 
+## [[Reference/Static Site/Type Filter|Type filter]]
+
+![[Reference/Static Site/Type Filter]]
+
 ## Configuration schema
 
 The full schema lives in [[Reference/Configuration]] (`[ssg]` and root

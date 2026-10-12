@@ -50,6 +50,7 @@ impl AboutRender {
 #[cfg(test)]
 mod tests {
     use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
+    use crate::usecase::build::model::scrap_types::ScrapTypes;
     use rstest::rstest;
     use scraps_libs::html::{self, EmbedMode};
     use scraps_libs::{
@@ -69,7 +70,14 @@ mod tests {
         let scrap1 = Scrap::new("intro", &None, "# Intro");
         let scraps = [scrap1.clone()];
         let backlinks_map = BacklinksMap::new(&scraps);
-        let site_nav = SiteNav::new(scraps.len(), Tags::new(&scraps), true, chrono_tz::UTC, true);
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
+            true,
+            chrono_tz::UTC,
+            true,
+        );
 
         let scrap_texts: HashMap<_, _> = scraps
             .iter()
