@@ -40,12 +40,19 @@ title = "My Site"
 # paginate_by = 20
 
 # Lint rule configuration (optional)
-# Each opt-in rule lives in its own [lint.<rule>] section. Section presence
-# enables the rule (enabled defaults to true); set enabled = false to disable
-# while preserving the rule's parameters.
+# Default rules report defects in any wiki and are always on. An opt-in rule
+# checks a policy this wiki chooses, in its own [lint.<rule>] section. Section
+# presence enables the rule (enabled defaults to true); set enabled = false to
+# disable while preserving the rule's parameters.
 
 # stale_by_git: flag scraps whose latest git commit is older than the threshold.
-# Opt-in because it shells out to git per scrap.
+# Opt-in because how old is stale is for each wiki to decide.
 # [lint.stale_by_git]
 # enabled = true
 # threshold_days = 180
+
+# unportable_key: flag scraps whose file path does not port across filesystems
+# (names Windows rejects, paths that differ only in case).
+# Opt-in because where a wiki must port to is for each wiki to decide.
+# [lint.unportable_key]
+# enabled = true

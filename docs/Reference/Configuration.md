@@ -21,7 +21,7 @@ and [[Reference/CLI Overview]] for how `-C` selects between multiple
 |---|---|---|
 | Root level | wiki-wide settings | every command |
 | `[ssg]` | static-site emit target | `build`, `serve` |
-| `[lint.*]` | opt-in lint rule config | `lint` (only those rules) |
+| `[lint.*]` | policies the wiki opts into for lint | `lint` (only those rules) |
 
 The `[ssg]` section is required only for `build` and `serve`; `lint`, `tag`,
 `get`, `search`, and `mcp serve` work without it. Within `[ssg]`, `base_url`
@@ -73,17 +73,23 @@ paginate_by = 20
 
 ## Lint rules
 
-Opt-in rules read their config from `[lint.<rule>]`. Presence of the section
-enables the rule for `scraps lint` without requiring `--rule`.
+Default rules report what is a defect in any wiki and are always on. An
+opt-in rule checks a policy the wiki chooses for itself: writing its
+`[lint.<rule>]` section turns it on for `scraps lint` without `--rule`, and
+the section holds the policy's parameters.
 
 ```toml:.scraps.toml
-# Enables stale-by-git during `scraps lint`.
+# Policy: a scrap not committed to for this long is stale.
 [lint.stale_by_git]
 enabled = true
 threshold_days = 180
+
+# Policy: the wiki must port across filesystems.
+[lint.unportable_key]
+enabled = true
 ```
 
-Default (graph-mechanical) rules are always on; see [[Reference/Lint Rules]].
+See [[Reference/Lint Rules]] for every rule.
 
 ## Project Root
 

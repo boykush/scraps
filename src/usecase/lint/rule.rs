@@ -10,7 +10,9 @@ pub enum LintRuleName {
     Overlinking,
     BrokenLink,
     BrokenHeadingRef,
+    UnlinkableKey,
     StaleByGit,
+    UnportableKey,
 }
 
 impl LintRuleName {
@@ -22,13 +24,15 @@ impl LintRuleName {
             Self::Overlinking => "overlinking",
             Self::BrokenLink => "broken-link",
             Self::BrokenHeadingRef => "broken-heading-ref",
+            Self::UnlinkableKey => "unlinkable-key",
             Self::StaleByGit => "stale-by-git",
+            Self::UnportableKey => "unportable-key",
         }
     }
 
     /// Rules selected when `scraps lint` is invoked without `--rule`.
-    /// Excludes opt-in rules with external dependencies (e.g. `_by_git`),
-    /// which are enabled per-rule through the `[lint.*]` config sections.
+    /// Excludes the opt-in rules: each checks a policy the wiki chooses and is
+    /// enabled through its `[lint.*]` config section.
     pub fn default_rules() -> Vec<LintRuleName> {
         vec![
             Self::DeadEnd,
@@ -37,6 +41,7 @@ impl LintRuleName {
             Self::Overlinking,
             Self::BrokenLink,
             Self::BrokenHeadingRef,
+            Self::UnlinkableKey,
         ]
     }
 }
