@@ -34,8 +34,11 @@ A single string saying what the scrap *is*, where a tag says what it is
 every blog summary replaces the habit of linking each of them to a `Blog`
 hub scrap only to group them.
 
-Scraps keeps no list of valid types and attaches no behaviour to any value.
-A scrap without a type is simply untyped.
+Scraps keeps no list of valid types and attaches no behaviour to any value,
+so `Blog` and `blog` are two types. A scrap without a type is simply untyped.
+
+`scraps type list` shows the types in use and `scraps type scraps <type>`
+the scraps of one; `scraps get --json type` returns a single scrap's type.
 
 ## Reading rules
 

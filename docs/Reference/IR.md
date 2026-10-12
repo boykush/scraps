@@ -76,9 +76,11 @@ command.
   (`path`, `title`, `ctx`), the `hash` of its content, and everything the
   parser found — `refs` (every `[[link]]`, `![[embed]]` and `#[[tag]]`
   occurrence with its line), `headings`, `code_blocks`, `images`,
-  `task_items`, and the `frontmatter` block as written. A tag from the
-  frontmatter `tags` list is not a `refs` entry, since it has no line in the
-  body; it is read from `frontmatter` when the object is loaded.
+  `task_items`, and the `frontmatter` block as written. The keys Scraps
+  reads from it ([[Reference/Frontmatter]]) are not stored a second time:
+  a frontmatter tag has no line in the body, so it is not a `refs` entry,
+  and both it and the type are read from `frontmatter` when the object is
+  loaded.
 - `links` is the link table: one edge per link or embed occurrence, with
   `resolved: false` when the target names no scrap. Tags are attributes of
   the object, not edges, matching the `[[ ]]` / `#[[ ]]` namespace split.
