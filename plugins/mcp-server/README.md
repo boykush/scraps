@@ -102,15 +102,6 @@ List all tags with their backlink counts, sorted by popularity.
 
 Returns: `[{ title, backlinks_count }]`.
 
-### `list_types`
-
-List the types in use with the number of scraps of each, most used first. A
-type is the `type` string of a scrap's YAML frontmatter: what the scrap is
-(`Blog`, `Book`), where a tag is what it is about. It is optional and
-single-valued, so untyped scraps are not listed.
-
-Returns: `{ results: [{ type, scraps_count }], count }`.
-
 ### `get_scrap`
 
 Retrieve a single scrap by title, optional context, optional heading, and
@@ -121,7 +112,7 @@ optional field projection.
 | `title` | string | yes | Scrap title |
 | `ctx` | string | no | Context folder/path |
 | `heading` | string | no | Restrict body/structure fields to this section |
-| `fields` | string[] | no | Defaults to `["title", "ctx", "body"]`; allowed: `title`, `ctx`, `body`, `headings`, `code_blocks`, `type` |
+| `fields` | string[] | no | Defaults to `["title", "ctx", "body"]`; allowed: `title`, `ctx`, `body`, `headings`, `code_blocks` |
 
 Returns the requested fields. Default response: `{ title, ctx, body }`.
 
@@ -206,16 +197,6 @@ Scraps that reference a specific tag.
 
 Returns: `{ results: [{ title, ctx }], count }`.
 
-### `lookup_type_scraps`
-
-Scraps of a specific type. The type is matched exactly, case included.
-
-| Parameter | Type | Required |
-|---|---|---|
-| `type` | string | yes |
-
-Returns: `{ results: [{ title, ctx }], count }`.
-
 ### `list_todos`
 
 Markdown task list items aggregated across every scrap.
@@ -265,10 +246,9 @@ Returns:
 ```
 
 Keys are passed through in the order they were written. Scraps requires none
-of them and interprets only `tags` and `type`: the strings of the `tags` list
-are scraps tags alongside `#[[tag]]`, so they also show up in `list_tags` and
-`lookup_tag_backlinks`, and the `type` string is the scrap's kind
-(`list_types`). Every other key is opaque. Scraps without a block are
+of them and interprets only `tags`: the strings of that list are scraps tags
+alongside `#[[tag]]`, so they also show up in `list_tags` and
+`lookup_tag_backlinks`. Every other key is opaque. Scraps without a block are
 omitted, and a malformed block is skipped rather than failing the call.
 
 ## Manual setup (without the plugin)

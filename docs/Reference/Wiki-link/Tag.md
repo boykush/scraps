@@ -20,7 +20,7 @@ tags: [Markdown, Notation/Wiki-link]
 
 The key is optional and read tolerantly: a `tags` value that is not a list,
 and entries that are not strings, are ignored without a warning. No other
-frontmatter key is read as a tag.
+frontmatter key is interpreted.
 
 Each tag has a generated index page on the static site — see
 [[Reference/Static Site/Tag Pages]].
