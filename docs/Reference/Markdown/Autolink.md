@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Notation/Markdown]]
 
 Bare URLs wrapped in angle brackets render as OGP cards on the static

@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Emit/Static Site]]
 
 Build output is written to the directory configured by `output_dir`

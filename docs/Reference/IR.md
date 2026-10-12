@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 The Scraps IR is what the compiler knows about a wiki after reading it: one
 object per Markdown source, and the link table produced by resolving every
 reference against those objects. Every command reads the wiki through it,

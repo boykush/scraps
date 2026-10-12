@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Emit/Static Site]]
 
 Every scrap page that has at least one connection draws its direct

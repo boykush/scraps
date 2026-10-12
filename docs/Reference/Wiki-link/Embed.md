@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Notation/Wiki-link]]
 
 `![[Title]]` inlines another scrap's body at this location. Embeds remove

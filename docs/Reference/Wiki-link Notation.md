@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Notation/Wiki-link]]
 
 Wiki-link notation gives Markdown a typed surface: each `[[…]]` is a typed

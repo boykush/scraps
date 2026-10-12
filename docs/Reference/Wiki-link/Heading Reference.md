@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Notation/Wiki-link]]
 
 `[[Title#Heading]]` links to a specific heading inside another scrap.

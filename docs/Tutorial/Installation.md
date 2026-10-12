@@ -1,3 +1,7 @@
+---
+type: Tutorial
+---
+
 #[[CLI]]
 
 After installing, see [[Tutorial/Getting Started]] for the basic flow.

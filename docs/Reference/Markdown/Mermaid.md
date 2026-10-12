@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Notation/Markdown]]
 
 Code blocks tagged `mermaid` render as Mermaid diagrams. This site uses

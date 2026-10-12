@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[CLI]]
 
 Scraps is a CLI-first compiler. Every command supports `--help`, which is

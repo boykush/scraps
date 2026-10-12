@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Notation/Markdown]]
 
 Headings, paragraphs, lists, code blocks, links, and emphasis follow the

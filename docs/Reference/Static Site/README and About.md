@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Emit/Static Site]]
 
 `README.md` at the wiki root is special-cased: it is not a scrap, and it

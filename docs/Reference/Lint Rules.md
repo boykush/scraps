@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[CLI]]
 
 Wiki-link quality rules used by [[Reference/CLI Overview]]'s `lint`

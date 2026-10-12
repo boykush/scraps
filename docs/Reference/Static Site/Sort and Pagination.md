@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Emit/Static Site]]
 
 Every sort view is always generated — a sort order is a URL, not a config:

@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Notation/Wiki-link]]
 
 `![[Title#Heading]]` embeds a single section from another scrap.

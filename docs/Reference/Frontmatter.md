@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Notation/Frontmatter]]
 
 Scraps reads a YAML frontmatter block when a file has one, and requires
@@ -39,6 +43,8 @@ so `Blog` and `blog` are two types. A scrap without a type is simply untyped.
 
 `scraps type list` shows the types in use and `scraps type scraps <type>`
 the scraps of one; `scraps get --json type` returns a single scrap's type.
+This documentation types its own pages this way: run `scraps type list` in
+`docs/`.
 
 ## Reading rules
 

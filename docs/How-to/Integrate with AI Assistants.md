@@ -1,3 +1,7 @@
+---
+type: How-to
+---
+
 #[[Integration]] #[[Emit/CLI JSON]]
 
 Scraps integrates with AI assistants in two ways. **CLI + JSON is the primary

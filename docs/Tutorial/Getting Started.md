@@ -1,3 +1,7 @@
+---
+type: Tutorial
+---
+
 #[[CLI]]
 
 This guide gets you from an empty directory to a small Scraps wiki that can

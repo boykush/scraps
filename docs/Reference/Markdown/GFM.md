@@ -1,3 +1,7 @@
+---
+type: Reference
+---
+
 #[[Notation/Markdown]]
 
 GitHub-flavored Markdown extensions are supported: tables, task lists,
