@@ -29,7 +29,8 @@ server.
 ```
 
 `scraps get --json` defaults to `title`, `ctx`, and `body`. It can project
-specific fields (`title`, `ctx`, `body`, `headings`, `code_blocks`, `images`, `type`) so an
+specific fields (`title`, `ctx`, `body`, `headings`, `code_blocks`, `images`, `type`,
+`description`, `frontmatter`) so an
 agent can avoid loading full bodies when it only needs structure or examples.
 `scraps links --json` returns outbound `link` and `embed` references with
 optional heading targets; `backlinks` stays a scrap-level inbound lookup.

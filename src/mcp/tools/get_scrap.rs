@@ -7,7 +7,7 @@ use rmcp::model::{CallToolResult, ContentBlock};
 use rmcp::schemars::JsonSchema;
 use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer};
-use scraps_libs::markdown::query::{code_blocks, heading_slug, headings, section};
+use scraps_libs::markdown::query::{body, code_blocks, heading_slug, headings, section};
 use serde::Deserialize;
 use serde_json::{Map, Value};
 use std::path::Path;
@@ -19,6 +19,7 @@ const FIELD_HEADINGS: &str = "headings";
 const FIELD_CODE_BLOCKS: &str = "code_blocks";
 const FIELD_TYPE: &str = "type";
 const FIELD_DESCRIPTION: &str = "description";
+const FIELD_FRONTMATTER: &str = "frontmatter";
 
 const DEFAULT_FIELDS: &[&str] = &[FIELD_TITLE, FIELD_CTX, FIELD_BODY];
 const ALLOWED_FIELDS: &[&str] = &[
@@ -29,6 +30,7 @@ const ALLOWED_FIELDS: &[&str] = &[
     FIELD_CODE_BLOCKS,
     FIELD_TYPE,
     FIELD_DESCRIPTION,
+    FIELD_FRONTMATTER,
 ];
 
 #[derive(Debug, Deserialize, JsonSchema)]
@@ -41,7 +43,8 @@ pub struct GetScrapRequest {
     /// Optional heading text. When set, body/headings/code_blocks are scoped to that section.
     pub heading: Option<String>,
     /// Optional projection of fields to include. Defaults to ["title", "ctx", "body"].
-    /// Allowed: "title", "ctx", "body", "headings", "code_blocks", "type", "description".
+    /// Allowed: "title", "ctx", "body", "headings", "code_blocks", "type", "description",
+    /// "frontmatter".
     pub fields: Option<Vec<String>>,
 }
 
@@ -105,12 +108,16 @@ pub async fn get_scrap(
         .execute(&scraps, &title, &ctx)
         .map_err(|e| ErrorData::new(ErrorCode(-32004), format!("Get scrap failed: {e}"), None))?;
 
-    let body_text: &str = match request.heading.as_deref() {
+    // Structure is read from the scoped file text so its lines stay file
+    // lines; only the body drops the frontmatter block.
+    let scoped: &str = match request.heading.as_deref() {
         None => &result.md_text,
         Some(h) => section(&result.md_text, &heading_slug(h)).ok_or_else(|| {
             ErrorData::new(ErrorCode(-32004), format!("Heading not found: '{h}'"), None)
         })?,
     };
+
+    let body_text = body(scoped);
 
     let fields = resolve_fields(request.fields.as_deref())?;
 
@@ -134,7 +141,7 @@ pub async fn get_scrap(
                 out.insert(field.to_string(), Value::String(body_text.to_string()));
             }
             FIELD_HEADINGS => {
-                let v: Vec<HeadingJson> = headings(body_text).into_iter().map(Into::into).collect();
+                let v: Vec<HeadingJson> = headings(scoped).into_iter().map(Into::into).collect();
                 out.insert(
                     field.to_string(),
                     serde_json::to_value(v).map_err(|e| {
@@ -148,7 +155,7 @@ pub async fn get_scrap(
             }
             FIELD_CODE_BLOCKS => {
                 let v: Vec<CodeBlockJson> =
-                    code_blocks(body_text).into_iter().map(Into::into).collect();
+                    code_blocks(scoped).into_iter().map(Into::into).collect();
                 out.insert(
                     field.to_string(),
                     serde_json::to_value(v).map_err(|e| {
@@ -178,6 +185,12 @@ pub async fn get_scrap(
                         .as_ref()
                         .map(|d| Value::String(d.clone()))
                         .unwrap_or(Value::Null),
+                );
+            }
+            FIELD_FRONTMATTER => {
+                out.insert(
+                    field.to_string(),
+                    result.frontmatter.clone().unwrap_or(Value::Null),
                 );
             }
             _ => unreachable!("validated by resolve_fields"),

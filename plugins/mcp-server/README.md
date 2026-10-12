@@ -123,11 +123,16 @@ optional field projection.
 | `title` | string | yes | Scrap title |
 | `ctx` | string | no | Context folder/path |
 | `heading` | string | no | Restrict body/structure fields to this section |
-| `fields` | string[] | no | Defaults to `["title", "ctx", "body"]`; allowed: `title`, `ctx`, `body`, `headings`, `code_blocks`, `type`, `description` |
+| `fields` | string[] | no | Defaults to `["title", "ctx", "body"]`; allowed: `title`, `ctx`, `body`, `headings`, `code_blocks`, `type`, `description`, `frontmatter` |
 
 Returns the requested fields. Default response: `{ title, ctx, body }`. `type`
-and `description` are the scrap's frontmatter type and description, each
-`null` when it has none.
+and `description` are the scrap's frontmatter type and description, and
+`frontmatter` its whole block as parsed data, each `null` when it has none.
+
+`body` is the scrap's content without its frontmatter block. Line numbers in
+`headings` and `code_blocks` count lines of the source file, block included,
+so they are not offsets into `body`; see the
+[frontmatter reference](https://boykush.github.io/scraps/scraps/Reference/Frontmatter.html).
 
 ### `lookup_scrap_links`
 

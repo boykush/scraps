@@ -18,11 +18,22 @@ pub fn frontmatter(text: &str) -> Option<Value> {
     block(text).map(|block| block.value)
 }
 
-/// The text after the frontmatter block: what a scrap says, as opposed to
-/// what is declared about it. Text without a recognised block is returned
-/// whole, so a block `frontmatter` does not read stays content.
+/// The text after the frontmatter block and the blank lines that set it
+/// apart: what a scrap says, as opposed to what is declared about it. Text
+/// without a recognised block is returned whole, so a block `frontmatter`
+/// does not read stays content.
 pub fn body(text: &str) -> &str {
-    block(text).map_or(text, |block| &text[block.len..])
+    block(text).map_or(text, |block| skip_blank_lines(&text[block.len..]))
+}
+
+fn skip_blank_lines(mut text: &str) -> &str {
+    while let Some(end) = text.find('\n') {
+        if !text[..end].trim().is_empty() {
+            break;
+        }
+        text = &text[end + 1..];
+    }
+    text
 }
 
 /// `text` with the frontmatter block blanked out rather than cut, so the
@@ -165,7 +176,13 @@ mod tests {
     #[rstest]
     #[case::block("---\nstatus: draft\n---\n\n# Body\n", "# Body\n")]
     #[case::no_blank_line("---\nstatus: draft\n---\n# Body\n", "# Body\n")]
+    #[case::blank_lines(
+        "---\nstatus: draft\n---\n\n\n# Body\n\n\ntext\n",
+        "# Body\n\n\ntext\n"
+    )]
     #[case::crlf("---\r\nstatus: draft\r\n---\r\n\r\n# Body\r\n", "# Body\r\n")]
+    #[case::crlf_blank_lines("---\r\nk: v\r\n---\r\n\r\n\r\n# Body\r\n", "# Body\r\n")]
+    #[case::indented_content("---\nk: v\n---\n \n\n    code\n", "    code\n")]
     #[case::bom("\u{feff}---\nstatus: draft\n---\n\n# Body\n", "# Body\n")]
     #[case::no_body("---\nstatus: draft\n---\n", "")]
     #[case::absent("# Body\n\ntext\n", "# Body\n\ntext\n")]
