@@ -371,6 +371,18 @@ mod tests {
     }
 
     #[test]
+    fn it_keeps_frontmatter_tags_out_of_refs_and_restores_them_from_facts() {
+        let text = "---\ntags: [sales, a/b]\n---\n\n#[[sales]]\n";
+        let scrap = Scrap::new("t", &None, text);
+        let object = ScrapObject::from_scrap("t.md", "hash", &scrap);
+        assert_eq!(object.refs.len(), 1);
+
+        let restored = Scrap::from_facts("t", &None, text, object.to_facts());
+        assert_eq!(restored.tags(), scrap.tags());
+        assert_eq!(restored.tags().len(), 2);
+    }
+
+    #[test]
     fn it_tags_refs_by_kind() {
         let scrap = Scrap::new("t", &None, "[[a]] #[[t]] ![[c]]");
         let object = ScrapObject::from_scrap("t.md", "hash", &scrap);

@@ -245,9 +245,10 @@ Returns:
 }
 ```
 
-Keys are passed through in the order they were written and are **not**
-interpreted — scraps defines no frontmatter fields, so a `tags:` key there is
-not a scraps tag (`#[[tag]]` is, via `list_tags`). Scraps without a block are
+Keys are passed through in the order they were written. Scraps requires none
+of them and interprets only `tags`: the strings of that list are scraps tags
+alongside `#[[tag]]`, so they also show up in `list_tags` and
+`lookup_tag_backlinks`. Every other key is opaque. Scraps without a block are
 omitted, and a malformed block is skipped rather than failing the call.
 
 ## Manual setup (without the plugin)
