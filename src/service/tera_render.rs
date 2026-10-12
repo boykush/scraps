@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use tera::{Context, Tera};
 
@@ -25,6 +25,43 @@ pub fn render_to_file(
         .render(template_name, context)
         .context(write_failure())?;
     fs::write(file_path, html).context(write_failure())
+}
+
+/// Where a build's pages go. `Discard` still renders every template, so a
+/// check fails on the same template errors a build would, without a site.
+#[derive(Clone)]
+pub enum RenderOutput {
+    Dir(PathBuf),
+    Discard,
+}
+
+impl RenderOutput {
+    pub fn join(&self, path: impl AsRef<Path>) -> RenderOutput {
+        match self {
+            RenderOutput::Dir(dir) => RenderOutput::Dir(dir.join(path)),
+            RenderOutput::Discard => RenderOutput::Discard,
+        }
+    }
+
+    /// Render `template_name` to `file_path`, relative to this output.
+    pub fn render(
+        &self,
+        tera: &Tera,
+        template_name: &str,
+        context: &Context,
+        file_path: impl AsRef<Path>,
+    ) -> ScrapsResult<()> {
+        let file_path = file_path.as_ref();
+        match self {
+            RenderOutput::Dir(dir) => {
+                render_to_file(tera, template_name, context, &dir.join(file_path))
+            }
+            RenderOutput::Discard => tera
+                .render(template_name, context)
+                .map(drop)
+                .context(BuildError::RenderFailure(file_path.to_path_buf())),
+        }
+    }
 }
 
 /// The `static/` glob tera loads user overrides from. A path that is not valid
@@ -85,6 +122,37 @@ mod tests {
                 .to_string()
                 .contains(&file_path.to_string_lossy().to_string())
         );
+    }
+
+    #[rstest]
+    fn render_output_dir_writes_under_the_directory(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let tera = tera_with(vec![("page.html", "hello")]);
+        let output = RenderOutput::Dir(project.output_dir.clone()).join("nested");
+
+        output
+            .render(&tera, "page.html", &Context::new(), "page.html")
+            .unwrap();
+
+        assert_eq!(
+            fs::read_to_string(project.output_path("nested/page.html")).unwrap(),
+            "hello"
+        );
+    }
+
+    #[rstest]
+    fn render_output_discard_reports_template_errors() {
+        let tera = tera_with(vec![("ok.html", "hello"), ("bad.html", "{{ missing }}")]);
+        let output = RenderOutput::Discard.join("nested");
+
+        assert!(
+            output
+                .render(&tera, "ok.html", &Context::new(), "ok.html")
+                .is_ok()
+        );
+        let result = output.render(&tera, "bad.html", &Context::new(), "bad.html");
+        assert!(result.unwrap_err().to_string().contains("bad.html"));
     }
 
     #[rstest]

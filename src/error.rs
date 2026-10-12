@@ -44,6 +44,9 @@ pub enum BuildError {
     #[error("Failed to write file: {0}")]
     WriteFailure(PathBuf),
 
+    #[error("Failed to render: {0}")]
+    RenderFailure(PathBuf),
+
     #[error("Failed to render html")]
     RenderHtml,
 

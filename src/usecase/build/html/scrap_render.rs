@@ -1,8 +1,8 @@
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use crate::error::ScrapsResult;
-use crate::service::tera_render::{render_to_file, user_template_glob};
+use crate::service::tera_render::{RenderOutput, user_template_glob};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::scrap_detail::{ScrapDetail, ScrapDetails};
@@ -25,16 +25,16 @@ use super::serde::tag::TagTera;
 
 pub struct ScrapRender {
     tera: Tera,
-    output_scraps_dir_path: PathBuf,
+    output: RenderOutput,
 }
 
 impl ScrapRender {
-    pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<ScrapRender> {
+    pub fn new(static_dir_path: &Path, output: &RenderOutput) -> ScrapsResult<ScrapRender> {
         let tera = templates::scrap(&user_template_glob(static_dir_path, "*.html"))?;
 
         Ok(ScrapRender {
             tera,
-            output_scraps_dir_path: output_dir_path.join("scraps"),
+            output: output.join("scraps"),
         })
     }
 
@@ -105,17 +105,20 @@ impl ScrapRender {
         }
 
         // The stem may contain `/`-separated context directories, which
-        // `render_to_file` creates on the way.
-        let file_path = self
-            .output_scraps_dir_path
-            .join(format!("{}.html", ScrapFileStem::from(scrap.self_key())));
-        render_to_file(&self.tera, "__builtins/scrap.html", &context, &file_path)
+        // the output creates on the way.
+        self.output.render(
+            &self.tera,
+            "__builtins/scrap.html",
+            &context,
+            format!("{}.html", ScrapFileStem::from(scrap.self_key())),
+        )
     }
 }
 
 #[cfg(test)]
 mod tests {
     use std::fs;
+    use std::path::PathBuf;
     use url::Url;
 
     use crate::usecase::build::model::backlinks_map::BacklinksMap;
@@ -178,7 +181,11 @@ mod tests {
             ScrapDetail::new(scrap1, &commited_ts1, base_url, &scrap_texts),
             ScrapDetail::new(scrap2, &commited_ts1, base_url, &scrap_texts),
         ]);
-        let render = ScrapRender::new(&static_dir_path, &output_dir_path).unwrap();
+        let render = ScrapRender::new(
+            &static_dir_path,
+            &RenderOutput::Dir(output_dir_path.clone()),
+        )
+        .unwrap();
 
         render
             .run(
@@ -236,7 +243,11 @@ mod tests {
         );
 
         let project = crate::test_fixtures::TempScrapProject::new();
-        let render = ScrapRender::new(&project.static_dir, &project.output_dir).unwrap();
+        let render = ScrapRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap();
         render
             .run(
                 base_url,

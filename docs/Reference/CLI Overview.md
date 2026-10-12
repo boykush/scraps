@@ -9,6 +9,7 @@ the authoritative reference for flags and arguments. This page is the
 |---|---|---|
 | `scraps init` | Write `.scraps.toml` to the current directory | – |
 | `scraps build` | Compile to the `_site/` static site | – |
+| `scraps check` | Run the build without writing `_site/`; fails where `scraps build` would | – |
 | `scraps serve` | Build then serve at `http://127.0.0.1:1112` | – |
 | `scraps lint` | Wiki-link health check ([[Reference/Lint Rules]]) | – |
 | `scraps get <title>` | Single-scrap introspection | ✓ |

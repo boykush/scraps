@@ -1,7 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use crate::error::ScrapsResult;
-use crate::service::tera_render::{render_to_file, resolve_template, user_template_glob};
+use crate::service::tera_render::{RenderOutput, resolve_template, user_template_glob};
 use scraps_libs::model::base_url::BaseUrl;
 use scraps_libs::model::scrap::Scrap;
 use tera::Tera;
@@ -11,16 +11,16 @@ use super::serde::search_index_scraps::SearchIndexScrapsTera;
 
 pub struct SearchIndexRender {
     tera: Tera,
-    output_dir_path: PathBuf,
+    output: RenderOutput,
 }
 
 impl SearchIndexRender {
-    pub fn new(static_dir_path: &Path, output_dir_path: &Path) -> ScrapsResult<SearchIndexRender> {
+    pub fn new(static_dir_path: &Path, output: &RenderOutput) -> ScrapsResult<SearchIndexRender> {
         let tera = search_index_tera::tera(&user_template_glob(static_dir_path, "*.json"))?;
 
         Ok(SearchIndexRender {
             tera,
-            output_dir_path: output_dir_path.to_path_buf(),
+            output: output.clone(),
         })
     }
 
@@ -33,8 +33,8 @@ impl SearchIndexRender {
             "search_index.json",
             "__builtins/search_index.json",
         );
-        let file_path = self.output_dir_path.join("search_index.json");
-        render_to_file(&self.tera, template_name, &context, &file_path)
+        self.output
+            .render(&self.tera, template_name, &context, "search_index.json")
     }
 }
 
@@ -63,7 +63,11 @@ mod tests {
         let sc2 = Scrap::new("scrap2", &Some("Context".into()), "## header2");
         let scraps = vec![sc1, sc2];
 
-        let render = SearchIndexRender::new(&project.static_dir, &project.output_dir).unwrap();
+        let render = SearchIndexRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap();
         render.run(&base_url, &scraps).unwrap();
 
         let result = fs::read_to_string(project.output_path("search_index.json")).unwrap();
@@ -83,7 +87,11 @@ mod tests {
             Scrap::new("quote\"in title", &None, "# header3"),
         ];
 
-        let render = SearchIndexRender::new(&project.static_dir, &project.output_dir).unwrap();
+        let render = SearchIndexRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap();
         render.run(&base_url, &scraps).unwrap();
 
         let result = fs::read_to_string(project.output_path("search_index.json")).unwrap();

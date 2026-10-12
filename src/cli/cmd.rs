@@ -1,5 +1,6 @@
 pub mod backlinks;
 pub mod build;
+pub mod check;
 pub mod frontmatter;
 pub mod get;
 pub mod init;
