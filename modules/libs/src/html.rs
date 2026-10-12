@@ -14,8 +14,8 @@ use crate::model::{
     base_url::BaseUrl,
     content::{Content, ContentElement},
     context::Ctx,
-    file::ScrapFileStem,
     key::ScrapKey,
+    page_path::PagePath,
     title::Title,
 };
 use crate::{model::tag::Tag, slugify};
@@ -165,8 +165,7 @@ fn transform_md_links<'a>(
 }
 
 fn scrap_page_url(base_url: &BaseUrl, key: ScrapKey, heading: Option<&str>) -> String {
-    let file_stem = ScrapFileStem::from(key);
-    let mut url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
+    let mut url = PagePath::of_scrap(&key).to_url(base_url);
     if let Some(heading) = heading {
         url.push('#');
         url.push_str(&slugify::by_dash(heading));
@@ -260,18 +259,12 @@ fn attach_heading_ids<'a>(heading_ids: Vec<(&'a AstNode<'a>, String)>, opts: &Op
 fn transform_tag_link<'a>(node: &'a AstNode<'a>, base_url: &BaseUrl, url: &str) {
     let tag_path = url.split_once('#').map_or(url, |(path, _)| path);
     let tag = Tag::from(tag_path);
-    let slug = tag
-        .segments()
-        .iter()
-        .map(|seg| slugify::by_dash(seg))
-        .collect::<Vec<_>>()
-        .join("/");
-    if slug.is_empty() {
+    if tag.segments().is_empty() {
         return;
     }
 
     node.data_mut().value = NodeValue::Link(Box::new(NodeLink {
-        url: format!("{}tags/{}.html", base_url.as_url(), slug),
+        url: PagePath::of_tag(&tag).to_url(base_url),
         title: String::new(),
     }));
 }
@@ -442,19 +435,31 @@ mod tests {
     )]
     #[case::context(
         "[[Context/link]]",
-        "<p><a href=\"http://localhost:1112/scraps/context/link.html\">link</a></p>\n"
+        "<p><a href=\"http://localhost:1112/scraps/Context/link.html\">link</a></p>\n"
     )]
     #[case::context_display(
         "[[Context/link|context display]]",
-        "<p><a href=\"http://localhost:1112/scraps/context/link.html\">context display</a></p>\n"
+        "<p><a href=\"http://localhost:1112/scraps/Context/link.html\">context display</a></p>\n"
     )]
     #[case::nested_context(
         "[[Programming/Rust/borrowing]]",
-        "<p><a href=\"http://localhost:1112/scraps/programming/rust/borrowing.html\">borrowing</a></p>\n"
+        "<p><a href=\"http://localhost:1112/scraps/Programming/Rust/borrowing.html\">borrowing</a></p>\n"
     )]
-    #[case::slugify(
-        "[[expect slugify]]",
-        "<p><a href=\"http://localhost:1112/scraps/expect-slugify.html\">expect slugify</a></p>\n"
+    #[case::space(
+        "[[Expect Verbatim]]",
+        "<p><a href=\"http://localhost:1112/scraps/Expect%20Verbatim.html\">Expect Verbatim</a></p>\n"
+    )]
+    #[case::reserved_characters(
+        "[[What is it?]]",
+        "<p><a href=\"http://localhost:1112/scraps/What%20is%20it%3F.html\">What is it?</a></p>\n"
+    )]
+    #[case::percent(
+        "[[100% sure]]",
+        "<p><a href=\"http://localhost:1112/scraps/100%25%20sure.html\">100% sure</a></p>\n"
+    )]
+    #[case::unicode(
+        "[[日本語]]",
+        "<p><a href=\"http://localhost:1112/scraps/%E6%97%A5%E6%9C%AC%E8%AA%9E.html\">日本語</a></p>\n"
     )]
     fn it_to_html_link(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
         let content = to_content(input, &None, &base_url, EmbedMode::Preserve);
@@ -464,19 +469,19 @@ mod tests {
     #[rstest]
     #[case::heading(
         "[[Home#Welcome]]",
-        "<p><a href=\"http://localhost:1112/scraps/home.html#welcome\">Home</a></p>\n"
+        "<p><a href=\"http://localhost:1112/scraps/Home.html#welcome\">Home</a></p>\n"
     )]
     #[case::heading_slugify(
         "[[Configuration#SSG section]]",
-        "<p><a href=\"http://localhost:1112/scraps/configuration.html#ssg-section\">Configuration</a></p>\n"
+        "<p><a href=\"http://localhost:1112/scraps/Configuration.html#ssg-section\">Configuration</a></p>\n"
     )]
     #[case::context_heading(
         "[[Ctx/Title#Heading]]",
-        "<p><a href=\"http://localhost:1112/scraps/ctx/title.html#heading\">Title</a></p>\n"
+        "<p><a href=\"http://localhost:1112/scraps/Ctx/Title.html#heading\">Title</a></p>\n"
     )]
     #[case::context_heading_display(
         "[[Ctx/Title#Heading|alias]]",
-        "<p><a href=\"http://localhost:1112/scraps/ctx/title.html#heading\">alias</a></p>\n"
+        "<p><a href=\"http://localhost:1112/scraps/Ctx/Title.html#heading\">alias</a></p>\n"
     )]
     fn it_to_html_heading_link(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
         let content = to_content(input, &None, &base_url, EmbedMode::Preserve);
@@ -502,7 +507,7 @@ mod tests {
     )]
     #[case::wikilink(
         "## [[Ctx/topic]]",
-        "<h2 id=\"ctx-slash-topic\"><a href=\"http://localhost:1112/scraps/ctx/topic.html\">topic</a></h2>\n"
+        "<h2 id=\"ctx-slash-topic\"><a href=\"http://localhost:1112/scraps/Ctx/topic.html\">topic</a></h2>\n"
     )]
     #[case::attribute_escape("## a \"b\"", "<h2 id=\"a-&quot;b&quot;\">a &quot;b&quot;</h2>\n")]
     fn it_to_html_heading_id(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
@@ -513,11 +518,15 @@ mod tests {
     #[rstest]
     #[case::single(
         "#[[Markdown]]",
-        "<p>#<a href=\"http://localhost:1112/tags/markdown.html\">Markdown</a></p>\n"
+        "<p>#<a href=\"http://localhost:1112/tags/Markdown.html\">Markdown</a></p>\n"
     )]
     #[case::nested(
         "#[[Programming/Rust]]",
-        "<p>#<a href=\"http://localhost:1112/tags/programming/rust.html\">Programming/Rust</a></p>\n"
+        "<p>#<a href=\"http://localhost:1112/tags/Programming/Rust.html\">Programming/Rust</a></p>\n"
+    )]
+    #[case::space(
+        "#[[Domain Driven Design]]",
+        "<p>#<a href=\"http://localhost:1112/tags/Domain%20Driven%20Design.html\">Domain Driven Design</a></p>\n"
     )]
     fn it_to_html_tag_link(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
         let content = to_content(input, &None, &base_url, EmbedMode::Preserve);
@@ -563,7 +572,7 @@ mod tests {
     )]
     #[case::sibling_with_space(
         "[**all** orders](./All%20Orders.md)",
-        "<p><a href=\"http://localhost:1112/scraps/tables/all-orders.html\"><strong>all</strong> orders</a></p>\n"
+        "<p><a href=\"http://localhost:1112/scraps/tables/All%20Orders.html\"><strong>all</strong> orders</a></p>\n"
     )]
     #[case::reference(
         "[customers][c]\n\n[c]: customers.md",

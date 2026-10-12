@@ -36,7 +36,7 @@ scraps links "Configuration" --json
 scraps lint
 ```
 
-See the [Getting Started tutorial](https://boykush.github.io/scraps/scraps/tutorial/getting-started.html) for the full flow.
+See the [Getting Started tutorial](https://boykush.github.io/scraps/scraps/Tutorial/Getting%20Started.html) for the full flow.
 
 ## How it works
 
@@ -57,7 +57,7 @@ CLI + JSON is the primary path — any shell-capable agent can query Scraps with
 - [`pkm`](plugins/pkm) — Personal knowledge management skills for Claude Code: *learn* a source and record only what you understood, or *digest* an article into a short linked page
 - [`mcp-server`](plugins/mcp-server) — MCP server for MCP-compatible clients, shared across repositories via `scraps mcp serve --http`
 
-See the [AI integration guide](https://boykush.github.io/scraps/scraps/how-to/integrate-with-ai-assistants.html) for the trade-offs.
+See the [AI integration guide](https://boykush.github.io/scraps/scraps/How-to/Integrate%20with%20AI%20Assistants.html) for the trade-offs.
 
 ## Documentation
 

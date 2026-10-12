@@ -10,8 +10,8 @@ use crate::usecase::build::model::scrap_graph::{MAX_NODES, ScrapGraph};
 use crate::usecase::build::model::site_nav::SiteNav;
 use rayon::prelude::*;
 use scraps_libs::model::base_url::BaseUrl;
-use scraps_libs::model::file::ScrapFileStem;
 use scraps_libs::model::key::ScrapKey;
+use scraps_libs::model::page_path::PagePath;
 use scraps_libs::model::scrap::Scrap;
 use tera::Tera;
 use tracing::{Level, span};
@@ -35,7 +35,7 @@ impl ScrapRender {
 
         Ok(ScrapRender {
             tera,
-            output: output.join("scraps"),
+            output: output.clone(),
         })
     }
 
@@ -116,13 +116,13 @@ impl ScrapRender {
             context.insert("scrap_graph", &ScrapGraphTera::from(&graph));
         }
 
-        // The stem may contain `/`-separated context directories, which
+        // The path may contain `/`-separated context directories, which
         // the output creates on the way.
         self.output.render(
             &self.tera,
             "__builtins/scrap.html",
             &context,
-            format!("{}.html", ScrapFileStem::from(scrap.self_key())),
+            PagePath::of_scrap(&scrap.self_key()).as_str(),
         )
     }
 }
@@ -186,10 +186,9 @@ mod tests {
             .map(|scrap| (scrap.self_key(), scrap))
             .collect();
 
-        let scrap1_html_path = output_dir_path.join("scraps/scrap-1.html");
-        // v1: nested ctx is a directory (`context/scrap-2.html`), not a
-        // dot-suffix on the file stem.
-        let scrap2_html_path = output_dir_path.join("scraps/context/scrap-2.html");
+        let scrap1_html_path = output_dir_path.join("scraps/scrap 1.html");
+        // The context is a directory, spelled as the key spells it.
+        let scrap2_html_path = output_dir_path.join("scraps/Context/scrap 2.html");
 
         let scrap_details = ScrapDetails::new(vec![
             ScrapDetail::new(scrap1, &commited_ts1, base_url, &scrap_texts),
@@ -353,7 +352,7 @@ mod tests {
 
         assert!(read("typed").contains(
             "<p class=\"type\">type <a class=\"name\" \
-             href=\"http://localhost:1112/types/bigquery-table/\">BigQuery Table</a></p>"
+             href=\"http://localhost:1112/types/BigQuery%20Table/\">BigQuery Table</a></p>"
         ));
         // The type is not a tag, so the tag line stays as it was.
         assert!(!read("typed").contains("<p class=\"tags\">"));

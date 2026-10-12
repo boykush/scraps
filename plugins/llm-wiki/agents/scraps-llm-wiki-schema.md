@@ -40,11 +40,11 @@ The spec lives in the official published docs — `WebFetch` them so guidance re
 
 | Source | Use for |
 | --- | --- |
-| <https://boykush.github.io/scraps/scraps/how-to/integrate-with-ai-assistants.html> | CLI + JSON vs MCP integration guidance |
-| <https://boykush.github.io/scraps/scraps/reference/cli-overview.html> | Available commands and JSON-capable surfaces |
-| <https://boykush.github.io/scraps/scraps/reference/wiki-link-notation.html> | Wiki-link, ctx, tag, heading, and embed syntax |
-| <https://boykush.github.io/scraps/scraps/reference/wiki-link/normal-link.html> vs <https://boykush.github.io/scraps/scraps/reference/wiki-link/tag.html> | The `[[link]]` vs `#[[tag]]` distinction — disjoint namespaces |
-| <https://boykush.github.io/scraps/scraps/reference/lint-rules.html> | Lint rule meanings and when to use them |
+| <https://boykush.github.io/scraps/scraps/How-to/Integrate%20with%20AI%20Assistants.html> | CLI + JSON vs MCP integration guidance |
+| <https://boykush.github.io/scraps/scraps/Reference/CLI%20Overview.html> | Available commands and JSON-capable surfaces |
+| <https://boykush.github.io/scraps/scraps/Reference/Wiki-link%20Notation.html> | Wiki-link, ctx, tag, heading, and embed syntax |
+| <https://boykush.github.io/scraps/scraps/Reference/Wiki-link/Normal%20Link.html> vs <https://boykush.github.io/scraps/scraps/Reference/Wiki-link/Tag.html> | The `[[link]]` vs `#[[tag]]` distinction — disjoint namespaces |
+| <https://boykush.github.io/scraps/scraps/Reference/Lint%20Rules.html> | Lint rule meanings and when to use them |
 | `plugins/llm-wiki/README.md` | Official Scraps skills and agents overview |
 | `plugins/llm-wiki/skills/ingest/SKILL.md` | Ingest workflow details |
 | `plugins/llm-wiki/skills/query/SKILL.md` | Query workflow details |

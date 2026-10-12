@@ -161,6 +161,55 @@ mod tests {
     }
 
     #[rstest]
+    fn run_writes_every_name_to_a_page_of_its_own(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(b"[ssg]\nbase_url = \"http://localhost:1112/\"\ntitle = \"Test\"")
+            .add_scrap("a b.md", b"spaced #[[a b]] #[[index]]")
+            .add_scrap("a-b.md", b"dashed #[[a-b]]")
+            .add_scrap("What is it?.md", b"asked")
+            .add_scrap("What is it question.md", b"spelled out")
+            .add_scrap("index.md", b"a scrap named index")
+            .add_scrap(
+                "hub.md",
+                b"[[a b]] [[a-b]] [[What is it?]] [dashed](a-b.md)",
+            )
+            .add_scrap("typed.md", b"---\ntype: index\n---\n");
+
+        let result = execute(false, Some(project.project_root.as_path()));
+        assert!(result.is_ok());
+
+        let read = |path: &str| fs::read_to_string(project.output_path(path)).unwrap();
+
+        // Names that used to slugify to one path each keep their own page.
+        assert!(read("scraps/a b.html").contains("spaced"));
+        assert!(read("scraps/a-b.html").contains("dashed"));
+        assert!(read("scraps/What is it?.html").contains("asked"));
+        assert!(read("scraps/What is it question.html").contains("spelled out"));
+        assert!(read("tags/a b.html").contains("scraps/a%20b.html"));
+        assert!(read("tags/a-b.html").contains("scraps/a-b.html"));
+
+        // A scrap, a tag and a type named `index` are pages like any other,
+        // and the listings they used to share a path with are still there.
+        assert!(read("scraps/index.html").contains("a scrap named index"));
+        assert!(read("tags/index.html").contains("tagged &#183; 1"));
+        assert!(read("types/index/index.html").contains("1 of 7 scraps"));
+        assert!(read("all-scraps/index.html").contains("class=\"jump\""));
+        assert!(read("all-tags/index.html").contains("class=\"tag-links\""));
+        assert!(read("index.html").contains("recently updated"));
+
+        let hub = read("scraps/hub.html");
+        for href in [
+            "http://localhost:1112/scraps/a%20b.html",
+            "http://localhost:1112/scraps/a-b.html",
+            "http://localhost:1112/scraps/What%20is%20it%3F.html",
+        ] {
+            assert!(hub.contains(&format!("href=\"{href}\"")), "missing {href}");
+        }
+    }
+
+    #[rstest]
     fn run_with_git_flag_includes_commited_date_block(
         #[from(temp_scrap_project)] project: TempScrapProject,
     ) {

@@ -7,8 +7,8 @@ use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::site_nav::SiteNav;
 use rayon::prelude::*;
 use scraps_libs::model::base_url::BaseUrl;
+use scraps_libs::model::page_path::PagePath;
 use scraps_libs::model::tag::Tag;
-use scraps_libs::slugify;
 use tera::Tera;
 use tracing::{Level, span};
 
@@ -28,9 +28,7 @@ impl TagRender {
 
         Ok(TagRender {
             tera,
-            // Tag pages live in their own `tags/` directory, separate from
-            // `scraps/`, to keep the two namespaces isolated (v1 design).
-            output: output.join("tags"),
+            output: output.clone(),
         })
     }
 
@@ -65,23 +63,14 @@ impl TagRender {
         let linked_scraps = backlinks_map.get_tag(tag);
         context.insert("linked_scraps", &LinkScrapsTera::new(linked_scraps));
 
-        // Build the slug-based path: `tags/<slug-segment>/<...>.html`. Each
-        // segment of a hierarchical tag becomes a directory.
+        // Each segment of a hierarchical tag becomes a directory.
         self.output.render(
             &self.tera,
             "__builtins/tag.html",
             &context,
-            format!("{}.html", tag_slug_path(tag)),
+            PagePath::of_tag(tag).as_str(),
         )
     }
-}
-
-fn tag_slug_path(tag: &Tag) -> String {
-    tag.segments()
-        .iter()
-        .map(|s| slugify::by_dash(s))
-        .collect::<Vec<_>>()
-        .join("/")
 }
 
 #[cfg(test)]
@@ -128,9 +117,7 @@ mod tests {
             false,
         );
 
-        // v1: tag pages live under `tags/` (not `scraps/`) and the slug is
-        // built per-segment. "tag 1" slugifies to "tag-1".
-        let tag1_html_path = output_dir_path.join("tags/tag-1.html");
+        let tag1_html_path = output_dir_path.join("tags/tag 1.html");
 
         let render = TagRender::new(
             &static_dir_path,

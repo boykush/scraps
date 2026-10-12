@@ -1,4 +1,4 @@
-use scraps_libs::model::file::ScrapFileStem;
+use scraps_libs::model::page_path::PagePath;
 use url::Url;
 
 use crate::usecase::build::model::scrap_detail::ScrapDetail;
@@ -9,7 +9,8 @@ use super::content::ContentTera;
 pub struct ScrapDetailTera<'a> {
     ctx: Option<String>,
     title: String,
-    html_file_name: String,
+    /// Page URL relative to `base_url`, already percent-encoded.
+    url_path: String,
     content: ContentTera<'a>,
     thumbnail: Option<Url>,
     commited_ts: Option<i64>,
@@ -20,11 +21,11 @@ impl<'a> From<&'a ScrapDetail> for ScrapDetailTera<'a> {
         let scrap = scrap_detail.scrap();
         let commited_ts = scrap_detail.commited_ts();
         let content = scrap_detail.content();
-        let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_key()));
+        let url_path = PagePath::of_scrap(&scrap.self_key()).to_url_path();
         ScrapDetailTera {
             ctx: scrap.ctx().as_ref().map(|ctx| ctx.to_string()),
             title: scrap.title().to_string(),
-            html_file_name,
+            url_path,
             content: content.into(),
             thumbnail: scrap.thumbnail(),
             commited_ts,

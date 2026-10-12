@@ -62,12 +62,12 @@ impl IndexRender {
         };
 
         // A type narrows a view the way a sort key orders it: as a URL. Each
-        // type gets the same views again under `types/<slug>/`.
+        // type gets the same views again under its own directory.
         let scopes = std::iter::once(None).chain(site_nav.types.iter().map(Some));
         let mut pages = 0;
         for active in scopes {
             let output = match active {
-                Some(scrap_type) => self.output.join("types").join(&scrap_type.slug),
+                Some(scrap_type) => self.output.join(scrap_type.page_path().as_str()),
                 None => self.output.clone(),
             };
             let of_scope = |sorted: &IndexScrapsTera| match active {
@@ -483,11 +483,11 @@ mod tests {
         let home = read("index.html");
         assert!(home.contains("<span class=\"option active\">all</span>"));
         assert!(home.contains(
-            "href=\"http://localhost:1112/types/bigquery-table/\">BigQuery Table<span class=\"count\">2</span>"
+            "href=\"http://localhost:1112/types/BigQuery%20Table/\">BigQuery Table<span class=\"count\">2</span>"
         ));
         assert!(home.contains("scraps/untyped.html"));
 
-        let tables = read("types/bigquery-table/index.html");
+        let tables = read("types/BigQuery Table/index.html");
         assert!(tables.contains("scraps/orders.html"));
         assert!(tables.contains("scraps/users.html"));
         assert!(!tables.contains("scraps/setup.html"));
@@ -498,9 +498,11 @@ mod tests {
             "<span class=\"option active\">BigQuery Table<span class=\"count\">2</span></span>"
         ));
         // Changing the sort order keeps the filter.
-        assert!(tables.contains("href=\"http://localhost:1112/types/bigquery-table/backlinks/\""));
+        assert!(
+            tables.contains("href=\"http://localhost:1112/types/BigQuery%20Table/backlinks/\"")
+        );
 
-        let most_linked = read("types/bigquery-table/backlinks/index.html");
+        let most_linked = read("types/BigQuery Table/backlinks/index.html");
         assert!(most_linked.contains("<span class=\"item active\">backlinks</span>"));
         assert!(most_linked.contains("href=\"http://localhost:1112/backlinks/\">all</a>"));
         assert!(most_linked.find("scraps/orders.html") < most_linked.find("scraps/users.html"));
@@ -516,9 +518,9 @@ mod tests {
 
         render_builtin(&project, &scraps, Paging::By(2));
 
-        assert!(project.output_path("types/blog/index.html").exists());
-        assert!(project.output_path("types/blog/2.html").exists());
-        assert!(!project.output_path("types/blog/3.html").exists());
+        assert!(project.output_path("types/Blog/index.html").exists());
+        assert!(project.output_path("types/Blog/2.html").exists());
+        assert!(!project.output_path("types/Blog/3.html").exists());
     }
 
     #[rstest]

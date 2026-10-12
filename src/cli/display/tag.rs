@@ -3,10 +3,7 @@ use std::fmt;
 use crate::error::{CliError, ScrapsResult, anyhow::Context};
 use colored::Colorize;
 use comfy_table::{Cell, CellAlignment, Table, presets::NOTHING};
-use scraps_libs::{
-    model::{base_url::BaseUrl, tag::Tag},
-    slugify,
-};
+use scraps_libs::model::{base_url::BaseUrl, page_path::PagePath, tag::Tag};
 use url::Url;
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
@@ -24,11 +21,7 @@ impl DisplayTag {
         backlinks_map: &BacklinksMap,
     ) -> ScrapsResult<DisplayTag> {
         let url = base_url
-            .map(|base_url| {
-                base_url
-                    .as_url()
-                    .join(&format!("tags/{}.html", tag_slug_path(tag)))
-            })
+            .map(|base_url| Url::parse(&PagePath::of_tag(tag).to_url(base_url)))
             .transpose()
             .context(CliError::Display)?;
         let backlinks_count = backlinks_map.get_tag(tag).len();
@@ -51,16 +44,6 @@ impl DisplayTag {
     pub fn backlinks_count(&self) -> usize {
         self.backlinks_count
     }
-}
-
-/// Slugify each segment of a hierarchical tag and join with `/`. Used both
-/// for URL generation and HTML output paths.
-fn tag_slug_path(tag: &Tag) -> String {
-    tag.segments()
-        .iter()
-        .map(|s| slugify::by_dash(s))
-        .collect::<Vec<_>>()
-        .join("/")
 }
 
 pub struct DisplayTagTable {

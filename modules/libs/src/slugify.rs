@@ -1,5 +1,7 @@
-/// Built in one pass into one buffer: the build slugifies every link and
-/// tag on every page it renders.
+/// The id of a heading, and what a `#heading` reference is matched by. Page
+/// paths are not slugified: see `model::page_path`.
+/// Built in one pass into one buffer: the build slugifies every heading and
+/// heading reference on every page it renders.
 pub fn by_dash(v: &str) -> String {
     let lower = v.trim().to_lowercase();
     let mut slug = String::with_capacity(lower.len());

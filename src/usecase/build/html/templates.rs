@@ -135,7 +135,11 @@ pub fn insert_type_filter(
     if let Some(scrap_type) = active {
         // The sidebar's views keep the filter, so changing the sort order
         // does not drop the type the reader narrowed to.
-        let view_root = format!("{}types/{}/", base_url_of(context), scrap_type.slug);
+        let view_root = format!(
+            "{}{}",
+            base_url_of(context),
+            scrap_type.page_path().to_url_path()
+        );
         context.insert("view_root", &view_root);
         context.insert("active_type", &TypeTera::from(scrap_type));
     }

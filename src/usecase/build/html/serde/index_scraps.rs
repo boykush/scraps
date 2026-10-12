@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use rayon::prelude::*;
-use scraps_libs::model::file::ScrapFileStem;
+use scraps_libs::model::page_path::PagePath;
 use url::Url;
 
 use crate::usecase::build::model::{
@@ -18,7 +18,8 @@ const SUMMARY_MAX_CHARS: usize = 90;
 struct SerializeIndexScrap {
     ctx: Option<String>,
     title: String,
-    html_file_name: String,
+    /// Page URL relative to `base_url`, already percent-encoded.
+    url_path: String,
     thumbnail: Option<Url>,
     summary: Option<String>,
     pub commited_ts: Option<i64>,
@@ -40,11 +41,11 @@ impl SerializeIndexScrap {
             Summary::from_md_text(scrap.md_text(), SUMMARY_MAX_CHARS)
                 .map(|s| s.as_str().to_string())
         });
-        let html_file_name = format!("{}.html", ScrapFileStem::from(scrap.self_key().clone()));
+        let url_path = PagePath::of_scrap(&scrap.self_key()).to_url_path();
         SerializeIndexScrap {
             ctx: scrap.ctx().as_ref().map(|c| c.to_string()),
             title: scrap.title().to_string(),
-            html_file_name,
+            url_path,
             thumbnail: scrap.thumbnail(),
             summary,
             commited_ts,

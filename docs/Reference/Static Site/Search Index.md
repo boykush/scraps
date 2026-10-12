@@ -10,8 +10,8 @@ the static site mounts a search UI backed by it.
 
 ```json
 [
-  { "title": "Getting Started", "url": "https://example.com/scraps/getting-started.html" },
-  { "title": "Configuration",   "url": "https://example.com/scraps/configuration.html" }
+  { "title": "Getting Started", "url": "https://example.com/scraps/Getting%20Started.html" },
+  { "title": "Configuration",   "url": "https://example.com/scraps/Configuration.html" }
 ]
 ```
 
