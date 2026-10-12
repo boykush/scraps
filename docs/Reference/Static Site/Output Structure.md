@@ -34,6 +34,9 @@ _site
 │       │   └── index.html
 │       └── all-scraps/
 │           └── index.html
+├── fonts/                  # the web fonts the theme uses, with their licenses
+│   ├── fonts.css
+│   └── *.woff2
 ├── js/                     # the libraries the pages load, with their licenses
 │   ├── fuse.min.js
 │   ├── highlight.min.js

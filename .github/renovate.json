@@ -66,6 +66,27 @@
         ],
         "executionMode": "branch"
       }
+    },
+    {
+      "description": "The web fonts a generated site serves, handled like the browser libraries above: the bump regenerates the copies in the same commit and fonts-check.yml fails a pull request whose copies are stale.",
+      "groupName": "Web fonts",
+      "matchFileNames": [
+        "fonts/**"
+      ],
+      "postUpgradeTasks": {
+        "installTools": {
+          "node": {},
+          "pnpm": {}
+        },
+        "commands": [
+          "pnpm --dir fonts install",
+          "pnpm --dir fonts run build"
+        ],
+        "fileFilters": [
+          "src/usecase/build/fonts/**"
+        ],
+        "executionMode": "branch"
+      }
     }
   ]
 }

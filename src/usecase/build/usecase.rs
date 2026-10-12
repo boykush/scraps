@@ -150,6 +150,11 @@ impl BuildUsecase {
         span_generate_css.exit();
         progress.complete_stage(&Stage::GenerateCss, &1);
 
+        // generate fonts
+        let span_generate_fonts = span!(Level::INFO, "generate_fonts").entered();
+        renderer.render_fonts()?;
+        span_generate_fonts.exit();
+
         // generate js
         let span_generate_js = span!(Level::INFO, "generate_js").entered();
         renderer.render_js()?;

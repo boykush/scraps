@@ -90,6 +90,7 @@ impl ScrapsService {
             Some("json") => "text/json",
             Some("css") => "text/css",
             Some("wasm") => "application/wasm",
+            Some("woff2") => "font/woff2",
             _ => "application/octet-stream",
         }
     }

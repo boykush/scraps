@@ -8,6 +8,7 @@ use crate::service::search::render::SearchIndexRender;
 use crate::service::tera_render::RenderOutput;
 use crate::usecase::build::{
     css::render::CSSRender,
+    fonts::FontsRender,
     html::{
         about_render::AboutRender, index_render::IndexRender, scrap_render::ScrapRender,
         scraps_index_render::ScrapsIndexRender, tag_render::TagRender,
@@ -19,7 +20,7 @@ use crate::usecase::build::{
         list_view_configs::ListViewConfigs, scrap_detail::ScrapDetails, site_nav::SiteNav,
     },
     renderer::{
-        CssRenderer, HtmlAboutRenderer, HtmlIndexRenderer, HtmlScrapRenderer,
+        CssRenderer, FontsRenderer, HtmlAboutRenderer, HtmlIndexRenderer, HtmlScrapRenderer,
         HtmlScrapsIndexRenderer, HtmlTagRenderer, HtmlTagsIndexRenderer, JsRenderer,
         SearchIndexJsonRenderer,
     },
@@ -36,6 +37,7 @@ pub struct BuildRendererImpl {
     tags_index_render: TagsIndexRender,
     tag_render: TagRender,
     css_render: CSSRender,
+    fonts_render: FontsRender,
     js_render: JsRender,
     search_index_render: SearchIndexRender,
 }
@@ -65,6 +67,7 @@ impl BuildRendererImpl {
             tags_index_render: TagsIndexRender::new(static_dir_path, output)?,
             tag_render: TagRender::new(static_dir_path, output)?,
             css_render: CSSRender::new(static_dir_path, output)?,
+            fonts_render: FontsRender::new(output),
             js_render: JsRender::new(output),
             search_index_render: SearchIndexRender::new(static_dir_path, output)?,
         })
@@ -181,6 +184,12 @@ impl HtmlTagRenderer for BuildRendererImpl {
 impl CssRenderer for BuildRendererImpl {
     fn render_css(&self, css_metadata: &CssMetadata) -> ScrapsResult<()> {
         self.css_render.render_main(css_metadata)
+    }
+}
+
+impl FontsRenderer for BuildRendererImpl {
+    fn render_fonts(&self) -> ScrapsResult<()> {
+        self.fonts_render.run()
     }
 }
 

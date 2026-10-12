@@ -27,3 +27,6 @@ apm_modules/
 
 # Browser libraries
 /jslibs/node_modules
+
+# Web fonts
+/fonts/node_modules

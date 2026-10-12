@@ -1,0 +1,13 @@
+{
+  "name": "scraps-fonts",
+  "private": true,
+  "type": "module",
+  "description": "The web fonts a generated site uses, copied into the crate so the site serves them itself.",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "@fontsource-variable/noto-sans-jp": "5.3.1",
+    "@fontsource-variable/rubik": "5.3.0"
+  }
+}
