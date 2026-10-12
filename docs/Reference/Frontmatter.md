@@ -5,12 +5,13 @@ type: Reference
 #[[Notation/Frontmatter]]
 
 Scraps reads a YAML frontmatter block when a file has one, and requires
-none. Two keys carry meaning; every other key is kept as data and given no
+none. Three keys carry meaning; every other key is kept as data and given no
 meaning.
 
 ```markdown
 ---
 type: Blog
+description: Why wiki-links beat Markdown links for notes.
 tags: [Markdown, Notation/Wiki-link]
 owner: alice
 ---
@@ -24,6 +25,7 @@ The body starts here.
 |---|---|
 | `tags` | The scrap's tags, merged with the `#[[tag]]` references in its body |
 | `type` | The scrap's kind |
+| `description` | The scrap's one-line summary |
 
 ### `tags`
 
@@ -46,6 +48,21 @@ the scraps of one; `scraps get --json type` returns a single scrap's type.
 This documentation types its own pages this way: run `scraps type list` in
 `docs/`.
 
+### `description`
+
+A single string: one sentence summarising the scrap, written for a reader
+deciding whether to open it. Surrounding whitespace is trimmed and the
+sentence is otherwise used as written.
+
+On the static site it replaces the summary derived from the body on the
+updated and backlinks views, and on the scrap's own page it fills the
+`description`, `og:description` and `twitter:description` meta tags in place
+of the site-wide `description` of [[Reference/Configuration]]. A scrap
+without one keeps the derived summary and the site-wide value.
+
+`scraps get --json description` returns a single scrap's description, and
+each `scraps search --json` hit that has one carries it.
+
 ## Reading rules
 
 Frontmatter never fails a command and never raises a lint warning.
@@ -53,8 +70,8 @@ Frontmatter never fails a command and never raises a lint warning.
 - A block that is absent, unclosed or not valid YAML is skipped; the scrap is
   read as if it had none, and the lines stay ordinary Markdown.
 - A key whose value has the wrong shape is ignored: `tags` that is not a
-  list, a `tags` entry that is not a string, a `type` that is not a non-empty
-  string.
+  list, a `tags` entry that is not a string, a `type` or `description` that
+  is not a non-empty string.
 - Keys Scraps does not read are passed through untouched, in the order they
   were written.
 
@@ -67,8 +84,9 @@ A scrap's title and context come from its file path, and its links from
 
 A block Scraps reads is metadata, not content:
 
-- The static site leaves it out of the scrap's page, of the summary on index
-  and tag pages, and of any page that embeds the scrap.
+- The static site leaves it out of the scrap's page, of the summary derived
+  for index pages, and of any page that embeds the scrap. Only a
+  `description` is shown, where the key says so above.
 - Nothing in it is read as structure: no heading, code block, image, task
   or `[[ ]]` reference comes out of the YAML, and `scraps search` does not
   match its text.
@@ -80,14 +98,15 @@ exception: it is the file's text, block included.
 
 ## Open Knowledge Format
 
-`tags` and `type` are the keys the
+`tags`, `type` and `description` are keys the
 [Open Knowledge Format](https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/main/SPEC.md)
-(OKF) defines, so files written for OKF bring their tags and types with them.
+(OKF) defines, so files written for OKF bring their tags, types and
+descriptions with them.
 The reverse is not asked for: OKF requires `type` on every document, Scraps
 on none.
 
-The rest of OKF is not interpreted. Its other keys are passed through like
-any author-defined key, links between files written as ordinary Markdown
+The rest of OKF is not interpreted. Its other keys, `title` among them, are
+passed through like any author-defined key, links between files written as ordinary Markdown
 links are not Scraps links, and `index.md` and `log.md` are ordinary scraps.
 
 ## Reading the whole block

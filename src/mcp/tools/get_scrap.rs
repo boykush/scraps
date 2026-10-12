@@ -18,6 +18,7 @@ const FIELD_BODY: &str = "body";
 const FIELD_HEADINGS: &str = "headings";
 const FIELD_CODE_BLOCKS: &str = "code_blocks";
 const FIELD_TYPE: &str = "type";
+const FIELD_DESCRIPTION: &str = "description";
 
 const DEFAULT_FIELDS: &[&str] = &[FIELD_TITLE, FIELD_CTX, FIELD_BODY];
 const ALLOWED_FIELDS: &[&str] = &[
@@ -27,6 +28,7 @@ const ALLOWED_FIELDS: &[&str] = &[
     FIELD_HEADINGS,
     FIELD_CODE_BLOCKS,
     FIELD_TYPE,
+    FIELD_DESCRIPTION,
 ];
 
 #[derive(Debug, Deserialize, JsonSchema)]
@@ -39,7 +41,7 @@ pub struct GetScrapRequest {
     /// Optional heading text. When set, body/headings/code_blocks are scoped to that section.
     pub heading: Option<String>,
     /// Optional projection of fields to include. Defaults to ["title", "ctx", "body"].
-    /// Allowed: "title", "ctx", "body", "headings", "code_blocks", "type".
+    /// Allowed: "title", "ctx", "body", "headings", "code_blocks", "type", "description".
     pub fields: Option<Vec<String>>,
 }
 
@@ -165,6 +167,16 @@ pub async fn get_scrap(
                         .scrap_type
                         .as_ref()
                         .map(|t| Value::String(t.clone()))
+                        .unwrap_or(Value::Null),
+                );
+            }
+            FIELD_DESCRIPTION => {
+                out.insert(
+                    field.to_string(),
+                    result
+                        .description
+                        .as_ref()
+                        .map(|d| Value::String(d.clone()))
                         .unwrap_or(Value::Null),
                 );
             }

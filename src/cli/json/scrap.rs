@@ -7,6 +7,16 @@ pub struct ScrapKeyJson {
     pub ctx: Option<String>,
 }
 
+/// A search hit: the scrap's key, plus its description when it has one so a
+/// reader can choose what to open without fetching bodies.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SearchHitJson {
+    pub title: String,
+    pub ctx: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HeadingJson {
     pub level: u8,

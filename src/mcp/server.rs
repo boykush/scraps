@@ -1351,6 +1351,76 @@ mod tests {
     }
 
     #[rstest]
+    #[tokio::test]
+    async fn test_get_scrap_projects_the_description_only_when_asked(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap(
+            "orders.md",
+            b"---\ndescription: One row per completed customer order.\n---\n\n# Orders\n",
+        );
+        project.add_scrap("note.md", b"# Note\n");
+
+        let described = call_tool_json(
+            &project,
+            "get_scrap",
+            serde_json::json!({"title": "orders", "fields": ["title", "description"]}),
+        )
+        .await;
+        assert_eq!(
+            described["description"],
+            "One row per completed customer order."
+        );
+
+        let plain = call_tool_json(
+            &project,
+            "get_scrap",
+            serde_json::json!({"title": "note", "fields": ["title", "description"]}),
+        )
+        .await;
+        assert!(plain["description"].is_null());
+        assert!(plain.as_object().unwrap().contains_key("description"));
+
+        let default = call_tool_json(
+            &project,
+            "get_scrap",
+            serde_json::json!({"title": "orders"}),
+        )
+        .await;
+        assert!(!default.as_object().unwrap().contains_key("description"));
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_search_scraps_carries_a_description_only_where_there_is_one(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap(
+            "orders.md",
+            b"---\ndescription: One row per completed customer order.\n---\n\n# Orders\n",
+        );
+        project.add_scrap("orders log.md", b"# Orders log\n");
+
+        let response = call_tool_json(
+            &project,
+            "search_scraps",
+            serde_json::json!({"query": "orders"}),
+        )
+        .await;
+        let results = response["results"].as_array().unwrap();
+        let hit = |title: &str| results.iter().find(|r| r["title"] == title).unwrap();
+
+        assert_eq!(
+            hit("orders")["description"],
+            "One row per completed customer order."
+        );
+        assert_eq!(
+            hit("orders log"),
+            &serde_json::json!({"title": "orders log", "ctx": null})
+        );
+    }
+
+    #[rstest]
     fn test_instructions_name_the_type_tools(
         #[from(temp_scrap_project)] project: TempScrapProject,
     ) {
