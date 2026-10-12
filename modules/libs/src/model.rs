@@ -1,10 +1,9 @@
 pub mod base_url;
 pub mod content;
 pub mod context;
-pub mod file;
 pub mod key;
+pub mod page_path;
 pub mod scrap;
-pub mod slug;
 pub mod tag;
 pub mod tags;
 pub mod title;

@@ -3,7 +3,7 @@
 {% block status_left %}scraps &#47; {% if scrap.ctx %}{{ scrap.ctx }}&#47;{% endif %}{{ scrap.title }}{% endblock status_left %}
 
 {% block head %}
-<meta property="og:url" content="{{ base_url }}scraps/{{ scrap.html_file_name }}" />
+<meta property="og:url" content="{{ base_url }}{{ scrap.url_path }}" />
 {% if scrap.thumbnail %}
     <meta property="og:image" content="{{ scrap.thumbnail }}" />
     <meta name="twitter:image" content="{{ scrap.thumbnail }}" />
@@ -15,7 +15,7 @@
         {% if scrap_tags | length > 0 %}
             <p class="tags">
                 {% for tag in scrap_tags %}
-                    <a class="tag" href="{{ base_url }}tags/{{ tag.slug }}.html"><span class="syntax">#[[</span>{{ tag.title }}<span class="syntax">]]</span></a>
+                    <a class="tag" href="{{ base_url }}{{ tag.url_path }}"><span class="syntax">#[[</span>{{ tag.title }}<span class="syntax">]]</span></a>
                 {% endfor %}
             </p>
         {% endif %}
@@ -23,7 +23,7 @@
           <h3 class="context">{{ scrap.ctx }}<span>&#47;</span></h3>
         {% endif %}
         <h1 class="title">{{ scrap.title }}</h1>{% if scrap_type %}
-        <p class="type">type <a class="name" href="{{ base_url }}types/{{ scrap_type.slug }}/">{{ scrap_type.name }}</a></p>{% endif %}
+        <p class="type">type <a class="name" href="{{ base_url }}{{ scrap_type.url_path }}">{{ scrap_type.name }}</a></p>{% endif %}
         {% if scrap.commited_ts %}
             <p class="commited-date">
                 committed {{ scrap.commited_ts | date(format="%Y-%m-%d", timezone=timezone) }}

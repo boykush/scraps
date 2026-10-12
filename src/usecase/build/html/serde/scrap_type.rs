@@ -6,8 +6,9 @@ use crate::usecase::build::model::scrap_types::{ScrapType, ScrapTypes};
 pub struct TypeTera {
     /// The type as written in frontmatter.
     pub name: String,
-    /// Directory of the views narrowed to the type: `/types/<slug>/`.
-    slug: String,
+    /// URL of the views narrowed to the type, relative to `base_url` and
+    /// already percent-encoded. Ends in `/`.
+    url_path: String,
     pub scraps_count: usize,
 }
 
@@ -15,7 +16,7 @@ impl From<&ScrapType> for TypeTera {
     fn from(scrap_type: &ScrapType) -> Self {
         TypeTera {
             name: scrap_type.name.clone(),
-            slug: scrap_type.slug.clone(),
+            url_path: scrap_type.page_path().to_url_path(),
             scraps_count: scrap_type.scraps_count,
         }
     }

@@ -95,7 +95,7 @@ test('sort views are always generated', async ({ page }) => {
   await page.goto('/backlinks/', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('.sidebar nav.views .item.active')).toHaveText(/backlinks/);
 
-  await page.goto('/scraps/', { waitUntil: 'domcontentloaded' });
+  await page.goto('/all-scraps/', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('.sidebar nav.views .item.active')).toHaveText(/all scraps/);
   await expect(page.locator('.jump-bar .jump').first()).toBeVisible();
   await expect(page.locator('section.title-group').first()).toBeVisible();
@@ -116,4 +116,24 @@ test('search scraps', async ({ page }) => {
 
   // Expect the search results to contain "What is Scraps?" (auto-retries).
   await expect(page.locator('[id="search-results"]')).toContainText('What is Scraps?');
+});
+
+test('pages are served at their names as written', async ({ page }) => {
+  await page.goto('/all-scraps/', { waitUntil: 'domcontentloaded' });
+
+  // A title with a space and a `?`: the link is percent-encoded, and the dev
+  // server has to decode it back to the file on disk.
+  await page.locator('.scrap-index a.entry', { hasText: 'What is Scraps?' }).click();
+  await expect(page).toHaveURL(/\/scraps\/Explanation\/What%20is%20Scraps%3F\.html$/);
+  await expect(page.locator('h1.title')).toHaveText('What is Scraps?');
+
+  // A type's views live under its name, and a tag's page under its own.
+  await page.locator('p.type a.name').click();
+  await expect(page).toHaveURL(/\/types\/Explanation\/$/);
+  await expect(page.locator('.type-filter .option.active')).toContainText('Explanation');
+
+  await page.goto('/all-tags/', { waitUntil: 'domcontentloaded' });
+  await page.locator('.tag-links a.link').first().click();
+  await expect(page).toHaveURL(/\/tags\/.+\.html$/);
+  await expect(page.locator('section.connections .scrap-links')).toBeVisible();
 });

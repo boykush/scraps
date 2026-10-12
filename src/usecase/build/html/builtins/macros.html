@@ -2,7 +2,7 @@
     <ul class="scrap-rows">
         {% for scrap in scraps %}
             <li class="item">
-                <a class="row" href="{{ base_url }}scraps/{{ scrap.html_file_name }}">
+                <a class="row" href="{{ base_url }}{{ scrap.url_path }}">
                     {% if scrap.thumbnail %}
                         <img class="thumbnail" alt="" src="{{ scrap.thumbnail }}" loading="lazy" />
                     {% endif %}
@@ -27,7 +27,7 @@
     <ul class="scrap-index">
         {% for scrap in scraps %}
             <li class="item">
-                <a class="entry" href="{{ base_url }}scraps/{{ scrap.html_file_name }}">
+                <a class="entry" href="{{ base_url }}{{ scrap.url_path }}">
                     <span class="title">{{ scrap.title }}</span>
                     {% if scrap.ctx %}<span class="ctx">{{ scrap.ctx }}</span>{% endif %}
                     <span class="count">{{ scrap.backlinks_count }}</span>
@@ -41,7 +41,7 @@
     <ul class="scrap-links">
         {% for scrap in scraps %}
             <li class="item">
-                <a class="link" href="{{ base_url }}scraps/{{ scrap.html_file_name }}">
+                <a class="link" href="{{ base_url }}{{ scrap.url_path }}">
                     <span class="title">{{ scrap.title }}</span>
                     {% if scrap.ctx %}<span class="ctx">{{ scrap.ctx }}</span>{% endif %}
                 </a>
@@ -61,7 +61,7 @@
             <line class="edge {{ node.dir }}" x1="{{ node.x1 }}" y1="{{ node.y1 }}" x2="{{ node.x2 }}" y2="{{ node.y2 }}"{% if node.arrow_start %} marker-start="url(#scrap-graph-arrow)"{% endif %}{% if node.arrow_end %} marker-end="url(#scrap-graph-arrow)"{% endif %} />
         {% endfor %}
         {% for node in graph.nodes %}
-            <a class="scrap {{ node.dir }}" href="{{ base_url }}scraps/{{ node.html_file_name }}">
+            <a class="scrap {{ node.dir }}" href="{{ base_url }}{{ node.url_path }}">
                 <title>{% if node.ctx %}{{ node.ctx }}&#47;{% endif %}{{ node.title }}</title>
                 <circle class="dot" cx="{{ node.x }}" cy="{{ node.y }}" r="{{ node.r }}" />
                 <text class="label" x="{{ node.label_x }}" y="{{ node.label_y }}" text-anchor="{{ node.anchor }}">{{ node.label }}</text>
@@ -79,14 +79,14 @@
     <ul class="tag-links">
         {% for tag in tags | slice(end=slice_size) %}
             <li class="item">
-                <a class="link" href="{{ base_url }}tags/{{ tag.slug }}.html">
+                <a class="link" href="{{ base_url }}{{ tag.url_path }}">
                     <span class="title">#{{ tag.title }}</span><span class="count">{{ tag.backlinks_count }}</span>
                 </a>
             </li>
         {% endfor %}
         {% if tags | length > slice_size %}
             <li class="item">
-                <a class="link more" href="{{ base_url }}tags/">More&#8230;</a>
+                <a class="link more" href="{{ base_url }}all-tags/">More&#8230;</a>
             </li>
         {% endif %}
     </ul>
@@ -97,7 +97,7 @@
         <span class="label">type</span>
         {% if active_name %}<a class="option" href="{{ base_url }}{{ view_path }}">all</a>{% else %}<span class="option active">all</span>{% endif %}
         {% for scrap_type in types %}
-            {% if scrap_type.name == active_name %}<span class="option active">{{ scrap_type.name }}<span class="count">{{ scrap_type.scraps_count }}</span></span>{% else %}<a class="option" href="{{ base_url }}types/{{ scrap_type.slug }}/{{ view_path }}">{{ scrap_type.name }}<span class="count">{{ scrap_type.scraps_count }}</span></a>{% endif %}
+            {% if scrap_type.name == active_name %}<span class="option active">{{ scrap_type.name }}<span class="count">{{ scrap_type.scraps_count }}</span></span>{% else %}<a class="option" href="{{ base_url }}{{ scrap_type.url_path }}{{ view_path }}">{{ scrap_type.name }}<span class="count">{{ scrap_type.scraps_count }}</span></a>{% endif %}
         {% endfor %}
     </p>
 {% endcomponent type_filter %}

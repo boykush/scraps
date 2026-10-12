@@ -53,7 +53,7 @@ mod tests {
         // Add static search_index.json template
         project.add_static_file(
             "search_index.json",
-            b"[{% for scrap in scraps %}{ \"title\": \"{{ scrap.link_title }}\", \"url\": \"{{ base_url}}scraps/{{ scrap.file_stem }}.html\" }{% if not loop.last %},{% endif %}{% endfor %}]"
+            b"[{% for scrap in scraps %}{ \"title\": \"{{ scrap.link_title }}\", \"url\": \"{{ base_url }}{{ scrap.url_path }}\" }{% if not loop.last %},{% endif %}{% endfor %}]"
         );
 
         let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
@@ -73,7 +73,7 @@ mod tests {
         let result = fs::read_to_string(project.output_path("search_index.json")).unwrap();
         assert_eq!(
             result,
-            "[{ \"title\": \"scrap1\", \"url\": \"http://localhost:1112/scraps/scrap1.html\" },{ \"title\": \"Context/scrap2\", \"url\": \"http://localhost:1112/scraps/context/scrap2.html\" }]"
+            "[{ \"title\": \"scrap1\", \"url\": \"http://localhost:1112/scraps/scrap1.html\" },{ \"title\": \"Context/scrap2\", \"url\": \"http://localhost:1112/scraps/Context/scrap2.html\" }]"
         );
     }
 
@@ -107,7 +107,7 @@ mod tests {
         assert_eq!(entries[1]["title"], "Context/scrap2");
         assert_eq!(
             entries[1]["url"],
-            "http://localhost:1112/scraps/context/scrap2.html"
+            "http://localhost:1112/scraps/Context/scrap2.html"
         );
         assert_eq!(entries[2]["title"], "quote\"in title");
     }

@@ -69,17 +69,17 @@ pub enum CliError {
     Display,
 
     #[error(
-        "Failed to load .scraps.toml. See: https://boykush.github.io/scraps/scraps/configuration.reference.html"
+        "Failed to load .scraps.toml. See: https://boykush.github.io/scraps/scraps/Reference/Configuration.html"
     )]
     ConfigLoad,
 
     #[error(
-        "Invalid .scraps.toml format. See: https://boykush.github.io/scraps/scraps/configuration.reference.html"
+        "Invalid .scraps.toml format. See: https://boykush.github.io/scraps/scraps/Reference/Configuration.html"
     )]
     InvalidConfigFormat,
 
     #[error(
-        "Missing [ssg] section in .scraps.toml. This section is required for build and serve commands. See: https://boykush.github.io/scraps/scraps/configuration.reference.html"
+        "Missing [ssg] section in .scraps.toml. This section is required for build and serve commands. See: https://boykush.github.io/scraps/scraps/Reference/Configuration.html"
     )]
     MissingSsgSection,
 }

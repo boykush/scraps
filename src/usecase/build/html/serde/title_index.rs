@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use scraps_libs::model::file::ScrapFileStem;
+use scraps_libs::model::page_path::PagePath;
 
 use crate::usecase::build::model::{
     backlinks_map::BacklinksMap,
@@ -12,7 +12,8 @@ use crate::usecase::build::model::{
 struct SerializeTitleIndexScrap {
     ctx: Option<String>,
     title: String,
-    html_file_name: String,
+    /// Page URL relative to `base_url`, already percent-encoded.
+    url_path: String,
     backlinks_count: usize,
 }
 
@@ -53,7 +54,7 @@ impl TitleIndexTera {
             let title = scrap.title().to_string();
             let entry = SerializeTitleIndexScrap {
                 ctx: scrap.ctx().as_ref().map(|c| c.to_string()),
-                html_file_name: format!("{}.html", ScrapFileStem::from(scrap.self_key().clone())),
+                url_path: PagePath::of_scrap(&scrap.self_key()).to_url_path(),
                 backlinks_count: backlinks_map.get(&scrap.self_key()).len(),
                 title,
             };

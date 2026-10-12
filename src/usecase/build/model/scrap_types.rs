@@ -1,21 +1,23 @@
-use std::collections::{BTreeMap, HashSet};
+use std::collections::BTreeMap;
 
-use scraps_libs::{model::scrap::Scrap, slugify};
+use scraps_libs::model::{page_path::PagePath, scrap::Scrap};
 
-/// Slug for a type whose name slugifies to nothing, such as `-`.
-const EMPTY_SLUG: &str = "type";
-
-/// One type in use: its name as written, the directory under `types/` that
-/// holds the views narrowed to it, and how many scraps carry it.
+/// One type in use: its name as written and how many scraps carry it.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ScrapType {
     pub name: String,
-    pub slug: String,
     pub scraps_count: usize,
 }
 
-/// The types in use across a wiki, in name order. Built once per build: a
-/// type's slug depends on the other types, so every page must read it here.
+impl ScrapType {
+    /// The directory that holds the views narrowed to this type.
+    pub fn page_path(&self) -> PagePath {
+        PagePath::of_type(&self.name)
+    }
+}
+
+/// The types in use across a wiki, in name order. Types compare as written,
+/// case included, so `Blog` and `blog` are two types.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ScrapTypes(Vec<ScrapType>);
 
@@ -26,20 +28,11 @@ impl ScrapTypes {
             *counts.entry(name).or_default() += 1;
         }
 
-        // Types are case-sensitive and slugs are not, so `Blog` and `blog`
-        // want the same path. Name order decides who keeps it; the rest get a
-        // numeric suffix, which keeps the paths the same on every build.
-        let mut taken: HashSet<String> = HashSet::new();
         let types = counts
             .into_iter()
-            .map(|(name, scraps_count)| {
-                let slug = free_slug(name, &taken);
-                taken.insert(slug.clone());
-                ScrapType {
-                    name: name.to_string(),
-                    slug,
-                    scraps_count,
-                }
+            .map(|(name, scraps_count)| ScrapType {
+                name: name.to_string(),
+                scraps_count,
             })
             .collect();
 
@@ -66,21 +59,6 @@ impl ScrapTypes {
     }
 }
 
-fn free_slug(name: &str, taken: &HashSet<String>) -> String {
-    let base = match slugify::by_dash(name) {
-        slug if slug.is_empty() => EMPTY_SLUG.to_string(),
-        slug => slug,
-    };
-
-    let mut slug = base.clone();
-    let mut suffix = 2;
-    while taken.contains(&slug) {
-        slug = format!("{base}-{suffix}");
-        suffix += 1;
-    }
-    slug
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -89,10 +67,10 @@ mod tests {
         Scrap::new(title, &None, &format!("---\ntype: \"{scrap_type}\"\n---\n"))
     }
 
-    fn slugs(types: &ScrapTypes) -> Vec<(&str, &str)> {
+    fn paths(types: &ScrapTypes) -> Vec<(&str, String)> {
         types
             .iter()
-            .map(|scrap_type| (scrap_type.name.as_str(), scrap_type.slug.as_str()))
+            .map(|scrap_type| (scrap_type.name.as_str(), scrap_type.page_path().to_string()))
             .collect()
     }
 
@@ -121,33 +99,24 @@ mod tests {
     }
 
     #[test]
-    fn it_slugifies_a_type_as_one_segment() {
-        let scraps = [typed("a", "BigQuery Table"), typed("b", "ADR/Accepted")];
+    fn it_puts_each_type_under_its_name_as_written() {
+        let scraps = [
+            typed("a", "blog"),
+            typed("b", "Blog"),
+            typed("c", "Blog 2"),
+            typed("d", "ADR/Accepted"),
+            typed("e", "-"),
+        ];
 
         assert_eq!(
-            slugs(&ScrapTypes::new(&scraps)),
+            paths(&ScrapTypes::new(&scraps)),
             vec![
-                ("ADR/Accepted", "adr-slash-accepted"),
-                ("BigQuery Table", "bigquery-table"),
+                ("-", "types/-/".to_string()),
+                ("ADR/Accepted", "types/ADR%2FAccepted/".to_string()),
+                ("Blog", "types/Blog/".to_string()),
+                ("Blog 2", "types/Blog 2/".to_string()),
+                ("blog", "types/blog/".to_string()),
             ]
         );
-    }
-
-    #[test]
-    fn it_keeps_types_whose_slugs_collide_on_separate_paths() {
-        // `blog-2` is already a type's own slug, so the suffix has to move on.
-        let scraps = [typed("a", "blog"), typed("b", "Blog"), typed("c", "Blog 2")];
-
-        assert_eq!(
-            slugs(&ScrapTypes::new(&scraps)),
-            vec![("Blog", "blog"), ("Blog 2", "blog-2"), ("blog", "blog-3")]
-        );
-    }
-
-    #[test]
-    fn it_gives_a_type_with_an_empty_slug_a_path() {
-        let scraps = [typed("a", "-")];
-
-        assert_eq!(slugs(&ScrapTypes::new(&scraps)), vec![("-", "type")]);
     }
 }

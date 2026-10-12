@@ -1,4 +1,4 @@
-use scraps_libs::model::file::ScrapFileStem;
+use scraps_libs::model::page_path::PagePath;
 
 use crate::usecase::build::model::scrap_graph::{GraphNode, LinkDir, NODE_R, ScrapGraph};
 
@@ -7,7 +7,8 @@ struct SerializeGraphNode {
     ctx: Option<String>,
     title: String,
     label: String,
-    html_file_name: String,
+    /// Page URL relative to `base_url`, already percent-encoded.
+    url_path: String,
     /// "in" | "out" | "both" — a class hook so a user template can style the
     /// directions without re-deriving them.
     dir: &'static str,
@@ -34,7 +35,7 @@ impl SerializeGraphNode {
             ctx: node.key.ctx().as_ref().map(|ctx| ctx.to_string()),
             label: node.label.clone(),
             title,
-            html_file_name: format!("{}.html", ScrapFileStem::from(node.key.clone())),
+            url_path: PagePath::of_scrap(&node.key).to_url_path(),
             dir: match node.dir {
                 LinkDir::In => "in",
                 LinkDir::Out => "out",
@@ -112,7 +113,7 @@ mod tests {
         let backlink = tera.nodes.iter().find(|n| n.title == "in").unwrap();
         assert_eq!(backlink.dir, "in");
         assert_eq!(backlink.ctx, Some("guide".to_string()));
-        assert_eq!(backlink.html_file_name, "guide/in.html");
+        assert_eq!(backlink.url_path, "scraps/guide/in.html");
         assert!(backlink.arrow_start && !backlink.arrow_end);
         assert_eq!(backlink.anchor, "end");
 

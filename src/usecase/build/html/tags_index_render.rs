@@ -25,7 +25,9 @@ impl TagsIndexRender {
 
         Ok(TagsIndexRender {
             tera,
-            output: output.join("tags"),
+            // Not `tags/`: that directory holds one page per tag, and a
+            // listing inside it would sit where a tag named `index` is written.
+            output: output.join("all-tags"),
         })
     }
 
@@ -101,7 +103,7 @@ mod tests {
             .run(&base_url, &metadata, &scraps, &backlinks_map, &site_nav)
             .unwrap();
 
-        let result1 = fs::read_to_string(project.output_path("tags/index.html")).unwrap();
+        let result1 = fs::read_to_string(project.output_path("all-tags/index.html")).unwrap();
         assert_eq!(
             result1,
             "<a href=\"./tag1.html\">tag1</a><a href=\"./tag2.html\">tag2</a>"

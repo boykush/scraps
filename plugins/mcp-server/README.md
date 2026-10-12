@@ -280,7 +280,7 @@ none of them. It reads three: the strings of a `tags` list are tags alongside
 `#[[tag]]` (`list_tags`, `lookup_tag_backlinks`), `type` is the scrap's
 type (`list_types`, `lookup_type_scraps`), and `description` is its one-line
 summary (`get_scrap`, `search_scraps`). Every other key is opaque — see the
-[frontmatter reference](https://boykush.github.io/scraps/scraps/reference/frontmatter.html).
+[frontmatter reference](https://boykush.github.io/scraps/scraps/Reference/Frontmatter.html).
 Scraps without a block are omitted, and a malformed block is skipped rather
 than failing the call.
 
@@ -305,5 +305,5 @@ Replace `~/path/to/your/wiki` with the directory containing `.scraps.toml`. stdi
 ## Further reading
 
 - Scraps documentation: <https://boykush.github.io/scraps/>
-- AI integration overview: <https://boykush.github.io/scraps/scraps/how-to/integrate-with-ai-assistants.html>
+- AI integration overview: <https://boykush.github.io/scraps/scraps/How-to/Integrate%20with%20AI%20Assistants.html>
 - CLI + JSON skills bundle: [`llm-wiki` plugin](../llm-wiki/README.md)

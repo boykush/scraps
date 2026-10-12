@@ -15,10 +15,13 @@ use super::serde::title_index::TitleIndexTera;
 /// The paginated index answers "what changed lately"; this one answers "what
 /// is in here": every scrap on a single page, grouped by the title's initial
 /// with a jump bar, so a reader who knows the name goes straight to it.
+// Not `scraps/`: that directory holds one page per key, and a listing inside
+// it would sit where a scrap named `index` is written.
+const VIEW_PATH: &str = "all-scraps/";
+
 pub struct ScrapsIndexRender {
     tera: Tera,
     output: RenderOutput,
-    types_output: RenderOutput,
 }
 
 impl ScrapsIndexRender {
@@ -27,8 +30,7 @@ impl ScrapsIndexRender {
 
         Ok(ScrapsIndexRender {
             tera,
-            output: output.join("scraps"),
-            types_output: output.join("types"),
+            output: output.clone(),
         })
     }
 
@@ -49,20 +51,21 @@ impl ScrapsIndexRender {
         );
 
         let mut context = shell.clone();
-        templates::insert_type_filter(&mut context, "scraps/", site_nav, None);
+        templates::insert_type_filter(&mut context, VIEW_PATH, site_nav, None);
         context.insert("groups", &TitleIndexTera::new(scrap_details, backlinks_map));
         self.output
+            .join(VIEW_PATH)
             .render(&self.tera, template_name, &context, "index.html")?;
 
-        // The same index again for each type, under `types/<slug>/scraps/`.
+        // The same index again for each type, under the type's directory.
         site_nav.types.iter().try_for_each(|scrap_type| {
             let mut context = shell.clone();
-            templates::insert_type_filter(&mut context, "scraps/", site_nav, Some(scrap_type));
+            templates::insert_type_filter(&mut context, VIEW_PATH, site_nav, Some(scrap_type));
             let groups = TitleIndexTera::of_type(scrap_details, backlinks_map, &scrap_type.name);
             context.insert("groups", &groups);
-            self.types_output
-                .join(&scrap_type.slug)
-                .join("scraps")
+            self.output
+                .join(scrap_type.page_path().as_str())
+                .join(VIEW_PATH)
                 .render(&self.tera, template_name, &context, "index.html")
         })
     }
@@ -126,7 +129,7 @@ mod tests {
             .run(&base_url, &metadata, &details, &backlinks_map, &site_nav)
             .unwrap();
 
-        let result = fs::read_to_string(project.output_path("scraps/index.html")).unwrap();
+        let result = fs::read_to_string(project.output_path("all-scraps/index.html")).unwrap();
         assert_eq!(result, "[た デザイントークン:0][A Alpha:1][B beta:0]");
     }
 
@@ -167,7 +170,7 @@ mod tests {
             .run(&base_url, &metadata, &details, &backlinks_map, &site_nav)
             .unwrap();
 
-        let result = fs::read_to_string(project.output_path("scraps/index.html")).unwrap();
+        let result = fs::read_to_string(project.output_path("all-scraps/index.html")).unwrap();
         assert!(result.contains("class=\"jump\""));
         assert!(result.contains("デザイントークン"));
     }
@@ -178,7 +181,7 @@ mod tests {
         let metadata = HtmlMetadata::new(&LangCode::default(), "Scrap", &None, &None);
         let scraps = [
             Scrap::new("alpha", &None, "---\ntype: Blog\n---\n"),
-            Scrap::new("beta", &None, "---\ntype: blog\n---\n"),
+            Scrap::new("beta", &None, "---\ntype: Field Note\n---\n"),
             Scrap::new("gamma", &None, ""),
         ];
         let scrap_texts = scraps
@@ -216,18 +219,25 @@ mod tests {
 
         let read = |path: &str| fs::read_to_string(project.output_path(path)).unwrap();
 
-        let all = read("scraps/index.html");
-        assert!(all.contains("href=\"http://localhost:1112/types/blog/scraps/\">Blog<"));
+        let all = read("all-scraps/index.html");
+        assert!(all.contains("href=\"http://localhost:1112/types/Blog/all-scraps/\">Blog<"));
+        assert!(
+            all.contains(
+                "href=\"http://localhost:1112/types/Field%20Note/all-scraps/\">Field Note<"
+            )
+        );
         assert!(all.contains("scraps/gamma.html"));
 
-        // `Blog` and `blog` want the same slug; each still gets its own view.
-        let upper = read("types/blog/scraps/index.html");
+        // The listing stays out of `scraps/`, where a key could name it.
+        assert!(!project.output_path("scraps").exists());
+
+        let upper = read("types/Blog/all-scraps/index.html");
         assert!(upper.contains("scraps/alpha.html"));
         assert!(!upper.contains("scraps/beta.html"));
         assert!(upper.contains("<span class=\"stats\">1 of 3 scraps</span>"));
 
-        let lower = read("types/blog-2/scraps/index.html");
-        assert!(lower.contains("scraps/beta.html"));
-        assert!(!lower.contains("scraps/alpha.html"));
+        let other = read("types/Field Note/all-scraps/index.html");
+        assert!(other.contains("scraps/beta.html"));
+        assert!(!other.contains("scraps/alpha.html"));
     }
 }
