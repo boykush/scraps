@@ -53,6 +53,10 @@
         "jslibs/**"
       ],
       "postUpgradeTasks": {
+        "installTools": {
+          "node": {},
+          "pnpm": {}
+        },
         "commands": [
           "pnpm --dir jslibs install",
           "pnpm --dir jslibs run build"
