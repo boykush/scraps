@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+#MISE description="Fail if the bundled web fonts are stale against fonts/package.json"
+#MISE dir="fonts"
+set -euo pipefail
+
+generated="../src/usecase/build/fonts"
+before="$(mktemp -d)"
+trap 'rm -rf "$before"' EXIT
+cp -R "$generated/." "$before"
+
+pnpm install
+pnpm run build
+
+# Compared against the files themselves rather than against git, so the check
+# also holds before the copies are first committed.
+if ! diff -rq "$before" "$generated" >&2; then
+  echo "error: $generated is out of date. Run 'mise run fonts:build' and commit the result." >&2
+  exit 1
+fi

@@ -70,7 +70,7 @@ mise install
 
 This will automatically install the correct versions of:
 - **Rust** (stable version)
-- **Node.js** and **pnpm** (for E2E tests, design tokens and the bundled browser libraries)
+- **Node.js** and **pnpm** (for E2E tests, design tokens and the bundled browser libraries and fonts)
 - **hk** (git hook manager)
 - **pkl** (configuration language)
 - Any other tools specified in the project configuration

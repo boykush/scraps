@@ -4,11 +4,10 @@ import { test, expect, type Page } from '@playwright/test';
  * Lightweight browser smoke tests for a scraps-generated site, run against the
  * local `scraps serve`.
  *
- * The site serves its own scripts, but the pages still link web fonts from
- * third-party hosts. Those requests intermittently *stall* on CI runners, and a
- * navigation waits on its stylesheets, so a single stall hangs the whole job.
- * So we answer every external request locally: the suite becomes hermetic and
- * never depends on runner network weather.
+ * The site serves its own scripts and fonts, but a scrap can still embed an
+ * image or a card from another host. Such requests intermittently *stall* on CI
+ * runners and a stall hangs the whole job, so every external request is
+ * answered locally: the suite never depends on runner network weather.
  */
 async function mockExternalRequests(page: Page) {
   await page.route('**/*', async (route) => {
@@ -16,7 +15,7 @@ async function mockExternalRequests(page: Page) {
     if (url.includes('127.0.0.1') || url.includes('localhost')) {
       return route.continue();
     }
-    return route.fulfill({ status: 200, contentType: 'text/css', body: '' });
+    return route.fulfill({ status: 200, contentType: 'text/plain', body: '' });
   });
 }
 
@@ -72,6 +71,26 @@ test('search scraps', async ({ page }) => {
 
   // Expect the search results to contain "What is Scraps?" (auto-retries).
   await expect(page.locator('[id="search-results"]')).toContainText('What is Scraps?');
+});
+
+test('scripts, styles and fonts all come from the site', async ({ page }) => {
+  // Other kinds are the wiki's own content: the docs' favicon is a remote image.
+  const kinds = ['script', 'stylesheet', 'font'];
+  const external: string[] = [];
+  page.on('request', (request) => {
+    const { hostname } = new URL(request.url());
+    if (hostname !== '127.0.0.1' && kinds.includes(request.resourceType())) {
+      external.push(request.url());
+    }
+  });
+
+  // A page with a diagram, so every script a page can load is loaded.
+  await page.goto('/scraps/Reference/Static%20Site/Pipeline.html', { waitUntil: 'load' });
+  await expect(page.locator('code.mermaid svg')).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+
+  expect(external).toEqual([]);
+  expect(await page.evaluate(() => document.fonts.check('16px Rubik'))).toBe(true);
 });
 
 test('diagrams and code are rendered by the libraries the site serves', async ({ page }) => {
