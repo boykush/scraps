@@ -2,13 +2,13 @@ use crate::error::ScrapsResult;
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::model::title::Title;
+use scraps_libs::model::stem::Stem;
 use serde_json::Value;
 
 /// Result for get scrap operation
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetScrapResult {
-    pub title: Title,
+    pub title: Stem,
     pub ctx: Option<Ctx>,
     pub md_text: String,
     pub scrap_type: Option<String>,
@@ -26,7 +26,7 @@ impl GetScrapUsecase {
     pub fn execute(
         &self,
         scraps: &[Scrap],
-        title: &Title,
+        title: &Stem,
         ctx: &Option<Ctx>,
     ) -> ScrapsResult<GetScrapResult> {
         // Create scrap key for the target scrap
@@ -45,7 +45,7 @@ impl GetScrapUsecase {
             })?;
 
         let scrap_key = target_scrap.self_key();
-        let result_title: Title = (&scrap_key).into();
+        let result_title: Stem = (&scrap_key).into();
         let result_ctx: Option<Ctx> = (&scrap_key).into();
 
         Ok(GetScrapResult {
@@ -74,7 +74,7 @@ mod tests {
         let usecase = GetScrapUsecase::new();
 
         let result = usecase
-            .execute(&scraps, &Title::from("scrap1"), &None)
+            .execute(&scraps, &Stem::from("scrap1"), &None)
             .expect("Should succeed");
 
         assert_eq!(result.title.to_string(), "scrap1");
@@ -93,7 +93,7 @@ mod tests {
         let usecase = GetScrapUsecase::new();
 
         let result = usecase
-            .execute(&scraps, &Title::from("scrap1"), &Some(Ctx::from("Context")))
+            .execute(&scraps, &Stem::from("scrap1"), &Some(Ctx::from("Context")))
             .expect("Should succeed");
 
         assert_eq!(result.title.to_string(), "scrap1");
@@ -110,13 +110,13 @@ mod tests {
 
         let usecase = GetScrapUsecase::new();
 
-        let typed = usecase.execute(&scraps, &Title::from("typed"), &None);
+        let typed = usecase.execute(&scraps, &Stem::from("typed"), &None);
         assert_eq!(
             typed.unwrap().frontmatter,
             Some(serde_json::json!({"type": "Blog"}))
         );
 
-        let plain = usecase.execute(&scraps, &Title::from("plain"), &None);
+        let plain = usecase.execute(&scraps, &Stem::from("plain"), &None);
         assert_eq!(plain.unwrap().frontmatter, None);
     }
 
@@ -126,7 +126,7 @@ mod tests {
 
         let usecase = GetScrapUsecase::new();
 
-        let result = usecase.execute(&scraps, &Title::from("nonexistent"), &None);
+        let result = usecase.execute(&scraps, &Stem::from("nonexistent"), &None);
 
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("Scrap not found"));

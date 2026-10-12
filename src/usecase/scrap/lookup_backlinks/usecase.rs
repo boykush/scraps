@@ -3,12 +3,12 @@ use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::model::title::Title;
+use scraps_libs::model::stem::Stem;
 
 /// Result for scrap backlinks lookup operation
 #[derive(Debug, Clone, PartialEq)]
 pub struct LookupScrapBacklinksResult {
-    pub title: Title,
+    pub title: Stem,
     pub ctx: Option<Ctx>,
     pub md_text: String,
 }
@@ -23,7 +23,7 @@ impl LookupScrapBacklinksUsecase {
     pub fn execute(
         &self,
         scraps: &[Scrap],
-        title: &Title,
+        title: &Stem,
         ctx: &Option<Ctx>,
     ) -> ScrapsResult<Vec<LookupScrapBacklinksResult>> {
         // Create scrap key for the target scrap
@@ -50,7 +50,7 @@ impl LookupScrapBacklinksUsecase {
             .iter()
             .map(|linking_scrap| {
                 let scrap_key = &linking_scrap.self_key();
-                let title: Title = scrap_key.into();
+                let title: Stem = scrap_key.into();
                 let ctx: Option<Ctx> = scrap_key.into();
 
                 LookupScrapBacklinksResult {
@@ -92,7 +92,7 @@ mod tests {
         let usecase = LookupScrapBacklinksUsecase::new();
 
         let results = usecase
-            .execute(&scraps, &Title::from("target_scrap"), &None)
+            .execute(&scraps, &Stem::from("target_scrap"), &None)
             .expect("Should succeed");
 
         assert_eq!(results.len(), 2);
@@ -123,7 +123,7 @@ mod tests {
         let results = usecase
             .execute(
                 &scraps,
-                &Title::from("target_scrap"),
+                &Stem::from("target_scrap"),
                 &Some(Ctx::from("Context")),
             )
             .expect("Should succeed");
@@ -138,7 +138,7 @@ mod tests {
 
         let usecase = LookupScrapBacklinksUsecase::new();
 
-        let result = usecase.execute(&scraps, &Title::from("Nonexistent Scrap"), &None);
+        let result = usecase.execute(&scraps, &Stem::from("Nonexistent Scrap"), &None);
 
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("Scrap not found"));
@@ -155,7 +155,7 @@ mod tests {
         let usecase = LookupScrapBacklinksUsecase::new();
 
         let results = usecase
-            .execute(&scraps, &Title::from("target_scrap"), &None)
+            .execute(&scraps, &Stem::from("target_scrap"), &None)
             .expect("Should succeed");
 
         assert_eq!(results.len(), 0);

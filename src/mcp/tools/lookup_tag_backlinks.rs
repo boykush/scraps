@@ -43,15 +43,17 @@ pub async fn lookup_tag_backlinks(
     let lookup_usecase = LookupTagBacklinksUsecase::new();
 
     // Execute lookup
-    let tag_title = scraps_libs::model::title::Title::from(request.tag.as_str());
+    let requested_tag = scraps_libs::model::tag::Tag::from(request.tag.as_str());
 
-    let results = lookup_usecase.execute(&scraps, &tag_title).map_err(|e| {
-        ErrorData::new(
-            ErrorCode(-32008),
-            format!("Lookup tag backlinks failed: {e}"),
-            None,
-        )
-    })?;
+    let results = lookup_usecase
+        .execute(&scraps, &requested_tag)
+        .map_err(|e| {
+            ErrorData::new(
+                ErrorCode(-32008),
+                format!("Lookup tag backlinks failed: {e}"),
+                None,
+            )
+        })?;
 
     // Convert results to structured response
     let scrap_jsons: Vec<ScrapKeyJson> = results

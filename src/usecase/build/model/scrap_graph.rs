@@ -101,7 +101,7 @@ fn sort_key(key: &ScrapKey) -> (String, String) {
             .as_ref()
             .map(|ctx| ctx.to_string())
             .unwrap_or_default(),
-        key.title().to_string(),
+        key.stem().to_string(),
     )
 }
 
@@ -134,7 +134,7 @@ impl ScrapGraph {
         let mut nodes: Vec<GraphNode> = selected
             .into_iter()
             .map(|(key, dir)| GraphNode {
-                label: label_of(&key.title().to_string()),
+                label: label_of(&key.stem().to_string()),
                 key,
                 dir,
                 x: 0.0,
@@ -331,7 +331,7 @@ mod tests {
         graph
             .nodes
             .iter()
-            .find(|node| node.key.title().to_string() == title)
+            .find(|node| node.key.stem().to_string() == title)
             .unwrap_or_else(|| panic!("{title} not in graph"))
             .dir
     }
@@ -368,7 +368,7 @@ mod tests {
             graph
                 .nodes
                 .iter()
-                .find(|n| n.key.title().to_string() == title)
+                .find(|n| n.key.stem().to_string() == title)
                 .unwrap()
                 .clone()
         };
@@ -447,7 +447,7 @@ mod tests {
             graph
                 .nodes
                 .iter()
-                .find(|n| n.key.title().to_string() == title)
+                .find(|n| n.key.stem().to_string() == title)
                 .unwrap()
         };
         assert!(node("in").arrow_at_center() && !node("in").arrow_at_node());

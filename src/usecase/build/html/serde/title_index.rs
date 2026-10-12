@@ -51,7 +51,7 @@ impl TitleIndexTera {
         let mut grouped: BTreeMap<TitleGroup, Vec<SerializeTitleIndexScrap>> = BTreeMap::new();
         for scrap_detail in scrap_details {
             let scrap = scrap_detail.scrap();
-            let title = scrap.title().to_string();
+            let title = scrap.stem().to_string();
             let entry = SerializeTitleIndexScrap {
                 ctx: scrap.ctx().as_ref().map(|c| c.to_string()),
                 url_path: PagePath::of_scrap(&scrap.self_key()).to_url_path(),

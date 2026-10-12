@@ -108,7 +108,7 @@ impl ScrapRender {
         // Both lists are already in hand, so the neighborhood costs no extra
         // walk over the wiki.
         if let Some(graph) = ScrapGraph::new(
-            &scrap.title().to_string(),
+            &scrap.stem().to_string(),
             linked_scraps,
             &outbound_scraps,
             MAX_NODES,

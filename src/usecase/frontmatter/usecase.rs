@@ -1,13 +1,13 @@
 use crate::error::ScrapsResult;
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::model::title::Title;
+use scraps_libs::model::stem::Stem;
 use serde_json::Value;
 
 /// One scrap's frontmatter, resolved back to the scrap it came from.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FrontmatterResult {
-    pub title: Title,
+    pub title: Stem,
     pub ctx: Option<Ctx>,
     pub frontmatter: Value,
 }
@@ -24,7 +24,7 @@ impl FrontmatterUsecase {
             .iter()
             .filter_map(|scrap| {
                 scrap.frontmatter().cloned().map(|value| FrontmatterResult {
-                    title: scrap.title().clone(),
+                    title: scrap.stem().clone(),
                     ctx: scrap.ctx().clone(),
                     frontmatter: value,
                 })

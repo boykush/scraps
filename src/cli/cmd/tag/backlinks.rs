@@ -35,8 +35,8 @@ pub fn run(
 
     let scraps = loader::load_scraps(&scraps_dir_path, &exclude_dirs)?;
     let usecase = LookupTagBacklinksUsecase::new();
-    let tag_title = scraps_libs::model::title::Title::from(tag);
-    let results = usecase.execute(&scraps, &tag_title)?;
+    let requested_tag = scraps_libs::model::tag::Tag::from(tag);
+    let results = usecase.execute(&scraps, &requested_tag)?;
 
     let scrap_keys: Vec<ScrapKeyJson> = results
         .into_iter()

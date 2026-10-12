@@ -9,7 +9,7 @@ use url::Url;
 
 /// Bump whenever the shape or meaning of anything below changes. A file
 /// carrying another version is discarded and rebuilt, never migrated.
-pub const FORMAT_VERSION: u32 = 4;
+pub const FORMAT_VERSION: u32 = 5;
 
 /// The whole compiled wiki: one object per source file plus the link table
 /// that resolving every reference against those objects produced.
@@ -41,14 +41,14 @@ impl IrFile {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct KeyJson {
-    pub title: String,
+    pub stem: String,
     pub ctx: Option<String>,
 }
 
 impl From<&ScrapKey> for KeyJson {
     fn from(key: &ScrapKey) -> Self {
         KeyJson {
-            title: key.title().to_string(),
+            stem: key.stem().to_string(),
             ctx: key.ctx().as_ref().map(|c| c.to_string()),
         }
     }
@@ -60,7 +60,7 @@ impl From<&ScrapKey> for KeyJson {
 pub struct ScrapObject {
     pub path: String,
     pub hash: String,
-    pub title: String,
+    pub stem: String,
     pub ctx: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub commited_ts: Option<i64>,
@@ -77,7 +77,7 @@ impl ScrapObject {
         ScrapObject {
             path: path.to_string(),
             hash: hash.to_string(),
-            title: scrap.title().to_string(),
+            stem: scrap.stem().to_string(),
             ctx: scrap.ctx().as_ref().map(|c| c.to_string()),
             commited_ts: None,
             refs: scrap.refs().iter().map(RefJson::from).collect(),
@@ -364,7 +364,7 @@ pub struct LinkEdge {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use scraps_libs::model::{context::Ctx, title::Title};
+    use scraps_libs::model::{context::Ctx, stem::Stem};
 
     const DOC: &str = "---\nstatus: draft\n---\n\n# Title\n\nSee [[a]], [[Ctx/b#Sec|B]], #[[t/u]], ![[c#Part]] and [d](../d.md#Sec).\n\n- [x] done\n\n```rust\nlet x = 1;\n```\n\n![img](https://example.com/i.png)\n";
 
@@ -373,7 +373,7 @@ mod tests {
         let scrap = Scrap::new("t", &Some("a/b".into()), DOC);
         let object = ScrapObject::from_scrap("a/b/t.md", "hash", &scrap);
         assert_eq!(object.to_facts(), *scrap.facts());
-        assert_eq!(object.title, "t");
+        assert_eq!(object.stem, "t");
         assert_eq!(object.ctx.as_deref(), Some("a/b"));
     }
 
@@ -421,9 +421,9 @@ mod tests {
 
     #[test]
     fn it_flattens_a_key_with_ctx() {
-        let key = ScrapKey::new(&Title::from("t"), &Some(Ctx::from("a/b")));
+        let key = ScrapKey::new(&Stem::from("t"), &Some(Ctx::from("a/b")));
         let json = KeyJson::from(&key);
-        assert_eq!(json.title, "t");
+        assert_eq!(json.stem, "t");
         assert_eq!(json.ctx.as_deref(), Some("a/b"));
     }
 

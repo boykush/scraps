@@ -94,7 +94,7 @@ pub async fn lookup_scrap_neighborhood(
         )
     })?;
 
-    let title = scraps_libs::model::title::Title::from(request.title.as_str());
+    let title = scraps_libs::model::stem::Stem::from(request.title.as_str());
     let ctx = request
         .ctx
         .as_ref()

@@ -1,13 +1,13 @@
 use crate::error::ScrapsResult;
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::model::title::Title;
+use scraps_libs::model::stem::Stem;
 use scraps_libs::nfc::nfc;
 
 /// Result for type scraps lookup operation
 #[derive(Debug, Clone, PartialEq)]
 pub struct LookupTypeScrapsResult {
-    pub title: Title,
+    pub title: Stem,
     pub ctx: Option<Ctx>,
 }
 
@@ -31,7 +31,7 @@ impl LookupTypeScrapsUsecase {
             .iter()
             .filter(|scrap| scrap.scrap_type() == Some(requested.as_ref()))
             .map(|scrap| LookupTypeScrapsResult {
-                title: scrap.title().clone(),
+                title: scrap.stem().clone(),
                 ctx: scrap.ctx().clone(),
             })
             .collect();

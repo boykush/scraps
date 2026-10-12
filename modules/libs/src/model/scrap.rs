@@ -6,7 +6,7 @@ use url::Url;
 use crate::markdown::query::{CodeBlock, Heading, ScrapFacts, TaskItem, WikiRef};
 use crate::nfc::nfc;
 
-use super::{context::Ctx, key::ScrapKey, tag::Tag, title::Title};
+use super::{context::Ctx, key::ScrapKey, stem::Stem, tag::Tag};
 
 const FRONTMATTER_TAGS_KEY: &str = "tags";
 
@@ -27,7 +27,7 @@ pub struct LinkOccurrence {
 /// `facts.refs`; `tags` is the one of its tag refs and the frontmatter `tags`.
 #[derive(PartialEq, Clone, Debug)]
 pub struct Scrap {
-    title: Title,
+    stem: Stem,
     ctx: Option<Ctx>,
     md_text: String,
     facts: ScrapFacts,
@@ -41,11 +41,11 @@ const FRONTMATTER_DESCRIPTION_KEY: &str = "description";
 
 impl Scrap {
     pub fn self_key(&self) -> ScrapKey {
-        ScrapKey::new(&self.title, &self.ctx)
+        ScrapKey::new(&self.stem, &self.ctx)
     }
 
-    pub fn title(&self) -> &Title {
-        &self.title
+    pub fn stem(&self) -> &Stem {
+        &self.stem
     }
 
     pub fn ctx(&self) -> &Option<Ctx> {
@@ -127,13 +127,13 @@ impl Scrap {
 }
 
 impl Scrap {
-    pub fn new(title: &str, ctx: &Option<Ctx>, text: &str) -> Scrap {
-        Scrap::from_facts(title, ctx, text, ScrapFacts::parse(text))
+    pub fn new(stem: &str, ctx: &Option<Ctx>, text: &str) -> Scrap {
+        Scrap::from_facts(stem, ctx, text, ScrapFacts::parse(text))
     }
 
     /// Assemble a scrap from facts parsed earlier, so a source the on-disk IR
     /// already knows is never parsed twice. The facts are trusted as given.
-    pub fn from_facts(title: &str, ctx: &Option<Ctx>, text: &str, facts: ScrapFacts) -> Scrap {
+    pub fn from_facts(stem: &str, ctx: &Option<Ctx>, text: &str, facts: ScrapFacts) -> Scrap {
         // Dedup through a HashSet used to leave the order to chance, which made
         // every consumer of `links()` — backlink lists, rendered pages, the
         // neighborhood walk — reshuffle on each read. Keep first occurrence.
@@ -160,7 +160,7 @@ impl Scrap {
         let scrap_type = frontmatter_type(facts.frontmatter.as_ref());
 
         Scrap {
-            title: title.into(),
+            stem: stem.into(),
             ctx: ctx.clone(),
             md_text: text.to_string(),
             facts,
@@ -228,15 +228,15 @@ mod tests {
     #[test]
     fn it_new_at_root() {
         let scrap = Scrap::new("scrap title", &None, "[[link1]][[link2]][[Context/link3]]");
-        assert_eq!(scrap.title(), &"scrap title".into());
+        assert_eq!(scrap.stem(), &"scrap title".into());
         assert!(scrap.ctx().is_none());
 
         let mut actual_links = scrap.links().to_vec();
         actual_links.sort();
 
         let mut expected = [
-            Title::from("link1").into(),
-            Title::from("link2").into(),
+            Stem::from("link1").into(),
+            Stem::from("link2").into(),
             ScrapKey::with_ctx(&"link3".into(), &"Context".into()),
         ];
         expected.sort();
@@ -285,8 +285,8 @@ mod tests {
         assert_eq!(
             scrap.links().to_vec(),
             vec![
-                ScrapKey::from(Title::from("zulu")),
-                ScrapKey::from(Title::from("alpha")),
+                ScrapKey::from(Stem::from("zulu")),
+                ScrapKey::from(Stem::from("alpha")),
                 ScrapKey::with_ctx(&"mike".into(), &"Context".into()),
             ]
         );
@@ -295,7 +295,7 @@ mod tests {
     #[test]
     fn it_new_with_nested_ctx() {
         let scrap = Scrap::new("borrowing", &Some("programming/rust".into()), "body");
-        assert_eq!(scrap.title(), &"borrowing".into());
+        assert_eq!(scrap.stem(), &"borrowing".into());
         let ctx = scrap.ctx().as_ref().expect("ctx should be Some");
         assert_eq!(format!("{}", ctx), "programming/rust");
         assert_eq!(ctx.depth(), 2);
@@ -410,7 +410,7 @@ mod tests {
         assert_eq!(scrap.images().len(), 1);
         assert_eq!(scrap.thumbnail(), scrap.images().first().cloned());
         assert_eq!(scrap.refs().len(), 3);
-        assert_eq!(scrap.links(), &[ScrapKey::from(Title::from("bar"))]);
+        assert_eq!(scrap.links(), &[ScrapKey::from(Stem::from("bar"))]);
         assert_eq!(scrap.tags(), &[Tag::from("ai")]);
         assert!(scrap.frontmatter().is_none());
     }
@@ -508,7 +508,7 @@ mod tests {
              [c](/%E3%82%AB%E3%82%99%E3%82%A4%E3%83%88%E3%82%99.md)"
         );
         let scrap = Scrap::new("from", &None, &text);
-        assert_eq!(scrap.links(), &[ScrapKey::from(Title::from(GUIDE_NFC))]);
+        assert_eq!(scrap.links(), &[ScrapKey::from(Stem::from(GUIDE_NFC))]);
         assert_eq!(
             Scrap::new(GUIDE_NFD, &None, "").self_key(),
             scrap.links()[0]

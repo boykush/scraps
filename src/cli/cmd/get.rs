@@ -9,7 +9,7 @@ use crate::ir::loader;
 use crate::usecase::scrap::get::usecase::GetScrapUsecase;
 use scraps_libs::markdown::query::{body, code_blocks, heading_slug, headings, images, section};
 use scraps_libs::model::context::Ctx;
-use scraps_libs::model::title::Title;
+use scraps_libs::model::stem::Stem;
 use serde_json::{Map, Value};
 
 const FIELD_TITLE: &str = "title";
@@ -88,7 +88,7 @@ pub fn run(
     ];
 
     let scraps = loader::load_scraps(&scraps_dir_path, &exclude_dirs)?;
-    let target_title = Title::from(title);
+    let target_title = Stem::from(title);
     let target_ctx = ctx.map(Ctx::from);
 
     let usecase = GetScrapUsecase::new();

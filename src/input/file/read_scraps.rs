@@ -58,9 +58,9 @@ pub(crate) fn to_scrap_paths(
     Ok(paths.into_iter().flatten().collect::<Vec<PathBuf>>())
 }
 
-/// Title and ctx a scrap file gets from where it sits: the file stem is the
-/// title and the directories below `scraps_dir_path` are the ctx. Both are
-/// NFC, whichever form the filesystem stores the name in.
+/// Stem and ctx a scrap file gets from where it sits: the file name without
+/// `.md`, and the directories below `scraps_dir_path`. Both are NFC,
+/// whichever form the filesystem stores the name in.
 pub(crate) fn scrap_identity(
     scraps_dir_path: &Path,
     scrap_file_path: &Path,
@@ -114,11 +114,11 @@ pub(crate) fn to_scrap_by_path(
     scraps_dir_path: &Path,
     scrap_file_path: &Path,
 ) -> ScrapsResult<Scrap> {
-    let (title, ctx) = scrap_identity(scraps_dir_path, scrap_file_path)?;
+    let (stem, ctx) = scrap_identity(scraps_dir_path, scrap_file_path)?;
     let md_text = fs::read_to_string(scrap_file_path)
         .context(ScrapsError::ReadScrap(scrap_file_path.to_path_buf()))?;
 
-    Ok(Scrap::new(&title, &ctx, &md_text))
+    Ok(Scrap::new(&stem, &ctx, &md_text))
 }
 
 #[cfg(test)]
@@ -139,18 +139,8 @@ mod tests {
     use crate::test_fixtures::TempScrapProject;
     use std::collections::HashSet;
 
-    fn collect_titles(scraps: &[Scrap]) -> HashSet<String> {
-        scraps
-            .iter()
-            .map(|s| {
-                let key = s.self_key();
-                let title = key.title().to_string();
-                match key.ctx() {
-                    Some(ctx) => format!("{ctx}/{title}"),
-                    None => title,
-                }
-            })
-            .collect()
+    fn collect_keys(scraps: &[Scrap]) -> HashSet<String> {
+        scraps.iter().map(|s| s.self_key().to_string()).collect()
     }
 
     #[test]
@@ -168,9 +158,9 @@ mod tests {
 
         let exclude = vec![project.static_dir.clone(), project.output_dir.clone()];
         let scraps = to_all_scraps(&project.project_root, &exclude).unwrap();
-        let titles = collect_titles(&scraps);
+        let keys = collect_keys(&scraps);
 
-        assert_eq!(titles, HashSet::from(["intro".to_string()]));
+        assert_eq!(keys, HashSet::from(["intro".to_string()]));
     }
 
     #[test]
@@ -178,9 +168,9 @@ mod tests {
         let root = Path::new("/wiki");
         let file = root.join("cafe\u{301}/\u{30ab}\u{3099}\u{30a4}\u{30c8}\u{3099}.md");
 
-        let (title, ctx) = scrap_identity(root, &file).unwrap();
+        let (stem, ctx) = scrap_identity(root, &file).unwrap();
 
-        assert_eq!(title, "\u{30ac}\u{30a4}\u{30c9}");
+        assert_eq!(stem, "\u{30ac}\u{30a4}\u{30c9}");
         assert_eq!(ctx, Some(Ctx::from("caf\u{e9}")));
         assert_eq!(ctx.unwrap().to_string(), "caf\u{e9}");
         assert_eq!(
@@ -197,10 +187,10 @@ mod tests {
 
         let exclude = vec![project.static_dir.clone(), project.output_dir.clone()];
         let scraps = to_all_scraps(&project.project_root, &exclude).unwrap();
-        let titles = collect_titles(&scraps);
+        let keys = collect_keys(&scraps);
 
         assert_eq!(
-            titles,
+            keys,
             HashSet::from(["root".to_string(), "architecture/overview".to_string()])
         );
     }

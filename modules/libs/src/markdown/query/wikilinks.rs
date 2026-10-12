@@ -210,9 +210,9 @@ mod tests {
         #[case] expected_ctx: Option<&str>,
     ) {
         use crate::model::context::Ctx;
-        use crate::model::title::Title;
+        use crate::model::stem::Stem;
         let key: ScrapKey = (&w).into();
-        assert_eq!(Title::from(&key), expected_title.into());
+        assert_eq!(Stem::from(&key), expected_title.into());
         let ctx_str = Option::<Ctx>::from(&key).as_ref().map(|c| format!("{}", c));
         assert_eq!(ctx_str.as_deref(), expected_ctx);
     }

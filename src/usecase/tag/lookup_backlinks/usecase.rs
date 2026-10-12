@@ -2,14 +2,14 @@ use crate::error::ScrapsResult;
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::scrap::Scrap;
+use scraps_libs::model::stem::Stem;
 use scraps_libs::model::tag::Tag;
 use scraps_libs::model::tags::Tags;
-use scraps_libs::model::title::Title;
 
 /// Result for tag backlinks lookup operation
 #[derive(Debug, Clone, PartialEq)]
 pub struct LookupTagBacklinksResult {
-    pub title: Title,
+    pub title: Stem,
     pub ctx: Option<Ctx>,
     pub md_text: String,
 }
@@ -24,27 +24,24 @@ impl LookupTagBacklinksUsecase {
     pub fn execute(
         &self,
         scraps: &[Scrap],
-        tag_title: &Title,
+        requested_tag: &Tag,
     ) -> ScrapsResult<Vec<LookupTagBacklinksResult>> {
-        // Treat the input as a possibly-hierarchical tag path (e.g. "ai/ml").
-        let requested_tag: Tag = Tag::from(tag_title.to_string().as_str());
-
         // Verify the requested tag actually exists in the wiki (with ancestor
         // auto-aggregation): if no scrap declares this tag at any descendant
         // level, return an empty result.
         let valid_tags = Tags::new(scraps);
-        if !valid_tags.into_iter().any(|tag| tag == requested_tag) {
+        if !valid_tags.into_iter().any(|tag| tag == *requested_tag) {
             return Ok(Vec::new());
         }
 
         let backlinks_map = BacklinksMap::new(scraps);
-        let linking_scraps = backlinks_map.get_tag(&requested_tag);
+        let linking_scraps = backlinks_map.get_tag(requested_tag);
 
         let results: Vec<LookupTagBacklinksResult> = linking_scraps
             .iter()
             .map(|linking_scrap| {
                 let scrap_key = &linking_scrap.self_key();
-                let title: Title = scrap_key.into();
+                let title: Stem = scrap_key.into();
                 let ctx: Option<Ctx> = scrap_key.into();
 
                 LookupTagBacklinksResult {
@@ -80,7 +77,7 @@ mod tests {
         let usecase = LookupTagBacklinksUsecase::new();
 
         let results = usecase
-            .execute(&scraps, &Title::from("test_tag"))
+            .execute(&scraps, &Tag::from("test_tag"))
             .expect("Should succeed");
 
         assert_eq!(results.len(), 2);
@@ -105,7 +102,7 @@ mod tests {
         let usecase = LookupTagBacklinksUsecase::new();
 
         let results = usecase
-            .execute(&scraps, &Title::from("test_tag"))
+            .execute(&scraps, &Tag::from("test_tag"))
             .expect("Should succeed");
 
         assert_eq!(results.len(), 2);
@@ -130,7 +127,7 @@ mod tests {
         let usecase = LookupTagBacklinksUsecase::new();
 
         let results = usecase
-            .execute(&scraps, &Title::from("nonexistent_tag"))
+            .execute(&scraps, &Tag::from("nonexistent_tag"))
             .expect("Should succeed");
 
         assert_eq!(results.len(), 0);
@@ -158,7 +155,7 @@ mod tests {
         // The scrap-link namespace and tag namespace are disjoint in v1, so
         // even though scrap2 wikilinks to it, this returns empty.
         let results = usecase
-            .execute(&scraps, &Title::from("actual_scrap"))
+            .execute(&scraps, &Tag::from("actual_scrap"))
             .expect("Should succeed");
 
         assert_eq!(
@@ -169,7 +166,7 @@ mod tests {
 
         // Real tags work.
         let tag_results = usecase
-            .execute(&scraps, &Title::from("actual_tag"))
+            .execute(&scraps, &Tag::from("actual_tag"))
             .expect("Should succeed");
 
         assert_eq!(
@@ -187,7 +184,7 @@ mod tests {
         let usecase = LookupTagBacklinksUsecase::new();
 
         let results = usecase
-            .execute(&scraps, &Title::from("any_tag"))
+            .execute(&scraps, &Tag::from("any_tag"))
             .expect("Should succeed");
 
         assert_eq!(results.len(), 0);

@@ -1,4 +1,4 @@
-use crate::model::{context::Ctx, key::ScrapKey, title::Title};
+use crate::model::{context::Ctx, key::ScrapKey, stem::Stem};
 
 const SCRAP_EXTENSION: &str = ".md";
 
@@ -64,7 +64,7 @@ pub fn resolve_scrap_dest(dest: &str, ctx: &Option<Ctx>) -> Option<(ScrapKey, Op
         return None;
     }
     let ctx = (!segments.is_empty()).then(|| Ctx::from(segments.join("/").as_str()));
-    Some((ScrapKey::new(&Title::from(title), &ctx), heading))
+    Some((ScrapKey::new(&Stem::from(title), &ctx), heading))
 }
 
 /// Split a destination into its percent-decoded path and heading, provided

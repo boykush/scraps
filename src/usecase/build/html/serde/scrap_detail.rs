@@ -24,7 +24,7 @@ impl<'a> From<&'a ScrapDetail> for ScrapDetailTera<'a> {
         let url_path = PagePath::of_scrap(&scrap.self_key()).to_url_path();
         ScrapDetailTera {
             ctx: scrap.ctx().as_ref().map(|ctx| ctx.to_string()),
-            title: scrap.title().to_string(),
+            title: scrap.stem().to_string(),
             url_path,
             content: content.into(),
             thumbnail: scrap.thumbnail(),

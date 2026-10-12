@@ -16,7 +16,7 @@ use crate::model::{
     context::Ctx,
     key::ScrapKey,
     page_path::PagePath,
-    title::Title,
+    stem::Stem,
 };
 use crate::{model::tag::Tag, slugify};
 
@@ -225,7 +225,7 @@ fn transform_wiki_refs<'a>(
         }));
 
         if !has_pothole {
-            let new_label = Title::from(&scrap_link).to_string();
+            let new_label = Stem::from(&scrap_link).to_string();
             replace_first_text(node, &new_label);
         }
     }

@@ -3,7 +3,7 @@ use scraps_libs::markdown::query::WikiRef;
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::model::title::Title;
+use scraps_libs::model::stem::Stem;
 use std::collections::HashMap;
 
 /// Kind of an outbound reference occurrence.
@@ -19,7 +19,7 @@ pub enum LinkRefKind {
 #[derive(Debug, Clone, PartialEq)]
 pub struct LookupScrapLinksResult {
     pub kind: LinkRefKind,
-    pub title: Title,
+    pub title: Stem,
     pub ctx: Option<Ctx>,
     pub heading: Option<String>,
 }
@@ -34,7 +34,7 @@ impl LookupScrapLinksUsecase {
     pub fn execute(
         &self,
         scraps: &[Scrap],
-        title: &Title,
+        title: &Stem,
         ctx: &Option<Ctx>,
     ) -> ScrapsResult<Vec<LookupScrapLinksResult>> {
         let target_key = if let Some(ctx) = ctx {
@@ -130,7 +130,7 @@ mod tests {
         let usecase = LookupScrapLinksUsecase::new();
 
         let results = usecase
-            .execute(&scraps, &Title::from("scrap1"), &None)
+            .execute(&scraps, &Stem::from("scrap1"), &None)
             .expect("Should succeed");
 
         assert_eq!(results.len(), 2);
@@ -154,7 +154,7 @@ mod tests {
         let usecase = LookupScrapLinksUsecase::new();
 
         let results = usecase
-            .execute(&scraps, &Title::from("scrap1"), &Some(Ctx::from("Context")))
+            .execute(&scraps, &Stem::from("scrap1"), &Some(Ctx::from("Context")))
             .expect("Should succeed");
 
         assert_eq!(results.len(), 1);
@@ -174,7 +174,7 @@ mod tests {
         ];
 
         let results = LookupScrapLinksUsecase::new()
-            .execute(&scraps, &Title::from("orders"), &Some(Ctx::from("tables")))
+            .execute(&scraps, &Stem::from("orders"), &Some(Ctx::from("tables")))
             .expect("Should succeed");
 
         assert_eq!(results.len(), 2);
@@ -191,7 +191,7 @@ mod tests {
 
         let usecase = LookupScrapLinksUsecase::new();
 
-        let result = usecase.execute(&scraps, &Title::from("Nonexistent Scrap"), &None);
+        let result = usecase.execute(&scraps, &Stem::from("Nonexistent Scrap"), &None);
 
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("Scrap not found"));
@@ -208,7 +208,7 @@ mod tests {
         let usecase = LookupScrapLinksUsecase::new();
 
         let results = usecase
-            .execute(&scraps, &Title::from("scrap1"), &None)
+            .execute(&scraps, &Stem::from("scrap1"), &None)
             .expect("Should succeed");
 
         assert_eq!(results.len(), 0);
@@ -229,7 +229,7 @@ mod tests {
 
         let usecase = LookupScrapLinksUsecase::new();
         let results = usecase
-            .execute(&scraps, &Title::from("scrap1"), &None)
+            .execute(&scraps, &Stem::from("scrap1"), &None)
             .expect("Should succeed");
 
         assert_eq!(results.len(), 2);
@@ -253,7 +253,7 @@ mod tests {
 
         let usecase = LookupScrapLinksUsecase::new();
         let results = usecase
-            .execute(&scraps, &Title::from("scrap1"), &None)
+            .execute(&scraps, &Stem::from("scrap1"), &None)
             .expect("Should succeed");
 
         assert_eq!(results.len(), 2);
@@ -278,7 +278,7 @@ mod tests {
 
         let usecase = LookupScrapLinksUsecase::new();
         let results = usecase
-            .execute(&scraps, &Title::from("scrap1"), &None)
+            .execute(&scraps, &Stem::from("scrap1"), &None)
             .expect("Should succeed");
 
         assert_eq!(results.len(), 1);
@@ -294,7 +294,7 @@ mod tests {
 
         let usecase = LookupScrapLinksUsecase::new();
         let results = usecase
-            .execute(&scraps, &Title::from("scrap1"), &None)
+            .execute(&scraps, &Stem::from("scrap1"), &None)
             .expect("Should succeed");
 
         assert_eq!(results.len(), 1);

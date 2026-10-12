@@ -65,8 +65,8 @@ impl<'a> BacklinksMap<'a> {
 
 #[cfg(test)]
 mod tests {
+    use scraps_libs::model::stem::Stem;
     use scraps_libs::model::tag::Tag;
-    use scraps_libs::model::title::Title;
 
     use super::*;
 
@@ -82,7 +82,7 @@ mod tests {
 
         let backlinks_map = BacklinksMap::new(&scraps);
         assert_eq!(
-            backlinks_map.get(&Title::from("scrap1").into()),
+            backlinks_map.get(&Stem::from("scrap1").into()),
             vec![&scrap2]
         );
     }
@@ -103,7 +103,7 @@ mod tests {
             backlinks_map.get(&ScrapKey::with_ctx(&"scrap2".into(), &"Context".into())),
             vec![&scrap3]
         );
-        assert!(backlinks_map.get(&Title::from("scrap3").into()).is_empty());
+        assert!(backlinks_map.get(&Stem::from("scrap3").into()).is_empty());
     }
 
     #[test]
@@ -115,7 +115,7 @@ mod tests {
 
         let backlinks_map = BacklinksMap::new(&scraps);
         let mut got = backlinks_map.get_tag(&Tag::from("ai")).to_vec();
-        got.sort_by_key(|s| s.title().to_string());
+        got.sort_by_key(|s| s.stem().to_string());
         assert_eq!(got, vec![&scrap1, &scrap2]);
     }
 

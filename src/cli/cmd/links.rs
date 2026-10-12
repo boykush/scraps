@@ -12,7 +12,7 @@ use crate::error::ScrapsResult;
 use crate::ir::loader;
 use crate::usecase::scrap::lookup_links::usecase::{LinkRefKind, LookupScrapLinksUsecase};
 use scraps_libs::model::context::Ctx;
-use scraps_libs::model::title::Title;
+use scraps_libs::model::stem::Stem;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
@@ -60,7 +60,7 @@ pub fn run(
     ];
 
     let scraps = loader::load_scraps(&scraps_dir_path, &exclude_dirs)?;
-    let target_title = Title::from(title);
+    let target_title = Stem::from(title);
     let target_ctx = ctx.map(Ctx::from);
 
     let usecase = LookupScrapLinksUsecase::new();

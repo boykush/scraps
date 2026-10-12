@@ -5,7 +5,7 @@ use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::model::title::Title;
+use scraps_libs::model::stem::Stem;
 
 // A hub scrap pulls in hundreds of neighbors within three hops, so depth is
 // only ever a knob: the node cap is what actually bounds the response.
@@ -13,14 +13,14 @@ pub const MAX_DEPTH: usize = 5;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ScrapRef {
-    pub title: Title,
+    pub title: Stem,
     pub ctx: Option<Ctx>,
 }
 
 impl From<&ScrapKey> for ScrapRef {
     fn from(key: &ScrapKey) -> Self {
         ScrapRef {
-            title: key.title().clone(),
+            title: key.stem().clone(),
             ctx: key.ctx().clone(),
         }
     }
@@ -52,7 +52,7 @@ fn sort_key(key: &ScrapKey) -> (String, String) {
             .as_ref()
             .map(|c| c.to_string())
             .unwrap_or_default(),
-        key.title().to_string(),
+        key.stem().to_string(),
     )
 }
 
@@ -66,7 +66,7 @@ impl LookupScrapNeighborhoodUsecase {
     pub fn execute(
         &self,
         scraps: &[Scrap],
-        title: &Title,
+        title: &Stem,
         ctx: &Option<Ctx>,
         depth: usize,
         limit: usize,
@@ -243,7 +243,7 @@ mod tests {
         ];
 
         let result = LookupScrapNeighborhoodUsecase::new()
-            .execute(&scraps, &Title::from("microservices"), &None, 1, 50)
+            .execute(&scraps, &Stem::from("microservices"), &None, 1, 50)
             .unwrap();
 
         assert_eq!(
@@ -265,7 +265,7 @@ mod tests {
         ];
 
         let result = LookupScrapNeighborhoodUsecase::new()
-            .execute(&scraps, &Title::from("rust guide"), &None, 1, 50)
+            .execute(&scraps, &Stem::from("rust guide"), &None, 1, 50)
             .unwrap();
 
         assert_eq!(titles(&result.nodes), vec!["rust guide", "rust patterns"]);
@@ -283,7 +283,7 @@ mod tests {
 
         let result = LookupScrapNeighborhoodUsecase::new().execute(
             &scraps,
-            &Title::from("unknown"),
+            &Stem::from("unknown"),
             &None,
             1,
             50,
@@ -303,7 +303,7 @@ mod tests {
         ];
 
         let result = LookupScrapNeighborhoodUsecase::new()
-            .execute(&scraps, &Title::from("root"), &None, 1, 50)
+            .execute(&scraps, &Stem::from("root"), &None, 1, 50)
             .unwrap();
 
         assert_eq!(titles(&result.nodes), vec!["root", "outbound", "inbound"]);
@@ -329,7 +329,7 @@ mod tests {
         ];
 
         let result = LookupScrapNeighborhoodUsecase::new()
-            .execute(&scraps, &Title::from("root"), &None, 2, 50)
+            .execute(&scraps, &Stem::from("root"), &None, 2, 50)
             .unwrap();
 
         assert_eq!(result.nodes.len(), 3);
@@ -347,7 +347,7 @@ mod tests {
         ];
 
         let result = LookupScrapNeighborhoodUsecase::new()
-            .execute(&scraps, &Title::from("a"), &None, MAX_DEPTH, 50)
+            .execute(&scraps, &Stem::from("a"), &None, MAX_DEPTH, 50)
             .unwrap();
 
         assert_eq!(titles(&result.nodes), vec!["a", "b", "c"]);
@@ -365,7 +365,7 @@ mod tests {
         ];
 
         let result = LookupScrapNeighborhoodUsecase::new()
-            .execute(&scraps, &Title::from("root"), &None, MAX_DEPTH, 50)
+            .execute(&scraps, &Stem::from("root"), &None, MAX_DEPTH, 50)
             .unwrap();
 
         assert_eq!(titles(&result.nodes), vec!["root", "other"]);
@@ -392,7 +392,7 @@ mod tests {
         }
         scraps.push(scrap("s7", "# s7\n\ncontent"));
         let usecase = LookupScrapNeighborhoodUsecase::new();
-        let root = Title::from("s0");
+        let root = Stem::from("s0");
 
         let shallow = usecase.execute(&scraps, &root, &None, 1, 50).unwrap();
         assert_eq!(titles(&shallow.nodes), vec!["s0", "s1"]);
@@ -419,10 +419,10 @@ mod tests {
         let usecase = LookupScrapNeighborhoodUsecase::new();
 
         let read_one = usecase
-            .execute(&scraps, &Title::from("root"), &None, 1, 50)
+            .execute(&scraps, &Stem::from("root"), &None, 1, 50)
             .unwrap();
         let read_other = usecase
-            .execute(&reversed, &Title::from("root"), &None, 1, 50)
+            .execute(&reversed, &Stem::from("root"), &None, 1, 50)
             .unwrap();
 
         assert_eq!(titles(&read_one.nodes), vec!["root", "a", "b", "c"]);
@@ -439,7 +439,7 @@ mod tests {
         }
 
         let result = LookupScrapNeighborhoodUsecase::new()
-            .execute(&scraps, &Title::from("hub"), &None, 2, 5)
+            .execute(&scraps, &Stem::from("hub"), &None, 2, 5)
             .unwrap();
 
         assert_eq!(result.nodes.len(), 5);
@@ -456,7 +456,7 @@ mod tests {
         ];
 
         let result = LookupScrapNeighborhoodUsecase::new()
-            .execute(&scraps, &Title::from("lonely"), &None, 2, 50)
+            .execute(&scraps, &Stem::from("lonely"), &None, 2, 50)
             .unwrap();
 
         assert_eq!(titles(&result.nodes), vec!["lonely"]);

@@ -30,7 +30,7 @@ impl SerializeGraphNode {
     fn new(node: &GraphNode, center_x: f32, center_y: f32) -> SerializeGraphNode {
         let (x1, y1) = node.edge_start(center_x, center_y);
         let (x2, y2) = node.edge_end(center_x, center_y);
-        let title = node.key.title().to_string();
+        let title = node.key.stem().to_string();
         SerializeGraphNode {
             ctx: node.key.ctx().as_ref().map(|ctx| ctx.to_string()),
             label: node.label.clone(),

@@ -2,7 +2,7 @@ use crate::error::ScrapsResult;
 use scraps_libs::markdown::query::TaskStatus;
 use scraps_libs::model::context::Ctx;
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::model::title::Title;
+use scraps_libs::model::stem::Stem;
 
 /// Status filter for `scraps todo`. `All` short-circuits status filtering.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -38,7 +38,7 @@ pub fn status_label(status: &TaskStatus) -> &'static str {
 /// One task list entry resolved back to its source scrap.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TodoResult {
-    pub title: Title,
+    pub title: Stem,
     pub ctx: Option<Ctx>,
     pub status: TaskStatus,
     pub text: String,
@@ -65,7 +65,7 @@ impl TodoUsecase {
                     continue;
                 }
                 results.push(TodoResult {
-                    title: scrap.title().clone(),
+                    title: scrap.stem().clone(),
                     ctx: scrap.ctx().clone(),
                     status: item.status.clone(),
                     text: item.text.clone(),
