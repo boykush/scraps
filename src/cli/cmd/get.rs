@@ -18,6 +18,7 @@ const FIELD_BODY: &str = "body";
 const FIELD_HEADINGS: &str = "headings";
 const FIELD_CODE_BLOCKS: &str = "code_blocks";
 const FIELD_IMAGES: &str = "images";
+const FIELD_TYPE: &str = "type";
 
 const DEFAULT_FIELDS: &[&str] = &[FIELD_TITLE, FIELD_CTX, FIELD_BODY];
 const ALLOWED_FIELDS: &[&str] = &[
@@ -27,6 +28,7 @@ const ALLOWED_FIELDS: &[&str] = &[
     FIELD_HEADINGS,
     FIELD_CODE_BLOCKS,
     FIELD_IMAGES,
+    FIELD_TYPE,
 ];
 
 fn parse_fields(spec: &str) -> ScrapsResult<Vec<&'static str>> {
@@ -131,6 +133,16 @@ pub fn run(
                             .map(|url| url.to_string())
                             .collect();
                         out.insert(field.to_string(), serde_json::to_value(v)?);
+                    }
+                    FIELD_TYPE => {
+                        out.insert(
+                            field.to_string(),
+                            result
+                                .scrap_type
+                                .as_ref()
+                                .map(|t| Value::String(t.clone()))
+                                .unwrap_or(Value::Null),
+                        );
                     }
                     _ => unreachable!("validated by parse_fields"),
                 }
@@ -284,6 +296,34 @@ mod tests {
             v["images"].as_array().unwrap(),
             &vec![Value::String("https://example.com/two.jpg".to_string())]
         );
+    }
+
+    #[rstest]
+    fn run_json_field_projection_supports_type(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(b"")
+            .add_scrap("post.md", b"---\ntype: Blog\n---\n\n# Post\n")
+            .add_scrap("note.md", b"# Note\n");
+
+        let typed = run_get("post", None, None, Some("title,type"), &project).unwrap();
+        assert_eq!(typed.trim(), r#"{"title":"post","type":"Blog"}"#);
+
+        let untyped = run_get("note", None, None, Some("title,type"), &project).unwrap();
+        assert_eq!(untyped.trim(), r#"{"title":"note","type":null}"#);
+    }
+
+    #[rstest]
+    fn run_default_json_leaves_the_type_out(#[from(temp_scrap_project)] project: TempScrapProject) {
+        project
+            .add_config(b"")
+            .add_scrap("post.md", b"---\ntype: Blog\n---\n\n# Post\n");
+
+        let output = run_get("post", None, None, Some(""), &project).unwrap();
+        let v: Value = serde_json::from_str(output.trim()).unwrap();
+
+        assert!(!v.as_object().unwrap().contains_key("type"));
     }
 
     #[rstest]

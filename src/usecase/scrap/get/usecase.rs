@@ -10,6 +10,7 @@ pub struct GetScrapResult {
     pub title: Title,
     pub ctx: Option<Ctx>,
     pub md_text: String,
+    pub scrap_type: Option<String>,
 }
 
 pub struct GetScrapUsecase;
@@ -48,6 +49,7 @@ impl GetScrapUsecase {
             title: result_title,
             ctx: result_ctx,
             md_text: target_scrap.md_text().to_string(),
+            scrap_type: target_scrap.scrap_type().map(str::to_string),
         })
     }
 }

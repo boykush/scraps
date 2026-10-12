@@ -18,6 +18,8 @@ the authoritative reference for flags and arguments. This page is the
 | `scraps backlinks <title>` | Inbound wiki-links to a scrap | ✓ |
 | `scraps tag list` | List all tags with backlink counts | ✓ |
 | `scraps tag backlinks <tag>` | Scraps referencing a tag | ✓ |
+| `scraps type list` | List the types in use with scrap counts | ✓ |
+| `scraps type scraps <type>` | Scraps of a type | ✓ |
 | `scraps todo` | Aggregate GFM task list items wiki-wide | ✓ |
 | `scraps frontmatter` | Aggregate YAML frontmatter wiki-wide | ✓ |
 | `scraps mcp serve` | Start an MCP server over stdio, or `--http` | – |
@@ -46,7 +48,7 @@ scraps get "Title" --json images
 scraps get "Title" --heading "Install" --json body,headings
 ```
 
-Allowed fields are `title`, `ctx`, `body`, `headings`, `code_blocks`, and `images`.
+Allowed fields are `title`, `ctx`, `body`, `headings`, `code_blocks`, `images`, and `type`.
 Reference navigation stays separate: use `scraps links`, `scraps backlinks`,
 and `scraps tag ...`.
 
@@ -57,10 +59,34 @@ directly to `scraps get <title> --ctx <ctx> --heading <heading>`.
 `scraps backlinks --json` remains scrap-level inbound discovery and returns
 the scraps that link to the requested scrap.
 
+A scrap may say what kind of thing it is with a `type` key in its YAML
+frontmatter, the key the [Open Knowledge Format](https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/main/SPEC.md)
+uses for it:
+
+```markdown
+---
+type: Blog
+---
+```
+
+A type is not a tag: a tag says what a scrap is about and a scrap can carry
+many, while a type says what the scrap is and a scrap has at most one. The key
+is optional, and a scrap without it is simply untyped. The value is any
+non-empty string, trimmed and otherwise compared as written (`Blog` and `blog`
+are two types); a `type` that is empty or not a string is ignored without a
+warning. Scraps keeps no list of known types and attaches no behaviour to any
+of them.
+
+`scraps type list --json` returns the types in use, most used first, as
+`[{ type, scraps_count }]`. `scraps type scraps <type> --json` returns the
+scraps of one type as `{ results: [{ title, ctx }], count }`, and
+`scraps get <title> --json type` returns one scrap's type, `null` when it has
+none.
+
 `scraps frontmatter --json` returns every scrap that carries a YAML
 frontmatter block, with its keys parsed as-is. Scraps requires none of those
-keys and reads a meaning into only one, `tags`, whose strings join the scrap's
-tags — see [[Reference/Wiki-link/Tag]]. A scrap's title, context and links
+keys and reads a meaning into only two: `tags`, whose strings join the scrap's
+tags — see [[Reference/Wiki-link/Tag]] — and `type`, the scrap's kind. A scrap's title, context and links
 still come only from the filesystem and Wiki-link syntax, never from
 frontmatter. A block that is absent, unclosed or malformed is skipped rather
 than raising an error, and frontmatter stays part of the scrap body — it is

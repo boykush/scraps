@@ -78,7 +78,8 @@ command.
   occurrence with its line), `headings`, `code_blocks`, `images`,
   `task_items`, and the `frontmatter` block as written. A tag from the
   frontmatter `tags` list is not a `refs` entry, since it has no line in the
-  body; it is read from `frontmatter` when the object is loaded.
+  body; it is read from `frontmatter` when the object is loaded, as is the
+  scrap's `type`.
 - `links` is the link table: one edge per link or embed occurrence, with
   `resolved: false` when the target names no scrap. Tags are attributes of
   the object, not edges, matching the `[[ ]]` / `#[[ ]]` namespace split.
