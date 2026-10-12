@@ -175,8 +175,9 @@ impl HtmlTagRenderer for BuildRendererImpl {
 }
 
 impl CssRenderer for BuildRendererImpl {
-    fn render_css(&self, css_metadata: &CssMetadata) -> ScrapsResult<()> {
-        self.css_render.render_main(css_metadata)
+    fn render_css(&self, css_metadata: &CssMetadata, site_nav: &SiteNav) -> ScrapsResult<()> {
+        self.css_render
+            .render_main(css_metadata, !site_nav.types.is_empty())
     }
 }
 

@@ -1,8 +1,10 @@
 use crate::error::{BuildError, ScrapsResult, anyhow::Context};
 use crate::usecase::build::html::cdn_versions::CDN_VERSIONS;
+use crate::usecase::build::html::serde::scrap_type::{TypeTera, TypesTera};
 use crate::usecase::build::html::serde::tags::TagsTera;
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
+use crate::usecase::build::model::scrap_types::ScrapType;
 use crate::usecase::build::model::site_nav::SiteNav;
 use scraps_libs::model::base_url::BaseUrl;
 use std::sync::LazyLock;
@@ -34,7 +36,6 @@ static TAGS_INDEX: LazyLock<Tera> = LazyLock::new(|| {
         include_str!("builtins/tags_index.html"),
     ))
 });
-
 /// Every page kind inherits `base.html` and `macros.html`; `page` is the
 /// template it renders through.
 fn builtins(page: (&'static str, &'static str)) -> Tera {
@@ -103,7 +104,39 @@ pub fn insert_site_nav(
     context.insert("view", view);
     context.insert("scrap_count", &site_nav.scrap_count);
     context.insert("nav_tags", &TagsTera::new(&site_nav.tags, backlinks_map));
+    context.insert("view_root", &base_url_of(context));
     context.insert("build_search_index", &site_nav.build_search_index);
     context.insert("timezone", &site_nav.timezone);
     context.insert("has_readme", &site_nav.has_readme);
+}
+
+fn base_url_of(context: &tera::Context) -> String {
+    context
+        .get("base_url")
+        .and_then(tera::Value::as_str)
+        .unwrap_or_default()
+        .to_string()
+}
+
+/// Lets a list view be narrowed to one type, the way a label narrows an issue
+/// list: `view_path` is the view's path under the site root, and `active` the
+/// type this page is narrowed to. A wiki without types gets no filter.
+pub fn insert_type_filter(
+    context: &mut tera::Context,
+    view_path: &str,
+    site_nav: &SiteNav,
+    active: Option<&ScrapType>,
+) {
+    if site_nav.types.is_empty() {
+        return;
+    }
+    context.insert("filter_types", &TypesTera::new(&site_nav.types));
+    context.insert("view_path", view_path);
+    if let Some(scrap_type) = active {
+        // The sidebar's views keep the filter, so changing the sort order
+        // does not drop the type the reader narrowed to.
+        let view_root = format!("{}types/{}/", base_url_of(context), scrap_type.slug);
+        context.insert("view_root", &view_root);
+        context.insert("active_type", &TypeTera::from(scrap_type));
+    }
 }

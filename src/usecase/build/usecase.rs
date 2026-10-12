@@ -13,6 +13,7 @@ use super::model::{
     backlinks_map::BacklinksMap,
     build_config::BuildConfig,
     scrap_detail::{ScrapDetail, ScrapDetails},
+    scrap_types::ScrapTypes,
     site_nav::SiteNav,
 };
 use std::collections::HashMap;
@@ -72,6 +73,7 @@ impl BuildUsecase {
         let site_nav = SiteNav::new(
             scraps.len(),
             Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
             list_view_configs.build_search_index,
             timezone,
             readme_content.is_some(),
@@ -138,13 +140,13 @@ impl BuildUsecase {
 
         progress.complete_stage(&Stage::GenerateHtml, &{
             index_page_count + scrap_details.len() + 1 + // tags index
-                site_nav.tags.len()
+                site_nav.tags.len() + site_nav.types.len() // all scraps of each type
         });
 
         // generate css
         progress.start_stage(&Stage::GenerateCss);
         let span_generate_css = span!(Level::INFO, "generate_css").entered();
-        renderer.render_css(css_metadata)?;
+        renderer.render_css(css_metadata, &site_nav)?;
         span_generate_css.exit();
         progress.complete_stage(&Stage::GenerateCss, &1);
 

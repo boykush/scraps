@@ -87,6 +87,7 @@ fn tag_slug_path(tag: &Tag) -> String {
 #[cfg(test)]
 mod tests {
     use crate::usecase::build::model::backlinks_map::BacklinksMap;
+    use crate::usecase::build::model::scrap_types::ScrapTypes;
     use scraps_libs::lang::LangCode;
     use scraps_libs::model::base_url::BaseUrl;
     use scraps_libs::model::scrap::Scrap;
@@ -121,6 +122,7 @@ mod tests {
         let site_nav = SiteNav::new(
             scraps.len(),
             Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
             true,
             chrono_tz::UTC,
             false,
@@ -165,6 +167,7 @@ mod tests {
         let site_nav = SiteNav::new(
             scraps.len(),
             Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
             true,
             chrono_tz::UTC,
             false,

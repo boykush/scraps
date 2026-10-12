@@ -52,6 +52,7 @@ impl TagsIndexRender {
 mod tests {
     use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use crate::usecase::build::model::backlinks_map::BacklinksMap;
+    use crate::usecase::build::model::scrap_types::ScrapTypes;
     use rstest::rstest;
     use scraps_libs::{lang::LangCode, model::base_url::BaseUrl};
     use std::fs;
@@ -85,6 +86,7 @@ mod tests {
         let site_nav = SiteNav::new(
             scraps.len(),
             Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
             true,
             chrono_tz::UTC,
             false,

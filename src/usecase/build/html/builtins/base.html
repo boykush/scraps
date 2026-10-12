@@ -63,9 +63,9 @@
             {% endif %}
             <nav class="views">
                 <p class="nav-label">views</p>
-                {% if view == "updated" %}<span class="item active">updated</span>{% else %}<a class="item" href="{{ base_url }}">updated</a>{% endif %}
-                {% if view == "backlinks" %}<span class="item active">backlinks</span>{% else %}<a class="item" href="{{ base_url }}backlinks/">backlinks</a>{% endif %}
-                {% if view == "scraps" %}<span class="item active">all scraps<span class="count">{{ scrap_count }}</span></span>{% else %}<a class="item" href="{{ base_url }}scraps/">all scraps<span class="count">{{ scrap_count }}</span></a>{% endif %}
+                {% if view == "updated" %}<span class="item active">updated</span>{% else %}<a class="item" href="{{ view_root }}">updated</a>{% endif %}
+                {% if view == "backlinks" %}<span class="item active">backlinks</span>{% else %}<a class="item" href="{{ view_root }}backlinks/">backlinks</a>{% endif %}
+                {% if view == "scraps" %}<span class="item active">all scraps<span class="count">{{ scrap_count }}</span></span>{% else %}<a class="item" href="{{ view_root }}scraps/">all scraps<span class="count">{{ scrap_count }}</span></a>{% endif %}
             </nav>
             <nav class="tags">
                 <p class="nav-label">tags</p>

@@ -76,7 +76,7 @@ pub trait HtmlTagRenderer {
 }
 
 pub trait CssRenderer {
-    fn render_css(&self, css_metadata: &CssMetadata) -> ScrapsResult<()>;
+    fn render_css(&self, css_metadata: &CssMetadata, site_nav: &SiteNav) -> ScrapsResult<()>;
 }
 
 pub trait SearchIndexJsonRenderer {
@@ -201,7 +201,7 @@ pub mod tests {
     }
 
     impl CssRenderer for BuildRendererTest {
-        fn render_css(&self, _css_metadata: &CssMetadata) -> ScrapsResult<()> {
+        fn render_css(&self, _css_metadata: &CssMetadata, _site_nav: &SiteNav) -> ScrapsResult<()> {
             Ok(())
         }
     }

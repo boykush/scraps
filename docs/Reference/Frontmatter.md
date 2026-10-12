@@ -46,6 +46,9 @@ the scraps of one; `scraps get --json type` returns a single scrap's type.
 This documentation types its own pages this way: run `scraps type list` in
 `docs/`.
 
+On the static site a type narrows the list views; see
+[[Reference/Static Site/Type Filter]].
+
 ## Reading rules
 
 Frontmatter never fails a command and never raises a lint warning.

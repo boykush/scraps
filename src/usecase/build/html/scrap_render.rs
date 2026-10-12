@@ -21,6 +21,7 @@ use crate::usecase::build::html::templates;
 use super::serde::link_scraps::LinkScrapsTera;
 use super::serde::scrap_detail::ScrapDetailTera;
 use super::serde::scrap_graph::ScrapGraphTera;
+use super::serde::scrap_type::TypeTera;
 use super::serde::tag::TagTera;
 
 pub struct ScrapRender {
@@ -57,7 +58,7 @@ impl ScrapRender {
             .par_iter()
             .try_for_each(|scrap_detail| {
                 let _span = span!(Level::INFO, "generate_html_scrap").entered();
-                self.render_page(&shell, scrap_detail, backlinks_map, scraps_by_key)
+                self.render_page(&shell, scrap_detail, backlinks_map, scraps_by_key, site_nav)
             })
     }
 
@@ -67,6 +68,7 @@ impl ScrapRender {
         scrap_detail: &ScrapDetail,
         backlinks_map: &BacklinksMap,
         scraps_by_key: &HashMap<ScrapKey, &Scrap>,
+        site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
         let mut context = shell.clone();
         let scrap = scrap_detail.scrap();
@@ -80,6 +82,10 @@ impl ScrapRender {
             .map(|tag| TagTera::new(tag, backlinks_map))
             .collect::<Vec<_>>();
         context.insert("scrap_tags", &scrap_tags);
+
+        if let Some(scrap_type) = scrap.scrap_type().and_then(|name| site_nav.types.get(name)) {
+            context.insert("scrap_type", &TypeTera::from(scrap_type));
+        }
 
         let linked_scraps = backlinks_map.get(&scrap.self_key());
         context.insert("linked_scraps", &LinkScrapsTera::new(linked_scraps));
@@ -117,6 +123,7 @@ impl ScrapRender {
 
 #[cfg(test)]
 mod tests {
+    use crate::usecase::build::model::scrap_types::ScrapTypes;
     use std::fs;
     use std::path::PathBuf;
     use url::Url;
@@ -163,6 +170,7 @@ mod tests {
         let site_nav = SiteNav::new(
             scraps.len(),
             Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
             true,
             chrono_tz::UTC,
             false,
@@ -210,6 +218,67 @@ mod tests {
     }
 
     #[test]
+    fn it_shows_the_type_only_on_a_typed_scrap() {
+        let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
+        let metadata = HtmlMetadata::new(&LangCode::default(), "Scrap", &None, &None);
+
+        let typed = &Scrap::new("typed", &None, "---\ntype: BigQuery Table\n---\nbody");
+        let untyped = &Scrap::new("untyped", &None, "#[[BigQuery Table]]");
+        let scraps = vec![typed.to_owned(), untyped.to_owned()];
+        let scrap_texts = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
+            .collect();
+        let backlinks_map = BacklinksMap::new(&scraps);
+        let scraps_by_key: HashMap<_, _> = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap))
+            .collect();
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
+            false,
+            chrono_tz::UTC,
+            false,
+        );
+        let scrap_details = ScrapDetails::new(
+            [typed, untyped]
+                .into_iter()
+                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &scrap_texts))
+                .collect(),
+        );
+
+        let project = crate::test_fixtures::TempScrapProject::new();
+        ScrapRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap()
+        .run(
+            base_url,
+            &metadata,
+            &scrap_details,
+            &backlinks_map,
+            &scraps_by_key,
+            &site_nav,
+        )
+        .unwrap();
+
+        let read = |stem: &str| {
+            fs::read_to_string(project.output_dir.join(format!("scraps/{stem}.html"))).unwrap()
+        };
+
+        assert!(read("typed").contains(
+            "<p class=\"type\">type <a class=\"name\" \
+             href=\"http://localhost:1112/types/bigquery-table/\">BigQuery Table</a></p>"
+        ));
+        // The type is not a tag, so the tag line stays as it was.
+        assert!(!read("typed").contains("<p class=\"tags\">"));
+        assert!(!read("untyped").contains("<p class=\"type\">"));
+    }
+
+    #[test]
     fn it_draws_the_neighbourhood_only_when_there_is_one() {
         let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let metadata = HtmlMetadata::new(&LangCode::default(), "Scrap", &None, &None);
@@ -230,6 +299,7 @@ mod tests {
         let site_nav = SiteNav::new(
             scraps.len(),
             Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
             false,
             chrono_tz::UTC,
             false,

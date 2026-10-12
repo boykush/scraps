@@ -18,6 +18,7 @@ use super::serde::title_index::TitleIndexTera;
 pub struct ScrapsIndexRender {
     tera: Tera,
     output: RenderOutput,
+    types_output: RenderOutput,
 }
 
 impl ScrapsIndexRender {
@@ -27,6 +28,7 @@ impl ScrapsIndexRender {
         Ok(ScrapsIndexRender {
             tera,
             output: output.join("scraps"),
+            types_output: output.join("types"),
         })
     }
 
@@ -38,17 +40,31 @@ impl ScrapsIndexRender {
         backlinks_map: &BacklinksMap,
         site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
-        let mut context = templates::context(base_url, metadata);
-        templates::insert_site_nav(&mut context, "scraps", site_nav, backlinks_map);
-        context.insert("groups", &TitleIndexTera::new(scrap_details, backlinks_map));
-
+        let mut shell = templates::context(base_url, metadata);
+        templates::insert_site_nav(&mut shell, "scraps", site_nav, backlinks_map);
         let template_name = resolve_template(
             &self.tera,
             "scraps_index.html",
             "__builtins/scraps_index.html",
         );
+
+        let mut context = shell.clone();
+        templates::insert_type_filter(&mut context, "scraps/", site_nav, None);
+        context.insert("groups", &TitleIndexTera::new(scrap_details, backlinks_map));
         self.output
-            .render(&self.tera, template_name, &context, "index.html")
+            .render(&self.tera, template_name, &context, "index.html")?;
+
+        // The same index again for each type, under `types/<slug>/scraps/`.
+        site_nav.types.iter().try_for_each(|scrap_type| {
+            let mut context = shell.clone();
+            templates::insert_type_filter(&mut context, "scraps/", site_nav, Some(scrap_type));
+            let groups = TitleIndexTera::of_type(scrap_details, backlinks_map, &scrap_type.name);
+            context.insert("groups", &groups);
+            self.types_output
+                .join(&scrap_type.slug)
+                .join("scraps")
+                .render(&self.tera, template_name, &context, "index.html")
+        })
     }
 }
 
@@ -56,6 +72,7 @@ impl ScrapsIndexRender {
 mod tests {
     use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use crate::usecase::build::model::scrap_detail::ScrapDetail;
+    use crate::usecase::build::model::scrap_types::ScrapTypes;
     use rstest::rstest;
     use scraps_libs::{
         lang::LangCode, model::base_url::BaseUrl, model::scrap::Scrap, model::tags::Tags,
@@ -94,6 +111,7 @@ mod tests {
         let site_nav = SiteNav::new(
             scraps.len(),
             Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
             true,
             chrono_tz::UTC,
             false,
@@ -134,6 +152,7 @@ mod tests {
         let site_nav = SiteNav::new(
             scraps.len(),
             Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
             true,
             chrono_tz::UTC,
             false,
@@ -151,5 +170,64 @@ mod tests {
         let result = fs::read_to_string(project.output_path("scraps/index.html")).unwrap();
         assert!(result.contains("class=\"jump\""));
         assert!(result.contains("デザイントークン"));
+    }
+
+    #[rstest]
+    fn it_narrows_the_index_to_a_type(#[from(temp_scrap_project)] project: TempScrapProject) {
+        let base_url = BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
+        let metadata = HtmlMetadata::new(&LangCode::default(), "Scrap", &None, &None);
+        let scraps = [
+            Scrap::new("alpha", &None, "---\ntype: Blog\n---\n"),
+            Scrap::new("beta", &None, "---\ntype: blog\n---\n"),
+            Scrap::new("gamma", &None, ""),
+        ];
+        let scrap_texts = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
+            .collect();
+        let scrap_details = ScrapDetails::new(
+            scraps
+                .iter()
+                .map(|scrap| ScrapDetail::new(scrap, &None, &base_url, &scrap_texts))
+                .collect(),
+        );
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
+            false,
+            chrono_tz::UTC,
+            false,
+        );
+
+        ScrapsIndexRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap()
+        .run(
+            &base_url,
+            &metadata,
+            &scrap_details,
+            &BacklinksMap::new(&scraps),
+            &site_nav,
+        )
+        .unwrap();
+
+        let read = |path: &str| fs::read_to_string(project.output_path(path)).unwrap();
+
+        let all = read("scraps/index.html");
+        assert!(all.contains("href=\"http://localhost:1112/types/blog/scraps/\">Blog<"));
+        assert!(all.contains("scraps/gamma.html"));
+
+        // `Blog` and `blog` want the same slug; each still gets its own view.
+        let upper = read("types/blog/scraps/index.html");
+        assert!(upper.contains("scraps/alpha.html"));
+        assert!(!upper.contains("scraps/beta.html"));
+        assert!(upper.contains("<span class=\"stats\">1 of 3 scraps</span>"));
+
+        let lower = read("types/blog-2/scraps/index.html");
+        assert!(lower.contains("scraps/beta.html"));
+        assert!(!lower.contains("scraps/alpha.html"));
     }
 }

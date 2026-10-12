@@ -92,6 +92,16 @@
     </ul>
 {% endcomponent tag_links %}
 
+{% component type_filter(types, base_url, view_path, active_name="") %}
+    <p class="type-filter">
+        <span class="label">type</span>
+        {% if active_name %}<a class="option" href="{{ base_url }}{{ view_path }}">all</a>{% else %}<span class="option active">all</span>{% endif %}
+        {% for scrap_type in types %}
+            {% if scrap_type.name == active_name %}<span class="option active">{{ scrap_type.name }}<span class="count">{{ scrap_type.scraps_count }}</span></span>{% else %}<a class="option" href="{{ base_url }}types/{{ scrap_type.slug }}/{{ view_path }}">{{ scrap_type.name }}<span class="count">{{ scrap_type.scraps_count }}</span></a>{% endif %}
+        {% endfor %}
+    </p>
+{% endcomponent type_filter %}
+
 {% component link_card(autolink) %}
 <a class="link-card" href="{{ autolink.url }}" target="_blank" rel="noopener noreferrer">
     <svg class="icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M6.5 9.5 L9.5 6.5"></path><path d="M7.5 4.5 L9 3 A2.1 2.1 0 0 1 12 6 L10.5 7.5"></path><path d="M8.5 11.5 L7 13 A2.1 2.1 0 0 1 4 10 L5.5 8.5"></path></svg>
