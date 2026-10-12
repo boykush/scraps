@@ -48,7 +48,7 @@ command.
 
 ```json
 {
-  "format_version": 2,
+  "format_version": 3,
   "scraps_version": "2.3.0",
   "scraps": [
     {
@@ -59,7 +59,9 @@ command.
       "refs": [
         { "kind": "tag", "tag": "Emit/Static Site", "line": 1 },
         { "kind": "link", "title": "Deploy to GitHub Pages", "ctx": "How-to",
-          "heading": null, "alias": null, "line": 12 }
+          "heading": null, "alias": null, "line": 12 },
+        { "kind": "mdlink", "dest": "../CLI%20Overview.md#build",
+          "alias": "build", "line": 14 }
       ],
       "headings": [],
       "code_blocks": [],
@@ -71,7 +73,10 @@ command.
   "links": [
     { "from": { "title": "Pipeline", "ctx": "Reference/Static Site" },
       "to": { "title": "Deploy to GitHub Pages", "ctx": "How-to" },
-      "kind": "link", "heading": null, "line": 12, "resolved": true }
+      "kind": "link", "heading": null, "line": 12, "resolved": true },
+    { "from": { "title": "Pipeline", "ctx": "Reference/Static Site" },
+      "to": { "title": "CLI Overview", "ctx": "Reference" },
+      "kind": "link", "heading": "build", "line": 14, "resolved": true }
   ]
 }
 ```
@@ -79,14 +84,17 @@ command.
 - `scraps` holds one object per source file, in path order: its identity
   (`path`, `title`, `ctx`), the `hash` of its content, and everything the
   parser found — `refs` (every `[[link]]`, `![[embed]]` and `#[[tag]]`
-  occurrence with its line), `headings`, `code_blocks`, `images`,
+  occurrence with its line, and every [[Reference/Markdown Link]] as an
+  `mdlink` holding the destination as written), `headings`, `code_blocks`, `images`,
   `task_items`, and the `frontmatter` block as written. The keys Scraps
   reads from it ([[Reference/Frontmatter]]) are not stored a second time:
   a frontmatter tag has no line in the body, so it is not a `refs` entry,
   and both it and the type are read from `frontmatter` when the object is
   loaded.
 - `links` is the link table: one edge per link or embed occurrence, with
-  `resolved: false` when the target names no scrap. Tags are attributes of
+  `resolved: false` when the target names no scrap. An `mdlink` becomes a
+  `link` edge to the scrap its path resolves to from the linking file, and
+  no edge at all when the path climbs out of the wiki root. Tags are attributes of
   the object, not edges, matching the `[[ ]]` / `#[[ ]]` namespace split.
 - `commited_ts` on an object and `git_head` at the top appear once a
   build has read git, which it does unless `--no-git`: the last-commit

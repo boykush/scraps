@@ -18,13 +18,19 @@ pub fn link_edges(scraps: &[Scrap]) -> Vec<LinkEdge> {
             let from = KeyJson::from(&scrap.self_key());
             scrap.refs().iter().filter_map(move |r| {
                 let (to, kind, heading, line) = match r {
-                    WikiRef::Link(l) => (ScrapKey::from(l), EdgeKind::Link, &l.heading, l.line),
+                    WikiRef::Link(l) => {
+                        (ScrapKey::from(l), EdgeKind::Link, l.heading.clone(), l.line)
+                    }
                     WikiRef::Embed(e) => (
                         ScrapKey::from_path_str(&embed_path(&e.ctx_path, &e.title)),
                         EdgeKind::Embed,
-                        &e.heading,
+                        e.heading.clone(),
                         e.line,
                     ),
+                    // A path out of the wiki root names no scrap, so no edge.
+                    WikiRef::MdLink(m) => {
+                        (m.resolve(scrap.ctx())?, EdgeKind::Link, m.heading(), m.line)
+                    }
                     WikiRef::Tag(_) => return None,
                 };
                 Some(LinkEdge {
@@ -32,7 +38,7 @@ pub fn link_edges(scraps: &[Scrap]) -> Vec<LinkEdge> {
                     resolved: keys.contains(&to),
                     to: KeyJson::from(&to),
                     kind,
-                    heading: heading.clone(),
+                    heading,
                     line,
                 })
             })
@@ -78,6 +84,33 @@ mod tests {
         assert_eq!(edges[2].to.title, "missing");
         assert!(!edges[2].resolved);
         assert!(edges.iter().all(|e| e.from.title == "a"));
+    }
+
+    #[test]
+    fn it_resolves_markdown_links_from_the_linking_scrap() {
+        let scraps = vec![
+            Scrap::new(
+                "orders",
+                &Some("tables".into()),
+                "[c](/tables/customers.md) [r](../metrics/revenue.md#definition)\n[g](./gone.md) [out](../../out.md)",
+            ),
+            Scrap::new("customers", &Some("tables".into()), ""),
+            Scrap::new("revenue", &Some("metrics".into()), "# Definition"),
+        ];
+
+        let edges = link_edges(&scraps);
+
+        assert_eq!(edges.len(), 3);
+        assert!(edges.iter().all(|e| e.kind == EdgeKind::Link));
+        assert_eq!(edges[0].to.title, "customers");
+        assert_eq!(edges[0].to.ctx.as_deref(), Some("tables"));
+        assert!(edges[0].resolved);
+        assert_eq!(edges[1].to.ctx.as_deref(), Some("metrics"));
+        assert_eq!(edges[1].heading.as_deref(), Some("definition"));
+        assert!(edges[1].resolved);
+        assert_eq!(edges[2].to.title, "gone");
+        assert_eq!(edges[2].line, 2);
+        assert!(!edges[2].resolved);
     }
 
     #[test]

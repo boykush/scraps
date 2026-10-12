@@ -9,10 +9,11 @@ use comrak::{
 };
 use url::Url;
 
-use crate::markdown::query::{body, section};
+use crate::markdown::query::{body, resolve_scrap_dest, section};
 use crate::model::{
     base_url::BaseUrl,
     content::{Content, ContentElement},
+    context::Ctx,
     file::ScrapFileStem,
     key::ScrapKey,
     title::Title,
@@ -47,12 +48,20 @@ fn options() -> Options<'static> {
     }
 }
 
-pub fn to_content(text: &str, base_url: &BaseUrl, embed_mode: EmbedMode<'_>) -> Content {
-    to_content_inner(body(text), base_url, &embed_mode, &mut HashSet::new())
+/// Render a scrap's text. `ctx` is the context the text lives in, which is
+/// what a relative Markdown link to another scrap's file resolves against.
+pub fn to_content(
+    text: &str,
+    ctx: &Option<Ctx>,
+    base_url: &BaseUrl,
+    embed_mode: EmbedMode<'_>,
+) -> Content {
+    to_content_inner(body(text), ctx, base_url, &embed_mode, &mut HashSet::new())
 }
 
 fn to_content_inner(
     text: &str,
+    ctx: &Option<Ctx>,
     base_url: &BaseUrl,
     embed_mode: &EmbedMode<'_>,
     visited_embeds: &mut HashSet<ScrapKey>,
@@ -66,6 +75,9 @@ fn to_content_inner(
     let root = parse_document(&arena, &parse_text, &opts);
 
     let heading_ids = heading_ids(root);
+    if let EmbedMode::Expand(scrap_texts) = embed_mode {
+        transform_md_links(root, ctx, base_url, scrap_texts);
+    }
     transform_wiki_refs(root, text, base_url, embed_mode, visited_embeds);
     attach_heading_ids(heading_ids, &opts);
 
@@ -131,6 +143,37 @@ fn autolink_paragraph_url<'a>(node: &'a AstNode<'a>) -> Option<String> {
     }
 }
 
+// Runs before wiki-links become `Link` nodes, so it only ever sees links the
+// author wrote as Markdown. One that names no known scrap stays as written.
+fn transform_md_links<'a>(
+    root: &'a AstNode<'a>,
+    ctx: &Option<Ctx>,
+    base_url: &BaseUrl,
+    scrap_texts: &HashMap<ScrapKey, String>,
+) {
+    for node in root.descendants() {
+        let NodeValue::Link(link) = &mut node.data_mut().value else {
+            continue;
+        };
+        let Some((key, heading)) = resolve_scrap_dest(&link.url, ctx) else {
+            continue;
+        };
+        if scrap_texts.contains_key(&key) {
+            link.url = scrap_page_url(base_url, key, heading.as_deref());
+        }
+    }
+}
+
+fn scrap_page_url(base_url: &BaseUrl, key: ScrapKey, heading: Option<&str>) -> String {
+    let file_stem = ScrapFileStem::from(key);
+    let mut url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
+    if let Some(heading) = heading {
+        url.push('#');
+        url.push_str(&slugify::by_dash(heading));
+    }
+    url
+}
+
 fn transform_wiki_refs<'a>(
     root: &'a AstNode<'a>,
     source_text: &str,
@@ -172,12 +215,7 @@ fn transform_wiki_refs<'a>(
             None => (url.as_str(), None),
         };
         let scrap_link = ScrapKey::from_path_str(path);
-        let file_stem = ScrapFileStem::from(scrap_link.clone());
-        let mut new_url = format!("{}scraps/{}.html", base_url.as_url(), file_stem);
-        if let Some(heading) = heading {
-            new_url.push('#');
-            new_url.push_str(&slugify::by_dash(heading));
-        }
+        let new_url = scrap_page_url(base_url, scrap_link.clone(), heading);
 
         let label = collect_text(node);
         let has_pothole = label != url;
@@ -276,6 +314,7 @@ fn transform_embed<'a>(
         .unwrap_or_else(|| body(text));
     let embedded = to_content_inner(
         embed_text,
+        scrap_key.ctx(),
         base_url,
         &EmbedMode::Expand(scrap_texts),
         visited_embeds,
@@ -388,7 +427,7 @@ mod tests {
         "<pre><code class=\"language-mermaid mermaid\">flowchart LR\nid\n</code></pre>\n"
     )]
     fn it_to_html_code(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
-        let content = to_content(input, &base_url, EmbedMode::Preserve);
+        let content = to_content(input, &None, &base_url, EmbedMode::Preserve);
         assert_eq!(content.to_string(), expected);
     }
 
@@ -418,7 +457,7 @@ mod tests {
         "<p><a href=\"http://localhost:1112/scraps/expect-slugify.html\">expect slugify</a></p>\n"
     )]
     fn it_to_html_link(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
-        let content = to_content(input, &base_url, EmbedMode::Preserve);
+        let content = to_content(input, &None, &base_url, EmbedMode::Preserve);
         assert_eq!(content.to_string(), expected);
     }
 
@@ -440,7 +479,7 @@ mod tests {
         "<p><a href=\"http://localhost:1112/scraps/ctx/title.html#heading\">alias</a></p>\n"
     )]
     fn it_to_html_heading_link(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
-        let content = to_content(input, &base_url, EmbedMode::Preserve);
+        let content = to_content(input, &None, &base_url, EmbedMode::Preserve);
         assert_eq!(content.to_string(), expected);
     }
 
@@ -467,7 +506,7 @@ mod tests {
     )]
     #[case::attribute_escape("## a \"b\"", "<h2 id=\"a-&quot;b&quot;\">a &quot;b&quot;</h2>\n")]
     fn it_to_html_heading_id(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
-        let content = to_content(input, &base_url, EmbedMode::Preserve);
+        let content = to_content(input, &None, &base_url, EmbedMode::Preserve);
         assert_eq!(content.to_string(), expected);
     }
 
@@ -481,7 +520,7 @@ mod tests {
         "<p>#<a href=\"http://localhost:1112/tags/programming/rust.html\">Programming/Rust</a></p>\n"
     )]
     fn it_to_html_tag_link(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
-        let content = to_content(input, &base_url, EmbedMode::Preserve);
+        let content = to_content(input, &None, &base_url, EmbedMode::Preserve);
         assert_eq!(content.to_string(), expected);
     }
 
@@ -496,6 +535,7 @@ mod tests {
 
         let content = to_content(
             "before ![[target]] after",
+            &None,
             &base_url,
             EmbedMode::Expand(&scrap_texts),
         );
@@ -503,6 +543,91 @@ mod tests {
         assert_eq!(
             content.to_string(),
             "<p>before  <div class=\"scrap-embed\"><p>embedded <strong>body</strong></p>\n</div> after</p>\n"
+        );
+    }
+
+    fn wiki(keys: &[&str]) -> HashMap<ScrapKey, String> {
+        keys.iter()
+            .map(|k| (ScrapKey::from_path_str(k), String::new()))
+            .collect()
+    }
+
+    #[rstest]
+    #[case::absolute(
+        "[customers](/tables/customers.md)",
+        "<p><a href=\"http://localhost:1112/scraps/tables/customers.html\">customers</a></p>\n"
+    )]
+    #[case::relative_with_heading(
+        "[revenue](../metrics/revenue.md#Net%20Revenue)",
+        "<p><a href=\"http://localhost:1112/scraps/metrics/revenue.html#net-revenue\">revenue</a></p>\n"
+    )]
+    #[case::sibling_with_space(
+        "[**all** orders](./All%20Orders.md)",
+        "<p><a href=\"http://localhost:1112/scraps/tables/all-orders.html\"><strong>all</strong> orders</a></p>\n"
+    )]
+    #[case::reference(
+        "[customers][c]\n\n[c]: customers.md",
+        "<p><a href=\"http://localhost:1112/scraps/tables/customers.html\">customers</a></p>\n"
+    )]
+    #[case::unresolved("[gone](./gone.md)", "<p><a href=\"./gone.md\">gone</a></p>\n")]
+    #[case::escapes_root("[out](../../out.md)", "<p><a href=\"../../out.md\">out</a></p>\n")]
+    #[case::scheme(
+        "[web](https://example.com/customers.md)",
+        "<p><a href=\"https://example.com/customers.md\">web</a></p>\n"
+    )]
+    #[case::not_markdown(
+        "[page](/tables/customers.html)",
+        "<p><a href=\"/tables/customers.html\">page</a></p>\n"
+    )]
+    #[case::image(
+        "![shot](./customers.md)",
+        "<p><img src=\"./customers.md\" alt=\"shot\" /></p>\n"
+    )]
+    #[case::inline_code("`[c](./customers.md)`", "<p><code>[c](./customers.md)</code></p>\n")]
+    fn it_to_html_markdown_link_to_a_scrap(
+        base_url: BaseUrl,
+        #[case] input: &str,
+        #[case] expected: &str,
+    ) {
+        let scrap_texts = wiki(&["tables/customers", "tables/All Orders", "metrics/revenue"]);
+        let content = to_content(
+            input,
+            &Some("tables".into()),
+            &base_url,
+            EmbedMode::Expand(&scrap_texts),
+        );
+        assert_eq!(content.to_string(), expected);
+    }
+
+    #[rstest]
+    fn it_gives_a_markdown_link_the_url_of_the_wiki_link(base_url: BaseUrl) {
+        let scrap_texts = wiki(&["metrics/revenue"]);
+        let render = |input: &str| {
+            to_content(input, &None, &base_url, EmbedMode::Expand(&scrap_texts)).to_string()
+        };
+        assert_eq!(
+            render("[revenue](/metrics/revenue.md#definition)"),
+            render("[[metrics/revenue#definition|revenue]]")
+        );
+    }
+
+    #[rstest]
+    fn it_resolves_a_markdown_link_from_the_embedded_scrap(base_url: BaseUrl) {
+        let mut scrap_texts = wiki(&["tables/customers"]);
+        scrap_texts.insert(
+            ScrapKey::from_path_str("tables/orders"),
+            "[c](./customers.md)".to_string(),
+        );
+        let content = to_content(
+            "![[tables/orders]]",
+            &None,
+            &base_url,
+            EmbedMode::Expand(&scrap_texts),
+        );
+        assert!(
+            content
+                .to_string()
+                .contains("href=\"http://localhost:1112/scraps/tables/customers.html\"")
         );
     }
 
@@ -517,6 +642,7 @@ mod tests {
 
         let content = to_content(
             "![[target#Keep]]",
+            &None,
             &base_url,
             EmbedMode::Expand(&scrap_texts),
         );
@@ -532,7 +658,7 @@ mod tests {
     )]
     #[case::inline_html("text with <br> break", "<p>text with <br> break</p>\n")]
     fn it_to_html_raw_html(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
-        let content = to_content(input, &base_url, EmbedMode::Preserve);
+        let content = to_content(input, &None, &base_url, EmbedMode::Preserve);
         assert_eq!(content.to_string(), expected);
     }
 
@@ -541,7 +667,7 @@ mod tests {
     #[case::http("<http://example.com>", "http://example.com")]
     fn it_to_html_autolink(base_url: BaseUrl, #[case] input: &str, #[case] expected_url: &str) {
         assert_eq!(
-            to_content(input, &base_url, EmbedMode::Preserve),
+            to_content(input, &None, &base_url, EmbedMode::Preserve),
             Content::new(vec![
                 ContentElement::Raw("<p>".to_string()),
                 ContentElement::Autolink(Url::parse(expected_url).unwrap()),
@@ -555,7 +681,7 @@ mod tests {
 
     #[rstest]
     fn it_to_html_without_the_frontmatter_block(base_url: BaseUrl) {
-        let content = to_content(FRONTED, &base_url, EmbedMode::Preserve);
+        let content = to_content(FRONTED, &None, &base_url, EmbedMode::Preserve);
         assert_eq!(
             content.to_string(),
             "<h1 id=\"schema\">Schema</h1>\n<p>Body text.</p>\n"
@@ -566,7 +692,7 @@ mod tests {
     #[case::unclosed("---\ntype: Blog\n\n# Schema\n")]
     #[case::malformed("---\ntype: [Blog\n---\n\n# Schema\n")]
     fn it_to_html_keeps_an_unrecognised_block(base_url: BaseUrl, #[case] input: &str) {
-        let content = to_content(input, &base_url, EmbedMode::Preserve).to_string();
+        let content = to_content(input, &None, &base_url, EmbedMode::Preserve).to_string();
         assert!(content.starts_with("<hr />\n"), "{content}");
     }
 
@@ -577,7 +703,7 @@ mod tests {
         let mut scrap_texts = HashMap::new();
         scrap_texts.insert(ScrapKey::from_path_str("target"), FRONTED.to_string());
 
-        let content = to_content(input, &base_url, EmbedMode::Expand(&scrap_texts));
+        let content = to_content(input, &None, &base_url, EmbedMode::Expand(&scrap_texts));
 
         assert_eq!(
             content.to_string(),
@@ -595,6 +721,7 @@ mod tests {
 
         let content = to_content(
             "![[target#Keep]]",
+            &None,
             &base_url,
             EmbedMode::Expand(&scrap_texts),
         );

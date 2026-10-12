@@ -1,5 +1,6 @@
 use scraps_libs::markdown::query::{
-    CodeBlock, EmbedRef, Heading, ScrapFacts, TagRef, TaskItem, TaskStatus, WikiLinkRef, WikiRef,
+    CodeBlock, EmbedRef, Heading, MdLinkRef, ScrapFacts, TagRef, TaskItem, TaskStatus, WikiLinkRef,
+    WikiRef,
 };
 use scraps_libs::model::{key::ScrapKey, scrap::Scrap};
 use serde::{Deserialize, Serialize};
@@ -8,10 +9,10 @@ use url::Url;
 
 /// Bump whenever the shape or meaning of anything below changes. A file
 /// carrying another version is discarded and rebuilt, never migrated.
-pub const FORMAT_VERSION: u32 = 2;
+pub const FORMAT_VERSION: u32 = 3;
 
 /// The whole compiled wiki: one object per source file plus the link table
-/// that resolving every `[[ ]]` reference against those objects produced.
+/// that resolving every reference against those objects produced.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct IrFile {
     pub format_version: u32,
@@ -118,8 +119,10 @@ impl ScrapObject {
     }
 }
 
-/// A `[[ ]]`-family occurrence. `ctx` is the `/`-joined context path so a
-/// reference reads like the `[[Ctx/Title]]` the author wrote.
+/// A reference occurrence. `ctx` is the `/`-joined context path so a
+/// reference reads like the `[[Ctx/Title]]` the author wrote; a Markdown
+/// link keeps its destination as written, since where it lands depends on
+/// the scrap holding it and is recorded in the link table.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "lowercase")]
 pub enum RefJson {
@@ -138,6 +141,11 @@ pub enum RefJson {
     },
     Tag {
         tag: String,
+        line: usize,
+    },
+    MdLink {
+        dest: String,
+        alias: Option<String>,
         line: usize,
     },
 }
@@ -175,6 +183,11 @@ impl From<&WikiRef> for RefJson {
                 tag: t.path.join("/"),
                 line: t.line,
             },
+            WikiRef::MdLink(m) => RefJson::MdLink {
+                dest: m.dest.clone(),
+                alias: m.alias.clone(),
+                line: m.line,
+            },
         }
     }
 }
@@ -210,6 +223,9 @@ impl From<RefJson> for WikiRef {
                 path: tag.split('/').map(String::from).collect(),
                 line,
             }),
+            RefJson::MdLink { dest, alias, line } => {
+                WikiRef::MdLink(MdLinkRef { dest, alias, line })
+            }
         }
     }
 }
@@ -350,7 +366,7 @@ mod tests {
     use super::*;
     use scraps_libs::model::{context::Ctx, title::Title};
 
-    const DOC: &str = "---\nstatus: draft\n---\n\n# Title\n\nSee [[a]], [[Ctx/b#Sec|B]], #[[t/u]] and ![[c#Part]].\n\n- [x] done\n\n```rust\nlet x = 1;\n```\n\n![img](https://example.com/i.png)\n";
+    const DOC: &str = "---\nstatus: draft\n---\n\n# Title\n\nSee [[a]], [[Ctx/b#Sec|B]], #[[t/u]], ![[c#Part]] and [d](../d.md#Sec).\n\n- [x] done\n\n```rust\nlet x = 1;\n```\n\n![img](https://example.com/i.png)\n";
 
     #[test]
     fn it_round_trips_facts_through_the_object() {
@@ -390,6 +406,17 @@ mod tests {
         assert!(json.contains(r#"{"kind":"link","title":"a","ctx":null"#));
         assert!(json.contains(r#"{"kind":"tag","tag":"t","line":1}"#));
         assert!(json.contains(r#"{"kind":"embed","title":"c""#));
+    }
+
+    #[test]
+    fn it_stores_a_markdown_link_as_written() {
+        let scrap = Scrap::new("t", &Some("a".into()), "[b](../b.md#Sec)");
+        let object = ScrapObject::from_scrap("a/t.md", "hash", &scrap);
+        let json = serde_json::to_string(&object.refs).unwrap();
+        assert_eq!(
+            json,
+            r#"[{"kind":"mdlink","dest":"../b.md#Sec","alias":"b","line":1}]"#
+        );
     }
 
     #[test]

@@ -52,7 +52,7 @@ impl BuildUsecase {
         // Process README content
         let readme_content = readme_text
             .as_ref()
-            .map(|text| html::to_content(text, base_url, EmbedMode::Expand(&scrap_texts)));
+            .map(|text| html::to_content(text, &None, base_url, EmbedMode::Expand(&scrap_texts)));
 
         // Build ScrapDetails from pre-loaded data
         let scrap_details = scraps_with_ts

@@ -9,7 +9,7 @@ use std::collections::HashMap;
 /// Kind of an outbound reference occurrence.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LinkRefKind {
-    /// Plain wikilink `[[...]]`.
+    /// Plain wikilink `[[...]]`, or a Markdown link to a scrap file.
     Link,
     /// Inline embed `![[...]]`.
     Embed,
@@ -61,15 +61,11 @@ impl LookupScrapLinksUsecase {
             .filter_map(|wref| match wref {
                 WikiRef::Link(r) => {
                     let key = ScrapKey::from_path_str(&join_path(&r.ctx_path, &r.title));
-                    scrap_map.get(&key).map(|linked| {
-                        let linked_key = linked.self_key();
-                        LookupScrapLinksResult {
-                            kind: LinkRefKind::Link,
-                            title: (&linked_key).into(),
-                            ctx: (&linked_key).into(),
-                            heading: r.heading.clone(),
-                        }
-                    })
+                    link_result(&scrap_map, &key, r.heading.clone())
+                }
+                WikiRef::MdLink(r) => {
+                    let key = r.resolve(target_scrap.ctx())?;
+                    link_result(&scrap_map, &key, r.heading())
                 }
                 WikiRef::Embed(r) => {
                     let key = ScrapKey::from_path_str(&join_path(&r.ctx_path, &r.title));
@@ -89,6 +85,22 @@ impl LookupScrapLinksUsecase {
 
         Ok(results)
     }
+}
+
+fn link_result(
+    scrap_map: &HashMap<ScrapKey, &Scrap>,
+    key: &ScrapKey,
+    heading: Option<String>,
+) -> Option<LookupScrapLinksResult> {
+    scrap_map.get(key).map(|linked| {
+        let linked_key = linked.self_key();
+        LookupScrapLinksResult {
+            kind: LinkRefKind::Link,
+            title: (&linked_key).into(),
+            ctx: (&linked_key).into(),
+            heading,
+        }
+    })
 }
 
 fn join_path(ctx_path: &[String], title: &str) -> String {
@@ -147,6 +159,30 @@ mod tests {
 
         assert_eq!(results.len(), 1);
         assert_eq!(results[0].title.to_string(), "scrap2");
+    }
+
+    #[test]
+    fn test_lookup_scrap_links_follows_markdown_links() {
+        let scraps = vec![
+            Scrap::new(
+                "orders",
+                &Some("tables".into()),
+                "[c](/tables/customers.md) [r](../metrics/revenue.md#definition) [g](./gone.md)",
+            ),
+            Scrap::new("customers", &Some("tables".into()), ""),
+            Scrap::new("revenue", &Some("metrics".into()), "# Definition"),
+        ];
+
+        let results = LookupScrapLinksUsecase::new()
+            .execute(&scraps, &Title::from("orders"), &Some(Ctx::from("tables")))
+            .expect("Should succeed");
+
+        assert_eq!(results.len(), 2);
+        assert_eq!(results[0].kind, LinkRefKind::Link);
+        assert_eq!(results[0].title.to_string(), "customers");
+        assert_eq!(results[0].ctx, Some(Ctx::from("tables")));
+        assert_eq!(results[1].title.to_string(), "revenue");
+        assert_eq!(results[1].heading.as_deref(), Some("definition"));
     }
 
     #[test]

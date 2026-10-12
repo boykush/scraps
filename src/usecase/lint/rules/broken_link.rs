@@ -5,7 +5,8 @@ use scraps_libs::model::{key::ScrapKey, scrap::Scrap, tags::Tags};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::lint::rule::{LintRule, LintRuleName, LintWarning, scrap_relative_path};
 
-/// Detect `[[wikilink]]` references that don't resolve to any existing scrap.
+/// Detect `[[wikilink]]` references, and Markdown links to a `.md` path,
+/// that don't resolve to any existing scrap.
 ///
 /// Pre-v1, unresolved links were silently turned into "implicit tags" via
 /// `Tags::new`. v1 keeps tags and scrap-links as separate namespaces:
@@ -31,17 +32,29 @@ impl LintRule for BrokenLinkRule {
             .iter()
             .flat_map(|scrap| {
                 let path = scrap_relative_path(scrap);
+                // One warning per distinct broken link, as the author wrote it.
+                let mut seen = HashSet::new();
                 scrap
-                    .links()
-                    .iter()
-                    .filter(|link| !scrap_self_keys.contains(link))
-                    .map(move |link| LintWarning {
+                    .link_occurrences()
+                    .filter(|link| {
+                        link.target
+                            .as_ref()
+                            .is_none_or(|key| !scrap_self_keys.contains(key))
+                    })
+                    .filter_map(|link| match (link.markdown, link.target) {
+                        (Some(written), _) => Some(format!("broken link: {written}")),
+                        (None, Some(key)) => Some(format!("broken wikilink: [[{key}]]")),
+                        (None, None) => None,
+                    })
+                    .filter(|message| seen.insert(message.clone()))
+                    .map(|message| LintWarning {
                         rule_name: LintRuleName::BrokenLink,
                         scrap_path: path.clone(),
-                        message: format!("broken wikilink: [[{}]]", link),
+                        message,
                         source: None,
                         span: None,
                     })
+                    .collect::<Vec<_>>()
             })
             .collect()
     }
@@ -99,6 +112,45 @@ mod tests {
 
         let warnings = BrokenLinkRule.check(&scraps, &backlinks_map, &tags);
         assert!(warnings.is_empty());
+    }
+
+    #[test]
+    fn detect_markdown_link_to_a_missing_scrap() {
+        let scraps = vec![
+            Scrap::new(
+                "orders",
+                &Some("tables".into()),
+                "[c](./customers.md) [gone](./gone.md) [gone](./gone.md) [out](../../out.md)",
+            ),
+            Scrap::new("customers", &Some("tables".into()), ""),
+        ];
+        let backlinks_map = BacklinksMap::new(&scraps);
+        let tags = Tags::new(&scraps);
+
+        let warnings = BrokenLinkRule.check(&scraps, &backlinks_map, &tags);
+        let messages: Vec<&str> = warnings.iter().map(|w| w.message.as_str()).collect();
+        assert_eq!(
+            messages,
+            vec![
+                "broken link: [gone](./gone.md)",
+                "broken link: [out](../../out.md)"
+            ]
+        );
+        assert_eq!(warnings[0].scrap_path, "tables/orders.md");
+    }
+
+    #[test]
+    fn skip_markdown_link_that_is_not_a_scrap_link() {
+        let scrap = Scrap::new("a", &None, "[w](https://example.com/x.md) [h](/x.html)");
+        let scraps = vec![scrap];
+        let backlinks_map = BacklinksMap::new(&scraps);
+        let tags = Tags::new(&scraps);
+
+        assert!(
+            BrokenLinkRule
+                .check(&scraps, &backlinks_map, &tags)
+                .is_empty()
+        );
     }
 
     #[test]

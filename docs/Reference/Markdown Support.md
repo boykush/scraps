@@ -21,6 +21,11 @@ compiler-enforced cross-references on top.
 
 ![[Reference/Markdown/Mermaid]]
 
+## [[Reference/Markdown Link|Markdown link to a scrap]]
+
+A Markdown link to another scrap's `.md` file is a link between scraps,
+resolved and linted like a wiki-link.
+
 ## [[Reference/Markdown/Autolink|Autolink with OGP card]]
 
 ![[Reference/Markdown/Autolink]]
