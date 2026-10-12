@@ -4,12 +4,14 @@ use super::tools::get_scrap::{GetScrapRequest, get_scrap};
 use super::tools::list_frontmatter::list_frontmatter;
 use super::tools::list_tags::list_tags;
 use super::tools::list_todos::{ListTodosRequest, list_todos};
+use super::tools::list_types::list_types;
 use super::tools::lookup_scrap_backlinks::{LookupScrapBacklinksRequest, lookup_scrap_backlinks};
 use super::tools::lookup_scrap_links::{LookupScrapLinksRequest, lookup_scrap_links};
 use super::tools::lookup_scrap_neighborhood::{
     LookupScrapNeighborhoodRequest, lookup_scrap_neighborhood,
 };
 use super::tools::lookup_tag_backlinks::{LookupTagBacklinksRequest, lookup_tag_backlinks};
+use super::tools::lookup_type_scraps::{LookupTypeScrapsRequest, lookup_type_scraps};
 use super::tools::orient::orient;
 use super::tools::search_scraps::{SearchRequest, search_scraps};
 use rmcp::handler::server::ServerHandler;
@@ -38,7 +40,7 @@ impl ScrapsServer {
 #[tool_router]
 impl ScrapsServer {
     #[tool(
-        description = "Use when you know which scrap to read, by title and optional context. Optionally restrict to a heading section via 'heading', and project specific fields via 'fields' (allowed: title, ctx, body, headings, code_blocks; defaults to ['title', 'ctx', 'body']) to keep the response small. Traverse onward with lookup_scrap_links or lookup_scrap_backlinks, or see everything around the scrap in one call with lookup_scrap_neighborhood."
+        description = "Use when you know which scrap to read, by title and optional context. Optionally restrict to a heading section via 'heading', and project specific fields via 'fields' (allowed: title, ctx, body, headings, code_blocks, type; defaults to ['title', 'ctx', 'body']) to keep the response small. Traverse onward with lookup_scrap_links or lookup_scrap_backlinks, or see everything around the scrap in one call with lookup_scrap_neighborhood."
     )]
     async fn get_scrap(
         &self,
@@ -124,6 +126,27 @@ impl ScrapsServer {
     }
 
     #[tool(
+        description = "Use when you need what kinds of scraps the wiki holds: lists each type in use with the number of scraps of that type. A type says what a scrap is (at most one, from its frontmatter `type`), where a tag says what it is about; a scrap need not have one. Expand a type into its scraps with lookup_type_scraps."
+    )]
+    async fn list_types(
+        &self,
+        context: RequestContext<RoleServer>,
+    ) -> Result<CallToolResult, ErrorData> {
+        list_types(&self.scraps_dir, &self.exclude_dirs, context).await
+    }
+
+    #[tool(
+        description = "Use when you want every scrap of one kind, such as all blog posts or all book summaries: returns the scraps whose type is exactly the given one, as list_types spells it. Read individual results with get_scrap."
+    )]
+    async fn lookup_type_scraps(
+        &self,
+        context: RequestContext<RoleServer>,
+        parameters: Parameters<LookupTypeScrapsRequest>,
+    ) -> Result<CallToolResult, ErrorData> {
+        lookup_type_scraps(&self.scraps_dir, &self.exclude_dirs, context, parameters).await
+    }
+
+    #[tool(
         description = "Use when you want the work recorded across the wiki rather than one scrap's: returns the markdown task list items across every scrap, each with the scrap it sits in and its line. Filter with status — 'open' (default), 'done', 'deferred' or 'all'. Read the scrap around a task with get_scrap."
     )]
     async fn list_todos(
@@ -135,7 +158,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Use when the wiki was retrofitted from files carrying YAML frontmatter and you want that metadata across it: returns each scrap that has a frontmatter block together with its parsed keys. The keys are the author's own and scraps reads them as opaque data, with one exception: the strings of a `tags` list are scraps tags alongside #[[tag]], so list_tags and lookup_tag_backlinks already cover them. Read the scrap behind an entry with get_scrap."
+        description = "Use when the wiki was retrofitted from files carrying YAML frontmatter and you want that metadata across it: returns each scrap that has a frontmatter block together with its parsed keys. The keys are the author's own and scraps reads them as opaque data, with two exceptions: the strings of a `tags` list are scraps tags alongside #[[tag]], so list_tags and lookup_tag_backlinks already cover them, and a `type` string is the scrap's kind (list_types). Read the scrap behind an entry with get_scrap."
     )]
     async fn list_frontmatter(
         &self,
@@ -165,7 +188,8 @@ impl ServerHandler for ScrapsServer {
                  lookup_scrap_links and lookup_scrap_backlinks. For the shape around a scrap \
                  rather than one relation at a time, lookup_scrap_neighborhood returns its \
                  neighborhood as a graph: nodes with their hop distance and the links between \
-                 them, no bodies. For the topic map, list_tags then lookup_tag_backlinks. For \
+                 them, no bodies. For the topic map, list_tags then lookup_tag_backlinks; for \
+                 the kinds of scraps, list_types then lookup_type_scraps. For \
                  the work recorded across the wiki, list_todos; for a wiki retrofitted from \
                  files with YAML frontmatter, list_frontmatter.",
             )
@@ -222,7 +246,7 @@ mod tests {
 
         let tools = client.list_tools(Default::default()).await.unwrap();
 
-        assert_eq!(tools.tools.len(), 10);
+        assert_eq!(tools.tools.len(), 12);
 
         let tool_names: Vec<&str> = tools.tools.iter().map(|t| t.name.as_ref()).collect();
         assert!(tool_names.contains(&"orient"));
@@ -233,6 +257,8 @@ mod tests {
         assert!(tool_names.contains(&"lookup_scrap_backlinks"));
         assert!(tool_names.contains(&"list_tags"));
         assert!(tool_names.contains(&"lookup_tag_backlinks"));
+        assert!(tool_names.contains(&"list_types"));
+        assert!(tool_names.contains(&"lookup_type_scraps"));
         assert!(tool_names.contains(&"list_todos"));
         assert!(tool_names.contains(&"list_frontmatter"));
 
@@ -431,6 +457,8 @@ mod tests {
             ),
             ("list_tags", serde_json::json!({})),
             ("lookup_tag_backlinks", serde_json::json!({"tag": "rust"})),
+            ("list_types", serde_json::json!({})),
+            ("lookup_type_scraps", serde_json::json!({"type": "Blog"})),
             ("orient", serde_json::json!({})),
             ("list_todos", serde_json::json!({})),
             ("list_frontmatter", serde_json::json!({})),
@@ -1207,6 +1235,134 @@ mod tests {
         assert!(
             map["next"].as_str().unwrap_or_default().contains("limit"),
             "a cut map should say how to see the rest: {map}"
+        );
+    }
+
+    // Called twice so the second read rebuilds the scraps from the stored IR.
+    #[rstest]
+    #[tokio::test]
+    async fn test_types_list_and_expand_into_their_scraps(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("post.md", b"---\ntype: Blog\n---\n\n# Post\n");
+        project.add_scrap("Shelf/one.md", b"---\ntype: Book\n---\n\n# One\n");
+        project.add_scrap("Shelf/two.md", b"---\ntype: Book\n---\n\n# Two\n");
+        project.add_scrap("note.md", b"# Note\n\n[[Blog]] #[[Blog]]\n");
+
+        for _ in 0..2 {
+            let types = call_tool_json(&project, "list_types", serde_json::json!({})).await;
+            assert_eq!(
+                types["results"],
+                serde_json::json!([
+                    {"type": "Book", "scraps_count": 2},
+                    {"type": "Blog", "scraps_count": 1},
+                ])
+            );
+            assert_eq!(types["count"], 2);
+            assert!(
+                types["next"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .contains("lookup_type_scraps"),
+                "list_types should say how to expand a type: {types}"
+            );
+
+            let blogs = call_tool_json(
+                &project,
+                "lookup_type_scraps",
+                serde_json::json!({"type": "Blog"}),
+            )
+            .await;
+            assert_eq!(
+                blogs["results"],
+                serde_json::json!([{"title": "post", "ctx": null}])
+            );
+            assert_eq!(blogs["count"], 1);
+            assert!(
+                blogs["next"]
+                    .as_str()
+                    .unwrap_or_default()
+                    .contains("get_scrap"),
+                "a type's scraps should point at reading one: {blogs}"
+            );
+        }
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_empty_type_responses_teach_another_way_in(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("note.md", b"# Note\n\n#[[rust]]\n");
+
+        let types = call_tool_json(&project, "list_types", serde_json::json!({})).await;
+        assert_eq!(types["count"], 0);
+        assert!(
+            types["next"]
+                .as_str()
+                .unwrap_or_default()
+                .contains("list_tags"),
+            "an untyped wiki should point at the topic map: {types}"
+        );
+
+        let scraps = call_tool_json(
+            &project,
+            "lookup_type_scraps",
+            serde_json::json!({"type": "Blog"}),
+        )
+        .await;
+        assert_eq!(scraps["count"], 0);
+        assert!(
+            scraps["next"]
+                .as_str()
+                .unwrap_or_default()
+                .contains("list_types"),
+            "an unused type should point at the types in use: {scraps}"
+        );
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_get_scrap_projects_the_type_only_when_asked(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap("post.md", b"---\ntype: Blog\n---\n\n# Post\n");
+        project.add_scrap("note.md", b"# Note\n");
+
+        let typed = call_tool_json(
+            &project,
+            "get_scrap",
+            serde_json::json!({"title": "post", "fields": ["title", "type"]}),
+        )
+        .await;
+        assert_eq!(typed["type"], "Blog");
+
+        let untyped = call_tool_json(
+            &project,
+            "get_scrap",
+            serde_json::json!({"title": "note", "fields": ["title", "type"]}),
+        )
+        .await;
+        assert!(untyped["type"].is_null() && untyped.as_object().unwrap().contains_key("type"));
+
+        let default =
+            call_tool_json(&project, "get_scrap", serde_json::json!({"title": "post"})).await;
+        assert!(!default.as_object().unwrap().contains_key("type"));
+    }
+
+    #[rstest]
+    fn test_instructions_name_the_type_tools(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let server = ScrapsServer::new(
+            project.scraps_dir.clone(),
+            vec![project.static_dir.clone(), project.output_dir.clone()],
+        );
+        let instructions = server.get_info().instructions.unwrap();
+
+        assert!(
+            instructions.contains("list_types") && instructions.contains("lookup_type_scraps"),
+            "the flow should name the type tools: {instructions}"
         );
     }
 

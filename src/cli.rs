@@ -85,7 +85,7 @@ pub enum SubCommands {
             value_name = "FIELDS",
             num_args = 0..=1,
             default_missing_value = "",
-            help = "Output as JSON. Optionally accepts a comma-separated field projection (title,ctx,body,headings,code_blocks)."
+            help = "Output as JSON. Optionally accepts a comma-separated field projection (title,ctx,body,headings,code_blocks,images,type)."
         )]
         json: Option<String>,
     },
@@ -156,6 +156,12 @@ pub enum SubCommands {
         tag_command: TagSubCommands,
     },
 
+    #[command(about = "Type commands")]
+    Type {
+        #[command(subcommand)]
+        type_command: TypeSubCommands,
+    },
+
     #[command(about = "Aggregate YAML frontmatter across the wiki")]
     Frontmatter {
         #[arg(long, help = "Output as JSON")]
@@ -194,6 +200,24 @@ pub enum TagSubCommands {
     #[command(about = "List scraps that reference the specified tag")]
     Backlinks {
         tag: String,
+
+        #[arg(long, help = "Output as JSON")]
+        json: bool,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum TypeSubCommands {
+    #[command(about = "List types")]
+    List {
+        #[arg(long, help = "Output as JSON")]
+        json: bool,
+    },
+
+    #[command(about = "List scraps of the specified type")]
+    Scraps {
+        #[arg(value_name = "TYPE")]
+        name: String,
 
         #[arg(long, help = "Output as JSON")]
         json: bool,

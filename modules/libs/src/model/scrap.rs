@@ -22,6 +22,8 @@ pub struct Scrap {
     tags: Vec<Tag>,
 }
 
+const FRONTMATTER_TYPE_KEY: &str = "type";
+
 impl Scrap {
     pub fn self_key(&self) -> ScrapKey {
         ScrapKey::new(&self.title, &self.ctx)
@@ -81,6 +83,17 @@ impl Scrap {
 
     pub fn frontmatter(&self) -> Option<&Value> {
         self.facts.frontmatter.as_ref()
+    }
+
+    /// What kind of thing the scrap is: the frontmatter `type` string,
+    /// trimmed. A scrap has at most one, and none when the key is missing,
+    /// blank or not a string. The value is the author's own vocabulary.
+    pub fn scrap_type(&self) -> Option<&str> {
+        self.frontmatter()?
+            .get(FRONTMATTER_TYPE_KEY)?
+            .as_str()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
     }
 }
 
@@ -325,6 +338,41 @@ mod tests {
                 .and_then(|v| v.as_str()),
             Some("draft")
         );
+    }
+
+    #[rstest::rstest]
+    #[case::plain("---\ntype: Blog\n---\n", "Blog")]
+    #[case::kept_verbatim("---\ntype: BigQuery Table\n---\n", "BigQuery Table")]
+    #[case::case_kept("---\ntype: blog\n---\n", "blog")]
+    #[case::trimmed("---\ntype: '  Book  '\n---\n", "Book")]
+    #[case::among_other_keys("---\ntitle: T\ntype: Metric\ntags: [a]\n---\n\nbody\n", "Metric")]
+    fn it_reads_the_frontmatter_type(#[case] text: &str, #[case] expected: &str) {
+        assert_eq!(Scrap::new("foo", &None, text).scrap_type(), Some(expected));
+    }
+
+    #[rstest::rstest]
+    #[case::no_frontmatter("# Body\n")]
+    #[case::no_type_key("---\nstatus: draft\n---\n")]
+    #[case::empty("---\ntype: ''\n---\n")]
+    #[case::blank("---\ntype: '   '\n---\n")]
+    #[case::null("---\ntype:\n---\n")]
+    #[case::list("---\ntype: [Blog, Book]\n---\n")]
+    #[case::mapping("---\ntype:\n  name: Blog\n---\n")]
+    #[case::number("---\ntype: 3\n---\n")]
+    #[case::boolean("---\ntype: true\n---\n")]
+    #[case::sequence_root("---\n- type\n---\n")]
+    fn it_has_no_type_without_a_non_empty_string(#[case] text: &str) {
+        assert_eq!(Scrap::new("foo", &None, text).scrap_type(), None);
+    }
+
+    #[test]
+    fn it_leaves_frontmatter_and_tags_untouched_by_the_type() {
+        let scrap = Scrap::new("foo", &None, "---\ntype: Blog\n---\n\n#[[ai]]\n");
+        assert_eq!(
+            scrap.frontmatter().and_then(|v| v.get("type")),
+            Some(&Value::String("Blog".to_string()))
+        );
+        assert_eq!(scrap.tags(), &[Tag::from("ai")]);
     }
 
     #[test]
