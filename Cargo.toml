@@ -62,7 +62,7 @@ opentelemetry-otlp = { version = "=0.33.1", default-features = false, features =
 ] }
 # Built against one opentelemetry minor: the two only move together.
 tracing-opentelemetry = { version = "=0.34.0", default-features = false }
-schemars = "=1.2.2"
+schemars = "=1.2.3"
 rstest = "=0.27.0"
 tempfile = "=3.27.0"
 annotate-snippets = "=0.12.16"
