@@ -1,4 +1,6 @@
 use crate::ir::loader;
+use crate::mcp::json::scrap::ScrapRefJson;
+use crate::mcp::scrap_target;
 use crate::usecase::scrap::lookup_links::usecase::{LinkRefKind, LookupScrapLinksUsecase};
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
@@ -12,9 +14,11 @@ use std::path::Path;
 #[derive(Debug, Deserialize, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct LookupScrapLinksRequest {
-    /// Title of the scrap to get links for
-    pub title: String,
-    /// Optional context if the scrap has one
+    /// Key of the scrap to get links for: its path under the wiki root without `.md`, e.g. "tables/orders". Pass the `key` of a result back.
+    pub key: Option<String>,
+    /// Still accepted in place of `key`: the scrap's file stem (not its frontmatter title).
+    pub title: Option<String>,
+    /// Still accepted with `title`: the context (folder path) of the scrap.
     pub ctx: Option<String>,
 }
 
@@ -37,8 +41,8 @@ impl From<LinkRefKind> for LinkRefKindJson {
 #[derive(Debug, Serialize)]
 pub struct LinkRefJson {
     pub kind: LinkRefKindJson,
-    pub title: String,
-    pub ctx: Option<String>,
+    #[serde(flatten)]
+    pub scrap: ScrapRefJson,
     pub heading: Option<String>,
 }
 
@@ -68,38 +72,35 @@ pub async fn lookup_scrap_links(
     let get_links_usecase = LookupScrapLinksUsecase::new();
 
     // Execute get links
-    let title = scraps_libs::model::title::Title::from(request.title.as_str());
-    let ctx = request
-        .ctx
-        .as_ref()
-        .map(|c| scraps_libs::model::context::Ctx::from(c.as_str()));
+    let key = scrap_target::resolve(
+        request.key.as_deref(),
+        request.title.as_deref(),
+        request.ctx.as_deref(),
+    )?;
 
-    let results = get_links_usecase
-        .execute(&scraps, &title, &ctx)
-        .map_err(|e| {
-            ErrorData::new(
-                ErrorCode(-32004),
-                format!("Get scrap links failed: {e}"),
-                None,
-            )
-        })?;
+    let results = get_links_usecase.execute(&scraps, &key).map_err(|e| {
+        ErrorData::new(
+            ErrorCode(-32004),
+            format!("Get scrap links failed: {e}"),
+            None,
+        )
+    })?;
 
     // Convert results to structured response
     let refs: Vec<LinkRefJson> = results
         .into_iter()
         .map(|result| LinkRefJson {
             kind: result.kind.into(),
-            title: result.title.to_string(),
-            ctx: result.ctx.map(|c| c.to_string()),
+            scrap: (&result.scrap).into(),
             heading: result.heading,
         })
         .collect();
 
     let count = refs.len();
     let next = if count == 0 {
-        "No outbound links. Try lookup_scrap_backlinks {title, ctx} for inbound references."
+        "No outbound links. Try lookup_scrap_backlinks {key} for inbound references."
     } else {
-        "Read a linked scrap with get_scrap {title, ctx} — add heading to jump to the referenced section."
+        "Read a linked scrap by passing its key back: get_scrap {key} — add heading to jump to the referenced section."
     };
     let response = LookupScrapLinksResponse {
         results: refs,

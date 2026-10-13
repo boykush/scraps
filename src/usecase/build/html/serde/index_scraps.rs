@@ -17,6 +17,8 @@ const SUMMARY_MAX_CHARS: usize = 90;
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeIndexScrap {
     ctx: Option<String>,
+    /// What a wiki-link to the scrap holds: its path without `.md`.
+    key: String,
     title: String,
     /// Page URL relative to `base_url`, already percent-encoded.
     url_path: String,
@@ -44,6 +46,7 @@ impl SerializeIndexScrap {
         let url_path = PagePath::of_scrap(&scrap.self_key()).to_url_path();
         SerializeIndexScrap {
             ctx: scrap.ctx().as_ref().map(|c| c.to_string()),
+            key: scrap.self_key().to_string(),
             title: scrap.title().to_string(),
             url_path,
             thumbnail: scrap.thumbnail(),
@@ -108,10 +111,8 @@ mod tests {
     fn summary_of(md_text: &str) -> Option<String> {
         let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let scrap = Scrap::new("orders", &None, md_text);
-        let scrap_texts = [(scrap.self_key(), scrap.md_text().to_string())]
-            .into_iter()
-            .collect();
-        let detail = ScrapDetail::new(&scrap, &None, base_url, &scrap_texts);
+        let link_targets = scraps_libs::html::LinkTargets::new([&scrap]);
+        let detail = ScrapDetail::new(&scrap, &None, base_url, &link_targets);
         let backlinks_map = BacklinksMap::new(std::slice::from_ref(&scrap));
 
         SerializeIndexScrap::new(&detail, &backlinks_map).summary
@@ -148,15 +149,12 @@ mod tests {
             scrap3.clone(),
             scrap4.clone(),
         ];
-        let scrap_texts = scraps
-            .iter()
-            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
-            .collect();
+        let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
 
-        let sc1 = ScrapDetail::new(&scrap1, &None, base_url, &scrap_texts);
-        let sc2 = ScrapDetail::new(&scrap2, &Some(3), base_url, &scrap_texts);
-        let sc3 = ScrapDetail::new(&scrap3, &Some(2), base_url, &scrap_texts);
-        let sc4 = ScrapDetail::new(&scrap4, &Some(1), base_url, &scrap_texts);
+        let sc1 = ScrapDetail::new(&scrap1, &None, base_url, &link_targets);
+        let sc2 = ScrapDetail::new(&scrap2, &Some(3), base_url, &link_targets);
+        let sc3 = ScrapDetail::new(&scrap3, &Some(2), base_url, &link_targets);
+        let sc4 = ScrapDetail::new(&scrap4, &Some(1), base_url, &link_targets);
         let backlinks_map = BacklinksMap::new(&scraps);
 
         let sscrap1 = SerializeIndexScrap::new(&sc1.clone(), &backlinks_map);

@@ -11,6 +11,8 @@ use crate::usecase::build::model::{
 #[derive(serde::Serialize, PartialEq, Debug)]
 struct SerializeTitleIndexScrap {
     ctx: Option<String>,
+    /// What a wiki-link to the scrap holds: its path without `.md`.
+    key: String,
     title: String,
     /// Page URL relative to `base_url`, already percent-encoded.
     url_path: String,
@@ -54,6 +56,7 @@ impl TitleIndexTera {
             let title = scrap.title().to_string();
             let entry = SerializeTitleIndexScrap {
                 ctx: scrap.ctx().as_ref().map(|c| c.to_string()),
+                key: scrap.self_key().to_string(),
                 url_path: PagePath::of_scrap(&scrap.self_key()).to_url_path(),
                 backlinks_count: backlinks_map.get(&scrap.self_key()).len(),
                 title,
@@ -101,16 +104,13 @@ mod tests {
             scrap3.clone(),
             scrap4.clone(),
         ];
-        let scrap_texts = scraps
-            .iter()
-            .map(|s| (s.self_key(), s.md_text().to_string()))
-            .collect();
+        let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
 
         let details = ScrapDetails::new(vec![
-            ScrapDetail::new(&scrap1, &None, base_url, &scrap_texts),
-            ScrapDetail::new(&scrap2, &None, base_url, &scrap_texts),
-            ScrapDetail::new(&scrap3, &None, base_url, &scrap_texts),
-            ScrapDetail::new(&scrap4, &None, base_url, &scrap_texts),
+            ScrapDetail::new(&scrap1, &None, base_url, &link_targets),
+            ScrapDetail::new(&scrap2, &None, base_url, &link_targets),
+            ScrapDetail::new(&scrap3, &None, base_url, &link_targets),
+            ScrapDetail::new(&scrap4, &None, base_url, &link_targets),
         ]);
         let backlinks_map = BacklinksMap::new(&scraps);
 
@@ -129,5 +129,42 @@ mod tests {
 
         // Backlink counts ride along for the index rows.
         assert_eq!(result.0[1].scraps[1].backlinks_count, 1);
+    }
+
+    #[test]
+    fn it_groups_and_sorts_by_the_title_that_is_shown() {
+        let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
+        let orders = Scrap::new("orders", &None, "---\ntitle: Customer Orders\n---\n");
+        let churn = Scrap::new("churn", &None, "");
+        let zeta = Scrap::new("zeta", &None, "---\ntitle: alpha\n---\n");
+        let scraps = [orders.clone(), churn.clone(), zeta.clone()];
+        let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
+        let details = ScrapDetails::new(
+            scraps
+                .iter()
+                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &link_targets))
+                .collect(),
+        );
+
+        let result = TitleIndexTera::new(&details, &BacklinksMap::new(&scraps));
+
+        let groups: Vec<(&str, Vec<(&str, &str)>)> = result
+            .0
+            .iter()
+            .map(|group| {
+                let rows = group.scraps.iter();
+                (
+                    group.label.as_str(),
+                    rows.map(|s| (s.title.as_str(), s.key.as_str())).collect(),
+                )
+            })
+            .collect();
+        assert_eq!(
+            groups,
+            vec![
+                ("A", vec![("alpha", "zeta")]),
+                ("C", vec![("churn", "churn"), ("Customer Orders", "orders")]),
+            ]
+        );
     }
 }

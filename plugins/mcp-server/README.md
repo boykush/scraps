@@ -59,6 +59,25 @@ One process serves one wiki. The server binds loopback with no authentication; i
 
 All operations run against the current state of the Scraps wiki. Search uses fuzzy matching.
 
+### Naming a scrap
+
+Every result names a scrap with three fields:
+
+```json
+{ "key": "tables/orders", "title": "Customer Orders", "ctx": "tables" }
+```
+
+`key` is the scrap's path under the wiki root without `.md`, the same string
+a wiki-link holds: pass it back to reach that scrap. `title` is what readers
+see (the frontmatter `title`, or the file name without `.md`), and `ctx` is
+the folder part of the key.
+
+The tools that take a scrap (`get_scrap`, `lookup_scrap_links`,
+`lookup_scrap_backlinks`, `lookup_scrap_neighborhood`) take `key`. The older
+pair is still accepted in its place: `title`, read as the file name without
+`.md` (never the frontmatter title), with an optional `ctx`. Exactly one of
+`key` and `title` is required.
+
 ### `orient`
 
 Where to start on an unfamiliar wiki: its scale, its folder contexts, the head
@@ -96,7 +115,7 @@ instead of naming tools.
 
 ### `search_scraps`
 
-Search titles + body content with fuzzy matching.
+Search keys, titles and body content with fuzzy matching.
 
 | Parameter | Type | Required | Default | Notes |
 |---|---|---|---|---|
@@ -104,7 +123,7 @@ Search titles + body content with fuzzy matching.
 | `num` | integer | no | 100 | Max results |
 | `logic` | `"or"` \| `"and"` | no | `"or"` | Multi-keyword logic |
 
-Returns: `{ results: [{ title, ctx, description? }], count }`. `description`
+Returns: `{ results: [{ key, title, ctx, description? }], count }`. `description`
 is the scrap's frontmatter description, present only on hits that have one.
 
 ### `list_tags`
@@ -115,17 +134,18 @@ Returns: `[{ title, backlinks_count }]`.
 
 ### `get_scrap`
 
-Retrieve a single scrap by title, optional context, optional heading, and
-optional field projection.
+Retrieve a single scrap by key, with an optional heading and an optional
+field projection.
 
 | Parameter | Type | Required | Notes |
 |---|---|---|---|
-| `title` | string | yes | Scrap title |
-| `ctx` | string | no | Context folder/path |
+| `key` | string | yes, unless `title` | Scrap key, as results return it |
+| `title` | string | no | Still accepted in place of `key`: the file name without `.md` |
+| `ctx` | string | no | Still accepted with `title`: context folder/path |
 | `heading` | string | no | Restrict body/structure fields to this section |
-| `fields` | string[] | no | Defaults to `["title", "ctx", "body"]`; allowed: `title`, `ctx`, `body`, `headings`, `code_blocks`, `type`, `description`, `frontmatter` |
+| `fields` | string[] | no | Defaults to `["key", "title", "ctx", "body"]`; allowed: `key`, `title`, `ctx`, `body`, `headings`, `code_blocks`, `type`, `description`, `frontmatter` |
 
-Returns the requested fields. Default response: `{ title, ctx, body }`. `type`
+Returns the requested fields. Default response: `{ key, title, ctx, body }`. `type`
 and `description` are the scrap's frontmatter type and description, and
 `frontmatter` its whole block as parsed data, each `null` when it has none.
 
@@ -140,16 +160,17 @@ Outbound wiki-links from a scrap.
 
 | Parameter | Type | Required |
 |---|---|---|
-| `title` | string | yes |
-| `ctx` | string | no |
+| `key` | string | yes, unless `title` |
+| `title` | string | no (still accepted in place of `key`) |
+| `ctx` | string | no (still accepted with `title`) |
 
 Returns outbound reference occurrences:
 
 ```json
 {
   "results": [
-    { "kind": "link", "title": "Target", "ctx": null, "heading": "Install" },
-    { "kind": "embed", "title": "Guide", "ctx": "Docs", "heading": null }
+    { "kind": "link", "key": "Target", "title": "Target", "ctx": null, "heading": "Install" },
+    { "kind": "embed", "key": "Docs/Guide", "title": "Guide", "ctx": "Docs", "heading": null }
   ],
   "count": 2
 }
@@ -161,10 +182,11 @@ Inbound wiki-links to a scrap.
 
 | Parameter | Type | Required |
 |---|---|---|
-| `title` | string | yes |
-| `ctx` | string | no |
+| `key` | string | yes, unless `title` |
+| `title` | string | no (still accepted in place of `key`) |
+| `ctx` | string | no (still accepted with `title`) |
 
-Returns: `{ results: [{ title, ctx }], count }`.
+Returns: `{ results: [{ key, title, ctx }], count }`.
 
 ### `lookup_scrap_neighborhood`
 
@@ -173,8 +195,9 @@ both link directions, with the links between them.
 
 | Parameter | Type | Required | Default | Notes |
 |---|---|---|---|---|
-| `title` | string | yes | — | Scrap the map opens around |
-| `ctx` | string | no | — | Context folder/path |
+| `key` | string | yes, unless `title` | — | Scrap the map opens around |
+| `title` | string | no | — | Still accepted in place of `key`: the file name without `.md` |
+| `ctx` | string | no | — | Still accepted with `title`: context folder/path |
 | `depth` | integer | no | 1 | Hops walked out from the scrap, capped at 5 |
 | `limit` | integer | no | 50 | Maximum nodes in the response |
 
@@ -183,13 +206,13 @@ Returns:
 ```json
 {
   "nodes": [
-    { "title": "Microservices", "ctx": null, "hop": 0 },
-    { "title": "Strangler Fig", "ctx": null, "hop": 1 }
+    { "key": "Microservices", "title": "Microservices", "ctx": null, "hop": 0 },
+    { "key": "Patterns/Strangler Fig", "title": "Strangler Fig", "ctx": "Patterns", "hop": 1 }
   ],
   "edges": [
     {
-      "from": { "title": "Microservices", "ctx": null },
-      "to": { "title": "Strangler Fig", "ctx": null }
+      "from": { "key": "Microservices", "title": "Microservices", "ctx": null },
+      "to": { "key": "Patterns/Strangler Fig", "title": "Strangler Fig", "ctx": "Patterns" }
     }
   ],
   "count": 2,
@@ -213,7 +236,7 @@ Scraps that reference a specific tag.
 |---|---|---|
 | `tag` | string | yes |
 
-Returns: `{ results: [{ title, ctx }], count }`.
+Returns: `{ results: [{ key, title, ctx }], count }`.
 
 ### `list_types`
 
@@ -230,7 +253,7 @@ Scraps of a specific type. The type is matched exactly and case-sensitively.
 |---|---|---|
 | `type` | string | yes |
 
-Returns: `{ results: [{ title, ctx }], count }`.
+Returns: `{ results: [{ key, title, ctx }], count }`.
 
 ### `list_todos`
 
@@ -246,7 +269,7 @@ Returns:
 {
   "results": [
     {
-      "scrap": { "title": "borrowing", "ctx": "Programming/Rust" },
+      "scrap": { "key": "Programming/Rust/borrowing", "title": "borrowing", "ctx": "Programming/Rust" },
       "status": "open",
       "text": "implement Drop for X",
       "line": 3
@@ -258,7 +281,7 @@ Returns:
 
 `- [ ]` is `open`, `- [x]` is `done` and `- [-]` is `deferred`; any other symbol
 is skipped, and items inside fenced code blocks are not tasks. Results are
-ordered by context, then title, then line, and carry the same shape as
+ordered by context, then file name, then line, and carry the same shape as
 `scraps todo --json`. Read the scrap a task sits in with `get_scrap`.
 
 ### `list_frontmatter`
@@ -272,7 +295,7 @@ Returns:
 {
   "results": [
     {
-      "scrap": { "title": "borrowing", "ctx": "Programming/Rust" },
+      "scrap": { "key": "Programming/Rust/borrowing", "title": "borrowing", "ctx": "Programming/Rust" },
       "frontmatter": { "status": "review", "owner": "bob", "taxonomy": ["rust", "memory"] }
     }
   ],
@@ -281,7 +304,8 @@ Returns:
 ```
 
 Keys are passed through in the order they were written, and Scraps requires
-none of them. It reads three: the strings of a `tags` list are tags alongside
+none of them. It reads four: `title` is the scrap's title (the `title` of
+every result), the strings of a `tags` list are tags alongside
 `#[[tag]]` (`list_tags`, `lookup_tag_backlinks`), `type` is the scrap's
 type (`list_types`, `lookup_type_scraps`), and `description` is its one-line
 summary (`get_scrap`, `search_scraps`). Every other key is opaque — see the

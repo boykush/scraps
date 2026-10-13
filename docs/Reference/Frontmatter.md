@@ -5,11 +5,12 @@ type: Reference
 #[[Notation/Frontmatter]]
 
 Scraps reads a YAML frontmatter block when a file has one, and requires
-none. Three keys carry meaning; every other key is kept as data and given no
+none. Four keys carry meaning; every other key is kept as data and given no
 meaning.
 
 ```markdown
 ---
+title: Why wiki-links?
 type: Blog
 description: Why wiki-links beat Markdown links for notes.
 tags: [Markdown, Notation/Wiki-link]
@@ -23,9 +24,27 @@ The body starts here.
 
 | Key | Read as |
 |---|---|
+| `title` | The scrap's title: the name readers see |
 | `tags` | The scrap's tags, merged with the `#[[tag]]` references in its body |
 | `type` | The scrap's kind |
 | `description` | The scrap's one-line summary |
+
+### `title`
+
+A single string: the name readers see. Surrounding whitespace is trimmed and
+the string is otherwise used as written, so it can hold spaces and symbols a
+file name is better off without. A scrap without one is titled by its file
+name without `.md`.
+
+The static site shows the title wherever it names the scrap: the page
+heading and `<title>`, the list views, tag pages, link lists, the
+neighbourhood graph, the search box, and the text of a `[[key]]` written
+without an alias. The `title` field of every `--json` output is this title,
+and `scraps search` matches it.
+
+A title names a scrap and does not identify it: links, commands and URLs go
+by its key. The model is in
+[[Reference/Wiki-link Notation#Key, title and context]].
 
 ### `tags`
 
@@ -73,27 +92,29 @@ Frontmatter never fails a command and never raises a lint warning.
 - A block that is absent, unclosed or not valid YAML is skipped; the scrap is
   read as if it had none, and the lines stay ordinary Markdown.
 - A key whose value has the wrong shape is ignored: `tags` that is not a
-  list, a `tags` entry that is not a string, a `type` or `description` that
-  is not a non-empty string.
+  list, a `tags` entry that is not a string, a `title`, `type` or
+  `description` that is not a non-empty string.
 - Keys Scraps does not read are passed through untouched, in the order they
   were written.
 
 ## What frontmatter does not change
 
-A scrap's title and context come from its file path, and its links from
-[[Reference/Wiki-link Notation]] and the Markdown links to scrap files in
-its body. No frontmatter key overrides them.
+A scrap's key and context come from its file path, and so do the links that
+resolve to it and the URL of its page. Its own links come from the `[[ ]]`
+references and the Markdown links to scrap files in its body. No frontmatter
+key overrides any of these: `title` changes what a scrap is called, never
+what points at it.
 
 ## Where the block appears
 
 A block Scraps reads is metadata, not content:
 
 - The static site leaves it out of the scrap's page, of the summary derived
-  for index pages, and of any page that embeds the scrap. Only a
-  `description` is shown, where the key says so above.
+  for index pages, and of any page that embeds the scrap. Only a `title` and
+  a `description` are shown, where the keys say so above.
 - Nothing in it is read as structure: no heading, code block, image, task,
   `[[ ]]` reference or Markdown link comes out of the YAML, and
-  `scraps search` does not match its text.
+  `scraps search` does not match its text, the `title` apart.
 - The `body` of `scraps get`, with or without `--json`, and of the MCP
   `get_scrap` tool is the content without the block: it starts at the first
   content line, and the blank lines after the block go with it.
@@ -107,19 +128,19 @@ written, or `null` when the scrap has none.
 
 ## Open Knowledge Format
 
-`tags`, `type` and `description` are keys the
+`title`, `tags`, `type` and `description` are keys the
 [Open Knowledge Format](https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/main/SPEC.md)
-(OKF) defines, so files written for OKF bring their tags, types and
-descriptions with them.
+(OKF) defines, so files written for OKF bring their titles, tags, types and
+descriptions with them. OKF's concept ID, the file path without `.md`, is
+the scrap's key.
 The reverse is not asked for: OKF requires `type` on every document, Scraps
 on none.
 
 OKF connects files with ordinary Markdown links to their `.md` paths, and
 those are links between scraps: see [[Reference/Markdown Link]].
 
-The rest of OKF is not interpreted. Its other keys, `title` among them, are
-passed through like any author-defined key, and `index.md` and `log.md` are
-ordinary scraps.
+The rest of OKF is not interpreted. Its other keys are passed through like
+any author-defined key, and `index.md` and `log.md` are ordinary scraps.
 
 ## Reading the whole block
 

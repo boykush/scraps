@@ -1,8 +1,7 @@
 use crate::error::ScrapsResult;
+use crate::usecase::scrap::scrap_ref::ScrapRef;
 use scraps_libs::markdown::query::TaskStatus;
-use scraps_libs::model::context::Ctx;
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::model::title::Title;
 
 /// Status filter for `scraps todo`. `All` short-circuits status filtering.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -38,8 +37,7 @@ pub fn status_label(status: &TaskStatus) -> &'static str {
 /// One task list entry resolved back to its source scrap.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TodoResult {
-    pub title: Title,
-    pub ctx: Option<Ctx>,
+    pub scrap: ScrapRef,
     pub status: TaskStatus,
     pub text: String,
     pub line: usize,
@@ -65,8 +63,7 @@ impl TodoUsecase {
                     continue;
                 }
                 results.push(TodoResult {
-                    title: scrap.title().clone(),
-                    ctx: scrap.ctx().clone(),
+                    scrap: scrap.into(),
                     status: item.status.clone(),
                     text: item.text.clone(),
                     line: item.line,
@@ -74,14 +71,7 @@ impl TodoUsecase {
             }
         }
 
-        results.sort_by(|a, b| {
-            let a_ctx = a.ctx.as_ref().map(|c| c.to_string()).unwrap_or_default();
-            let b_ctx = b.ctx.as_ref().map(|c| c.to_string()).unwrap_or_default();
-            a_ctx
-                .cmp(&b_ctx)
-                .then_with(|| a.title.to_string().cmp(&b.title.to_string()))
-                .then_with(|| a.line.cmp(&b.line))
-        });
+        results.sort_by_key(|result| (result.scrap.sort_key(), result.line));
 
         Ok(results)
     }
@@ -90,6 +80,7 @@ impl TodoUsecase {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use scraps_libs::model::context::Ctx;
 
     fn ctx(s: &str) -> Ctx {
         Ctx::from(s)
@@ -175,9 +166,9 @@ mod tests {
         assert_eq!(results.len(), 1);
         assert_eq!(results[0].text, "implement Drop for X");
         assert_eq!(results[0].line, 3);
-        assert_eq!(results[0].title.to_string(), "borrowing");
+        assert_eq!(results[0].scrap.title, "borrowing");
         assert_eq!(
-            results[0].ctx.as_ref().map(|c| c.to_string()),
+            results[0].scrap.ctx().as_ref().map(|c| c.to_string()),
             Some("programming/rust".to_string())
         );
     }

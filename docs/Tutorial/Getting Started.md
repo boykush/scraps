@@ -78,15 +78,17 @@ can query the wiki:
 
 ```bash
 ❯ scraps search "query" --json
-❯ scraps get "Page Name" --json
-❯ scraps get "Page Name" --heading "Section" --json body
-❯ scraps backlinks "Page Name" --json
+❯ scraps get "Folder/Page Name" --json
+❯ scraps get "Folder/Page Name" --heading "Section" --json body
+❯ scraps backlinks "Folder/Page Name" --json
 ❯ scraps todo --json
 ```
 
-`scraps get --json` returns `title`, `ctx`, and `body` by default. It can also
-project fields such as `headings`, `code_blocks`, or `images`, and `--heading` narrows
-the read to one section.
+A scrap is named by its key: its path under the wiki root without `.md`,
+which every `--json` result returns as `key`. `scraps get --json` returns
+`key`, `title`, `ctx`, and `body` by default. It can also project fields such
+as `headings`, `code_blocks`, or `images`, and `--heading` narrows the read to
+one section.
 
 For Claude Code users there is also an official skills bundle. See
 [[How-to/Integrate with AI Assistants]] for both paths.

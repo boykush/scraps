@@ -54,26 +54,26 @@ mod tests {
             backlinks_map
                 .get_tag(&tag1)
                 .iter()
-                .map(|s| s.title().clone())
+                .map(|s| s.stem().clone())
                 .sorted_by_key(|t| t.to_string())
                 .collect_vec(),
-            vec![scrap1.title().clone(), scrap2.title().clone()]
+            vec![scrap1.stem().clone(), scrap2.stem().clone()]
         );
         assert_eq!(
             backlinks_map
                 .get_tag(&tag2)
                 .iter()
-                .map(|s| s.title().clone())
+                .map(|s| s.stem().clone())
                 .collect_vec(),
-            vec![scrap1.title().clone()]
+            vec![scrap1.stem().clone()]
         );
         assert_eq!(
             backlinks_map
                 .get_tag(&tag3)
                 .iter()
-                .map(|s| s.title().clone())
+                .map(|s| s.stem().clone())
                 .collect_vec(),
-            vec![scrap2.title().clone()]
+            vec![scrap2.stem().clone()]
         );
     }
 }

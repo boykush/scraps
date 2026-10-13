@@ -1,5 +1,5 @@
 use crate::ir::loader;
-use crate::mcp::json::scrap::ScrapKeyJson;
+use crate::mcp::json::scrap::ScrapRefJson;
 use crate::usecase::frontmatter::usecase::FrontmatterUsecase;
 use rmcp::model::ErrorCode;
 use rmcp::model::{CallToolResult, ContentBlock};
@@ -11,7 +11,7 @@ use std::path::Path;
 
 #[derive(Debug, Serialize)]
 pub struct FrontmatterItemJson {
-    pub scrap: ScrapKeyJson,
+    pub scrap: ScrapRefJson,
     pub frontmatter: Value,
 }
 
@@ -48,10 +48,7 @@ pub async fn list_frontmatter(
     let items: Vec<FrontmatterItemJson> = results
         .into_iter()
         .map(|result| FrontmatterItemJson {
-            scrap: ScrapKeyJson {
-                title: result.title.to_string(),
-                ctx: result.ctx.map(|c| c.to_string()),
-            },
+            scrap: (&result.scrap).into(),
             frontmatter: result.frontmatter,
         })
         .collect();
@@ -60,7 +57,7 @@ pub async fn list_frontmatter(
     let next = if count == 0 {
         "No scrap carries frontmatter. The wiki's tags are all #[[tag]] in scrap bodies — start from list_tags."
     } else {
-        "Keys are the author's own; scraps gives them no meaning, except that the strings of a `tags` list are tags (list_tags) and a `type` string is the scrap's kind (list_types). Read the scrap behind an entry with get_scrap {title, ctx}."
+        "Keys are the author's own; scraps gives them no meaning, except that the strings of a `tags` list are tags (list_tags) and a `type` string is the scrap's kind (list_types). Read the scrap behind an entry with get_scrap {key}."
     };
     let response = ListFrontmatterResponse {
         results: items,

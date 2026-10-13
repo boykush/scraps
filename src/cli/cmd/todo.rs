@@ -7,20 +7,15 @@ use comfy_table::{Cell, Table};
 use serde::{Deserialize, Serialize};
 
 use crate::cli::config::scrap_config::ScrapConfig;
+use crate::cli::json::scrap::ScrapRefJson;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 use crate::ir::loader;
 use crate::usecase::todo::usecase::{StatusFilter, TodoUsecase, status_label};
 
 #[derive(Debug, Serialize, Deserialize)]
-struct TodoScrapJson {
-    title: String,
-    ctx: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
 struct TodoItemJson {
-    scrap: TodoScrapJson,
+    scrap: ScrapRefJson,
     status: String,
     text: String,
     line: usize,
@@ -30,13 +25,6 @@ struct TodoItemJson {
 struct TodoResponse {
     results: Vec<TodoItemJson>,
     count: usize,
-}
-
-fn scrap_label(title: &str, ctx: Option<&str>) -> String {
-    match ctx {
-        Some(c) if !c.is_empty() => format!("{c}/{title}"),
-        _ => title.to_string(),
-    }
 }
 
 pub fn run(
@@ -62,10 +50,7 @@ pub fn run(
         let items: Vec<TodoItemJson> = results
             .into_iter()
             .map(|r| TodoItemJson {
-                scrap: TodoScrapJson {
-                    title: r.title.to_string(),
-                    ctx: r.ctx.map(|c| c.to_string()),
-                },
+                scrap: (&r.scrap).into(),
                 status: status_label(&r.status).to_string(),
                 text: r.text,
                 line: r.line,
@@ -90,10 +75,7 @@ pub fn run(
         ]);
 
         for r in &results {
-            let scrap = scrap_label(
-                &r.title.to_string(),
-                r.ctx.as_ref().map(|c| c.to_string()).as_deref(),
-            );
+            let scrap = r.scrap.key.to_string();
             table.add_row(vec![
                 Cell::new(scrap),
                 Cell::new(status_label(&r.status)),

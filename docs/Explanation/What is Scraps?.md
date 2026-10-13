@@ -24,10 +24,11 @@ syntax clear meaning:
 - `#[[tag]]` marks a tag
 - `[[name#heading]]` references a heading inside another scrap
 - `![[embed]]` embeds content from another scrap
-- folders provide context, so `DDD/Service.md` and `Kubernetes/Service.md` are
-  different scraps
-- YAML frontmatter is optional; when present, its `tags` and `type` are read
-  ([[Reference/Frontmatter]])
+- a scrap's key is its path without `.md`, so `DDD/Service.md` and
+  `Kubernetes/Service.md` are different scraps, linked as `[[DDD/Service]]`
+  and `[[Kubernetes/Service]]`
+- YAML frontmatter is optional; when present, its `title`, `tags`, `type` and
+  `description` are read ([[Reference/Frontmatter]])
 
 Because these are typed, Scraps can lint broken references, render navigation,
 and expose structured documentation data to other tools. See
@@ -62,10 +63,10 @@ Any assistant that can run shell commands can query Scraps directly:
 
 ```bash
 ❯ scraps search "release checklist" --json
-❯ scraps get "Configuration" --json
-❯ scraps get "Configuration" --heading "Profiles" --json body
-❯ scraps links "Configuration" --json
-❯ scraps backlinks "Configuration" --json
+❯ scraps get "Reference/Configuration" --json
+❯ scraps get "Reference/Configuration" --heading "Profiles" --json body
+❯ scraps links "Reference/Configuration" --json
+❯ scraps backlinks "Reference/Configuration" --json
 ❯ scraps todo --status all --json
 ```
 

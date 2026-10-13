@@ -4,14 +4,14 @@ use std::path::Path;
 use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::json::scrap::{CodeBlockJson, HeadingJson};
 use crate::cli::path_resolver::PathResolver;
+use crate::cli::scrap_arg::scrap_key;
 use crate::error::ScrapsResult;
 use crate::ir::loader;
 use crate::usecase::scrap::get::usecase::GetScrapUsecase;
 use scraps_libs::markdown::query::{body, code_blocks, heading_slug, headings, images, section};
-use scraps_libs::model::context::Ctx;
-use scraps_libs::model::title::Title;
 use serde_json::{Map, Value};
 
+const FIELD_KEY: &str = "key";
 const FIELD_TITLE: &str = "title";
 const FIELD_CTX: &str = "ctx";
 const FIELD_BODY: &str = "body";
@@ -22,8 +22,9 @@ const FIELD_TYPE: &str = "type";
 const FIELD_DESCRIPTION: &str = "description";
 const FIELD_FRONTMATTER: &str = "frontmatter";
 
-const DEFAULT_FIELDS: &[&str] = &[FIELD_TITLE, FIELD_CTX, FIELD_BODY];
+const DEFAULT_FIELDS: &[&str] = &[FIELD_KEY, FIELD_TITLE, FIELD_CTX, FIELD_BODY];
 const ALLOWED_FIELDS: &[&str] = &[
+    FIELD_KEY,
     FIELD_TITLE,
     FIELD_CTX,
     FIELD_BODY,
@@ -72,7 +73,7 @@ fn scoped_text<'a>(md_text: &'a str, heading: Option<&str>) -> ScrapsResult<&'a 
 }
 
 pub fn run(
-    title: &str,
+    key: &str,
     ctx: Option<&str>,
     heading: Option<&str>,
     json: Option<&str>,
@@ -88,11 +89,10 @@ pub fn run(
     ];
 
     let scraps = loader::load_scraps(&scraps_dir_path, &exclude_dirs)?;
-    let target_title = Title::from(title);
-    let target_ctx = ctx.map(Ctx::from);
+    let target_key = scrap_key(key, ctx);
 
     let usecase = GetScrapUsecase::new();
-    let result = usecase.execute(&scraps, &target_title, &target_ctx)?;
+    let result = usecase.execute(&scraps, &target_key)?;
 
     // Structure is read from the scoped file text so its lines stay file
     // lines; only the body drops the frontmatter block.
@@ -108,14 +108,21 @@ pub fn run(
             let mut out = Map::new();
             for field in fields {
                 match field {
+                    FIELD_KEY => {
+                        out.insert(
+                            field.to_string(),
+                            Value::String(result.scrap.key.to_string()),
+                        );
+                    }
                     FIELD_TITLE => {
-                        out.insert(field.to_string(), Value::String(result.title.to_string()));
+                        out.insert(field.to_string(), Value::String(result.scrap.title.clone()));
                     }
                     FIELD_CTX => {
                         out.insert(
                             field.to_string(),
                             result
-                                .ctx
+                                .scrap
+                                .ctx()
                                 .as_ref()
                                 .map(|c| Value::String(c.to_string()))
                                 .unwrap_or(Value::Null),
@@ -214,7 +221,7 @@ mod tests {
     }
 
     #[rstest]
-    fn run_default_json_returns_title_ctx_body(
+    fn run_default_json_returns_key_title_ctx_body(
         #[from(temp_scrap_project)] project: TempScrapProject,
     ) {
         project
@@ -225,7 +232,8 @@ mod tests {
         let v: Value = serde_json::from_str(output.trim()).unwrap();
         let obj = v.as_object().unwrap();
 
-        assert_eq!(obj.len(), 3);
+        assert_eq!(obj.len(), 4);
+        assert_eq!(obj["key"], "Backend/Auth");
         assert_eq!(obj["title"], "Auth");
         assert_eq!(obj["ctx"], "Backend");
         assert!(obj["body"].as_str().unwrap().contains("# Auth"));
@@ -583,5 +591,49 @@ mod tests {
     fn run_fails_without_config(#[from(temp_scrap_project)] project: TempScrapProject) {
         let result = run_get("rust", None, None, None, &project);
         assert!(result.is_err());
+    }
+
+    #[rstest]
+    fn run_takes_a_key_and_returns_key_title_and_ctx(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(b"")
+            .add_scrap(
+                "tables/orders.md",
+                b"---\ntitle: Customer Orders\n---\n\nOne row per order.\n",
+            )
+            .add_scrap(
+                "metrics/revenue.md",
+                b"See [[tables/orders]] and [[tables/orders|the orders table]].\n",
+            );
+
+        let by_key = run_get("tables/orders", None, None, Some(""), &project).unwrap();
+        let v: Value = serde_json::from_str(by_key.trim()).unwrap();
+        assert_eq!(v["key"], "tables/orders");
+        assert_eq!(v["title"], "Customer Orders");
+        assert_eq!(v["ctx"], "tables");
+
+        let by_stem = run_get("orders", Some("tables"), None, Some(""), &project).unwrap();
+        assert_eq!(by_stem, by_key);
+    }
+
+    #[rstest]
+    fn run_does_not_find_a_scrap_by_its_frontmatter_title(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(b"")
+            .add_scrap(
+                "tables/orders.md",
+                b"---\ntitle: Customer Orders\n---\n\nOne row per order.\n",
+            )
+            .add_scrap(
+                "metrics/revenue.md",
+                b"See [[tables/orders]] and [[tables/orders|the orders table]].\n",
+            );
+
+        assert!(run_get("Customer Orders", Some("tables"), None, None, &project).is_err());
+        assert!(run_get("tables/Customer Orders", None, None, None, &project).is_err());
     }
 }

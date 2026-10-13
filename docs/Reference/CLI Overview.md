@@ -16,10 +16,10 @@ the authoritative reference for flags and arguments. This page is the
 | `scraps check` | Run the build without writing `_site/`; fails where `scraps build` would | – |
 | `scraps serve` | Build then serve at `http://127.0.0.1:1112` | – |
 | `scraps lint` | Wiki-link health check ([[Reference/Lint Rules]]) | – |
-| `scraps get <title>` | Single-scrap introspection | ✓ |
-| `scraps search <query>` | Fuzzy search over titles + body | ✓ |
-| `scraps links <title>` | Outbound wiki-links from a scrap | ✓ |
-| `scraps backlinks <title>` | Inbound wiki-links to a scrap | ✓ |
+| `scraps get <key>` | Single-scrap introspection | ✓ |
+| `scraps search <query>` | Fuzzy search over keys, titles + body | ✓ |
+| `scraps links <key>` | Outbound wiki-links from a scrap | ✓ |
+| `scraps backlinks <key>` | Inbound wiki-links to a scrap | ✓ |
 | `scraps tag list` | List all tags with backlink counts | ✓ |
 | `scraps tag backlinks <tag>` | Scraps referencing a tag | ✓ |
 | `scraps type list` | List all types with scrap counts | ✓ |
@@ -34,26 +34,49 @@ given directory.
 `scraps build` and `scraps serve` read each scrap's last commit date from
 git; `--no-git` skips it (see [[Reference/Static Site/Sort and Pagination]]).
 
-## JSON Reads
+## Naming a scrap
 
-`scraps get` reads one scrap, optionally scoped by context and heading:
+`get`, `links` and `backlinks` take a scrap's key, the same string a
+wiki-link holds ([[Reference/Wiki-link Notation#Key, title and context]]):
 
 ```bash
-scraps get "Title" --ctx "Book" --heading "Install" --json
+scraps get "Tutorial/Getting Started"
+scraps links tables/orders --json
+```
+
+Every `--json` output that names a scrap carries three fields: `key` to pass
+back to a command, `title` to show a reader, and `ctx`, the folder part of
+the key.
+
+```json
+{ "key": "tables/orders", "title": "Customer Orders", "ctx": "tables" }
+```
+
+`--ctx` is still supported: with it the argument is the file name without
+`.md` inside that context, so `scraps get orders --ctx tables` reads the
+same scrap. Neither form looks a scrap up by its frontmatter title; find the
+key with `scraps search`.
+
+## JSON Reads
+
+`scraps get` reads one scrap, optionally scoped by heading:
+
+```bash
+scraps get "Book/Title" --heading "Install" --json
 ```
 
 Its `--json` flag accepts an optional comma-separated field projection. With
-no projection it returns `title`, `ctx`, and `body`.
+no projection it returns `key`, `title`, `ctx`, and `body`.
 
 ```bash
-scraps get "Title" --json title,ctx,body
-scraps get "Title" --json code_blocks
-scraps get "Title" --json images
-scraps get "Title" --heading "Install" --json body,headings
+scraps get "Book/Title" --json key,title,body
+scraps get "Book/Title" --json code_blocks
+scraps get "Book/Title" --json images
+scraps get "Book/Title" --heading "Install" --json body,headings
 ```
 
-Allowed fields are `title`, `ctx`, `body`, `headings`, `code_blocks`, `images`,
-`type`, `description`, and `frontmatter`. `type` and `description` are the
+Allowed fields are `key`, `title`, `ctx`, `body`, `headings`, `code_blocks`,
+`images`, `type`, `description`, and `frontmatter`. `type` and `description` are the
 scrap's frontmatter type and description, and `frontmatter` its whole block,
 each `null` when it has none. What `body` leaves out and what the line
 numbers in `headings` and `code_blocks` count is in
@@ -62,8 +85,8 @@ Reference navigation stays separate: use `scraps links`, `scraps backlinks`,
 and `scraps tag ...`.
 
 `scraps links --json` returns outbound reference occurrences. Each result has
-`kind` (`link` or `embed`), `title`, `ctx`, and `heading`, so agents can jump
-directly to `scraps get <title> --ctx <ctx> --heading <heading>`.
+`kind` (`link` or `embed`), `key`, `title`, `ctx`, and `heading`, so agents
+can jump directly to `scraps get <key> --heading <heading>`.
 
 `scraps backlinks --json` remains scrap-level inbound discovery and returns
 the scraps that link to the requested scrap.

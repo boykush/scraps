@@ -1,40 +1,41 @@
 use std::fmt;
 
-use super::{context::Ctx, title::Title};
+use super::{context::Ctx, stem::Stem};
 
-/// A scrap is uniquely identified by a title and an optional hierarchical
-/// context. `ctx == None` means the scrap is at the root of the scraps
-/// directory; `ctx == Some(_)` carries one or more context segments.
+/// What identifies a scrap and what links point at: its file path under the
+/// wiki root without `.md`, held as the file stem and the folder context.
+/// `ctx == None` is a scrap at the root; `Display` writes the key as one
+/// `/`-separated string, the form that goes inside `[[ ]]`.
 #[derive(PartialEq, Clone, Debug, PartialOrd, Eq, Ord, Hash)]
 pub struct ScrapKey {
-    title: Title,
+    stem: Stem,
     ctx: Option<Ctx>,
 }
 
-impl From<Title> for ScrapKey {
-    fn from(title: Title) -> Self {
-        ScrapKey { title, ctx: None }
+impl From<Stem> for ScrapKey {
+    fn from(stem: Stem) -> Self {
+        ScrapKey { stem, ctx: None }
     }
 }
 
 impl fmt::Display for ScrapKey {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.ctx {
-            Some(ctx) => write!(f, "{}/{}", ctx, self.title),
-            None => write!(f, "{}", self.title),
+            Some(ctx) => write!(f, "{}/{}", ctx, self.stem),
+            None => write!(f, "{}", self.stem),
         }
     }
 }
 
-impl From<ScrapKey> for Title {
+impl From<ScrapKey> for Stem {
     fn from(val: ScrapKey) -> Self {
-        val.title
+        val.stem
     }
 }
 
-impl From<&ScrapKey> for Title {
+impl From<&ScrapKey> for Stem {
     fn from(val: &ScrapKey) -> Self {
-        val.title.clone()
+        val.stem.clone()
     }
 }
 
@@ -51,24 +52,24 @@ impl From<&ScrapKey> for Option<Ctx> {
 }
 
 impl ScrapKey {
-    /// Construct a key from a title and an optional hierarchical context.
-    pub fn new(title: &Title, ctx: &Option<Ctx>) -> ScrapKey {
+    /// Construct a key from a stem and an optional hierarchical context.
+    pub fn new(stem: &Stem, ctx: &Option<Ctx>) -> ScrapKey {
         ScrapKey {
-            title: title.clone(),
+            stem: stem.clone(),
             ctx: ctx.clone(),
         }
     }
 
     /// Convenience constructor for a single-level context.
-    pub fn with_ctx(title: &Title, ctx: &Ctx) -> ScrapKey {
+    pub fn with_ctx(stem: &Stem, ctx: &Ctx) -> ScrapKey {
         ScrapKey {
-            title: title.clone(),
+            stem: stem.clone(),
             ctx: Some(ctx.clone()),
         }
     }
 
-    pub fn title(&self) -> &Title {
-        &self.title
+    pub fn stem(&self) -> &Stem {
+        &self.stem
     }
 
     pub fn ctx(&self) -> &Option<Ctx> {
@@ -76,23 +77,23 @@ impl ScrapKey {
     }
 
     /// Parse a `/`-separated path. The last non-empty segment becomes the
-    /// title; the segments before it (if any) become the context. An empty
-    /// input yields an empty title at the root.
+    /// stem; the segments before it (if any) become the context. An empty
+    /// input yields an empty stem at the root.
     pub fn from_path_str(path: &str) -> ScrapKey {
         let mut parts: Vec<&str> = path.split('/').filter(|s| !s.is_empty()).collect();
         match parts.pop() {
-            Some(title) => {
+            Some(stem) => {
                 let ctx = if parts.is_empty() {
                     None
                 } else {
                     Some(Ctx::from(parts.join("/").as_str()))
                 };
                 ScrapKey {
-                    title: Title::from(title),
+                    stem: Stem::from(stem),
                     ctx,
                 }
             }
-            None => ScrapKey::from(Title::from("")),
+            None => ScrapKey::from(Stem::from("")),
         }
     }
 }
@@ -103,21 +104,21 @@ mod tests {
     use rstest::rstest;
 
     // v1 shape:
-    //   ScrapKey { title: Title, ctx: Option<Ctx> }
+    //   ScrapKey { stem: Stem, ctx: Option<Ctx> }
     // where None = root scrap, Some(ctx) = ctx is a multi-segment hierarchical
     // path (depth >= 1).
     #[rstest]
-    #[case::title_only("title", "title", None)]
-    #[case::single_ctx("ctx/title", "title", Some("ctx"))]
-    #[case::two_levels("a/b/title", "title", Some("a/b"))]
-    #[case::three_levels("a/b/c/title", "title", Some("a/b/c"))]
-    #[case::four_levels("a/b/c/d/title", "title", Some("a/b/c/d"))]
+    #[case::stem_only("stem", "stem", None)]
+    #[case::single_ctx("ctx/stem", "stem", Some("ctx"))]
+    #[case::two_levels("a/b/stem", "stem", Some("a/b"))]
+    #[case::three_levels("a/b/c/stem", "stem", Some("a/b/c"))]
+    #[case::four_levels("a/b/c/d/stem", "stem", Some("a/b/c/d"))]
     #[case::empty_path("", "", None)]
-    #[case::trailing_slash_ignored("ctx/title/", "title", Some("ctx"))]
-    #[case::leading_slash_ignored("/ctx/title", "title", Some("ctx"))]
-    #[case::double_slash_collapsed("a//b/title", "title", Some("a/b"))]
+    #[case::trailing_slash_ignored("ctx/stem/", "stem", Some("ctx"))]
+    #[case::leading_slash_ignored("/ctx/stem", "stem", Some("ctx"))]
+    #[case::double_slash_collapsed("a//b/stem", "stem", Some("a/b"))]
     #[case::japanese("日本語/タイトル", "タイトル", Some("日本語"))]
-    #[case::emoji("🚀/title", "title", Some("🚀"))]
+    #[case::emoji("🚀/stem", "stem", Some("🚀"))]
     #[case::space_in_segment(
         "Book/Test driven development",
         "Test driven development",
@@ -125,18 +126,18 @@ mod tests {
     )]
     fn it_from_path_str(
         #[case] path: &str,
-        #[case] expected_title: &str,
+        #[case] expected_stem: &str,
         #[case] expected_ctx: Option<&str>,
     ) {
         let key = ScrapKey::from_path_str(path);
-        assert_eq!(key.title(), &Title::from(expected_title));
+        assert_eq!(key.stem(), &Stem::from(expected_stem));
         let actual = key.ctx().as_ref().map(|c| format!("{}", c));
         assert_eq!(actual.as_deref(), expected_ctx);
     }
 
     #[test]
     fn it_display_root_scrap() {
-        let key = ScrapKey::from(Title::from("foo"));
+        let key = ScrapKey::from(Stem::from("foo"));
         assert_eq!(format!("{}", key), "foo");
     }
 
@@ -190,18 +191,18 @@ mod tests {
     }
 
     #[test]
-    fn it_from_title_yields_root_scrap() {
-        let key: ScrapKey = Title::from("foo").into();
-        assert_eq!(key.title(), &Title::from("foo"));
+    fn it_from_stem_yields_root_scrap() {
+        let key: ScrapKey = Stem::from("foo").into();
+        assert_eq!(key.stem(), &Stem::from("foo"));
         assert!(key.ctx().is_none());
     }
 
     #[test]
-    fn it_into_title_from_value_and_ref() {
+    fn it_into_stem_from_value_and_ref() {
         let key = ScrapKey::new(&"foo".into(), &Some("Book".into()));
-        let by_value: Title = key.clone().into();
+        let by_value: Stem = key.clone().into();
         assert_eq!(by_value, "foo".into());
-        let by_ref: Title = (&key).into();
+        let by_ref: Stem = (&key).into();
         assert_eq!(by_ref, "foo".into());
     }
 
@@ -219,7 +220,7 @@ mod tests {
             Some("a/b")
         );
 
-        let root_key = ScrapKey::from(Title::from("bar"));
+        let root_key = ScrapKey::from(Stem::from("bar"));
         let root_ctx: Option<Ctx> = (&root_key).into();
         assert!(root_ctx.is_none());
     }

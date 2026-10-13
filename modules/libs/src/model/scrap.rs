@@ -6,7 +6,7 @@ use url::Url;
 use crate::markdown::query::{CodeBlock, Heading, ScrapFacts, TaskItem, WikiRef};
 use crate::nfc::nfc;
 
-use super::{context::Ctx, key::ScrapKey, tag::Tag, title::Title};
+use super::{context::Ctx, key::ScrapKey, stem::Stem, tag::Tag};
 
 const FRONTMATTER_TAGS_KEY: &str = "tags";
 
@@ -27,7 +27,7 @@ pub struct LinkOccurrence {
 /// `facts.refs`; `tags` is the one of its tag refs and the frontmatter `tags`.
 #[derive(PartialEq, Clone, Debug)]
 pub struct Scrap {
-    title: Title,
+    stem: Stem,
     ctx: Option<Ctx>,
     md_text: String,
     facts: ScrapFacts,
@@ -36,16 +36,17 @@ pub struct Scrap {
     scrap_type: Option<String>,
 }
 
+const FRONTMATTER_TITLE_KEY: &str = "title";
 const FRONTMATTER_TYPE_KEY: &str = "type";
 const FRONTMATTER_DESCRIPTION_KEY: &str = "description";
 
 impl Scrap {
     pub fn self_key(&self) -> ScrapKey {
-        ScrapKey::new(&self.title, &self.ctx)
+        ScrapKey::new(&self.stem, &self.ctx)
     }
 
-    pub fn title(&self) -> &Title {
-        &self.title
+    pub fn stem(&self) -> &Stem {
+        &self.stem
     }
 
     pub fn ctx(&self) -> &Option<Ctx> {
@@ -106,6 +107,23 @@ impl Scrap {
         self.facts.frontmatter.as_ref()
     }
 
+    /// What readers see as the scrap's name: its frontmatter title, or the
+    /// file stem when it has none. A title names a scrap and never identifies
+    /// it; links resolve by `self_key()`.
+    pub fn title(&self) -> &str {
+        self.frontmatter_title().unwrap_or(self.stem.as_str())
+    }
+
+    /// The frontmatter `title` string, trimmed and otherwise as written. None
+    /// when the key is missing, blank or not a string.
+    pub fn frontmatter_title(&self) -> Option<&str> {
+        self.frontmatter()?
+            .get(FRONTMATTER_TITLE_KEY)?
+            .as_str()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+    }
+
     /// What kind of thing the scrap is: the frontmatter `type` string,
     /// trimmed and in NFC. A scrap has at most one, and none when the key is
     /// missing, blank or not a string. The value is the author's own
@@ -127,13 +145,13 @@ impl Scrap {
 }
 
 impl Scrap {
-    pub fn new(title: &str, ctx: &Option<Ctx>, text: &str) -> Scrap {
-        Scrap::from_facts(title, ctx, text, ScrapFacts::parse(text))
+    pub fn new(stem: &str, ctx: &Option<Ctx>, text: &str) -> Scrap {
+        Scrap::from_facts(stem, ctx, text, ScrapFacts::parse(text))
     }
 
     /// Assemble a scrap from facts parsed earlier, so a source the on-disk IR
     /// already knows is never parsed twice. The facts are trusted as given.
-    pub fn from_facts(title: &str, ctx: &Option<Ctx>, text: &str, facts: ScrapFacts) -> Scrap {
+    pub fn from_facts(stem: &str, ctx: &Option<Ctx>, text: &str, facts: ScrapFacts) -> Scrap {
         // Dedup through a HashSet used to leave the order to chance, which made
         // every consumer of `links()` — backlink lists, rendered pages, the
         // neighborhood walk — reshuffle on each read. Keep first occurrence.
@@ -160,7 +178,7 @@ impl Scrap {
         let scrap_type = frontmatter_type(facts.frontmatter.as_ref());
 
         Scrap {
-            title: title.into(),
+            stem: stem.into(),
             ctx: ctx.clone(),
             md_text: text.to_string(),
             facts,
@@ -228,15 +246,15 @@ mod tests {
     #[test]
     fn it_new_at_root() {
         let scrap = Scrap::new("scrap title", &None, "[[link1]][[link2]][[Context/link3]]");
-        assert_eq!(scrap.title(), &"scrap title".into());
+        assert_eq!(scrap.stem(), &"scrap title".into());
         assert!(scrap.ctx().is_none());
 
         let mut actual_links = scrap.links().to_vec();
         actual_links.sort();
 
         let mut expected = [
-            Title::from("link1").into(),
-            Title::from("link2").into(),
+            Stem::from("link1").into(),
+            Stem::from("link2").into(),
             ScrapKey::with_ctx(&"link3".into(), &"Context".into()),
         ];
         expected.sort();
@@ -285,8 +303,8 @@ mod tests {
         assert_eq!(
             scrap.links().to_vec(),
             vec![
-                ScrapKey::from(Title::from("zulu")),
-                ScrapKey::from(Title::from("alpha")),
+                ScrapKey::from(Stem::from("zulu")),
+                ScrapKey::from(Stem::from("alpha")),
                 ScrapKey::with_ctx(&"mike".into(), &"Context".into()),
             ]
         );
@@ -295,7 +313,7 @@ mod tests {
     #[test]
     fn it_new_with_nested_ctx() {
         let scrap = Scrap::new("borrowing", &Some("programming/rust".into()), "body");
-        assert_eq!(scrap.title(), &"borrowing".into());
+        assert_eq!(scrap.stem(), &"borrowing".into());
         let ctx = scrap.ctx().as_ref().expect("ctx should be Some");
         assert_eq!(format!("{}", ctx), "programming/rust");
         assert_eq!(ctx.depth(), 2);
@@ -410,7 +428,7 @@ mod tests {
         assert_eq!(scrap.images().len(), 1);
         assert_eq!(scrap.thumbnail(), scrap.images().first().cloned());
         assert_eq!(scrap.refs().len(), 3);
-        assert_eq!(scrap.links(), &[ScrapKey::from(Title::from("bar"))]);
+        assert_eq!(scrap.links(), &[ScrapKey::from(Stem::from("bar"))]);
         assert_eq!(scrap.tags(), &[Tag::from("ai")]);
         assert!(scrap.frontmatter().is_none());
     }
@@ -484,6 +502,47 @@ mod tests {
         assert_eq!(Scrap::new("foo", &None, text).description(), None);
     }
 
+    #[rstest::rstest]
+    #[case::plain("---\ntitle: Customer Orders\n---\n", "Customer Orders")]
+    #[case::trimmed("---\ntitle: '  Customer Orders  '\n---\n", "Customer Orders")]
+    #[case::symbols(
+        "---\ntitle: 'What is C#? [draft] | 50%'\n---\n",
+        "What is C#? [draft] | 50%"
+    )]
+    #[case::among_other_keys("---\ntype: Table\ntitle: Orders\ntags: [a]\n---\n\nbody\n", "Orders")]
+    fn it_reads_the_frontmatter_title(#[case] text: &str, #[case] expected: &str) {
+        let scrap = Scrap::new("orders", &Some("tables".into()), text);
+        assert_eq!(scrap.title(), expected);
+        assert_eq!(scrap.frontmatter_title(), Some(expected));
+    }
+
+    #[rstest::rstest]
+    #[case::no_frontmatter("# Body\n")]
+    #[case::no_title_key("---\ntype: Blog\n---\n")]
+    #[case::empty("---\ntitle: ''\n---\n")]
+    #[case::blank("---\ntitle: '   '\n---\n")]
+    #[case::null("---\ntitle:\n---\n")]
+    #[case::list("---\ntitle: [a, b]\n---\n")]
+    #[case::mapping("---\ntitle:\n  text: a\n---\n")]
+    #[case::number("---\ntitle: 3\n---\n")]
+    #[case::boolean("---\ntitle: true\n---\n")]
+    fn it_is_titled_by_its_stem_without_a_non_empty_string(#[case] text: &str) {
+        let scrap = Scrap::new("orders", &Some("tables".into()), text);
+        assert_eq!(scrap.title(), "orders");
+        assert_eq!(scrap.frontmatter_title(), None);
+    }
+
+    #[test]
+    fn it_keeps_its_key_whatever_the_title() {
+        let scrap = Scrap::new(
+            "orders",
+            &Some("tables".into()),
+            "---\ntitle: Customer Orders\n---\n",
+        );
+        assert_eq!(scrap.self_key(), ScrapKey::from_path_str("tables/orders"));
+        assert_eq!(scrap.stem(), &"orders".into());
+    }
+
     #[test]
     fn it_leaves_frontmatter_and_tags_untouched_by_the_type() {
         let scrap = Scrap::new("foo", &None, "---\ntype: Blog\n---\n\n#[[ai]]\n");
@@ -508,7 +567,7 @@ mod tests {
              [c](/%E3%82%AB%E3%82%99%E3%82%A4%E3%83%88%E3%82%99.md)"
         );
         let scrap = Scrap::new("from", &None, &text);
-        assert_eq!(scrap.links(), &[ScrapKey::from(Title::from(GUIDE_NFC))]);
+        assert_eq!(scrap.links(), &[ScrapKey::from(Stem::from(GUIDE_NFC))]);
         assert_eq!(
             Scrap::new(GUIDE_NFD, &None, "").self_key(),
             scrap.links()[0]

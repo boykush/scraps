@@ -56,8 +56,8 @@ pub struct LintWarning {
 
 pub fn scrap_relative_path(scrap: &Scrap) -> String {
     match scrap.ctx() {
-        Some(ctx) => format!("{}/{}.md", ctx, scrap.title()),
-        None => format!("{}.md", scrap.title()),
+        Some(ctx) => format!("{}/{}.md", ctx, scrap.stem()),
+        None => format!("{}.md", scrap.stem()),
     }
 }
 

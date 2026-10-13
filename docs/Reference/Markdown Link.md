@@ -34,10 +34,11 @@ scrap link when its destination has no URL scheme and its path ends in
 - Percent-encoding is decoded, so `Static%20Site/Pipeline.md` reaches the
   scrap in the `Static Site` folder. A destination in angle brackets,
   `<Static Site/Pipeline.md>`, does the same without encoding.
-- The path names a scrap the way a file does: its folders are the context
-  and its file name without `.md` is the title.
-- A `#fragment` is a heading reference, as in `[[Title#Heading]]`.
-- The link text plays the role of the alias in `[[Title|alias]]`.
+- The path names a scrap by its key: the path from the wiki root without
+  `.md`.
+- A `#fragment` is a heading reference, as in `[[key#Heading]]`.
+- The link text plays the role of the alias in `[[key|alias]]`, so it is
+  shown as written and never replaced by the scrap's title.
 
 ## What a scrap link does
 

@@ -4,7 +4,7 @@ use crate::usecase::progress::{Progress, Stage};
 use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use scraps_libs::{
-    html::{self, EmbedMode},
+    html::{self, EmbedMode, LinkTargets},
     model::{scrap::Scrap, tags::Tags},
 };
 use tracing::{Level, span};
@@ -45,21 +45,18 @@ impl BuildUsecase {
         progress.start_stage(&Stage::ReadScraps);
         let span_read_scraps = span!(Level::INFO, "read_scraps").entered();
 
-        let scrap_texts: HashMap<_, _> = scraps_with_ts
-            .iter()
-            .map(|(scrap, _)| (scrap.self_key(), scrap.md_text().to_string()))
-            .collect();
+        let link_targets = LinkTargets::new(scraps_with_ts.iter().map(|(scrap, _)| scrap));
 
         // Process README content
         let readme_content = readme_text
             .as_ref()
-            .map(|text| html::to_content(text, &None, base_url, EmbedMode::Expand(&scrap_texts)));
+            .map(|text| html::to_content(text, &None, base_url, EmbedMode::Expand(&link_targets)));
 
         // Build ScrapDetails from pre-loaded data
         let scrap_details = scraps_with_ts
             .into_par_iter()
             .map(|(scrap, commited_ts)| {
-                ScrapDetail::new(scrap, commited_ts, base_url, &scrap_texts)
+                ScrapDetail::new(scrap, commited_ts, base_url, &link_targets)
             })
             .collect::<Vec<ScrapDetail>>();
         let scrap_details = ScrapDetails::new(scrap_details);

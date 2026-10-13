@@ -5,6 +5,8 @@ use crate::usecase::build::model::scrap_graph::{GraphNode, LinkDir, NODE_R, Scra
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 struct SerializeGraphNode {
     ctx: Option<String>,
+    /// What a wiki-link to the scrap holds: its path without `.md`.
+    key: String,
     title: String,
     label: String,
     /// Page URL relative to `base_url`, already percent-encoded.
@@ -30,11 +32,11 @@ impl SerializeGraphNode {
     fn new(node: &GraphNode, center_x: f32, center_y: f32) -> SerializeGraphNode {
         let (x1, y1) = node.edge_start(center_x, center_y);
         let (x2, y2) = node.edge_end(center_x, center_y);
-        let title = node.key.title().to_string();
         SerializeGraphNode {
             ctx: node.key.ctx().as_ref().map(|ctx| ctx.to_string()),
+            key: node.key.to_string(),
             label: node.label.clone(),
-            title,
+            title: node.title.clone(),
             url_path: PagePath::of_scrap(&node.key).to_url_path(),
             dir: match node.dir {
                 LinkDir::In => "in",
@@ -148,5 +150,22 @@ mod tests {
 
         assert_eq!(tera.nodes[0].title, long);
         assert_eq!(tera.nodes[0].label, "a very long scra…");
+    }
+
+    #[test]
+    fn it_names_a_node_by_its_title_and_links_it_by_its_key() {
+        let orders = Scrap::new(
+            "orders",
+            &Some(Ctx::from("tables")),
+            "---\ntitle: Customer Orders Of The Whole Year\n---\n",
+        );
+        let graph = ScrapGraph::new("center", &[], &[&orders], MAX_NODES).unwrap();
+
+        let tera = ScrapGraphTera::from(&graph);
+
+        assert_eq!(tera.nodes[0].title, "Customer Orders Of The Whole Year");
+        assert_eq!(tera.nodes[0].label, "Customer Orders …");
+        assert_eq!(tera.nodes[0].key, "tables/orders");
+        assert_eq!(tera.nodes[0].url_path, "scraps/tables/orders.html");
     }
 }

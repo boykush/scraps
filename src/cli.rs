@@ -12,6 +12,7 @@ mod display;
 mod json;
 pub mod path_resolver;
 mod progress;
+mod scrap_arg;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -67,13 +68,20 @@ pub enum SubCommands {
     Check,
 
     #[command(
-        about = "Get the markdown body of a scrap by title",
-        long_about = "Get the markdown body of a scrap by title.\n\nThe body is the scrap's content: a YAML frontmatter block is left out, and `--json frontmatter` returns it as data. Line numbers in `headings` and `code_blocks` count lines of the source file, block included, so they are not offsets into the body."
+        about = "Get the markdown body of a scrap by key",
+        long_about = "Get the markdown body of a scrap by key.\n\nThe body is the scrap's content: a YAML frontmatter block is left out, and `--json frontmatter` returns it as data. Line numbers in `headings` and `code_blocks` count lines of the source file, block included, so they are not offsets into the body."
     )]
     Get {
-        title: String,
+        #[arg(
+            value_name = "KEY",
+            help = "Key of the scrap: its path under the wiki root without .md (e.g. tables/orders)"
+        )]
+        key: String,
 
-        #[arg(long, help = "Disambiguate title across contexts")]
+        #[arg(
+            long,
+            help = "Context of the scrap, when the argument is a file stem instead of a key"
+        )]
         ctx: Option<String>,
 
         #[arg(
@@ -88,7 +96,7 @@ pub enum SubCommands {
             value_name = "FIELDS",
             num_args = 0..=1,
             default_missing_value = "",
-            help = "Output as JSON. Optionally accepts a comma-separated field projection (title,ctx,body,headings,code_blocks,images,type,description,frontmatter)."
+            help = "Output as JSON. Optionally accepts a comma-separated field projection (key,title,ctx,body,headings,code_blocks,images,type,description,frontmatter)."
         )]
         json: Option<String>,
     },
@@ -108,9 +116,16 @@ pub enum SubCommands {
 
     #[command(about = "List outbound wiki-links from a scrap")]
     Links {
-        title: String,
+        #[arg(
+            value_name = "KEY",
+            help = "Key of the scrap: its path under the wiki root without .md (e.g. tables/orders)"
+        )]
+        key: String,
 
-        #[arg(long, help = "Disambiguate title across contexts")]
+        #[arg(
+            long,
+            help = "Context of the scrap, when the argument is a file stem instead of a key"
+        )]
         ctx: Option<String>,
 
         #[arg(long, help = "Output as JSON")]
@@ -119,9 +134,16 @@ pub enum SubCommands {
 
     #[command(about = "List inbound wiki-links (backlinks) to a scrap")]
     Backlinks {
-        title: String,
+        #[arg(
+            value_name = "KEY",
+            help = "Key of the scrap: its path under the wiki root without .md (e.g. tables/orders)"
+        )]
+        key: String,
 
-        #[arg(long, help = "Disambiguate title across contexts")]
+        #[arg(
+            long,
+            help = "Context of the scrap, when the argument is a file stem instead of a key"
+        )]
         ctx: Option<String>,
 
         #[arg(long, help = "Output as JSON")]

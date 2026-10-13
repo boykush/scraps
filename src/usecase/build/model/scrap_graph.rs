@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::f32::consts::PI;
 
 use scraps_libs::model::{key::ScrapKey, scrap::Scrap};
@@ -43,6 +43,8 @@ pub enum LinkDir {
 #[derive(PartialEq, Clone, Debug)]
 pub struct GraphNode {
     pub key: ScrapKey,
+    /// The neighbour's name in full, kept on the node as a tooltip.
+    pub title: String,
     /// The title as drawn: cut to [`LABEL_CHARS`] so it fits on one node.
     pub label: String,
     pub dir: LinkDir,
@@ -101,7 +103,7 @@ fn sort_key(key: &ScrapKey) -> (String, String) {
             .as_ref()
             .map(|ctx| ctx.to_string())
             .unwrap_or_default(),
-        key.title().to_string(),
+        key.stem().to_string(),
     )
 }
 
@@ -115,6 +117,11 @@ impl ScrapGraph {
         outbound: &[&Scrap],
         limit: usize,
     ) -> Option<ScrapGraph> {
+        let titles: HashMap<ScrapKey, &str> = inbound
+            .iter()
+            .chain(outbound)
+            .map(|scrap| (scrap.self_key(), scrap.title()))
+            .collect();
         let ins: HashSet<ScrapKey> = inbound.iter().map(|scrap| scrap.self_key()).collect();
         let outs: HashSet<ScrapKey> = outbound.iter().map(|scrap| scrap.self_key()).collect();
 
@@ -134,7 +141,8 @@ impl ScrapGraph {
         let mut nodes: Vec<GraphNode> = selected
             .into_iter()
             .map(|(key, dir)| GraphNode {
-                label: label_of(&key.title().to_string()),
+                title: titles[&key].to_string(),
+                label: label_of(titles[&key]),
                 key,
                 dir,
                 x: 0.0,
@@ -331,7 +339,7 @@ mod tests {
         graph
             .nodes
             .iter()
-            .find(|node| node.key.title().to_string() == title)
+            .find(|node| node.key.stem().to_string() == title)
             .unwrap_or_else(|| panic!("{title} not in graph"))
             .dir
     }
@@ -368,7 +376,7 @@ mod tests {
             graph
                 .nodes
                 .iter()
-                .find(|n| n.key.title().to_string() == title)
+                .find(|n| n.key.stem().to_string() == title)
                 .unwrap()
                 .clone()
         };
@@ -447,7 +455,7 @@ mod tests {
             graph
                 .nodes
                 .iter()
-                .find(|n| n.key.title().to_string() == title)
+                .find(|n| n.key.stem().to_string() == title)
                 .unwrap()
         };
         assert!(node("in").arrow_at_center() && !node("in").arrow_at_node());

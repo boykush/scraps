@@ -212,12 +212,9 @@ mod tests {
         let scrap1 = Scrap::new("scrap1", &None, "# header1");
         let scrap2 = Scrap::new("scrap2", &None, "## header2");
         let scraps = [scrap1.clone(), scrap2.clone()];
-        let scrap_texts = scraps
-            .iter()
-            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
-            .collect();
-        let sc1 = ScrapDetail::new(&scrap1, &Some(1), base_url, &scrap_texts);
-        let sc2 = ScrapDetail::new(&scrap2, &Some(0), base_url, &scrap_texts);
+        let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
+        let sc1 = ScrapDetail::new(&scrap1, &Some(1), base_url, &link_targets);
+        let sc2 = ScrapDetail::new(&scrap2, &Some(0), base_url, &link_targets);
         let scrap_details = ScrapDetails::new(vec![sc1.to_owned(), sc2.to_owned()]);
 
         let scraps = scrap_details.to_scraps();
@@ -292,14 +289,11 @@ mod tests {
             scrap3.clone(),
             scrap4.clone(),
         ];
-        let scrap_texts = scraps
-            .iter()
-            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
-            .collect();
-        let sc1 = ScrapDetail::new(&scrap1, &Some(3), base_url, &scrap_texts);
-        let sc2 = ScrapDetail::new(&scrap2, &Some(2), base_url, &scrap_texts);
-        let sc3 = ScrapDetail::new(&scrap3, &Some(1), base_url, &scrap_texts);
-        let sc4 = ScrapDetail::new(&scrap4, &Some(0), base_url, &scrap_texts);
+        let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
+        let sc1 = ScrapDetail::new(&scrap1, &Some(3), base_url, &link_targets);
+        let sc2 = ScrapDetail::new(&scrap2, &Some(2), base_url, &link_targets);
+        let sc3 = ScrapDetail::new(&scrap3, &Some(1), base_url, &link_targets);
+        let sc4 = ScrapDetail::new(&scrap4, &Some(0), base_url, &link_targets);
         let scrap_details = ScrapDetails::new(vec![
             sc1.to_owned(),
             sc2.to_owned(),
@@ -372,11 +366,8 @@ mod tests {
         let list_view_configs = ListViewConfigs::new(&true, &Paging::By(10));
 
         let scrap1 = Scrap::new("scrap1", &None, "# header1");
-        let scrap_texts = [&scrap1]
-            .iter()
-            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
-            .collect();
-        let sc1 = ScrapDetail::new(&scrap1, &Some(0), base_url, &scrap_texts);
+        let link_targets = scraps_libs::html::LinkTargets::new([&scrap1]);
+        let sc1 = ScrapDetail::new(&scrap1, &Some(0), base_url, &link_targets);
         let scrap_details = ScrapDetails::new(vec![sc1]);
         let scraps = scrap_details.to_scraps();
         let backlinks_map = BacklinksMap::new(&scraps);
@@ -429,14 +420,11 @@ mod tests {
     fn render_builtin(project: &TempScrapProject, scraps: &[Scrap], paging: Paging) -> usize {
         let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
         let metadata = HtmlMetadata::new(&LangCode::default(), "Scrap", &None, &None);
-        let scrap_texts = scraps
-            .iter()
-            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
-            .collect();
+        let link_targets = scraps_libs::html::LinkTargets::new(scraps);
         let scrap_details = ScrapDetails::new(
             scraps
                 .iter()
-                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &scrap_texts))
+                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &link_targets))
                 .collect(),
         );
         let site_nav = SiteNav::new(

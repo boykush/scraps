@@ -18,7 +18,7 @@ const README_PATH: &str = "README.md";
 
 struct Source {
     rel_path: String,
-    title: String,
+    stem: String,
     ctx: Option<Ctx>,
     text: String,
     hash: String,
@@ -56,12 +56,12 @@ impl LoadedWiki {
 
 fn read_source(scraps_dir: &Path, path: &Path) -> ScrapsResult<Source> {
     let rel_path = read_scraps::relative_path(scraps_dir, path)?;
-    let (title, ctx) = read_scraps::scrap_identity(scraps_dir, path)?;
+    let (stem, ctx) = read_scraps::scrap_identity(scraps_dir, path)?;
     let text = std::fs::read_to_string(path).context(ScrapsError::ReadScrap(path.to_path_buf()))?;
     let hash = content_hash(text.as_bytes());
     Ok(Source {
         rel_path,
-        title,
+        stem,
         ctx,
         text,
         hash,
@@ -74,7 +74,7 @@ fn read_source(scraps_dir: &Path, path: &Path) -> ScrapsResult<Source> {
 fn reject_same_key(scraps_dir: &Path, sources: &[Source]) -> ScrapsResult<()> {
     let mut seen: HashMap<(&Option<Ctx>, &str), &str> = HashMap::with_capacity(sources.len());
     for src in sources {
-        if let Some(first) = seen.insert((&src.ctx, &src.title), &src.rel_path) {
+        if let Some(first) = seen.insert((&src.ctx, &src.stem), &src.rel_path) {
             let path = |rel_path: &str| scraps_dir.join(rel_path);
             return Err(ScrapsError::SameKey(path(first), path(&src.rel_path)).into());
         }
@@ -114,11 +114,11 @@ fn load(scraps_dir: &Path, exclude_dirs: &[PathBuf]) -> ScrapsResult<LoadedWiki>
             let (scrap, object, reused) = match stored {
                 Some(object) if object.hash == src.hash => {
                     let facts = object.to_facts();
-                    let scrap = Scrap::from_facts(&src.title, &src.ctx, &src.text, facts);
+                    let scrap = Scrap::from_facts(&src.stem, &src.ctx, &src.text, facts);
                     (scrap, object.clone(), true)
                 }
                 _ => {
-                    let scrap = Scrap::new(&src.title, &src.ctx, &src.text);
+                    let scrap = Scrap::new(&src.stem, &src.ctx, &src.text);
                     let mut object = ScrapObject::from_scrap(&src.rel_path, &src.hash, &scrap);
                     // The timestamp follows HEAD, not the working tree, so an
                     // edited source keeps the one already recorded.
@@ -292,18 +292,18 @@ mod tests {
 
         let scraps = load_scraps(&project.project_root, &exclude(&project)).unwrap();
 
-        let titles: Vec<String> = scraps.iter().map(|s| s.title().to_string()).collect();
-        assert_eq!(titles, vec!["a", "b"]);
+        let stems: Vec<String> = scraps.iter().map(|s| s.stem().to_string()).collect();
+        assert_eq!(stems, vec!["a", "b"]);
         let ir = read_ir(&project);
         assert_eq!(ir.format_version, FORMAT_VERSION);
         let paths: Vec<&str> = ir.scraps.iter().map(|o| o.path.as_str()).collect();
         assert_eq!(paths, vec!["a.md", "b.md"]);
         assert_eq!(ir.links.len(), 2);
-        assert!(ir.links.iter().any(|e| e.to.title == "a" && e.resolved));
+        assert!(ir.links.iter().any(|e| e.to.stem == "a" && e.resolved));
         assert!(
             ir.links
                 .iter()
-                .any(|e| e.to.title == "missing" && !e.resolved)
+                .any(|e| e.to.stem == "missing" && !e.resolved)
         );
         let dir = project.project_root.join(IR_DIR_NAME);
         assert_eq!(fs::read_to_string(dir.join(".gitignore")).unwrap(), "*\n");
@@ -428,7 +428,7 @@ mod tests {
             load_scraps_with_timestamps::<GitCommandImpl>(&project.project_root, &excl, None)
                 .unwrap();
         assert_eq!(scraps.len(), 1);
-        assert_eq!(scraps[0].0.title().to_string(), "a");
+        assert_eq!(scraps[0].0.stem().to_string(), "a");
         assert_eq!(scraps[0].1, None);
         assert_eq!(readme.as_deref(), Some("# Readme body"));
     }
@@ -630,7 +630,7 @@ mod tests {
         assert_eq!(git.asked(), vec![vec!["a.md", "ctx/b.md"]]);
         let stamped: Vec<(String, Option<i64>)> = scraps
             .iter()
-            .map(|(scrap, ts)| (scrap.title().to_string(), *ts))
+            .map(|(scrap, ts)| (scrap.stem().to_string(), *ts))
             .collect();
         assert_eq!(
             stamped,
@@ -712,7 +712,7 @@ mod tests {
 
         let stamped: Vec<(String, Option<i64>)> = scraps
             .iter()
-            .map(|(scrap, ts)| (scrap.title().to_string(), *ts))
+            .map(|(scrap, ts)| (scrap.stem().to_string(), *ts))
             .collect();
         assert_eq!(
             stamped,
@@ -736,19 +736,19 @@ mod tests {
 
         let scraps = load_scraps(&project.project_root, &exclude(&project)).unwrap();
 
-        assert!(scraps.iter().any(|s| s.title().to_string() == GUIDE_NFC));
+        assert!(scraps.iter().any(|s| s.stem().to_string() == GUIDE_NFC));
         let ir = read_ir(&project);
-        let guide = ir.scraps.iter().find(|o| o.title == GUIDE_NFC).unwrap();
+        let guide = ir.scraps.iter().find(|o| o.stem == GUIDE_NFC).unwrap();
         assert_eq!(guide.path, format!("{GUIDE_NFD}.md"));
         assert!(ir.links.iter().all(|e| e.resolved));
     }
 
     fn source(rel_path: &str) -> Source {
         let root = Path::new("/wiki");
-        let (title, ctx) = read_scraps::scrap_identity(root, &root.join(rel_path)).unwrap();
+        let (stem, ctx) = read_scraps::scrap_identity(root, &root.join(rel_path)).unwrap();
         Source {
             rel_path: rel_path.to_string(),
-            title,
+            stem,
             ctx,
             text: String::new(),
             hash: String::new(),
@@ -802,7 +802,7 @@ mod tests {
     }
 
     #[test]
-    fn it_accepts_the_same_title_under_different_contexts() {
+    fn it_accepts_the_same_stem_under_different_contexts() {
         let sources = vec![source("a/t.md"), source("b/t.md"), source("t.md")];
         assert!(reject_same_key(Path::new("/wiki"), &sources).is_ok());
     }

@@ -4,6 +4,6 @@ pub mod context;
 pub mod key;
 pub mod page_path;
 pub mod scrap;
+pub mod stem;
 pub mod tag;
 pub mod tags;
-pub mod title;

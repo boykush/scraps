@@ -100,15 +100,12 @@ mod tests {
         let scrap2 = Scrap::new("Alpha", &None, "");
         let scrap3 = Scrap::new("デザイントークン", &None, "");
         let scraps = [scrap1.clone(), scrap2.clone(), scrap3.clone()];
-        let scrap_texts = scraps
-            .iter()
-            .map(|s| (s.self_key(), s.md_text().to_string()))
-            .collect();
+        let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
 
         let details = ScrapDetails::new(vec![
-            ScrapDetail::new(&scrap1, &None, &base_url, &scrap_texts),
-            ScrapDetail::new(&scrap2, &None, &base_url, &scrap_texts),
-            ScrapDetail::new(&scrap3, &None, &base_url, &scrap_texts),
+            ScrapDetail::new(&scrap1, &None, &base_url, &link_targets),
+            ScrapDetail::new(&scrap2, &None, &base_url, &link_targets),
+            ScrapDetail::new(&scrap3, &None, &base_url, &link_targets),
         ]);
         let backlinks_map = BacklinksMap::new(&scraps);
         let site_nav = SiteNav::new(
@@ -140,16 +137,13 @@ mod tests {
 
         let scrap1 = Scrap::new("デザイントークン", &None, "");
         let scraps = [scrap1.clone()];
-        let scrap_texts = scraps
-            .iter()
-            .map(|s| (s.self_key(), s.md_text().to_string()))
-            .collect();
+        let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
 
         let details = ScrapDetails::new(vec![ScrapDetail::new(
             &scrap1,
             &None,
             &base_url,
-            &scrap_texts,
+            &link_targets,
         )]);
         let backlinks_map = BacklinksMap::new(&scraps);
         let site_nav = SiteNav::new(
@@ -184,14 +178,11 @@ mod tests {
             Scrap::new("beta", &None, "---\ntype: Field Note\n---\n"),
             Scrap::new("gamma", &None, ""),
         ];
-        let scrap_texts = scraps
-            .iter()
-            .map(|scrap| (scrap.self_key(), scrap.md_text().to_string()))
-            .collect();
+        let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
         let scrap_details = ScrapDetails::new(
             scraps
                 .iter()
-                .map(|scrap| ScrapDetail::new(scrap, &None, &base_url, &scrap_texts))
+                .map(|scrap| ScrapDetail::new(scrap, &None, &base_url, &link_targets))
                 .collect(),
         );
         let site_nav = SiteNav::new(

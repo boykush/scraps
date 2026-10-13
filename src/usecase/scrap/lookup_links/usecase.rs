@@ -1,9 +1,8 @@
 use crate::error::ScrapsResult;
+use crate::usecase::scrap::scrap_ref::{ScrapRef, find_scrap};
 use scraps_libs::markdown::query::WikiRef;
-use scraps_libs::model::context::Ctx;
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::model::title::Title;
 use std::collections::HashMap;
 
 /// Kind of an outbound reference occurrence.
@@ -19,8 +18,7 @@ pub enum LinkRefKind {
 #[derive(Debug, Clone, PartialEq)]
 pub struct LookupScrapLinksResult {
     pub kind: LinkRefKind,
-    pub title: Title,
-    pub ctx: Option<Ctx>,
+    pub scrap: ScrapRef,
     pub heading: Option<String>,
 }
 
@@ -34,21 +32,9 @@ impl LookupScrapLinksUsecase {
     pub fn execute(
         &self,
         scraps: &[Scrap],
-        title: &Title,
-        ctx: &Option<Ctx>,
+        key: &ScrapKey,
     ) -> ScrapsResult<Vec<LookupScrapLinksResult>> {
-        let target_key = if let Some(ctx) = ctx {
-            ScrapKey::with_ctx(title, ctx)
-        } else {
-            ScrapKey::from(title.clone())
-        };
-
-        let target_scrap = scraps
-            .iter()
-            .find(|scrap| scrap.self_key() == target_key)
-            .ok_or_else(|| {
-                anyhow::anyhow!("Scrap not found: title='{}', ctx='{:?}'", title, ctx)
-            })?;
+        let target_scrap = find_scrap(scraps, key)?;
 
         let scrap_map: HashMap<ScrapKey, &Scrap> = scraps
             .iter()
@@ -69,14 +55,10 @@ impl LookupScrapLinksUsecase {
                 }
                 WikiRef::Embed(r) => {
                     let key = ScrapKey::from_path_str(&join_path(&r.ctx_path, &r.title));
-                    scrap_map.get(&key).map(|linked| {
-                        let linked_key = linked.self_key();
-                        LookupScrapLinksResult {
-                            kind: LinkRefKind::Embed,
-                            title: (&linked_key).into(),
-                            ctx: (&linked_key).into(),
-                            heading: r.heading.clone(),
-                        }
+                    scrap_map.get(&key).map(|linked| LookupScrapLinksResult {
+                        kind: LinkRefKind::Embed,
+                        scrap: (*linked).into(),
+                        heading: r.heading.clone(),
                     })
                 }
                 WikiRef::Tag(_) => None,
@@ -92,14 +74,10 @@ fn link_result(
     key: &ScrapKey,
     heading: Option<String>,
 ) -> Option<LookupScrapLinksResult> {
-    scrap_map.get(key).map(|linked| {
-        let linked_key = linked.self_key();
-        LookupScrapLinksResult {
-            kind: LinkRefKind::Link,
-            title: (&linked_key).into(),
-            ctx: (&linked_key).into(),
-            heading,
-        }
+    scrap_map.get(key).map(|linked| LookupScrapLinksResult {
+        kind: LinkRefKind::Link,
+        scrap: (*linked).into(),
+        heading,
     })
 }
 
@@ -114,6 +92,7 @@ fn join_path(ctx_path: &[String], title: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use scraps_libs::model::context::Ctx;
 
     #[test]
     fn test_lookup_scrap_links_success() {
@@ -130,14 +109,14 @@ mod tests {
         let usecase = LookupScrapLinksUsecase::new();
 
         let results = usecase
-            .execute(&scraps, &Title::from("scrap1"), &None)
+            .execute(&scraps, &ScrapKey::from_path_str("scrap1"))
             .expect("Should succeed");
 
         assert_eq!(results.len(), 2);
         assert_eq!(results[0].kind, LinkRefKind::Link);
-        assert_eq!(results[0].title.to_string(), "scrap2");
+        assert_eq!(results[0].scrap.title, "scrap2");
         assert_eq!(results[1].kind, LinkRefKind::Link);
-        assert_eq!(results[1].title.to_string(), "scrap3");
+        assert_eq!(results[1].scrap.title, "scrap3");
     }
 
     #[test]
@@ -154,11 +133,11 @@ mod tests {
         let usecase = LookupScrapLinksUsecase::new();
 
         let results = usecase
-            .execute(&scraps, &Title::from("scrap1"), &Some(Ctx::from("Context")))
+            .execute(&scraps, &ScrapKey::from_path_str("Context/scrap1"))
             .expect("Should succeed");
 
         assert_eq!(results.len(), 1);
-        assert_eq!(results[0].title.to_string(), "scrap2");
+        assert_eq!(results[0].scrap.title, "scrap2");
     }
 
     #[test]
@@ -174,14 +153,14 @@ mod tests {
         ];
 
         let results = LookupScrapLinksUsecase::new()
-            .execute(&scraps, &Title::from("orders"), &Some(Ctx::from("tables")))
+            .execute(&scraps, &ScrapKey::from_path_str("tables/orders"))
             .expect("Should succeed");
 
         assert_eq!(results.len(), 2);
         assert_eq!(results[0].kind, LinkRefKind::Link);
-        assert_eq!(results[0].title.to_string(), "customers");
-        assert_eq!(results[0].ctx, Some(Ctx::from("tables")));
-        assert_eq!(results[1].title.to_string(), "revenue");
+        assert_eq!(results[0].scrap.title, "customers");
+        assert_eq!(results[0].scrap.ctx(), &Some(Ctx::from("tables")));
+        assert_eq!(results[1].scrap.title, "revenue");
         assert_eq!(results[1].heading.as_deref(), Some("definition"));
     }
 
@@ -191,7 +170,7 @@ mod tests {
 
         let usecase = LookupScrapLinksUsecase::new();
 
-        let result = usecase.execute(&scraps, &Title::from("Nonexistent Scrap"), &None);
+        let result = usecase.execute(&scraps, &ScrapKey::from_path_str("Nonexistent Scrap"));
 
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("Scrap not found"));
@@ -208,7 +187,7 @@ mod tests {
         let usecase = LookupScrapLinksUsecase::new();
 
         let results = usecase
-            .execute(&scraps, &Title::from("scrap1"), &None)
+            .execute(&scraps, &ScrapKey::from_path_str("scrap1"))
             .expect("Should succeed");
 
         assert_eq!(results.len(), 0);
@@ -229,12 +208,12 @@ mod tests {
 
         let usecase = LookupScrapLinksUsecase::new();
         let results = usecase
-            .execute(&scraps, &Title::from("scrap1"), &None)
+            .execute(&scraps, &ScrapKey::from_path_str("scrap1"))
             .expect("Should succeed");
 
         assert_eq!(results.len(), 2);
         assert_eq!(results[0].kind, LinkRefKind::Link);
-        assert_eq!(results[0].title.to_string(), "Target");
+        assert_eq!(results[0].scrap.title, "Target");
         assert_eq!(results[0].heading.as_deref(), Some("Install"));
         assert_eq!(results[1].heading.as_deref(), Some("Usage"));
     }
@@ -253,15 +232,15 @@ mod tests {
 
         let usecase = LookupScrapLinksUsecase::new();
         let results = usecase
-            .execute(&scraps, &Title::from("scrap1"), &None)
+            .execute(&scraps, &ScrapKey::from_path_str("scrap1"))
             .expect("Should succeed");
 
         assert_eq!(results.len(), 2);
         assert_eq!(results[0].kind, LinkRefKind::Embed);
-        assert_eq!(results[0].title.to_string(), "Target");
+        assert_eq!(results[0].scrap.title, "Target");
         assert_eq!(results[0].heading.as_deref(), Some("Install"));
         assert_eq!(results[1].kind, LinkRefKind::Link);
-        assert_eq!(results[1].title.to_string(), "Other");
+        assert_eq!(results[1].scrap.title, "Other");
         assert_eq!(results[1].heading, None);
     }
 
@@ -278,11 +257,11 @@ mod tests {
 
         let usecase = LookupScrapLinksUsecase::new();
         let results = usecase
-            .execute(&scraps, &Title::from("scrap1"), &None)
+            .execute(&scraps, &ScrapKey::from_path_str("scrap1"))
             .expect("Should succeed");
 
         assert_eq!(results.len(), 1);
-        assert_eq!(results[0].title.to_string(), "Target");
+        assert_eq!(results[0].scrap.title, "Target");
     }
 
     #[test]
@@ -294,13 +273,18 @@ mod tests {
 
         let usecase = LookupScrapLinksUsecase::new();
         let results = usecase
-            .execute(&scraps, &Title::from("scrap1"), &None)
+            .execute(&scraps, &ScrapKey::from_path_str("scrap1"))
             .expect("Should succeed");
 
         assert_eq!(results.len(), 1);
-        assert_eq!(results[0].title.to_string(), "Target");
+        assert_eq!(results[0].scrap.title, "Target");
         assert_eq!(
-            results[0].ctx.as_ref().map(|c| c.to_string()).as_deref(),
+            results[0]
+                .scrap
+                .ctx()
+                .as_ref()
+                .map(|c| c.to_string())
+                .as_deref(),
             Some("Book")
         );
     }

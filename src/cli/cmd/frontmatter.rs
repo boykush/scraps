@@ -8,20 +8,15 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::cli::config::scrap_config::ScrapConfig;
+use crate::cli::json::scrap::ScrapRefJson;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 use crate::ir::loader;
 use crate::usecase::frontmatter::usecase::FrontmatterUsecase;
 
 #[derive(Debug, Serialize, Deserialize)]
-struct FrontmatterScrapJson {
-    title: String,
-    ctx: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
 struct FrontmatterItemJson {
-    scrap: FrontmatterScrapJson,
+    scrap: ScrapRefJson,
     frontmatter: Value,
 }
 
@@ -29,13 +24,6 @@ struct FrontmatterItemJson {
 struct FrontmatterResponse {
     results: Vec<FrontmatterItemJson>,
     count: usize,
-}
-
-fn scrap_label(title: &str, ctx: Option<&str>) -> String {
-    match ctx {
-        Some(c) if !c.is_empty() => format!("{c}/{title}"),
-        _ => title.to_string(),
-    }
 }
 
 /// Table cells hold one line, so a nested value is shown as compact JSON
@@ -78,10 +66,7 @@ pub fn run(json: bool, project_path: Option<&Path>, writer: &mut impl Write) -> 
         let items: Vec<FrontmatterItemJson> = results
             .into_iter()
             .map(|r| FrontmatterItemJson {
-                scrap: FrontmatterScrapJson {
-                    title: r.title.to_string(),
-                    ctx: r.ctx.map(|c| c.to_string()),
-                },
+                scrap: (&r.scrap).into(),
                 frontmatter: r.frontmatter,
             })
             .collect();
@@ -104,10 +89,7 @@ pub fn run(json: bool, project_path: Option<&Path>, writer: &mut impl Write) -> 
         ]);
 
         for r in &results {
-            let scrap = scrap_label(
-                &r.title.to_string(),
-                r.ctx.as_ref().map(|c| c.to_string()).as_deref(),
-            );
+            let scrap = r.scrap.key.to_string();
             for (key, value) in rows(&r.frontmatter) {
                 table.add_row(vec![Cell::new(&scrap), Cell::new(key), Cell::new(value)]);
             }

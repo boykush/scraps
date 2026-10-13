@@ -1,15 +1,13 @@
 use crate::error::ScrapsResult;
-use scraps_libs::model::context::Ctx;
+use crate::usecase::scrap::scrap_ref::{ScrapRef, find_scrap};
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::model::title::Title;
 use serde_json::Value;
 
 /// Result for get scrap operation
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetScrapResult {
-    pub title: Title,
-    pub ctx: Option<Ctx>,
+    pub scrap: ScrapRef,
     pub md_text: String,
     pub scrap_type: Option<String>,
     pub description: Option<String>,
@@ -23,34 +21,11 @@ impl GetScrapUsecase {
         GetScrapUsecase
     }
 
-    pub fn execute(
-        &self,
-        scraps: &[Scrap],
-        title: &Title,
-        ctx: &Option<Ctx>,
-    ) -> ScrapsResult<GetScrapResult> {
-        // Create scrap key for the target scrap
-        let target_key = if let Some(ctx) = ctx {
-            ScrapKey::with_ctx(title, ctx)
-        } else {
-            ScrapKey::from(title.clone())
-        };
-
-        // Find the target scrap
-        let target_scrap = scraps
-            .iter()
-            .find(|scrap| scrap.self_key() == target_key)
-            .ok_or_else(|| {
-                anyhow::anyhow!("Scrap not found: title='{}', ctx='{:?}'", title, ctx)
-            })?;
-
-        let scrap_key = target_scrap.self_key();
-        let result_title: Title = (&scrap_key).into();
-        let result_ctx: Option<Ctx> = (&scrap_key).into();
+    pub fn execute(&self, scraps: &[Scrap], key: &ScrapKey) -> ScrapsResult<GetScrapResult> {
+        let target_scrap = find_scrap(scraps, key)?;
 
         Ok(GetScrapResult {
-            title: result_title,
-            ctx: result_ctx,
+            scrap: target_scrap.into(),
             md_text: target_scrap.md_text().to_string(),
             scrap_type: target_scrap.scrap_type().map(str::to_string),
             description: target_scrap.description().map(str::to_string),
@@ -74,11 +49,11 @@ mod tests {
         let usecase = GetScrapUsecase::new();
 
         let result = usecase
-            .execute(&scraps, &Title::from("scrap1"), &None)
+            .execute(&scraps, &ScrapKey::from_path_str("scrap1"))
             .expect("Should succeed");
 
-        assert_eq!(result.title.to_string(), "scrap1");
-        assert!(result.ctx.is_none());
+        assert_eq!(result.scrap.title, "scrap1");
+        assert!(result.scrap.ctx().is_none());
         assert!(result.md_text.contains("Content of scrap 1"));
     }
 
@@ -93,11 +68,11 @@ mod tests {
         let usecase = GetScrapUsecase::new();
 
         let result = usecase
-            .execute(&scraps, &Title::from("scrap1"), &Some(Ctx::from("Context")))
+            .execute(&scraps, &ScrapKey::from_path_str("Context/scrap1"))
             .expect("Should succeed");
 
-        assert_eq!(result.title.to_string(), "scrap1");
-        assert_eq!(result.ctx.unwrap().to_string(), "Context");
+        assert_eq!(result.scrap.title, "scrap1");
+        assert_eq!(result.scrap.key.to_string(), "Context/scrap1");
         assert!(result.md_text.contains("Content of scrap 1"));
     }
 
@@ -110,13 +85,13 @@ mod tests {
 
         let usecase = GetScrapUsecase::new();
 
-        let typed = usecase.execute(&scraps, &Title::from("typed"), &None);
+        let typed = usecase.execute(&scraps, &ScrapKey::from_path_str("typed"));
         assert_eq!(
             typed.unwrap().frontmatter,
             Some(serde_json::json!({"type": "Blog"}))
         );
 
-        let plain = usecase.execute(&scraps, &Title::from("plain"), &None);
+        let plain = usecase.execute(&scraps, &ScrapKey::from_path_str("plain"));
         assert_eq!(plain.unwrap().frontmatter, None);
     }
 
@@ -126,7 +101,7 @@ mod tests {
 
         let usecase = GetScrapUsecase::new();
 
-        let result = usecase.execute(&scraps, &Title::from("nonexistent"), &None);
+        let result = usecase.execute(&scraps, &ScrapKey::from_path_str("nonexistent"));
 
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("Scrap not found"));

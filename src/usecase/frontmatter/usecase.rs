@@ -1,14 +1,13 @@
 use crate::error::ScrapsResult;
-use scraps_libs::model::context::Ctx;
+use crate::usecase::scrap::scrap_ref::ScrapRef;
 use scraps_libs::model::scrap::Scrap;
-use scraps_libs::model::title::Title;
+
 use serde_json::Value;
 
 /// One scrap's frontmatter, resolved back to the scrap it came from.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FrontmatterResult {
-    pub title: Title,
-    pub ctx: Option<Ctx>,
+    pub scrap: ScrapRef,
     pub frontmatter: Value,
 }
 
@@ -24,20 +23,13 @@ impl FrontmatterUsecase {
             .iter()
             .filter_map(|scrap| {
                 scrap.frontmatter().cloned().map(|value| FrontmatterResult {
-                    title: scrap.title().clone(),
-                    ctx: scrap.ctx().clone(),
+                    scrap: scrap.into(),
                     frontmatter: value,
                 })
             })
             .collect();
 
-        results.sort_by(|a, b| {
-            let a_ctx = a.ctx.as_ref().map(|c| c.to_string()).unwrap_or_default();
-            let b_ctx = b.ctx.as_ref().map(|c| c.to_string()).unwrap_or_default();
-            a_ctx
-                .cmp(&b_ctx)
-                .then_with(|| a.title.to_string().cmp(&b.title.to_string()))
-        });
+        results.sort_by_key(|result| result.scrap.sort_key());
 
         Ok(results)
     }
@@ -46,6 +38,7 @@ impl FrontmatterUsecase {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use scraps_libs::model::context::Ctx;
     use serde_json::json;
 
     fn ctx(s: &str) -> Ctx {
@@ -62,7 +55,7 @@ mod tests {
         let results = FrontmatterUsecase::new().execute(&scraps).unwrap();
 
         assert_eq!(results.len(), 1);
-        assert_eq!(results[0].title.to_string(), "a");
+        assert_eq!(results[0].scrap.title, "a");
         assert_eq!(results[0].frontmatter, json!({"status": "draft"}));
     }
 
@@ -92,7 +85,7 @@ mod tests {
 
         let results = FrontmatterUsecase::new().execute(&scraps).unwrap();
 
-        let order: Vec<String> = results.iter().map(|r| r.title.to_string()).collect();
+        let order: Vec<String> = results.iter().map(|r| r.scrap.title.clone()).collect();
         assert_eq!(order, vec!["z", "a", "b"]);
     }
 

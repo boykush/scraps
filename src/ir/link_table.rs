@@ -73,7 +73,7 @@ mod tests {
         let edges = link_edges(&scraps);
 
         assert_eq!(edges.len(), 3);
-        assert_eq!(edges[0].to.title, "b");
+        assert_eq!(edges[0].to.stem, "b");
         assert_eq!(edges[0].kind, EdgeKind::Link);
         assert_eq!(edges[0].heading.as_deref(), Some("Sec"));
         assert_eq!(edges[0].line, 2);
@@ -81,9 +81,9 @@ mod tests {
         assert_eq!(edges[1].kind, EdgeKind::Embed);
         assert_eq!(edges[1].to.ctx.as_deref(), Some("Ctx"));
         assert!(edges[1].resolved);
-        assert_eq!(edges[2].to.title, "missing");
+        assert_eq!(edges[2].to.stem, "missing");
         assert!(!edges[2].resolved);
-        assert!(edges.iter().all(|e| e.from.title == "a"));
+        assert!(edges.iter().all(|e| e.from.stem == "a"));
     }
 
     #[test]
@@ -102,13 +102,13 @@ mod tests {
 
         assert_eq!(edges.len(), 3);
         assert!(edges.iter().all(|e| e.kind == EdgeKind::Link));
-        assert_eq!(edges[0].to.title, "customers");
+        assert_eq!(edges[0].to.stem, "customers");
         assert_eq!(edges[0].to.ctx.as_deref(), Some("tables"));
         assert!(edges[0].resolved);
         assert_eq!(edges[1].to.ctx.as_deref(), Some("metrics"));
         assert_eq!(edges[1].heading.as_deref(), Some("definition"));
         assert!(edges[1].resolved);
-        assert_eq!(edges[2].to.title, "gone");
+        assert_eq!(edges[2].to.stem, "gone");
         assert_eq!(edges[2].line, 2);
         assert!(!edges[2].resolved);
     }

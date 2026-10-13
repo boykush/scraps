@@ -64,8 +64,8 @@ Reject requests like "run all default rules" without a stated purpose.
 
 For each violation:
 - Identify the likely fix
-  - `broken-link`: search for the closest title via `scraps search --json`
-  - `broken-heading-ref`: read target headings with `scraps get <title> --json headings`, then choose the closest valid heading
+  - `broken-link`: search for the closest scrap via `scraps search --json` and link its `key`
+  - `broken-heading-ref`: read target headings with `scraps get <key> --json headings`, then choose the closest valid heading
   - `self-link`: remove the link
 - Propose the Edit
 - Apply on user confirmation (or directly when invoked from a trusted skill context)
@@ -74,7 +74,7 @@ For each violation:
 ### Judgment rules (dead-end, lonely, overlinking, unlinkable-key, unportable-key)
 
 For each violation:
-- Read the offending scrap via `scraps get <title> [--ctx <ctx>] --json`
+- Read the offending scrap via `scraps get <key> --json`
 - Interpret against purpose:
   - `dead-end` → atomic definition (signal: keep) vs. genuinely incomplete (signal: extend)
   - `lonely` → natural root/source note (signal: accept) vs. orphan (signal: link from a related scrap)
@@ -106,7 +106,7 @@ For each violation:
 ## CLI used
 
 - `scraps lint --rule <rule> [--rule <rule> ...]`
-- `scraps get <title> [--ctx <ctx>] [--heading <heading>] --json [fields]`
+- `scraps get <key> [--heading <heading>] --json [fields]` (`<key>` is the scrap's path without `.md`, as results return it; `<name> --ctx <ctx>` is still accepted)
 - `scraps search <query> --json` (for `broken-link` replacement candidates)
 
 Full command details: `scraps <cmd> --help`.

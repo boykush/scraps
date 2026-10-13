@@ -7,7 +7,7 @@ use comfy_table::{Cell, Table};
 use serde::Serialize;
 
 use crate::cli::config::scrap_config::ScrapConfig;
-use crate::cli::json::scrap::ScrapKeyJson;
+use crate::cli::json::scrap::ScrapRefJson;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 use crate::ir::loader;
@@ -15,7 +15,7 @@ use crate::usecase::tag::lookup_backlinks::usecase::LookupTagBacklinksUsecase;
 
 #[derive(Debug, Serialize, serde::Deserialize)]
 struct TagBacklinksResponse {
-    results: Vec<ScrapKeyJson>,
+    results: Vec<ScrapRefJson>,
     count: usize,
 }
 
@@ -35,37 +35,36 @@ pub fn run(
 
     let scraps = loader::load_scraps(&scraps_dir_path, &exclude_dirs)?;
     let usecase = LookupTagBacklinksUsecase::new();
-    let tag_title = scraps_libs::model::title::Title::from(tag);
-    let results = usecase.execute(&scraps, &tag_title)?;
+    let requested_tag = scraps_libs::model::tag::Tag::from(tag);
+    let results = usecase.execute(&scraps, &requested_tag)?;
 
-    let scrap_keys: Vec<ScrapKeyJson> = results
-        .into_iter()
-        .map(|r| ScrapKeyJson {
-            title: r.title.to_string(),
-            ctx: r.ctx.map(|c| c.to_string()),
-        })
-        .collect();
+    let scrap_refs: Vec<ScrapRefJson> = results.iter().map(|r| (&r.scrap).into()).collect();
 
     if json {
-        let count = scrap_keys.len();
+        let count = scrap_refs.len();
         let response = TagBacklinksResponse {
-            results: scrap_keys,
+            results: scrap_refs,
             count,
         };
         writeln!(writer, "{}", serde_json::to_string(&response)?)?;
     } else {
-        if scrap_keys.is_empty() {
+        if scrap_refs.is_empty() {
             return Ok(());
         }
 
         let mut table = Table::new();
         table.load_style(NOTHING);
-        table.set_header(vec![Cell::new("Title".bold()), Cell::new("Context".bold())]);
+        table.set_header(vec![
+            Cell::new("Key".bold()),
+            Cell::new("Title".bold()),
+            Cell::new("Context".bold()),
+        ]);
 
-        for key in &scrap_keys {
+        for scrap in &scrap_refs {
             table.add_row(vec![
-                Cell::new(&key.title),
-                Cell::new(key.ctx.as_deref().unwrap_or("")),
+                Cell::new(&scrap.key),
+                Cell::new(&scrap.title),
+                Cell::new(scrap.ctx.as_deref().unwrap_or("")),
             ]);
         }
         writeln!(writer, "{table}")?;

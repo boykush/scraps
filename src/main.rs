@@ -25,12 +25,12 @@ fn main() -> error::ScrapsResult<()> {
         }
         cli::SubCommands::Check => cli::cmd::check::run(directory),
         cli::SubCommands::Get {
-            title,
+            key,
             ctx,
             heading,
             json,
         } => cli::cmd::get::run(
-            &title,
+            &key,
             ctx.as_deref(),
             heading.as_deref(),
             json.as_deref(),
@@ -41,15 +41,15 @@ fn main() -> error::ScrapsResult<()> {
             let rule_names: Vec<_> = rules.into_iter().map(Into::into).collect();
             cli::cmd::lint::run(directory, &rule_names)
         }
-        cli::SubCommands::Links { title, ctx, json } => cli::cmd::links::run(
-            &title,
+        cli::SubCommands::Links { key, ctx, json } => cli::cmd::links::run(
+            &key,
             ctx.as_deref(),
             json,
             directory,
             &mut std::io::stdout(),
         ),
-        cli::SubCommands::Backlinks { title, ctx, json } => cli::cmd::backlinks::run(
-            &title,
+        cli::SubCommands::Backlinks { key, ctx, json } => cli::cmd::backlinks::run(
+            &key,
             ctx.as_deref(),
             json,
             directory,

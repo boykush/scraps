@@ -77,8 +77,7 @@ pub async fn search_scraps(
     let scrap_jsons: Vec<SearchHitJson> = results
         .into_iter()
         .map(|result| SearchHitJson {
-            title: result.title.to_string(),
-            ctx: result.ctx.map(|c| c.to_string()),
+            scrap: (&result.scrap).into(),
             description: result.description,
         })
         .collect();
@@ -87,7 +86,7 @@ pub async fn search_scraps(
     let next = if count == 0 {
         "No hits. Vary the keywords (default OR logic matches any), or start from the topic map with list_tags."
     } else {
-        "Read a hit with get_scrap {title, ctx}; then traverse it with lookup_scrap_links."
+        "Read a hit by passing its key back: get_scrap {key}; then traverse it with lookup_scrap_links."
     };
     let response = SearchResponse {
         results: scrap_jsons,

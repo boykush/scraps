@@ -1,5 +1,6 @@
 use crate::ir::loader;
 use crate::mcp::json::scrap::{CodeBlockJson, HeadingJson};
+use crate::mcp::scrap_target;
 use crate::usecase::scrap::get::usecase::GetScrapUsecase;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
@@ -12,6 +13,7 @@ use serde::Deserialize;
 use serde_json::{Map, Value};
 use std::path::Path;
 
+const FIELD_KEY: &str = "key";
 const FIELD_TITLE: &str = "title";
 const FIELD_CTX: &str = "ctx";
 const FIELD_BODY: &str = "body";
@@ -21,8 +23,9 @@ const FIELD_TYPE: &str = "type";
 const FIELD_DESCRIPTION: &str = "description";
 const FIELD_FRONTMATTER: &str = "frontmatter";
 
-const DEFAULT_FIELDS: &[&str] = &[FIELD_TITLE, FIELD_CTX, FIELD_BODY];
+const DEFAULT_FIELDS: &[&str] = &[FIELD_KEY, FIELD_TITLE, FIELD_CTX, FIELD_BODY];
 const ALLOWED_FIELDS: &[&str] = &[
+    FIELD_KEY,
     FIELD_TITLE,
     FIELD_CTX,
     FIELD_BODY,
@@ -36,14 +39,16 @@ const ALLOWED_FIELDS: &[&str] = &[
 #[derive(Debug, Deserialize, JsonSchema)]
 #[schemars(deny_unknown_fields)]
 pub struct GetScrapRequest {
-    /// Title of the scrap to get
-    pub title: String,
-    /// Optional context if the scrap has one
+    /// Key of the scrap to get: its path under the wiki root without `.md`, e.g. "tables/orders". Pass the `key` of a result back.
+    pub key: Option<String>,
+    /// Still accepted in place of `key`: the scrap's file stem (not its frontmatter title).
+    pub title: Option<String>,
+    /// Still accepted with `title`: the context (folder path) of the scrap.
     pub ctx: Option<String>,
     /// Optional heading text. When set, body/headings/code_blocks are scoped to that section.
     pub heading: Option<String>,
-    /// Optional projection of fields to include. Defaults to ["title", "ctx", "body"].
-    /// Allowed: "title", "ctx", "body", "headings", "code_blocks", "type", "description",
+    /// Optional projection of fields to include. Defaults to ["key", "title", "ctx", "body"].
+    /// Allowed: "key", "title", "ctx", "body", "headings", "code_blocks", "type", "description",
     /// "frontmatter".
     pub fields: Option<Vec<String>>,
 }
@@ -98,14 +103,14 @@ pub async fn get_scrap(
 
     let usecase = GetScrapUsecase::new();
 
-    let title = scraps_libs::model::title::Title::from(request.title.as_str());
-    let ctx = request
-        .ctx
-        .as_ref()
-        .map(|c| scraps_libs::model::context::Ctx::from(c.as_str()));
+    let key = scrap_target::resolve(
+        request.key.as_deref(),
+        request.title.as_deref(),
+        request.ctx.as_deref(),
+    )?;
 
     let result = usecase
-        .execute(&scraps, &title, &ctx)
+        .execute(&scraps, &key)
         .map_err(|e| ErrorData::new(ErrorCode(-32004), format!("Get scrap failed: {e}"), None))?;
 
     // Structure is read from the scoped file text so its lines stay file
@@ -124,14 +129,21 @@ pub async fn get_scrap(
     let mut out = Map::new();
     for field in fields {
         match field {
+            FIELD_KEY => {
+                out.insert(
+                    field.to_string(),
+                    Value::String(result.scrap.key.to_string()),
+                );
+            }
             FIELD_TITLE => {
-                out.insert(field.to_string(), Value::String(result.title.to_string()));
+                out.insert(field.to_string(), Value::String(result.scrap.title.clone()));
             }
             FIELD_CTX => {
                 out.insert(
                     field.to_string(),
                     result
-                        .ctx
+                        .scrap
+                        .ctx()
                         .as_ref()
                         .map(|c| Value::String(c.to_string()))
                         .unwrap_or(Value::Null),
@@ -199,7 +211,7 @@ pub async fn get_scrap(
     out.insert(
         "next".to_string(),
         Value::String(
-            "Traverse onward with lookup_scrap_links or lookup_scrap_backlinks {title, ctx}, or see everything around this scrap in one call with lookup_scrap_neighborhood {title, ctx}."
+            "Traverse onward with lookup_scrap_links or lookup_scrap_backlinks {key}, or see everything around this scrap in one call with lookup_scrap_neighborhood {key}."
                 .to_string(),
         ),
     );

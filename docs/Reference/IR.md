@@ -48,13 +48,13 @@ command.
 
 ```json
 {
-  "format_version": 4,
+  "format_version": 5,
   "scraps_version": "2.3.0",
   "scraps": [
     {
       "path": "Reference/Static Site/Pipeline.md",
       "hash": "201b925e42f4fe4b",
-      "title": "Pipeline",
+      "stem": "Pipeline",
       "ctx": "Reference/Static Site",
       "refs": [
         { "kind": "tag", "tag": "Emit/Static Site", "line": 1 },
@@ -71,26 +71,26 @@ command.
     }
   ],
   "links": [
-    { "from": { "title": "Pipeline", "ctx": "Reference/Static Site" },
-      "to": { "title": "Deploy to GitHub Pages", "ctx": "How-to" },
+    { "from": { "stem": "Pipeline", "ctx": "Reference/Static Site" },
+      "to": { "stem": "Deploy to GitHub Pages", "ctx": "How-to" },
       "kind": "link", "heading": null, "line": 12, "resolved": true },
-    { "from": { "title": "Pipeline", "ctx": "Reference/Static Site" },
-      "to": { "title": "CLI Overview", "ctx": "Reference" },
+    { "from": { "stem": "Pipeline", "ctx": "Reference/Static Site" },
+      "to": { "stem": "CLI Overview", "ctx": "Reference" },
       "kind": "link", "heading": "build", "line": 14, "resolved": true }
   ]
 }
 ```
 
 - `scraps` holds one object per source file, in path order: its identity
-  (`path`, `title`, `ctx`), the `hash` of its content, and everything the
+  (`path`, and the key as `stem` and `ctx`), the `hash` of its content, and everything the
   parser found — `refs` (every `[[link]]`, `![[embed]]` and `#[[tag]]`
   occurrence with its line, and every [[Reference/Markdown Link]] as an
   `mdlink` holding the destination as written), `headings`, `code_blocks`, `images`,
   `task_items`, and the `frontmatter` block as written. The keys Scraps
   reads from it ([[Reference/Frontmatter]]) are not stored a second time:
   a frontmatter tag has no line in the body, so it is not a `refs` entry,
-  and both it and the type are read from `frontmatter` when the object is
-  loaded.
+  and it, the title and the type are read from `frontmatter` when the
+  object is loaded.
 - `links` is the link table: one edge per link or embed occurrence, with
   `resolved: false` when the target names no scrap. An `mdlink` becomes a
   `link` edge to the scrap its path resolves to from the linking file, and

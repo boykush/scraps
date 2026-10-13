@@ -28,7 +28,8 @@ impl LintRule for UnlinkableKeyRule {
                     scrap_path: scrap_relative_path(scrap),
                     message: format!(
                         "key cannot be written as a wiki-link: {reason}; \
-                         link to it with a Markdown link to the file, or rename the file"
+                         link to it with a Markdown link to the file, or rename the file \
+                         and keep its name in a frontmatter `title`"
                     ),
                     source: None,
                     span: None,
