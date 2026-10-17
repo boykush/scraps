@@ -12,7 +12,7 @@ permissions: {}
 
 jobs:
   ai-review:
-    uses: boykush/workflows/.github/workflows/ai-review.yml@171453582e77aa54d6762e75f207a82b743708d5
+    uses: boykush/workflows/.github/workflows/ai-review.yml@e93f0e96968e261bf3bcb7a69d69f0e7ffecb8fe
     permissions:
       contents: read
       pull-requests: read
