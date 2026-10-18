@@ -52,7 +52,7 @@ impl ScrapRender {
         // The shell is identical on every page and its tag list grows with the
         // wiki, so it is built once and each page clones it.
         let mut shell = templates::context(base_url, metadata);
-        templates::insert_site_nav(&mut shell, "", site_nav, backlinks_map);
+        templates::insert_site_nav(&mut shell, site_nav, None, false);
 
         scrap_details
             .as_slice()
@@ -138,7 +138,6 @@ impl ScrapRender {
 
 #[cfg(test)]
 mod tests {
-    use crate::usecase::build::model::scrap_types::ScrapTypes;
     use std::fs;
     use std::path::PathBuf;
     use url::Url;
@@ -148,7 +147,6 @@ mod tests {
     use scraps_libs::lang::LangCode;
     use scraps_libs::model::base_url::BaseUrl;
     use scraps_libs::model::scrap::Scrap;
-    use scraps_libs::model::tags::Tags;
 
     use super::*;
 
@@ -180,9 +178,8 @@ mod tests {
         let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
         let backlinks_map = BacklinksMap::new(&scraps);
         let site_nav = SiteNav::new(
-            scraps.len(),
-            Tags::new(&scraps),
-            ScrapTypes::new(&scraps),
+            &scraps,
+            &BacklinksMap::new(&scraps),
             true,
             chrono_tz::UTC,
             false,
@@ -224,7 +221,7 @@ mod tests {
 
         let result4 = fs::read_to_string(scrap2_html_path).unwrap();
         assert!(result4.contains(">links &#183; 1"));
-        assert!(result4.contains("tags/design.html"));
+        assert!(result4.contains("tags/design/"));
         assert!(result4.contains("#[["));
     }
 
@@ -252,9 +249,8 @@ mod tests {
             .map(|scrap| (scrap.self_key(), scrap))
             .collect();
         let site_nav = SiteNav::new(
-            scraps.len(),
-            Tags::new(&scraps),
-            ScrapTypes::new(&scraps),
+            &scraps,
+            &BacklinksMap::new(&scraps),
             false,
             chrono_tz::UTC,
             false,
@@ -316,9 +312,8 @@ mod tests {
             .map(|scrap| (scrap.self_key(), scrap))
             .collect();
         let site_nav = SiteNav::new(
-            scraps.len(),
-            Tags::new(&scraps),
-            ScrapTypes::new(&scraps),
+            &scraps,
+            &BacklinksMap::new(&scraps),
             false,
             chrono_tz::UTC,
             false,
@@ -352,7 +347,7 @@ mod tests {
 
         assert!(read("typed").contains(
             "<p class=\"type\">type <a class=\"name\" \
-             href=\"http://localhost:1112/types/BigQuery%20Table/\">BigQuery Table</a></p>"
+             href=\"http://localhost:1112/?type=BigQuery+Table\">BigQuery Table</a></p>"
         ));
         // The type is not a tag, so the tag line stays as it was.
         assert!(!read("typed").contains("<p class=\"tags\">"));
@@ -379,9 +374,8 @@ mod tests {
             .map(|scrap| (scrap.self_key(), scrap))
             .collect();
         let site_nav = SiteNav::new(
-            scraps.len(),
-            Tags::new(&scraps),
-            ScrapTypes::new(&scraps),
+            &scraps,
+            &BacklinksMap::new(&scraps),
             false,
             chrono_tz::UTC,
             false,
@@ -451,9 +445,8 @@ mod tests {
             .map(|scrap| (scrap.self_key(), scrap))
             .collect();
         let site_nav = SiteNav::new(
-            scraps.len(),
-            Tags::new(&scraps),
-            ScrapTypes::new(&scraps),
+            &scraps,
+            &BacklinksMap::new(&scraps),
             false,
             chrono_tz::UTC,
             false,
@@ -524,9 +517,8 @@ mod tests {
             .map(|scrap| (scrap.self_key(), scrap))
             .collect();
         let site_nav = SiteNav::new(
-            scraps.len(),
-            Tags::new(&scraps),
-            ScrapTypes::new(&scraps),
+            &scraps,
+            &BacklinksMap::new(&scraps),
             false,
             chrono_tz::UTC,
             false,

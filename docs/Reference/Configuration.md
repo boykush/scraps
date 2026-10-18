@@ -66,8 +66,8 @@ color_scheme = "os_setting"
 # (optional, default=true, choices=true or false)
 build_search_index = true
 
-# Scraps pagination on the updated and backlinks views
-# (optional, default=no pagination)
+# Rows a list shows before "show more" in the updated and backlinks orders
+# (optional, default=every row)
 paginate_by = 20
 ```
 

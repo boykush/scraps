@@ -11,7 +11,6 @@ use crate::usecase::build::{
     fonts::FontsRender,
     html::{
         about_render::AboutRender, index_render::IndexRender, scrap_render::ScrapRender,
-        scraps_index_render::ScrapsIndexRender, tag_render::TagRender,
         tags_index_render::TagsIndexRender,
     },
     js::JsRender,
@@ -21,8 +20,7 @@ use crate::usecase::build::{
     },
     renderer::{
         CssRenderer, FontsRenderer, HtmlAboutRenderer, HtmlIndexRenderer, HtmlScrapRenderer,
-        HtmlScrapsIndexRenderer, HtmlTagRenderer, HtmlTagsIndexRenderer, JsRenderer,
-        SearchIndexJsonRenderer,
+        HtmlTagsIndexRenderer, JsRenderer, SearchIndexJsonRenderer,
     },
 };
 
@@ -33,9 +31,7 @@ pub struct BuildRendererImpl {
     index_render: IndexRender,
     about_render: AboutRender,
     scrap_render: ScrapRender,
-    scraps_index_render: ScrapsIndexRender,
     tags_index_render: TagsIndexRender,
-    tag_render: TagRender,
     css_render: CSSRender,
     fonts_render: FontsRender,
     js_render: JsRender,
@@ -63,9 +59,7 @@ impl BuildRendererImpl {
             index_render: IndexRender::new(static_dir_path, output)?,
             about_render: AboutRender::new(static_dir_path, output)?,
             scrap_render: ScrapRender::new(static_dir_path, output)?,
-            scraps_index_render: ScrapsIndexRender::new(static_dir_path, output)?,
             tags_index_render: TagsIndexRender::new(static_dir_path, output)?,
-            tag_render: TagRender::new(static_dir_path, output)?,
             css_render: CSSRender::new(static_dir_path, output)?,
             fonts_render: FontsRender::new(output),
             js_render: JsRender::new(output),
@@ -101,16 +95,10 @@ impl HtmlAboutRenderer for BuildRendererImpl {
         base_url: &BaseUrl,
         html_metadata: &HtmlMetadata,
         readme_content: &Content,
-        backlinks_map: &BacklinksMap,
         site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
-        self.about_render.run(
-            base_url,
-            html_metadata,
-            readme_content,
-            backlinks_map,
-            site_nav,
-        )
+        self.about_render
+            .run(base_url, html_metadata, readme_content, site_nav)
     }
 }
 
@@ -135,25 +123,6 @@ impl HtmlScrapRenderer for BuildRendererImpl {
     }
 }
 
-impl HtmlScrapsIndexRenderer for BuildRendererImpl {
-    fn render_scraps_index(
-        &self,
-        base_url: &BaseUrl,
-        html_metadata: &HtmlMetadata,
-        scrap_details: &ScrapDetails,
-        backlinks_map: &BacklinksMap,
-        site_nav: &SiteNav,
-    ) -> ScrapsResult<()> {
-        self.scraps_index_render.run(
-            base_url,
-            html_metadata,
-            scrap_details,
-            backlinks_map,
-            site_nav,
-        )
-    }
-}
-
 impl HtmlTagsIndexRenderer for BuildRendererImpl {
     fn render_tags_index(
         &self,
@@ -165,19 +134,6 @@ impl HtmlTagsIndexRenderer for BuildRendererImpl {
     ) -> ScrapsResult<()> {
         self.tags_index_render
             .run(base_url, html_metadata, scraps, backlinks_map, site_nav)
-    }
-}
-
-impl HtmlTagRenderer for BuildRendererImpl {
-    fn render_tags(
-        &self,
-        base_url: &BaseUrl,
-        html_metadata: &HtmlMetadata,
-        backlinks_map: &BacklinksMap,
-        site_nav: &SiteNav,
-    ) -> ScrapsResult<()> {
-        self.tag_render
-            .run(base_url, html_metadata, backlinks_map, site_nav)
     }
 }
 

@@ -5,7 +5,7 @@ use rayon::iter::IntoParallelIterator;
 use rayon::prelude::*;
 use scraps_libs::{
     html::{self, EmbedMode, LinkTargets},
-    model::{scrap::Scrap, tags::Tags},
+    model::scrap::Scrap,
 };
 use tracing::{Level, span};
 
@@ -13,7 +13,6 @@ use super::model::{
     backlinks_map::BacklinksMap,
     build_config::BuildConfig,
     scrap_detail::{ScrapDetail, ScrapDetails},
-    scrap_types::ScrapTypes,
     site_nav::SiteNav,
 };
 use std::collections::HashMap;
@@ -68,9 +67,8 @@ impl BuildUsecase {
             .map(|scrap| (scrap.self_key(), scrap))
             .collect();
         let site_nav = SiteNav::new(
-            scraps.len(),
-            Tags::new(&scraps),
-            ScrapTypes::new(&scraps),
+            &scraps,
+            &backlinks_map,
             list_view_configs.build_search_index,
             timezone,
             readme_content.is_some(),
@@ -96,7 +94,7 @@ impl BuildUsecase {
         // generate html about page from README, when present
         if let Some(readme) = &readme_content {
             let span_generate_html_about = span!(Level::INFO, "generate_html_about").entered();
-            renderer.render_about(base_url, html_metadata, readme, &backlinks_map, &site_nav)?;
+            renderer.render_about(base_url, html_metadata, readme, &site_nav)?;
             span_generate_html_about.exit();
         }
 
@@ -112,32 +110,14 @@ impl BuildUsecase {
         )?;
         span_generate_html_scraps.exit();
 
-        // generate html scraps index
-        let span_generate_html_scraps_index =
-            span!(Level::INFO, "generate_html_scraps_index").entered();
-        renderer.render_scraps_index(
-            base_url,
-            html_metadata,
-            &scrap_details,
-            &backlinks_map,
-            &site_nav,
-        )?;
-        span_generate_html_scraps_index.exit();
-
         // generate html tags index
         let span_generate_html_tags_index =
             span!(Level::INFO, "generate_html_tags_index").entered();
         renderer.render_tags_index(base_url, html_metadata, &scraps, &backlinks_map, &site_nav)?;
         span_generate_html_tags_index.exit();
 
-        // generate html tags
-        let span_generate_html_tags = span!(Level::INFO, "generate_html_tags").entered();
-        renderer.render_tags(base_url, html_metadata, &backlinks_map, &site_nav)?;
-        span_generate_html_tags.exit();
-
         progress.complete_stage(&Stage::GenerateHtml, &{
-            index_page_count + scrap_details.len() + 1 + // tags index
-                site_nav.tags.len() + site_nav.types.len() // all scraps of each type
+            index_page_count + scrap_details.len() + 1 // tags index
         });
 
         // generate css

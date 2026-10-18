@@ -26,7 +26,6 @@ pub trait HtmlAboutRenderer {
         base_url: &BaseUrl,
         html_metadata: &HtmlMetadata,
         readme_content: &Content,
-        backlinks_map: &BacklinksMap,
         site_nav: &SiteNav,
     ) -> ScrapsResult<()>;
 }
@@ -43,33 +42,12 @@ pub trait HtmlScrapRenderer {
     ) -> ScrapsResult<()>;
 }
 
-pub trait HtmlScrapsIndexRenderer {
-    fn render_scraps_index(
-        &self,
-        base_url: &BaseUrl,
-        html_metadata: &HtmlMetadata,
-        scrap_details: &ScrapDetails,
-        backlinks_map: &BacklinksMap,
-        site_nav: &SiteNav,
-    ) -> ScrapsResult<()>;
-}
-
 pub trait HtmlTagsIndexRenderer {
     fn render_tags_index(
         &self,
         base_url: &BaseUrl,
         html_metadata: &HtmlMetadata,
         scraps: &[Scrap],
-        backlinks_map: &BacklinksMap,
-        site_nav: &SiteNav,
-    ) -> ScrapsResult<()>;
-}
-
-pub trait HtmlTagRenderer {
-    fn render_tags(
-        &self,
-        base_url: &BaseUrl,
-        html_metadata: &HtmlMetadata,
         backlinks_map: &BacklinksMap,
         site_nav: &SiteNav,
     ) -> ScrapsResult<()>;
@@ -95,9 +73,7 @@ pub trait BuildRenderer:
     HtmlIndexRenderer
     + HtmlAboutRenderer
     + HtmlScrapRenderer
-    + HtmlScrapsIndexRenderer
     + HtmlTagsIndexRenderer
-    + HtmlTagRenderer
     + CssRenderer
     + FontsRenderer
     + JsRenderer
@@ -110,9 +86,7 @@ impl<T> BuildRenderer for T where
     T: HtmlIndexRenderer
         + HtmlAboutRenderer
         + HtmlScrapRenderer
-        + HtmlScrapsIndexRenderer
         + HtmlTagsIndexRenderer
-        + HtmlTagRenderer
         + CssRenderer
         + FontsRenderer
         + JsRenderer
@@ -153,7 +127,6 @@ pub mod tests {
             _base_url: &BaseUrl,
             _html_metadata: &HtmlMetadata,
             _readme_content: &Content,
-            _backlinks_map: &BacklinksMap,
             _site_nav: &SiteNav,
         ) -> ScrapsResult<()> {
             Ok(())
@@ -174,37 +147,12 @@ pub mod tests {
         }
     }
 
-    impl HtmlScrapsIndexRenderer for BuildRendererTest {
-        fn render_scraps_index(
-            &self,
-            _base_url: &BaseUrl,
-            _html_metadata: &HtmlMetadata,
-            _scrap_details: &ScrapDetails,
-            _backlinks_map: &BacklinksMap,
-            _site_nav: &SiteNav,
-        ) -> ScrapsResult<()> {
-            Ok(())
-        }
-    }
-
     impl HtmlTagsIndexRenderer for BuildRendererTest {
         fn render_tags_index(
             &self,
             _base_url: &BaseUrl,
             _html_metadata: &HtmlMetadata,
             _scraps: &[Scrap],
-            _backlinks_map: &BacklinksMap,
-            _site_nav: &SiteNav,
-        ) -> ScrapsResult<()> {
-            Ok(())
-        }
-    }
-
-    impl HtmlTagRenderer for BuildRendererTest {
-        fn render_tags(
-            &self,
-            _base_url: &BaseUrl,
-            _html_metadata: &HtmlMetadata,
             _backlinks_map: &BacklinksMap,
             _site_nav: &SiteNav,
         ) -> ScrapsResult<()> {

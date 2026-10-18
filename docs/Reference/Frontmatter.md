@@ -70,7 +70,7 @@ the scraps of one; `scraps get --json type` returns a single scrap's type.
 This documentation types its own pages this way: run `scraps type list` in
 `docs/`.
 
-On the static site a type narrows the list views; see
+On the static site a type narrows any list; see
 [[Reference/Static Site/Type Filter]].
 
 ### `description`

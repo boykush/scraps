@@ -1,14 +1,16 @@
 use itertools::Itertools;
 
-use crate::usecase::build::model::scrap_types::{ScrapType, ScrapTypes};
+use crate::usecase::build::model::{
+    scope_counts::TypeCounts,
+    scrap_types::{ScrapType, ScrapTypes},
+};
 
 #[derive(serde::Serialize, Clone, PartialEq, Debug)]
 pub struct TypeTera {
     /// The type as written in frontmatter.
     pub name: String,
-    /// URL of the views narrowed to the type, relative to `base_url` and
-    /// already percent-encoded. Ends in `/`.
-    url_path: String,
+    /// The query that narrows a list to the type, e.g. `type=How-to`.
+    query: String,
     pub scraps_count: usize,
 }
 
@@ -16,7 +18,9 @@ impl From<&ScrapType> for TypeTera {
     fn from(scrap_type: &ScrapType) -> Self {
         TypeTera {
             name: scrap_type.name.clone(),
-            url_path: scrap_type.page_path().to_url_path(),
+            query: url::form_urlencoded::Serializer::new(String::new())
+                .append_pair("type", &scrap_type.name)
+                .finish(),
             scraps_count: scrap_type.scraps_count,
         }
     }
@@ -35,6 +39,17 @@ impl TypesTera {
                 .then_with(|| a.name.cmp(&b.name))
         });
         TypesTera(sorted.collect_vec())
+    }
+
+    /// The same types in the same order, each counted within one scope
+    /// rather than across the wiki.
+    pub fn counted_in(types: &ScrapTypes, counts: &TypeCounts) -> TypesTera {
+        let TypesTera(types) = Self::new(types);
+        let counted = types.into_iter().map(|scrap_type| TypeTera {
+            scraps_count: counts.by_type.get(&scrap_type.name).copied().unwrap_or(0),
+            ..scrap_type
+        });
+        TypesTera(counted.collect_vec())
     }
 }
 

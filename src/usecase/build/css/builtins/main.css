@@ -273,14 +273,15 @@ aside.sidebar {
         }
     }
 
-    nav.views,
-    nav.tags {
+    /* Every scope a list can show: the whole wiki, then each tag as a
+       tree. On a list page the script recounts them for the chosen type. */
+    nav.scopes {
         display: flex;
         flex-direction: column;
         gap: 2px;
 
         p.nav-label {
-            margin: 0 0 var(--space-1);
+            margin: var(--space-3) 0 var(--space-1);
             padding: 0 var(--space-2);
             font-family: var(--font-family-mono);
             font-size: var(--font-size-xs);
@@ -294,6 +295,7 @@ aside.sidebar {
             justify-content: space-between;
             gap: var(--space-2);
             padding: var(--space-1) var(--space-2);
+            padding-left: calc(var(--space-2) + var(--depth, 0) * var(--space-3));
             border-radius: var(--radius-md);
             font-size: var(--font-size-sm);
             color: var(--color-text);
@@ -304,24 +306,18 @@ aside.sidebar {
             }
         }
 
-        .item.active {
+        .item[aria-current] {
             background-color: var(--color-accent-wash);
             font-weight: var(--font-weight-medium);
         }
 
-        span.count {
-            flex-shrink: 0;
-            font-family: var(--font-family-mono);
-            font-size: var(--font-size-xs);
-            font-weight: var(--font-weight-regular);
+        .item.zero {
             color: var(--color-text-muted);
-        }
-    }
+            opacity: 0.6;
 
-    nav.tags {
-        .item {
-            font-family: var(--font-family-mono);
-            font-size: var(--font-size-xs);
+            &:hover {
+                background-color: transparent;
+            }
         }
 
         span.tag-name {
@@ -329,6 +325,8 @@ aside.sidebar {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-xs);
             color: var(--color-accent);
         }
 
@@ -336,7 +334,11 @@ aside.sidebar {
             color: var(--color-text-muted);
         }
 
-        .item.more {
+        span.count {
+            flex-shrink: 0;
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-regular);
             color: var(--color-text-muted);
         }
     }
@@ -492,47 +494,136 @@ div.about {
     }
 }
 
-/* tag */
-div.tag {
-    h1.title {
-        margin: 0;
-        font-size: var(--font-size-2xl);
-        line-height: var(--font-line-height-tight);
+/* index — one list per scope; the page sorts and narrows its own rows */
+div.index {
+    p.list-head {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-4);
+        margin: 0 0 var(--space-2);
+        padding-bottom: var(--space-2);
+        border-bottom: var(--border-hairline) solid var(--color-rule);
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-xs);
+        color: var(--color-text-muted);
 
-        &::before {
-            content: "#";
-            font-family: var(--font-family-mono);
+        span.view-name {
+            color: var(--color-text);
+        }
+
+        span.syntax {
             color: var(--color-text-muted);
-            margin-right: var(--space-2);
+        }
+    }
+
+    p.jump-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-1) var(--space-3);
+        margin: 0 0 var(--space-3);
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-sm);
+    }
+
+    /* Group headings and the jump bar belong to the title order only. */
+    &:not([data-sort="title"]) {
+        p.jump-bar,
+        li.group-head {
+            display: none;
+        }
+    }
+
+    li.group-head {
+        padding: var(--space-5) 0 var(--space-2);
+        border-bottom: var(--border-hairline) solid var(--color-rule);
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-accent);
+    }
+
+    p.empty {
+        margin: var(--space-5) 0;
+        font-size: var(--font-size-sm);
+        color: var(--color-text-muted);
+    }
+
+    button.more {
+        display: block;
+        margin: var(--space-5) auto 0;
+        padding: var(--space-2) var(--space-5);
+        border: var(--border-hairline) solid var(--color-rule);
+        border-radius: var(--radius-md);
+        background: none;
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-sm);
+        color: var(--color-accent);
+        cursor: pointer;
+
+        &:hover {
+            border-color: var(--color-accent);
+        }
+
+        &[hidden] {
+            display: none;
         }
     }
 }
 
-/* index */
-div.index {
-    /* links block */
-    div.links-block {
-        p.list-head {
-            display: flex;
-            justify-content: space-between;
-            gap: var(--space-4);
-            margin: 0 0 var(--space-2);
-            padding-bottom: var(--space-2);
-            border-bottom: var(--border-hairline) solid var(--color-rule);
-            font-family: var(--font-family-mono);
-            font-size: var(--font-size-xs);
-            color: var(--color-text-muted);
+/* Sort and type narrow the list the way a label narrows an issue list:
+   one option of each is always current. */
+div.facets {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin: 0 0 var(--space-3);
+
+    p.facet {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: var(--space-1) var(--space-2);
+        margin: 0;
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-xs);
+        color: var(--color-text-muted);
+    }
+
+    span.label {
+        min-width: 3em;
+    }
+
+    .option {
+        display: inline-flex;
+        align-items: baseline;
+        gap: var(--space-2);
+        padding: var(--space-1) var(--space-2);
+        border-radius: var(--radius-md);
+        color: var(--color-text);
+
+        &:hover {
+            text-decoration: none;
+            background-color: var(--color-accent-wash);
         }
     }
 
-    /* paging arrows */
-    div.paging-arrows {
-        display: flex;
-        justify-content: center;
-        gap: var(--space-5);
-        margin-top: var(--space-6);
-        font-family: var(--font-family-mono);
-        font-size: var(--font-size-sm);
+    .option[aria-current] {
+        background-color: var(--color-accent-wash);
+        font-weight: var(--font-weight-medium);
+    }
+
+    .option.zero {
+        color: var(--color-text-muted);
+        opacity: 0.6;
+
+        &:hover {
+            background-color: transparent;
+        }
+    }
+
+    span.count {
+        font-weight: var(--font-weight-regular);
+        color: var(--color-text-muted);
     }
 }
 
@@ -592,6 +683,16 @@ ul.scrap-rows {
     }
 
     span.ctx {
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-xs);
+        color: var(--color-text-muted);
+    }
+
+    span.type {
+        flex-shrink: 0;
+        padding: 0 var(--space-1);
+        border: var(--border-hairline) solid var(--color-rule);
+        border-radius: var(--radius-sm);
         font-family: var(--font-family-mono);
         font-size: var(--font-size-xs);
         color: var(--color-text-muted);
@@ -766,104 +867,6 @@ svg.scrap-graph {
     }
 }
 
-/* scraps index — every scrap on one page, grouped by the title's initial */
-div.scraps-index {
-    p.list-head {
-        display: flex;
-        justify-content: space-between;
-        gap: var(--space-4);
-        margin: 0 0 var(--space-3);
-        padding-bottom: var(--space-2);
-        border-bottom: var(--border-hairline) solid var(--color-rule);
-        font-family: var(--font-family-mono);
-        font-size: var(--font-size-xs);
-        color: var(--color-text-muted);
-    }
-
-    p.jump-bar {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-1) var(--space-3);
-        margin: 0 0 var(--space-5);
-        font-family: var(--font-family-mono);
-        font-size: var(--font-size-sm);
-    }
-
-    section.title-group {
-        margin-bottom: var(--space-6);
-
-        h2.group-head {
-            display: flex;
-            align-items: baseline;
-            gap: var(--space-2);
-            margin: 0 0 var(--space-2);
-            padding-bottom: var(--space-2);
-            border-bottom: var(--border-hairline) solid var(--color-rule);
-            font-family: var(--font-family-mono);
-            font-size: var(--font-size-sm);
-            font-weight: var(--font-weight-medium);
-            color: var(--color-accent);
-
-            span.count {
-                font-size: var(--font-size-xs);
-                font-weight: var(--font-weight-regular);
-                color: var(--color-text-muted);
-            }
-        }
-    }
-}
-
-ul.scrap-index {
-    columns: 260px 4;
-    column-gap: var(--space-6);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-
-    li.item {
-        break-inside: avoid;
-        border-bottom: var(--border-hairline) solid var(--color-rule);
-    }
-
-    a.entry {
-        display: flex;
-        align-items: baseline;
-        gap: var(--space-2);
-        padding: var(--space-1) 0;
-
-        &:hover {
-            text-decoration: none;
-
-            .title {
-                text-decoration: underline;
-            }
-        }
-    }
-
-    span.title {
-        font-size: var(--font-size-sm);
-        color: var(--color-accent);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    span.ctx {
-        flex-shrink: 0;
-        font-family: var(--font-family-mono);
-        font-size: 10px;
-        color: var(--color-text-muted);
-    }
-
-    span.count {
-        margin-left: auto;
-        flex-shrink: 0;
-        font-family: var(--font-family-mono);
-        font-size: 10px;
-        color: var(--color-text-muted);
-    }
-}
-
 /* tag links */
 ul.tag-links {
     display: flex;
@@ -910,47 +913,6 @@ div.scrap p.resource {
     font-size: var(--font-size-xs);
     color: var(--color-text-muted);
     overflow-wrap: anywhere;
-}
-
-/* The type filter narrows a list view, the way a label narrows an issue
-   list. One option is always active; "all" is the unfiltered view. */
-p.type-filter {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: var(--space-1) var(--space-2);
-    margin: 0 0 var(--space-3);
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
-
-    span.label {
-        margin-right: var(--space-1);
-    }
-
-    .option {
-        display: inline-flex;
-        align-items: baseline;
-        gap: var(--space-2);
-        padding: var(--space-1) var(--space-2);
-        border-radius: var(--radius-md);
-        color: var(--color-text);
-
-        &:hover {
-            text-decoration: none;
-            background-color: var(--color-accent-wash);
-        }
-    }
-
-    span.option.active {
-        background-color: var(--color-accent-wash);
-        font-weight: var(--font-weight-medium);
-    }
-
-    span.count {
-        font-weight: var(--font-weight-regular);
-        color: var(--color-text-muted);
-    }
 }
 
 /* The sidebar collapses to a top block on narrow screens: no drawer, no JS,

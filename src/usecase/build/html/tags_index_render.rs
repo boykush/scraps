@@ -40,7 +40,7 @@ impl TagsIndexRender {
         site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
         let mut context = templates::context(base_url, metadata);
-        templates::insert_site_nav(&mut context, "", site_nav, backlinks_map);
+        templates::insert_site_nav(&mut context, site_nav, None, false);
         context.insert("tags", &TagsTera::new(&Tags::new(scraps), backlinks_map));
 
         let template_name =
@@ -54,7 +54,6 @@ impl TagsIndexRender {
 mod tests {
     use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
     use crate::usecase::build::model::backlinks_map::BacklinksMap;
-    use crate::usecase::build::model::scrap_types::ScrapTypes;
     use rstest::rstest;
     use scraps_libs::{lang::LangCode, model::base_url::BaseUrl};
     use std::fs;
@@ -86,9 +85,8 @@ mod tests {
 
         let backlinks_map = BacklinksMap::new(&scraps);
         let site_nav = SiteNav::new(
-            scraps.len(),
-            Tags::new(&scraps),
-            ScrapTypes::new(&scraps),
+            &scraps,
+            &BacklinksMap::new(&scraps),
             true,
             chrono_tz::UTC,
             false,

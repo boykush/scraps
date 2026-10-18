@@ -1,32 +1,32 @@
-// Where a scrap's type shows: the label in scrap.html and the `type_filter`
-// component in macros.html, used by index.html and scraps_index.html. Markup
-// duplicated deliberately: change one, change the other.
+// Where a scrap's type shows: the label in scrap.html, the label in a
+// `scrap_rows` row, and the type row of the `facet_bar` component in
+// macros.html. Markup duplicated deliberately: change one, change the other.
 // A type carries no #[[ ]] marks and never sits in the tag line.
 
 const TYPES = [
   { name: 'Reference', count: 29 },
   { name: 'How-to', count: 2 },
-  { name: 'Tutorial', count: 2 },
+  { name: 'Tutorial', count: 0 },
   { name: 'Explanation', count: 1 },
 ];
 
-const option = (label, count, active) => {
-  const inner = `${label}${count != null ? `<span class="count">${count}</span>` : ''}`;
-  return active
-    ? `<span class="option active">${inner}</span>`
-    : `<a class="option" href="#">${inner}</a>`;
-};
+const option = (label, count, current) =>
+  count === 0
+    ? `<span class="option zero">${label}<span class="count">0</span></span>`
+    : `<a class="option" href="#"${current ? ' aria-current="true"' : ''}>${label}${count != null ? `<span class="count">${count}</span>` : ''}</a>`;
 
-const filter = (activeName) => `
-  <p class="type-filter">
-    <span class="label">type</span>
-    ${option('all', null, !activeName)}
-    ${TYPES.map((t) => option(t.name, t.count, t.name === activeName)).join('')}
-  </p>`;
+const facet = (currentName) => `
+  <div class="facets">
+    <p class="facet facet-type">
+      <span class="label">type</span>
+      ${option('all', null, !currentName)}
+      ${TYPES.map((t) => option(t.name, t.count, t.name === currentName)).join('')}
+    </p>
+  </div>`;
 
 const listHead = (stats) => `
   <p class="list-head">
-    <span class="view-name">recently updated</span>
+    <span class="view-name">all scraps</span>
     <span class="stats">${stats}</span>
   </p>`;
 
@@ -36,27 +36,34 @@ export default {
     docs: {
       description: {
         component:
-          'The frontmatter `type` of a scrap: at most one per scrap. It narrows a list view the way a label narrows an issue list.',
+          'The frontmatter `type` of a scrap: at most one per scrap. It narrows any list, through `?type=`, the way a label narrows an issue list.',
       },
     },
   },
 };
 
-export const Filter = {
-  name: 'Filter, nothing chosen',
-  render: () => `<div class="index"><div class="links-block">${listHead('34 scraps &#183; 11 tags')}${filter()}</div></div>`,
-};
-
-export const FilterActive = {
-  name: 'Filter, one type chosen',
+export const Facet = {
+  name: 'Facet, nothing chosen',
   parameters: {
     docs: {
       description: {
-        story: 'The same view narrowed to one type. The stats say how many of the scraps are left; `all` goes back.',
+        story: 'Counts are within the listed scope. A type the scope holds none of is shown but cannot be picked.',
       },
     },
   },
-  render: () => `<div class="index"><div class="links-block">${listHead('2 of 34 scraps')}${filter('How-to')}</div></div>`,
+  render: () => `<div class="index">${listHead('34 scraps')}${facet()}</div>`,
+};
+
+export const FacetActive = {
+  name: 'Facet, one type chosen',
+  parameters: {
+    docs: {
+      description: {
+        story: 'The same list narrowed to one type. The stats say how many of the scraps are left; `all` goes back.',
+      },
+    },
+  },
+  render: () => `<div class="index">${listHead('2 of 34 scraps')}${facet('How-to')}</div>`,
 };
 
 export const ScrapLabel = {

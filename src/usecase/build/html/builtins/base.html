@@ -57,20 +57,11 @@
                     <ul id="search-results"></ul>
                 </div>
             {% endif %}
-            <nav class="views">
-                <p class="nav-label">views</p>
-                {% if view == "updated" %}<span class="item active">updated</span>{% else %}<a class="item" href="{{ view_root }}">updated</a>{% endif %}
-                {% if view == "backlinks" %}<span class="item active">backlinks</span>{% else %}<a class="item" href="{{ view_root }}backlinks/">backlinks</a>{% endif %}
-                {% if view == "scraps" %}<span class="item active">all scraps<span class="count">{{ scrap_count }}</span></span>{% else %}<a class="item" href="{{ view_root }}all-scraps/">all scraps<span class="count">{{ scrap_count }}</span></a>{% endif %}
-            </nav>
-            <nav class="tags">
-                <p class="nav-label">tags</p>
-                {% for tag in nav_tags | slice(end=5) %}
-                    <a class="item" href="{{ base_url }}{{ tag.url_path }}"><span class="tag-name"><span class="syntax">#[[</span>{{ tag.title }}<span class="syntax">]]</span></span><span class="count">{{ tag.backlinks_count }}</span></a>
+            <nav class="scopes" aria-label="Scopes">
+                {% for scope in nav_scopes %}
+                    {% if loop.index == 2 %}<p class="nav-label">tags</p>{% endif %}
+                    <a class="item{% if scope.depth > 0 %} nested{% endif %}" href="{{ base_url }}{{ scope.url_path }}" data-counts="{{ scope.counts | json_encode() }}"{% if scope.title %} title="{{ scope.title }}"{% endif %}{% if scope.active %} aria-current="page"{% endif %} style="--depth: {{ scope.depth }}">{% if scope.title %}<span class="tag-name"><span class="syntax">#[[</span>{{ scope.name }}<span class="syntax">]]</span></span>{% else %}<span class="scope-name">{{ scope.name }}</span>{% endif %}<span class="count">{{ scope.counts.total }}</span></a>
                 {% endfor %}
-                {% if nav_tags | length > 5 %}
-                    <a class="item more" href="{{ base_url }}all-tags/">+ {{ nav_tags | length - 5 }} more</a>
-                {% endif %}
             </nav>
             <p class="version">scraps v{{ scraps_version }}</p>
         </aside>

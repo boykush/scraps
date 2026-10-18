@@ -3,7 +3,6 @@ use std::path::Path;
 use crate::error::ScrapsResult;
 use crate::service::tera_render::{RenderOutput, resolve_template, user_template_glob};
 use crate::usecase::build::html::templates;
-use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::site_nav::SiteNav;
 use scraps_libs::model::{base_url::BaseUrl, content::Content};
@@ -34,11 +33,10 @@ impl AboutRender {
         base_url: &BaseUrl,
         metadata: &HtmlMetadata,
         readme_content: &Content,
-        backlinks_map: &BacklinksMap,
         site_nav: &SiteNav,
     ) -> ScrapsResult<()> {
         let mut context = templates::context(base_url, metadata);
-        templates::insert_site_nav(&mut context, "about", site_nav, backlinks_map);
+        templates::insert_site_nav(&mut context, site_nav, None, false);
         context.insert("readme_content", &ContentTera::from(readme_content));
 
         let template_name = resolve_template(&self.tera, "about.html", "__builtins/about.html");
@@ -50,16 +48,14 @@ impl AboutRender {
 #[cfg(test)]
 mod tests {
     use crate::test_fixtures::{TempScrapProject, temp_scrap_project};
-    use crate::usecase::build::model::scrap_types::ScrapTypes;
     use rstest::rstest;
     use scraps_libs::html::{self, EmbedMode, LinkTargets};
-    use scraps_libs::{
-        lang::LangCode, model::base_url::BaseUrl, model::scrap::Scrap, model::tags::Tags,
-    };
+    use scraps_libs::{lang::LangCode, model::base_url::BaseUrl, model::scrap::Scrap};
     use std::fs;
     use url::Url;
 
     use super::*;
+    use crate::usecase::build::model::backlinks_map::BacklinksMap;
 
     #[rstest]
     fn it_run(#[from(temp_scrap_project)] project: TempScrapProject) {
@@ -68,11 +64,9 @@ mod tests {
 
         let scrap1 = Scrap::new("intro", &None, "# Intro");
         let scraps = [scrap1.clone()];
-        let backlinks_map = BacklinksMap::new(&scraps);
         let site_nav = SiteNav::new(
-            scraps.len(),
-            Tags::new(&scraps),
-            ScrapTypes::new(&scraps),
+            &scraps,
+            &BacklinksMap::new(&scraps),
             true,
             chrono_tz::UTC,
             true,
@@ -92,13 +86,7 @@ mod tests {
         )
         .unwrap();
         render
-            .run(
-                &base_url,
-                &metadata,
-                &readme_content,
-                &backlinks_map,
-                &site_nav,
-            )
+            .run(&base_url, &metadata, &readme_content, &site_nav)
             .unwrap();
 
         let result = fs::read_to_string(project.output_path("about/index.html")).unwrap();

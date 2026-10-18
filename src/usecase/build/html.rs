@@ -1,9 +1,6 @@
 pub mod about_render;
 pub mod index_render;
-mod page_pointer;
 pub mod scrap_render;
-pub mod scraps_index_render;
 mod serde;
-pub mod tag_render;
 pub mod tags_index_render;
 mod templates;

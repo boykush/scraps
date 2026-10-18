@@ -557,15 +557,15 @@ mod tests {
     #[rstest]
     #[case::single(
         "#[[Markdown]]",
-        "<p>#<a href=\"http://localhost:1112/tags/Markdown.html\">Markdown</a></p>\n"
+        "<p>#<a href=\"http://localhost:1112/tags/Markdown/\">Markdown</a></p>\n"
     )]
     #[case::nested(
         "#[[Programming/Rust]]",
-        "<p>#<a href=\"http://localhost:1112/tags/Programming/Rust.html\">Programming/Rust</a></p>\n"
+        "<p>#<a href=\"http://localhost:1112/tags/Programming/Rust/\">Programming/Rust</a></p>\n"
     )]
     #[case::space(
         "#[[Domain Driven Design]]",
-        "<p>#<a href=\"http://localhost:1112/tags/Domain%20Driven%20Design.html\">Domain Driven Design</a></p>\n"
+        "<p>#<a href=\"http://localhost:1112/tags/Domain%20Driven%20Design/\">Domain Driven Design</a></p>\n"
     )]
     fn it_to_html_tag_link(base_url: BaseUrl, #[case] input: &str, #[case] expected: &str) {
         let content = to_content(input, &None, &base_url, EmbedMode::Preserve);

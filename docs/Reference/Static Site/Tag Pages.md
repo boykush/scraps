@@ -5,15 +5,20 @@ type: Reference
 #[[Emit/Static Site]]
 
 Each tag carried by at least one scrap, as `#[[tag]]` in its body or in its
-frontmatter `tags` list, gets a generated index page listing all scraps that
-carry it. Nested tags (`#[[a/b/c]]`)
-auto-aggregate to their parents — see [[Reference/Wiki-link/Nested Tag]].
+frontmatter `tags` list, gets its own list of the scraps that carry it.
+Nested tags (`#[[a/b/c]]`) auto-aggregate to their parents — see
+[[Reference/Wiki-link/Nested Tag]]. A tag's list is ordered and narrowed like
+the whole wiki's: see [[Reference/Static Site/Sort and Pagination]] and
+[[Reference/Static Site/Type Filter]].
 
-A tag's page is written under `tags/` at the tag's name as written, with a
+The sidebar lists the whole wiki and then every tag as a tree, a nested tag
+indented under its parent; choosing one shows its list.
+
+A tag's list is written under `tags/` at the tag's name as written, with a
 nested tag's hierarchy as directories: `#[[Notation/Wiki-link]]` is
-`tags/Notation/Wiki-link.html`. Two spellings share a page only when they are
-the same tag, and tags compare exactly, case included: `#[[Rust]]` and
-`#[[rust]]` are two tags with two pages. The naming rule is the one in
+`tags/Notation/Wiki-link/`. Two spellings share a list only when they are the
+same tag, and tags compare exactly, case included: `#[[Rust]]` and `#[[rust]]`
+are two tags with two lists. The naming rule is the one in
 [[Reference/Static Site/Output Structure]].
 
 The list of every tag is `all-tags/index.html`.

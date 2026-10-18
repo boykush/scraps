@@ -15,15 +15,11 @@ impl PagePath {
         PagePath(format!("scraps/{key}.html"))
     }
 
-    /// A nested tag keeps its hierarchy as directories.
+    /// A tag's list is a directory, so a nested tag keeps its hierarchy as
+    /// directories and its children sit beside its own `index.html`.
     pub fn of_tag(tag: &Tag) -> PagePath {
-        let segments: Vec<String> = tag.segments().iter().map(|s| name_segment(s)).collect();
-        PagePath(format!("tags/{}.html", segments.join("/")))
-    }
-
-    /// The directory of the list views narrowed to one type.
-    pub fn of_type(name: &str) -> PagePath {
-        PagePath(format!("types/{}/", name_segment(name)))
+        let segments: Vec<String> = tag.segments().iter().map(|s| tag_segment(s)).collect();
+        PagePath(format!("tags/{}/", segments.join("/")))
     }
 
     /// The URL a browser requests for this page.
@@ -62,15 +58,25 @@ impl Display for PagePath {
     }
 }
 
-// A tag segment or a type is free text, not a file name, so three spellings
-// cannot be used as written: `/` would split the name, `.` and `..` would
-// leave its directory, and `%` has to be escaped for the escapes to stay
-// injective. Everything else, case included, is kept.
+// A tag segment is free text, not a file name, so three spellings cannot be
+// used as written: `/` would split the name, `.` and `..` would leave its
+// directory, and `%` has to be escaped for the escapes to stay injective.
+// Everything else, case included, is kept.
 fn name_segment(name: &str) -> String {
     if name == "." || name == ".." {
         return name.replace('.', "%2E");
     }
     name.replace('%', "%25").replace('/', "%2F")
+}
+
+// A child tag's directory sits beside its parent's `index.html`, so a segment
+// ending in `.html` has that dot escaped and can never become a page file.
+fn tag_segment(name: &str) -> String {
+    let segment = name_segment(name);
+    match segment.strip_suffix(".html") {
+        Some(stem) => format!("{stem}%2Ehtml"),
+        None => segment,
+    }
 }
 
 #[cfg(test)]
@@ -109,12 +115,13 @@ mod tests {
     }
 
     #[rstest]
-    #[case::flat("Domain Driven Design", "tags/Domain Driven Design.html")]
-    #[case::nested("AI/ML", "tags/AI/ML.html")]
-    #[case::named_like_a_listing("index", "tags/index.html")]
-    #[case::percent("100%", "tags/100%25.html")]
-    #[case::parent_dir("../index", "tags/%2E%2E/index.html")]
-    #[case::current_dir("./a", "tags/%2E/a.html")]
+    #[case::flat("Domain Driven Design", "tags/Domain Driven Design/")]
+    #[case::nested("AI/ML", "tags/AI/ML/")]
+    #[case::named_like_a_listing("index", "tags/index/")]
+    #[case::named_like_a_page("a/index.html", "tags/a/index%2Ehtml/")]
+    #[case::percent("100%", "tags/100%25/")]
+    #[case::parent_dir("../index", "tags/%2E%2E/index/")]
+    #[case::current_dir("./a", "tags/%2E/a/")]
     fn it_writes_a_tag_at_its_name(#[case] tag: &str, #[case] expected: &str) {
         assert_eq!(PagePath::of_tag(&Tag::from(tag)).as_str(), expected);
     }
@@ -133,6 +140,7 @@ mod tests {
             ("Rust", "rust"),
             ("..", "%2E%2E"),
             ("%", "%25"),
+            ("index.html", "index%2Ehtml"),
         ] {
             assert_ne!(Tag::from(a), Tag::from(b));
             assert_ne!(
@@ -140,25 +148,6 @@ mod tests {
                 PagePath::of_tag(&Tag::from(b))
             );
         }
-    }
-
-    #[rstest]
-    #[case::as_written("BigQuery Table", "types/BigQuery Table/")]
-    #[case::slash("ADR/Accepted", "types/ADR%2FAccepted/")]
-    #[case::percent("a%2Fb", "types/a%252Fb/")]
-    #[case::parent_dir("..", "types/%2E%2E/")]
-    #[case::dash("-", "types/-/")]
-    fn it_writes_a_type_under_its_name(#[case] name: &str, #[case] expected: &str) {
-        assert_eq!(PagePath::of_type(name).as_str(), expected);
-    }
-
-    #[rstest]
-    #[case::case("Blog", "blog")]
-    #[case::former_suffix("blog", "blog-2")]
-    #[case::slash_and_its_escape("a/b", "a%2Fb")]
-    #[case::dot_and_its_escape(".", "%2E")]
-    fn it_keeps_distinct_types_on_distinct_paths(#[case] a: &str, #[case] b: &str) {
-        assert_ne!(PagePath::of_type(a), PagePath::of_type(b));
     }
 
     #[rstest]
@@ -181,10 +170,7 @@ mod tests {
         "scraps/日本語.html",
         "http://localhost:1112/scraps/%E6%97%A5%E6%9C%AC%E8%AA%9E.html"
     )]
-    #[case::escaped_on_disk(
-        "types/ADR%2FAccepted/",
-        "http://localhost:1112/types/ADR%252FAccepted/"
-    )]
+    #[case::escaped_on_disk("tags/100%25/", "http://localhost:1112/tags/100%2525/")]
     fn it_percent_encodes_each_segment_of_the_url(#[case] path: &str, #[case] expected: &str) {
         assert_eq!(PagePath(path.to_string()).to_url(&base_url()), expected);
     }

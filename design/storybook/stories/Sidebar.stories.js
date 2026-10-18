@@ -5,15 +5,14 @@
 // The real sidebar is position: sticky with height: 100vh; stories pin a fixed
 // height inline so the frame stays readable.
 
-const viewItem = ({ label, count, active, href = '#' }) =>
-  active
-    ? `<span class="item active">${label}${count != null ? `<span class="count">${count}</span>` : ''}</span>`
-    : `<a class="item" href="${href}">${label}${count != null ? `<span class="count">${count}</span>` : ''}</a>`;
+const scope = ({ name, count, depth = 0, tag = true, current, zero }) => `
+  <a class="item${depth ? ' nested' : ''}${zero ? ' zero' : ''}"${zero ? '' : ' href="#"'}${current ? ' aria-current="page"' : ''} style="--depth: ${depth}">${
+    tag
+      ? `<span class="tag-name"><span class="syntax">#[[</span>${name}<span class="syntax">]]</span></span>`
+      : `<span class="scope-name">${name}</span>`
+  }<span class="count">${zero ? 0 : count}</span></a>`;
 
-const tagItem = ({ title, count }) => `
-  <a class="item" href="#"><span class="tag-name"><span class="syntax">#[[</span>${title}<span class="syntax">]]</span></span><span class="count">${count}</span></a>`;
-
-const sidebar = ({ activeView, results = [] }) => `
+const sidebar = ({ activeView, current = 'all', narrowed = false, results = [] }) => `
   <aside class="sidebar" style="height: 640px; position: static;">
     <div class="brand-block">
       <a class="brand" href="#">
@@ -32,24 +31,19 @@ const sidebar = ({ activeView, results = [] }) => `
           : '<ul id="search-results"></ul>'
       }
     </div>
-    <nav class="views">
-      <p class="nav-label">views</p>
-      ${viewItem({ label: 'updated', active: activeView === 'updated' })}
-      ${viewItem({ label: 'backlinks', active: activeView === 'backlinks' })}
-      ${viewItem({ label: 'all scraps', count: 764, active: activeView === 'scraps' })}
-    </nav>
-    <nav class="tags">
+    <nav class="scopes" aria-label="Scopes">
+      ${scope({ name: 'all scraps', count: 764, tag: false, current: current === 'all' })}
       <p class="nav-label">tags</p>
       ${[
-        { title: 'Security', count: 170 },
-        { title: 'Programming', count: 87 },
-        { title: 'Agile', count: 67 },
-        { title: 'Cloud Native', count: 63 },
-        { title: 'Documentation', count: 38 },
+        { name: 'Security', count: 170 },
+        { name: 'Authentication', count: 40, depth: 1 },
+        { name: 'Cryptography', count: 20, depth: 1 },
+        { name: 'Programming', count: 87 },
+        { name: 'Agile', count: 67, zero: narrowed },
+        { name: 'Cloud Native', count: 63 },
       ]
-        .map(tagItem)
+        .map((entry) => scope({ ...entry, current: current === entry.name }))
         .join('')}
-      <a class="item more" href="#">+ 36 more</a>
     </nav>
     <p class="version">scraps v2.0.0</p>
   </aside>`;
@@ -60,7 +54,7 @@ export default {
     docs: {
       description: {
         component:
-          'The persistent sidebar: brand, search, sort views, tags. No file tree and no graph pane — ctx stays a row prefix, never navigation.',
+          'The persistent sidebar: brand, search, and the scopes a list can show — the whole wiki, then every tag as a tree. No file tree and no graph pane — ctx stays a row prefix, never navigation.',
       },
     },
   },
@@ -79,7 +73,14 @@ export const SearchOpen = {
     }),
 };
 
-export const AllScrapsActive = {
-  name: 'All scraps active',
-  render: () => sidebar({ activeView: 'scraps' }),
+export const TagScopeNarrowed = {
+  name: 'Tag scope, narrowed to a type',
+  parameters: {
+    docs: {
+      description: {
+        story: 'On a list narrowed to a type, every count is that type\'s, and a tag holding none of it cannot be picked.',
+      },
+    },
+  },
+  render: () => sidebar({ activeView: 'updated', current: 'Security', narrowed: true }),
 };
