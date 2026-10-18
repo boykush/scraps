@@ -92,7 +92,7 @@ mod tests {
         project
             .add_config(b"")
             .add_scrap("rust-basics.md", b"# Rust Basics\n\nLearning rust.")
-            .add_scrap("ownership.md", b"# Ownership\n\nRust ownership rules.")
+            .add_scrap("ownership.md", b"# Ownership\n\n#[[Rust]] ownership rules.")
             .add_scrap("python.md", b"# Python\n\nA different language.");
 
         let mut buf = Vec::new();
@@ -116,7 +116,7 @@ mod tests {
         project
             .add_config(b"")
             .add_scrap("rust-basics.md", b"# Rust Basics\n\nLearning rust.")
-            .add_scrap("ownership.md", b"# Ownership\n\nRust ownership rules.")
+            .add_scrap("ownership.md", b"# Ownership\n\n#[[Rust]] ownership rules.")
             .add_scrap("python.md", b"# Python\n\nA different language.");
 
         let mut buf = Vec::new();
