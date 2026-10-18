@@ -49,14 +49,18 @@ Follow the writing rules in `learn`'s "5. Write the page" (`../learn/SKILL.md`),
 The page has this form:
 
 ```
+---
+resource: <URL>
+---
+
 #[[Tag]] #[[Tag]]
 
 <Gist: who says what, and where. One or two sentences.>
 
 - <A bullet that carries a connection to an existing page. Zero to three.>
-
-<URL>
 ```
+
+The page is a summary of the source and stands for it, so the source's URL goes in the frontmatter `resource`, not in the body. Other pages that cite the source point at this page by path in their `sources`.
 
 Place the page without a context folder by default, and add one only when step 1 found a page with the same title. Project instructions may add local conventions for source pages, such as a category link or the context folder to use; follow them.
 

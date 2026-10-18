@@ -109,7 +109,8 @@ Wait for the user to confirm or correct the plan.
 ## 5. Write the page
 
 - Write only what passed the check.
-- Order: if the title is an abbreviation, its expansion as a second-level heading; then the tag line, the gist, bullets if any, and the source URL as an autolink (`<https://...>`). Do not embed slides or videos.
+- Order: if the title is an abbreviation, its expansion as a second-level heading; then the tag line, the gist, and bullets if any. Do not embed slides or videos.
+- Record the source in the frontmatter, not in the body. A page about the source itself is an alias for it: give it the source's URL as `resource`, and add `sources` only for what was read when that differs, such as a translation. Any other page lists what it was written from in `sources`: the source's URL, or the path of the source's own page (`resource: "/<key>.md"`) when the wiki has one; step 7 finds those.
 - The gist alone is the default. Add bullets only to state connections to existing pages. An explanation that carries no link is left out, even if the source has it.
 - Link terms that have a page instead of explaining them. For terms without one, phrase the sentence so the term needs no explanation.
 - Do not copy specification details, procedures, or exhaustive usage examples. That turns the page into a summary of the source.
@@ -131,6 +132,6 @@ With no candidates, leave existing pages untouched. Backlinks are computed autom
 
 1. Reread the page. It should hold no explanation without a link and nothing that did not pass the check.
 2. Confirm every tag is an existing tag or a new one the user explicitly agreed to.
-3. Run `scraps lint --rule broken-link`.
+3. Run `scraps lint --rule broken-link --rule source-has-page`. A `source-has-page` warning names the path to write in place of a source URL that has its own page.
 4. Read the diff and confirm that only the new page and the approved links changed.
 5. Report separately: the page created, the links updated, the points left out and the candidates for later runs, anything in the source that could not be read, and warnings unrelated to this change.

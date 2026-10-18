@@ -56,7 +56,7 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
    - Plain Markdown with `[[link]]` for references and `#[[tag]]` for tags
    - **Link vs tag**: reference a scrap with `[[Title]]`, never `#[[Tag]]` (tags are only existing categories from step 2). A `[[Title]]` must resolve to a real scrap — a concept that *should* exist but doesn't yet stays **plain text**, since an unresolved `[[Title]]` is a broken link (step 7), not a forward reference.
    - **Link direction & fidelity (outbound)**: links flow concrete → abstract — a concrete scrap links out to the abstractions it depends on; the reverse is the anti-pattern (concrete scraps link IN instead, step 6), and siblings link only on a direct, asymmetric relation. From a source, add only what it attests — never a concrete entity it doesn't name (a CVE, product, person), though an abstraction it genuinely instantiates is fine.
-   - Include source autolink if URL: `<https://...>`
+   - Record a source URL in the frontmatter `sources` (`- resource: <URL>`), not as a body autolink; step 7 asks for the path instead when the wiki already has a page for that source
    - Stay within max-lines
 
 6. **Cross-link inbound mentions** (Karpathy's "update related entity and concept pages")
@@ -69,7 +69,7 @@ Implements Karpathy's *Ingest* primitive for Scraps: read a source, draft a new 
 
 7. **Post-write sanity check**
    - **Tag check**: list every `#[[tag]]` you wrote and confirm each already appeared in the `scraps tag list --json` from step 2. A tag that was not in that list was almost certainly meant to be a `[[link]]` — convert it. Add a genuinely new tag only when you deliberately intend a new cross-cutting category. (Broken-link lint cannot catch this: a stray tag is valid syntax, it just creates a single-use tag.)
-   - `scraps lint --rule broken-link` (purpose: confirm the new scrap introduced no broken references)
+   - `scraps lint --rule broken-link --rule source-has-page` (purpose: confirm the new scrap introduced no broken references, and that a source with its own page is named by that page's `/<key>.md` path)
    - For non-trivial violations, hand off to the `lint-rule-handler` agent
 
 ## Wiki-link syntax
