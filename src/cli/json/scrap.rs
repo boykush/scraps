@@ -1,6 +1,7 @@
 use crate::usecase::scrap::scrap_ref::ScrapRef;
 use chrono::SecondsFormat;
 use scraps_libs::markdown::query::{CodeBlock, Heading};
+use scraps_libs::model::source::Source;
 use scraps_libs::model::verification::{TrustTier, Verification};
 use serde::{Deserialize, Serialize};
 
@@ -95,6 +96,35 @@ impl VerifiedJson {
                     at: v.at.to_rfc3339_opts(SecondsFormat::AutoSi, true),
                 })
                 .collect(),
+        }
+    }
+}
+
+/// One material a scrap derives from, read as an OKF consumer reads an entry
+/// of `sources`. Optional keys the entry leaves out are left out here too.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SourceJson {
+    pub resource: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub title: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub author: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub last_modified: Option<String>,
+}
+
+impl From<&Source> for SourceJson {
+    fn from(source: &Source) -> Self {
+        Self {
+            resource: source.resource.clone(),
+            id: source.id.clone(),
+            title: source.title.clone(),
+            author: source.author.clone(),
+            last_modified: source
+                .last_modified
+                .map(|at| at.to_rfc3339_opts(SecondsFormat::AutoSi, true)),
         }
     }
 }

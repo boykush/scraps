@@ -2,7 +2,7 @@ use std::io::Write;
 use std::path::Path;
 
 use crate::cli::config::scrap_config::ScrapConfig;
-use crate::cli::json::scrap::{CodeBlockJson, HeadingJson, VerifiedJson};
+use crate::cli::json::scrap::{CodeBlockJson, HeadingJson, SourceJson, VerifiedJson};
 use crate::cli::path_resolver::PathResolver;
 use crate::cli::scrap_arg::scrap_key;
 use crate::error::ScrapsResult;
@@ -22,6 +22,7 @@ const FIELD_TYPE: &str = "type";
 const FIELD_DESCRIPTION: &str = "description";
 const FIELD_FRONTMATTER: &str = "frontmatter";
 const FIELD_VERIFIED: &str = "verified";
+const FIELD_SOURCES: &str = "sources";
 
 const DEFAULT_FIELDS: &[&str] = &[FIELD_KEY, FIELD_TITLE, FIELD_CTX, FIELD_BODY];
 const ALLOWED_FIELDS: &[&str] = &[
@@ -36,6 +37,7 @@ const ALLOWED_FIELDS: &[&str] = &[
     FIELD_DESCRIPTION,
     FIELD_FRONTMATTER,
     FIELD_VERIFIED,
+    FIELD_SOURCES,
 ];
 
 fn parse_fields(spec: &str) -> ScrapsResult<Vec<&'static str>> {
@@ -137,6 +139,11 @@ pub fn run(
                         let v: Vec<HeadingJson> =
                             headings(scoped).into_iter().map(Into::into).collect();
                         out.insert(field.to_string(), serde_json::to_value(v)?);
+                    }
+                    FIELD_SOURCES => {
+                        let sources: Vec<SourceJson> =
+                            result.sources.iter().map(SourceJson::from).collect();
+                        out.insert(field.to_string(), serde_json::to_value(sources)?);
                     }
                     FIELD_CODE_BLOCKS => {
                         let v: Vec<CodeBlockJson> =
@@ -472,6 +479,23 @@ mod tests {
         assert_eq!(
             output.trim(),
             r#"{"verified":{"tier":"human-reviewed","entries":[{"by":"human:alice","at":"2026-10-17T00:00:00Z"},{"by":"process:ci","at":"2026-10-16T00:00:00Z"}]}}"#
+        );
+    }
+
+    #[rstest]
+    fn run_json_field_projection_supports_sources(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_config(b"").add_scrap(
+            "post.md",
+            b"---\nsources:\n  - resource: https://example.com/ga4\n    title: GA4 schema\n    last_modified: 2026-05-30T09:00:00+09:00\n  - title: no resource\n  - resource: references/schema.md\n---\n\n# Post\n",
+        );
+
+        let output = run_get("post", None, None, Some("sources"), &project).unwrap();
+
+        assert_eq!(
+            output.trim(),
+            r#"{"sources":[{"resource":"https://example.com/ga4","title":"GA4 schema","last_modified":"2026-05-30T00:00:00Z"},{"resource":"references/schema.md"}]}"#
         );
     }
 
