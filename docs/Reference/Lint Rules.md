@@ -19,7 +19,7 @@ alike and quote each as it was written.
 | `lonely` | scrap with no backlinks | on |
 | `self-link` | scrap links to itself | on |
 | `overlinking` | same scrap linked more than once in one scrap | on |
-| `broken-link` | link that does not resolve to a scrap | on |
+| `broken-link` | link, or `sources` path, that does not resolve to a scrap | on |
 | `broken-heading-ref` | `[[Page#Heading]]` or `page.md#heading` heading missing | on |
 | `unlinkable-key` | scrap whose file path cannot be written inside `[[ ]]` | on |
 | `stale-by-git` | policy: last commit older than the threshold the wiki sets | opt-in |

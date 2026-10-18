@@ -1,5 +1,6 @@
 use crate::error::ScrapsResult;
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
+use crate::usecase::scrap::lookup_links::usecase::LinkRefKind;
 use crate::usecase::scrap::scrap_ref::{ScrapRef, find_scrap};
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
@@ -9,6 +10,8 @@ use scraps_libs::model::scrap::Scrap;
 pub struct LookupScrapBacklinksResult {
     pub scrap: ScrapRef,
     pub md_text: String,
+    /// How the scrap links here: in its body, as one of its `sources`, or both.
+    pub kinds: Vec<LinkRefKind>,
 }
 
 pub struct LookupScrapBacklinksUsecase;
@@ -36,11 +39,29 @@ impl LookupScrapBacklinksUsecase {
             .map(|linking_scrap| LookupScrapBacklinksResult {
                 scrap: (*linking_scrap).into(),
                 md_text: linking_scrap.md_text().to_string(),
+                kinds: link_kinds(linking_scrap, key),
             })
             .collect();
 
         Ok(results)
     }
+}
+
+fn link_kinds(linking: &Scrap, key: &ScrapKey) -> Vec<LinkRefKind> {
+    let in_body = linking
+        .link_occurrences()
+        .any(|link| link.target.as_ref() == Some(key));
+    let as_source = linking
+        .source_links()
+        .iter()
+        .any(|link| link.target.as_ref() == Some(key));
+    [
+        (in_body, LinkRefKind::Link),
+        (as_source, LinkRefKind::Source),
+    ]
+    .into_iter()
+    .filter_map(|(found, kind)| found.then_some(kind))
+    .collect()
 }
 
 #[cfg(test)]
@@ -133,5 +154,43 @@ mod tests {
             .expect("Should succeed");
 
         assert_eq!(results.len(), 0);
+    }
+
+    #[test]
+    fn test_lookup_scrap_backlinks_tells_how_each_scrap_links_here() {
+        let scraps = vec![
+            Scrap::new("body", &None, "[[Intro]]"),
+            Scrap::new(
+                "source",
+                &None,
+                "---\nsources:\n  - resource: /Intro.md\n---\n",
+            ),
+            Scrap::new(
+                "both",
+                &None,
+                "---\nsources:\n  - resource: /Intro.md\n---\n\n[[Intro]]\n",
+            ),
+            Scrap::new("Intro", &None, ""),
+        ];
+
+        let results = LookupScrapBacklinksUsecase::new()
+            .execute(&scraps, &ScrapKey::from_path_str("Intro"))
+            .unwrap();
+
+        let kinds: Vec<(String, Vec<LinkRefKind>)> = results
+            .into_iter()
+            .map(|r| (r.scrap.key.to_string(), r.kinds))
+            .collect();
+        assert_eq!(
+            kinds,
+            vec![
+                ("body".to_string(), vec![LinkRefKind::Link]),
+                ("source".to_string(), vec![LinkRefKind::Source]),
+                (
+                    "both".to_string(),
+                    vec![LinkRefKind::Link, LinkRefKind::Source]
+                ),
+            ]
+        );
     }
 }

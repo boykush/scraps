@@ -87,11 +87,13 @@ Reference navigation stays separate: use `scraps links`, `scraps backlinks`,
 and `scraps tag ...`.
 
 `scraps links --json` returns outbound reference occurrences. Each result has
-`kind` (`link` or `embed`), `key`, `title`, `ctx`, and `heading`, so agents
-can jump directly to `scraps get <key> --heading <heading>`.
+`kind` (`link`, `embed`, or `source` for a frontmatter `sources` path), `key`,
+`title`, `ctx`, and `heading`, so agents can jump directly to
+`scraps get <key> --heading <heading>`.
 
 `scraps backlinks --json` remains scrap-level inbound discovery and returns
-the scraps that link to the requested scrap.
+the scraps that link to the requested scrap, each with `kinds`: `link` when
+its body links here, `source` when it names this scrap in its `sources`.
 
 `scraps type list --json` returns each type in use with its `scraps_count`,
 most used first. `scraps type scraps <type> --json` returns the scraps of one

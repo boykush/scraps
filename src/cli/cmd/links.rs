@@ -7,32 +7,16 @@ use comfy_table::{Cell, Table};
 use serde::{Deserialize, Serialize};
 
 use crate::cli::config::scrap_config::ScrapConfig;
-use crate::cli::json::scrap::ScrapRefJson;
+use crate::cli::json::scrap::{LinkKindJson, ScrapRefJson};
 use crate::cli::path_resolver::PathResolver;
 use crate::cli::scrap_arg::scrap_key;
 use crate::error::ScrapsResult;
 use crate::ir::loader;
-use crate::usecase::scrap::lookup_links::usecase::{LinkRefKind, LookupScrapLinksUsecase};
-
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone, Copy)]
-#[serde(rename_all = "lowercase")]
-enum LinkRefKindJson {
-    Link,
-    Embed,
-}
-
-impl From<LinkRefKind> for LinkRefKindJson {
-    fn from(k: LinkRefKind) -> Self {
-        match k {
-            LinkRefKind::Link => LinkRefKindJson::Link,
-            LinkRefKind::Embed => LinkRefKindJson::Embed,
-        }
-    }
-}
+use crate::usecase::scrap::lookup_links::usecase::LookupScrapLinksUsecase;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct LinkRefJson {
-    kind: LinkRefKindJson,
+    kind: LinkKindJson,
     #[serde(flatten)]
     scrap: ScrapRefJson,
     heading: Option<String>,
@@ -97,10 +81,7 @@ pub fn run(
         ]);
 
         for r in &refs {
-            let kind_str = match r.kind {
-                LinkRefKindJson::Link => "link",
-                LinkRefKindJson::Embed => "embed",
-            };
+            let kind_str = r.kind.as_str();
             table.add_row(vec![
                 Cell::new(kind_str),
                 Cell::new(&r.scrap.key),
@@ -177,7 +158,7 @@ mod tests {
             response
                 .results
                 .iter()
-                .all(|r| r.kind == LinkRefKindJson::Link)
+                .all(|r| r.kind == LinkKindJson::Link)
         );
         assert!(response.results.iter().all(|r| r.heading.is_none()));
     }
@@ -332,9 +313,9 @@ mod tests {
         let output = String::from_utf8(buf).unwrap();
         let response: LinksResponse = serde_json::from_str(output.trim()).unwrap();
         assert_eq!(response.count, 2);
-        let kinds: Vec<LinkRefKindJson> = response.results.iter().map(|r| r.kind).collect();
-        assert!(kinds.contains(&LinkRefKindJson::Embed));
-        assert!(kinds.contains(&LinkRefKindJson::Link));
+        let kinds: Vec<LinkKindJson> = response.results.iter().map(|r| r.kind).collect();
+        assert!(kinds.contains(&LinkKindJson::Embed));
+        assert!(kinds.contains(&LinkKindJson::Link));
     }
 
     #[rstest]
@@ -358,6 +339,33 @@ mod tests {
         let response: LinksResponse = serde_json::from_str(output.trim()).unwrap();
         assert_eq!(response.count, 1);
         assert_eq!(response.results[0].scrap.title, "Target");
+    }
+
+    #[rstest]
+    fn run_json_names_a_source_by_its_kind(#[from(temp_scrap_project)] project: TempScrapProject) {
+        project
+            .add_config(b"")
+            .add_scrap(
+                "OKF.md",
+                b"---\nsources:\n  - resource: /Blog/Intro.md\n---\n\n# OKF\n",
+            )
+            .add_scrap("Blog/Intro.md", b"# Intro");
+
+        let mut buf = Vec::new();
+        run(
+            "OKF",
+            None,
+            true,
+            Some(project.project_root.as_path()),
+            &mut buf,
+        )
+        .unwrap();
+
+        let output = String::from_utf8(buf).unwrap();
+        let response: LinksResponse = serde_json::from_str(output.trim()).unwrap();
+        assert_eq!(response.count, 1);
+        assert_eq!(response.results[0].kind, LinkKindJson::Source);
+        assert_eq!(response.results[0].scrap.key, "Blog/Intro");
     }
 
     #[rstest]

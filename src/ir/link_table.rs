@@ -16,7 +16,21 @@ pub fn link_edges(scraps: &[Scrap]) -> Vec<LinkEdge> {
         .iter()
         .flat_map(|scrap| {
             let from = KeyJson::from(&scrap.self_key());
-            scrap.refs().iter().filter_map(move |r| {
+            let sources = scrap.source_links().into_iter().filter_map({
+                let from = from.clone();
+                move |link| {
+                    let to = link.target?;
+                    Some(LinkEdge {
+                        from: from.clone(),
+                        resolved: keys.contains(&to),
+                        to: KeyJson::from(&to),
+                        kind: EdgeKind::Source,
+                        heading: link.heading,
+                        line: line_of(scrap.md_text(), &link.resource),
+                    })
+                }
+            });
+            let refs = scrap.refs().iter().filter_map(move |r| {
                 let (to, kind, heading, line) = match r {
                     WikiRef::Link(l) => {
                         (ScrapKey::from(l), EdgeKind::Link, l.heading.clone(), l.line)
@@ -41,9 +55,18 @@ pub fn link_edges(scraps: &[Scrap]) -> Vec<LinkEdge> {
                     heading,
                     line,
                 })
-            })
+            });
+            refs.chain(sources)
         })
         .collect()
+}
+
+/// The first line holding `resource`, which for a source is the frontmatter
+/// line that names it.
+fn line_of(text: &str, resource: &str) -> usize {
+    text.lines()
+        .position(|line| line.contains(resource))
+        .map_or(1, |index| index + 1)
 }
 
 fn embed_path(ctx_path: &[String], title: &str) -> String {
@@ -84,6 +107,28 @@ mod tests {
         assert_eq!(edges[2].to.stem, "missing");
         assert!(!edges[2].resolved);
         assert!(edges.iter().all(|e| e.from.stem == "a"));
+    }
+
+    #[test]
+    fn it_adds_an_edge_for_each_source_naming_a_scrap() {
+        let scraps = vec![
+            Scrap::new(
+                "okf",
+                &None,
+                "---\nsources:\n  - resource: https://example.com\n  - resource: /Blog/Intro.md\n  - resource: /Gone.md\n---\n\nbody\n",
+            ),
+            Scrap::new("Intro", &Some("Blog".into()), ""),
+        ];
+
+        let edges = link_edges(&scraps);
+
+        assert_eq!(edges.len(), 2);
+        assert!(edges.iter().all(|e| e.kind == EdgeKind::Source));
+        assert_eq!(edges[0].to.stem, "Intro");
+        assert_eq!(edges[0].line, 4);
+        assert!(edges[0].resolved);
+        assert_eq!(edges[1].to.stem, "Gone");
+        assert!(!edges[1].resolved);
     }
 
     #[test]

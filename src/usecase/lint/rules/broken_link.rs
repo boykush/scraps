@@ -5,8 +5,9 @@ use scraps_libs::model::{key::ScrapKey, scrap::Scrap, tags::Tags};
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::lint::rule::{LintRule, LintRuleName, LintWarning, scrap_relative_path};
 
-/// Detect `[[wikilink]]` references, and Markdown links to a `.md` path,
-/// that don't resolve to any existing scrap.
+/// Detect `[[wikilink]]` references, Markdown links to a `.md` path, and
+/// frontmatter `sources` naming a `.md` path, that don't resolve to any
+/// existing scrap.
 ///
 /// Pre-v1, unresolved links were silently turned into "implicit tags" via
 /// `Tags::new`. v1 keeps tags and scrap-links as separate namespaces:
@@ -46,6 +47,17 @@ impl LintRule for BrokenLinkRule {
                         (None, Some(key)) => Some(format!("broken wikilink: [[{key}]]")),
                         (None, None) => None,
                     })
+                    .chain(
+                        scrap
+                            .source_links()
+                            .into_iter()
+                            .filter(|link| {
+                                link.target
+                                    .as_ref()
+                                    .is_none_or(|key| !scrap_self_keys.contains(key))
+                            })
+                            .map(|link| format!("broken source: {}", link.resource)),
+                    )
                     .filter(|message| seen.insert(message.clone()))
                     .map(|message| LintWarning {
                         rule_name: LintRuleName::BrokenLink,
@@ -63,6 +75,30 @@ impl LintRule for BrokenLinkRule {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn detect_a_source_naming_no_scrap() {
+        let scraps = vec![
+            Scrap::new(
+                "a",
+                &None,
+                "---\nsources:\n  - resource: /b.md\n  - resource: /gone.md\n  - resource: ../out.md\n  - resource: https://example.com/x.md\n---\n",
+            ),
+            Scrap::new("b", &None, ""),
+        ];
+        let backlinks_map = BacklinksMap::new(&scraps);
+        let tags = Tags::new(&scraps);
+
+        let messages: Vec<String> = BrokenLinkRule
+            .check(&scraps, &backlinks_map, &tags)
+            .into_iter()
+            .map(|w| w.message)
+            .collect();
+        assert_eq!(
+            messages,
+            vec!["broken source: /gone.md", "broken source: ../out.md"]
+        );
+    }
 
     #[test]
     fn detect_unresolved_wikilink() {

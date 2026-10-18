@@ -9,7 +9,7 @@ use url::Url;
 
 /// Bump whenever the shape or meaning of anything below changes. A file
 /// carrying another version is discarded and rebuilt, never migrated.
-pub const FORMAT_VERSION: u32 = 5;
+pub const FORMAT_VERSION: u32 = 6;
 
 /// The whole compiled wiki: one object per source file plus the link table
 /// that resolving every reference against those objects produced.
@@ -347,6 +347,8 @@ impl From<TaskItemJson> for TaskItem {
 pub enum EdgeKind {
     Link,
     Embed,
+    /// A frontmatter `sources` entry whose `resource` is a path to a scrap.
+    Source,
 }
 
 /// One resolved reference between scraps. `resolved` is false when `to`

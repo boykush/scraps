@@ -1,5 +1,5 @@
 use crate::ir::loader;
-use crate::mcp::json::scrap::ScrapRefJson;
+use crate::mcp::json::scrap::{LinkKindJson, ScrapRefJson};
 use crate::mcp::scrap_target;
 use crate::usecase::scrap::lookup_backlinks::usecase::LookupScrapBacklinksUsecase;
 use rmcp::handler::server::wrapper::Parameters;
@@ -23,8 +23,15 @@ pub struct LookupScrapBacklinksRequest {
 }
 
 #[derive(Debug, Serialize)]
+pub struct BacklinkJson {
+    #[serde(flatten)]
+    pub scrap: ScrapRefJson,
+    pub kinds: Vec<LinkKindJson>,
+}
+
+#[derive(Debug, Serialize)]
 pub struct LookupScrapBacklinksResponse {
-    pub results: Vec<ScrapRefJson>,
+    pub results: Vec<BacklinkJson>,
     pub count: usize,
     pub next: String,
 }
@@ -63,9 +70,17 @@ pub async fn lookup_scrap_backlinks(
     })?;
 
     // Convert results to structured response
-    let scrap_jsons: Vec<ScrapRefJson> = results
+    let scrap_jsons: Vec<BacklinkJson> = results
         .iter()
-        .map(|result| (&result.scrap).into())
+        .map(|result| BacklinkJson {
+            scrap: (&result.scrap).into(),
+            kinds: result
+                .kinds
+                .iter()
+                .copied()
+                .map(LinkKindJson::from)
+                .collect(),
+        })
         .collect();
 
     let count = scrap_jsons.len();

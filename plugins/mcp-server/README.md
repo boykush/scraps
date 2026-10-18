@@ -174,11 +174,14 @@ Returns outbound reference occurrences:
 {
   "results": [
     { "kind": "link", "key": "Target", "title": "Target", "ctx": null, "heading": "Install" },
-    { "kind": "embed", "key": "Docs/Guide", "title": "Guide", "ctx": "Docs", "heading": null }
+    { "kind": "embed", "key": "Docs/Guide", "title": "Guide", "ctx": "Docs", "heading": null },
+    { "kind": "source", "key": "Blog/Intro", "title": "Intro", "ctx": "Blog", "heading": null }
   ],
-  "count": 2
+  "count": 3
 }
 ```
+
+`source` is a frontmatter `sources` entry whose `resource` is a path to a scrap.
 
 ### `lookup_scrap_backlinks`
 
@@ -190,7 +193,8 @@ Inbound wiki-links to a scrap.
 | `title` | string | no (still accepted in place of `key`) |
 | `ctx` | string | no (still accepted with `title`) |
 
-Returns: `{ results: [{ key, title, ctx }], count }`.
+Returns: `{ results: [{ key, title, ctx, kinds }], count }`. `kinds` says how
+each scrap links here: `link` from its body, `source` from its `sources`.
 
 ### `lookup_scrap_neighborhood`
 

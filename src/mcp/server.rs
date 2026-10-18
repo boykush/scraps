@@ -72,7 +72,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Use when you want what a scrap references: returns its outbound wiki links as scraps. Name the scrap by `key`; read any result by passing its `key` to get_scrap."
+        description = "Use when you want what a scrap references: returns its outbound wiki links as scraps, each with its kind: `link`, `embed`, or `source` for a frontmatter `sources` path. Name the scrap by `key`; read any result by passing its `key` to get_scrap."
     )]
     async fn lookup_scrap_links(
         &self,
@@ -94,7 +94,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Use when you want what references a scrap: returns the scraps linking to it (inbound wiki links). Name the scrap by `key`; read any result by passing its `key` to get_scrap."
+        description = "Use when you want what references a scrap: returns the scraps linking to it (inbound wiki links), each with the `kinds` it links by: `link` from its body, `source` from its `sources`. Name the scrap by `key`; read any result by passing its `key` to get_scrap."
     )]
     async fn lookup_scrap_backlinks(
         &self,
@@ -1794,7 +1794,9 @@ mod tests {
             serde_json::json!({"key": "tables/orders"}),
         )
         .await;
-        assert_eq!(backlinks["results"], serde_json::json!([revenue]));
+        let mut revenue_backlink = revenue.clone();
+        revenue_backlink["kinds"] = serde_json::json!(["link"]);
+        assert_eq!(backlinks["results"], serde_json::json!([revenue_backlink]));
 
         let map = call_tool_json(
             &project,

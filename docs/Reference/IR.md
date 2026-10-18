@@ -91,10 +91,12 @@ command.
   a frontmatter tag has no line in the body, so it is not a `refs` entry,
   and it, the title and the type are read from `frontmatter` when the
   object is loaded.
-- `links` is the link table: one edge per link or embed occurrence, with
+- `links` is the link table: one edge per link, embed or source occurrence, with
   `resolved: false` when the target names no scrap. An `mdlink` becomes a
   `link` edge to the scrap its path resolves to from the linking file, and
-  no edge at all when the path climbs out of the wiki root. Tags are attributes of
+  no edge at all when the path climbs out of the wiki root. A frontmatter
+  `sources` entry whose `resource` is such a path becomes a `source` edge,
+  its line the one in the block that names it. Tags are attributes of
   the object, not edges, matching the `[[ ]]` / `#[[ ]]` namespace split.
 - `commited_ts` on an object and `git_head` at the top appear once a
   build has read git, which it does unless `--no-git`: the last-commit

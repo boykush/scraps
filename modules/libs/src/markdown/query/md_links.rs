@@ -67,6 +67,12 @@ pub fn resolve_scrap_dest(dest: &str, ctx: &Option<Ctx>) -> Option<(ScrapKey, Op
     Some((ScrapKey::new(&Stem::from(title), &ctx), heading))
 }
 
+/// Whether `dest` has the shape of a path to a scrap file, whether or not it
+/// resolves.
+pub fn is_scrap_dest(dest: &str) -> bool {
+    split_scrap_dest(dest).is_some()
+}
+
 /// Split a destination into its percent-decoded path and heading, provided
 /// it carries no scheme or host and the path ends in `.md`.
 fn split_scrap_dest(dest: &str) -> Option<(String, Option<String>)> {
