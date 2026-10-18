@@ -115,7 +115,8 @@ instead of naming tools.
 
 ### `search_scraps`
 
-Search keys, titles and body content with fuzzy matching.
+Search keys, titles, descriptions and tags with fuzzy matching. Bodies are
+not searched: read a hit with `get_scrap`.
 
 | Parameter | Type | Required | Default | Notes |
 |---|---|---|---|---|

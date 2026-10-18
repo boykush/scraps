@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use crate::error::ScrapsResult;
 use crate::usecase::scrap::scrap_ref::ScrapRef;
-use scraps_libs::markdown::query::body;
 use scraps_libs::model::scrap::Scrap;
 
 use scraps_libs::search::engine::{SearchEngine, SearchLogic};
@@ -11,7 +10,6 @@ use scraps_libs::search::fuzzy_engine::FuzzySearchEngine;
 #[derive(Debug, Clone, PartialEq)]
 pub struct SearchResult {
     pub scrap: ScrapRef,
-    pub md_text: String,
     pub description: Option<String>,
 }
 
@@ -35,15 +33,15 @@ impl SearchUsecase {
             .map(|scrap| (scrap.self_key().to_string(), scrap))
             .collect();
 
-        // Create search items in memory: key and body, and the title when the
-        // scrap has one of its own
         let lib_items: Vec<scraps_libs::search::result::SearchItem> = scraps
             .iter()
             .map(|scrap| {
+                let tags: Vec<String> = scrap.tags().iter().map(ToString::to_string).collect();
                 scraps_libs::search::result::SearchItem::new(
                     &scrap.self_key().to_string(),
                     scrap.frontmatter_title(),
-                    body(scrap.md_text()),
+                    scrap.description(),
+                    &tags,
                 )
             })
             .collect();
@@ -58,7 +56,6 @@ impl SearchUsecase {
             .filter_map(|result| {
                 scrap_map.get(&result.key).map(|scrap| SearchResult {
                     scrap: (*scrap).into(),
-                    md_text: scrap.md_text().to_string(),
                     description: scrap.description().map(str::to_string),
                 })
             })
@@ -92,8 +89,6 @@ mod tests {
         // Should find documents containing "test"
         assert!(!results.is_empty());
         assert!(results.iter().any(|r| r.scrap.title.contains("test")));
-        // Verify md_text is present
-        assert!(results.iter().all(|r| !r.md_text.is_empty()));
     }
 
     #[test]
@@ -107,11 +102,10 @@ mod tests {
             .unwrap();
         assert!(in_block.is_empty());
 
-        let in_body = usecase
-            .execute(&scraps, "Orders", 100, SearchLogic::And)
+        let by_key = usecase
+            .execute(&scraps, "orders", 100, SearchLogic::And)
             .unwrap();
-        assert_eq!(in_body.len(), 1);
-        assert_eq!(in_body[0].md_text, text);
+        assert_eq!(by_key.len(), 1);
     }
 
     #[test]
@@ -143,16 +137,6 @@ mod tests {
             "Expected 2 results for duplicate titles with different contexts, got {}. \
             This indicates the HashMap is overwriting duplicate titles.",
             results.len()
-        );
-
-        // Verify content is different
-        let md_texts: std::collections::HashSet<String> =
-            results.iter().map(|r| r.md_text.clone()).collect();
-        assert_eq!(
-            md_texts.len(),
-            2,
-            "Expected 2 unique content texts, got {}",
-            md_texts.len()
         );
 
         // Verify ctx field separation works correctly
@@ -196,23 +180,45 @@ mod tests {
         );
     }
 
-    /// Test: search matches body content, not just title
     #[test]
-    fn it_searches_body_content() {
+    fn it_leaves_the_body_unsearched() {
         let scraps = vec![Scrap::new(
             "mydoc",
             &None,
             "# mydoc\n\nThis body contains uniquekeyword here.",
         )];
 
-        let usecase = SearchUsecase::new();
-
-        // Search by body-only keyword - should match
-        let results = usecase
+        let results = SearchUsecase::new()
             .execute(&scraps, "uniquekeyword", 100, SearchLogic::And)
             .unwrap();
 
-        assert_eq!(results.len(), 1, "Body keyword should match scrap");
-        assert_eq!(results[0].scrap.title, "mydoc");
+        assert!(results.is_empty(), "the body is read by get, not search");
+    }
+
+    #[test]
+    fn it_matches_the_description() {
+        let text = "---\ndescription: One row per completed customer order.\n---\n\n# Orders\n";
+        let scraps = vec![Scrap::new("orders", &None, text)];
+
+        let results = SearchUsecase::new()
+            .execute(&scraps, "customer", 100, SearchLogic::And)
+            .unwrap();
+
+        assert_eq!(results.len(), 1);
+    }
+
+    #[test]
+    fn it_matches_a_tag() {
+        let scraps = vec![
+            Scrap::new("tokio", &None, "# tokio\n\n#[[Rust]] runtime"),
+            Scrap::new("asyncio", &None, "# asyncio\n\n#[[Python]] runtime"),
+        ];
+
+        let results = SearchUsecase::new()
+            .execute(&scraps, "rust", 100, SearchLogic::And)
+            .unwrap();
+
+        let keys: Vec<String> = results.iter().map(|r| r.scrap.title.clone()).collect();
+        assert_eq!(keys, vec!["tokio".to_string()]);
     }
 }

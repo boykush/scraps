@@ -17,7 +17,7 @@ the authoritative reference for flags and arguments. This page is the
 | `scraps serve` | Build then serve at `http://127.0.0.1:1112` | – |
 | `scraps lint` | Wiki-link health check ([[Reference/Lint Rules]]) | – |
 | `scraps get <key>` | Single-scrap introspection | ✓ |
-| `scraps search <query>` | Fuzzy search over keys, titles + body | ✓ |
+| `scraps search <query>` | Fuzzy search over keys, titles, descriptions + tags | ✓ |
 | `scraps links <key>` | Outbound wiki-links from a scrap | ✓ |
 | `scraps backlinks <key>` | Inbound wiki-links to a scrap | ✓ |
 | `scraps tag list` | List all tags with backlink counts | ✓ |

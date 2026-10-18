@@ -121,7 +121,7 @@ Wait for the user to confirm or correct the plan.
 
 ## 6. Link existing pages to the new one
 
-1. Search again with the new title and read the `body` of each candidate to find literal mentions that are not yet links.
+1. `Grep` the wiki for the literal new title across `*.md`, with surrounding context, to find mentions that are not yet links. `scraps search` does not search bodies, so it cannot find them.
 2. Drop mentions already inside a link, the new page itself, and candidates with no literal mention.
 3. Present the remaining mentions with their context and your read of each, and let the user pick which to link, several at once. With more candidates than one question holds, list them all in the message body and ask only about those that need judgment.
 4. Convert only the chosen mentions to `[[Title]]` or `[[Title|surface form]]`.
