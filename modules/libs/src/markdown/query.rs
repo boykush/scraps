@@ -18,7 +18,7 @@ pub use facts::ScrapFacts;
 pub use frontmatter::{body, frontmatter};
 pub use headings::{Heading, headings};
 pub use images::images;
-pub use md_links::{MdLinkRef, resolve_scrap_dest};
+pub use md_links::{MdLinkRef, is_scrap_dest, resolve_scrap_dest};
 pub use section::{heading_slug, section};
 pub use tags::{TagRef, tags};
 pub use task_items::{TaskItem, TaskStatus, task_items};

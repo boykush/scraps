@@ -144,8 +144,20 @@ sources:
 | `last_modified` | When the source last changed, an RFC 3339 datetime with an explicit offset |
 
 `resource` may be a URL, a path, or a description of something no one can
-follow, and OKF marks none of them, so Scraps keeps it as written and does
-not resolve it: a `resource` naming a scrap is not a link to it.
+follow, and OKF marks none of them, so Scraps keeps it as written. When it is
+a path to a `.md` file, it is also a link to that scrap, resolved as a
+Markdown link is: from the wiki root when it starts with `/`,
+otherwise from the folder holding the scrap.
+
+```yaml
+sources:
+  - resource: /Blog/Introducing the Open Knowledge Format.md
+```
+
+Such a link counts as any other: it is among the scrap's links and the
+target's backlinks, and a path naming no scrap is a `broken-link`. What tells
+it apart is its kind, `source`, which `scraps links` and `scraps backlinks`
+report next to `link` and `embed`.
 
 `scraps get --json sources` returns the readable entries in the order
 written, each with only the keys it carries and `last_modified` in UTC. A
@@ -158,7 +170,9 @@ whose `resource` is a web URL; see [[Reference/Static Site/Sources]].
 
 ## Reading rules
 
-Frontmatter never fails a command and never raises a lint warning.
+Frontmatter never fails a command and raises no lint warning of its own:
+the one warning it can lead to is a `broken-link` for a `sources` path
+naming no scrap.
 
 - A block that is absent, unclosed or not valid YAML is skipped; the scrap is
   read as if it had none, and the lines stay ordinary Markdown.

@@ -12,6 +12,8 @@ pub enum LinkRefKind {
     Link,
     /// Inline embed `![[...]]`.
     Embed,
+    /// A frontmatter `sources` entry whose `resource` is a path to a scrap.
+    Source,
 }
 
 /// One outbound reference occurrence found in a scrap.
@@ -63,6 +65,14 @@ impl LookupScrapLinksUsecase {
                 }
                 WikiRef::Tag(_) => None,
             })
+            .chain(target_scrap.source_links().into_iter().filter_map(|link| {
+                let linked = scrap_map.get(&link.target?)?;
+                Some(LookupScrapLinksResult {
+                    kind: LinkRefKind::Source,
+                    scrap: (*linked).into(),
+                    heading: link.heading,
+                })
+            }))
             .collect();
 
         Ok(results)
@@ -287,5 +297,26 @@ mod tests {
                 .as_deref(),
             Some("Book")
         );
+    }
+
+    #[test]
+    fn test_lookup_scrap_links_lists_sources_naming_a_scrap_after_the_body() {
+        let scraps = vec![
+            Scrap::new(
+                "okf",
+                &None,
+                "---\nsources:\n  - resource: https://example.com\n  - resource: /Blog/Intro.md\n  - resource: /Gone.md\n---\n\n[[Intro]]\n",
+            ),
+            Scrap::new("Intro", &Some(Ctx::from("Blog")), ""),
+            Scrap::new("Intro", &None, ""),
+        ];
+
+        let results = LookupScrapLinksUsecase::new()
+            .execute(&scraps, &ScrapKey::from_path_str("okf"))
+            .unwrap();
+
+        let kinds: Vec<LinkRefKind> = results.iter().map(|r| r.kind).collect();
+        assert_eq!(kinds, vec![LinkRefKind::Link, LinkRefKind::Source]);
+        assert_eq!(results[1].scrap.key, ScrapKey::from_path_str("Blog/Intro"));
     }
 }

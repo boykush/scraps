@@ -12,6 +12,7 @@ scrap without any shows no list. The key itself is described in
 Each entry is labelled by its `title`, or by its `resource` when it has
 none. An `http` or `https` URL becomes a link to that address. Any other
 `resource` — a path, a scrap's key, a description of something no one can
-follow — is shown as text, after the `title` when there is one, and is
-never turned into a link to a scrap. `id`, `author` and `last_modified` are
-not shown.
+follow — is shown as text, after the `title` when there is one. A path
+naming a scrap is still a link to it: the page lists that scrap among its
+links, and the scrap's page lists this one among its backlinks. `id`,
+`author` and `last_modified` are not shown.

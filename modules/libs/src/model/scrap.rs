@@ -6,7 +6,7 @@ use url::Url;
 use crate::markdown::query::{CodeBlock, Heading, ScrapFacts, TaskItem, WikiRef};
 use crate::nfc::nfc;
 
-use super::source::{Source, frontmatter_sources};
+use super::source::{Source, SourceLink, frontmatter_sources};
 use super::verification::{TrustTier, Verification, frontmatter_verifications};
 use super::{context::Ctx, key::ScrapKey, stem::Stem, tag::Tag};
 
@@ -26,7 +26,7 @@ pub struct LinkOccurrence {
 
 /// One scrap as the compiler sees it: identity, the source text, and every
 /// fact parsed out of that text. `links` is the deduplicated view of
-/// `facts.refs`; `tags` is the one of its tag refs and the frontmatter `tags`.
+/// `facts.refs` and of the `sources` naming a scrap; `tags` is the one of its tag refs and the frontmatter `tags`.
 #[derive(PartialEq, Clone, Debug)]
 pub struct Scrap {
     stem: Stem,
@@ -160,6 +160,11 @@ impl Scrap {
     pub fn sources(&self) -> Vec<Source> {
         frontmatter_sources(self.frontmatter())
     }
+
+    /// The sources whose `resource` is a path to a scrap file, as links.
+    pub fn source_links(&self) -> Vec<SourceLink> {
+        source_links(self.frontmatter(), &self.ctx)
+    }
 }
 
 impl Scrap {
@@ -176,6 +181,11 @@ impl Scrap {
         let mut seen_links = HashSet::new();
         let links: Vec<ScrapKey> = link_occurrences(&facts.refs, ctx)
             .filter_map(|occurrence| occurrence.target)
+            .chain(
+                source_links(facts.frontmatter.as_ref(), ctx)
+                    .into_iter()
+                    .filter_map(|link| link.target),
+            )
             .filter(|key| seen_links.insert(key.clone()))
             .collect();
 
@@ -226,6 +236,13 @@ fn link_occurrences<'a>(
         }),
         WikiRef::Embed(_) | WikiRef::Tag(_) => None,
     })
+}
+
+fn source_links(frontmatter: Option<&Value>, ctx: &Option<Ctx>) -> Vec<SourceLink> {
+    frontmatter_sources(frontmatter)
+        .iter()
+        .filter_map(|source| source.link(ctx))
+        .collect()
 }
 
 /// A type is a name like a tag: compared for identity and written as a path.
@@ -631,6 +648,23 @@ mod tests {
             "---\nsources:\n  - resource: https://example.com\n---\n\nbody\n",
         );
         assert_eq!(scrap.sources()[0].resource, "https://example.com");
+    }
+
+    #[test]
+    fn it_counts_a_source_naming_a_scrap_among_its_links() {
+        let scrap = Scrap::new(
+            "foo",
+            &Some(Ctx::from("Notes")),
+            "---\nsources:\n  - resource: /Blog/Article.md\n  - resource: https://example.com\n---\n\n[[bar]] [[Blog/Article]]\n",
+        );
+        assert_eq!(
+            scrap.links(),
+            &[
+                ScrapKey::from_path_str("bar"),
+                ScrapKey::from_path_str("Blog/Article")
+            ]
+        );
+        assert_eq!(scrap.source_links().len(), 1);
     }
 
     #[test]

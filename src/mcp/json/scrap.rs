@@ -1,3 +1,4 @@
+use crate::usecase::scrap::lookup_links::usecase::LinkRefKind;
 use crate::usecase::scrap::scrap_ref::ScrapRef;
 use chrono::SecondsFormat;
 use scraps_libs::markdown::query::{CodeBlock, Heading};
@@ -125,6 +126,26 @@ impl From<&Source> for SourceJson {
             last_modified: source
                 .last_modified
                 .map(|at| at.to_rfc3339_opts(SecondsFormat::AutoSi, true)),
+        }
+    }
+}
+
+/// How one scrap references another: in the body, as an embed, or as one of
+/// its `sources`.
+#[derive(Debug, Serialize, PartialEq, Eq, Clone, Copy)]
+#[serde(rename_all = "lowercase")]
+pub enum LinkKindJson {
+    Link,
+    Embed,
+    Source,
+}
+
+impl From<LinkRefKind> for LinkKindJson {
+    fn from(kind: LinkRefKind) -> Self {
+        match kind {
+            LinkRefKind::Link => LinkKindJson::Link,
+            LinkRefKind::Embed => LinkKindJson::Embed,
+            LinkRefKind::Source => LinkKindJson::Source,
         }
     }
 }

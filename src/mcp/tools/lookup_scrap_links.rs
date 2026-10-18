@@ -1,7 +1,7 @@
 use crate::ir::loader;
-use crate::mcp::json::scrap::ScrapRefJson;
+use crate::mcp::json::scrap::{LinkKindJson, ScrapRefJson};
 use crate::mcp::scrap_target;
-use crate::usecase::scrap::lookup_links::usecase::{LinkRefKind, LookupScrapLinksUsecase};
+use crate::usecase::scrap::lookup_links::usecase::LookupScrapLinksUsecase;
 use rmcp::handler::server::wrapper::Parameters;
 use rmcp::model::ErrorCode;
 use rmcp::model::{CallToolResult, ContentBlock};
@@ -22,25 +22,9 @@ pub struct LookupScrapLinksRequest {
     pub ctx: Option<String>,
 }
 
-#[derive(Debug, Serialize, PartialEq, Eq, Clone, Copy)]
-#[serde(rename_all = "lowercase")]
-pub enum LinkRefKindJson {
-    Link,
-    Embed,
-}
-
-impl From<LinkRefKind> for LinkRefKindJson {
-    fn from(k: LinkRefKind) -> Self {
-        match k {
-            LinkRefKind::Link => LinkRefKindJson::Link,
-            LinkRefKind::Embed => LinkRefKindJson::Embed,
-        }
-    }
-}
-
 #[derive(Debug, Serialize)]
 pub struct LinkRefJson {
-    pub kind: LinkRefKindJson,
+    pub kind: LinkKindJson,
     #[serde(flatten)]
     pub scrap: ScrapRefJson,
     pub heading: Option<String>,

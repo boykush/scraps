@@ -7,7 +7,7 @@ use comfy_table::{Cell, Table};
 use serde::{Deserialize, Serialize};
 
 use crate::cli::config::scrap_config::ScrapConfig;
-use crate::cli::json::scrap::ScrapRefJson;
+use crate::cli::json::scrap::{LinkKindJson, ScrapRefJson};
 use crate::cli::path_resolver::PathResolver;
 use crate::cli::scrap_arg::scrap_key;
 use crate::error::ScrapsResult;
@@ -15,8 +15,15 @@ use crate::ir::loader;
 use crate::usecase::scrap::lookup_backlinks::usecase::LookupScrapBacklinksUsecase;
 
 #[derive(Debug, Serialize, Deserialize)]
+struct BacklinkJson {
+    #[serde(flatten)]
+    scrap: ScrapRefJson,
+    kinds: Vec<LinkKindJson>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 struct BacklinksResponse {
-    results: Vec<ScrapRefJson>,
+    results: Vec<BacklinkJson>,
     count: usize,
 }
 
@@ -41,7 +48,13 @@ pub fn run(
     let usecase = LookupScrapBacklinksUsecase::new();
     let results = usecase.execute(&scraps, &target_key)?;
 
-    let scrap_refs: Vec<ScrapRefJson> = results.iter().map(|r| (&r.scrap).into()).collect();
+    let scrap_refs: Vec<BacklinkJson> = results
+        .iter()
+        .map(|r| BacklinkJson {
+            scrap: (&r.scrap).into(),
+            kinds: r.kinds.iter().copied().map(LinkKindJson::from).collect(),
+        })
+        .collect();
 
     if json {
         let count = scrap_refs.len();
@@ -61,13 +74,17 @@ pub fn run(
             Cell::new("Key".bold()),
             Cell::new("Title".bold()),
             Cell::new("Context".bold()),
+            Cell::new("Kinds".bold()),
         ]);
 
-        for scrap in &scrap_refs {
+        for backlink in &scrap_refs {
+            let scrap = &backlink.scrap;
+            let kinds: Vec<&str> = backlink.kinds.iter().map(LinkKindJson::as_str).collect();
             table.add_row(vec![
                 Cell::new(&scrap.key),
                 Cell::new(&scrap.title),
                 Cell::new(scrap.ctx.as_deref().unwrap_or("")),
+                Cell::new(kinds.join(",")),
             ]);
         }
         writeln!(writer, "{table}")?;
@@ -127,7 +144,11 @@ mod tests {
         assert_eq!(response.count, 2);
         assert_eq!(response.results.len(), 2);
 
-        let titles: Vec<&str> = response.results.iter().map(|r| r.title.as_str()).collect();
+        let titles: Vec<&str> = response
+            .results
+            .iter()
+            .map(|r| r.scrap.title.as_str())
+            .collect();
         assert!(titles.contains(&"rust"));
         assert!(titles.contains(&"clippy"));
     }
@@ -184,7 +205,7 @@ mod tests {
         let output = String::from_utf8(buf).unwrap();
         let response: BacklinksResponse = serde_json::from_str(output.trim()).unwrap();
         assert_eq!(response.count, 1);
-        assert_eq!(response.results[0].title, "Server");
+        assert_eq!(response.results[0].scrap.title, "Server");
     }
 
     #[rstest]
@@ -269,7 +290,7 @@ mod tests {
         let by_key = backlinks("tables/orders", None);
         assert_eq!(
             by_key.trim(),
-            r#"{"results":[{"key":"metrics/revenue","title":"revenue","ctx":"metrics"}],"count":1}"#
+            r#"{"results":[{"key":"metrics/revenue","title":"revenue","ctx":"metrics","kinds":["link"]}],"count":1}"#
         );
         assert_eq!(backlinks("orders", Some("tables")), by_key);
     }

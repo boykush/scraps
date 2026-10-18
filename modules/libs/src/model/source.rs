@@ -1,6 +1,10 @@
 use chrono::{DateTime, Utc};
 use serde_json::Value;
 
+use crate::markdown::query::{is_scrap_dest, resolve_scrap_dest};
+
+use super::{context::Ctx, key::ScrapKey};
+
 const FRONTMATTER_SOURCES_KEY: &str = "sources";
 
 /// One material a scrap's content derives from, as the Open Knowledge
@@ -13,6 +17,35 @@ pub struct Source {
     pub title: Option<String>,
     pub author: Option<String>,
     pub last_modified: Option<DateTime<Utc>>,
+}
+
+/// A source whose `resource` is a path to a scrap file, read as a link to
+/// that scrap. `target` is `None` when the path climbs out of the wiki root.
+#[derive(PartialEq, Eq, Clone, Debug)]
+pub struct SourceLink {
+    pub target: Option<ScrapKey>,
+    pub heading: Option<String>,
+    pub resource: String,
+}
+
+impl Source {
+    /// The link this source makes when `resource` is a `.md` path, resolved as
+    /// a Markdown link in a scrap living in `ctx` resolves it. A URL or a
+    /// scope descriptor makes none.
+    pub fn link(&self, ctx: &Option<Ctx>) -> Option<SourceLink> {
+        if !is_scrap_dest(&self.resource) {
+            return None;
+        }
+        let (target, heading) = match resolve_scrap_dest(&self.resource, ctx) {
+            Some((key, heading)) => (Some(key), heading),
+            None => (None, None),
+        };
+        Some(SourceLink {
+            target,
+            heading,
+            resource: self.resource.clone(),
+        })
+    }
 }
 
 /// The readable entries of the frontmatter `sources`, in the order written.
@@ -140,6 +173,54 @@ mod tests {
                 last_modified: None,
             }]
         );
+    }
+
+    fn source(resource: &str) -> Source {
+        Source {
+            resource: resource.to_string(),
+            id: None,
+            title: None,
+            author: None,
+            last_modified: None,
+        }
+    }
+
+    #[rstest]
+    #[case::from_root("/Blog/Article.md", Some("Book"), "Blog/Article")]
+    #[case::relative("Article.md", Some("Blog"), "Blog/Article")]
+    #[case::parent("../Article.md", Some("Blog/2026"), "Blog/Article")]
+    #[case::top_level("Article.md", None, "Article")]
+    fn it_links_a_scrap_path_resource(
+        #[case] resource: &str,
+        #[case] ctx: Option<&str>,
+        #[case] expected: &str,
+    ) {
+        let ctx = ctx.map(Ctx::from);
+        assert_eq!(
+            source(resource).link(&ctx).unwrap().target,
+            Some(ScrapKey::from_path_str(expected))
+        );
+    }
+
+    #[test]
+    fn it_reads_the_fragment_as_a_heading() {
+        let link = source("/Article.md#Summary").link(&None).unwrap();
+        assert_eq!(link.heading, Some("Summary".to_string()));
+    }
+
+    #[test]
+    fn it_has_no_target_for_a_path_out_of_the_root() {
+        let link = source("../Article.md").link(&None).unwrap();
+        assert_eq!(link.target, None);
+        assert_eq!(link.resource, "../Article.md");
+    }
+
+    #[rstest]
+    #[case::url("https://example.com/Article.md")]
+    #[case::descriptor("all queries in BigQuery project X")]
+    #[case::not_markdown("references/schema.json")]
+    fn it_makes_no_link_for_anything_else(#[case] resource: &str) {
+        assert_eq!(source(resource).link(&None), None);
     }
 
     #[rstest]

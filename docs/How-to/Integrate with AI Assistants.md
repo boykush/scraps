@@ -36,8 +36,9 @@ its `ctx`; pass the `key` back to read or traverse that scrap. The older
 specific fields (`key`, `title`, `ctx`, `body`, `headings`, `code_blocks`, `images`, `type`,
 `description`, `frontmatter`) so an
 agent can avoid loading full bodies when it only needs structure or examples.
-`scraps links --json` returns outbound `link` and `embed` references with
-optional heading targets; `backlinks` stays a scrap-level inbound lookup.
+`scraps links --json` returns outbound `link`, `embed` and `source` references
+with optional heading targets; `backlinks` stays a scrap-level inbound lookup
+and says by which kinds each scrap links in.
 
 The full command map is in [[Reference/CLI Overview]]. Each command's `--help`
 documents flags and JSON shape.
