@@ -6,6 +6,7 @@ use url::Url;
 use crate::markdown::query::{CodeBlock, Heading, ScrapFacts, TaskItem, WikiRef};
 use crate::nfc::nfc;
 
+use super::source::{Source, frontmatter_sources};
 use super::verification::{TrustTier, Verification, frontmatter_verifications};
 use super::{context::Ctx, key::ScrapKey, stem::Stem, tag::Tag};
 
@@ -152,6 +153,12 @@ impl Scrap {
 
     pub fn trust_tier(&self) -> TrustTier {
         TrustTier::of(&self.verifications())
+    }
+
+    /// What the scrap's content derives from: the readable entries of the
+    /// frontmatter `sources`, in the order written.
+    pub fn sources(&self) -> Vec<Source> {
+        frontmatter_sources(self.frontmatter())
     }
 }
 
@@ -614,6 +621,16 @@ mod tests {
         );
         assert_eq!(scrap.verifications()[0].by, "human:alice");
         assert_eq!(scrap.trust_tier(), TrustTier::HumanReviewed);
+    }
+
+    #[test]
+    fn it_reads_the_frontmatter_sources() {
+        let scrap = Scrap::new(
+            "foo",
+            &None,
+            "---\nsources:\n  - resource: https://example.com\n---\n\nbody\n",
+        );
+        assert_eq!(scrap.sources()[0].resource, "https://example.com");
     }
 
     #[test]

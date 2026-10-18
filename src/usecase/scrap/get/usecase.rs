@@ -2,6 +2,7 @@ use crate::error::ScrapsResult;
 use crate::usecase::scrap::scrap_ref::{ScrapRef, find_scrap};
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
+use scraps_libs::model::source::Source;
 use scraps_libs::model::verification::{TrustTier, Verification};
 use serde_json::Value;
 
@@ -15,6 +16,7 @@ pub struct GetScrapResult {
     pub frontmatter: Option<Value>,
     pub verifications: Vec<Verification>,
     pub trust_tier: TrustTier,
+    pub sources: Vec<Source>,
 }
 
 pub struct GetScrapUsecase;
@@ -35,6 +37,7 @@ impl GetScrapUsecase {
             frontmatter: target_scrap.frontmatter().cloned(),
             verifications: target_scrap.verifications(),
             trust_tier: target_scrap.trust_tier(),
+            sources: target_scrap.sources(),
         })
     }
 }

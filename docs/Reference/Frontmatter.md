@@ -5,7 +5,7 @@ type: Reference
 #[[Notation/Frontmatter]]
 
 Scraps reads a YAML frontmatter block when a file has one, and requires
-none. Five keys carry meaning; every other key is kept as data and given no
+none. Six keys carry meaning; every other key is kept as data and given no
 meaning.
 
 ```markdown
@@ -29,6 +29,7 @@ The body starts here.
 | `type` | The scrap's kind |
 | `description` | The scrap's one-line summary |
 | `verified` | Who confirmed the scrap's content, and when |
+| `sources` | The materials the scrap's content derives from |
 
 ### `title`
 
@@ -118,6 +119,40 @@ readable confirmations newest first and each `at` in UTC. A scrap without
 the key is `unverified` with no entries. The tier is advisory: nothing in
 Scraps is withheld or reordered by it.
 
+### `sources`
+
+A list of mappings, one per material the content derives from. Each entry
+needs `resource`; the other keys are optional. A single source may be
+written as one bare mapping, read as a list of one.
+
+```yaml
+sources:
+  - resource: https://example.com/handbook
+    title: Team handbook
+    author: human:alice
+    last_modified: 2026-05-30T00:00:00Z
+  - resource: references/ga4-schema.md
+    id: ga4-schema
+```
+
+| Key | Read as |
+|---|---|
+| `resource` | What the content derives from, as written |
+| `id` | A stable key the body can cite the source by |
+| `title` | A label for readers |
+| `author` | Who wrote the source, as an actor like `by` of `verified` |
+| `last_modified` | When the source last changed, an RFC 3339 datetime with an explicit offset |
+
+`resource` may be a URL, a path, or a description of something no one can
+follow, and OKF marks none of them, so Scraps keeps it as written and does
+not resolve it: a `resource` naming a scrap is not a link to it.
+
+`scraps get --json sources` returns the readable entries in the order
+written, each with only the keys it carries and `last_modified` in UTC. A
+scrap without the key returns an empty list. Sources do not change the
+trust tier of `verified`. OKF's `usage_count` and `usage_window` are not
+read.
+
 ## Reading rules
 
 Frontmatter never fails a command and never raises a lint warning.
@@ -127,7 +162,10 @@ Frontmatter never fails a command and never raises a lint warning.
 - A key whose value has the wrong shape is ignored: `tags` that is not a
   list, a `tags` entry that is not a string, a `title`, `type` or
   `description` that is not a non-empty string, a `verified` entry without
-  a non-empty `by` or whose `at` is not a datetime with an offset.
+  a non-empty `by` or whose `at` is not a datetime with an offset, a
+  `sources` entry without a non-empty `resource`. Within a readable
+  `sources` entry, an optional key of the wrong shape is dropped and the
+  entry kept.
 - Keys Scraps does not read are passed through untouched, in the order they
   were written.
 
@@ -162,10 +200,10 @@ written, or `null` when the scrap has none.
 
 ## Open Knowledge Format
 
-`title`, `tags`, `type`, `description` and `verified` are keys the
+`title`, `tags`, `type`, `description`, `verified` and `sources` are keys the
 [Open Knowledge Format](https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/main/SPEC.md)
 (OKF) defines, so files written for OKF bring their titles, tags, types,
-descriptions and confirmations with them. Scraps reads `verified` as an OKF
+descriptions, confirmations and sources with them. Scraps reads `verified` as an OKF
 consumer does, deriving the trust tier from it alone. OKF's concept ID, the file path without `.md`, is
 the scrap's key.
 The reverse is not asked for: OKF requires `type` on every document, Scraps
