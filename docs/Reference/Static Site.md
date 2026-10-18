@@ -34,6 +34,10 @@ fully supported.
 
 ![[Reference/Static Site/Neighbourhood Graph]]
 
+## [[Reference/Static Site/Sources|Sources]]
+
+![[Reference/Static Site/Sources]]
+
 ## [[Reference/Static Site/Tag Pages|Tag pages]]
 
 ![[Reference/Static Site/Tag Pages]]
