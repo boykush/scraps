@@ -18,6 +18,7 @@ fuzzy-matcher = { version = "=0.3.7", optional = true }
 unicode-normalization = "=0.1.26"
 yaml-rust2 = { version = "=0.13.0", optional = true }
 serde_json = { workspace = true, optional = true }
+chrono = { workspace = true, optional = true }
 
 [dev-dependencies]
 rstest.workspace = true
@@ -30,6 +31,6 @@ git_test = []
 html = ["markdown", "model", "slugify"]
 lang = []
 markdown = ["dep:yaml-rust2", "dep:serde_json"]
-model = ["markdown", "frontmatter"]
+model = ["markdown", "frontmatter", "dep:chrono"]
 search = ["fuzzy-matcher"]
 slugify = []

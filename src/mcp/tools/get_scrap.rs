@@ -1,5 +1,5 @@
 use crate::ir::loader;
-use crate::mcp::json::scrap::{CodeBlockJson, HeadingJson};
+use crate::mcp::json::scrap::{CodeBlockJson, HeadingJson, VerifiedJson};
 use crate::mcp::scrap_target;
 use crate::usecase::scrap::get::usecase::GetScrapUsecase;
 use rmcp::handler::server::wrapper::Parameters;
@@ -22,6 +22,7 @@ const FIELD_CODE_BLOCKS: &str = "code_blocks";
 const FIELD_TYPE: &str = "type";
 const FIELD_DESCRIPTION: &str = "description";
 const FIELD_FRONTMATTER: &str = "frontmatter";
+const FIELD_VERIFIED: &str = "verified";
 
 const DEFAULT_FIELDS: &[&str] = &[FIELD_KEY, FIELD_TITLE, FIELD_CTX, FIELD_BODY];
 const ALLOWED_FIELDS: &[&str] = &[
@@ -34,6 +35,7 @@ const ALLOWED_FIELDS: &[&str] = &[
     FIELD_TYPE,
     FIELD_DESCRIPTION,
     FIELD_FRONTMATTER,
+    FIELD_VERIFIED,
 ];
 
 #[derive(Debug, Deserialize, JsonSchema)]
@@ -49,7 +51,7 @@ pub struct GetScrapRequest {
     pub heading: Option<String>,
     /// Optional projection of fields to include. Defaults to ["key", "title", "ctx", "body"].
     /// Allowed: "key", "title", "ctx", "body", "headings", "code_blocks", "type", "description",
-    /// "frontmatter".
+    /// "frontmatter", "verified".
     pub fields: Option<Vec<String>>,
 }
 
@@ -203,6 +205,19 @@ pub async fn get_scrap(
                 out.insert(
                     field.to_string(),
                     result.frontmatter.clone().unwrap_or(Value::Null),
+                );
+            }
+            FIELD_VERIFIED => {
+                let v = VerifiedJson::new(&result.verifications, result.trust_tier);
+                out.insert(
+                    field.to_string(),
+                    serde_json::to_value(v).map_err(|e| {
+                        ErrorData::new(
+                            ErrorCode(-32005),
+                            format!("JSON serialization failed: {e}"),
+                            None,
+                        )
+                    })?,
                 );
             }
             _ => unreachable!("validated by resolve_fields"),

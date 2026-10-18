@@ -5,7 +5,7 @@ type: Reference
 #[[Notation/Frontmatter]]
 
 Scraps reads a YAML frontmatter block when a file has one, and requires
-none. Four keys carry meaning; every other key is kept as data and given no
+none. Five keys carry meaning; every other key is kept as data and given no
 meaning.
 
 ```markdown
@@ -28,6 +28,7 @@ The body starts here.
 | `tags` | The scrap's tags, merged with the `#[[tag]]` references in its body |
 | `type` | The scrap's kind |
 | `description` | The scrap's one-line summary |
+| `verified` | Who confirmed the scrap's content, and when |
 
 ### `title`
 
@@ -85,6 +86,38 @@ without one keeps the derived summary and the site-wide value.
 `scraps get --json description` returns a single scrap's description, and
 each `scraps search --json` hit that has one carries it.
 
+### `verified`
+
+A list of confirmations, each a mapping with `by`, who or what confirmed the
+content, and `at`, when. A single confirmation may be written as one bare
+mapping, read as a list of one.
+
+```yaml
+verified:
+  - by: human:alice
+    at: 2026-10-17T09:00:00+09:00
+  - by: process:ci
+    at: 2026-10-16T00:00:00Z
+```
+
+`by` is an actor as the Open Knowledge Format writes one: `human:<id>` for a
+person, `process:<id>` for an automated process, `<producer>/<version>` for an
+agent. `at` is an RFC 3339 datetime with an explicit offset.
+
+From the readable entries Scraps derives the scrap's trust tier, lowest
+first:
+
+| Tier | When |
+|---|---|
+| `unverified` | No readable entry |
+| `machine-confirmed` | Entries, none by a `human:` actor |
+| `human-reviewed` | At least one entry by a `human:` actor |
+
+`scraps get --json verified` returns `{ tier, entries }`, with `entries` the
+readable confirmations newest first and each `at` in UTC. A scrap without
+the key is `unverified` with no entries. The tier is advisory: nothing in
+Scraps is withheld or reordered by it.
+
 ## Reading rules
 
 Frontmatter never fails a command and never raises a lint warning.
@@ -93,7 +126,8 @@ Frontmatter never fails a command and never raises a lint warning.
   read as if it had none, and the lines stay ordinary Markdown.
 - A key whose value has the wrong shape is ignored: `tags` that is not a
   list, a `tags` entry that is not a string, a `title`, `type` or
-  `description` that is not a non-empty string.
+  `description` that is not a non-empty string, a `verified` entry without
+  a non-empty `by` or whose `at` is not a datetime with an offset.
 - Keys Scraps does not read are passed through untouched, in the order they
   were written.
 
@@ -128,10 +162,11 @@ written, or `null` when the scrap has none.
 
 ## Open Knowledge Format
 
-`title`, `tags`, `type` and `description` are keys the
+`title`, `tags`, `type`, `description` and `verified` are keys the
 [Open Knowledge Format](https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/main/SPEC.md)
-(OKF) defines, so files written for OKF bring their titles, tags, types and
-descriptions with them. OKF's concept ID, the file path without `.md`, is
+(OKF) defines, so files written for OKF bring their titles, tags, types,
+descriptions and confirmations with them. Scraps reads `verified` as an OKF
+consumer does, deriving the trust tier from it alone. OKF's concept ID, the file path without `.md`, is
 the scrap's key.
 The reverse is not asked for: OKF requires `type` on every document, Scraps
 on none.

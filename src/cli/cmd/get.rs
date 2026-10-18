@@ -2,7 +2,7 @@ use std::io::Write;
 use std::path::Path;
 
 use crate::cli::config::scrap_config::ScrapConfig;
-use crate::cli::json::scrap::{CodeBlockJson, HeadingJson};
+use crate::cli::json::scrap::{CodeBlockJson, HeadingJson, VerifiedJson};
 use crate::cli::path_resolver::PathResolver;
 use crate::cli::scrap_arg::scrap_key;
 use crate::error::ScrapsResult;
@@ -21,6 +21,7 @@ const FIELD_IMAGES: &str = "images";
 const FIELD_TYPE: &str = "type";
 const FIELD_DESCRIPTION: &str = "description";
 const FIELD_FRONTMATTER: &str = "frontmatter";
+const FIELD_VERIFIED: &str = "verified";
 
 const DEFAULT_FIELDS: &[&str] = &[FIELD_KEY, FIELD_TITLE, FIELD_CTX, FIELD_BODY];
 const ALLOWED_FIELDS: &[&str] = &[
@@ -34,6 +35,7 @@ const ALLOWED_FIELDS: &[&str] = &[
     FIELD_TYPE,
     FIELD_DESCRIPTION,
     FIELD_FRONTMATTER,
+    FIELD_VERIFIED,
 ];
 
 fn parse_fields(spec: &str) -> ScrapsResult<Vec<&'static str>> {
@@ -173,6 +175,10 @@ pub fn run(
                             field.to_string(),
                             result.frontmatter.clone().unwrap_or(Value::Null),
                         );
+                    }
+                    FIELD_VERIFIED => {
+                        let v = VerifiedJson::new(&result.verifications, result.trust_tier);
+                        out.insert(field.to_string(), serde_json::to_value(v)?);
                     }
                     _ => unreachable!("validated by parse_fields"),
                 }
@@ -449,6 +455,37 @@ mod tests {
         assert_eq!(
             output.trim(),
             r#"{"frontmatter":{"type":"Blog","tags":["a","b"],"owner":"alice"}}"#
+        );
+    }
+
+    #[rstest]
+    fn run_json_field_projection_supports_verified(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_config(b"").add_scrap(
+            "post.md",
+            b"---\nverified:\n  - by: process:ci\n    at: 2026-10-16T00:00:00Z\n  - by: human:alice\n    at: 2026-10-17T09:00:00+09:00\n---\n\n# Post\n",
+        );
+
+        let output = run_get("post", None, None, Some("verified"), &project).unwrap();
+
+        assert_eq!(
+            output.trim(),
+            r#"{"verified":{"tier":"human-reviewed","entries":[{"by":"human:alice","at":"2026-10-17T00:00:00Z"},{"by":"process:ci","at":"2026-10-16T00:00:00Z"}]}}"#
+        );
+    }
+
+    #[rstest]
+    fn run_json_verified_is_unverified_without_the_key(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_config(b"").add_scrap("post.md", WITH_BLOCK);
+
+        let output = run_get("post", None, None, Some("verified"), &project).unwrap();
+
+        assert_eq!(
+            output.trim(),
+            r#"{"verified":{"tier":"unverified","entries":[]}}"#
         );
     }
 

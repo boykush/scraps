@@ -143,11 +143,13 @@ field projection.
 | `title` | string | no | Still accepted in place of `key`: the file name without `.md` |
 | `ctx` | string | no | Still accepted with `title`: context folder/path |
 | `heading` | string | no | Restrict body/structure fields to this section |
-| `fields` | string[] | no | Defaults to `["key", "title", "ctx", "body"]`; allowed: `key`, `title`, `ctx`, `body`, `headings`, `code_blocks`, `type`, `description`, `frontmatter` |
+| `fields` | string[] | no | Defaults to `["key", "title", "ctx", "body"]`; allowed: `key`, `title`, `ctx`, `body`, `headings`, `code_blocks`, `type`, `description`, `frontmatter`, `verified` |
 
 Returns the requested fields. Default response: `{ key, title, ctx, body }`. `type`
 and `description` are the scrap's frontmatter type and description, and
 `frontmatter` its whole block as parsed data, each `null` when it has none.
+`verified` is `{ tier, entries }`: the trust tier (`unverified`,
+`machine-confirmed` or `human-reviewed`) and the confirmations newest first.
 
 `body` is the scrap's content without its frontmatter block. Line numbers in
 `headings` and `code_blocks` count lines of the source file, block included,
@@ -304,11 +306,12 @@ Returns:
 ```
 
 Keys are passed through in the order they were written, and Scraps requires
-none of them. It reads four: `title` is the scrap's title (the `title` of
+none of them. It reads five: `title` is the scrap's title (the `title` of
 every result), the strings of a `tags` list are tags alongside
 `#[[tag]]` (`list_tags`, `lookup_tag_backlinks`), `type` is the scrap's
-type (`list_types`, `lookup_type_scraps`), and `description` is its one-line
-summary (`get_scrap`, `search_scraps`). Every other key is opaque — see the
+type (`list_types`, `lookup_type_scraps`), `description` is its one-line
+summary (`get_scrap`, `search_scraps`), and `verified` its confirmations
+(`get_scrap`). Every other key is opaque — see the
 [frontmatter reference](https://boykush.github.io/scraps/scraps/Reference/Frontmatter.html).
 Scraps without a block are omitted, and a malformed block is skipped rather
 than failing the call.
