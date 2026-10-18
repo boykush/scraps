@@ -679,6 +679,25 @@ ul.scrap-links {
     }
 }
 
+ul.source-list {
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    list-style: none;
+
+    li.item {
+        padding: var(--space-2) 0;
+        border-bottom: var(--border-hairline) solid var(--color-rule);
+        font-size: var(--font-size-sm);
+        overflow-wrap: anywhere;
+    }
+
+    span.resource {
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-xs);
+        color: var(--color-text-muted);
+    }
+}
+
 /* neighbourhood graph — direction is carried by which side a scrap sits on
    (backlinks left, links right, mutual vertical) and by the arrowheads, so
    the drawing needs no colour of its own to be read. */

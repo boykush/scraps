@@ -22,6 +22,7 @@ use super::serde::link_scraps::LinkScrapsTera;
 use super::serde::scrap_detail::ScrapDetailTera;
 use super::serde::scrap_graph::ScrapGraphTera;
 use super::serde::scrap_type::TypeTera;
+use super::serde::source::SourceTera;
 use super::serde::tag::TagTera;
 
 pub struct ScrapRender {
@@ -92,6 +93,13 @@ impl ScrapRender {
         if let Some(scrap_type) = scrap.scrap_type().and_then(|name| site_nav.types.get(name)) {
             context.insert("scrap_type", &TypeTera::from(scrap_type));
         }
+
+        let sources = scrap
+            .sources()
+            .iter()
+            .map(SourceTera::from)
+            .collect::<Vec<_>>();
+        context.insert("sources", &sources);
 
         let linked_scraps = backlinks_map.get(&scrap.self_key());
         context.insert("linked_scraps", &LinkScrapsTera::new(linked_scraps));
@@ -345,6 +353,77 @@ mod tests {
         // The type is not a tag, so the tag line stays as it was.
         assert!(!read("typed").contains("<p class=\"tags\">"));
         assert!(!read("untyped").contains("<p class=\"type\">"));
+    }
+
+    #[test]
+    fn it_lists_the_sources_after_the_body_only_when_there_are_some() {
+        let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
+        let metadata = HtmlMetadata::new(&LangCode::default(), "Scrap", &None, &None);
+
+        let sourced = &Scrap::new(
+            "sourced",
+            &None,
+            "---\nsources:\n  - resource: https://example.com/book\n    title: A <Book>\n  \
+             - resource: https://example.com/blog\n  - resource: plain\n---\n\nbody\n",
+        );
+        let plain = &Scrap::new("plain", &None, "body");
+        let scraps = vec![sourced.to_owned(), plain.to_owned()];
+        let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
+        let backlinks_map = BacklinksMap::new(&scraps);
+        let scraps_by_key: HashMap<_, _> = scraps
+            .iter()
+            .map(|scrap| (scrap.self_key(), scrap))
+            .collect();
+        let site_nav = SiteNav::new(
+            scraps.len(),
+            Tags::new(&scraps),
+            ScrapTypes::new(&scraps),
+            false,
+            chrono_tz::UTC,
+            false,
+        );
+        let scrap_details = ScrapDetails::new(
+            [sourced, plain]
+                .into_iter()
+                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &link_targets))
+                .collect(),
+        );
+
+        let project = crate::test_fixtures::TempScrapProject::new();
+        ScrapRender::new(
+            &project.static_dir,
+            &RenderOutput::Dir(project.output_dir.clone()),
+        )
+        .unwrap()
+        .run(
+            base_url,
+            &metadata,
+            &scrap_details,
+            &backlinks_map,
+            &scraps_by_key,
+            &site_nav,
+        )
+        .unwrap();
+
+        let read = |stem: &str| {
+            fs::read_to_string(project.output_dir.join(format!("scraps/{stem}.html"))).unwrap()
+        };
+
+        let html = read("sourced");
+        assert!(html.contains(">sources &#183; 3"));
+        assert!(
+            html.contains("<a class=\"link\" href=\"https://example.com/book\">A &lt;Book&gt;</a>")
+        );
+        assert!(html.contains(
+            "<a class=\"link\" href=\"https://example.com/blog\">https://example.com/blog</a>"
+        ));
+        assert!(html.contains("<span class=\"resource\">plain</span>"));
+        assert!(!html.contains("scraps/plain.html"));
+        assert!(
+            html.find("class=\"content\"").unwrap() < html.find("class=\"source-list\"").unwrap()
+        );
+
+        assert!(!read("plain").contains(">sources &#183;"));
     }
 
     #[test]

@@ -153,6 +153,9 @@ scrap without the key returns an empty list. Sources do not change the
 trust tier of `verified`. OKF's `usage_count` and `usage_window` are not
 read.
 
+The static site lists the sources after the scrap's body, linking those
+whose `resource` is a web URL; see [[Reference/Static Site/Sources]].
+
 ## Reading rules
 
 Frontmatter never fails a command and never raises a lint warning.
@@ -182,8 +185,8 @@ what points at it.
 A block Scraps reads is metadata, not content:
 
 - The static site leaves it out of the scrap's page, of the summary derived
-  for index pages, and of any page that embeds the scrap. Only a `title` and
-  a `description` are shown, where the keys say so above.
+  for index pages, and of any page that embeds the scrap. Only a `title`, a
+  `description` and `sources` are shown, where the keys say so above.
 - Nothing in it is read as structure: no heading, code block, image, task,
   `[[ ]]` reference or Markdown link comes out of the YAML, and
   `scraps search` does not match its text, the `title` apart.
