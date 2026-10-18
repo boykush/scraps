@@ -1,10 +1,10 @@
 pub mod content;
 pub mod index_scraps;
 pub mod link_scraps;
+pub mod nav_scopes;
 pub mod scrap_detail;
 pub mod scrap_graph;
 pub mod scrap_type;
 pub mod source;
 pub mod tag;
 pub mod tags;
-pub mod title_index;

@@ -10,29 +10,21 @@ Build output is written to the directory configured by `output_dir`
 ```bash
 ❯ tree _site
 _site
-├── index.html              # home: the updated view
+├── index.html              # home: the list of every scrap
 ├── about/
 │   └── index.html          # README.md, when present
-├── backlinks/
-│   └── index.html          # most linked first
-├── all-scraps/
-│   └── index.html          # every scrap, grouped by the title's initial
 ├── all-tags/
 │   └── index.html          # every tag, most used first
 ├── scraps/                 # one page per scrap, nothing else
 │   ├── Getting Started.html
 │   └── Guide/
 │       └── Links.html
-├── tags/                   # one page per tag, nothing else
-│   ├── Markdown.html
+├── tags/                   # one list per tag, nothing else
+│   ├── Markdown/
+│   │   └── index.html
 │   └── Notation/
-│       └── Wiki-link.html
-├── types/                  # only when a scrap has a type
-│   └── How-to/             # the views again, narrowed to one type
 │       ├── index.html
-│       ├── backlinks/
-│       │   └── index.html
-│       └── all-scraps/
+│       └── Wiki-link/
 │           └── index.html
 ├── fonts/                  # the web fonts the theme uses, with their licenses
 │   ├── fonts.css
@@ -45,10 +37,9 @@ _site
 └── search_index.json       # when build_search_index = true
 ```
 
-`all-scraps/index.html` lists every scrap on a single page, grouped by the
-title's initial with a jump bar and no pagination, so a wiki can be browsed
-whole however large it grows. The root index and `backlinks/` stay
-paginated; see [[Reference/Static Site/Sort and Pagination]].
+Sort order and type are query parameters on these lists rather than pages of
+their own; see [[Reference/Static Site/Sort and Pagination]] and
+[[Reference/Static Site/Type Filter]].
 
 ## Page paths
 
@@ -72,22 +63,21 @@ not load.
 A link to a page percent-encodes each path segment, so the page above is
 served at `scraps/Reference/CLI%20Overview.html`.
 
-Tags and types follow the same rule in directories of their own, so a scrap,
-a tag and a type of the same name never share a path; see
-[[Reference/Static Site/Tag Pages]] and [[Reference/Static Site/Type Filter]].
-A tag segment or a type is free text rather than a file name, so three
-spellings are escaped in the file name to keep every name on its own path
-inside its directory:
+Tags follow the same rule in a directory of their own, so a scrap and a tag
+of the same name never share a path; see [[Reference/Static Site/Tag Pages]].
+A tag segment is free text rather than a file name, so a few spellings are
+escaped in the path to keep every tag on its own path inside its directory:
 
-| In the name | In the file name |
+| In the tag segment | In the path |
 |---|---|
 | `%` | `%25` |
-| `/` in a type | `%2F` |
-| a tag segment or type that is exactly `.` or `..` | `%2E` or `%2E%2E` |
+| exactly `.` or `..` | `%2E` or `%2E%2E` |
+| ending in `.html` | that `.` as `%2E` |
 
-`scraps/` and `tags/` hold only pages named by a scrap or a tag, and a type's
-directory is named by the type, so no name can land on a listing: a scrap or
-a tag called `index` is a page like any other.
+A child tag's directory sits beside its parent's `index.html`, which is why a
+segment ending in `.html` is escaped. `scraps/` and `tags/` hold only pages
+named by a scrap or a tag, so no name can land on a listing: a scrap or a tag
+called `index` is a page like any other.
 
 Files in `static/`, the build output directory, and any directory whose name
 starts with a dot (such as `.git/` or the `.scraps/` [[Reference/IR]]) are

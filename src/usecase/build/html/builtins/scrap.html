@@ -23,7 +23,7 @@
           <h3 class="context">{{ scrap.ctx }}<span>&#47;</span></h3>
         {% endif %}
         <h1 class="title">{{ scrap.title }}</h1>{% if scrap_type %}
-        <p class="type">type <a class="name" href="{{ base_url }}{{ scrap_type.url_path }}">{{ scrap_type.name }}</a></p>{% endif %}
+        <p class="type">type <a class="name" href="{{ base_url }}?{{ scrap_type.query }}">{{ scrap_type.name }}</a></p>{% endif %}
         {% if scrap.commited_ts %}
             <p class="commited-date">
                 committed {{ scrap.commited_ts | date(format="%Y-%m-%d", timezone=timezone) }}

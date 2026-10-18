@@ -1,22 +1,93 @@
 {% extends "__builtins/base.html" %}
 
+{% block status_left %}{% if scope_tag %}tags &#47; {{ scope_tag }}{% else %}{{ scrap_count }} scraps indexed{% endif %}{% endblock status_left %}
+
 {% block main %}
-    <div class="index">
-        <div class="links-block">
-            <p class="list-head">
-                <span class="view-name">{% if view == "backlinks" %}most backlinked{% else %}recently updated{% endif %}</span>
-                <span class="stats">{% if active_type %}{{ active_type.scraps_count }} of {{ scrap_count }} scraps{% else %}{{ scrap_count }} scraps &#183; {{ nav_tags | length }} tags{% endif %}</span>
-            </p>{% if filter_types %}
-            {% if active_type %}{{ <type_filter types={filter_types} base_url={base_url} view_path={view_path} active_name={active_type.name} /> }}{% else %}{{ <type_filter types={filter_types} base_url={base_url} view_path={view_path} /> }}{% endif %}{% endif %}
-            {{ <scrap_rows scraps={scraps} base_url={base_url} timezone={timezone} /> }}
-        </div>
-        <div class="paging-arrows">
-            {% if prev %}
-                <a class="prev" href="{{ prev }}">&#8249; prev</a>
-            {% endif %}
-            {% if next %}
-                <a class="next" href="{{ next }}">next &#8250;</a>
-            {% endif %}
-        </div>
+    <div class="index" id="scope-list" data-sort="updated" data-type="" data-paginate-by="{{ paginate_by }}" data-total="{{ scrap_count }}" data-scoped="{% if scope_tag %}true{% endif %}">
+        <p class="list-head">
+            <span class="view-name">{% if scope_tag %}<span class="syntax">#[[</span>{{ scope_tag }}<span class="syntax">]]</span>{% else %}all scraps{% endif %}</span>
+            <span class="stats">{% if scope_tag %}{{ scraps.rows | length }} of {{ scrap_count }}{% else %}{{ scrap_count }}{% endif %} scraps</span>
+        </p>
+        {{ <facet_bar types={types} /> }}
+        <p class="jump-bar">
+            {% for group in scraps.groups %}
+                <a class="jump" href="#title-group-{{ group.number }}" data-group="{{ group.number }}">{{ group.label }}</a>
+            {% endfor %}
+        </p>
+        {{ <scrap_rows scraps={scraps.rows} groups={scraps.groups} base_url={base_url} timezone={timezone} /> }}
+        <p class="empty" hidden>No scraps of this type here.</p>
+        <button type="button" class="more" hidden>show more</button>
     </div>
 {% endblock %}
+
+{% block script %}
+    <script>
+        // Sort and type live in the query, so the page arranges its own rows:
+        // every row of the scope is in the HTML, in updated order, carrying a
+        // rank per sort. Links are rewritten to carry the query along.
+        (() => {
+            const list = document.getElementById('scope-list');
+            const query = new URLSearchParams(location.search);
+            const sort = ['backlinks', 'title'].includes(query.get('sort')) ? query.get('sort') : 'updated';
+            const type = query.get('type') ?? '';
+            list.dataset.sort = sort;
+            list.dataset.type = type;
+
+            const ul = list.querySelector('ul.scrap-rows');
+            const key = 'rank' + sort[0].toUpperCase() + sort.slice(1);
+            const rank = (li) => Number(li.dataset[key] ?? Infinity);
+            ul.append(...[...ul.children].sort((a, b) => rank(a) - rank(b)));
+
+            const rows = [...ul.querySelectorAll('li.item')];
+            const matches = rows.filter((li) => !type || li.dataset.type === type);
+            const groups = new Set(matches.map((li) => li.dataset.group));
+            list.querySelectorAll('.group-head, .jump').forEach((el) => {
+                el.hidden = !groups.has(el.dataset.group);
+            });
+
+            const step = sort === 'title' ? 0 : Number(list.dataset.paginateBy);
+            const more = list.querySelector('button.more');
+            let limit = step || matches.length;
+            const page = () => {
+                rows.forEach((li) => { li.hidden = true; });
+                matches.slice(0, limit).forEach((li) => { li.hidden = false; });
+                more.hidden = limit >= matches.length;
+            };
+            more.addEventListener('click', () => { limit += step; page(); });
+            page();
+            list.querySelector('.empty').hidden = matches.length > 0;
+
+            const total = Number(list.dataset.total);
+            const narrowed = type || list.dataset.scoped;
+            list.querySelector('.stats').textContent =
+                (narrowed ? matches.length + ' of ' + total : total) + ' scraps';
+
+            const mark = (a, current) => {
+                current ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current');
+            };
+            const href = (changes) => {
+                const next = new URLSearchParams(location.search);
+                Object.entries(changes).forEach(([k, v]) => { v ? next.set(k, v) : next.delete(k); });
+                return next.size ? '?' + next : './';
+            };
+            list.querySelectorAll('a[data-sort]').forEach((a) => {
+                a.href = href({ sort: a.dataset.sort === 'updated' ? '' : a.dataset.sort });
+                mark(a, a.dataset.sort === sort);
+            });
+            list.querySelectorAll('a[data-type]').forEach((a) => {
+                a.href = href({ type: a.dataset.type });
+                mark(a, a.dataset.type === type);
+            });
+
+            const carried = query.toString();
+            document.querySelectorAll('nav.scopes a.item').forEach((a) => {
+                const counts = JSON.parse(a.dataset.counts);
+                const count = type ? counts.by_type[type] ?? 0 : counts.total;
+                a.querySelector('.count').textContent = count;
+                a.classList.toggle('zero', count === 0);
+                if (count === 0) a.removeAttribute('href');
+                else if (carried) a.search = carried;
+            });
+        })();
+    </script>
+{% endblock script %}

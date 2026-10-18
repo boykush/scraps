@@ -36,7 +36,7 @@ title = "My Site"
 # Scraps sort key choice on index page (optional, default=committed_date, choices=committed_date or linked_count)
 # sort_key = "committed_date"
 
-# Scraps pagination on index page(optional, default=no pagination)
+# Rows a list shows before "show more" (optional, default=every row)
 # paginate_by = 20
 
 # Lint rule configuration (optional)

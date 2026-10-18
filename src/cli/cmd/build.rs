@@ -140,7 +140,7 @@ mod tests {
         assert!(result.is_ok());
 
         let html = fs::read_to_string(project.output_path("scraps/source.html")).unwrap();
-        assert!(html.contains("http://localhost:1112/tags/ai/ml.html"));
+        assert!(html.contains("http://localhost:1112/tags/ai/ml/"));
         assert!(html.contains("embedded body"));
         assert!(!html.contains("hidden body"));
     }
@@ -157,7 +157,7 @@ mod tests {
         assert!(result.is_ok());
 
         let index = fs::read_to_string(project.output_path("index.html")).unwrap();
-        assert!(index.contains("tags/ai.html"));
+        assert!(index.contains("tags/ai/"));
     }
 
     #[rstest]
@@ -187,17 +187,16 @@ mod tests {
         assert!(read("scraps/a-b.html").contains("dashed"));
         assert!(read("scraps/What is it?.html").contains("asked"));
         assert!(read("scraps/What is it question.html").contains("spelled out"));
-        assert!(read("tags/a b.html").contains("scraps/a%20b.html"));
-        assert!(read("tags/a-b.html").contains("scraps/a-b.html"));
+        assert!(read("tags/a b/index.html").contains("scraps/a%20b.html"));
+        assert!(read("tags/a-b/index.html").contains("scraps/a-b.html"));
 
-        // A scrap, a tag and a type named `index` are pages like any other,
-        // and the listings they used to share a path with are still there.
+        // A scrap and a tag named `index` are pages like any other, and a
+        // type named `index` is a query on a list rather than a path.
         assert!(read("scraps/index.html").contains("a scrap named index"));
-        assert!(read("tags/index.html").contains("tagged &#183; 1"));
-        assert!(read("types/index/index.html").contains("1 of 7 scraps"));
-        assert!(read("all-scraps/index.html").contains("class=\"jump\""));
+        assert!(read("tags/index/index.html").contains("1 of 7 scraps"));
+        assert!(read("index.html").contains(r#"href="?type=index""#));
         assert!(read("all-tags/index.html").contains("class=\"tag-links\""));
-        assert!(read("index.html").contains("recently updated"));
+        assert!(read("index.html").contains("all scraps"));
 
         let hub = read("scraps/hub.html");
         for href in [

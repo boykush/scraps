@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use itertools::Itertools;
 use rayon::prelude::*;
 use scraps_libs::model::page_path::PagePath;
@@ -6,8 +8,8 @@ use url::Url;
 use crate::usecase::build::model::{
     backlinks_map::BacklinksMap,
     scrap_detail::{ScrapDetail, ScrapDetails},
-    sort::SortKey,
     summary::Summary,
+    title_group::TitleGroup,
 };
 
 /// Long enough to be a useful gloss on an index row, short enough to stay on
@@ -27,7 +29,6 @@ struct SerializeIndexScrap {
     pub commited_ts: Option<i64>,
     pub backlinks_count: usize,
     pub links_count: usize,
-    #[serde(skip)]
     scrap_type: Option<String>,
 }
 
@@ -59,45 +60,102 @@ impl SerializeIndexScrap {
     }
 }
 
-#[derive(serde::Serialize, PartialEq, Debug, Clone)]
-pub struct IndexScrapsTera(Vec<SerializeIndexScrap>);
+/// Every scrap's row, built once per build in updated order; each scope's
+/// list is cut from it, so a row's summary is derived only once.
+pub struct IndexScraps(Vec<SerializeIndexScrap>);
 
-impl IndexScrapsTera {
-    pub fn new_with_sort(
-        scrap_details: &ScrapDetails,
-        backlinks_map: &BacklinksMap,
-        sort_key: &SortKey,
-    ) -> IndexScrapsTera {
-        let serialize_scraps = scrap_details
+impl IndexScraps {
+    pub fn new(scrap_details: &ScrapDetails, backlinks_map: &BacklinksMap) -> IndexScraps {
+        let rows = scrap_details
             .as_slice()
             .par_iter()
             .map(|s| SerializeIndexScrap::new(s, backlinks_map))
-            .collect::<Vec<_>>()
-            .into_iter();
-        let sorted = (match sort_key {
-            SortKey::CommittedDate => serialize_scraps.sorted_by_key(|s| s.commited_ts).rev(),
-            SortKey::LinkedCount => serialize_scraps.sorted_by_key(|s| s.backlinks_count).rev(),
-        })
-        .collect_vec();
-
-        IndexScrapsTera(sorted)
+            .collect::<Vec<_>>();
+        IndexScraps(
+            rows.into_iter()
+                .sorted_by_key(|s| s.commited_ts)
+                .rev()
+                .collect_vec(),
+        )
     }
 
-    /// The rows of one type, in the order this view already sorted them.
-    pub fn of_type(&self, name: &str) -> IndexScrapsTera {
-        let typed = self
-            .0
-            .iter()
-            .filter(|scrap| scrap.scrap_type.as_deref() == Some(name));
-        IndexScrapsTera(typed.cloned().collect_vec())
-    }
+    /// The list of one scope: the rows whose key `keep` accepts, with the
+    /// rank each takes under every sort, so the page can reorder itself.
+    pub fn scope(&self, keep: impl Fn(&str) -> bool) -> IndexScrapsTera {
+        let scraps = self.0.iter().filter(|s| keep(&s.key)).collect_vec();
 
-    pub fn chunks(&self, chunk_size: usize) -> Vec<IndexScrapsTera> {
-        self.0
-            .chunks(chunk_size)
-            .map(|scraps| IndexScrapsTera(scraps.to_vec()))
-            .collect_vec()
+        let mut backlinks_rank = vec![0; scraps.len()];
+        let by_backlinks = (0..scraps.len())
+            .sorted_by(|&a, &b| scraps[b].backlinks_count.cmp(&scraps[a].backlinks_count));
+        for (rank, index) in by_backlinks.enumerate() {
+            backlinks_rank[index] = rank;
+        }
+
+        // Title order interleaves each group's heading before its rows.
+        let mut grouped: BTreeMap<TitleGroup, Vec<usize>> = BTreeMap::new();
+        for (index, scrap) in scraps.iter().enumerate() {
+            grouped
+                .entry(TitleGroup::from_title(&scrap.title))
+                .or_default()
+                .push(index);
+        }
+        let mut title_rank = vec![(0, 0); scraps.len()];
+        let mut groups = Vec::with_capacity(grouped.len());
+        let mut rank = 0;
+        for (number, (group, mut members)) in grouped.into_iter().enumerate() {
+            let number = number + 1;
+            groups.push(TitleGroupTera {
+                label: group.label(),
+                number,
+                title_rank: rank,
+            });
+            rank += 1;
+            members.sort_by_key(|&index| scraps[index].title.to_lowercase());
+            for index in members {
+                title_rank[index] = (rank, number);
+                rank += 1;
+            }
+        }
+
+        let rows = scraps
+            .into_iter()
+            .enumerate()
+            .map(|(index, scrap)| IndexRowTera {
+                scrap: scrap.clone(),
+                updated_rank: index,
+                backlinks_rank: backlinks_rank[index],
+                title_rank: title_rank[index].0,
+                group: title_rank[index].1,
+            })
+            .collect();
+        IndexScrapsTera { rows, groups }
     }
+}
+
+#[derive(serde::Serialize, Clone, PartialEq, Debug)]
+struct IndexRowTera {
+    #[serde(flatten)]
+    scrap: SerializeIndexScrap,
+    updated_rank: usize,
+    backlinks_rank: usize,
+    title_rank: usize,
+    /// The number of the title group the row falls in, from 1.
+    group: usize,
+}
+
+/// A heading of the title order: the title's initial, as the all-scraps
+/// index grouped it.
+#[derive(serde::Serialize, Clone, PartialEq, Debug)]
+struct TitleGroupTera {
+    label: String,
+    number: usize,
+    title_rank: usize,
+}
+
+#[derive(serde::Serialize, PartialEq, Debug, Clone)]
+pub struct IndexScrapsTera {
+    rows: Vec<IndexRowTera>,
+    groups: Vec<TitleGroupTera>,
 }
 
 #[cfg(test)]
@@ -136,64 +194,99 @@ mod tests {
         assert_eq!(summary_of(md_text).as_deref(), Some("Orders table"));
     }
 
-    #[test]
-    fn it_new_with_sort() {
+    fn index_scraps(scraps: &[Scrap], ts: &[Option<i64>]) -> IndexScrapsTera {
         let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
-        let scrap1 = Scrap::new("title1", &None, "[[Context/title4]][[title2]]");
-        let scrap2 = Scrap::new("title2", &None, "[[Context/title4]][[title1]]");
-        let scrap3 = Scrap::new("title3", &None, "[[Context/title4]]");
-        let scrap4 = Scrap::new("title4", &Some("Context".into()), "[[title1]]");
+        let link_targets = scraps_libs::html::LinkTargets::new(scraps);
+        let details = ScrapDetails::new(
+            scraps
+                .iter()
+                .zip(ts)
+                .map(|(scrap, ts)| ScrapDetail::new(scrap, ts, base_url, &link_targets))
+                .collect(),
+        );
+        IndexScraps::new(&details, &BacklinksMap::new(scraps)).scope(|_| true)
+    }
+
+    fn titles_by(list: &IndexScrapsTera, rank: impl Fn(&IndexRowTera) -> usize) -> Vec<&str> {
+        list.rows
+            .iter()
+            .sorted_by_key(|row| rank(row))
+            .map(|row| row.scrap.title.as_str())
+            .collect()
+    }
+
+    #[test]
+    fn it_ranks_every_row_under_each_sort() {
         let scraps = [
-            scrap1.clone(),
-            scrap2.clone(),
-            scrap3.clone(),
-            scrap4.clone(),
+            Scrap::new("title1", &None, "[[Context/title4]][[title2]]"),
+            Scrap::new("title2", &None, "[[Context/title4]][[title1]]"),
+            Scrap::new("title3", &None, "[[Context/title4]]"),
+            Scrap::new("title4", &Some("Context".into()), "[[title1]]"),
         ];
+        let list = index_scraps(&scraps, &[None, Some(3), Some(2), Some(1)]);
+
+        // Rows come in updated order, which is also the page's order without JS.
+        let in_order: Vec<&str> = list.rows.iter().map(|r| r.scrap.title.as_str()).collect();
+        assert_eq!(in_order, vec!["title2", "title3", "title4", "title1"]);
+        assert_eq!(
+            titles_by(&list, |r| r.updated_rank),
+            vec!["title2", "title3", "title4", "title1"]
+        );
+        // Most linked first; a tie keeps the updated order.
+        assert_eq!(
+            titles_by(&list, |r| r.backlinks_rank),
+            vec!["title4", "title1", "title2", "title3"]
+        );
+    }
+
+    #[test]
+    fn it_groups_the_title_order_by_initial() {
+        let scraps = [
+            Scrap::new("デザイントークン", &None, "[[DTCG]]"),
+            Scrap::new("DTCG", &None, ""),
+            Scrap::new("DevOps", &None, ""),
+            Scrap::new("設計", &None, ""),
+            Scrap::new("orders", &None, "---\ntitle: Customer Orders\n---\n"),
+        ];
+        let list = index_scraps(&scraps, &[None, None, None, None, None]);
+
+        let labels: Vec<&str> = list.groups.iter().map(|g| g.label.as_str()).collect();
+        assert_eq!(labels, vec!["た", "C", "D", "漢字"]);
+        // Within a group, the shown title sorts case-insensitively.
+        assert_eq!(
+            titles_by(&list, |r| r.title_rank),
+            vec![
+                "デザイントークン",
+                "Customer Orders",
+                "DevOps",
+                "DTCG",
+                "設計"
+            ]
+        );
+        // Each heading ranks just before its group's first row.
+        let d = &list.groups[2];
+        let first_d = list
+            .rows
+            .iter()
+            .find(|r| r.scrap.title == "DevOps")
+            .unwrap();
+        assert_eq!(first_d.group, d.number);
+        assert_eq!(first_d.title_rank, d.title_rank + 1);
+    }
+
+    #[test]
+    fn it_cuts_a_scope_out_of_every_row() {
+        let base_url = &BaseUrl::new(Url::parse("http://localhost:1112/").unwrap()).unwrap();
+        let scraps = [Scrap::new("a", &None, ""), Scrap::new("b", &None, "")];
         let link_targets = scraps_libs::html::LinkTargets::new(&scraps);
-
-        let sc1 = ScrapDetail::new(&scrap1, &None, base_url, &link_targets);
-        let sc2 = ScrapDetail::new(&scrap2, &Some(3), base_url, &link_targets);
-        let sc3 = ScrapDetail::new(&scrap3, &Some(2), base_url, &link_targets);
-        let sc4 = ScrapDetail::new(&scrap4, &Some(1), base_url, &link_targets);
-        let backlinks_map = BacklinksMap::new(&scraps);
-
-        let sscrap1 = SerializeIndexScrap::new(&sc1.clone(), &backlinks_map);
-        let sscrap2 = SerializeIndexScrap::new(&sc2.clone(), &backlinks_map);
-        let sscrap3 = SerializeIndexScrap::new(&sc3.clone(), &backlinks_map);
-        let sscrap4 = SerializeIndexScrap::new(&sc4.clone(), &backlinks_map);
-
-        // Sort by commited date
-        let result1 = IndexScrapsTera::new_with_sort(
-            &ScrapDetails::new(vec![sc1.clone(), sc2.clone(), sc3.clone(), sc4.clone()]),
-            &backlinks_map,
-            &SortKey::CommittedDate,
+        let details = ScrapDetails::new(
+            scraps
+                .iter()
+                .map(|scrap| ScrapDetail::new(scrap, &None, base_url, &link_targets))
+                .collect(),
         );
-
-        assert_eq!(
-            result1.0,
-            vec![
-                sscrap2.clone(),
-                sscrap3.clone(),
-                sscrap4.clone(),
-                sscrap1.clone()
-            ]
-        );
-
-        // Sort by linked count
-        let result2 = IndexScrapsTera::new_with_sort(
-            &ScrapDetails::new(vec![sc1.clone(), sc2.clone(), sc3.clone(), sc4.clone()]),
-            &backlinks_map,
-            &SortKey::LinkedCount,
-        );
-
-        assert_eq!(
-            result2.0,
-            vec![
-                sscrap4.clone(),
-                sscrap1.clone(),
-                sscrap2.clone(),
-                sscrap3.clone()
-            ]
-        )
+        let list = IndexScraps::new(&details, &BacklinksMap::new(&scraps)).scope(|key| key == "b");
+        assert_eq!(list.rows.len(), 1);
+        assert_eq!(list.rows[0].updated_rank, 0);
     }
 }
