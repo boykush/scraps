@@ -2043,6 +2043,7 @@ dependencies = [
 name = "scraps_libs"
 version = "3.4.0"
 dependencies = [
+ "chrono",
  "comrak",
  "fuzzy-matcher",
  "iso639_enum",

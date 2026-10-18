@@ -96,7 +96,7 @@ pub enum SubCommands {
             value_name = "FIELDS",
             num_args = 0..=1,
             default_missing_value = "",
-            help = "Output as JSON. Optionally accepts a comma-separated field projection (key,title,ctx,body,headings,code_blocks,images,type,description,frontmatter)."
+            help = "Output as JSON. Optionally accepts a comma-separated field projection (key,title,ctx,body,headings,code_blocks,images,type,description,frontmatter,verified)."
         )]
         json: Option<String>,
     },

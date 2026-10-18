@@ -1,5 +1,7 @@
 use crate::usecase::scrap::scrap_ref::ScrapRef;
+use chrono::SecondsFormat;
 use scraps_libs::markdown::query::{CodeBlock, Heading};
+use scraps_libs::model::verification::{TrustTier, Verification};
 use serde::Serialize;
 
 /// A scrap as a tool result names it: `key` is what to pass back to a tool,
@@ -64,6 +66,35 @@ impl From<CodeBlock> for CodeBlockJson {
             lang: c.lang,
             content: c.content,
             line: c.line,
+        }
+    }
+}
+
+/// A scrap's confirmations, read as an OKF consumer reads `verified`: the
+/// trust tier derived from them, and the readable entries newest first.
+#[derive(Debug, Serialize)]
+pub struct VerifiedJson {
+    pub tier: String,
+    pub entries: Vec<VerificationJson>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct VerificationJson {
+    pub by: String,
+    pub at: String,
+}
+
+impl VerifiedJson {
+    pub fn new(verifications: &[Verification], tier: TrustTier) -> Self {
+        Self {
+            tier: tier.as_str().to_string(),
+            entries: verifications
+                .iter()
+                .map(|v| VerificationJson {
+                    by: v.by.clone(),
+                    at: v.at.to_rfc3339_opts(SecondsFormat::AutoSi, true),
+                })
+                .collect(),
         }
     }
 }

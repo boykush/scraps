@@ -6,6 +6,7 @@ use url::Url;
 use crate::markdown::query::{CodeBlock, Heading, ScrapFacts, TaskItem, WikiRef};
 use crate::nfc::nfc;
 
+use super::verification::{TrustTier, Verification, frontmatter_verifications};
 use super::{context::Ctx, key::ScrapKey, stem::Stem, tag::Tag};
 
 const FRONTMATTER_TAGS_KEY: &str = "tags";
@@ -141,6 +142,16 @@ impl Scrap {
             .as_str()
             .map(str::trim)
             .filter(|value| !value.is_empty())
+    }
+
+    /// Who confirmed the scrap's content and when: the readable entries of
+    /// the frontmatter `verified`, newest first.
+    pub fn verifications(&self) -> Vec<Verification> {
+        frontmatter_verifications(self.frontmatter())
+    }
+
+    pub fn trust_tier(&self) -> TrustTier {
+        TrustTier::of(&self.verifications())
     }
 }
 
@@ -592,6 +603,24 @@ mod tests {
             Some(&json!({"type": GUIDE_NFD, "owner": GUIDE_NFD}))
         );
         assert_eq!(scrap.md_text(), text);
+    }
+
+    #[test]
+    fn it_reads_the_frontmatter_verified() {
+        let scrap = Scrap::new(
+            "foo",
+            &None,
+            "---\nverified:\n  by: human:alice\n  at: 2026-10-17T00:00:00Z\n---\n\nbody\n",
+        );
+        assert_eq!(scrap.verifications()[0].by, "human:alice");
+        assert_eq!(scrap.trust_tier(), TrustTier::HumanReviewed);
+    }
+
+    #[test]
+    fn it_is_unverified_without_a_frontmatter_verified() {
+        let scrap = Scrap::new("foo", &None, "# Body\n");
+        assert!(scrap.verifications().is_empty());
+        assert_eq!(scrap.trust_tier(), TrustTier::Unverified);
     }
 
     #[test]

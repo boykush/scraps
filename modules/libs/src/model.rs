@@ -7,3 +7,4 @@ pub mod scrap;
 pub mod stem;
 pub mod tag;
 pub mod tags;
+pub mod verification;
