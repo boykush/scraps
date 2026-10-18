@@ -85,9 +85,6 @@ fn main() -> error::ScrapsResult<()> {
                 cli::cmd::scrap_type::scraps::run(&name, json, directory, &mut std::io::stdout())
             }
         },
-        cli::SubCommands::Frontmatter { json } => {
-            cli::cmd::frontmatter::run(json, directory, &mut std::io::stdout())
-        }
         cli::SubCommands::Todo { status, json } => {
             cli::cmd::todo::run(status.into(), json, directory, &mut std::io::stdout())
         }

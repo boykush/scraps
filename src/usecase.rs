@@ -1,5 +1,4 @@
 pub mod build;
-pub mod frontmatter;
 pub mod init;
 pub mod lint;
 pub mod progress;

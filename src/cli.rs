@@ -69,7 +69,7 @@ pub enum SubCommands {
 
     #[command(
         about = "Get the markdown body of a scrap by key",
-        long_about = "Get the markdown body of a scrap by key.\n\nThe body is the scrap's content: a YAML frontmatter block is left out, and `--json frontmatter` returns it as data. Line numbers in `headings` and `code_blocks` count lines of the source file, block included, so they are not offsets into the body."
+        long_about = "Get the markdown body of a scrap by key.\n\nThe body is the scrap's content: a YAML frontmatter block is left out, and the keys Scraps reads from it are fields of their own (`type`, `description`, `resource`, `verified`, `sources`). Line numbers in `headings` and `code_blocks` count lines of the source file, block included, so they are not offsets into the body."
     )]
     Get {
         #[arg(
@@ -96,7 +96,7 @@ pub enum SubCommands {
             value_name = "FIELDS",
             num_args = 0..=1,
             default_missing_value = "",
-            help = "Output as JSON. Optionally accepts a comma-separated field projection (key,title,ctx,body,headings,code_blocks,images,type,description,frontmatter,verified,sources,resource)."
+            help = "Output as JSON. Optionally accepts a comma-separated field projection (key,title,ctx,body,headings,code_blocks,images,type,description,verified,sources,resource)."
         )]
         json: Option<String>,
     },
@@ -185,12 +185,6 @@ pub enum SubCommands {
     Type {
         #[command(subcommand)]
         type_command: TypeSubCommands,
-    },
-
-    #[command(about = "Aggregate YAML frontmatter across the wiki")]
-    Frontmatter {
-        #[arg(long, help = "Output as JSON")]
-        json: bool,
     },
 
     #[command(about = "Aggregate markdown task list items across the wiki")]

@@ -25,7 +25,6 @@ the authoritative reference for flags and arguments. This page is the
 | `scraps type list` | List all types with scrap counts | ✓ |
 | `scraps type scraps <type>` | Scraps of a type | ✓ |
 | `scraps todo` | Aggregate GFM task list items wiki-wide | ✓ |
-| `scraps frontmatter` | Aggregate YAML frontmatter wiki-wide | ✓ |
 | `scraps mcp serve` | Start an MCP server over stdio, or `--http` | – |
 
 `-C` / `--directory` (or `SCRAPS_DIRECTORY` env) runs as if started in the
@@ -76,9 +75,8 @@ scraps get "Book/Title" --heading "Install" --json body,headings
 ```
 
 Allowed fields are `key`, `title`, `ctx`, `body`, `headings`, `code_blocks`,
-`images`, `type`, `description`, `frontmatter`, `verified`, `sources`, and `resource`. `type` and `description` are the
-scrap's frontmatter type and description, and `frontmatter` its whole block,
-each `null` when it has none. `verified` is the scrap's trust tier and
+`images`, `type`, `description`, `verified`, `sources`, and `resource`. `type` and `description` are the
+scrap's frontmatter type and description, each `null` when it has none. `verified` is the scrap's trust tier and
 confirmations, `{ tier, entries }`, `sources` the materials it
 derives from, and `resource` what it is about, `null` when it has none. What `body` leaves out and what the line
 numbers in `headings` and `code_blocks` count is in
@@ -98,9 +96,5 @@ its body links here, `source` when it names this scrap in its `sources`.
 `scraps type list --json` returns each type in use with its `scraps_count`,
 most used first. `scraps type scraps <type> --json` returns the scraps of one
 type; the type is matched exactly and case-sensitively.
-
-`scraps frontmatter --json` returns every scrap that carries a YAML
-frontmatter block, with all of its keys as written. Which keys Scraps reads,
-and how, is in [[Reference/Frontmatter]].
 
 For agent integration, see [[How-to/Integrate with AI Assistants]].

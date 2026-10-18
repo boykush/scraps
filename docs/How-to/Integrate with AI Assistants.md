@@ -25,7 +25,6 @@ server.
 ❯ scraps tag list --json
 ❯ scraps type list --json
 ❯ scraps todo --status all --json
-❯ scraps frontmatter --json
 ```
 
 Every result names a scrap by its `key`, next to the `title` readers see and
@@ -34,7 +33,7 @@ its `ctx`; pass the `key` back to read or traverse that scrap. The older
 
 `scraps get --json` defaults to `key`, `title`, `ctx`, and `body`. It can project
 specific fields (`key`, `title`, `ctx`, `body`, `headings`, `code_blocks`, `images`, `type`,
-`description`, `frontmatter`) so an
+`description`, `verified`, `sources`, `resource`) so an
 agent can avoid loading full bodies when it only needs structure or examples.
 `scraps links --json` returns outbound `link`, `embed` and `source` references
 with optional heading targets; `backlinks` stays a scrap-level inbound lookup
