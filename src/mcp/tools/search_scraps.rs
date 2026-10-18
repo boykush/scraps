@@ -9,6 +9,7 @@ use rmcp::service::RequestContext;
 use rmcp::{ErrorData, RoleServer};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
+use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 /// Search logic for combining multiple keywords
 #[derive(Debug, Clone, Copy, Default, Deserialize, JsonSchema)]
@@ -83,6 +84,8 @@ pub async fn search_scraps(
         .collect();
 
     let count = scrap_jsons.len();
+    // Tells a search the hits answered from one that found nothing, when no read follows.
+    tracing::Span::current().set_attribute("scraps.search.result_count", count as i64);
     let next = if count == 0 {
         "No hits. Vary the keywords (default OR logic matches any), or start from the topic map with list_tags."
     } else {
