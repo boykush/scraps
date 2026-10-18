@@ -144,9 +144,19 @@ mod tests {
         spawn_server_with(project, vec![], Some(spans)).await
     }
 
+    /// The request's own span; a tool call also leaves internal spans under it.
     fn only_span(exporter: &InMemorySpanExporter) -> SpanData {
-        let mut spans = exporter.get_finished_spans().unwrap();
-        assert_eq!(spans.len(), 1, "expected one span per request: {spans:?}");
+        let mut spans: Vec<SpanData> = exporter
+            .get_finished_spans()
+            .unwrap()
+            .into_iter()
+            .filter(|span| span.span_kind == SpanKind::Server)
+            .collect();
+        assert_eq!(
+            spans.len(),
+            1,
+            "expected one server span per request: {spans:?}"
+        );
         spans.remove(0)
     }
 

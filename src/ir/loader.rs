@@ -5,6 +5,7 @@ use anyhow::Context;
 use rayon::prelude::*;
 use scraps_libs::git::GitCommand;
 use scraps_libs::model::{context::Ctx, scrap::Scrap};
+use tracing::{Level, span};
 
 use crate::error::{BuildError, ScrapsError, ScrapsResult};
 use crate::input::file::read_scraps::{self, ScrapsWithReadme};
@@ -42,6 +43,7 @@ struct LoadedWiki {
 
 impl LoadedWiki {
     fn save(&self) {
+        let _span = span!(Level::INFO, "save_ir").entered();
         let scraps: Vec<Scrap> = self.entries.iter().map(|l| l.scrap.clone()).collect();
         let mut file = IrFile::new(self.objects.clone(), link_edges(&scraps));
         file.git_head = self.git_head.clone();
@@ -86,6 +88,8 @@ fn reject_same_key(scraps_dir: &Path, sources: &[Source]) -> ScrapsResult<()> {
 /// a source whose hash the IR knows is rebuilt from its stored facts, the
 /// rest are parsed. Nothing is written here; callers save when `dirty`.
 fn load(scraps_dir: &Path, exclude_dirs: &[PathBuf]) -> ScrapsResult<LoadedWiki> {
+    let _span = span!(Level::INFO, "load_scraps").entered();
+    let span_read_sources = span!(Level::INFO, "read_sources").entered();
     let paths = read_scraps::to_scrap_paths(scraps_dir, exclude_dirs)?;
     let mut sources = paths
         .into_par_iter()
@@ -93,7 +97,9 @@ fn load(scraps_dir: &Path, exclude_dirs: &[PathBuf]) -> ScrapsResult<LoadedWiki>
         .collect::<ScrapsResult<Vec<Source>>>()?;
     sources.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
     reject_same_key(scraps_dir, &sources)?;
+    span_read_sources.exit();
 
+    let span_read_ir = span!(Level::INFO, "read_ir").entered();
     let store = IrStore::new(scraps_dir);
     let stored = store.load();
     let had_file = stored.is_some();
@@ -106,7 +112,9 @@ fn load(scraps_dir: &Path, exclude_dirs: &[PathBuf]) -> ScrapsResult<LoadedWiki>
                 .collect()
         })
         .unwrap_or_default();
+    span_read_ir.exit();
 
+    let span_rebuild_scraps = span!(Level::INFO, "rebuild_scraps").entered();
     let entries: Vec<(Loaded, ScrapObject, bool)> = sources
         .into_par_iter()
         .map(|src| {
@@ -133,6 +141,7 @@ fn load(scraps_dir: &Path, exclude_dirs: &[PathBuf]) -> ScrapsResult<LoadedWiki>
             (loaded, object, reused)
         })
         .collect();
+    span_rebuild_scraps.exit();
 
     let reused = entries.iter().filter(|(_, _, reused)| *reused).count();
     let dirty = !had_file || reused != entries.len() || known.len() != entries.len();

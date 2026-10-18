@@ -318,15 +318,8 @@ mod tests {
         assert_eq!(span.status, Status::error(""));
     }
 
-    #[rstest]
-    #[case::hits("rust", "1")]
-    #[case::no_hits("haskell", "0")]
-    #[tokio::test]
-    async fn test_search_span_records_how_many_scraps_it_returned(
-        #[from(temp_scrap_project)] project: TempScrapProject,
-        #[case] query: &str,
-        #[case] expected: &str,
-    ) {
+    /// Every span one `search_scraps` call over a two-scrap wiki leaves.
+    async fn spans_of_a_search(project: &TempScrapProject, query: &str) -> Vec<SpanData> {
         project.add_scrap("rust.md", b"# Rust\n\nRust content");
         project.add_scrap("python.md", b"# Python\n\nPython content");
         let (exporter, _subscriber) = capture_spans();
@@ -352,16 +345,51 @@ mod tests {
         client.cancel().await.unwrap();
         server_handle.abort();
 
-        let span = exporter
-            .get_finished_spans()
-            .unwrap()
-            .into_iter()
-            .find(|span| span.name == "tools/call search_scraps")
-            .expect("the search should have left a span");
+        exporter.get_finished_spans().unwrap()
+    }
+
+    fn named<'a>(spans: &'a [SpanData], name: &str) -> &'a SpanData {
+        spans
+            .iter()
+            .find(|span| span.name == name)
+            .unwrap_or_else(|| panic!("no span named {name}"))
+    }
+
+    #[rstest]
+    #[case::hits("rust", "1")]
+    #[case::no_hits("haskell", "0")]
+    #[tokio::test]
+    async fn test_search_span_records_how_many_scraps_it_returned(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+        #[case] query: &str,
+        #[case] expected: &str,
+    ) {
+        let spans = spans_of_a_search(&project, query).await;
+
+        let span = named(&spans, "tools/call search_scraps");
         assert_eq!(
-            attribute(&span, "scraps.search.result_count").as_deref(),
+            attribute(span, "scraps.search.result_count").as_deref(),
             Some(expected)
         );
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_search_span_times_loading_apart_from_searching(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        let spans = spans_of_a_search(&project, "rust").await;
+
+        let request = named(&spans, "tools/call search_scraps")
+            .span_context
+            .span_id();
+        let load = named(&spans, "load_scraps").span_context.span_id();
+        for stage in ["load_scraps", "save_ir", "search"] {
+            assert_eq!(named(&spans, stage).parent_span_id, request, "{stage}");
+        }
+        for stage in ["read_sources", "read_ir", "rebuild_scraps"] {
+            assert_eq!(named(&spans, stage).parent_span_id, load, "{stage}");
+        }
     }
 
     #[tokio::test]
