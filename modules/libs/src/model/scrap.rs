@@ -41,6 +41,7 @@ pub struct Scrap {
 const FRONTMATTER_TITLE_KEY: &str = "title";
 const FRONTMATTER_TYPE_KEY: &str = "type";
 const FRONTMATTER_DESCRIPTION_KEY: &str = "description";
+const FRONTMATTER_RESOURCE_KEY: &str = "resource";
 
 impl Scrap {
     pub fn self_key(&self) -> ScrapKey {
@@ -140,6 +141,16 @@ impl Scrap {
     pub fn description(&self) -> Option<&str> {
         self.frontmatter()?
             .get(FRONTMATTER_DESCRIPTION_KEY)?
+            .as_str()
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+    }
+
+    /// What the scrap is about, as OKF's top-level `resource` names it: the
+    /// string trimmed, None when missing, blank or not a string.
+    pub fn resource(&self) -> Option<&str> {
+        self.frontmatter()?
+            .get(FRONTMATTER_RESOURCE_KEY)?
             .as_str()
             .map(str::trim)
             .filter(|value| !value.is_empty())
@@ -638,6 +649,19 @@ mod tests {
         );
         assert_eq!(scrap.verifications()[0].by, "human:alice");
         assert_eq!(scrap.trust_tier(), TrustTier::HumanReviewed);
+    }
+
+    #[rstest]
+    #[case::string(
+        "resource: \" https://example.com/a \"\n",
+        Some("https://example.com/a")
+    )]
+    #[case::blank("resource: \"  \"\n", None)]
+    #[case::not_a_string("resource: [a]\n", None)]
+    #[case::missing("type: Blog\n", None)]
+    fn it_reads_the_frontmatter_resource(#[case] block: &str, #[case] expected: Option<&str>) {
+        let scrap = Scrap::new("foo", &None, &format!("---\n{block}---\n\nbody\n"));
+        assert_eq!(scrap.resource(), expected);
     }
 
     #[test]

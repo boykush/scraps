@@ -902,6 +902,16 @@ div.scrap p.type {
     }
 }
 
+/* resource — what the scrap stands for, under its title. A long URL breaks
+   anywhere rather than widening the page. */
+div.scrap p.resource {
+    margin: var(--space-2) 0 0;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+}
+
 /* The type filter narrows a list view, the way a label narrows an issue
    list. One option is always active; "all" is the unfiltered view. */
 p.type-filter {

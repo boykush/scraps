@@ -57,7 +57,7 @@ Answer a question against the wiki. The skill searches scraps with `scraps searc
 
 Translates a natural-language wiki-health request (e.g., "fix broken links", "audit orphans") into a small, deliberate set of `scraps lint` rules and runs them. Behavior branches per rule type:
 
-- **Mechanical** (`broken-link`, `broken-heading-ref`, `self-link`) — propose and apply fixes
+- **Mechanical** (`broken-link`, `broken-heading-ref`, `self-link`, `source-has-page`) — propose and apply fixes
 - **Judgment** (`dead-end`, `lonely`, `overlinking`, `unlinkable-key`, `unportable-key`) — read affected scraps and report; do not auto-fix
 - **Informational** (`stale-by-git`) — list with metadata
 

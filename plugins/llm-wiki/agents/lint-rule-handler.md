@@ -24,6 +24,7 @@ Pick the smallest rule set that serves the stated purpose.
 | "find stale scraps" / "更新ない scrap" | `stale-by-git` |
 | "find scraps a wiki-link cannot reach" / "リンクできない scrap" | `unlinkable-key` |
 | "check the wiki ports to Windows / other filesystems" | `unportable-key` |
+| "point sources at the pages we have" / "出典をページに置き換えて" | `source-has-page` |
 | "wiki health 全般" (vague) | ask for narrowing first |
 
 Reject requests like "run all default rules" without a stated purpose.
@@ -35,6 +36,7 @@ Reject requests like "run all default rules" without a stated purpose.
 | `broken-link` | mechanical | search for likely target, propose Edit, apply on confirm |
 | `broken-heading-ref` | mechanical | check valid headings on target, propose Edit |
 | `self-link` | mechanical | remove the self-reference |
+| `source-has-page` | mechanical | replace the `sources` URL with the path the warning names |
 | `dead-end` | judgment | read the scrap, report whether it is a natural atom or genuinely incomplete |
 | `lonely` | judgment | read the scrap, report whether it is a natural root/source note or an orphan that should be linked |
 | `overlinking` | judgment | report which repetitions are structural emphasis vs. noise (graph dedupes; this is about HTML readability) |
@@ -60,13 +62,14 @@ Reject requests like "run all default rules" without a stated purpose.
 
 4. **Branch per rule type**
 
-### Mechanical rules (broken-link, broken-heading-ref, self-link)
+### Mechanical rules (broken-link, broken-heading-ref, self-link, source-has-page)
 
 For each violation:
 - Identify the likely fix
   - `broken-link`: search for the closest scrap via `scraps search --json` and link its `key`
   - `broken-heading-ref`: read target headings with `scraps get <key> --json headings`, then choose the closest valid heading
   - `self-link`: remove the link
+  - `source-has-page`: set the entry's `resource` to the `/<key>.md` path the warning names
 - Propose the Edit
 - Apply on user confirmation (or directly when invoked from a trusted skill context)
 - Re-run the same rule to verify the fix

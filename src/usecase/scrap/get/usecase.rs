@@ -17,6 +17,7 @@ pub struct GetScrapResult {
     pub verifications: Vec<Verification>,
     pub trust_tier: TrustTier,
     pub sources: Vec<Source>,
+    pub resource: Option<String>,
 }
 
 pub struct GetScrapUsecase;
@@ -38,6 +39,7 @@ impl GetScrapUsecase {
             verifications: target_scrap.verifications(),
             trust_tier: target_scrap.trust_tier(),
             sources: target_scrap.sources(),
+            resource: target_scrap.resource().map(str::to_string),
         })
     }
 }

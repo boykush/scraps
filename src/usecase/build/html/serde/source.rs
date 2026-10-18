@@ -14,10 +14,7 @@ pub struct SourceTera {
 
 impl From<&Source> for SourceTera {
     fn from(source: &Source) -> Self {
-        let href = Url::parse(&source.resource)
-            .ok()
-            .filter(|url| matches!(url.scheme(), "http" | "https"))
-            .map(|_| source.resource.clone());
+        let href = web_href(&source.resource);
         SourceTera {
             resource: source.resource.clone(),
             title: source.title.clone(),
@@ -25,6 +22,29 @@ impl From<&Source> for SourceTera {
             href,
         }
     }
+}
+
+/// What a scrap is about, as its top-level `resource` names it.
+#[derive(serde::Serialize, Clone, PartialEq, Debug)]
+pub struct ResourceTera {
+    resource: String,
+    href: Option<String>,
+}
+
+impl ResourceTera {
+    pub fn new(resource: &str) -> Self {
+        ResourceTera {
+            resource: resource.to_string(),
+            href: web_href(resource),
+        }
+    }
+}
+
+fn web_href(resource: &str) -> Option<String> {
+    Url::parse(resource)
+        .ok()
+        .filter(|url| matches!(url.scheme(), "http" | "https"))
+        .map(|_| resource.to_string())
 }
 
 #[cfg(test)]
@@ -72,5 +92,15 @@ mod tests {
     #[case::script("javascript:alert(1)")]
     fn it_keeps_anything_else_as_text(#[case] resource: &str) {
         assert_eq!(SourceTera::from(&source(resource)).href, None);
+    }
+
+    #[rstest]
+    #[case::web("https://example.com/a", Some("https://example.com/a"))]
+    #[case::other_scheme("bigquery://acme/sales/orders", None)]
+    fn it_links_a_resource_only_when_a_browser_can_follow_it(
+        #[case] resource: &str,
+        #[case] href: Option<&str>,
+    ) {
+        assert_eq!(ResourceTera::new(resource).href.as_deref(), href);
     }
 }

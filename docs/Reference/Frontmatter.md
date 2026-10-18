@@ -5,7 +5,7 @@ type: Reference
 #[[Notation/Frontmatter]]
 
 Scraps reads a YAML frontmatter block when a file has one, and requires
-none. Six keys carry meaning; every other key is kept as data and given no
+none. Seven keys carry meaning; every other key is kept as data and given no
 meaning.
 
 ```markdown
@@ -29,6 +29,7 @@ The body starts here.
 | `type` | The scrap's kind |
 | `description` | The scrap's one-line summary |
 | `verified` | Who confirmed the scrap's content, and when |
+| `resource` | What the scrap is about |
 | `sources` | The materials the scrap's content derives from |
 
 ### `title`
@@ -118,6 +119,28 @@ first:
 readable confirmations newest first and each `at` in UTC. A scrap without
 the key is `unverified` with no entries. The tier is advisory: nothing in
 Scraps is withheld or reordered by it.
+
+### `resource`
+
+A single string: the URI of what the scrap is about, such as the article a
+summary stands for. Surrounding whitespace is trimmed and the string is
+otherwise used as written.
+
+```yaml
+type: Blog
+resource: https://example.com/blog/introducing-okf
+```
+
+`resource` says what the scrap is about and `sources` what its content was
+written from. A summary of an article is about that article, so `resource`
+alone says it; `sources` is for what was read when that differs, such as a
+translation.
+
+On the static site it is shown under the title, as a link when it is a web
+URL. `scraps get --json resource` returns it, or `null` when the scrap has
+none. When another scrap lists the same string in its `sources`, the
+`source-has-page` rule of [[Reference/Lint Rules]] asks for the path of this
+scrap instead.
 
 ### `sources`
 
@@ -217,10 +240,10 @@ written, or `null` when the scrap has none.
 
 ## Open Knowledge Format
 
-`title`, `tags`, `type`, `description`, `verified` and `sources` are keys the
+`title`, `tags`, `type`, `description`, `resource`, `verified` and `sources` are keys the
 [Open Knowledge Format](https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/main/SPEC.md)
 (OKF) defines, so files written for OKF bring their titles, tags, types,
-descriptions, confirmations and sources with them. Scraps reads `verified` as an OKF
+descriptions, resources, confirmations and sources with them. Scraps reads `verified` as an OKF
 consumer does, deriving the trust tier from it alone. OKF's concept ID, the file path without `.md`, is
 the scrap's key.
 The reverse is not asked for: OKF requires `type` on every document, Scraps
