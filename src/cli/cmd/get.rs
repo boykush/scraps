@@ -20,7 +20,6 @@ const FIELD_CODE_BLOCKS: &str = "code_blocks";
 const FIELD_IMAGES: &str = "images";
 const FIELD_TYPE: &str = "type";
 const FIELD_DESCRIPTION: &str = "description";
-const FIELD_FRONTMATTER: &str = "frontmatter";
 const FIELD_VERIFIED: &str = "verified";
 const FIELD_SOURCES: &str = "sources";
 const FIELD_RESOURCE: &str = "resource";
@@ -36,7 +35,6 @@ const ALLOWED_FIELDS: &[&str] = &[
     FIELD_IMAGES,
     FIELD_TYPE,
     FIELD_DESCRIPTION,
-    FIELD_FRONTMATTER,
     FIELD_VERIFIED,
     FIELD_SOURCES,
     FIELD_RESOURCE,
@@ -187,12 +185,6 @@ pub fn run(
                                 .as_ref()
                                 .map(|d| Value::String(d.clone()))
                                 .unwrap_or(Value::Null),
-                        );
-                    }
-                    FIELD_FRONTMATTER => {
-                        out.insert(
-                            field.to_string(),
-                            result.frontmatter.clone().unwrap_or(Value::Null),
                         );
                     }
                     FIELD_VERIFIED => {
@@ -456,25 +448,19 @@ mod tests {
             .add_config(b"")
             .add_scrap("post.md", text.as_bytes());
 
-        let output = run_get("post", None, None, Some("body,frontmatter"), &project).unwrap();
+        let output = run_get("post", None, None, Some("body"), &project).unwrap();
         let v: Value = serde_json::from_str(output.trim()).unwrap();
 
         assert_eq!(v["body"], text);
-        assert!(v["frontmatter"].is_null());
     }
 
     #[rstest]
-    fn run_json_field_projection_supports_frontmatter(
+    fn run_json_rejects_the_whole_frontmatter_block(
         #[from(temp_scrap_project)] project: TempScrapProject,
     ) {
         project.add_config(b"").add_scrap("post.md", WITH_BLOCK);
 
-        let output = run_get("post", None, None, Some("frontmatter"), &project).unwrap();
-
-        assert_eq!(
-            output.trim(),
-            r#"{"frontmatter":{"type":"Blog","tags":["a","b"],"owner":"alice"}}"#
-        );
+        assert!(run_get("post", None, None, Some("frontmatter"), &project).is_err());
     }
 
     #[rstest]

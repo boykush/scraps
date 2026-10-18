@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 
 use super::tools::get_scrap::{GetScrapRequest, get_scrap};
-use super::tools::list_frontmatter::list_frontmatter;
 use super::tools::list_tags::list_tags;
 use super::tools::list_todos::{ListTodosRequest, list_todos};
 use super::tools::list_types::list_types;
@@ -40,7 +39,7 @@ impl ScrapsServer {
 #[tool_router]
 impl ScrapsServer {
     #[tool(
-        description = "Use when you know which scrap to read: pass the `key` of a result back (the scrap's path under the wiki root without `.md`, e.g. 'tables/orders'). The older `title` (file stem) with optional `ctx` is still accepted. Optionally restrict to a heading section via 'heading', and project specific fields via 'fields' (allowed: key, title, ctx, body, headings, code_blocks, type, description, frontmatter, verified, sources, resource; defaults to ['key', 'title', 'ctx', 'body']) to keep the response small. 'body' is the scrap's content without its YAML frontmatter block; ask for 'frontmatter' to get that block as parsed data (null when there is none), or 'verified' for the OKF trust tier and confirmations read from it, or 'sources' for the OKF materials the scrap derives from, or 'resource' for the URI of what the scrap is about (null when there is none). Line numbers in headings and code_blocks count lines of the source file, frontmatter block included, so they are not offsets into body. Traverse onward with lookup_scrap_links or lookup_scrap_backlinks, or see everything around the scrap in one call with lookup_scrap_neighborhood."
+        description = "Use when you know which scrap to read: pass the `key` of a result back (the scrap's path under the wiki root without `.md`, e.g. 'tables/orders'). The older `title` (file stem) with optional `ctx` is still accepted. Optionally restrict to a heading section via 'heading', and project specific fields via 'fields' (allowed: key, title, ctx, body, headings, code_blocks, type, description, verified, sources, resource; defaults to ['key', 'title', 'ctx', 'body']) to keep the response small. 'body' is the scrap's content without its YAML frontmatter block. The Open Knowledge Format keys Scraps reads from that block are fields of their own: 'type' and 'description', 'verified' for the trust tier and confirmations, 'sources' for the materials the scrap derives from, and 'resource' for the URI of what the scrap is about (null when there is none). Line numbers in headings and code_blocks count lines of the source file, frontmatter block included, so they are not offsets into body. Traverse onward with lookup_scrap_links or lookup_scrap_backlinks, or see everything around the scrap in one call with lookup_scrap_neighborhood."
     )]
     async fn get_scrap(
         &self,
@@ -156,16 +155,6 @@ impl ScrapsServer {
     ) -> Result<CallToolResult, ErrorData> {
         list_todos(&self.scraps_dir, &self.exclude_dirs, context, parameters).await
     }
-
-    #[tool(
-        description = "Use when the wiki was retrofitted from files carrying YAML frontmatter and you want that metadata across it: returns each scrap that has a frontmatter block together with its parsed keys. The keys are the author's own and scraps reads them as opaque data, with two exceptions: the strings of a `tags` list are scraps tags alongside #[[tag]], so list_tags and lookup_tag_backlinks already cover them, and a `type` string is the scrap's kind (list_types). Read the scrap behind an entry with get_scrap."
-    )]
-    async fn list_frontmatter(
-        &self,
-        context: RequestContext<RoleServer>,
-    ) -> Result<CallToolResult, ErrorData> {
-        list_frontmatter(&self.scraps_dir, &self.exclude_dirs, context).await
-    }
 }
 
 // Without `router = ...` the macro rebuilds the router (and every tool's
@@ -193,8 +182,7 @@ impl ServerHandler for ScrapsServer {
                  neighborhood as a graph: nodes with their hop distance and the links between \
                  them, no bodies. For the topic map, list_tags then lookup_tag_backlinks; for \
                  the kinds of scraps, list_types then lookup_type_scraps. For \
-                 the work recorded across the wiki, list_todos; for a wiki retrofitted from \
-                 files with YAML frontmatter, list_frontmatter.",
+                 the work recorded across the wiki, list_todos.",
             )
     }
 }
@@ -249,7 +237,7 @@ mod tests {
 
         let tools = client.list_tools(Default::default()).await.unwrap();
 
-        assert_eq!(tools.tools.len(), 12);
+        assert_eq!(tools.tools.len(), 11);
 
         let tool_names: Vec<&str> = tools.tools.iter().map(|t| t.name.as_ref()).collect();
         assert!(tool_names.contains(&"orient"));
@@ -263,7 +251,7 @@ mod tests {
         assert!(tool_names.contains(&"list_types"));
         assert!(tool_names.contains(&"lookup_type_scraps"));
         assert!(tool_names.contains(&"list_todos"));
-        assert!(tool_names.contains(&"list_frontmatter"));
+        assert!(!tool_names.contains(&"list_frontmatter"));
 
         client.cancel().await.unwrap();
         server_handle.abort();
@@ -464,7 +452,6 @@ mod tests {
             ("lookup_type_scraps", serde_json::json!({"type": "Blog"})),
             ("orient", serde_json::json!({})),
             ("list_todos", serde_json::json!({})),
-            ("list_frontmatter", serde_json::json!({})),
             (
                 "lookup_scrap_neighborhood",
                 serde_json::json!({"title": "source"}),
@@ -848,29 +835,6 @@ mod tests {
         );
     }
 
-    #[rstest]
-    #[tokio::test]
-    async fn test_call_list_frontmatter_passes_keys_through(
-        #[from(temp_scrap_project)] project: TempScrapProject,
-    ) {
-        project.add_scrap(
-            "Book/reading.md",
-            b"---\nstatus: draft\ntaxonomy:\n  - infra\n---\n\n# reading\n",
-        );
-        project.add_scrap("plain.md", b"# plain\n\nNo frontmatter.\n");
-
-        let response = call_tool_json(&project, "list_frontmatter", serde_json::json!({})).await;
-
-        assert_eq!(response["count"], 1);
-        let item = &response["results"][0];
-        assert_eq!(item["scrap"]["title"], "reading");
-        assert_eq!(item["scrap"]["ctx"], "Book");
-        assert_eq!(
-            item["frontmatter"],
-            serde_json::json!({"status": "draft", "taxonomy": ["infra"]})
-        );
-    }
-
     // Called twice so the second read rebuilds the scrap from the stored IR.
     #[rstest]
     #[tokio::test]
@@ -896,31 +860,7 @@ mod tests {
             )
             .await;
             assert!(backlinks.to_string().contains("orders"), "{backlinks}");
-
-            let frontmatter =
-                call_tool_json(&project, "list_frontmatter", serde_json::json!({})).await;
-            assert_eq!(
-                frontmatter["results"][0]["frontmatter"],
-                serde_json::json!({"tags": ["sales", "a/b"]})
-            );
         }
-    }
-
-    #[rstest]
-    #[tokio::test]
-    async fn test_call_list_frontmatter_empty_points_at_tags(
-        #[from(temp_scrap_project)] project: TempScrapProject,
-    ) {
-        project.add_scrap("plain.md", b"# plain\n\n#[[rust]]\n");
-
-        let response = call_tool_json(&project, "list_frontmatter", serde_json::json!({})).await;
-
-        assert_eq!(response["count"], 0);
-        let next = response["next"].as_str().unwrap_or_default();
-        assert!(
-            next.contains("list_tags"),
-            "empty frontmatter should point at scraps' own metadata: {response}"
-        );
     }
 
     #[rstest]
@@ -1436,29 +1376,19 @@ mod tests {
         let post = call_tool_json(
             &project,
             "get_scrap",
-            serde_json::json!({"title": "post", "fields": ["body", "frontmatter", "headings"]}),
+            serde_json::json!({"title": "post", "fields": ["body", "headings"]}),
         )
         .await;
         assert_eq!(post["body"], "# Post\n\ntext\n");
-        assert_eq!(
-            post["frontmatter"].to_string(),
-            r#"{"type":"Blog","tags":["a","b"],"owner":"alice"}"#
-        );
         assert_eq!(post["headings"][0]["line"], 8);
 
         let open = call_tool_json(
             &project,
             "get_scrap",
-            serde_json::json!({"title": "open", "fields": ["body", "frontmatter"]}),
+            serde_json::json!({"title": "open", "fields": ["body"]}),
         )
         .await;
         assert_eq!(open["body"], "---\ntype: Blog\n\n# Open\n");
-        assert!(open["frontmatter"].is_null());
-        assert!(open.as_object().unwrap().contains_key("frontmatter"));
-
-        let default =
-            call_tool_json(&project, "get_scrap", serde_json::json!({"title": "post"})).await;
-        assert!(!default.as_object().unwrap().contains_key("frontmatter"));
     }
 
     #[rstest]

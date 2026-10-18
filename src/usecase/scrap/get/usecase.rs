@@ -4,7 +4,6 @@ use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::source::Source;
 use scraps_libs::model::verification::{TrustTier, Verification};
-use serde_json::Value;
 
 /// Result for get scrap operation
 #[derive(Debug, Clone, PartialEq)]
@@ -13,7 +12,6 @@ pub struct GetScrapResult {
     pub md_text: String,
     pub scrap_type: Option<String>,
     pub description: Option<String>,
-    pub frontmatter: Option<Value>,
     pub verifications: Vec<Verification>,
     pub trust_tier: TrustTier,
     pub sources: Vec<Source>,
@@ -35,7 +33,6 @@ impl GetScrapUsecase {
             md_text: target_scrap.md_text().to_string(),
             scrap_type: target_scrap.scrap_type().map(str::to_string),
             description: target_scrap.description().map(str::to_string),
-            frontmatter: target_scrap.frontmatter().cloned(),
             verifications: target_scrap.verifications(),
             trust_tier: target_scrap.trust_tier(),
             sources: target_scrap.sources(),
@@ -84,25 +81,6 @@ mod tests {
         assert_eq!(result.scrap.title, "scrap1");
         assert_eq!(result.scrap.key.to_string(), "Context/scrap1");
         assert!(result.md_text.contains("Content of scrap 1"));
-    }
-
-    #[test]
-    fn test_get_scrap_carries_the_frontmatter_block() {
-        let scraps = vec![
-            Scrap::new("typed", &None, "---\ntype: Blog\n---\n\n# Typed\n"),
-            Scrap::new("plain", &None, "# Plain\n"),
-        ];
-
-        let usecase = GetScrapUsecase::new();
-
-        let typed = usecase.execute(&scraps, &ScrapKey::from_path_str("typed"));
-        assert_eq!(
-            typed.unwrap().frontmatter,
-            Some(serde_json::json!({"type": "Blog"}))
-        );
-
-        let plain = usecase.execute(&scraps, &ScrapKey::from_path_str("plain"));
-        assert_eq!(plain.unwrap().frontmatter, None);
     }
 
     #[test]

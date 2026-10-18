@@ -143,11 +143,11 @@ field projection.
 | `title` | string | no | Still accepted in place of `key`: the file name without `.md` |
 | `ctx` | string | no | Still accepted with `title`: context folder/path |
 | `heading` | string | no | Restrict body/structure fields to this section |
-| `fields` | string[] | no | Defaults to `["key", "title", "ctx", "body"]`; allowed: `key`, `title`, `ctx`, `body`, `headings`, `code_blocks`, `type`, `description`, `frontmatter`, `verified`, `sources`, `resource` |
+| `fields` | string[] | no | Defaults to `["key", "title", "ctx", "body"]`; allowed: `key`, `title`, `ctx`, `body`, `headings`, `code_blocks`, `type`, `description`, `verified`, `sources`, `resource` |
 
 Returns the requested fields. Default response: `{ key, title, ctx, body }`. `type`
-and `description` are the scrap's frontmatter type and description, and
-`frontmatter` its whole block as parsed data, each `null` when it has none.
+and `description` are the scrap's frontmatter type and description, each
+`null` when it has none.
 `verified` is `{ tier, entries }`: the trust tier (`unverified`,
 `machine-confirmed` or `human-reviewed`) and the confirmations newest first.
 `sources` is the list of `{ resource, id?, title?, author?, last_modified? }`
@@ -292,37 +292,6 @@ Returns:
 is skipped, and items inside fenced code blocks are not tasks. Results are
 ordered by context, then file name, then line, and carry the same shape as
 `scraps todo --json`. Read the scrap a task sits in with `get_scrap`.
-
-### `list_frontmatter`
-
-YAML frontmatter aggregated across every scrap that carries a block. Takes no
-parameters.
-
-Returns:
-
-```json
-{
-  "results": [
-    {
-      "scrap": { "key": "Programming/Rust/borrowing", "title": "borrowing", "ctx": "Programming/Rust" },
-      "frontmatter": { "status": "review", "owner": "bob", "taxonomy": ["rust", "memory"] }
-    }
-  ],
-  "count": 1
-}
-```
-
-Keys are passed through in the order they were written, and Scraps requires
-none of them. It reads seven: `title` is the scrap's title (the `title` of
-every result), the strings of a `tags` list are tags alongside
-`#[[tag]]` (`list_tags`, `lookup_tag_backlinks`), `type` is the scrap's
-type (`list_types`, `lookup_type_scraps`), `description` is its one-line
-summary (`get_scrap`, `search_scraps`), and `resource` what it is about,
-`verified` its confirmations and `sources` what it derives from
-(`get_scrap`). Every other key is opaque — see the
-[frontmatter reference](https://boykush.github.io/scraps/scraps/Reference/Frontmatter.html).
-Scraps without a block are omitted, and a malformed block is skipped rather
-than failing the call.
 
 ## Manual setup (without the plugin)
 

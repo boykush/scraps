@@ -5,8 +5,8 @@ type: Reference
 #[[Notation/Frontmatter]]
 
 Scraps reads a YAML frontmatter block when a file has one, and requires
-none. Seven keys carry meaning; every other key is kept as data and given no
-meaning.
+none. It reads the seven keys below, all defined by the Open Knowledge
+Format, and ignores every other key.
 
 ```markdown
 ---
@@ -206,8 +206,8 @@ naming no scrap.
   `sources` entry without a non-empty `resource`. Within a readable
   `sources` entry, an optional key of the wrong shape is dropped and the
   entry kept.
-- Keys Scraps does not read are passed through untouched, in the order they
-  were written.
+- Keys Scraps does not read are ignored: no command, tool or page shows
+  them. The file itself is never rewritten.
 
 ## What frontmatter does not change
 
@@ -234,10 +234,6 @@ A block Scraps reads is metadata, not content:
   lines, so they are the lines of the file. They are not offsets into
   `body`, which is shorter by the block.
 
-`scraps get --json frontmatter`, or `fields: ["frontmatter"]` on `get_scrap`,
-returns the block of one scrap as data: its keys in the order they were
-written, or `null` when the scrap has none.
-
 ## Open Knowledge Format
 
 `title`, `tags`, `type`, `description`, `resource`, `verified` and `sources` are keys the
@@ -252,11 +248,6 @@ on none.
 OKF connects files with ordinary Markdown links to their `.md` paths, and
 those are links between scraps: see [[Reference/Markdown Link]].
 
-The rest of OKF is not interpreted. Its other keys are passed through like
-any author-defined key, and `index.md` and `log.md` are ordinary scraps.
-
-## Reading the whole block
-
-`scraps frontmatter --json` returns every scrap that carries a block with
-all of its keys, read or not, and `scraps get --json frontmatter` the block
-of a single scrap — see [[Reference/CLI Overview]].
+The rest of OKF is not interpreted yet. Its other keys are ignored like any
+author-defined key, and `index.md` and `log.md` are ordinary scraps. Each
+OKF key Scraps comes to read is added as a field of its own.

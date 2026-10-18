@@ -21,7 +21,6 @@ const FIELD_HEADINGS: &str = "headings";
 const FIELD_CODE_BLOCKS: &str = "code_blocks";
 const FIELD_TYPE: &str = "type";
 const FIELD_DESCRIPTION: &str = "description";
-const FIELD_FRONTMATTER: &str = "frontmatter";
 const FIELD_VERIFIED: &str = "verified";
 const FIELD_SOURCES: &str = "sources";
 const FIELD_RESOURCE: &str = "resource";
@@ -36,7 +35,6 @@ const ALLOWED_FIELDS: &[&str] = &[
     FIELD_CODE_BLOCKS,
     FIELD_TYPE,
     FIELD_DESCRIPTION,
-    FIELD_FRONTMATTER,
     FIELD_VERIFIED,
     FIELD_SOURCES,
     FIELD_RESOURCE,
@@ -55,7 +53,7 @@ pub struct GetScrapRequest {
     pub heading: Option<String>,
     /// Optional projection of fields to include. Defaults to ["key", "title", "ctx", "body"].
     /// Allowed: "key", "title", "ctx", "body", "headings", "code_blocks", "type", "description",
-    /// "frontmatter", "verified", "sources", "resource".
+    /// "verified", "sources", "resource".
     pub fields: Option<Vec<String>>,
 }
 
@@ -203,12 +201,6 @@ pub async fn get_scrap(
                         .as_ref()
                         .map(|d| Value::String(d.clone()))
                         .unwrap_or(Value::Null),
-                );
-            }
-            FIELD_FRONTMATTER => {
-                out.insert(
-                    field.to_string(),
-                    result.frontmatter.clone().unwrap_or(Value::Null),
                 );
             }
             FIELD_VERIFIED => {
