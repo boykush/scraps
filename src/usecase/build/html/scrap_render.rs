@@ -22,7 +22,7 @@ use super::serde::link_scraps::LinkScrapsTera;
 use super::serde::scrap_detail::ScrapDetailTera;
 use super::serde::scrap_graph::ScrapGraphTera;
 use super::serde::scrap_type::TypeTera;
-use super::serde::source::SourceTera;
+use super::serde::source::{ResourceTera, SourceTera};
 use super::serde::tag::TagTera;
 
 pub struct ScrapRender {
@@ -92,6 +92,10 @@ impl ScrapRender {
 
         if let Some(scrap_type) = scrap.scrap_type().and_then(|name| site_nav.types.get(name)) {
             context.insert("scrap_type", &TypeTera::from(scrap_type));
+        }
+
+        if let Some(resource) = scrap.resource() {
+            context.insert("scrap_resource", &ResourceTera::new(resource));
         }
 
         let sources = scrap
@@ -363,7 +367,7 @@ mod tests {
         let sourced = &Scrap::new(
             "sourced",
             &None,
-            "---\nsources:\n  - resource: https://example.com/book\n    title: A <Book>\n  \
+            "---\nresource: https://example.com/book\nsources:\n  - resource: https://example.com/book\n    title: A <Book>\n  \
              - resource: https://example.com/blog\n  - resource: plain\n---\n\nbody\n",
         );
         let plain = &Scrap::new("plain", &None, "body");
@@ -423,7 +427,12 @@ mod tests {
             html.find("class=\"content\"").unwrap() < html.find("class=\"source-list\"").unwrap()
         );
 
+        assert!(html.contains(
+            "<p class=\"resource\">about <a class=\"link\" href=\"https://example.com/book\">https://example.com/book</a></p>"
+        ));
+
         assert!(!read("plain").contains(">sources &#183;"));
+        assert!(!read("plain").contains("<p class=\"resource\">"));
     }
 
     #[test]

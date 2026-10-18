@@ -23,6 +23,7 @@ const FIELD_DESCRIPTION: &str = "description";
 const FIELD_FRONTMATTER: &str = "frontmatter";
 const FIELD_VERIFIED: &str = "verified";
 const FIELD_SOURCES: &str = "sources";
+const FIELD_RESOURCE: &str = "resource";
 
 const DEFAULT_FIELDS: &[&str] = &[FIELD_KEY, FIELD_TITLE, FIELD_CTX, FIELD_BODY];
 const ALLOWED_FIELDS: &[&str] = &[
@@ -38,6 +39,7 @@ const ALLOWED_FIELDS: &[&str] = &[
     FIELD_FRONTMATTER,
     FIELD_VERIFIED,
     FIELD_SOURCES,
+    FIELD_RESOURCE,
 ];
 
 fn parse_fields(spec: &str) -> ScrapsResult<Vec<&'static str>> {
@@ -139,6 +141,16 @@ pub fn run(
                         let v: Vec<HeadingJson> =
                             headings(scoped).into_iter().map(Into::into).collect();
                         out.insert(field.to_string(), serde_json::to_value(v)?);
+                    }
+                    FIELD_RESOURCE => {
+                        out.insert(
+                            field.to_string(),
+                            result
+                                .resource
+                                .clone()
+                                .map(Value::String)
+                                .unwrap_or(Value::Null),
+                        );
                     }
                     FIELD_SOURCES => {
                         let sources: Vec<SourceJson> =
@@ -497,6 +509,25 @@ mod tests {
             output.trim(),
             r#"{"sources":[{"resource":"https://example.com/ga4","title":"GA4 schema","last_modified":"2026-05-30T00:00:00Z"},{"resource":"references/schema.md"}]}"#
         );
+    }
+
+    #[rstest]
+    fn run_json_field_projection_supports_resource(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(b"")
+            .add_scrap(
+                "post.md",
+                b"---\nresource: https://example.com/post\n---\n\n# Post\n",
+            )
+            .add_scrap("plain.md", b"# Plain\n");
+
+        let with = run_get("post", None, None, Some("resource"), &project).unwrap();
+        let without = run_get("plain", None, None, Some("resource"), &project).unwrap();
+
+        assert_eq!(with.trim(), r#"{"resource":"https://example.com/post"}"#);
+        assert_eq!(without.trim(), r#"{"resource":null}"#);
     }
 
     #[rstest]

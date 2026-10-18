@@ -22,8 +22,17 @@ alike and quote each as it was written.
 | `broken-link` | link, or `sources` path, that does not resolve to a scrap | on |
 | `broken-heading-ref` | `[[Page#Heading]]` or `page.md#heading` heading missing | on |
 | `unlinkable-key` | scrap whose file path cannot be written inside `[[ ]]` | on |
+| `source-has-page` | `sources` URL that another scrap's `resource` names | on |
 | `stale-by-git` | policy: last commit older than the threshold the wiki sets | opt-in |
 | `unportable-key` | policy: file path that does not port across filesystems | opt-in |
+
+## Sources
+
+`source-has-page` reports a `sources` entry whose `resource` is the same
+string as another scrap's top-level `resource`: the material has a page of
+its own, so the entry can point at it by path, `/<key>.md`, and become a
+`source` link. A scrap naming its own `resource` in its `sources` is not
+reported. See [[Reference/Frontmatter]].
 
 ## Key rules
 

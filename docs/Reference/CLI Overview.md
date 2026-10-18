@@ -76,11 +76,11 @@ scraps get "Book/Title" --heading "Install" --json body,headings
 ```
 
 Allowed fields are `key`, `title`, `ctx`, `body`, `headings`, `code_blocks`,
-`images`, `type`, `description`, `frontmatter`, `verified`, and `sources`. `type` and `description` are the
+`images`, `type`, `description`, `frontmatter`, `verified`, `sources`, and `resource`. `type` and `description` are the
 scrap's frontmatter type and description, and `frontmatter` its whole block,
 each `null` when it has none. `verified` is the scrap's trust tier and
-confirmations, `{ tier, entries }`, and `sources` the materials it
-derives from. What `body` leaves out and what the line
+confirmations, `{ tier, entries }`, `sources` the materials it
+derives from, and `resource` what it is about, `null` when it has none. What `body` leaves out and what the line
 numbers in `headings` and `code_blocks` count is in
 [[Reference/Frontmatter]].
 Reference navigation stays separate: use `scraps links`, `scraps backlinks`,

@@ -96,7 +96,7 @@ pub enum SubCommands {
             value_name = "FIELDS",
             num_args = 0..=1,
             default_missing_value = "",
-            help = "Output as JSON. Optionally accepts a comma-separated field projection (key,title,ctx,body,headings,code_blocks,images,type,description,frontmatter,verified,sources)."
+            help = "Output as JSON. Optionally accepts a comma-separated field projection (key,title,ctx,body,headings,code_blocks,images,type,description,frontmatter,verified,sources,resource)."
         )]
         json: Option<String>,
     },
@@ -296,6 +296,8 @@ pub enum CliLintRuleName {
     StaleByGit,
     #[value(name = "unportable-key")]
     UnportableKey,
+    #[value(name = "source-has-page")]
+    SourceHasPage,
 }
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
@@ -350,6 +352,7 @@ impl From<CliLintRuleName> for LintRuleName {
             CliLintRuleName::UnlinkableKey => LintRuleName::UnlinkableKey,
             CliLintRuleName::StaleByGit => LintRuleName::StaleByGit,
             CliLintRuleName::UnportableKey => LintRuleName::UnportableKey,
+            CliLintRuleName::SourceHasPage => LintRuleName::SourceHasPage,
         }
     }
 }

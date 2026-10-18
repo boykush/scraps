@@ -4,6 +4,7 @@ pub mod dead_end;
 pub mod lonely;
 pub mod overlinking;
 pub mod self_link;
+pub mod source_has_page;
 pub mod stale_by_git;
 pub mod unlinkable_key;
 pub mod unportable_key;

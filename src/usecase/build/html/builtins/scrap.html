@@ -29,6 +29,9 @@
                 committed {{ scrap.commited_ts | date(format="%Y-%m-%d", timezone=timezone) }}
             </p>
         {% endif %}
+        {% if scrap_resource %}
+            <p class="resource">about {% if scrap_resource.href %}<a class="link" href="{{ scrap_resource.href }}">{{ scrap_resource.resource }}</a>{% else %}<span class="name">{{ scrap_resource.resource }}</span>{% endif %}</p>
+        {% endif %}
         <div class="content">
             {% for element in scrap.content.elements %}{% if element.raw %}{{ element.raw | safe }}{% elif element.autolink %}{{ <link_card autolink={element.autolink} /> }}{% endif %}{% endfor %}
         </div>

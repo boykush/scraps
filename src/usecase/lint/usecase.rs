@@ -8,7 +8,8 @@ use super::{
     rules::{
         broken_heading_ref::BrokenHeadingRefRule, broken_link::BrokenLinkRule,
         dead_end::DeadEndRule, lonely::LonelyRule, overlinking::OverlinkingRule,
-        self_link::SelfLinkRule, unlinkable_key::UnlinkableKeyRule,
+        self_link::SelfLinkRule, source_has_page::SourceHasPageRule,
+        unlinkable_key::UnlinkableKeyRule,
     },
 };
 
@@ -45,6 +46,7 @@ impl LintUsecase {
             Box::new(BrokenLinkRule),
             Box::new(BrokenHeadingRefRule),
             Box::new(UnlinkableKeyRule),
+            Box::new(SourceHasPageRule),
         ];
 
         if !rule_names.is_empty() {
