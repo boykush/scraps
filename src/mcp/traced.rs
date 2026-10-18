@@ -318,6 +318,52 @@ mod tests {
         assert_eq!(span.status, Status::error(""));
     }
 
+    #[rstest]
+    #[case::hits("rust", "1")]
+    #[case::no_hits("haskell", "0")]
+    #[tokio::test]
+    async fn test_search_span_records_how_many_scraps_it_returned(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+        #[case] query: &str,
+        #[case] expected: &str,
+    ) {
+        project.add_scrap("rust.md", b"# Rust\n\nRust content");
+        project.add_scrap("python.md", b"# Python\n\nPython content");
+        let (exporter, _subscriber) = capture_spans();
+        let spans = SpanOptions {
+            capture_content: false,
+        };
+
+        let (client_stream, server_stream) = tokio::io::duplex(4096);
+        let server = Traced::new(
+            ScrapsServer::new(project.scraps_dir.clone(), vec![]),
+            Some(spans),
+        );
+        let server_handle = tokio::spawn(async move { server.serve(server_stream).await });
+        let client = ().serve(client_stream).await.unwrap();
+        let arguments = serde_json::json!({"query": query});
+        client
+            .call_tool(
+                CallToolRequestParams::new("search_scraps")
+                    .with_arguments(arguments.as_object().unwrap().clone()),
+            )
+            .await
+            .unwrap();
+        client.cancel().await.unwrap();
+        server_handle.abort();
+
+        let span = exporter
+            .get_finished_spans()
+            .unwrap()
+            .into_iter()
+            .find(|span| span.name == "tools/call search_scraps")
+            .expect("the search should have left a span");
+        assert_eq!(
+            attribute(&span, "scraps.search.result_count").as_deref(),
+            Some(expected)
+        );
+    }
+
     #[tokio::test]
     async fn test_span_outside_http_records_a_pipe_transport() {
         let span = span_of_a_call_to(FailingTool).await;
