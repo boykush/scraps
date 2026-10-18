@@ -1,0 +1,31 @@
+# This repository's entities in boykush's Backstage catalog, found on main by its
+# GitHub discovery (boykush/infrastructure-as-code's applications/backstage/).
+# How an entity is written — which edges to draw, what a tag means — is set in
+# boykush/github-management's AGENTS.md and the comments atop its catalog/ files.
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: scraps
+  description: >-
+    Wiki-link で書く markdown の compiler（CLI・静的サイト生成・MCP サーバー）。wiki の生成と、wiki の
+    MCP サーバーの実体に使われる
+  links:
+    - url: https://boykush.github.io/scraps/
+      title: ドキュメント
+      icon: docs
+    - url: https://crates.io/crates/scraps
+      title: crates.io
+spec:
+  type: repository
+  lifecycle: production
+  owner: user:boykush
+  system: knowledge
+  consumesApis:
+    - adr-mcp
+    - jaeger-mcp
+  dependsOn:
+    - component:homebrew-tap
+    - component:ai-plugins
+    - component:workflows
+    - resource:github-pages
+    - resource:repo-writer-app
