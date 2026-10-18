@@ -70,8 +70,8 @@ pub async fn search_scraps(
     // Execute search
     let num = request.num.unwrap_or(100);
     let logic = request.logic.unwrap_or_default().into();
-    let results = search_usecase
-        .execute(&scraps, &request.query, num, logic)
+    let results = tracing::info_span!("search")
+        .in_scope(|| search_usecase.execute(&scraps, &request.query, num, logic))
         .map_err(|e| ErrorData::new(ErrorCode(-32004), format!("Search failed: {e}"), None))?;
 
     // Convert results to structured response
