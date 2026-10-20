@@ -22,7 +22,8 @@ then `A`–`Z`, then a `漢字` group, then `#` for anything else. Groups with n
 scraps are not shown.
 
 A list page holds every scrap of its list and arranges them itself in the
-browser. Without JavaScript it shows them all in the updated order.
+browser, so switching the order or the type rewrites the query without
+reloading the page. Without JavaScript it shows them all in the updated order.
 
 `paginate_by` under `[ssg]` in [[Reference/Configuration]] sets how many rows
 the updated and backlinks orders show before a *show more* button; the title

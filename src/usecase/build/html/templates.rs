@@ -1,4 +1,5 @@
 use crate::error::{BuildError, ScrapsResult, anyhow::Context};
+use crate::usecase::build::css::serde::color_scheme::ColorSchemeTera;
 use crate::usecase::build::html::serde::nav_scopes::NavScopesTera;
 use crate::usecase::build::model::html::HtmlMetadata;
 use crate::usecase::build::model::site_nav::SiteNav;
@@ -67,6 +68,10 @@ pub fn context(base_url: &BaseUrl, metadata: &HtmlMetadata) -> tera::Context {
     context.insert("title", &metadata.title());
     context.insert("description", &metadata.description());
     context.insert("favicon", &metadata.favicon());
+    context.insert(
+        "color_scheme",
+        &ColorSchemeTera::new(metadata.color_scheme()),
+    );
     context.insert("scraps_version", env!("CARGO_PKG_VERSION"));
 
     context
