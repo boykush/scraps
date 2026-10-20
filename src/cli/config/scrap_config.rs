@@ -118,16 +118,16 @@ impl ScrapConfig {
             .as_ref()
             .map(|c| c.as_lang_code())
             .unwrap_or(&default_lang_code);
-        let html_metadata =
-            HtmlMetadata::new(lang_code, &ssg.title, &ssg.description, &ssg.favicon);
-
         let default_color_scheme = ColorScheme::OsSetting;
-        let css_metadata = CssMetadata::new(
-            ssg.color_scheme
-                .as_ref()
-                .map(|c| c.as_color_scheme())
-                .unwrap_or(&default_color_scheme),
-        );
+        let color_scheme = ssg
+            .color_scheme
+            .as_ref()
+            .map(|c| c.as_color_scheme())
+            .unwrap_or(&default_color_scheme);
+        let html_metadata =
+            HtmlMetadata::new(lang_code, &ssg.title, &ssg.description, &ssg.favicon)
+                .with_color_scheme(color_scheme);
+        let css_metadata = CssMetadata::new(color_scheme);
 
         let paging = match ssg.paginate_by {
             None => Paging::Not,

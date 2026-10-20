@@ -4,6 +4,14 @@
 {% include "__builtins/_tokens.css" %}
 }
 
+/* Moving to another page of the site keeps the old one on screen until the
+   new one can paint, instead of flashing a blank ground in between. */
+@media (prefers-reduced-motion: no-preference) {
+    @view-transition {
+        navigation: auto;
+    }
+}
+
 /* html tag */
 body {
     margin: 0;
@@ -523,6 +531,11 @@ div.index {
         margin: 0 0 var(--space-3);
         font-family: var(--font-family-mono);
         font-size: var(--font-size-sm);
+    }
+
+    /* A list opened with a query waits for the script to arrange it. */
+    &[data-arranging] ul.scrap-rows {
+        visibility: hidden;
     }
 
     /* Group headings and the jump bar belong to the title order only. */

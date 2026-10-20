@@ -4,6 +4,8 @@
 
 {% block main %}
     <div class="index" id="scope-list" data-sort="updated" data-type="" data-paginate-by="{{ paginate_by }}" data-total="{{ scrap_count }}" data-scoped="{% if scope_tag %}true{% endif %}">
+        {# Hidden until arranged, so a list opened with a query never shows its default order first. #}
+        <script>if (location.search) document.getElementById('scope-list').dataset.arranging = '';</script>
         <p class="list-head">
             <span class="view-name">{% if scope_tag %}<span class="syntax">#[[</span>{{ scope_tag }}<span class="syntax">]]</span>{% else %}all scraps{% endif %}</span>
             <span class="stats">{% if scope_tag %}{{ scraps.rows | length }} of {{ scrap_count }}{% else %}{{ scrap_count }}{% endif %} scraps</span>
@@ -24,44 +26,24 @@
     <script>
         // Sort and type live in the query, so the page arranges its own rows:
         // every row of the scope is in the HTML, in updated order, carrying a
-        // rank per sort. Links are rewritten to carry the query along.
+        // rank per sort. A facet only rewrites the query and arranges again,
+        // so switching one never reloads the page.
         (() => {
             const list = document.getElementById('scope-list');
-            const query = new URLSearchParams(location.search);
-            const sort = ['backlinks', 'title'].includes(query.get('sort')) ? query.get('sort') : 'updated';
-            const type = query.get('type') ?? '';
-            list.dataset.sort = sort;
-            list.dataset.type = type;
-
             const ul = list.querySelector('ul.scrap-rows');
-            const key = 'rank' + sort[0].toUpperCase() + sort.slice(1);
-            const rank = (li) => Number(li.dataset[key] ?? Infinity);
-            ul.append(...[...ul.children].sort((a, b) => rank(a) - rank(b)));
-
-            const rows = [...ul.querySelectorAll('li.item')];
-            const matches = rows.filter((li) => !type || li.dataset.type === type);
-            const groups = new Set(matches.map((li) => li.dataset.group));
-            list.querySelectorAll('.group-head, .jump').forEach((el) => {
-                el.hidden = !groups.has(el.dataset.group);
-            });
-
-            const step = sort === 'title' ? 0 : Number(list.dataset.paginateBy);
             const more = list.querySelector('button.more');
-            let limit = step || matches.length;
+            const scopes = [...document.querySelectorAll('nav.scopes a.item')];
+            scopes.forEach((a) => { a.dataset.path = a.getAttribute('href'); });
+            let rows = [];
+            let matches = [];
+            let step = 0;
+            let limit = 0;
+
             const page = () => {
                 rows.forEach((li) => { li.hidden = true; });
                 matches.slice(0, limit).forEach((li) => { li.hidden = false; });
                 more.hidden = limit >= matches.length;
             };
-            more.addEventListener('click', () => { limit += step; page(); });
-            page();
-            list.querySelector('.empty').hidden = matches.length > 0;
-
-            const total = Number(list.dataset.total);
-            const narrowed = type || list.dataset.scoped;
-            list.querySelector('.stats').textContent =
-                (narrowed ? matches.length + ' of ' + total : total) + ' scraps';
-
             const mark = (a, current) => {
                 current ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current');
             };
@@ -70,24 +52,63 @@
                 Object.entries(changes).forEach(([k, v]) => { v ? next.set(k, v) : next.delete(k); });
                 return next.size ? '?' + next : './';
             };
-            list.querySelectorAll('a[data-sort]').forEach((a) => {
-                a.href = href({ sort: a.dataset.sort === 'updated' ? '' : a.dataset.sort });
-                mark(a, a.dataset.sort === sort);
-            });
-            list.querySelectorAll('a[data-type]').forEach((a) => {
-                a.href = href({ type: a.dataset.type });
-                mark(a, a.dataset.type === type);
-            });
 
-            const carried = query.toString();
-            document.querySelectorAll('nav.scopes a.item').forEach((a) => {
-                const counts = JSON.parse(a.dataset.counts);
-                const count = type ? counts.by_type[type] ?? 0 : counts.total;
-                a.querySelector('.count').textContent = count;
-                a.classList.toggle('zero', count === 0);
-                if (count === 0) a.removeAttribute('href');
-                else if (carried) a.search = carried;
+            const arrange = () => {
+                const query = new URLSearchParams(location.search);
+                const sort = ['backlinks', 'title'].includes(query.get('sort')) ? query.get('sort') : 'updated';
+                const type = query.get('type') ?? '';
+                list.dataset.sort = sort;
+                list.dataset.type = type;
+
+                const key = 'rank' + sort[0].toUpperCase() + sort.slice(1);
+                const rank = (li) => Number(li.dataset[key] ?? Infinity);
+                ul.append(...[...ul.children].sort((a, b) => rank(a) - rank(b)));
+
+                rows = [...ul.querySelectorAll('li.item')];
+                matches = rows.filter((li) => !type || li.dataset.type === type);
+                const groups = new Set(matches.map((li) => li.dataset.group));
+                list.querySelectorAll('.group-head, .jump').forEach((el) => {
+                    el.hidden = !groups.has(el.dataset.group);
+                });
+                step = sort === 'title' ? 0 : Number(list.dataset.paginateBy);
+                limit = step || matches.length;
+                page();
+                list.querySelector('.empty').hidden = matches.length > 0;
+
+                const total = Number(list.dataset.total);
+                const narrowed = type || list.dataset.scoped;
+                list.querySelector('.stats').textContent =
+                    (narrowed ? matches.length + ' of ' + total : total) + ' scraps';
+
+                list.querySelectorAll('a[data-sort]').forEach((a) => {
+                    a.href = href({ sort: a.dataset.sort === 'updated' ? '' : a.dataset.sort });
+                    mark(a, a.dataset.sort === sort);
+                });
+                list.querySelectorAll('a[data-type]').forEach((a) => {
+                    a.href = href({ type: a.dataset.type });
+                    mark(a, a.dataset.type === type);
+                });
+                scopes.forEach((a) => {
+                    const counts = JSON.parse(a.dataset.counts);
+                    const count = type ? counts.by_type[type] ?? 0 : counts.total;
+                    a.querySelector('.count').textContent = count;
+                    a.classList.toggle('zero', count === 0);
+                    if (count === 0) a.removeAttribute('href');
+                    else a.setAttribute('href', a.dataset.path + location.search);
+                });
+                delete list.dataset.arranging;
+            };
+
+            more.addEventListener('click', () => { limit += step; page(); });
+            list.addEventListener('click', (event) => {
+                const facet = event.target.closest('a[data-sort], a[data-type]');
+                if (!facet || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                event.preventDefault();
+                history.pushState(null, '', facet.href);
+                arrange();
             });
+            window.addEventListener('popstate', arrange);
+            arrange();
         })();
     </script>
 {% endblock script %}

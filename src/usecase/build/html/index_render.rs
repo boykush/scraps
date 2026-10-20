@@ -243,6 +243,18 @@ mod tests {
     }
 
     #[rstest]
+    fn it_names_the_color_scheme_before_the_stylesheet_loads(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        render(&project, &[Scrap::new("a", &None, "")], &[]);
+
+        let home = fs::read_to_string(project.output_path("index.html")).unwrap();
+        let meta = home.find(r#"<meta name="color-scheme" content="light dark">"#);
+        let stylesheet = home.find("main.css");
+        assert!(meta.is_some() && meta < stylesheet, "{home}");
+    }
+
+    #[rstest]
     fn fusejs_loads_as_es_module_in_builtin_index(
         #[from(temp_scrap_project)] project: TempScrapProject,
     ) {
