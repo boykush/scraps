@@ -65,7 +65,7 @@ tracing-opentelemetry = { version = "=0.34.0", default-features = false }
 schemars = "=1.2.3"
 rstest = "=0.28.0"
 tempfile = "=3.27.0"
-annotate-snippets = "=0.12.16"
+annotate-snippets = "=0.12.17"
 comfy-table = { version = "=8.0.1", features = ["custom_styling"] }
 
 [package]
