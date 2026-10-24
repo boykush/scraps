@@ -1,0 +1,18 @@
+# Managed by Terraform (boykush/github-management): this file is distributed by
+# the github_repository_file resource. Edits made directly in a target repo are
+# overwritten on the next `terraform apply` — change templates/dependabot-merge.yml instead.
+name: dependabot-merge
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions: {}
+
+jobs:
+  merge:
+    uses: boykush/workflows/.github/workflows/dependabot-merge.yml@9f6dd4e78f04c9e19a65ca452a32c21a6d5a981a
+    permissions:
+      contents: read
+      pull-requests: read
+      id-token: write
