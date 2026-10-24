@@ -1,5 +1,6 @@
 use crate::error::ScrapsResult;
 use crate::usecase::scrap::scrap_ref::{ScrapRef, find_scrap};
+use scraps_libs::model::generated::Generated;
 use scraps_libs::model::key::ScrapKey;
 use scraps_libs::model::scrap::Scrap;
 use scraps_libs::model::source::Source;
@@ -12,6 +13,7 @@ pub struct GetScrapResult {
     pub md_text: String,
     pub scrap_type: Option<String>,
     pub description: Option<String>,
+    pub generated: Option<Generated>,
     pub verifications: Vec<Verification>,
     pub trust_tier: TrustTier,
     pub sources: Vec<Source>,
@@ -33,6 +35,7 @@ impl GetScrapUsecase {
             md_text: target_scrap.md_text().to_string(),
             scrap_type: target_scrap.scrap_type().map(str::to_string),
             description: target_scrap.description().map(str::to_string),
+            generated: target_scrap.generated(),
             verifications: target_scrap.verifications(),
             trust_tier: target_scrap.trust_tier(),
             sources: target_scrap.sources(),

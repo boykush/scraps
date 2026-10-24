@@ -918,6 +918,22 @@ div.scrap p.type {
     }
 }
 
+/* generated and verified — who wrote the content and who confirmed it, on one
+   line. Dates are left to the committed date, so only the actors show. */
+div.scrap p.generated,
+div.scrap p.verified {
+    display: inline-block;
+    margin: var(--space-2) var(--space-3) 0 0;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+
+    & .actor {
+        color: var(--color-text);
+    }
+}
+
 /* resource — what the scrap stands for, under its title. A long URL breaks
    anywhere rather than widening the page. */
 div.scrap p.resource {

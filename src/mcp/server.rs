@@ -39,7 +39,7 @@ impl ScrapsServer {
 #[tool_router]
 impl ScrapsServer {
     #[tool(
-        description = "Use when you know which scrap to read: pass the `key` of a result back (the scrap's path under the wiki root without `.md`, e.g. 'tables/orders'). The older `title` (file stem) with optional `ctx` is still accepted. Optionally restrict to a heading section via 'heading', and project specific fields via 'fields' (allowed: key, title, ctx, body, headings, code_blocks, type, description, verified, sources, resource; defaults to ['key', 'title', 'ctx', 'body']) to keep the response small. 'body' is the scrap's content without its YAML frontmatter block. The Open Knowledge Format keys Scraps reads from that block are fields of their own: 'type' and 'description', 'verified' for the trust tier and confirmations, 'sources' for the materials the scrap derives from, and 'resource' for the URI of what the scrap is about (null when there is none). Line numbers in headings and code_blocks count lines of the source file, frontmatter block included, so they are not offsets into body. Traverse onward with lookup_scrap_links or lookup_scrap_backlinks, or see everything around the scrap in one call with lookup_scrap_neighborhood."
+        description = "Use when you know which scrap to read: pass the `key` of a result back (the scrap's path under the wiki root without `.md`, e.g. 'tables/orders'). The older `title` (file stem) with optional `ctx` is still accepted. Optionally restrict to a heading section via 'heading', and project specific fields via 'fields' (allowed: key, title, ctx, body, headings, code_blocks, type, description, generated, verified, sources, resource; defaults to ['key', 'title', 'ctx', 'body']) to keep the response small. 'body' is the scrap's content without its YAML frontmatter block. The Open Knowledge Format keys Scraps reads from that block are fields of their own: 'type' and 'description', 'generated' for who wrote the content and when (null when there is none), 'verified' for the trust tier and confirmations, 'sources' for the materials the scrap derives from, and 'resource' for the URI of what the scrap is about (null when there is none). Line numbers in headings and code_blocks count lines of the source file, frontmatter block included, so they are not offsets into body. Traverse onward with lookup_scrap_links or lookup_scrap_backlinks, or see everything around the scrap in one call with lookup_scrap_neighborhood."
     )]
     async fn get_scrap(
         &self,
@@ -1406,6 +1406,32 @@ mod tests {
             desc.contains("frontmatter") && desc.contains("not offsets into body"),
             "get should say what its line numbers count: {desc}"
         );
+    }
+
+    #[rstest]
+    #[tokio::test]
+    async fn test_get_scrap_projects_generated_only_when_asked(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project.add_scrap(
+            "orders.md",
+            b"---\ngenerated: { by: reference_agent/gemini-2.5-pro, at: 2026-06-20T22:53:05Z }\n---\n\n# Orders\n",
+        );
+
+        let generated = call_tool_json(
+            &project,
+            "get_scrap",
+            serde_json::json!({"key": "orders", "fields": ["generated"]}),
+        )
+        .await;
+        assert_eq!(
+            generated["generated"],
+            serde_json::json!({"by": "reference_agent/gemini-2.5-pro", "at": "2026-06-20T22:53:05Z"})
+        );
+
+        let default =
+            call_tool_json(&project, "get_scrap", serde_json::json!({"key": "orders"})).await;
+        assert!(!default.as_object().unwrap().contains_key("generated"));
     }
 
     #[rstest]

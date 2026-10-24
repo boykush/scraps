@@ -75,8 +75,9 @@ scraps get "Book/Title" --heading "Install" --json body,headings
 ```
 
 Allowed fields are `key`, `title`, `ctx`, `body`, `headings`, `code_blocks`,
-`images`, `type`, `description`, `verified`, `sources`, and `resource`. `type` and `description` are the
-scrap's frontmatter type and description, each `null` when it has none. `verified` is the scrap's trust tier and
+`images`, `type`, `description`, `generated`, `verified`, `sources`, and `resource`. `type` and `description` are the
+scrap's frontmatter type and description, each `null` when it has none. `generated` is who wrote the content and when,
+`{ by, at? }` or `null`. `verified` is the scrap's trust tier and
 confirmations, `{ tier, entries }`, `sources` the materials it
 derives from, and `resource` what it is about, `null` when it has none. What `body` leaves out and what the line
 numbers in `headings` and `code_blocks` count is in
