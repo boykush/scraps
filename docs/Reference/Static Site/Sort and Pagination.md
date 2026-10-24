@@ -12,7 +12,7 @@ switching keeps the list you are on:
 
 | `sort` | Order |
 |---|---|
-| (none) | updated: committed date, newest first |
+| (none) | updated: generated date, newest first |
 | `backlinks` | most linked first |
 | `title` | by title, grouped by the title's initial with a jump bar |
 
@@ -29,6 +29,8 @@ reloading the page. Without JavaScript it shows them all in the updated order.
 the updated and backlinks orders show before a *show more* button; the title
 order always shows every row.
 
-Committed dates come from git, which every build reads unless `--no-git`.
-With `--no-git`, or outside a git repository, no scrap has a date and the
-updated order has nothing to sort by.
+A scrap's generated date is the `at` of its frontmatter `generated` (see
+[[Reference/Frontmatter]]), or else the time of the last commit to its file.
+Every build reads git for those commits unless `--no-git`. With `--no-git`,
+or outside a git repository, only scraps whose frontmatter gives an `at`
+have a date, and the scraps without one come last in the updated order.

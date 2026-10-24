@@ -24,9 +24,9 @@
         {% endif %}
         <h1 class="title">{{ scrap.title }}</h1>{% if scrap_type %}
         <p class="type">type <a class="name" href="{{ base_url }}?{{ scrap_type.query }}">{{ scrap_type.name }}</a></p>{% endif %}
-        {% if scrap.commited_ts %}
-            <p class="commited-date">
-                committed {{ scrap.commited_ts | date(format="%Y-%m-%d", timezone=timezone) }}
+        {% if scrap.generated_ts %}
+            <p class="generated-date">
+                generated {{ scrap.generated_ts | date(format="%Y-%m-%d", timezone=timezone) }}
             </p>
         {% endif %}
         {% if generated %}

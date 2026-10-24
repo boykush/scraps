@@ -39,7 +39,7 @@ pub struct GitFlags {
     #[arg(
         long,
         overrides_with = "git",
-        help = "Skip git-derived metadata (commited_ts): the updated view then has no dates to sort by"
+        help = "Skip git-derived metadata (commited_ts): only a frontmatter generated.at then dates a scrap"
     )]
     no_git: bool,
 

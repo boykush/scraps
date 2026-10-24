@@ -22,7 +22,7 @@ export const Header = {
       </p>
       <h3 class="context">Reference/Wiki-link<span>&#47;</span></h3>
       <h1 class="title">Heading Reference</h1>
-      <p class="commited-date">committed 2026-08-12</p>
+      <p class="generated-date">generated 2026-08-12</p>
     </div>`,
 };
 

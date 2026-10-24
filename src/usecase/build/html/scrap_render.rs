@@ -506,8 +506,9 @@ mod tests {
             "<p class=\"verified\">verified by <span class=\"actor\">human:alice</span> \
              <span class=\"tier\">(human-reviewed)</span></p>"
         ));
-        // Dates stay with the committed date: the lines name actors only.
-        assert!(!html.contains("2026-10-16"));
+        // `at` dates the scrap on its own line; the actor lines carry no date.
+        assert!(html.contains("generated 2026-10-16"));
+        assert_eq!(html.matches("2026-10-16").count(), 1);
         assert!(
             html.find("<p class=\"verified\"").unwrap()
                 < html.find("<p class=\"resource\"").unwrap()
