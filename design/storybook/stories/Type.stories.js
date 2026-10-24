@@ -83,7 +83,7 @@ export const ScrapLabel = {
       <h3 class="context">Reference<span>&#47;</span></h3>
       <h1 class="title">CLI Overview</h1>
       <p class="type">type <a class="name" href="#">Reference</a></p>
-      <p class="commited-date">committed 2026-08-12</p>
+      <p class="generated-date">generated 2026-08-12</p>
     </div>`,
 };
 

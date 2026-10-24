@@ -15,7 +15,7 @@
                         {% if scrap.summary %}<span class="summary">{{ scrap.summary }}</span>{% endif %}
                     </span>
                     <span class="graph">
-                        {% if scrap.commited_ts %}<span class="metric date">{{ scrap.commited_ts | date(format="%Y-%m-%d", timezone=timezone) }}</span>{% endif %}
+                        {% if scrap.generated_ts %}<span class="metric date">{{ scrap.generated_ts | date(format="%Y-%m-%d", timezone=timezone) }}</span>{% endif %}
                         <span class="metric">{{ scrap.links_count }} ref{% if scrap.links_count != 1 %}s{% endif %} &#183; {{ scrap.backlinks_count }} backlink{% if scrap.backlinks_count != 1 %}s{% endif %}</span>
                     </span>
                 </a>

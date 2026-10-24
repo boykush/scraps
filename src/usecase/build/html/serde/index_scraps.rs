@@ -26,7 +26,7 @@ struct SerializeIndexScrap {
     url_path: String,
     thumbnail: Option<Url>,
     summary: Option<String>,
-    pub commited_ts: Option<i64>,
+    pub generated_ts: Option<i64>,
     pub backlinks_count: usize,
     pub links_count: usize,
     scrap_type: Option<String>,
@@ -35,7 +35,7 @@ struct SerializeIndexScrap {
 impl SerializeIndexScrap {
     pub fn new(scrap_detail: &ScrapDetail, backlinks_map: &BacklinksMap) -> SerializeIndexScrap {
         let scrap = scrap_detail.scrap();
-        let commited_ts = scrap_detail.commited_ts();
+        let generated_ts = scrap_detail.generated_ts();
         let backlinks_count = backlinks_map.get(&scrap.self_key()).len();
         let links_count = scrap.links().len();
         // The author's own sentence is shown as written; only a summary
@@ -52,7 +52,7 @@ impl SerializeIndexScrap {
             url_path,
             thumbnail: scrap.thumbnail(),
             summary,
-            commited_ts,
+            generated_ts,
             backlinks_count,
             links_count,
             scrap_type: scrap.scrap_type().map(str::to_string),
@@ -73,7 +73,7 @@ impl IndexScraps {
             .collect::<Vec<_>>();
         IndexScraps(
             rows.into_iter()
-                .sorted_by_key(|s| s.commited_ts)
+                .sorted_by_key(|s| s.generated_ts)
                 .rev()
                 .collect_vec(),
         )

@@ -44,7 +44,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # For scraps git committed date
+          fetch-depth: 0 # For the commit dates scraps falls back to
           persist-credentials: false
 
       - name: Setup Scraps
