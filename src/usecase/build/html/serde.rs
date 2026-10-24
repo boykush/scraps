@@ -1,4 +1,5 @@
 pub mod content;
+pub mod generated;
 pub mod index_scraps;
 pub mod link_scraps;
 pub mod nav_scopes;
@@ -8,3 +9,4 @@ pub mod scrap_type;
 pub mod source;
 pub mod tag;
 pub mod tags;
+pub mod verified;

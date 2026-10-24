@@ -1,6 +1,7 @@
 pub mod base_url;
 pub mod content;
 pub mod context;
+pub mod generated;
 pub mod key;
 pub mod page_path;
 pub mod scrap;

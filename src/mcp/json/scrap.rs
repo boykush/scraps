@@ -2,6 +2,7 @@ use crate::usecase::scrap::lookup_links::usecase::LinkRefKind;
 use crate::usecase::scrap::scrap_ref::ScrapRef;
 use chrono::SecondsFormat;
 use scraps_libs::markdown::query::{CodeBlock, Heading};
+use scraps_libs::model::generated::Generated;
 use scraps_libs::model::source::Source;
 use scraps_libs::model::verification::{TrustTier, Verification};
 use serde::Serialize;
@@ -68,6 +69,26 @@ impl From<CodeBlock> for CodeBlockJson {
             lang: c.lang,
             content: c.content,
             line: c.line,
+        }
+    }
+}
+
+/// How a scrap's content was produced, read from `generated`: `at` is left
+/// out when the frontmatter gives none that is readable.
+#[derive(Debug, Serialize)]
+pub struct GeneratedJson {
+    pub by: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub at: Option<String>,
+}
+
+impl From<&Generated> for GeneratedJson {
+    fn from(generated: &Generated) -> Self {
+        Self {
+            by: generated.by.clone(),
+            at: generated
+                .at
+                .map(|at| at.to_rfc3339_opts(SecondsFormat::AutoSi, true)),
         }
     }
 }

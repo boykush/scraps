@@ -2,7 +2,9 @@ use std::io::Write;
 use std::path::Path;
 
 use crate::cli::config::scrap_config::ScrapConfig;
-use crate::cli::json::scrap::{CodeBlockJson, HeadingJson, SourceJson, VerifiedJson};
+use crate::cli::json::scrap::{
+    CodeBlockJson, GeneratedJson, HeadingJson, SourceJson, VerifiedJson,
+};
 use crate::cli::path_resolver::PathResolver;
 use crate::cli::scrap_arg::scrap_key;
 use crate::error::ScrapsResult;
@@ -20,6 +22,7 @@ const FIELD_CODE_BLOCKS: &str = "code_blocks";
 const FIELD_IMAGES: &str = "images";
 const FIELD_TYPE: &str = "type";
 const FIELD_DESCRIPTION: &str = "description";
+const FIELD_GENERATED: &str = "generated";
 const FIELD_VERIFIED: &str = "verified";
 const FIELD_SOURCES: &str = "sources";
 const FIELD_RESOURCE: &str = "resource";
@@ -35,6 +38,7 @@ const ALLOWED_FIELDS: &[&str] = &[
     FIELD_IMAGES,
     FIELD_TYPE,
     FIELD_DESCRIPTION,
+    FIELD_GENERATED,
     FIELD_VERIFIED,
     FIELD_SOURCES,
     FIELD_RESOURCE,
@@ -186,6 +190,10 @@ pub fn run(
                                 .map(|d| Value::String(d.clone()))
                                 .unwrap_or(Value::Null),
                         );
+                    }
+                    FIELD_GENERATED => {
+                        let v = result.generated.as_ref().map(GeneratedJson::from);
+                        out.insert(field.to_string(), serde_json::to_value(v)?);
                     }
                     FIELD_VERIFIED => {
                         let v = VerifiedJson::new(&result.verifications, result.trust_tier);
@@ -528,6 +536,33 @@ mod tests {
             output.trim(),
             r#"{"verified":{"tier":"unverified","entries":[]}}"#
         );
+    }
+
+    #[rstest]
+    fn run_json_field_projection_supports_generated(
+        #[from(temp_scrap_project)] project: TempScrapProject,
+    ) {
+        project
+            .add_config(b"")
+            .add_scrap(
+                "post.md",
+                b"---\ngenerated:\n  by: reference_agent/gemini-2.5-pro\n  at: 2026-06-21T07:53:05+09:00\n---\n\n# Post\n",
+            )
+            .add_scrap("draft.md", b"---\ngenerated: { by: human:alice }\n---\n\n# Draft\n")
+            .add_scrap("plain.md", b"# Plain\n");
+
+        let generated =
+            |stem: &str| run_get(stem, None, None, Some("generated"), &project).unwrap();
+
+        assert_eq!(
+            generated("post").trim(),
+            r#"{"generated":{"by":"reference_agent/gemini-2.5-pro","at":"2026-06-20T22:53:05Z"}}"#
+        );
+        assert_eq!(
+            generated("draft").trim(),
+            r#"{"generated":{"by":"human:alice"}}"#
+        );
+        assert_eq!(generated("plain").trim(), r#"{"generated":null}"#);
     }
 
     #[rstest]

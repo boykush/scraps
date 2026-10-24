@@ -144,11 +144,13 @@ field projection.
 | `title` | string | no | Still accepted in place of `key`: the file name without `.md` |
 | `ctx` | string | no | Still accepted with `title`: context folder/path |
 | `heading` | string | no | Restrict body/structure fields to this section |
-| `fields` | string[] | no | Defaults to `["key", "title", "ctx", "body"]`; allowed: `key`, `title`, `ctx`, `body`, `headings`, `code_blocks`, `type`, `description`, `verified`, `sources`, `resource` |
+| `fields` | string[] | no | Defaults to `["key", "title", "ctx", "body"]`; allowed: `key`, `title`, `ctx`, `body`, `headings`, `code_blocks`, `type`, `description`, `generated`, `verified`, `sources`, `resource` |
 
 Returns the requested fields. Default response: `{ key, title, ctx, body }`. `type`
 and `description` are the scrap's frontmatter type and description, each
 `null` when it has none.
+`generated` is `{ by, at? }`: who wrote the content and when, `null` when
+the scrap has none.
 `verified` is `{ tier, entries }`: the trust tier (`unverified`,
 `machine-confirmed` or `human-reviewed`) and the confirmations newest first.
 `sources` is the list of `{ resource, id?, title?, author?, last_modified? }`

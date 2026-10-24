@@ -1,5 +1,7 @@
 use crate::ir::loader;
-use crate::mcp::json::scrap::{CodeBlockJson, HeadingJson, SourceJson, VerifiedJson};
+use crate::mcp::json::scrap::{
+    CodeBlockJson, GeneratedJson, HeadingJson, SourceJson, VerifiedJson,
+};
 use crate::mcp::scrap_target;
 use crate::usecase::scrap::get::usecase::GetScrapUsecase;
 use rmcp::handler::server::wrapper::Parameters;
@@ -21,6 +23,7 @@ const FIELD_HEADINGS: &str = "headings";
 const FIELD_CODE_BLOCKS: &str = "code_blocks";
 const FIELD_TYPE: &str = "type";
 const FIELD_DESCRIPTION: &str = "description";
+const FIELD_GENERATED: &str = "generated";
 const FIELD_VERIFIED: &str = "verified";
 const FIELD_SOURCES: &str = "sources";
 const FIELD_RESOURCE: &str = "resource";
@@ -35,6 +38,7 @@ const ALLOWED_FIELDS: &[&str] = &[
     FIELD_CODE_BLOCKS,
     FIELD_TYPE,
     FIELD_DESCRIPTION,
+    FIELD_GENERATED,
     FIELD_VERIFIED,
     FIELD_SOURCES,
     FIELD_RESOURCE,
@@ -53,7 +57,7 @@ pub struct GetScrapRequest {
     pub heading: Option<String>,
     /// Optional projection of fields to include. Defaults to ["key", "title", "ctx", "body"].
     /// Allowed: "key", "title", "ctx", "body", "headings", "code_blocks", "type", "description",
-    /// "verified", "sources", "resource".
+    /// "generated", "verified", "sources", "resource".
     pub fields: Option<Vec<String>>,
 }
 
@@ -201,6 +205,19 @@ pub async fn get_scrap(
                         .as_ref()
                         .map(|d| Value::String(d.clone()))
                         .unwrap_or(Value::Null),
+                );
+            }
+            FIELD_GENERATED => {
+                let v = result.generated.as_ref().map(GeneratedJson::from);
+                out.insert(
+                    field.to_string(),
+                    serde_json::to_value(v).map_err(|e| {
+                        ErrorData::new(
+                            ErrorCode(-32005),
+                            format!("JSON serialization failed: {e}"),
+                            None,
+                        )
+                    })?,
                 );
             }
             FIELD_VERIFIED => {

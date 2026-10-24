@@ -6,6 +6,7 @@ use url::Url;
 use crate::markdown::query::{CodeBlock, Heading, ScrapFacts, TaskItem, WikiRef};
 use crate::nfc::nfc;
 
+use super::generated::{Generated, frontmatter_generated};
 use super::source::{Source, SourceLink, frontmatter_sources};
 use super::verification::{TrustTier, Verification, frontmatter_verifications};
 use super::{context::Ctx, key::ScrapKey, stem::Stem, tag::Tag};
@@ -154,6 +155,12 @@ impl Scrap {
             .as_str()
             .map(str::trim)
             .filter(|value| !value.is_empty())
+    }
+
+    /// Who wrote the scrap's current content and when: the frontmatter
+    /// `generated`, None when it has no readable `by`.
+    pub fn generated(&self) -> Option<Generated> {
+        frontmatter_generated(self.frontmatter())
     }
 
     /// Who confirmed the scrap's content and when: the readable entries of
@@ -689,6 +696,20 @@ mod tests {
             ]
         );
         assert_eq!(scrap.source_links().len(), 1);
+    }
+
+    #[test]
+    fn it_reads_the_frontmatter_generated() {
+        let scrap = Scrap::new(
+            "foo",
+            &None,
+            "---\ngenerated: { by: reference_agent/gemini-2.5-pro }\n---\n\nbody\n",
+        );
+        assert_eq!(
+            scrap.generated().map(|g| g.by),
+            Some("reference_agent/gemini-2.5-pro".to_string())
+        );
+        assert_eq!(Scrap::new("bar", &None, "# Body\n").generated(), None);
     }
 
     #[test]
