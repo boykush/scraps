@@ -130,3 +130,10 @@ rstest.workspace = true
 tempfile.workspace = true
 rmcp = { workspace = true, features = ["client", "server", "transport-async-rw"] }
 opentelemetry_sdk = { workspace = true, features = ["testing"] }
+
+[profile.dev]
+# Worktrees share one target/, and on macOS (unpacked by default) each build
+# of diverging sources leaves object files behind that nothing removes.
+# packed bundles them into .dSYM; line tables keep dsymutil fast.
+split-debuginfo = "packed"
+debug = "line-tables-only"
