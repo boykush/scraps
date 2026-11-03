@@ -1,0 +1,2 @@
+# vendor した mermaid.min.js の minify されたコード（keyCount 周り）に当たった誤検知。
+e84d1bc29c62dd863d36e0453e94de8b2e5f7b15:src/usecase/build/js/builtins/mermaid.min.js:generic-api-key:636
