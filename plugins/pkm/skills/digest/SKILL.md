@@ -8,7 +8,7 @@ argument-hint: "[url]"
 
 Take the URL of an article or talk and write one page about that source, start to finish, without dialogue.
 
-Digest is for keeping up with incoming material. The page records what the source says and where it touches what the wiki already holds, so the user can take it in quickly. It does not claim the user understood it; that is `learn`'s job. The subject is therefore always the source itself (who said what, and where), never a term or a tool. A page named after a concept stands for something the user understood, and only `learn` writes those.
+Digest is for keeping up with incoming material. The page records what the source says and which of the wiki's pages the source itself refers to, so the user can take it in quickly. It does not claim the user understood it; that is `learn`'s job. The subject is therefore always the source itself (who said what, and where), never a term or a tool. A page named after a concept stands for something the user understood, and only `learn` writes those.
 
 Do not ask questions along the way. Where judgment could go either way, decide by the rules here and record the decision in the report. If the rules do not decide it, leave that part unwritten and report it. The user can read a diff and fix it, but an understanding that was silently added goes unnoticed.
 
@@ -31,7 +31,7 @@ When the URL points at the official site of a tool or product, the subject is th
 
 1. Fetch the source.
 2. Check how much you got. Slide hosts such as Speaker Deck often yield only the title and abstract. Write from what you could read, note in the report what you could not, and do not fill the gap by guessing.
-3. Identify the central terms and claims.
+3. Identify the central terms and claims. Only what the source names can become a link.
 4. Search for related pages with varied wording using `scraps search "<query>" --json`.
 5. Check the existing tags with `scraps tag list --json`.
 6. Read the 3–8 most related pages by passing each hit's `key` back: `scraps get "<key>" --json`.
@@ -43,6 +43,7 @@ When the URL points at the official site of a tool or product, the subject is th
 Follow the writing rules in `learn`'s "5. Write the page" (`../learn/SKILL.md`), read as follows.
 
 - "Write only what passed the check" reads as: write only what the source confirms.
+- Link only what the source itself mentions. Like a book's notes and references, the links are the author's: they turn what the source cites into wiki pages. A connection you see yourself, such as another source that says something similar or a concept the source resembles but does not name, is a reader's interpretation, not the source's content, and stays out of the page however close it is.
 - Do not use the abbreviation heading. The title is the source's own title, neither translated nor shortened.
 - "Do not copy specification details, procedures, or exhaustive usage examples" applies as is. The reason here is not that it would summarize the source (the gist of a digest page is a summary) but that it is explanation without a connection.
 
@@ -57,7 +58,7 @@ resource: <URL>
 
 <Gist: who says what, and where. One or two sentences.>
 
-- <A bullet that carries a connection to an existing page. Zero to three.>
+- <A bullet that links an existing page the source mentions. Zero to three.>
 ```
 
 The page is a summary of the source and stands for it, so the source's URL goes in the frontmatter `resource`, not in the body. Other pages that cite the source point at this page by path in their `sources`.
@@ -66,7 +67,7 @@ Place the page without a context folder by default, and add one only when step 1
 
 ## 3. Verify and report
 
-1. Reread the page and confirm no explanation without a link remains.
+1. Reread the page and confirm no explanation without a link remains, and that the source mentions everything each link points at.
 2. Confirm every tag is an existing tag.
 3. Run `scraps lint --rule broken-link`.
 4. Read the diff and confirm nothing changed except the one new file.
