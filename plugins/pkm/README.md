@@ -6,7 +6,7 @@ Personal knowledge management skills for a [Scraps](https://github.com/boykush/s
 
 A collection of skills for keeping a wiki as a record of what its owner understands. They run on `scraps <cmd> --json`, like the [`llm-wiki`](../llm-wiki/README.md) plugin, and need no MCP server.
 
-The two plugins differ in whose knowledge the wiki holds. `llm-wiki` follows Andrej Karpathy's *LLM Wiki*, where the model maintains the wiki. `pkm` is for a wiki the user writes for themselves, so its skills keep what the model summarized apart from what the user understood.
+The two plugins differ in whose knowledge the wiki holds. `llm-wiki` follows Andrej Karpathy's *LLM Wiki*, where the model maintains the wiki. `pkm` is for a wiki the user writes for themselves, so its skills keep what the model summarized apart from what the user understood, and record when the user confirmed a page is still current.
 
 ## Install
 
@@ -35,6 +35,10 @@ The skills operate against the current Scraps wiki. To target a different wiki, 
 ### `/learn [source]`
 
 Learn a URL, article, talk, or term together with the user. The skill explains the source on the pages the wiki already has, checks comprehension with questions, and writes one page from the points that passed. When understanding is not reached, nothing is written.
+
+### `/verify [page]`
+
+Re-check an existing page against today's primary sources together with the user. Changed claims are explained and checked the way `learn` checks a new page, and only what the user confirmed is rewritten. When the user confirms the page as a whole, the skill records it in the page's `verified` frontmatter, which makes the page `human-reviewed`. With no page named, it takes stock of the wiki and proposes the pages most likely to have drifted.
 
 ### `/digest [url]`
 
