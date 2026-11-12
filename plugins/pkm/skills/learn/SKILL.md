@@ -18,7 +18,7 @@ Hold the dialogue and write the page in the user's language.
 - Write only what passed the check. Something you explained is not established until the user has shown they understand it.
 - One run produces one page. If the source holds several concepts, pick the central one and name the rest as candidates for later runs.
 - State as fact only what you verified in a primary source. Analogies and examples are fine as teaching aids, but build the questions and the page from what the source says.
-- Do not write the user's answers for them. If you quietly fix a wrong answer and let it pass, the page records your understanding, not theirs.
+- Do not write the user's answers for them. If you quietly fix a wrong answer and let it pass, the page records your understanding, not theirs. The one exception is the gist check in step 3: when only details are off, you may propose a minimal fix to the user's own sentences, openly, for them to approve.
 - Change existing pages only by turning literal mentions the user approved into links.
 - Do not widen the work into tidying or auditing the wiki.
 
@@ -81,7 +81,12 @@ When the answers come back, say for each question whether it was right and why. 
 
 For "Not interested", drop the point from this run without explaining it again or asking why. It is not a failed point and not a candidate for a later run. It does say your read of the context was off: if most of the points come back this way, stop and ask what the user came for instead of checking further. If the gist itself comes back this way, there is no page to write; end the run there.
 
-Once the multiple-choice questions are settled, ask the user to write what the thing is in one or two sentences. That text becomes the basis of the page's gist. If it disagrees with the source, point out where and ask them to restate it.
+Once the multiple-choice questions are settled, ask the user to write what the thing is in one or two sentences. That text becomes the basis of the page's gist. If it disagrees with the source, point out where, then decide by what is wrong:
+
+- The core is wrong or missing (what the thing is): ask them to restate it. Writing the answer yourself would record your understanding, not theirs.
+- Only details are off (a number, a condition, an imprecise phrase): propose a fix that keeps the user's sentences and changes only the parts you pointed out, showing what changed. If the user approves it, the gist passes. If they reject or rewrite it, take their version and check it again.
+
+When in doubt, treat it as the core.
 
 Explain each point again about once. A point that still does not pass is left out of this run.
 
@@ -92,7 +97,7 @@ If the gist did not pass, say where understanding stopped and end without writin
 Otherwise, without writing any file yet, present:
 
 - which points passed, which did not, which were dropped as not of interest, and the candidates for later runs
-- the gist, based on the user's own sentences. Tidy the style, but do not rephrase beyond that
+- the gist, based on the user's own sentences, including any detail fix they approved in step 3. Tidy the style, but do not rephrase beyond that
 - a title, and a context folder only if the title collides with an existing page (check with `scraps get "<title>" --json`)
 - the connections that passed, as links to existing pages with their direction
 - tags chosen from `scraps tag list --json`
