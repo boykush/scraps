@@ -4,18 +4,18 @@ dependencies:
 - repo_url: boykush/ai-plugins
   name: adr-remote-mcp
   host: github.com
-  resolved_commit: 8b2de2badfa47e21638789782a17d4aebcf66bba
-  resolved_ref: 8b2de2badfa47e21638789782a17d4aebcf66bba
+  resolved_commit: 936e6dc0b2f42e86388adb983103944e25488333
+  resolved_ref: 936e6dc0b2f42e86388adb983103944e25488333
   version: 0.1.0
   virtual_path: plugins/adr-remote-mcp
   is_virtual: true
   package_type: apm_package
-  content_hash: sha256:deab6e9d5130238414f81f6174288cf75acbaa5d70a6ef06210561f804f80431
+  content_hash: sha256:fe74b55bc46e5f59066442c8b20544a2e4a038f070334a16318fcd7f6fc41b78
 - repo_url: boykush/ai-plugins
   name: jaeger-remote-mcp
   host: github.com
-  resolved_commit: 8b2de2badfa47e21638789782a17d4aebcf66bba
-  resolved_ref: 8b2de2badfa47e21638789782a17d4aebcf66bba
+  resolved_commit: 936e6dc0b2f42e86388adb983103944e25488333
+  resolved_ref: 936e6dc0b2f42e86388adb983103944e25488333
   version: 0.1.0
   virtual_path: plugins/jaeger-remote-mcp
   is_virtual: true
@@ -24,8 +24,8 @@ dependencies:
 - repo_url: boykush/adr
   name: ade-rule-dsl
   host: github.com
-  resolved_commit: 33c30b03d23a3362aed52d3a39f096de93b7cabc
-  resolved_ref: 33c30b03d23a3362aed52d3a39f096de93b7cabc
+  resolved_commit: 994a61d42e66dbff4263df31d1d49c0073e2ea99
+  resolved_ref: 994a61d42e66dbff4263df31d1d49c0073e2ea99
   version: unknown
   virtual_path: plugins/adr-remote-mcp/skills/ade-rule-dsl
   is_virtual: true
@@ -52,8 +52,8 @@ dependencies:
 - repo_url: boykush/adr
   name: adr-check
   host: github.com
-  resolved_commit: 33c30b03d23a3362aed52d3a39f096de93b7cabc
-  resolved_ref: 33c30b03d23a3362aed52d3a39f096de93b7cabc
+  resolved_commit: 994a61d42e66dbff4263df31d1d49c0073e2ea99
+  resolved_ref: 994a61d42e66dbff4263df31d1d49c0073e2ea99
   version: unknown
   virtual_path: plugins/adr-remote-mcp/skills/adr-check
   is_virtual: true
@@ -72,8 +72,8 @@ dependencies:
 - repo_url: boykush/adr
   name: adr-review
   host: github.com
-  resolved_commit: 33c30b03d23a3362aed52d3a39f096de93b7cabc
-  resolved_ref: 33c30b03d23a3362aed52d3a39f096de93b7cabc
+  resolved_commit: 994a61d42e66dbff4263df31d1d49c0073e2ea99
+  resolved_ref: 994a61d42e66dbff4263df31d1d49c0073e2ea99
   version: unknown
   virtual_path: plugins/adr-remote-mcp/skills/adr-review
   is_virtual: true
