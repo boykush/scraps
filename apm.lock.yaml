@@ -4,18 +4,18 @@ dependencies:
 - repo_url: boykush/ai-plugins
   name: adr-remote-mcp
   host: github.com
-  resolved_commit: 936e6dc0b2f42e86388adb983103944e25488333
-  resolved_ref: 936e6dc0b2f42e86388adb983103944e25488333
+  resolved_commit: 4397313c6dba2522cf369fd2ef4ab51cd58f324c
+  resolved_ref: 4397313c6dba2522cf369fd2ef4ab51cd58f324c
   version: 0.1.0
   virtual_path: plugins/adr-remote-mcp
   is_virtual: true
   package_type: apm_package
-  content_hash: sha256:fe74b55bc46e5f59066442c8b20544a2e4a038f070334a16318fcd7f6fc41b78
+  content_hash: sha256:78c408767e6b9d38cd06a7c7c0aadc5604107f83557c4c3d70cb623afde6fae3
 - repo_url: boykush/ai-plugins
   name: jaeger-remote-mcp
   host: github.com
-  resolved_commit: 936e6dc0b2f42e86388adb983103944e25488333
-  resolved_ref: 936e6dc0b2f42e86388adb983103944e25488333
+  resolved_commit: 4397313c6dba2522cf369fd2ef4ab51cd58f324c
+  resolved_ref: 4397313c6dba2522cf369fd2ef4ab51cd58f324c
   version: 0.1.0
   virtual_path: plugins/jaeger-remote-mcp
   is_virtual: true
@@ -24,8 +24,8 @@ dependencies:
 - repo_url: boykush/adr
   name: ade-rule-dsl
   host: github.com
-  resolved_commit: 994a61d42e66dbff4263df31d1d49c0073e2ea99
-  resolved_ref: 994a61d42e66dbff4263df31d1d49c0073e2ea99
+  resolved_commit: c5cac3dd412360b3cc0b17b6bde61e512d16cf35
+  resolved_ref: c5cac3dd412360b3cc0b17b6bde61e512d16cf35
   version: unknown
   virtual_path: plugins/adr-remote-mcp/skills/ade-rule-dsl
   is_virtual: true
@@ -52,8 +52,8 @@ dependencies:
 - repo_url: boykush/adr
   name: adr-check
   host: github.com
-  resolved_commit: 994a61d42e66dbff4263df31d1d49c0073e2ea99
-  resolved_ref: 994a61d42e66dbff4263df31d1d49c0073e2ea99
+  resolved_commit: c5cac3dd412360b3cc0b17b6bde61e512d16cf35
+  resolved_ref: c5cac3dd412360b3cc0b17b6bde61e512d16cf35
   version: unknown
   virtual_path: plugins/adr-remote-mcp/skills/adr-check
   is_virtual: true
@@ -72,8 +72,8 @@ dependencies:
 - repo_url: boykush/adr
   name: adr-review
   host: github.com
-  resolved_commit: 994a61d42e66dbff4263df31d1d49c0073e2ea99
-  resolved_ref: 994a61d42e66dbff4263df31d1d49c0073e2ea99
+  resolved_commit: c5cac3dd412360b3cc0b17b6bde61e512d16cf35
+  resolved_ref: c5cac3dd412360b3cc0b17b6bde61e512d16cf35
   version: unknown
   virtual_path: plugins/adr-remote-mcp/skills/adr-review
   is_virtual: true
