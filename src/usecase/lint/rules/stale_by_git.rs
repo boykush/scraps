@@ -10,9 +10,9 @@ const SECONDS_PER_DAY: i64 = 86_400;
 
 /// Flag scraps whose latest git commit is older than `threshold_days`.
 ///
-/// The clock of the content itself: a scrap left untouched may say what
-/// was once accurate. Whether a person still stands behind it is a
-/// different clock, kept by `stale-verified`.
+/// Maps to Notion's "Verified Pages" concept: knowledge bases accumulate
+/// content that was once accurate but rots when left untouched. The default
+/// 180-day threshold matches Notion's default re-verification cycle.
 ///
 /// Opt-in (`[lint.stale_by_git]` or `--rule stale-by-git`): how old is
 /// stale is a policy each wiki sets, not a defect in any wiki.

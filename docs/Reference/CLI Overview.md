@@ -25,6 +25,7 @@ the authoritative reference for flags and arguments. This page is the
 | `scraps type list` | List all types with scrap counts | ✓ |
 | `scraps type scraps <type>` | Scraps of a type | ✓ |
 | `scraps todo` | Aggregate GFM task list items wiki-wide | ✓ |
+| `scraps verified` | List scraps by their newest `verified` confirmation, oldest first | ✓ |
 | `scraps mcp serve` | Start an MCP server over stdio, or `--http` | – |
 
 `-C` / `--directory` (or `SCRAPS_DIRECTORY` env) runs as if started in the
@@ -97,5 +98,38 @@ its body links here, `source` when it names this scrap in its `sources`.
 `scraps type list --json` returns each type in use with its `scraps_count`,
 most used first. `scraps type scraps <type> --json` returns the scraps of one
 type; the type is matched exactly and case-sensitively.
+
+## Confirmations
+
+`scraps verified` lists every scrap that carries a readable `verified` entry
+([[Reference/Frontmatter]]), by its newest one, oldest first: the scraps
+whose confirmation is most due for renewal come at the top.
+
+```bash
+scraps verified --by human --older-than 180 --json
+```
+
+```json
+{
+  "results": [
+    {
+      "scrap": { "key": "LLM/Agent", "title": "Agent", "ctx": "LLM" },
+      "by": "human:alice",
+      "at": "2026-04-28T00:00:00Z",
+      "age_days": 200
+    }
+  ],
+  "count": 1
+}
+```
+
+`--by` chooses whose confirmations count. `human` counts entries by a
+`human:` actor and `machine` every other, a `process:` or an agent; the
+default, `any`, counts all. The two are separate clocks in one key: a recent
+entry by one never hides an old entry by the other. A scrap the chosen
+confirmer never confirmed is left out.
+
+`--older-than <days>` keeps only the scraps whose newest such entry is more
+than that many days old. `at` is in UTC and `age_days` counts whole days.
 
 For agent integration, see [[How-to/Integrate with AI Assistants]].

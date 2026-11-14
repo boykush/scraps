@@ -12,7 +12,6 @@ pub enum LintRuleName {
     BrokenHeadingRef,
     UnlinkableKey,
     StaleByGit,
-    StaleVerified,
     UnportableKey,
     SourceHasPage,
 }
@@ -28,7 +27,6 @@ impl LintRuleName {
             Self::BrokenHeadingRef => "broken-heading-ref",
             Self::UnlinkableKey => "unlinkable-key",
             Self::StaleByGit => "stale-by-git",
-            Self::StaleVerified => "stale-verified",
             Self::UnportableKey => "unportable-key",
             Self::SourceHasPage => "source-has-page",
         }

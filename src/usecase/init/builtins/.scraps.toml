@@ -51,13 +51,6 @@ title = "My Site"
 # enabled = true
 # threshold_days = 180
 
-# stale_verified: flag scraps whose newest `verified` confirmation by a person
-# is older than the threshold. Opt-in because how long a confirmation holds is for each
-# wiki to decide.
-# [lint.stale_verified]
-# enabled = true
-# threshold_days = 180
-
 # unportable_key: flag scraps whose file path does not port across filesystems
 # (names Windows rejects, paths that differ only in case).
 # Opt-in because where a wiki must port to is for each wiki to decide.

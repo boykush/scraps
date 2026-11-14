@@ -149,9 +149,10 @@ readable confirmations newest first and each `at` in UTC. A scrap without
 the key is `unverified` with no entries. The tier is advisory: nothing in
 Scraps is withheld or reordered by it.
 
-A confirmation can grow old: the opt-in `stale-verified` rule of
-[[Reference/Lint Rules]] reports a scrap whose newest entry by a `human:`
-actor is older than the threshold the wiki sets.
+A confirmation can grow old. `scraps verified` lists scraps by their newest
+entry, oldest first; `--by human` and `--by machine` count only a person's
+or only a machine's, and `--older-than <days>` keeps those past an age. See
+[[Reference/CLI Overview#Confirmations]].
 
 On the static site a scrap with a readable entry names, under the title,
 `verified by <by> (<tier>)`: the newest `human:` actor when the tier is
@@ -230,9 +231,9 @@ whose `resource` is a web URL; see [[Reference/Static Site/Sources]].
 
 ## Reading rules
 
-Frontmatter never fails a command and no default lint rule warns about its
-shape: the one default warning it can lead to is a `broken-link` for a
-`sources` path naming no scrap.
+Frontmatter never fails a command and raises no lint warning of its own:
+the one warning it can lead to is a `broken-link` for a `sources` path
+naming no scrap.
 
 - A block that is absent, unclosed or not valid YAML is skipped; the scrap is
   read as if it had none, and the lines stay ordinary Markdown.

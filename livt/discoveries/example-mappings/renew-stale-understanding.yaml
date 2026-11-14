@@ -2,50 +2,54 @@ story: renew-stale-understanding
 
 rules:
   - id: R-01
-    name: 最新の確認がしきい値より古い scrap を、経過日数と確認者つきで挙げる
+    name: 確認を持つ scrap を、最新の確認とその経過日数つきで、古い順に並べる
     examples:
       - id: EX-01
-        name: 200日前に human:alice が確認した scrap は、しきい値180日で「last verified 200 days ago by human:alice」と報告される
+        name: 複数の確認を持つ scrap は最新の1件（確認者・日時・経過日数）で表される
       - id: EX-02
-        name: 30日前に確認した scrap は報告されない
+        name: 確認がいちばん古い scrap が先頭に来る
     automated: true
   - id: R-02
-    name: 確認が複数あれば、いちばん新しいものが決める
+    name: 人の確認と機械の確認は別の時計 — 片方の新しい確認が、もう片方の古さを隠さない
     examples:
       - id: EX-01
-        name: 古い確認と最近の確認を両方持つ scrap は報告されない
+        name: --by human は、最近 process:ci が確認していても human:alice の200日前の確認で数える
+      - id: EX-02
+        name: --by machine は、最近 human:alice が確認していてもエージェントの古い確認で数える
     automated: true
   - id: R-03
-    name: 誰も確認していない scrap は挙げない — 求めるのは更新で、最初の確認ではない
+    name: その確認者が一度も確認していない scrap は出さない — 求めるのは更新で、最初の確認ではない
     examples:
       - id: EX-01
-        name: frontmatter のない scrap も、verified のない scrap も報告されない
-      - id: EX-02
-        name: at を欠いて読めない確認だけの scrap は、確認なしと同じに扱う
+        name: verified のない scrap はどちらにも出ず、人だけ・機械だけが確認した scrap は自分の側にだけ出る
     automated: true
   - id: R-04
-    name: どれだけ古ければ古いかは wiki ごとの方針 — セクションを書いたときだけ既定の lint に入る
+    name: どれだけ古ければ期限かは呼び出し側が日数で渡す
     examples:
       - id: EX-01
-        name: "[lint.stale_verified] を書いた wiki では --rule なしの scraps lint がこのルールを走らせる"
+        name: --older-than 180 は、200日前の確認を残し30日前の確認を落とす
+      - id: EX-02
+        name: --older-than 0 は、過去の確認をすべて残す
     automated: true
   - id: R-05
-    name: 数えるのは人の確認だけ — 理解の時計は機械の確認では巻き戻らない
+    name: 応答は scrap を key で名指し、スキルがそのまま次の呼び出しに渡せる
     examples:
       - id: EX-01
-        name: 最近 process:ci が確認していても、human:alice の確認が200日前なら報告される
+        name: --json の各要素が scrap（key / title / ctx）・by・UTC の at・age_days を持つ
       - id: EX-02
-        name: 機械の確認しか持たない scrap は、更新すべき人の確認が無いので報告されない
+        name: 確認が1件もない wiki では results が空で count が 0
     automated: true
 
 questions:
   - id: Q-01
-    text: verify が書く verified も理解の時計を巻き戻す — 想起を試していない確認を復習1回分と見なしてよいか
+    text: verify は本人が全体を確認したとき human の確認も書く — 想起を試していない確認が理解の時計を巻き戻してよいか
   - id: Q-02
     text: recall スキルの合否（要旨が合い、繋がりの取りこぼしは1つまで）は妥当か — eval でどう確かめるか
   - id: Q-03
-    text: しきい値を一律ではなく、verified の履歴（人の確認の回数と間隔）から次の期限を出すか（間隔反復）— 落ちた回は記録に残らない
+    text: 一律の日数ではなく、人の確認の回数と間隔から次の期限を出すか（間隔反復）— 落ちた回は記録に残らない
   - id: Q-04
-    text: digest が書くページに generated を残し、確認されていないことを明示するか
+    text: 一度も確認されていない scrap を出す指定（機械の側では「最も古い」とも言える）を足すか
   - id: Q-05
-    text: 期限の来た scrap を MCP からも引けるようにするか（いまは CLI の lint だけ）
+    text: 同じ一覧を MCP からも引けるようにするか（いまは CLI だけ）
+  - id: Q-06
+    text: エージェントが照合せずに確認だけ書くと期限が黙る — 規律をスキルの文面以上に支える手段はあるか

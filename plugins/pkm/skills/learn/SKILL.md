@@ -116,7 +116,7 @@ Wait for the user to confirm or correct the plan.
 - Write only what passed the check.
 - Order: if the title is an abbreviation, its expansion as a second-level heading; then the tag line, the gist, and bullets if any. Do not embed slides or videos.
 - Record the source in the frontmatter, not in the body. A page about the source itself is an alias for it: give it the source's URL as `resource`, and add `sources` only for what was read when that differs, such as a translation. Any other page lists what it was written from in `sources`: the source's URL, or the path of the source's own page (`resource: "/<key>.md"`) when the wiki has one; step 7 finds those.
-- Record that the check passed as `verified` in the frontmatter: one entry with the user as `by` and the current time as `at` (`date -u +%Y-%m-%dT%H:%M:%SZ`). The user is written `human:<id>`: take the id from project instructions, else from the `human:` entries the wiki's pages already carry, else ask once. Without this entry the page cannot be told from one nobody checked, and `recall` never brings it back.
+- Record who stands behind the page as two `verified` entries in the frontmatter, the user's first, both with the current time as `at` (`date -u +%Y-%m-%dT%H:%M:%SZ`). The user's says they showed they understand it: `by: human:<id>`, the id taken from project instructions, else from the `human:` entries the wiki's pages already carry, else asked once. Yours says you checked the page against its primary source: `by` is you as an agent, written `<producer>/<version>` (for example `claude-code/<model id>`). The two are separate clocks: `recall` brings the page back by the first, `verify` by the second.
 - The gist alone is the default. Add bullets only to state connections to existing pages. An explanation that carries no link is left out, even if the source has it.
 - Link terms that have a page instead of explaining them. For terms without one, phrase the sentence so the term needs no explanation.
 - Do not copy specification details, procedures, or exhaustive usage examples. That turns the page into a summary of the source.
@@ -138,7 +138,7 @@ With no candidates, leave existing pages untouched. Backlinks are computed autom
 
 1. Reread the page. It should hold no explanation without a link and nothing that did not pass the check.
 2. Confirm every tag is an existing tag or a new one the user explicitly agreed to.
-3. Run `scraps get "<key>" --json verified` and confirm the tier is `human-reviewed`. An entry of the wrong shape is dropped without a warning, so only this shows it was read.
+3. Run `scraps get "<key>" --json verified` and confirm the tier is `human-reviewed` and that both entries are listed. An entry of the wrong shape is dropped without a warning, so only this shows it was read.
 4. Run `scraps lint --rule broken-link --rule source-has-page`. A `source-has-page` warning names the path to write in place of a source URL that has its own page.
 5. Read the diff and confirm that only the new page and the approved links changed.
 6. Report separately: the page created, the links updated, the points left out and the candidates for later runs, anything in the source that could not be read, and warnings unrelated to this change.

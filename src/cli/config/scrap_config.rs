@@ -43,7 +43,6 @@ impl SsgConfig {
 #[derive(Debug, Deserialize, Default)]
 pub struct LintConfig {
     pub stale_by_git: Option<StaleByGitConfig>,
-    pub stale_verified: Option<StaleVerifiedConfig>,
     pub unportable_key: Option<UnportableKeyConfig>,
 }
 
@@ -54,15 +53,6 @@ pub struct LintConfig {
 /// disables the rule while preserving the threshold for later toggling.
 #[derive(Debug, Deserialize)]
 pub struct StaleByGitConfig {
-    #[serde(default = "default_true")]
-    pub enabled: bool,
-    pub threshold_days: Option<u64>,
-}
-
-/// Configuration for the `stale_verified` lint rule, opted into the same way
-/// as `stale_by_git`: a bare `[lint.stale_verified]` enables it.
-#[derive(Debug, Deserialize)]
-pub struct StaleVerifiedConfig {
     #[serde(default = "default_true")]
     pub enabled: bool,
     pub threshold_days: Option<u64>,

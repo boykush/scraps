@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 use crate::usecase::lint::rule::LintRuleName;
 use crate::usecase::todo::usecase::StatusFilter;
+use crate::usecase::verified::usecase::ConfirmerFilter;
 use scraps_libs::search::engine::SearchLogic;
 
 pub mod cmd;
@@ -187,6 +188,27 @@ pub enum SubCommands {
         type_command: TypeSubCommands,
     },
 
+    #[command(about = "List scraps by their newest `verified` confirmation, oldest first")]
+    Verified {
+        #[arg(
+            long,
+            value_enum,
+            default_value_t = CliConfirmer::Any,
+            help = "Whose confirmations count: a person's, a machine's (process or agent), or anyone's"
+        )]
+        by: CliConfirmer,
+
+        #[arg(
+            long,
+            value_name = "DAYS",
+            help = "Only scraps whose newest such confirmation is more than this many days old"
+        )]
+        older_than: Option<u64>,
+
+        #[arg(long, help = "Output as JSON")]
+        json: bool,
+    },
+
     #[command(about = "Aggregate markdown task list items across the wiki")]
     Todo {
         #[arg(
@@ -288,8 +310,6 @@ pub enum CliLintRuleName {
     UnlinkableKey,
     #[value(name = "stale-by-git")]
     StaleByGit,
-    #[value(name = "stale-verified")]
-    StaleVerified,
     #[value(name = "unportable-key")]
     UnportableKey,
     #[value(name = "source-has-page")]
@@ -302,6 +322,26 @@ pub enum CliSearchLogic {
     And,
     #[value(name = "or")]
     Or,
+}
+
+#[derive(Clone, Copy, Debug, ValueEnum)]
+pub enum CliConfirmer {
+    #[value(name = "human")]
+    Human,
+    #[value(name = "machine")]
+    Machine,
+    #[value(name = "any")]
+    Any,
+}
+
+impl From<CliConfirmer> for ConfirmerFilter {
+    fn from(cli: CliConfirmer) -> Self {
+        match cli {
+            CliConfirmer::Human => ConfirmerFilter::Human,
+            CliConfirmer::Machine => ConfirmerFilter::Machine,
+            CliConfirmer::Any => ConfirmerFilter::Any,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
@@ -347,7 +387,6 @@ impl From<CliLintRuleName> for LintRuleName {
             CliLintRuleName::BrokenHeadingRef => LintRuleName::BrokenHeadingRef,
             CliLintRuleName::UnlinkableKey => LintRuleName::UnlinkableKey,
             CliLintRuleName::StaleByGit => LintRuleName::StaleByGit,
-            CliLintRuleName::StaleVerified => LintRuleName::StaleVerified,
             CliLintRuleName::UnportableKey => LintRuleName::UnportableKey,
             CliLintRuleName::SourceHasPage => LintRuleName::SourceHasPage,
         }

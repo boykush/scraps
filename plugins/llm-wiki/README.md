@@ -59,7 +59,7 @@ Translates a natural-language wiki-health request (e.g., "fix broken links", "au
 
 - **Mechanical** (`broken-link`, `broken-heading-ref`, `self-link`, `source-has-page`) — propose and apply fixes
 - **Judgment** (`dead-end`, `lonely`, `overlinking`, `unlinkable-key`, `unportable-key`) — read affected scraps and report; do not auto-fix
-- **Informational** (`stale-by-git`, `stale-verified`) — list with metadata
+- **Informational** (`stale-by-git`) — list with metadata
 
 Lint warnings are signals against a purpose, not absolute errors. The agent rejects "run everything without a purpose" requests and asks for narrowing when intent is vague.
 

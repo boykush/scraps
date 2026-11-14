@@ -1,6 +1,6 @@
 ---
 name: recall
-description: Check again that the user still understands pages of this Scraps wiki whose understanding was confirmed long ago, and renew the confirmation of those that pass. Takes the pages whose `verified` entry is older than the wiki's threshold, asks the user to recall each before showing it, and appends a new `verified` entry on a pass; a page that does not pass is left untouched and stays due. Use this whenever the user wants to be quizzed on, revisit, or review what they wrote in the wiki, or asks what they may have forgotten. Recall asks whether the user still holds the page, not whether the page is still current: to check a page against today's sources, use verify; to understand something new, use learn.
+description: Check again that the user still understands pages of this Scraps wiki whose understanding was confirmed long ago, and renew the confirmation of those that pass. Takes the pages a person confirmed longest ago, from `scraps verified --by human`, asks the user to recall each before showing it, and appends a new `verified` entry on a pass; a page that does not pass is left untouched and stays due. Use this whenever the user wants to be quizzed on, revisit, or review what they wrote in the wiki, or asks what they may have forgotten. Recall asks whether the user still holds the page, not whether the page is still current: to check a page against today's sources, use verify; to understand something new, use learn.
 argument-hint: "[key]"
 ---
 
@@ -16,7 +16,7 @@ Hold the dialogue in the user's language.
 
 ## Boundaries
 
-- Change nothing in a page except its `verified` entries. A page whose content looks wrong or out of date is reported, not fixed; rewriting it is a new `learn` run.
+- Change nothing in a page except to add a `human:` entry to its `verified`. Entries by an agent or a process record a check against the page's sources, which is `verify`'s; leave them as they are. A page whose content looks wrong or out of date is reported, not fixed; rewriting it is a new `learn` run.
 - Append a `verified` entry only for a page the user passed in this run. Do not renew a page because it is short, obvious, or because the user says they remember it.
 - Do not show a page, quote it, or name its links before the user has answered for it. An answer given with the page in view measures reading.
 - Do not write the user's answer for them, and do not let a wrong answer pass by quietly correcting it.
@@ -29,9 +29,9 @@ Follow "Asking the user" in `learn` (`../learn/SKILL.md`): use the client's mult
 ## 1. Pick the pages
 
 1. Given a key, take that page, whether or not it is due.
-2. Otherwise run `scraps lint --rule stale-verified`. Each warning names a page whose newest confirmation by a person is older than the threshold, with its age in days. The threshold is the wiki's own policy, set in `[lint.stale_verified]` of `.scraps.toml`, and 180 days without it.
-3. With no warning, say that nothing is due and end. Pages without a `human:` entry in `verified` are never due: no person confirmed them, so there is nothing to renew. That is `learn`'s ground.
-4. With more than three due, take the three confirmed longest ago and say how many remain. A short run that gets finished beats a long one that gets abandoned.
+2. Otherwise run `scraps verified --by human --older-than 180 --json`. Each result is a page whose newest confirmation by a person is more than that many days old, oldest first, with who confirmed it (`by`), when (`at`) and its `age_days`. 180 days is the default; project instructions may set another, and the user may ask for one.
+3. With no result, say that nothing is due and end. Pages without a `human:` entry in `verified` are never due: no person confirmed them, so there is nothing to renew. That is `learn`'s ground.
+4. With more than three due, take the first three, which are the ones confirmed longest ago, and say how many remain. A short run that gets finished beats a long one that gets abandoned.
 
 ## 2. Read the page, out of the user's sight
 
@@ -61,7 +61,7 @@ After the answers for a page are in, show what the page says and where the answe
 
 ## 5. Renew the confirmation
 
-For each page that passed, add one entry to the frontmatter `verified`, above the entries already there, and keep those:
+For each page that passed, add one entry to the frontmatter `verified`, above the entries already there, and keep those, whoever wrote them:
 
 ```yaml
 verified:
@@ -80,6 +80,6 @@ Change nothing else in the file.
 ## 6. Verify and report
 
 1. For each renewed page, run `scraps get "<key>" --json verified` and confirm the newest entry is the one you wrote. An entry of the wrong shape is dropped without a warning, so only this shows it was read.
-2. Run `scraps lint --rule stale-verified` and confirm the renewed pages are gone from it and the others are still there.
+2. Run the command of step 1 again and confirm the renewed pages are gone from it and the others are still there.
 3. Read the diff and confirm that only `verified` lines changed, and only in pages that passed.
 4. Report separately: the pages renewed, the pages that did not pass and which point each missed, the pages skipped, the candidates for `learn`, and how many pages remain due.

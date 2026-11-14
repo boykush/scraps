@@ -84,11 +84,6 @@ the section holds the policy's parameters.
 enabled = true
 threshold_days = 180
 
-# Policy: a person's confirmation older than this is due for renewal.
-[lint.stale_verified]
-enabled = true
-threshold_days = 180
-
 # Policy: the wiki must port across filesystems.
 [lint.unportable_key]
 enabled = true
