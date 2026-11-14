@@ -4,7 +4,7 @@ experimental = true
 [tools]
 # rust-analyzer is not in the default profile, and apm.yml declares it as an LSP server.
 "rust" = { version = "1.100.0", profile = "default", components = ["rust-analyzer"] }
-"node" = "24.22.3"
+"node" = "26.13.1"
 "pnpm" = "12.18.0"
 "hk" = "latest"
 "pkl" = "latest"
