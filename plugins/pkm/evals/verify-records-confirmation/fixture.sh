@@ -10,7 +10,7 @@ sources:
 ---
 #[[AI]]
 
-A system in which an [[LLM]] decides its own steps and tool calls in a loop until a task is done.
+A system in which an [[LLM]] decides its own steps and tool calls in a loop, based on feedback from its environment.
 
 - Acts through [[Tool use]]
 PAGE
