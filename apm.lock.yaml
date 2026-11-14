@@ -1,21 +1,21 @@
 lockfile_version: '1'
-apm_version: 0.31.0
+apm_version: 0.35.0
 dependencies:
 - repo_url: boykush/ai-plugins
   name: adr-remote-mcp
   host: github.com
-  resolved_commit: e0c605d627c5f7782d18b029f33d9282dc81278f
-  resolved_ref: e0c605d627c5f7782d18b029f33d9282dc81278f
+  resolved_commit: ca23ce4c5e97f808e88d65565ea4165041e1c92f
+  resolved_ref: ca23ce4c5e97f808e88d65565ea4165041e1c92f
   version: 0.1.0
   virtual_path: plugins/adr-remote-mcp
   is_virtual: true
   package_type: apm_package
-  content_hash: sha256:2501f82e700ce0619b4d6a3b8957b07f1f3212df683b612ca695768d98788db5
+  content_hash: sha256:53de792ab67ca6189ae1d2c5f5bd21b60cb7636e81619da06c24b615425d6dc7
 - repo_url: boykush/ai-plugins
   name: jaeger-remote-mcp
   host: github.com
-  resolved_commit: e0c605d627c5f7782d18b029f33d9282dc81278f
-  resolved_ref: e0c605d627c5f7782d18b029f33d9282dc81278f
+  resolved_commit: ca23ce4c5e97f808e88d65565ea4165041e1c92f
+  resolved_ref: ca23ce4c5e97f808e88d65565ea4165041e1c92f
   version: 0.1.0
   virtual_path: plugins/jaeger-remote-mcp
   is_virtual: true
@@ -24,144 +24,40 @@ dependencies:
 - repo_url: boykush/adr
   name: ade-rule-dsl
   host: github.com
-  resolved_commit: ddcfcde82f15fcd6bbe066436d66d28d20bcaef3
-  resolved_ref: ddcfcde82f15fcd6bbe066436d66d28d20bcaef3
+  resolved_commit: b879f16d364a1aa0f6233241b855e17433ab726f
+  resolved_ref: b879f16d364a1aa0f6233241b855e17433ab726f
   version: unknown
   virtual_path: plugins/adr-remote-mcp/skills/ade-rule-dsl
   is_virtual: true
   depth: 2
   resolved_by: boykush/ai-plugins
   package_type: claude_skill
-  deployed_files:
-  - .agents/skills/ade-rule-dsl
-  - .agents/skills/ade-rule-dsl/SKILL.md
-  - .agents/skills/ade-rule-dsl/references/LICENSE
-  - .agents/skills/ade-rule-dsl/references/dsl-reference.md
-  - .claude/skills/ade-rule-dsl
-  - .claude/skills/ade-rule-dsl/SKILL.md
-  - .claude/skills/ade-rule-dsl/references/LICENSE
-  - .claude/skills/ade-rule-dsl/references/dsl-reference.md
-  deployed_file_hashes:
-    .agents/skills/ade-rule-dsl/SKILL.md: sha256:77acc0d7a76a8504fe6f8e938386bae8e9894b9474ba1beac96eb88f4272ad6e
-    .agents/skills/ade-rule-dsl/references/LICENSE: sha256:c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-    .agents/skills/ade-rule-dsl/references/dsl-reference.md: sha256:f1902a0e36446191ca0bdfe6542360c58ff3374e4285fec3a2c87f119ae42a84
-    .claude/skills/ade-rule-dsl/SKILL.md: sha256:77acc0d7a76a8504fe6f8e938386bae8e9894b9474ba1beac96eb88f4272ad6e
-    .claude/skills/ade-rule-dsl/references/LICENSE: sha256:c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-    .claude/skills/ade-rule-dsl/references/dsl-reference.md: sha256:f1902a0e36446191ca0bdfe6542360c58ff3374e4285fec3a2c87f119ae42a84
   content_hash: sha256:770b856e17dda98605242444200d8f1b2921d8a08c34a7f0d34ffd1bc76ac14d
 - repo_url: boykush/adr
   name: adr-check
   host: github.com
-  resolved_commit: ddcfcde82f15fcd6bbe066436d66d28d20bcaef3
-  resolved_ref: ddcfcde82f15fcd6bbe066436d66d28d20bcaef3
+  resolved_commit: b879f16d364a1aa0f6233241b855e17433ab726f
+  resolved_ref: b879f16d364a1aa0f6233241b855e17433ab726f
   version: unknown
   virtual_path: plugins/adr-remote-mcp/skills/adr-check
   is_virtual: true
   depth: 2
   resolved_by: boykush/ai-plugins
   package_type: claude_skill
-  deployed_files:
-  - .agents/skills/adr-check
-  - .agents/skills/adr-check/SKILL.md
-  - .claude/skills/adr-check
-  - .claude/skills/adr-check/SKILL.md
-  deployed_file_hashes:
-    .agents/skills/adr-check/SKILL.md: sha256:0a96dea6cda4f3dc8e3a570befa669a5d81e506960ad19e4b61325a5c409b26d
-    .claude/skills/adr-check/SKILL.md: sha256:0a96dea6cda4f3dc8e3a570befa669a5d81e506960ad19e4b61325a5c409b26d
   content_hash: sha256:0ffebca3346275207979d83e492bb0f6227b1efeae9984de5ec59a81d1511736
 - repo_url: boykush/adr
   name: adr-review
   host: github.com
-  resolved_commit: ddcfcde82f15fcd6bbe066436d66d28d20bcaef3
-  resolved_ref: ddcfcde82f15fcd6bbe066436d66d28d20bcaef3
+  resolved_commit: b879f16d364a1aa0f6233241b855e17433ab726f
+  resolved_ref: b879f16d364a1aa0f6233241b855e17433ab726f
   version: unknown
   virtual_path: plugins/adr-remote-mcp/skills/adr-review
   is_virtual: true
   depth: 2
   resolved_by: boykush/ai-plugins
   package_type: claude_skill
-  deployed_files:
-  - .agents/skills/adr-review
-  - .agents/skills/adr-review/SKILL.md
-  - .claude/skills/adr-review
-  - .claude/skills/adr-review/SKILL.md
-  deployed_file_hashes:
-    .agents/skills/adr-review/SKILL.md: sha256:7db35c60c4f6922baaf1118445ef6282dc4ed01454ea1ebab4ef6f358790eb67
-    .claude/skills/adr-review/SKILL.md: sha256:7db35c60c4f6922baaf1118445ef6282dc4ed01454ea1ebab4ef6f358790eb67
   content_hash: sha256:28019f3b1a1e6a4fc7ea56130585044622cac384dbe8f19005b9be57e0eeabe0
 deployments:
-- kind: project-relative
-  target: claude
-  value: .claude/skills/ade-rule-dsl
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  content_hash: null
-- kind: project-relative
-  target: claude
-  value: .claude/skills/ade-rule-dsl/SKILL.md
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  content_hash: sha256:77acc0d7a76a8504fe6f8e938386bae8e9894b9474ba1beac96eb88f4272ad6e
-- kind: project-relative
-  target: claude
-  value: .claude/skills/ade-rule-dsl/references/LICENSE
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  content_hash: sha256:c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-- kind: project-relative
-  target: claude
-  value: .claude/skills/ade-rule-dsl/references/dsl-reference.md
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  content_hash: sha256:f1902a0e36446191ca0bdfe6542360c58ff3374e4285fec3a2c87f119ae42a84
-- kind: project-relative
-  target: claude
-  value: .claude/skills/adr-check
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/adr-check
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/adr-check
-  content_hash: null
-- kind: project-relative
-  target: claude
-  value: .claude/skills/adr-check/SKILL.md
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/adr-check
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/adr-check
-  content_hash: sha256:0a96dea6cda4f3dc8e3a570befa669a5d81e506960ad19e4b61325a5c409b26d
-- kind: project-relative
-  target: claude
-  value: .claude/skills/adr-review
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/adr-review
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/adr-review
-  content_hash: null
-- kind: project-relative
-  target: claude
-  value: .claude/skills/adr-review/SKILL.md
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/adr-review
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/adr-review
-  content_hash: sha256:7db35c60c4f6922baaf1118445ef6282dc4ed01454ea1ebab4ef6f358790eb67
 - kind: project-relative
   target: claude
   value: .claude/skills/doc-update
@@ -218,78 +114,6 @@ deployments:
   content_hash: sha256:dabb5baf0d67f4285f2e6b57418e87c437360a12a03e8a95d8591a189a9133b2
 - kind: project-relative
   target: codex
-  value: .agents/skills/ade-rule-dsl
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  content_hash: null
-- kind: project-relative
-  target: codex
-  value: .agents/skills/ade-rule-dsl/SKILL.md
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  content_hash: sha256:77acc0d7a76a8504fe6f8e938386bae8e9894b9474ba1beac96eb88f4272ad6e
-- kind: project-relative
-  target: codex
-  value: .agents/skills/ade-rule-dsl/references/LICENSE
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  content_hash: sha256:c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
-- kind: project-relative
-  target: codex
-  value: .agents/skills/ade-rule-dsl/references/dsl-reference.md
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/ade-rule-dsl
-  content_hash: sha256:f1902a0e36446191ca0bdfe6542360c58ff3374e4285fec3a2c87f119ae42a84
-- kind: project-relative
-  target: codex
-  value: .agents/skills/adr-check
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/adr-check
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/adr-check
-  content_hash: null
-- kind: project-relative
-  target: codex
-  value: .agents/skills/adr-check/SKILL.md
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/adr-check
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/adr-check
-  content_hash: sha256:0a96dea6cda4f3dc8e3a570befa669a5d81e506960ad19e4b61325a5c409b26d
-- kind: project-relative
-  target: codex
-  value: .agents/skills/adr-review
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/adr-review
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/adr-review
-  content_hash: null
-- kind: project-relative
-  target: codex
-  value: .agents/skills/adr-review/SKILL.md
-  runtime: null
-  scope: project
-  owners:
-  - boykush/adr/plugins/adr-remote-mcp/skills/adr-review
-  active_owner: boykush/adr/plugins/adr-remote-mcp/skills/adr-review
-  content_hash: sha256:7db35c60c4f6922baaf1118445ef6282dc4ed01454ea1ebab4ef6f358790eb67
-- kind: project-relative
-  target: legacy
   value: .agents/skills/doc-update
   runtime: null
   scope: project
@@ -298,7 +122,7 @@ deployments:
   active_owner: .
   content_hash: null
 - kind: project-relative
-  target: legacy
+  target: codex
   value: .agents/skills/doc-update/SKILL.md
   runtime: null
   scope: project
@@ -307,7 +131,7 @@ deployments:
   active_owner: .
   content_hash: sha256:3799d7b8ff782173d1a57d1ccb78c735170c80d057c893488fee0aa365c3cf8f
 - kind: project-relative
-  target: legacy
+  target: codex
   value: .agents/skills/dogfood
   runtime: null
   scope: project
@@ -316,7 +140,7 @@ deployments:
   active_owner: .
   content_hash: null
 - kind: project-relative
-  target: legacy
+  target: codex
   value: .agents/skills/dogfood/SKILL.md
   runtime: null
   scope: project
@@ -325,7 +149,7 @@ deployments:
   active_owner: .
   content_hash: sha256:812d8898ae588b5ca58fbe2781de04237fe444cc21837e804aac5501fc373992
 - kind: project-relative
-  target: legacy
+  target: codex
   value: .agents/skills/release
   runtime: null
   scope: project
@@ -334,7 +158,7 @@ deployments:
   active_owner: .
   content_hash: null
 - kind: project-relative
-  target: legacy
+  target: codex
   value: .agents/skills/release/SKILL.md
   runtime: null
   scope: project
