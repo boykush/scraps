@@ -6,5 +6,6 @@ pub mod overlinking;
 pub mod self_link;
 pub mod source_has_page;
 pub mod stale_by_git;
+pub mod stale_verified;
 pub mod unlinkable_key;
 pub mod unportable_key;

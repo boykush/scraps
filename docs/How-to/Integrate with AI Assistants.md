@@ -73,6 +73,7 @@ from what you understood:
 | Skill | Role |
 |---|---|
 | `/learn` | Explain a source on the pages you already have, check comprehension, and write only what passed |
+| `/review` | Ask you to recall the pages confirmed long ago, and renew the confirmation of those you still hold |
 | `/digest` | Record an article or talk as one short linked page, without dialogue |
 
 ## MCP (for MCP-compatible clients)

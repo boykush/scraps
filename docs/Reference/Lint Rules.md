@@ -24,6 +24,7 @@ alike and quote each as it was written.
 | `unlinkable-key` | scrap whose file path cannot be written inside `[[ ]]` | on |
 | `source-has-page` | `sources` URL that another scrap's `resource` names | on |
 | `stale-by-git` | policy: last commit older than the threshold the wiki sets | opt-in |
+| `stale-verified` | policy: newest `verified` confirmation older than the threshold the wiki sets | opt-in |
 | `unportable-key` | policy: file path that does not port across filesystems | opt-in |
 
 ## Sources
@@ -33,6 +34,23 @@ string as another scrap's top-level `resource`: the material has a page of
 its own, so the entry can point at it by path, `/<key>.md`, and become a
 `source` link. A scrap naming its own `resource` in its `sources` is not
 reported. See [[Reference/Frontmatter]].
+
+## Confirmations
+
+`stale-verified` reports a scrap whose newest `verified` entry
+([[Reference/Frontmatter]]) is older than the threshold, naming its age in
+days and who confirmed it. How long a confirmation holds is the wiki's own
+policy, so the rule is opt-in:
+
+```toml:.scraps.toml
+[lint.stale_verified]
+threshold_days = 180
+```
+
+A scrap with no readable `verified` entry is not reported: the rule asks for
+a confirmation to be renewed, never for a first one. It reads the
+frontmatter alone and needs no git, where `stale-by-git` asks when the file
+last changed and `stale-verified` when someone last stood behind it.
 
 ## Key rules
 

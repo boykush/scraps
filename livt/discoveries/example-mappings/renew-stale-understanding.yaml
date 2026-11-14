@@ -1,0 +1,43 @@
+story: renew-stale-understanding
+
+rules:
+  - id: R-01
+    name: 最新の確認がしきい値より古い scrap を、経過日数と確認者つきで挙げる
+    examples:
+      - id: EX-01
+        name: 200日前に human:alice が確認した scrap は、しきい値180日で「last verified 200 days ago by human:alice」と報告される
+      - id: EX-02
+        name: 30日前に確認した scrap は報告されない
+    automated: true
+  - id: R-02
+    name: 確認が複数あれば、いちばん新しいものが決める
+    examples:
+      - id: EX-01
+        name: 古い確認と最近の確認を両方持つ scrap は報告されない
+    automated: true
+  - id: R-03
+    name: 誰も確認していない scrap は挙げない — 求めるのは更新で、最初の確認ではない
+    examples:
+      - id: EX-01
+        name: frontmatter のない scrap も、verified のない scrap も報告されない
+      - id: EX-02
+        name: at を欠いて読めない確認だけの scrap は、確認なしと同じに扱う
+    automated: true
+  - id: R-04
+    name: どれだけ古ければ古いかは wiki ごとの方針 — セクションを書いたときだけ既定の lint に入る
+    examples:
+      - id: EX-01
+        name: "[lint.stale_verified] を書いた wiki では --rule なしの scraps lint がこのルールを走らせる"
+    automated: true
+
+questions:
+  - id: Q-01
+    text: 人の確認と機械の確認を分けるか（いまは by を問わず最新の1件で決める）
+  - id: Q-02
+    text: review スキルの合否（要旨が合い、繋がりの取りこぼしは1つまで）は妥当か — eval でどう確かめるか
+  - id: Q-03
+    text: しきい値を一律ではなく、通った回数に応じて伸ばすか（間隔反復）
+  - id: Q-04
+    text: digest が書くページに generated を残し、確認されていないことを明示するか
+  - id: Q-05
+    text: 期限の来た scrap を MCP からも引けるようにするか（いまは CLI の lint だけ）
