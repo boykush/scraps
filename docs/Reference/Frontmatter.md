@@ -149,6 +149,11 @@ readable confirmations newest first and each `at` in UTC. A scrap without
 the key is `unverified` with no entries. The tier is advisory: nothing in
 Scraps is withheld or reordered by it.
 
+A confirmation can grow old. `scraps verified` lists scraps by their newest
+entry, oldest first; `--by human` and `--by machine` count only a person's
+or only a machine's, and `--older-than <days>` keeps those past an age. See
+[[Reference/CLI Overview#Confirmations]].
+
 On the static site a scrap with a readable entry names, under the title,
 `verified by <by> (<tier>)`: the newest `human:` actor when the tier is
 `human-reviewed`, the newest actor otherwise. Dates are not shown.

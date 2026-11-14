@@ -52,6 +52,9 @@ The page has this form:
 ```
 ---
 resource: <URL>
+verified:
+  - by: <you, as an agent>
+    at: <now>
 ---
 
 #[[Tag]] #[[Tag]]
@@ -61,6 +64,8 @@ resource: <URL>
 - <A bullet that links an existing page the source mentions. Zero to three.>
 ```
 
+The `verified` entry says you checked the summary against the source, and nothing about the user: `by` is you as an agent, written `<producer>/<version>` (for example `claude-code/<model id>`), never a `human:` actor, and `at` is the current time (`date -u +%Y-%m-%dT%H:%M:%SZ`). It leaves the page `machine-confirmed`, which is what tells a digested page from one the user understood, and it is the date `verify` counts from when the source is revised later.
+
 The page is a summary of the source and stands for it, so the source's URL goes in the frontmatter `resource`, not in the body. Other pages that cite the source point at this page by path in their `sources`.
 
 Place the page without a context folder by default, and add one only when step 1 found a page with the same title. Project instructions may add local conventions for source pages, such as a category link or the context folder to use; follow them.
@@ -69,6 +74,7 @@ Place the page without a context folder by default, and add one only when step 1
 
 1. Reread the page and confirm no explanation without a link remains, and that the source mentions everything each link points at.
 2. Confirm every tag is an existing tag.
-3. Run `scraps lint --rule broken-link`.
-4. Read the diff and confirm nothing changed except the one new file.
-5. Report separately: the page created with its tags and links, the decisions you made by rule, what could not be fetched from the source, the reason for a context folder if one was used, and warnings unrelated to this change.
+3. Run `scraps get "<key>" --json verified` and confirm the tier is `machine-confirmed`. An entry of the wrong shape is dropped without a warning, so only this shows it was read.
+4. Run `scraps lint --rule broken-link`.
+5. Read the diff and confirm nothing changed except the one new file.
+6. Report separately: the page created with its tags and links, the decisions you made by rule, what could not be fetched from the source, the reason for a context folder if one was used, and warnings unrelated to this change.

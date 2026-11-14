@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Re-confirm an existing page of this Scraps wiki against today's primary sources together with the user, fix what has changed only as far as the user understands the change, and record the user's confirmation in the page's `verified` frontmatter. When no page is named, takes stock of the wiki first and proposes the pages most worth checking. Use this whenever the user wants to know whether pages are still current, take stock or inventory of the wiki, update old pages to the latest, or re-check what a page says, even if they do not name a page. For a new page use learn. Broken or moved external links are out of scope.
+description: Re-confirm an existing page of this Scraps wiki against today's primary sources together with the user, fix what has changed only as far as the user understands the change, and record in the page's `verified` frontmatter that it was checked, and the user's confirmation when they give it. When no page is named, takes stock of the wiki first and proposes the pages most worth checking. Use this whenever the user wants to know whether pages are still current, take stock or inventory of the wiki, update old pages to the latest, or re-check what a page says, even if they do not name a page. For a new page use learn. Broken or moved external links are out of scope.
 argument-hint: "[page]"
 ---
 
@@ -8,7 +8,7 @@ argument-hint: "[page]"
 
 Check one existing page against how things stand today, with the user, and record that they confirmed it.
 
-The wiki is a record of the user's understanding. A page was true to that understanding when it was written, but what it describes moves on: tools are renamed, options are removed, recommendations change. Rewriting the page from today's documentation would only swap the user's understanding for a fresh summary. So the changes are explained and checked the way `learn` checks a new page, and only what the user confirmed is written. The `verified` entry is the user's statement that the page still says what they understand; it is never added on the user's behalf. A run where every claim still holds, and only the entry is added, has ended correctly.
+The wiki is a record of the user's understanding. A page was true to that understanding when it was written, but what it describes moves on: tools are renamed, options are removed, recommendations change. Rewriting the page from today's documentation would only swap the user's understanding for a fresh summary. So the changes are explained and checked the way `learn` checks a new page, and only what the user confirmed is written. The run can leave two `verified` entries, and they say different things. Yours, written as an agent, says the page was checked against its sources today; it is the date the next `verify` counts from. The user's, written `human:`, is their statement that the page still says what they understand; it is never added on the user's behalf. A run where every claim still holds, and only entries are added, has ended correctly.
 
 Hold the dialogue and write in the user's language.
 
@@ -17,9 +17,9 @@ Hold the dialogue and write in the user's language.
 - One run verifies one page. Name the other candidates for later runs.
 - State a change as fact only after checking it in a primary source: official documentation, the repository, release notes, the changelog.
 - Change only the page being verified. A change that belongs on another page, or something new that the page never covered, becomes a candidate for `learn`.
-- Do not verify a page about a source (an article, book, or talk). It records what that source said at the time, and today's state of the world does not make it wrong.
+- Check a page about a source (an article, book, or talk) against that source as it stands today, not against the world. It records what the source said, so a claim is changed only when the source itself was revised: slides replaced, a post edited. That the world has moved on does not make it wrong.
 - Check what the page says, not whether its links still resolve: note a broken or moved external link in the report and leave it. Do not widen the work into tidying the wiki.
-- Add a `verified` entry only for a page the user confirmed as a whole.
+- Add your own `verified` entry only when no claim is left changed, gone or unchecked on the page. Add the user's only for a page they confirmed as a whole.
 
 ## Asking the user
 
@@ -33,10 +33,10 @@ Otherwise take stock and propose:
 
 1. Gather two pools, since neither alone finds the pages that drift:
    - pages about things that change quickly: tools, services, and their features. If the wiki types its pages, list them with `scraps type list --json` and `scraps type scraps "<type>" --json`.
-   - pages not updated for a while: `scraps lint --rule stale-by-git` when the wiki enables it under `[lint.stale_by_git]` in `.scraps.toml`, otherwise the dates from the next step.
-2. Date each page by when its content was last confirmed, not by its last commit. A bulk edit of frontmatter or links touches many pages at once and makes them look fresh, so look past such commits in `git log --format='%as %s' -- <file>`. A page whose newest `verified` entry is by a `human:` actor counts from that entry.
-3. Read `scraps get "<key>" --json body,type,verified` and drop pages about a source and pages with no claims to check, such as a stub with an empty body. Rank what remains, highest first:
-   - pages about things that change quickly, oldest confirmation first
+   - pages not checked for a while: `scraps verified --by machine --older-than 180 --json` lists those whose newest check by an agent or process is more than that many days old, oldest first. A page never checked is not in that list; date it in the next step.
+2. Date each page by when it was last checked against its sources. A page with a `verified` entry by an agent or process counts from the newest one; a `human:` entry says the user stood behind the page, not that anyone compared it with a source, so it does not count here. A page never checked counts from when its content last changed: a bulk edit of frontmatter or links touches many pages at once and makes them look fresh, so look past such commits in `git log --format='%as %s' -- <file>`.
+3. Read `scraps get "<key>" --json body,type,verified` and drop pages with no claims to check, such as a stub with an empty body. Rank what remains, highest first:
+   - pages about things that change quickly, oldest check first
    - pages the user is working near now (`git log --since="1 month ago" --name-only --format=`)
    - pages many others depend on (`scraps backlinks "<key>" --json`)
 4. Present three to five candidates with why each is likely to have drifted, and let the user pick one.
@@ -77,20 +77,24 @@ Show the page as it would read after the edits, and ask the user to confirm it a
 ## 5. Edit the page
 
 1. Apply only the confirmed edits. Follow `learn`'s step 5 for how a page is written; keep the page's existing structure and wording elsewhere.
-2. If the user confirmed the page as a whole, append to the frontmatter's `verified` list an entry by the user's actor and the current time with its offset (`date -Iseconds`). Take the actor from project instructions; if they name none, ask the user once for a `human:<id>`.
+2. Add to the top of the frontmatter's `verified` list, each with the current time and its offset (`date -Iseconds`):
+   - the user's entry, if they confirmed the page as a whole. Take the actor from project instructions; if they name none, ask the user once for a `human:<id>`.
+   - below it, your own entry, if no claim is left changed, gone or unchecked. `by` is you as an agent, written `<producer>/<version>` (for example `claude-code/<model id>`).
 
    ```yaml
    verified:
      - by: human:<id>
        at: 2026-11-12T21:00:00+09:00
+     - by: <producer>/<version>
+       at: 2026-11-12T21:00:00+09:00
    ```
 
    Keep earlier entries; they are the history of confirmations.
-3. If the page was not confirmed, keep the edits that passed and add no entry.
+3. If the page was not confirmed, keep the edits that passed and add no entry by the user. If a claim is still changed, gone or unchecked, add none of your own either: the page is not checked until it is.
 
 ## 6. Check
 
-1. Confirm the tier with `scraps get "<key>" --json verified`: `human-reviewed` when an entry was added.
+1. Confirm the entries with `scraps get "<key>" --json verified`: each one you added is listed, and the tier is `human-reviewed` when the user's is among them, `machine-confirmed` when only yours is.
 2. Run `scraps lint --rule broken-link --rule source-has-page`.
 3. Read the diff and confirm that only this page changed.
 4. Report: what was confirmed, what changed and why, what was removed, what is still unchecked, and the candidates for later runs with the skill to use for each (`verify` or `learn`).
