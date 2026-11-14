@@ -3,12 +3,14 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use annotate_snippets::{AnnotationKind, Group, Level, Renderer, Snippet};
 use colored::Colorize;
+use scraps_libs::git::GitCommandImpl;
 
 use crate::cli::config::scrap_config::ScrapConfig;
 use crate::cli::path_resolver::PathResolver;
 use crate::error::ScrapsResult;
 use crate::ir::loader;
 use crate::usecase::lint::rule::{LintRule, LintRuleName, LintWarning};
+use crate::usecase::lint::rules::stale_by_git::StaleByGitRule;
 use crate::usecase::lint::rules::stale_verified::StaleVerifiedRule;
 use crate::usecase::lint::rules::unportable_key::UnportableKeyRule;
 use crate::usecase::lint::usecase::LintUsecase;
@@ -24,12 +26,16 @@ pub fn run(project_path: Option<&Path>, rule_names: &[LintRuleName]) -> ScrapsRe
 
     // CLI `--rule X` overrides everything; otherwise default rules plus
     // opt-in rules whose config section enables them.
+    let stale_config = config.lint.as_ref().and_then(|l| l.stale_by_git.as_ref());
     let verified_config = config.lint.as_ref().and_then(|l| l.stale_verified.as_ref());
     let unportable_config = config.lint.as_ref().and_then(|l| l.unportable_key.as_ref());
     let effective_rules = if !rule_names.is_empty() {
         rule_names.to_vec()
     } else {
         let mut rules = LintRuleName::default_rules();
+        if stale_config.is_some_and(|c| c.enabled) {
+            rules.push(LintRuleName::StaleByGit);
+        }
         if verified_config.is_some_and(|c| c.enabled) {
             rules.push(LintRuleName::StaleVerified);
         }
@@ -44,6 +50,12 @@ pub fn run(project_path: Option<&Path>, rule_names: &[LintRuleName]) -> ScrapsRe
         .map(|d| d.as_secs() as i64)
         .unwrap_or(0);
     let extra_rules: Vec<Box<dyn LintRule>> = vec![
+        Box::new(StaleByGitRule {
+            git_command: GitCommandImpl::new(),
+            scraps_dir: scraps_dir_path.clone(),
+            threshold_days: stale_config.and_then(|c| c.threshold_days).unwrap_or(180),
+            now_ts,
+        }),
         Box::new(StaleVerifiedRule {
             threshold_days: verified_config
                 .and_then(|c| c.threshold_days)
@@ -155,9 +167,8 @@ mod tests {
         assert!(result.is_ok());
     }
 
-    // livt:automates livt://mapping/renew-stale-understanding/rule/R-05/example/EX-01
     #[rstest]
-    fn run_fails_with_section_naming_no_rule(
+    fn run_succeeds_with_stale_by_git_section(
         #[from(temp_scrap_project)] project: TempScrapProject,
     ) {
         project
@@ -165,8 +176,10 @@ mod tests {
             .add_scrap("a.md", b"[[b]]")
             .add_scrap("b.md", b"[[a]]");
 
+        // Without --rule, presence of [lint.stale_by_git] enables the opt-in
+        // rule; outside a git repo it gracefully skips.
         let result = run(Some(project.project_root.as_path()), &[]);
-        assert!(result.is_err());
+        assert!(result.is_ok());
     }
 
     // livt:automates livt://mapping/renew-stale-understanding/rule/R-04/example/EX-01

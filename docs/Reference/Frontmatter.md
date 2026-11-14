@@ -150,8 +150,8 @@ the key is `unverified` with no entries. The tier is advisory: nothing in
 Scraps is withheld or reordered by it.
 
 A confirmation can grow old: the opt-in `stale-verified` rule of
-[[Reference/Lint Rules]] reports a scrap whose newest entry is older than
-the threshold the wiki sets.
+[[Reference/Lint Rules]] reports a scrap whose newest entry by a `human:`
+actor is older than the threshold the wiki sets.
 
 On the static site a scrap with a readable entry names, under the title,
 `verified by <by> (<tier>)`: the newest `human:` actor when the tier is

@@ -138,7 +138,7 @@ fn strip_prose_marker(line: &str) -> &str {
 }
 
 /// Inline code fences and bold markers are noise in a one-line gloss. Single
-/// `*` and `_` are left alone so identifiers like `stale_verified` survive.
+/// `*` and `_` are left alone so identifiers like `stale_by_git` survive.
 fn clean(line: &str) -> String {
     let bare = line.replace("**", "").replace("__", "").replace('`', "");
     strip_wiki_syntax(&bare)

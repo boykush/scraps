@@ -79,7 +79,12 @@ opt-in rule checks a policy the wiki chooses for itself: writing its
 the section holds the policy's parameters.
 
 ```toml:.scraps.toml
-# Policy: a confirmation older than this is due for renewal.
+# Policy: a scrap not committed to for this long is stale.
+[lint.stale_by_git]
+enabled = true
+threshold_days = 180
+
+# Policy: a person's confirmation older than this is due for renewal.
 [lint.stale_verified]
 enabled = true
 threshold_days = 180
@@ -88,9 +93,6 @@ threshold_days = 180
 [lint.unportable_key]
 enabled = true
 ```
-
-A `[lint.<name>]` section naming no rule is an error, so a policy written
-down never silently stops being checked.
 
 See [[Reference/Lint Rules]] for every rule.
 

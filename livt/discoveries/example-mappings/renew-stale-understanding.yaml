@@ -30,22 +30,22 @@ rules:
         name: "[lint.stale_verified] を書いた wiki では --rule なしの scraps lint がこのルールを走らせる"
     automated: true
   - id: R-05
-    name: 鮮度を言うのは確認の記録だけ — git の日時では測らず、消えたルールの設定は黙って無視しない
+    name: 数えるのは人の確認だけ — 理解の時計は機械の確認では巻き戻らない
     examples:
       - id: EX-01
-        name: "[lint.stale_by_git] のようにどのルールも指さないセクションがあると、scraps lint はエラーで止まる"
+        name: 最近 process:ci が確認していても、human:alice の確認が200日前なら報告される
+      - id: EX-02
+        name: 機械の確認しか持たない scrap は、更新すべき人の確認が無いので報告されない
     automated: true
 
 questions:
   - id: Q-01
-    text: 人の確認と機械の確認を分けるか（いまは by を問わず最新の1件で決める）
+    text: verify が書く verified も理解の時計を巻き戻す — 想起を試していない確認を復習1回分と見なしてよいか
   - id: Q-02
-    text: review スキルの合否（要旨が合い、繋がりの取りこぼしは1つまで）は妥当か — eval でどう確かめるか
+    text: recall スキルの合否（要旨が合い、繋がりの取りこぼしは1つまで）は妥当か — eval でどう確かめるか
   - id: Q-03
-    text: しきい値を一律ではなく、通った回数に応じて伸ばすか（間隔反復）
+    text: しきい値を一律ではなく、verified の履歴（人の確認の回数と間隔）から次の期限を出すか（間隔反復）— 落ちた回は記録に残らない
   - id: Q-04
     text: digest が書くページに generated を残し、確認されていないことを明示するか
-  - id: Q-06
-    text: 確認の記録が無い既存ページへ、AI が verified を補完する道具を用意するか（by は human ではなくエージェントにし、machine-confirmed に留める）
   - id: Q-05
     text: 期限の来た scrap を MCP からも引けるようにするか（いまは CLI の lint だけ）

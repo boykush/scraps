@@ -33,7 +33,7 @@ Otherwise take stock and propose:
 
 1. Gather two pools, since neither alone finds the pages that drift:
    - pages about things that change quickly: tools, services, and their features. If the wiki types its pages, list them with `scraps type list --json` and `scraps type scraps "<type>" --json`.
-   - pages not confirmed for a while: `scraps lint --rule stale-verified` lists those whose newest `verified` entry is older than the wiki's threshold. A page nobody confirmed is not in that list; date it in the next step.
+   - pages not updated for a while: `scraps lint --rule stale-by-git` when the wiki enables it under `[lint.stale_by_git]` in `.scraps.toml`, otherwise the dates from the next step.
 2. Date each page by when its content was last confirmed, not by its last commit. A bulk edit of frontmatter or links touches many pages at once and makes them look fresh, so look past such commits in `git log --format='%as %s' -- <file>`. A page whose newest `verified` entry is by a `human:` actor counts from that entry.
 3. Read `scraps get "<key>" --json body,type,verified` and drop pages about a source and pages with no claims to check, such as a stub with an empty body. Rank what remains, highest first:
    - pages about things that change quickly, oldest confirmation first

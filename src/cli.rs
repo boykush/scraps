@@ -286,6 +286,8 @@ pub enum CliLintRuleName {
     BrokenHeadingRef,
     #[value(name = "unlinkable-key")]
     UnlinkableKey,
+    #[value(name = "stale-by-git")]
+    StaleByGit,
     #[value(name = "stale-verified")]
     StaleVerified,
     #[value(name = "unportable-key")]
@@ -344,6 +346,7 @@ impl From<CliLintRuleName> for LintRuleName {
             CliLintRuleName::BrokenLink => LintRuleName::BrokenLink,
             CliLintRuleName::BrokenHeadingRef => LintRuleName::BrokenHeadingRef,
             CliLintRuleName::UnlinkableKey => LintRuleName::UnlinkableKey,
+            CliLintRuleName::StaleByGit => LintRuleName::StaleByGit,
             CliLintRuleName::StaleVerified => LintRuleName::StaleVerified,
             CliLintRuleName::UnportableKey => LintRuleName::UnportableKey,
             CliLintRuleName::SourceHasPage => LintRuleName::SourceHasPage,

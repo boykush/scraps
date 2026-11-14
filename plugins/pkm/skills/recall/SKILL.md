@@ -1,14 +1,14 @@
 ---
-name: review
-description: Check again that the user still understands pages of this Scraps wiki whose understanding was confirmed long ago, and renew the confirmation of those that pass. Takes the pages whose `verified` entry is older than the wiki's threshold, asks the user to recall each before showing it, and appends a new `verified` entry on a pass; a page that does not pass is left untouched and stays due. Use this whenever the user wants to review, revisit, or be quizzed on what they wrote in the wiki, or asks what they may have forgotten. To check whether a page still matches its sources, use verify; to understand something new, use learn.
+name: recall
+description: Check again that the user still understands pages of this Scraps wiki whose understanding was confirmed long ago, and renew the confirmation of those that pass. Takes the pages whose `verified` entry is older than the wiki's threshold, asks the user to recall each before showing it, and appends a new `verified` entry on a pass; a page that does not pass is left untouched and stays due. Use this whenever the user wants to be quizzed on, revisit, or review what they wrote in the wiki, or asks what they may have forgotten. Recall asks whether the user still holds the page, not whether the page is still current: to check a page against today's sources, use verify; to understand something new, use learn.
 argument-hint: "[key]"
 ---
 
-# Review
+# Recall
 
 Ask the user to recall what a page records, and renew its confirmation only when they still hold it.
 
-`learn` writes a page once the user has shown they understand it, and records that moment as `verified`. Understanding fades while the page stays, so a wiki that is only written to drifts into a record of what its owner once knew. Review closes that gap: the page comes back, the user answers for themselves, and the date moves only when the answer holds.
+`learn` writes a page once the user has shown they understand it, and records that moment as `verified`. Understanding fades while the page stays, so a wiki that is only written to drifts into a record of what its owner once knew. Recall closes that gap: the page comes back, the user answers for themselves, and the date moves only when the answer holds.
 
 The goal is the user's recall, not a tidy wiki. A run that renews nothing, because nothing was recalled, has ended correctly.
 
@@ -28,9 +28,9 @@ Follow "Asking the user" in `learn` (`../learn/SKILL.md`): use the client's mult
 
 ## 1. Pick the pages
 
-1. Given a key, review that page, whether or not it is due.
-2. Otherwise run `scraps lint --rule stale-verified`. Each warning names a page whose newest confirmation is older than the threshold, with its age in days. The threshold is the wiki's own policy, set in `[lint.stale_verified]` of `.scraps.toml`, and 180 days without it.
-3. With no warning, say that nothing is due and end. Pages without any `verified` entry are never due: nobody confirmed them, so there is nothing to renew. That is `learn`'s ground.
+1. Given a key, take that page, whether or not it is due.
+2. Otherwise run `scraps lint --rule stale-verified`. Each warning names a page whose newest confirmation by a person is older than the threshold, with its age in days. The threshold is the wiki's own policy, set in `[lint.stale_verified]` of `.scraps.toml`, and 180 days without it.
+3. With no warning, say that nothing is due and end. Pages without a `human:` entry in `verified` are never due: no person confirmed them, so there is nothing to renew. That is `learn`'s ground.
 4. With more than three due, take the three confirmed longest ago and say how many remain. A short run that gets finished beats a long one that gets abandoned.
 
 ## 2. Read the page, out of the user's sight
@@ -43,7 +43,7 @@ From the page take the points to check, the same ones `learn` recorded: the gist
 
 Take the pages one at a time.
 
-1. Name the page by its title only, and ask the user to say in one or two sentences what it is. Offer two ways out besides answering: "I don't remember", and "Skip this page" for one they do not want to review now.
+1. Name the page by its title only, and ask the user to say in one or two sentences what it is. Offer two ways out besides answering: "I don't remember", and "Skip this page" for one they do not want to take now.
 2. Compare the answer with the page's gist.
    - The core matches: the gist passes, even when the wording differs or details are missing.
    - The core is wrong or missing, or the user does not remember: the gist does not pass. Go to step 4 for this page without asking about its connections.

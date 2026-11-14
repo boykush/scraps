@@ -36,13 +36,13 @@ The skills operate against the current Scraps wiki. To target a different wiki, 
 
 Learn a URL, article, talk, or term together with the user. The skill explains the source on the pages the wiki already has, checks comprehension with questions, and writes one page from the points that passed. When understanding is not reached, nothing is written.
 
-### `/review [key]`
-
-Check again that the user still recalls a page they confirmed. Where `/verify` asks whether the page is still true to the world, `/review` asks whether it is still true to the user. The skill takes the pages whose `verified` confirmation is older than the wiki's threshold, asks the user to recall each one before showing it, and renews the confirmation of those that passed. A page that did not pass is left as it is and stays due.
-
 ### `/verify [page]`
 
 Re-check an existing page against today's primary sources together with the user. Changed claims are explained and checked the way `learn` checks a new page, and only what the user confirmed is rewritten. When the user confirms the page as a whole, the skill records it in the page's `verified` frontmatter, which makes the page `human-reviewed`. With no page named, it takes stock of the wiki and proposes the pages most likely to have drifted.
+
+### `/recall [key]`
+
+Check again that the user still recalls a page they confirmed. Where `/verify` asks whether the page is still true to the world, `/recall` asks whether it is still true to the user. The skill takes the pages whose `verified` confirmation is older than the wiki's threshold, asks the user to recall each one before showing it, and renews the confirmation of those that passed. A page that did not pass is left as it is and stays due.
 
 ### `/digest [url]`
 

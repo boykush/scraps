@@ -7,8 +7,8 @@ type: Reference
 Link quality rules used by [[Reference/CLI Overview]]'s `lint`
 command. Default rules report what is a defect in any wiki: a link that does
 not resolve, a scrap that cannot be linked. Opt-in rules check a policy the
-wiki chooses for itself, such as how long a confirmation holds or which
-filesystems it must port to; writing the rule's `[lint.<rule>]` section in
+wiki chooses for itself, such as how old is stale or which filesystems it
+must port to; writing the rule's `[lint.<rule>]` section in
 [[Reference/Configuration]] turns it on, and `--rule` runs it once. A link is a `[[wiki-link]]` or a Markdown link
 to a scrap's `.md` file ([[Reference/Markdown Link]]); the rules treat both
 alike and quote each as it was written.
@@ -23,7 +23,8 @@ alike and quote each as it was written.
 | `broken-heading-ref` | `[[Page#Heading]]` or `page.md#heading` heading missing | on |
 | `unlinkable-key` | scrap whose file path cannot be written inside `[[ ]]` | on |
 | `source-has-page` | `sources` URL that another scrap's `resource` names | on |
-| `stale-verified` | policy: newest `verified` confirmation older than the threshold the wiki sets | opt-in |
+| `stale-by-git` | policy: last commit older than the threshold the wiki sets | opt-in |
+| `stale-verified` | policy: newest `verified` confirmation by a person older than the threshold the wiki sets | opt-in |
 | `unportable-key` | policy: file path that does not port across filesystems | opt-in |
 
 ## Sources
@@ -34,22 +35,37 @@ its own, so the entry can point at it by path, `/<key>.md`, and become a
 `source` link. A scrap naming its own `resource` in its `sources` is not
 reported. See [[Reference/Frontmatter]].
 
-## Confirmations
+## Staleness
 
-`stale-verified` reports a scrap whose newest `verified` entry
-([[Reference/Frontmatter]]) is older than the threshold, naming its age in
-days and who confirmed it. How long a confirmation holds is the wiki's own
-policy, so the rule is opt-in:
+Two opt-in rules say a scrap has grown old, each by its own clock, because
+they ask different questions:
+
+| Rule | Clock | Asks |
+|---|---|---|
+| `stale-by-git` | the last commit to the file | has what the scrap says fallen behind? |
+| `stale-verified` | the newest `verified` entry by a `human:` actor | does a person still stand behind it? |
 
 ```toml:.scraps.toml
+[lint.stale_by_git]
+threshold_days = 180
+
 [lint.stale_verified]
 threshold_days = 180
 ```
 
-A scrap with no readable `verified` entry is not reported: the rule asks for
-a confirmation to be renewed, never for a first one. The rule reads the
-frontmatter alone: when a file last changed is git's to say, and a commit
-that fixes a typo confirms nothing.
+`stale-by-git` reports a committed scrap whose last commit is older than the
+threshold. It knows when the content last changed, not whether anyone
+checked it.
+
+`stale-verified` reports a scrap whose newest confirmation by a person
+([[Reference/Frontmatter]]) is older than the threshold, naming its age in
+days and who confirmed it. It reads the frontmatter alone and needs no git.
+Entries by a `process:` or an agent do not count, and a scrap no person
+confirmed is not reported: the rule asks for a confirmation to be renewed,
+never for a first one.
+
+A scrap can be reported by both. The remedies differ: one is checked against
+its sources, the other is recalled by the person who confirmed it.
 
 ## Key rules
 

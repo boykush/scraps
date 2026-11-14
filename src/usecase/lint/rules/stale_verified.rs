@@ -1,13 +1,14 @@
-use scraps_libs::model::{scrap::Scrap, tags::Tags};
+use scraps_libs::model::{scrap::Scrap, tags::Tags, verification::Verification};
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
 use crate::usecase::lint::rule::{LintRule, LintRuleName, LintWarning, scrap_relative_path};
 
 const SECONDS_PER_DAY: i64 = 86_400;
 
-/// Flag scraps whose newest `verified` confirmation is older than
-/// `threshold_days`. A scrap nobody confirmed is not reported: the rule asks
-/// for a confirmation to be renewed, never for a first one.
+/// Flag scraps whose newest `verified` confirmation by a person is older
+/// than `threshold_days`. Only `human:` entries count: the rule is the clock
+/// of what a person still stands behind, and a machine's pass does not wind
+/// it. A scrap no person confirmed has nothing to renew and is not reported.
 ///
 /// Opt-in (`[lint.stale_verified]` or `--rule stale-verified`): how long a
 /// confirmation holds is a policy each wiki sets.
@@ -34,7 +35,10 @@ impl LintRule for StaleVerifiedRule {
             .iter()
             .filter_map(|scrap| {
                 // `verifications` is newest first.
-                let newest = scrap.verifications().into_iter().next()?;
+                let newest = scrap
+                    .verifications()
+                    .into_iter()
+                    .find(Verification::is_human)?;
                 let ts = newest.at.timestamp();
                 if ts >= cutoff {
                     return None;
@@ -103,6 +107,32 @@ mod tests {
     fn newest_confirmation_decides() {
         let warnings = check(
             "---\nverified:\n  - by: human:alice\n    at: 2025-01-01T00:00:00Z\n  - by: human:bob\n    at: 2026-11-01T00:00:00Z\n---\nbody",
+            180,
+        );
+
+        assert!(warnings.is_empty());
+    }
+
+    // livt:automates livt://mapping/renew-stale-understanding/rule/R-05/example/EX-01
+    #[test]
+    fn recent_machine_confirmation_does_not_renew() {
+        let warnings = check(
+            "---\nverified:\n  - by: process:ci\n    at: 2026-11-01T00:00:00Z\n  - by: human:alice\n    at: 2026-04-28T00:00:00Z\n---\nbody",
+            180,
+        );
+
+        assert_eq!(warnings.len(), 1);
+        assert_eq!(
+            warnings[0].message,
+            "last verified 200 days ago by human:alice"
+        );
+    }
+
+    // livt:automates livt://mapping/renew-stale-understanding/rule/R-05/example/EX-02
+    #[test]
+    fn skip_scrap_only_machines_confirmed() {
+        let warnings = check(
+            "---\nverified:\n  - by: process:ci\n    at: 2020-01-01T00:00:00Z\n---\nbody",
             180,
         );
 
