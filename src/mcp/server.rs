@@ -60,7 +60,7 @@ impl ScrapsServer {
     }
 
     #[tool(
-        description = "Use when you have keywords or a rough cue but no exact key. Fuzzy-matches keys, titles, descriptions and tags, not bodies; space-separated keywords use OR logic by default (any keyword matches). Start broad, then re-search with logic 'and' to require every keyword. Read promising hits by passing their `key` to get_scrap."
+        description = "Use when you have keywords or a rough cue but no exact key. Matches keywords, ignoring case, inside keys, titles, descriptions and tags, not bodies; space-separated keywords use OR logic by default (any keyword matches), and hits that match more keywords, as whole words, in a key or title come first. Start broad, then re-search with logic 'and' to require every keyword. Read promising hits by passing their `key` to get_scrap."
     )]
     async fn search_scraps(
         &self,
