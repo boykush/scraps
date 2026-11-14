@@ -24,11 +24,11 @@ jobs:
       with:
         persist-credentials: false
     - name: Setup mise (install rust)
-      uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+      uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
       with:
         cache: false
         install_args: "rust"
-    - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+    - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
     # Built from this checkout, so the suite renders the PR's templates and CSS
     # instead of a released binary's. Ahead of the browser install so a compile
     # error fails fast, and outside Playwright's webServer command, whose 30s
@@ -36,7 +36,7 @@ jobs:
     - name: Build scraps
       run: cargo build --release
     - name: Setup Node.js
-      uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+      uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
       with:
         working_directory: ./tests/e2e
         install_args: "node pnpm"

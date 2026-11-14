@@ -1,6 +1,6 @@
 ---
 name: review
-description: Check again that the user still understands pages of this Scraps wiki whose understanding was confirmed long ago, and renew the confirmation of those that pass. Takes the pages whose `verified` entry is older than the wiki's threshold, asks the user to recall each before showing it, and appends a new `verified` entry on a pass; a page that does not pass is left untouched and stays due. Use this whenever the user wants to review, revisit, or be quizzed on what they wrote in the wiki, or asks what they may have forgotten. To understand something new, use learn.
+description: Check again that the user still understands pages of this Scraps wiki whose understanding was confirmed long ago, and renew the confirmation of those that pass. Takes the pages whose `verified` entry is older than the wiki's threshold, asks the user to recall each before showing it, and appends a new `verified` entry on a pass; a page that does not pass is left untouched and stays due. Use this whenever the user wants to review, revisit, or be quizzed on what they wrote in the wiki, or asks what they may have forgotten. To check whether a page still matches its sources, use verify; to understand something new, use learn.
 argument-hint: "[key]"
 ---
 

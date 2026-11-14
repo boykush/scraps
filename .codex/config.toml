@@ -1,7 +1,5 @@
 [mcp_servers.adr]
 url = "https://adr-mcp.boykush.com/mcp"
-id = ""
 
 [mcp_servers.jaeger]
 url = "https://jaeger-mcp.boykush.com/mcp"
-id = ""

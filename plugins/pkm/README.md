@@ -6,7 +6,7 @@ Personal knowledge management skills for a [Scraps](https://github.com/boykush/s
 
 A collection of skills for keeping a wiki as a record of what its owner understands, and for keeping that record true as time passes. They run on `scraps <cmd> --json`, like the [`llm-wiki`](../llm-wiki/README.md) plugin, and need no MCP server.
 
-The two plugins differ in whose knowledge the wiki holds. `llm-wiki` follows Andrej Karpathy's *LLM Wiki*, where the model maintains the wiki. `pkm` is for a wiki the user writes for themselves, so its skills keep what the model summarized apart from what the user understood.
+The two plugins differ in whose knowledge the wiki holds. `llm-wiki` follows Andrej Karpathy's *LLM Wiki*, where the model maintains the wiki. `pkm` is for a wiki the user writes for themselves, so its skills keep what the model summarized apart from what the user understood, and record when the user confirmed a page is still current.
 
 ## Install
 
@@ -38,7 +38,11 @@ Learn a URL, article, talk, or term together with the user. The skill explains t
 
 ### `/review [key]`
 
-Check again that the user still understands a page `/learn` wrote. The skill takes the pages whose `verified` confirmation is older than the wiki's threshold, asks the user to recall each one before showing it, and renews the confirmation of those that passed. A page that did not pass is left as it is and stays due.
+Check again that the user still recalls a page they confirmed. Where `/verify` asks whether the page is still true to the world, `/review` asks whether it is still true to the user. The skill takes the pages whose `verified` confirmation is older than the wiki's threshold, asks the user to recall each one before showing it, and renews the confirmation of those that passed. A page that did not pass is left as it is and stays due.
+
+### `/verify [page]`
+
+Re-check an existing page against today's primary sources together with the user. Changed claims are explained and checked the way `learn` checks a new page, and only what the user confirmed is rewritten. When the user confirms the page as a whole, the skill records it in the page's `verified` frontmatter, which makes the page `human-reviewed`. With no page named, it takes stock of the wiki and proposes the pages most likely to have drifted.
 
 ### `/digest [url]`
 

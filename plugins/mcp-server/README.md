@@ -57,7 +57,7 @@ One process serves one wiki. The server binds loopback with no authentication; i
 
 ## MCP tools
 
-All operations run against the current state of the Scraps wiki. Search uses fuzzy matching.
+All operations run against the current state of the Scraps wiki. Search matches keywords as written, ignoring case.
 
 ### Naming a scrap
 
@@ -115,8 +115,14 @@ instead of naming tools.
 
 ### `search_scraps`
 
-Search keys, titles, descriptions and tags with fuzzy matching. Bodies are
-not searched: read a hit with `get_scrap`.
+Search keys, titles, descriptions and tags. Bodies are not searched: read a
+hit with `get_scrap`.
+
+A keyword matches where it is written, ignoring case; a keyword of four or
+more letters also matches a word that has an extra letter in it, one per
+four letters of the keyword. Hits that match more keywords come first, then
+whole-word matches before partial ones, and a key, title or tag before a
+description.
 
 | Parameter | Type | Required | Default | Notes |
 |---|---|---|---|---|

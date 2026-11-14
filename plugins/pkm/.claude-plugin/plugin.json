@@ -1,7 +1,7 @@
 {
   "name": "pkm",
-  "version": "0.4.0",
-  "description": "Personal knowledge management skills for a Scraps wiki - learn a source through explanation and comprehension checks and record only what was understood, review the pages whose understanding was confirmed long ago, or digest an article or talk into a short linked summary without dialogue.",
+  "version": "0.4.2",
+  "description": "Personal knowledge management skills for a Scraps wiki - learn a source through explanation and comprehension checks and record only what was understood, re-check an existing page against today's sources and record the user's confirmation, review whether the user still recalls the pages confirmed long ago, or digest an article or talk into a short linked summary without dialogue.",
   "author": {
     "name": "boykush",
     "email": "boykush315@gmail.com"

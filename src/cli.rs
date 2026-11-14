@@ -150,7 +150,7 @@ pub enum SubCommands {
         json: bool,
     },
 
-    #[command(about = "Search scraps by query (fuzzy)")]
+    #[command(about = "Search scraps by keywords, best match first")]
     Search {
         query: String,
 
