@@ -27,8 +27,8 @@ impl LintUsecase {
     /// - non-empty: only the listed rules, drawn from default and `extra_rules`
     ///
     /// `extra_rules` lets the caller register the opt-in rules, some of which
-    /// (e.g. `StaleByGitRule`) are built from resources the usecase does not
-    /// own (git command, project path, current time).
+    /// (e.g. `StaleVerifiedRule`) are built from resources the usecase does not
+    /// own (the current time).
     pub fn execute(
         &self,
         scraps: &[Scrap],
@@ -141,19 +141,19 @@ mod tests {
 
     #[test]
     fn default_excludes_opt_in_rules() {
-        // StaleByGit must not run when no rule is explicitly requested,
+        // StaleVerified must not run when no rule is explicitly requested,
         // even if an extra rule is registered.
-        use crate::usecase::lint::rules::stale_by_git::StaleByGitRule;
-        use scraps_libs::git::tests::GitCommandTest;
-        use std::path::PathBuf;
+        use crate::usecase::lint::rules::stale_verified::StaleVerifiedRule;
 
         let scraps = vec![
-            Scrap::new("a", &None, "[[b]]"),
+            Scrap::new(
+                "a",
+                &None,
+                "---\nverified: { by: human:alice, at: 2020-01-01T00:00:00Z }\n---\n[[b]]",
+            ),
             Scrap::new("b", &None, "[[a]]"),
         ];
-        let stale_rule = StaleByGitRule {
-            git_command: GitCommandTest::new(),
-            scraps_dir: PathBuf::from("/tmp"),
+        let stale_rule = StaleVerifiedRule {
             threshold_days: 1,
             now_ts: 1_700_000_000,
         };
@@ -166,7 +166,7 @@ mod tests {
         assert!(
             warnings
                 .iter()
-                .all(|w| w.rule_name != LintRuleName::StaleByGit)
+                .all(|w| w.rule_name != LintRuleName::StaleVerified)
         );
     }
 
@@ -197,19 +197,17 @@ mod tests {
 
     #[test]
     fn extra_rule_runs_when_explicitly_selected() {
-        use crate::usecase::lint::rules::stale_by_git::StaleByGitRule;
-        use scraps_libs::git::tests::GitCommandTest;
-        use std::path::PathBuf;
+        use crate::usecase::lint::rules::stale_verified::StaleVerifiedRule;
 
-        // GitCommandTest returns ts=0 for every scrap, so any positive
-        // threshold flags everything as stale.
         let scraps = vec![
-            Scrap::new("a", &None, "[[b]]"),
+            Scrap::new(
+                "a",
+                &None,
+                "---\nverified: { by: human:alice, at: 2020-01-01T00:00:00Z }\n---\n[[b]]",
+            ),
             Scrap::new("b", &None, "[[a]]"),
         ];
-        let stale_rule = StaleByGitRule {
-            git_command: GitCommandTest::new(),
-            scraps_dir: PathBuf::from("/tmp"),
+        let stale_rule = StaleVerifiedRule {
             threshold_days: 1,
             now_ts: 1_700_000_000,
         };
@@ -218,7 +216,7 @@ mod tests {
         let warnings = usecase
             .execute(
                 &scraps,
-                &[LintRuleName::StaleByGit],
+                &[LintRuleName::StaleVerified],
                 vec![Box::new(stale_rule)],
             )
             .unwrap();
@@ -227,7 +225,7 @@ mod tests {
         assert!(
             warnings
                 .iter()
-                .all(|w| w.rule_name == LintRuleName::StaleByGit)
+                .all(|w| w.rule_name == LintRuleName::StaleVerified)
         );
     }
 }

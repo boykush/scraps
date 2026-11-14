@@ -45,12 +45,6 @@ title = "My Site"
 # presence enables the rule (enabled defaults to true); set enabled = false to
 # disable while preserving the rule's parameters.
 
-# stale_by_git: flag scraps whose latest git commit is older than the threshold.
-# Opt-in because how old is stale is for each wiki to decide.
-# [lint.stale_by_git]
-# enabled = true
-# threshold_days = 180
-
 # stale_verified: flag scraps whose newest `verified` confirmation is older
 # than the threshold. Opt-in because how long a confirmation holds is for each
 # wiki to decide.

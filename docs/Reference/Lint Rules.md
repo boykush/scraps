@@ -7,8 +7,8 @@ type: Reference
 Link quality rules used by [[Reference/CLI Overview]]'s `lint`
 command. Default rules report what is a defect in any wiki: a link that does
 not resolve, a scrap that cannot be linked. Opt-in rules check a policy the
-wiki chooses for itself, such as how old is stale or which filesystems it
-must port to; writing the rule's `[lint.<rule>]` section in
+wiki chooses for itself, such as how long a confirmation holds or which
+filesystems it must port to; writing the rule's `[lint.<rule>]` section in
 [[Reference/Configuration]] turns it on, and `--rule` runs it once. A link is a `[[wiki-link]]` or a Markdown link
 to a scrap's `.md` file ([[Reference/Markdown Link]]); the rules treat both
 alike and quote each as it was written.
@@ -23,7 +23,6 @@ alike and quote each as it was written.
 | `broken-heading-ref` | `[[Page#Heading]]` or `page.md#heading` heading missing | on |
 | `unlinkable-key` | scrap whose file path cannot be written inside `[[ ]]` | on |
 | `source-has-page` | `sources` URL that another scrap's `resource` names | on |
-| `stale-by-git` | policy: last commit older than the threshold the wiki sets | opt-in |
 | `stale-verified` | policy: newest `verified` confirmation older than the threshold the wiki sets | opt-in |
 | `unportable-key` | policy: file path that does not port across filesystems | opt-in |
 
@@ -48,9 +47,9 @@ threshold_days = 180
 ```
 
 A scrap with no readable `verified` entry is not reported: the rule asks for
-a confirmation to be renewed, never for a first one. It reads the
-frontmatter alone and needs no git, where `stale-by-git` asks when the file
-last changed and `stale-verified` when someone last stood behind it.
+a confirmation to be renewed, never for a first one. The rule reads the
+frontmatter alone: when a file last changed is git's to say, and a commit
+that fixes a typo confirms nothing.
 
 ## Key rules
 

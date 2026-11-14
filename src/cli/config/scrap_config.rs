@@ -38,29 +38,23 @@ impl SsgConfig {
 ///
 /// Rules surface opt-in/opt-out via `enabled` (default `true` when the
 /// section is present) and rule-specific parameters as sibling fields. This
-/// keeps selection and parameters co-located, so writing `[lint.stale_by_git]`
+/// keeps selection and parameters co-located, so writing `[lint.stale_verified]`
 /// is enough to opt in with defaults.
+///
+/// A section naming no rule is an error rather than ignored: a policy the
+/// wiki wrote down must not silently stop being checked.
 #[derive(Debug, Deserialize, Default)]
+#[serde(deny_unknown_fields)]
 pub struct LintConfig {
-    pub stale_by_git: Option<StaleByGitConfig>,
     pub stale_verified: Option<StaleVerifiedConfig>,
     pub unportable_key: Option<UnportableKeyConfig>,
 }
 
-/// Configuration for the `stale_by_git` lint rule.
+/// Configuration for the `stale_verified` lint rule.
 ///
 /// `enabled` defaults to `true` when the section is present in `.scraps.toml`,
-/// so a bare `[lint.stale_by_git]` opts the rule in. Setting `enabled = false`
+/// so a bare `[lint.stale_verified]` opts the rule in. Setting `enabled = false`
 /// disables the rule while preserving the threshold for later toggling.
-#[derive(Debug, Deserialize)]
-pub struct StaleByGitConfig {
-    #[serde(default = "default_true")]
-    pub enabled: bool,
-    pub threshold_days: Option<u64>,
-}
-
-/// Configuration for the `stale_verified` lint rule, opted into the same way
-/// as `stale_by_git`: a bare `[lint.stale_verified]` enables it.
 #[derive(Debug, Deserialize)]
 pub struct StaleVerifiedConfig {
     #[serde(default = "default_true")]
@@ -69,7 +63,7 @@ pub struct StaleVerifiedConfig {
 }
 
 /// Configuration for the `unportable_key` lint rule, opted into the same way
-/// as `stale_by_git`: a bare `[lint.unportable_key]` enables it.
+/// as `stale_verified`: a bare `[lint.unportable_key]` enables it.
 #[derive(Debug, Deserialize)]
 pub struct UnportableKeyConfig {
     #[serde(default = "default_true")]

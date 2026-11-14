@@ -21,8 +21,7 @@ Pick the smallest rule set that serves the stated purpose.
 | "audit orphans" / "孤立 scrap" | `lonely` |
 | "audit graph isolation" (orphans + dead-ends) | `lonely`, `dead-end` |
 | "trim graph noise" / "link 重複" | `overlinking` |
-| "find stale scraps" / "更新ない scrap" | `stale-by-git` |
-| "find confirmations due for renewal" / "確認が古い scrap" | `stale-verified` |
+| "find stale scraps" / "確認が古い scrap" | `stale-verified` |
 | "find scraps a wiki-link cannot reach" / "リンクできない scrap" | `unlinkable-key` |
 | "check the wiki ports to Windows / other filesystems" | `unportable-key` |
 | "point sources at the pages we have" / "出典をページに置き換えて" | `source-has-page` |
@@ -43,7 +42,6 @@ Reject requests like "run all default rules" without a stated purpose.
 | `overlinking` | judgment | report which repetitions are structural emphasis vs. noise (graph dedupes; this is about HTML readability) |
 | `unlinkable-key` | judgment | report the file and why `[[ ]]` cannot reach it; renaming is the user's call |
 | `unportable-key` | judgment | report the file and what does not port; renaming is the user's call |
-| `stale-by-git` | informational | list stale scraps with last-modified dates |
 | `stale-verified` | informational | list scraps whose newest confirmation is past the threshold, with its age and confirmer |
 
 ## Workflow
@@ -88,9 +86,9 @@ For each violation:
 - Report findings; do not auto-fix
 - Suggest concrete next actions where appropriate
 
-### Informational rules (stale-by-git, stale-verified)
+### Informational rules (stale-verified)
 
-- Output the list with last-modified dates, or with the confirmation's age and confirmer
+- Output the list with each confirmation's age and confirmer
 - Never renew a `verified` entry yourself: only the confirmer can stand behind the content again
 - Do not propose changes; the caller decides
 
