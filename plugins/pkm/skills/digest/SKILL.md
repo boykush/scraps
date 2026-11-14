@@ -64,7 +64,7 @@ verified:
 - <A bullet that links an existing page the source mentions. Zero to three.>
 ```
 
-The `verified` entry says you checked the summary against the source, and nothing about the user: `by` is you as an agent, written `<producer>/<version>` (for example `claude-code/<model id>`), never a `human:` actor, and `at` is the current time (`date -u +%Y-%m-%dT%H:%M:%SZ`). It leaves the page `machine-confirmed`, which is what tells a digested page from one the user understood, and it is the date `verify` counts from when the source is revised later.
+The `verified` entry says you checked the summary against the source, and nothing about the user: `by` is you as an agent, written `<producer>/<version>` (for example `claude-code/<model id>`), never a `human:` actor, and `at` is the current time (`date -u +%Y-%m-%dT%H:%M:%SZ`). Read the time before writing, so the page is written once and complete. It leaves the page `machine-confirmed`, which is what tells a digested page from one the user understood, and it is the date `verify` counts from when the source is revised later.
 
 The page is a summary of the source and stands for it, so the source's URL goes in the frontmatter `resource`, not in the body. Other pages that cite the source point at this page by path in their `sources`.
 
