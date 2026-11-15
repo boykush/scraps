@@ -1,7 +1,9 @@
 use scraps_libs::model::{scrap::Scrap, tags::Tags};
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
-use crate::usecase::lint::rule::{LintRule, LintRuleName, LintWarning, scrap_relative_path};
+use crate::usecase::lint::rule::{
+    LintRule, LintRuleName, LintWarning, is_about_page, scrap_relative_path,
+};
 
 pub struct LonelyRule;
 
@@ -18,6 +20,7 @@ impl LintRule for LonelyRule {
     ) -> Vec<LintWarning> {
         scraps
             .iter()
+            .filter(|scrap| !is_about_page(scrap))
             .filter(|scrap| backlinks_map.get(&scrap.self_key()).is_empty())
             .map(|scrap| LintWarning {
                 rule_name: self.name(),
@@ -33,6 +36,26 @@ impl LintRule for LonelyRule {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn skip_the_readme_the_site_renders_as_its_about_page() {
+        let scraps = vec![
+            Scrap::new("README", &None, "About this wiki."),
+            Scrap::new("README", &Some("notes".into()), "Not the root one."),
+        ];
+        let backlinks_map = BacklinksMap::new(&scraps);
+        let tags = Tags::new(&scraps);
+
+        let warnings = LonelyRule.check(&scraps, &backlinks_map, &tags);
+
+        assert_eq!(
+            warnings
+                .iter()
+                .map(|w| w.scrap_path.as_str())
+                .collect::<Vec<_>>(),
+            vec!["notes/README.md"]
+        );
+    }
 
     #[test]
     fn detect_scrap_with_no_backlinks() {

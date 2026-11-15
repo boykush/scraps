@@ -20,6 +20,8 @@ rules:
         name: コード、リンクの文字、URL、frontmatter に書かれた題名は出ない
       - id: EX-03
         name: 自分の題名を本文に書いても出ない
+      - id: EX-04
+        name: wiki 直下の README は about ページで scrap ではないので、「README」と書いても出ない
     automated: true
   - id: R-03
     name: ラテン文字の題名は語として、分かち書きしない文字の題名は書かれた場所すべてで照合し、重なりは長いほうを取る
