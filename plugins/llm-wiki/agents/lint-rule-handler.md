@@ -25,6 +25,7 @@ Pick the smallest rule set that serves the stated purpose.
 | "find scraps a wiki-link cannot reach" / "リンクできない scrap" | `unlinkable-key` |
 | "check the wiki ports to Windows / other filesystems" | `unportable-key` |
 | "point sources at the pages we have" / "出典をページに置き換えて" | `source-has-page` |
+| "link the pages that mention X" / "未リンクの言及" | `unlinked-mention` |
 | "wiki health 全般" (vague) | ask for narrowing first |
 
 Reject requests like "run all default rules" without a stated purpose.
@@ -43,6 +44,7 @@ Reject requests like "run all default rules" without a stated purpose.
 | `unlinkable-key` | judgment | report the file and why `[[ ]]` cannot reach it; renaming is the user's call |
 | `unportable-key` | judgment | report the file and what does not port; renaming is the user's call |
 | `stale-by-git` | informational | list stale scraps with last-modified dates |
+| `unlinked-mention` | judgment | read each mention in context; propose a link only where the text means that scrap, not part of a longer term |
 
 ## Workflow
 

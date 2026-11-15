@@ -25,6 +25,7 @@ alike and quote each as it was written.
 | `source-has-page` | `sources` URL that another scrap's `resource` names | on |
 | `stale-by-git` | policy: last commit older than the threshold the wiki sets | opt-in |
 | `unportable-key` | policy: file path that does not port across filesystems | opt-in |
+| `unlinked-mention` | policy: prose that writes another scrap's title without linking it | opt-in |
 
 ## Sources
 
@@ -33,6 +34,40 @@ string as another scrap's top-level `resource`: the material has a page of
 its own, so the entry can point at it by path, `/<key>.md`, and become a
 `source` link. A scrap naming its own `resource` in its `sources` is not
 reported. See [[Reference/Frontmatter]].
+
+## Mentions
+
+`unlinked-mention` reports where a scrap's prose writes another scrap's
+title without linking to it, once per scrap and title, at the first place:
+
+```
+warning: unlinked-mention: mentions "Customer Orders" without linking [[tables/orders]]
+```
+
+Whether a word that names a scrap should link to it is the wiki's call, so
+the rule is opt-in:
+
+```toml:.scraps.toml
+[lint.unlinked_mention]
+```
+
+What it counts as a mention:
+
+- Only running prose. Links of every kind and their text, images, code,
+  raw HTML, bare URLs and the frontmatter block are left out.
+- A title is matched as written, case included. One that starts or ends in a
+  Latin letter or digit must stand as a whole word, so `Git` is not found in
+  `GitHub`. A title in a script written without spaces between words is
+  found wherever it is written, so it can be part of a longer word.
+- Where titles overlap, the longest wins: `Claude Code` is reported, not
+  `Claude`.
+- A scrap that already links the target anywhere, and the target itself, are
+  not reported.
+- Titles shorter than three characters, and a title two scraps share, are
+  never matched.
+
+The warning names the target by its key, so the warnings about one scrap are
+those that end in its `[[key]]`.
 
 ## Key rules
 

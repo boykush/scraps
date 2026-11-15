@@ -56,3 +56,9 @@ title = "My Site"
 # Opt-in because where a wiki must port to is for each wiki to decide.
 # [lint.unportable_key]
 # enabled = true
+
+# unlinked_mention: flag prose that writes another scrap's title without linking it.
+# Opt-in because whether a word that names a scrap should link to it is for each
+# wiki to decide.
+# [lint.unlinked_mention]
+# enabled = true

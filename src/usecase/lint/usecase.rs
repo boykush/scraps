@@ -195,6 +195,36 @@ mod tests {
         assert_eq!(selected.len(), 1);
     }
 
+    // livt:automates livt://mapping/link-unlinked-mentions/rule/R-05/example/EX-02
+    #[test]
+    fn unlinked_mention_is_opt_in() {
+        use crate::usecase::lint::rules::unlinked_mention::UnlinkedMentionRule;
+
+        let scraps = vec![
+            Scrap::new("Rust", &None, "A language. [[notes]]"),
+            Scrap::new("notes", &None, "Learning Rust."),
+        ];
+        let usecase = LintUsecase::new();
+
+        let default = usecase
+            .execute(&scraps, &[], vec![Box::new(UnlinkedMentionRule)])
+            .unwrap();
+        assert!(
+            default
+                .iter()
+                .all(|w| w.rule_name != LintRuleName::UnlinkedMention)
+        );
+
+        let selected = usecase
+            .execute(
+                &scraps,
+                &[LintRuleName::UnlinkedMention],
+                vec![Box::new(UnlinkedMentionRule)],
+            )
+            .unwrap();
+        assert_eq!(selected.len(), 1);
+    }
+
     #[test]
     fn extra_rule_runs_when_explicitly_selected() {
         use crate::usecase::lint::rules::stale_by_git::StaleByGitRule;

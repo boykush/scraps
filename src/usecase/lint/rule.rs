@@ -14,6 +14,7 @@ pub enum LintRuleName {
     StaleByGit,
     UnportableKey,
     SourceHasPage,
+    UnlinkedMention,
 }
 
 impl LintRuleName {
@@ -29,6 +30,7 @@ impl LintRuleName {
             Self::StaleByGit => "stale-by-git",
             Self::UnportableKey => "unportable-key",
             Self::SourceHasPage => "source-has-page",
+            Self::UnlinkedMention => "unlinked-mention",
         }
     }
 
