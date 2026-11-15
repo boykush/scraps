@@ -37,7 +37,7 @@ rules:
       - id: EX-01
         name: 3文字未満の題名（Go）は照合しない
       - id: EX-02
-        name: 2つのページが共有する題名（DDD/Service と Kubernetes/Service）は照合しない
+        name: 同じ場所で2つのページを指しうる題名（どちらも title: Orders）は照合しない
     automated: true
   - id: R-05
     name: リンクすべきかは wiki の方針 — 設定に書くか --rule で呼んだときだけ走る
@@ -47,12 +47,20 @@ rules:
       - id: EX-02
         name: 設定も --rule もなければ、既定の lint はこのルールを走らせない
     automated: true
+  - id: R-06
+    name: context の中のページのファイル名は、その context の中でだけ名前になる
+    examples:
+      - id: EX-01
+        name: Kubernetes/ユーザ は Kubernetes/Pod と Kubernetes のページで報告され、それ以外の「ユーザ」では報告されない
+      - id: EX-02
+        name: DDD/Service と Kubernetes/Service は、Kubernetes/Pod の中では Kubernetes/Service として区別される
+    automated: true
 
 questions:
   - id: Q-01
     text: 分かち書きしない言語の題名が長い語の一部に当たる誤検出（状態 in 状態管理）を、ルールでどこまで減らすか
   - id: Q-02
-    text: 一般語に近い題名（リソース など）が警告の多くを占める — 題名ごとに除外できる設定が要るか
+    text: context 付きのページを context の中だけで照合すると、owner の wiki で 467 件が 242 件になった — 残りの一般語寄りの題名（CLI など）に除外の設定が要るか
   - id: Q-03
     text: 警告を機械が読める形（lint --json）で出すか — いまはスキルが文言の末尾 [[key]] で絞る
   - id: Q-04

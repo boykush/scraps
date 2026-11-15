@@ -61,10 +61,16 @@ What it counts as a mention:
   found wherever it is written, so it can be part of a longer word.
 - Where titles overlap, the longest wins: `Claude Code` is reported, not
   `Claude`.
+- A title the frontmatter gives, or the file name of a scrap outside any
+  context, names the scrap anywhere. The file name of a scrap in a context
+  names it only in that context's scraps and in the scrap the context is
+  named after: `Kubernetes/User.md` is `User` to `Kubernetes/Pod.md` and
+  `Kubernetes.md`, not to the rest of the wiki
+  ([[Reference/Wiki-link Notation#Key, title and context]]).
 - A scrap that already links the target anywhere, and the target itself, are
   not reported.
-- Titles shorter than three characters, and a title two scraps share, are
-  never matched.
+- Titles shorter than three characters are never matched, and a title that
+  could name two scraps in the same place names neither.
 
 The warning names the target by its key, so the warnings about one scrap are
 those that end in its `[[key]]`.

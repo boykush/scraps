@@ -27,10 +27,10 @@ impl LintRule for UnlinkedMentionRule {
         _backlinks_map: &BacklinksMap,
         _tags: &Tags,
     ) -> Vec<LintWarning> {
-        let targets = targets(scraps);
+        let titles = titles(scraps);
         let Ok(matcher) = AhoCorasick::builder()
             .match_kind(MatchKind::LeftmostLongest)
-            .build(targets.iter().map(|(title, _)| title))
+            .build(titles.iter().map(|(title, _)| title))
         else {
             return Vec::new();
         };
@@ -45,7 +45,8 @@ impl LintRule for UnlinkedMentionRule {
                 matcher
                     .find_iter(&text)
                     .filter_map(|found| {
-                        let (title, key) = &targets[found.pattern().as_usize()];
+                        let (title, named) = &titles[found.pattern().as_usize()];
+                        let key = meant(scrap, named)?;
                         let skip = *key == self_key
                             || linked.contains(key)
                             || !whole_word(&text, found.start(), found.end())
@@ -64,23 +65,49 @@ impl LintRule for UnlinkedMentionRule {
     }
 }
 
-/// The titles a mention can be matched against, each with the one scrap it
-/// names. A title two scraps share names neither, so it is left out.
-fn targets(scraps: &[Scrap]) -> Vec<(String, ScrapKey)> {
-    let mut by_title: HashMap<&str, Vec<ScrapKey>> = HashMap::new();
+/// A scrap a title can name, and where writing that title names it.
+struct Named {
+    key: ScrapKey,
+    /// The context it is named in, or `None` for the whole wiki.
+    within: Option<String>,
+}
+
+/// Each title long enough to match, with the scraps it can name. A title the
+/// author wrote, or the file name of a scrap outside any context, names the
+/// scrap anywhere. The file name of a scrap in a context names it only in
+/// that context: `Kubernetes/ユーザ` is `ユーザ` to Kubernetes pages alone.
+fn titles(scraps: &[Scrap]) -> Vec<(String, Vec<Named>)> {
+    let mut by_title: HashMap<&str, Vec<Named>> = HashMap::new();
     for scrap in scraps {
-        by_title
-            .entry(scrap.title())
-            .or_default()
-            .push(scrap.self_key());
+        let within = match (scrap.frontmatter_title(), scrap.ctx()) {
+            (None, Some(ctx)) => Some(ctx.to_string()),
+            _ => None,
+        };
+        by_title.entry(scrap.title()).or_default().push(Named {
+            key: scrap.self_key(),
+            within,
+        });
     }
-    let mut targets: Vec<(String, ScrapKey)> = by_title
+    let mut titles: Vec<(String, Vec<Named>)> = by_title
         .into_iter()
-        .filter(|(title, keys)| keys.len() == 1 && title.chars().count() >= MIN_TITLE_CHARS)
-        .filter_map(|(title, mut keys)| Some((title.to_string(), keys.pop()?)))
+        .filter(|(title, _)| title.chars().count() >= MIN_TITLE_CHARS)
+        .map(|(title, named)| (title.to_string(), named))
         .collect();
-    targets.sort_by(|a, b| a.0.cmp(&b.0));
-    targets
+    titles.sort_by(|a, b| a.0.cmp(&b.0));
+    titles
+}
+
+/// The one scrap a title written in `scrap` names there. A title that could
+/// name two scraps names neither.
+fn meant<'a>(scrap: &Scrap, named: &'a [Named]) -> Option<&'a ScrapKey> {
+    let here = scrap.ctx().as_ref().map(|ctx| ctx.to_string());
+    let page = scrap.self_key().to_string();
+    let mut candidates = named.iter().filter(|n| match &n.within {
+        None => true,
+        Some(ctx) => here.as_ref() == Some(ctx) || page == *ctx,
+    });
+    let key = &candidates.next()?.key;
+    candidates.next().is_none().then_some(key)
 }
 
 /// A title that starts or ends in a Latin letter or digit must not run into
@@ -276,13 +303,60 @@ mod tests {
 
     // livt:automates livt://mapping/link-unlinked-mentions/rule/R-04/example/EX-02
     #[test]
-    fn skip_a_title_two_scraps_share() {
+    fn skip_a_title_two_scraps_share_where_both_could_be_meant() {
+        let scraps = vec![
+            Scrap::new("a", &None, "---\ntitle: Orders\n---\nOne."),
+            Scrap::new("b", &None, "---\ntitle: Orders\n---\nTwo."),
+            Scrap::new("notes", &None, "Some Orders here."),
+        ];
+
+        assert!(check(&scraps).is_empty());
+    }
+
+    // livt:automates livt://mapping/link-unlinked-mentions/rule/R-06/example/EX-01
+    #[test]
+    fn match_a_file_named_title_in_a_context_only_inside_that_context() {
+        let scraps = vec![
+            Scrap::new("ユーザ", &Some("Kubernetes".into()), "認証される主体。"),
+            Scrap::new("notes", &None, "ユーザが増えた。"),
+            Scrap::new("Pod", &Some("Kubernetes".into()), "ユーザが作る。"),
+            Scrap::new("Kubernetes", &None, "ユーザを持つ。"),
+        ];
+
+        let mut warnings = reported(&check(&scraps));
+        warnings.sort();
+
+        assert_eq!(
+            warnings,
+            vec![
+                (
+                    "Kubernetes.md".to_string(),
+                    "mentions \"ユーザ\" without linking [[Kubernetes/ユーザ]]".to_string()
+                ),
+                (
+                    "Kubernetes/Pod.md".to_string(),
+                    "mentions \"ユーザ\" without linking [[Kubernetes/ユーザ]]".to_string()
+                ),
+            ]
+        );
+    }
+
+    // livt:automates livt://mapping/link-unlinked-mentions/rule/R-06/example/EX-02
+    #[test]
+    fn tell_scraps_that_share_a_file_name_apart_by_their_context() {
         let scraps = vec![
             Scrap::new("Service", &Some("DDD".into()), "Domain."),
             Scrap::new("Service", &Some("Kubernetes".into()), "Network."),
             Scrap::new("notes", &None, "A Service here."),
+            Scrap::new("Pod", &Some("Kubernetes".into()), "Exposed by a Service."),
         ];
 
-        assert!(check(&scraps).is_empty());
+        assert_eq!(
+            reported(&check(&scraps)),
+            vec![(
+                "Kubernetes/Pod.md".to_string(),
+                "mentions \"Service\" without linking [[Kubernetes/Service]]".to_string()
+            )]
+        );
     }
 }
