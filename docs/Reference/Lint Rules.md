@@ -55,6 +55,8 @@ What it counts as a mention:
   found wherever it is written, so it can be part of a longer word.
 - Where titles overlap, the longest wins: `Claude Code` is reported, not
   `Claude`.
+- A title written right onto a link, code or a URL, with no space between,
+  is part of that word and is not reported: `URL` in `[[Base64]]URL`.
 - A title the frontmatter gives, or the file name of a scrap outside any
   context, names the scrap anywhere. The file name of a scrap in a context
   names it only in that context's scraps and in the scrap the context is
@@ -70,6 +72,17 @@ What it counts as a mention:
 
 The warning names the target by its key, so the warnings about one scrap are
 those that end in its `[[key]]`.
+
+A warning is a candidate, not a verdict. What the rule cannot tell is left to
+whoever acts on it, a person or an agent:
+
+- whether the title is part of a longer name set apart by a space, such as
+  `CLI` in `GitHub CLI`, and the longer name has no scrap of its own
+- whether the word is meant in the scrap's sense: `MVP` in an article about a
+  Minimum Viable Platform does not name a scrap about the Minimum Viable
+  Product
+- whether the link would point from an abstract scrap down to an example of
+  it, when the wiki wants links to point from the concrete to the abstract
 
 ## Key rules
 
