@@ -63,10 +63,22 @@ rules:
       - id: EX-02
         name: "[[Base64]] then a URL のように空白を挟めば報告される"
     automated: true
+  - id: R-08
+    name: ページ自身の名前（context や題名）が始まりに持つ題名は、関係が名前で明らかなので報告しない
+    examples:
+      - id: EX-01
+        name: Claude Artifacts/Data の「Claude」、Kubernetes/Pod の「Kubernetes」は報告されない
+      - id: EX-02
+        name: 題名が Google Cloud のページの「Google」、Kubernetesパターン のページの「Kubernetes」は報告されない
+      - id: EX-03
+        name: GitHub のページの「Git」は、文字を共有するだけなので報告される
+    automated: true
 
 questions:
   - id: Q-05
     text: 空白を挟んだ複数語の名前（GitHub CLI、OpenID Connect）の一部かどうかは、ルールで決めずに AI と人の判断に残す — それで足りるか
+  - id: Q-06
+    text: context に入っていること自体を親ページとの関係として扱うか（被リンクや近傍グラフに出す）— owner の wiki では context の親への被リンクの 46% が同じ context の中から来ている
   - id: Q-01
     text: 分かち書きしない言語の題名が長い語の一部に当たる誤検出（状態 in 状態管理）を、ルールでどこまで減らすか
   - id: Q-02

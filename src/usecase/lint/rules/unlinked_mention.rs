@@ -48,6 +48,7 @@ impl LintRule for UnlinkedMentionRule {
                         let key = meant(scrap, named)?;
                         let skip = *key == self_key
                             || linked.contains(key)
+                            || carried(scrap, title)
                             || !whole_word(&text, found.start(), found.end())
                             || glued(scrap.md_text(), &text, found.start(), found.end())
                             || !reported.insert(key.clone());
@@ -110,6 +111,28 @@ fn meant<'a>(scrap: &Scrap, named: &'a [Named]) -> Option<&'a ScrapKey> {
     candidates.next().is_none().then_some(key)
 }
 
+/// Whether the scrap's own name already says `title`: a context or a title
+/// that starts with it, such as `Claude Code/*` for `Claude`. The relation is
+/// plain from the name, so a link would add nothing.
+fn carried(scrap: &Scrap, title: &str) -> bool {
+    let ctx = scrap.ctx().as_ref().map(|ctx| ctx.to_string());
+    let stem = scrap.stem().to_string();
+    ctx.iter()
+        .flat_map(|ctx| ctx.split('/'))
+        .chain([stem.as_str(), scrap.title()])
+        .any(|name| {
+            name.strip_prefix(title)
+                .is_some_and(|rest| !runs_on(title, rest))
+        })
+}
+
+/// Whether `after` continues a Latin word that `before` ends in, as `Hub`
+/// does after `Git`. Scripts written without spaces between words never do.
+fn runs_on(before: &str, after: &str) -> bool {
+    let word = |c: char| c.is_ascii_alphanumeric();
+    before.ends_with(word) && after.starts_with(word)
+}
+
 /// Whether the match is written right onto a link, code or URL, with no space
 /// between: `[[Base64]]URL` is one name, not a mention of `URL`. `prose`
 /// blanks those to spaces, which would otherwise read as a word break.
@@ -124,15 +147,11 @@ fn glued(source: &str, prose: &str, start: usize, end: usize) -> bool {
     before || after
 }
 
-/// A title that starts or ends in a Latin letter or digit must not run into
-/// one, so `Git` stays out of `GitHub`. Scripts written without spaces
-/// between words have no such edge to check.
+/// The match runs into no Latin word on either side, so `Git` stays out of
+/// `GitHub`.
 fn whole_word(text: &str, start: usize, end: usize) -> bool {
-    let word = |c: char| c.is_ascii_alphanumeric();
     let matched = &text[start..end];
-    let open = !matched.starts_with(word) || !text[..start].ends_with(word);
-    let close = !matched.ends_with(word) || !text[end..].starts_with(word);
-    open && close
+    !runs_on(&text[..start], matched) && !runs_on(matched, &text[end..])
 }
 
 #[cfg(test)]
@@ -417,6 +436,57 @@ mod tests {
             vec![(
                 "notes.md".to_string(),
                 "mentions \"URL\" without linking [[URL]]".to_string()
+            )]
+        );
+    }
+
+    // livt:automates livt://mapping/link-unlinked-mentions/rule/R-08/example/EX-01
+    #[test]
+    fn skip_a_name_the_scraps_context_already_carries() {
+        let scraps = vec![
+            Scrap::new("Claude", &None, "A model."),
+            Scrap::new("Kubernetes", &None, "An orchestrator."),
+            Scrap::new(
+                "Data",
+                &Some("Claude Artifacts".into()),
+                "Claude writes the SQL.",
+            ),
+            Scrap::new(
+                "Pod",
+                &Some("Kubernetes".into()),
+                "The smallest unit in Kubernetes.",
+            ),
+        ];
+
+        assert!(check(&scraps).is_empty());
+    }
+
+    // livt:automates livt://mapping/link-unlinked-mentions/rule/R-08/example/EX-02
+    #[test]
+    fn skip_a_name_the_scraps_own_title_already_carries() {
+        let scraps = vec![
+            Scrap::new("Google", &None, "A company."),
+            Scrap::new("Kubernetes", &None, "An orchestrator."),
+            Scrap::new("Google Cloud", &None, "Google runs it."),
+            Scrap::new("Kubernetesパターン", &None, "Patterns for Kubernetes."),
+        ];
+
+        assert!(check(&scraps).is_empty());
+    }
+
+    // livt:automates livt://mapping/link-unlinked-mentions/rule/R-08/example/EX-03
+    #[test]
+    fn report_a_name_that_only_shares_letters_with_the_scraps_name() {
+        let scraps = vec![
+            Scrap::new("Git", &None, "A VCS."),
+            Scrap::new("GitHub", &None, "Hosting. Built on Git."),
+        ];
+
+        assert_eq!(
+            reported(&check(&scraps)),
+            vec![(
+                "GitHub.md".to_string(),
+                "mentions \"Git\" without linking [[Git]]".to_string()
             )]
         );
     }

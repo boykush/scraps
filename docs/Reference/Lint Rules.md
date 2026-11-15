@@ -57,6 +57,10 @@ What it counts as a mention:
   `Claude`.
 - A title written right onto a link, code or a URL, with no space between,
   is part of that word and is not reported: `URL` in `[[Base64]]URL`.
+- A title the scrap's own name already carries is not reported: `Claude` in
+  `Claude Code/Hooks.md` or in a scrap titled `Claude Artifacts`, since its
+  context or title starts with it. `Git` is still reported in `GitHub.md`,
+  where the name only shares letters.
 - A title the frontmatter gives, or the file name of a scrap outside any
   context, names the scrap anywhere. The file name of a scrap in a context
   names it only in that context's scraps and in the scrap the context is
