@@ -9,7 +9,7 @@ use super::{
         broken_heading_ref::BrokenHeadingRefRule, broken_link::BrokenLinkRule,
         dead_end::DeadEndRule, lonely::LonelyRule, overlinking::OverlinkingRule,
         self_link::SelfLinkRule, source_has_page::SourceHasPageRule,
-        unlinkable_key::UnlinkableKeyRule,
+        unlinkable_key::UnlinkableKeyRule, unlinked_mention::UnlinkedMentionRule,
     },
 };
 
@@ -47,6 +47,7 @@ impl LintUsecase {
             Box::new(BrokenHeadingRefRule),
             Box::new(UnlinkableKeyRule),
             Box::new(SourceHasPageRule),
+            Box::new(UnlinkedMentionRule),
         ];
 
         if !rule_names.is_empty() {
@@ -193,6 +194,25 @@ mod tests {
             )
             .unwrap();
         assert_eq!(selected.len(), 1);
+    }
+
+    // livt:automates livt://mapping/link-unlinked-mentions/rule/R-05/example/EX-01
+    #[test]
+    fn unlinked_mention_runs_by_default() {
+        let scraps = vec![
+            Scrap::new("Rust", &None, "A language. [[notes]]"),
+            Scrap::new("notes", &None, "Learning Rust."),
+        ];
+
+        let warnings = LintUsecase::new()
+            .execute(&scraps, &[], Vec::new())
+            .unwrap();
+
+        assert!(
+            warnings
+                .iter()
+                .any(|w| w.rule_name == LintRuleName::UnlinkedMention)
+        );
     }
 
     #[test]

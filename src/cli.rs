@@ -314,6 +314,8 @@ pub enum CliLintRuleName {
     UnportableKey,
     #[value(name = "source-has-page")]
     SourceHasPage,
+    #[value(name = "unlinked-mention")]
+    UnlinkedMention,
 }
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
@@ -389,6 +391,7 @@ impl From<CliLintRuleName> for LintRuleName {
             CliLintRuleName::StaleByGit => LintRuleName::StaleByGit,
             CliLintRuleName::UnportableKey => LintRuleName::UnportableKey,
             CliLintRuleName::SourceHasPage => LintRuleName::SourceHasPage,
+            CliLintRuleName::UnlinkedMention => LintRuleName::UnlinkedMention,
         }
     }
 }

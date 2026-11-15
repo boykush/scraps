@@ -127,10 +127,9 @@ Wait for the user to confirm or correct the plan.
 
 ## 6. Link existing pages to the new one
 
-1. `Grep` the wiki for the literal new title across `*.md`, with surrounding context, to find mentions that are not yet links. `scraps search` does not search bodies, so it cannot find them.
-2. Drop mentions already inside a link, the new page itself, and candidates with no literal mention.
-3. Present the remaining mentions with their context and your read of each, and let the user pick which to link, several at once. With more candidates than one question holds, list them all in the message body and ask only about those that need judgment.
-4. Convert only the chosen mentions to `[[Title]]` or `[[Title|surface form]]`.
+1. Run `scraps lint --rule unlinked-mention` and keep the warnings that end in `[[<key>]]`, the new page's key. Each names a page that writes the new title without linking it, at the line shown. Which text counts as a mention is the rule's to decide: take its warnings as the candidates, and do not search the pages yourself.
+2. Present the candidates with their context and your read of each, and let the user pick which to link, several at once. With more candidates than one question holds, list them all in the message body and ask only about those that need judgment.
+3. Convert only the chosen mentions to `[[Title]]` or `[[Title|surface form]]`.
 
 With no candidates, leave existing pages untouched. Backlinks are computed automatically, so do not add reverse links.
 

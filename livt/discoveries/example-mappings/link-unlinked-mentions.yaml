@@ -1,0 +1,65 @@
+story: link-unlinked-mentions
+
+rules:
+  - id: R-01
+    name: 地の文が他のページの題名をリンクなしで書いていたら、そのページを key で名指して報告する
+    examples:
+      - id: EX-01
+        name: 本文に「Rust」と書いたページに、mentions "Rust" without linking [[Rust]] が出て、位置は「Rust」の4文字を指す
+      - id: EX-02
+        name: frontmatter の title で照合し、名指しは key（tables/orders）で行う
+      - id: EX-03
+        name: 同じページの同じ題名は、最初の1か所で1件だけ
+    automated: true
+  - id: R-02
+    name: すでにリンクしている言及、言及でない箇所、自分自身は報告しない
+    examples:
+      - id: EX-01
+        name: wiki-link でも Markdown リンクでも、どこかで一度リンクしていればそのページは出ない
+      - id: EX-02
+        name: コード、リンクの文字、URL、frontmatter に書かれた題名は出ない
+      - id: EX-03
+        name: 自分の題名を本文に書いても出ない
+    automated: true
+  - id: R-03
+    name: ラテン文字の題名は語として、分かち書きしない文字の題名は書かれた場所すべてで照合し、重なりは長いほうを取る
+    examples:
+      - id: EX-01
+        name: Git は GitHub・git・Gitter には当たらない
+      - id: EX-02
+        name: 認可制御 は「ここで認可制御を導入した」の中で当たる
+      - id: EX-03
+        name: Claude と Claude Code があるとき、「Claude Code」は Claude Code として1件だけ出る
+    automated: true
+  - id: R-04
+    name: 言葉と区別できない題名は照合しない
+    examples:
+      - id: EX-01
+        name: 3文字未満の題名（Go）は照合しない
+      - id: EX-02
+        name: "同じ場所で2つのページを指しうる題名（どちらも title: Orders）は照合しない"
+    automated: true
+  - id: R-05
+    name: どの wiki でも直す価値がある — 既定の lint で走る
+    examples:
+      - id: EX-01
+        name: 設定も --rule もない scraps lint が、このルールの警告を出す
+    automated: true
+  - id: R-06
+    name: context の中のページのファイル名は、その context の中でだけ名前になる
+    examples:
+      - id: EX-01
+        name: Kubernetes/ユーザ は Kubernetes/Pod と Kubernetes のページで報告され、それ以外の「ユーザ」では報告されない
+      - id: EX-02
+        name: DDD/Service と Kubernetes/Service は、Kubernetes/Pod の中では Kubernetes/Service として区別される
+    automated: true
+
+questions:
+  - id: Q-01
+    text: 分かち書きしない言語の題名が長い語の一部に当たる誤検出（状態 in 状態管理）を、ルールでどこまで減らすか
+  - id: Q-02
+    text: context 付きのページを context の中だけで照合すると、owner の wiki で 467 件が 242 件になった — 残りの一般語寄りの題名（CLI など）に除外の設定が要るか
+  - id: Q-03
+    text: 警告を機械が読める形（lint --json）で出すか — いまはスキルが文言の末尾 [[key]] で絞る
+  - id: Q-04
+    text: スキル側で他にも自前で品質を判定している箇所（タグの既存確認など）を lint に寄せるか

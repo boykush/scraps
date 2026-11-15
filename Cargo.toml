@@ -13,6 +13,7 @@ rust-version = "1.98"
 version = "5.2.0"
 path = "modules/libs"
 [workspace.dependencies]
+aho-corasick = "=1.1.4"
 anyhow = "=1.0.104"
 thiserror = "=2.0.21"
 url = { version = "=2.5.8", features = ["serde"] }
@@ -92,6 +93,7 @@ include = [
 scraps_libs.workspace = true
 scraps_libs.features = ["frontmatter", "git", "html", "lang", "markdown", "model", "search", "slugify"]
 #external crates
+aho-corasick.workspace = true
 url.workspace = true
 itertools.workspace = true
 serde.workspace = true
