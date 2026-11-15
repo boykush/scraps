@@ -126,11 +126,11 @@ fn carried(scrap: &Scrap, title: &str) -> bool {
         })
 }
 
-/// Whether `rest` continues the Latin word `title` ends in, as `Hub` does
-/// after `Git`.
-fn runs_on(title: &str, rest: &str) -> bool {
+/// Whether `after` continues a Latin word that `before` ends in, as `Hub`
+/// does after `Git`. Scripts written without spaces between words never do.
+fn runs_on(before: &str, after: &str) -> bool {
     let word = |c: char| c.is_ascii_alphanumeric();
-    title.ends_with(word) && rest.starts_with(word)
+    before.ends_with(word) && after.starts_with(word)
 }
 
 /// Whether the match is written right onto a link, code or URL, with no space
@@ -147,15 +147,11 @@ fn glued(source: &str, prose: &str, start: usize, end: usize) -> bool {
     before || after
 }
 
-/// A title that starts or ends in a Latin letter or digit must not run into
-/// one, so `Git` stays out of `GitHub`. Scripts written without spaces
-/// between words have no such edge to check.
+/// The match runs into no Latin word on either side, so `Git` stays out of
+/// `GitHub`.
 fn whole_word(text: &str, start: usize, end: usize) -> bool {
-    let word = |c: char| c.is_ascii_alphanumeric();
     let matched = &text[start..end];
-    let open = !matched.starts_with(word) || !text[..start].ends_with(word);
-    let close = !matched.ends_with(word) || !text[end..].starts_with(word);
-    open && close
+    !runs_on(&text[..start], matched) && !runs_on(matched, &text[end..])
 }
 
 #[cfg(test)]
