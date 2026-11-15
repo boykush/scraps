@@ -55,8 +55,18 @@ rules:
       - id: EX-02
         name: DDD/Service と Kubernetes/Service は、Kubernetes/Pod の中では Kubernetes/Service として区別される
     automated: true
+  - id: R-07
+    name: リンクやコード、URL に空白なしでくっついて書かれた題名は、その語の一部なので報告しない
+    examples:
+      - id: EX-01
+        name: "[[Base64]]URL、[[コンテナ]]イメージ、`curl`URL、URL[[Base64]] はどれも報告されない"
+      - id: EX-02
+        name: "[[Base64]] then a URL のように空白を挟めば報告される"
+    automated: true
 
 questions:
+  - id: Q-05
+    text: 空白を挟んだ複数語の名前（GitHub CLI、OpenID Connect）の一部かどうかは、ルールで決めずに AI と人の判断に残す — それで足りるか
   - id: Q-01
     text: 分かち書きしない言語の題名が長い語の一部に当たる誤検出（状態 in 状態管理）を、ルールでどこまで減らすか
   - id: Q-02

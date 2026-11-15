@@ -49,6 +49,7 @@ impl LintRule for UnlinkedMentionRule {
                         let skip = *key == self_key
                             || linked.contains(key)
                             || !whole_word(&text, found.start(), found.end())
+                            || glued(scrap.md_text(), &text, found.start(), found.end())
                             || !reported.insert(key.clone());
                         (!skip).then(|| LintWarning {
                             rule_name: LintRuleName::UnlinkedMention,
@@ -107,6 +108,20 @@ fn meant<'a>(scrap: &Scrap, named: &'a [Named]) -> Option<&'a ScrapKey> {
     });
     let key = &candidates.next()?.key;
     candidates.next().is_none().then_some(key)
+}
+
+/// Whether the match is written right onto a link, code or URL, with no space
+/// between: `[[Base64]]URL` is one name, not a mention of `URL`. `prose`
+/// blanks those to spaces, which would otherwise read as a word break.
+fn glued(source: &str, prose: &str, start: usize, end: usize) -> bool {
+    let blanked =
+        |p: Option<char>, s: Option<char>| p == Some(' ') && s.is_some_and(|c| !c.is_whitespace());
+    let before = blanked(
+        prose[..start].chars().next_back(),
+        source[..start].chars().next_back(),
+    );
+    let after = blanked(prose[end..].chars().next(), source[end..].chars().next());
+    before || after
 }
 
 /// A title that starts or ends in a Latin letter or digit must not run into
@@ -368,5 +383,41 @@ mod tests {
         ];
 
         assert!(check(&scraps).is_empty());
+    }
+
+    // livt:automates livt://mapping/link-unlinked-mentions/rule/R-07/example/EX-01
+    #[test]
+    fn skip_a_title_written_onto_a_link_or_code() {
+        let scraps = vec![
+            Scrap::new("URL", &None, "An address."),
+            Scrap::new("イメージ", &None, "A file system."),
+            Scrap::new("Base64", &None, "An encoding."),
+            Scrap::new("コンテナ", &None, "A process."),
+            Scrap::new(
+                "notes",
+                &None,
+                "Encoded as [[Base64]]URL. Pulled the [[コンテナ]]イメージ. Ran `curl`URL. Saw URL[[Base64]] too.",
+            ),
+        ];
+
+        assert!(check(&scraps).is_empty());
+    }
+
+    // livt:automates livt://mapping/link-unlinked-mentions/rule/R-07/example/EX-02
+    #[test]
+    fn report_a_title_set_apart_from_a_link() {
+        let scraps = vec![
+            Scrap::new("URL", &None, "An address."),
+            Scrap::new("Base64", &None, "An encoding."),
+            Scrap::new("notes", &None, "Wrote [[Base64]] then a URL."),
+        ];
+
+        assert_eq!(
+            reported(&check(&scraps)),
+            vec![(
+                "notes.md".to_string(),
+                "mentions \"URL\" without linking [[URL]]".to_string()
+            )]
+        );
     }
 }
