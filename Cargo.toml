@@ -13,7 +13,7 @@ rust-version = "1.98"
 version = "5.2.0"
 path = "modules/libs"
 [workspace.dependencies]
-aho-corasick = "=1.1.4"
+aho-corasick = "=1.1.5"
 anyhow = "=1.0.104"
 thiserror = "=2.0.21"
 url = { version = "=2.5.8", features = ["serde"] }
