@@ -6,7 +6,7 @@ and into JSON any agent can shell into — turning Karpathy's *LLM Wiki*
 pattern into a typed, queryable artifact. CLI primary with companion AI
 skills and agents, fitting any editor and any LLM agent.
 
-Start at [[Explanation/What is Scraps?]] for the bigger picture.
+Start at the Explanation below for the bigger picture.
 
 ## Documentation
 

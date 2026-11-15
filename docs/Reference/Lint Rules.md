@@ -17,7 +17,7 @@ alike and quote each as it was written.
 | Rule | Detects | Default |
 |---|---|---|
 | `dead-end` | scrap with no outbound links | on |
-| `lonely` | scrap with no backlinks | on |
+| `lonely` | scrap with no backlinks, the root `README.md` aside | on |
 | `self-link` | scrap links to itself | on |
 | `overlinking` | same scrap linked more than once in one scrap | on |
 | `broken-link` | link, or `sources` path, that does not resolve to a scrap | on |
@@ -62,7 +62,9 @@ What it counts as a mention:
   `Kubernetes.md`, not to the rest of the wiki
   ([[Reference/Wiki-link Notation#Key, title and context]]).
 - A scrap that already links the target anywhere, and the target itself, are
-  not reported.
+  not reported. Nor is the root `README.md`, which the site renders as its
+  about page rather than as a scrap
+  ([[Reference/Static Site/README and About]]).
 - Titles shorter than three characters are never matched, and a title that
   could name two scraps in the same place names neither.
 

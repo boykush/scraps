@@ -101,8 +101,8 @@ type; the type is matched exactly and case-sensitively.
 
 ## Confirmations
 
-`scraps verified` lists every scrap that carries a readable `verified` entry
-([[Reference/Frontmatter]]), by its newest one, oldest first: the scraps
+`scraps verified` lists every scrap that carries a readable `verified` entry,
+the Frontmatter key above, by its newest one, oldest first: the scraps
 whose confirmation is most due for renewal come at the top.
 
 ```bash

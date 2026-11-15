@@ -5,7 +5,9 @@ use scraps_libs::markdown::query::prose;
 use scraps_libs::model::{key::ScrapKey, scrap::Scrap, tags::Tags};
 
 use crate::usecase::build::model::backlinks_map::BacklinksMap;
-use crate::usecase::lint::rule::{LintRule, LintRuleName, LintWarning, scrap_relative_path};
+use crate::usecase::lint::rule::{
+    LintRule, LintRuleName, LintWarning, is_about_page, scrap_relative_path,
+};
 
 /// Shorter titles are mostly ordinary words and abbreviations.
 const MIN_TITLE_CHARS: usize = 3;
@@ -75,7 +77,7 @@ struct Named {
 /// that context: `Kubernetes/ユーザ` is `ユーザ` to Kubernetes pages alone.
 fn titles(scraps: &[Scrap]) -> Vec<(String, Vec<Named>)> {
     let mut by_title: HashMap<&str, Vec<Named>> = HashMap::new();
-    for scrap in scraps {
+    for scrap in scraps.iter().filter(|scrap| !is_about_page(scrap)) {
         let within = match (scrap.frontmatter_title(), scrap.ctx()) {
             (None, Some(ctx)) => Some(ctx.to_string()),
             _ => None,
@@ -355,5 +357,16 @@ mod tests {
                 "mentions \"Service\" without linking [[Kubernetes/Service]]".to_string()
             )]
         );
+    }
+
+    // livt:automates livt://mapping/link-unlinked-mentions/rule/R-02/example/EX-04
+    #[test]
+    fn skip_the_readme_the_site_renders_as_its_about_page() {
+        let scraps = vec![
+            Scrap::new("README", &None, "About this wiki."),
+            Scrap::new("notes", &None, "See the README for setup."),
+        ];
+
+        assert!(check(&scraps).is_empty());
     }
 }

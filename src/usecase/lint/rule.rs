@@ -60,6 +60,12 @@ pub struct LintWarning {
     pub span: Option<(usize, usize)>,
 }
 
+/// `README.md` at the wiki root, which the site renders as its about page
+/// rather than as a scrap, so no link can point at it.
+pub fn is_about_page(scrap: &Scrap) -> bool {
+    scrap.ctx().is_none() && scrap.stem().as_str() == "README"
+}
+
 pub fn scrap_relative_path(scrap: &Scrap) -> String {
     match scrap.ctx() {
         Some(ctx) => format!("{}/{}.md", ctx, scrap.stem()),
