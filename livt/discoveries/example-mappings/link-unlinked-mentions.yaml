@@ -37,7 +37,7 @@ rules:
       - id: EX-01
         name: 3文字未満の題名（Go）は照合しない
       - id: EX-02
-        name: 同じ場所で2つのページを指しうる題名（どちらも title: Orders）は照合しない
+        name: "同じ場所で2つのページを指しうる題名（どちらも title: Orders）は照合しない"
     automated: true
   - id: R-05
     name: リンクすべきかは wiki の方針 — 設定に書くか --rule で呼んだときだけ走る
