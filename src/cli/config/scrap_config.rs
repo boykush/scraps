@@ -44,7 +44,6 @@ impl SsgConfig {
 pub struct LintConfig {
     pub stale_by_git: Option<StaleByGitConfig>,
     pub unportable_key: Option<UnportableKeyConfig>,
-    pub unlinked_mention: Option<UnlinkedMentionConfig>,
 }
 
 /// Configuration for the `stale_by_git` lint rule.
@@ -63,14 +62,6 @@ pub struct StaleByGitConfig {
 /// as `stale_by_git`: a bare `[lint.unportable_key]` enables it.
 #[derive(Debug, Deserialize)]
 pub struct UnportableKeyConfig {
-    #[serde(default = "default_true")]
-    pub enabled: bool,
-}
-
-/// Configuration for the `unlinked_mention` lint rule, opted into the same
-/// way as `stale_by_git`: a bare `[lint.unlinked_mention]` enables it.
-#[derive(Debug, Deserialize)]
-pub struct UnlinkedMentionConfig {
     #[serde(default = "default_true")]
     pub enabled: bool,
 }

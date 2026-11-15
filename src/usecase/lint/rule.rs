@@ -47,6 +47,7 @@ impl LintRuleName {
             Self::BrokenHeadingRef,
             Self::UnlinkableKey,
             Self::SourceHasPage,
+            Self::UnlinkedMention,
         ]
     }
 }

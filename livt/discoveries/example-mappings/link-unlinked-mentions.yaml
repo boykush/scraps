@@ -40,12 +40,10 @@ rules:
         name: "同じ場所で2つのページを指しうる題名（どちらも title: Orders）は照合しない"
     automated: true
   - id: R-05
-    name: リンクすべきかは wiki の方針 — 設定に書くか --rule で呼んだときだけ走る
+    name: どの wiki でも直す価値がある — 既定の lint で走る
     examples:
       - id: EX-01
-        name: "[lint.unlinked_mention] を書いた wiki では --rule なしの scraps lint がこのルールを走らせる"
-      - id: EX-02
-        name: 設定も --rule もなければ、既定の lint はこのルールを走らせない
+        name: 設定も --rule もない scraps lint が、このルールの警告を出す
     automated: true
   - id: R-06
     name: context の中のページのファイル名は、その context の中でだけ名前になる

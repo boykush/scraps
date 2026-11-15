@@ -9,7 +9,7 @@ use super::{
         broken_heading_ref::BrokenHeadingRefRule, broken_link::BrokenLinkRule,
         dead_end::DeadEndRule, lonely::LonelyRule, overlinking::OverlinkingRule,
         self_link::SelfLinkRule, source_has_page::SourceHasPageRule,
-        unlinkable_key::UnlinkableKeyRule,
+        unlinkable_key::UnlinkableKeyRule, unlinked_mention::UnlinkedMentionRule,
     },
 };
 
@@ -47,6 +47,7 @@ impl LintUsecase {
             Box::new(BrokenHeadingRefRule),
             Box::new(UnlinkableKeyRule),
             Box::new(SourceHasPageRule),
+            Box::new(UnlinkedMentionRule),
         ];
 
         if !rule_names.is_empty() {
@@ -195,34 +196,23 @@ mod tests {
         assert_eq!(selected.len(), 1);
     }
 
-    // livt:automates livt://mapping/link-unlinked-mentions/rule/R-05/example/EX-02
+    // livt:automates livt://mapping/link-unlinked-mentions/rule/R-05/example/EX-01
     #[test]
-    fn unlinked_mention_is_opt_in() {
-        use crate::usecase::lint::rules::unlinked_mention::UnlinkedMentionRule;
-
+    fn unlinked_mention_runs_by_default() {
         let scraps = vec![
             Scrap::new("Rust", &None, "A language. [[notes]]"),
             Scrap::new("notes", &None, "Learning Rust."),
         ];
-        let usecase = LintUsecase::new();
 
-        let default = usecase
-            .execute(&scraps, &[], vec![Box::new(UnlinkedMentionRule)])
+        let warnings = LintUsecase::new()
+            .execute(&scraps, &[], Vec::new())
             .unwrap();
+
         assert!(
-            default
+            warnings
                 .iter()
-                .all(|w| w.rule_name != LintRuleName::UnlinkedMention)
+                .any(|w| w.rule_name == LintRuleName::UnlinkedMention)
         );
-
-        let selected = usecase
-            .execute(
-                &scraps,
-                &[LintRuleName::UnlinkedMention],
-                vec![Box::new(UnlinkedMentionRule)],
-            )
-            .unwrap();
-        assert_eq!(selected.len(), 1);
     }
 
     #[test]

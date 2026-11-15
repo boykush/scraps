@@ -11,9 +11,6 @@ use crate::usecase::lint::rule::{LintRule, LintRuleName, LintWarning, scrap_rela
 const MIN_TITLE_CHARS: usize = 3;
 
 /// Report prose that writes another scrap's title without linking to it.
-///
-/// Opt-in (`[lint.unlinked_mention]` or `--rule unlinked-mention`): whether a
-/// word that names a scrap should link to it is the wiki's call, not a defect.
 pub struct UnlinkedMentionRule;
 
 impl LintRule for UnlinkedMentionRule {

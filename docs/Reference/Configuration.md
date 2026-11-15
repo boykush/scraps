@@ -87,10 +87,6 @@ threshold_days = 180
 # Policy: the wiki must port across filesystems.
 [lint.unportable_key]
 enabled = true
-
-# Policy: a title written in prose should link to its scrap.
-[lint.unlinked_mention]
-enabled = true
 ```
 
 See [[Reference/Lint Rules]] for every rule.

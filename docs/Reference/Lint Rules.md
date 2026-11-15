@@ -6,7 +6,8 @@ type: Reference
 
 Link quality rules used by [[Reference/CLI Overview]]'s `lint`
 command. Default rules report what is a defect in any wiki: a link that does
-not resolve, a scrap that cannot be linked. Opt-in rules check a policy the
+not resolve, a scrap that cannot be linked, a title written without its
+link. Opt-in rules check a policy the
 wiki chooses for itself, such as how old is stale or which filesystems it
 must port to; writing the rule's `[lint.<rule>]` section in
 [[Reference/Configuration]] turns it on, and `--rule` runs it once. A link is a `[[wiki-link]]` or a Markdown link
@@ -23,9 +24,9 @@ alike and quote each as it was written.
 | `broken-heading-ref` | `[[Page#Heading]]` or `page.md#heading` heading missing | on |
 | `unlinkable-key` | scrap whose file path cannot be written inside `[[ ]]` | on |
 | `source-has-page` | `sources` URL that another scrap's `resource` names | on |
+| `unlinked-mention` | prose that writes another scrap's title without linking it | on |
 | `stale-by-git` | policy: last commit older than the threshold the wiki sets | opt-in |
 | `unportable-key` | policy: file path that does not port across filesystems | opt-in |
-| `unlinked-mention` | policy: prose that writes another scrap's title without linking it | opt-in |
 
 ## Sources
 
@@ -42,13 +43,6 @@ title without linking to it, once per scrap and title, at the first place:
 
 ```
 warning: unlinked-mention: mentions "Customer Orders" without linking [[tables/orders]]
-```
-
-Whether a word that names a scrap should link to it is the wiki's call, so
-the rule is opt-in:
-
-```toml:.scraps.toml
-[lint.unlinked_mention]
 ```
 
 What it counts as a mention:
