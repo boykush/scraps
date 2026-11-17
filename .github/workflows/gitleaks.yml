@@ -17,6 +17,15 @@ permissions: {}
 jobs:
   gitleaks:
     name: gitleaks
+    # Skip events whose commits only bots wrote: Renovate's version/digest bumps and
+    # the files github-management distributes. A job skipped by `if:` bills no
+    # minutes, and on private repos (Free: 2,000 min/month) these two bots trigger
+    # most runs. A human push, or a human's merge of a bot PR, still scans; a manual
+    # run always does. Not a required check anywhere, so a skip blocks no merge.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.actor != 'boykush-renovate-app[bot]' &&
+       github.actor != 'boykush-github-management[bot]')
     runs-on: ubuntu-latest
     permissions:
       contents: read # checkout
