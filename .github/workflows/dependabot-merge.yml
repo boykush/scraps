@@ -11,7 +11,7 @@ permissions: {}
 
 jobs:
   merge:
-    uses: boykush/workflows/.github/workflows/dependabot-merge.yml@ee80f660c9f856b09f9d0141baed6644a3ac5862
+    uses: boykush/workflows/.github/workflows/dependabot-merge.yml@a66e4e88a25148b4148ce32e10af5edcd1d97b06
     permissions:
       contents: read
       pull-requests: read
