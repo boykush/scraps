@@ -9,12 +9,16 @@ name: Plugin tags
 # These tags are independent of the product's v* releases: they create no
 # GitHub Release, and a tag pushed with GITHUB_TOKEN starts no workflow, so
 # release.yml never sees them.
+#
+# The plugin manifests are the only trigger and the only source of the tag:
+# no manual run, no other file. A plugin that ships both a Claude Code and a
+# Codex manifest is tagged only while the two agree on name and version.
 on:
   push:
     branches: [main]
     paths:
       - "plugins/*/.claude-plugin/plugin.json"
-  workflow_dispatch:
+      - "plugins/*/.codex-plugin/plugin.json"
 
 permissions: {}
 
@@ -41,13 +45,32 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          for pj in plugins/*/.claude-plugin/plugin.json; do
-            name=$(jq -r .name "$pj")
-            version=$(jq -r .version "$pj")
-            if [ -z "$name" ] || [ "$name" = null ] || [ -z "$version" ] || [ "$version" = null ]; then
-              echo "::error file=$pj::plugin.json needs both name and version"
-              exit 1
-            fi
+          for dir in plugins/*/; do
+            dir=${dir%/}
+            manifests=()
+            for pj in "$dir/.claude-plugin/plugin.json" "$dir/.codex-plugin/plugin.json"; do
+              [ -f "$pj" ] && manifests+=("$pj")
+            done
+            [ "${#manifests[@]}" -gt 0 ] || continue
+
+            # Every manifest names the same plugin at the same version, or
+            # nothing is tagged: the tag would otherwise promise one number
+            # to Claude Code and another to Codex.
+            name="" version=""
+            for pj in "${manifests[@]}"; do
+              n=$(jq -r '.name // empty' "$pj")
+              v=$(jq -r '.version // empty' "$pj")
+              if [ -z "$n" ] || [ -z "$v" ]; then
+                echo "::error file=$pj::plugin.json needs both name and version"
+                exit 1
+              fi
+              if [ -z "$name" ]; then
+                name=$n version=$v
+              elif [ "$n" != "$name" ] || [ "$v" != "$version" ]; then
+                echo "::error file=$pj::$n@$v does not match $name@$version in ${manifests[0]}"
+                exit 1
+              fi
+            done
             tag="${name}--v${version}"
 
             if gh api "repos/${REPO}/git/ref/tags/${tag}" --silent 2>/dev/null; then
@@ -56,13 +79,17 @@ jobs:
             fi
 
             # The commit where this version first appeared: the oldest of the
-            # unbroken run of commits, newest first, whose plugin.json still
-            # carries it. A later commit that only reworded the description
-            # does not move the tag off the bump.
+            # unbroken run of commits, newest first, at which every manifest
+            # that existed already carried it. A later commit that only
+            # reworded a description does not move the tag off the bump.
             commit=""
-            for c in $(git log --format=%H -- "$pj"); do
-              v=$(git show "$c:$pj" 2>/dev/null | jq -r .version 2>/dev/null || true)
-              [ "$v" = "$version" ] || break
+            for c in $(git log --format=%H -- "${manifests[@]}"); do
+              ok=true
+              for pj in "${manifests[@]}"; do
+                v=$(git show "$c:$pj" 2>/dev/null | jq -r .version 2>/dev/null) || continue
+                [ "$v" = "$version" ] || { ok=false; break; }
+              done
+              $ok || break
               commit=$c
             done
             commit=${commit:-$GITHUB_SHA}
