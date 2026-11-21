@@ -25,7 +25,8 @@ spec:
     - jaeger-mcp
   dependsOn:
     - component:homebrew-tap
-    - component:ai-plugins
+    - component:adr
+    - component:infrastructure-as-code
     - component:workflows
     - resource:github-pages
     - resource:repo-writer-app

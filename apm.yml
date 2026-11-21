@@ -11,10 +11,10 @@ includes: auto
 # this file and .apm/; edit those sources, not the generated files.
 dependencies:
   apm:
-    - boykush/ai-plugins/plugins/adr-remote-mcp#cee25253a3af876a92d067f38c85189d1b9faf2b
+    - boykush/adr/plugins/adr-remote-mcp#0ace14215204963afc46838a03502819e705c4c4 # adr-remote-mcp--v0.1.0
     # Owner only: the server sits behind the owner's login, so it connects for no one else. In
     # this repository it is called from the dogfood skill (.apm/skills/dogfood/) and nowhere else.
-    - boykush/ai-plugins/plugins/jaeger-remote-mcp#cee25253a3af876a92d067f38c85189d1b9faf2b
+    - boykush/infrastructure-as-code/plugins/jaeger-remote-mcp#5fbbbe6922fc6a98f06ff2a483a98c4f47ab1203 # jaeger-remote-mcp--v0.1.0
   mcp: []
   # claude-plugins-official's rust-analyzer-lsp keeps this server in its marketplace entry and
   # ships no manifest, so apm can't install it by path. apm writes LSP config for Claude Code only.
