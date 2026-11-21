@@ -157,7 +157,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:812d8898ae588b5ca58fbe2781de04237fe444cc21837e804aac5501fc373992
+  content_hash: sha256:7e1a37f217a5c573256e8540459b30db3403eee42797bdefce1731e1168deadf
 - kind: project-relative
   target: claude
   value: .claude/skills/release
@@ -283,7 +283,7 @@ deployments:
   owners:
   - .
   active_owner: .
-  content_hash: sha256:812d8898ae588b5ca58fbe2781de04237fe444cc21837e804aac5501fc373992
+  content_hash: sha256:7e1a37f217a5c573256e8540459b30db3403eee42797bdefce1731e1168deadf
 - kind: project-relative
   target: codex
   value: .agents/skills/release
@@ -399,8 +399,8 @@ local_deployed_files:
 - .claude/skills/release/SKILL.md
 local_deployed_file_hashes:
   .agents/skills/doc-update/SKILL.md: sha256:3799d7b8ff782173d1a57d1ccb78c735170c80d057c893488fee0aa365c3cf8f
-  .agents/skills/dogfood/SKILL.md: sha256:812d8898ae588b5ca58fbe2781de04237fe444cc21837e804aac5501fc373992
+  .agents/skills/dogfood/SKILL.md: sha256:7e1a37f217a5c573256e8540459b30db3403eee42797bdefce1731e1168deadf
   .agents/skills/release/SKILL.md: sha256:dabb5baf0d67f4285f2e6b57418e87c437360a12a03e8a95d8591a189a9133b2
   .claude/skills/doc-update/SKILL.md: sha256:3799d7b8ff782173d1a57d1ccb78c735170c80d057c893488fee0aa365c3cf8f
-  .claude/skills/dogfood/SKILL.md: sha256:812d8898ae588b5ca58fbe2781de04237fe444cc21837e804aac5501fc373992
+  .claude/skills/dogfood/SKILL.md: sha256:7e1a37f217a5c573256e8540459b30db3403eee42797bdefce1731e1168deadf
   .claude/skills/release/SKILL.md: sha256:dabb5baf0d67f4285f2e6b57418e87c437360a12a03e8a95d8591a189a9133b2
