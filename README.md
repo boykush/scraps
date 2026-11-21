@@ -57,6 +57,14 @@ CLI + JSON is the primary path — any shell-capable agent can query Scraps with
 - [`pkm`](plugins/pkm) — Personal knowledge management skills for Claude Code: *learn* a source and record only what you understood, or *digest* an article into a short linked page
 - [`mcp-server`](plugins/mcp-server) — MCP server for MCP-compatible clients, shared across repositories via `scraps mcp serve --http`
 
+Each plugin is also an [apm](https://github.com/microsoft/apm) package. Every version is tagged `<plugin>--v<version>` when it lands on `main`, independently of Scraps' own `v*` releases, so an `apm.yml` can pin one:
+
+```yaml
+dependencies:
+  apm:
+    - boykush/scraps/plugins/pkm#pkm--v<version>
+```
+
 See the [AI integration guide](https://boykush.github.io/scraps/scraps/How-to/Integrate%20with%20AI%20Assistants.html) for the trade-offs.
 
 ## Documentation

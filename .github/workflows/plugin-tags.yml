@@ -1,0 +1,72 @@
+name: Plugin tags
+
+# Tags each plugin under plugins/ as <name>--v<version> once its plugin.json
+# carries a version no tag names yet, so an apm.yml can pin a plugin to a
+# release of its own:
+#
+#   - boykush/<repo>/plugins/<name>#<sha> # <name>--v<version>
+#
+# These tags are independent of the product's v* releases: they create no
+# GitHub Release, and a tag pushed with GITHUB_TOKEN starts no workflow, so
+# release.yml never sees them.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "plugins/*/.claude-plugin/plugin.json"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: plugin-tags
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    name: tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create tag refs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # walk plugin.json history to find where a version first appeared
+          persist-credentials: false
+
+      - name: Tag new plugin versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for pj in plugins/*/.claude-plugin/plugin.json; do
+            name=$(jq -r .name "$pj")
+            version=$(jq -r .version "$pj")
+            if [ -z "$name" ] || [ "$name" = null ] || [ -z "$version" ] || [ "$version" = null ]; then
+              echo "::error file=$pj::plugin.json needs both name and version"
+              exit 1
+            fi
+            tag="${name}--v${version}"
+
+            if gh api "repos/${REPO}/git/ref/tags/${tag}" --silent 2>/dev/null; then
+              echo "$tag exists"
+              continue
+            fi
+
+            # The commit where this version first appeared: the oldest of the
+            # unbroken run of commits, newest first, whose plugin.json still
+            # carries it. A later commit that only reworded the description
+            # does not move the tag off the bump.
+            commit=""
+            for c in $(git log --format=%H -- "$pj"); do
+              v=$(git show "$c:$pj" 2>/dev/null | jq -r .version 2>/dev/null || true)
+              [ "$v" = "$version" ] || break
+              commit=$c
+            done
+            commit=${commit:-$GITHUB_SHA}
+
+            gh api "repos/${REPO}/git/refs" -f ref="refs/tags/${tag}" -f sha="$commit" --silent
+            echo "::notice::tagged $tag at $commit"
+          done
