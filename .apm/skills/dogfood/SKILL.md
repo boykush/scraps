@@ -9,7 +9,7 @@ The repository owner runs Scraps as a remote MCP server over their own wiki and 
 
 Only the owner can run it. The `jaeger` MCP server authenticates as them, and no one else gets past its login. This skill is also the only place in the repository that calls `mcp__jaeger__*`: outside it, leave those tools alone.
 
-If the `jaeger` tools are missing or refuse the call, stop and say so. The package's README (`apm_modules/boykush/ai-plugins/plugins/jaeger-remote-mcp/README.md`) says how to sign in and when the cluster is down. Don't route around the login.
+If the `jaeger` tools are missing or refuse the call, stop and say so. The README of the jaeger-remote-mcp package, which `apm.yml` takes from boykush/infrastructure-as-code (`plugins/jaeger-remote-mcp/README.md`, installed under `apm_modules/`), says how to sign in and when the cluster is down. Don't route around the login.
 
 ## 1. Read the traces
 
