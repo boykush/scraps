@@ -10,13 +10,13 @@ importers:
     devDependencies:
       '@storybook/addon-a11y':
         specifier: ^10.5.10
-        version: 10.6.7(storybook@10.6.7(react@19.2.8))
+        version: 10.6.8(storybook@10.6.8(react@19.2.8))
       '@storybook/html-vite':
         specifier: ^10.5.10
-        version: 10.6.7(storybook@10.6.7(react@19.2.8))(vite@8.3.5(esbuild@0.28.2))
+        version: 10.6.8(storybook@10.6.8(react@19.2.8))(vite@8.3.5(esbuild@0.28.2))
       storybook:
         specifier: ^10.5.10
-        version: 10.6.7(react@19.2.8)
+        version: 10.6.8(react@19.2.8)
 
 packages:
 
@@ -551,30 +551,30 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@storybook/addon-a11y@10.6.7':
-    resolution: {integrity: sha512-ARd+bjfOYoICe00+svRgFsCVqV7RbN+wgi8yfRhk31kESR7NnTMBGiZD8vWv/r3xqul/Ddr1uR6mUK4lpH7sqw==}
+  '@storybook/addon-a11y@10.6.8':
+    resolution: {integrity: sha512-+tzs6nyvy4A4/tCFcXZoYrt7d5K8nQN8p7H1nP1GFicTHY4mlQpebP2PZUBcitupXUpyvHfYvw8fJUhrQKJC4Q==}
     peerDependencies:
-      storybook: ^10.6.7
+      storybook: ^10.6.8
 
-  '@storybook/builder-vite@10.6.7':
-    resolution: {integrity: sha512-6DI3XP4He/nMMK4vGLl9tkneygr5bJvYx5EwNZMzw15tCosvGuWRREBvWqTHjZdoRa8HJpqosoFm60splBoAew==}
+  '@storybook/builder-vite@10.6.8':
+    resolution: {integrity: sha512-prL9t88RSzN3uk8Kzx5LnkqIODhRbwKa0PMryTlIEcew1J1hAiXcCNCJTDM5uhKjTO8s4OSBsCozVozdd+C2TQ==}
     peerDependencies:
-      storybook: ^10.6.7
+      storybook: ^10.6.8
       vite: ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
 
   '@storybook/global@5.0.0':
     resolution: {integrity: sha512-FcOqPAXACP0I3oJ/ws6/rrPT9WGhu915Cg8D02a9YxLo0DE9zI+a9A5gRGvmQ09fiWPukqI8ZAEoQEdWUKMQdQ==}
 
-  '@storybook/html-vite@10.6.7':
-    resolution: {integrity: sha512-MBqAMr3htgvFA38ThzPLiE8KbtZZoVnWTdPDV/h3FACz8z0kDOUMGq1usieMbQixbxGeMoD4HERwRV/vkT8l2Q==}
+  '@storybook/html-vite@10.6.8':
+    resolution: {integrity: sha512-dCVzrsSmwbo6hUyTEAeArAOK7sxrOYaLRiv1pawiYGCyQouGJjq1WXHbCI6PWqbljBbOXCK01y/kklMfYe5+iw==}
     peerDependencies:
-      storybook: ^10.6.7
+      storybook: ^10.6.8
       vite: ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
 
-  '@storybook/html@10.6.7':
-    resolution: {integrity: sha512-WJ9JujBalze+XPJBkdGtsbpBg5S3lcW37reqfkV/Rhw7fnGBVbRLovNvW7gdl/QTNuQyI2bkDfKrpdK1wcqh6Q==}
+  '@storybook/html@10.6.8':
+    resolution: {integrity: sha512-1UHKInvWq0vnm4RNxdxfi0IBrE5Q4mOhYbBKi5tKt+sxEnEb7tq3en8hEwgGGpdG5xdkTsWesc00IK9HizHYZA==}
     peerDependencies:
-      storybook: ^10.6.7
+      storybook: ^10.6.8
 
   '@storybook/icons@2.1.0':
     resolution: {integrity: sha512-Fxh9vYpX9bQqFeHRiY8h2ApeRGDzRSMLwJwNZ/AIRqnyOKHxRKL+yFe+ctEkVJmuptRE9u1Hrn8ZZNHyfDKKNg==}
@@ -895,8 +895,8 @@ packages:
     resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
 
-  storybook@10.6.7:
-    resolution: {integrity: sha512-/1h87XqC+8tZ5PQ/GVWOg78tCQuEAshYWwok5niBcnHEKzZy6Ls06uuT5/rhQ3iUB0y8iexEVHmUe3jaaxNguw==}
+  storybook@10.6.8:
+    resolution: {integrity: sha512-evtpCo87LwamL5oMQJmtD0kaQNOBePOAbhW9WlM2zW5nItbtDHeXVBLJR4d3Wld9++XhPntaGJKE3RUw6c0VVg==}
     hasBin: true
     peerDependencies:
       '@types/react': ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
@@ -1314,31 +1314,31 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@storybook/addon-a11y@10.6.7(storybook@10.6.7(react@19.2.8))':
+  '@storybook/addon-a11y@10.6.8(storybook@10.6.8(react@19.2.8))':
     dependencies:
       '@storybook/global': 5.0.0
       axe-core: 4.13.0
-      storybook: 10.6.7(react@19.2.8)
+      storybook: 10.6.8(react@19.2.8)
 
-  '@storybook/builder-vite@10.6.7(storybook@10.6.7(react@19.2.8))(vite@8.3.5(esbuild@0.28.2))':
+  '@storybook/builder-vite@10.6.8(storybook@10.6.8(react@19.2.8))(vite@8.3.5(esbuild@0.28.2))':
     dependencies:
-      storybook: 10.6.7(react@19.2.8)
+      storybook: 10.6.8(react@19.2.8)
       ts-dedent: 2.3.0
       vite: 8.3.5(esbuild@0.28.2)
 
   '@storybook/global@5.0.0': {}
 
-  '@storybook/html-vite@10.6.7(storybook@10.6.7(react@19.2.8))(vite@8.3.5(esbuild@0.28.2))':
+  '@storybook/html-vite@10.6.8(storybook@10.6.8(react@19.2.8))(vite@8.3.5(esbuild@0.28.2))':
     dependencies:
-      '@storybook/builder-vite': 10.6.7(storybook@10.6.7(react@19.2.8))(vite@8.3.5(esbuild@0.28.2))
-      '@storybook/html': 10.6.7(storybook@10.6.7(react@19.2.8))
-      storybook: 10.6.7(react@19.2.8)
+      '@storybook/builder-vite': 10.6.8(storybook@10.6.8(react@19.2.8))(vite@8.3.5(esbuild@0.28.2))
+      '@storybook/html': 10.6.8(storybook@10.6.8(react@19.2.8))
+      storybook: 10.6.8(react@19.2.8)
       vite: 8.3.5(esbuild@0.28.2)
 
-  '@storybook/html@10.6.7(storybook@10.6.7(react@19.2.8))':
+  '@storybook/html@10.6.8(storybook@10.6.8(react@19.2.8))':
     dependencies:
       '@storybook/global': 5.0.0
-      storybook: 10.6.7(react@19.2.8)
+      storybook: 10.6.8(react@19.2.8)
       ts-dedent: 2.3.0
 
   '@storybook/icons@2.1.0(react@19.2.8)':
@@ -1687,7 +1687,7 @@ snapshots:
 
   source-map@0.6.1: {}
 
-  storybook@10.6.7(react@19.2.8):
+  storybook@10.6.8(react@19.2.8):
     dependencies:
       '@storybook/global': 5.0.0
       '@storybook/icons': 2.1.0(react@19.2.8)
