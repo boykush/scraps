@@ -1,0 +1,99 @@
+name: Plugin tags
+
+# Tags each plugin under plugins/ as <name>--v<version> once its plugin.json
+# carries a version no tag names yet, so an apm.yml can pin a plugin to a
+# release of its own:
+#
+#   - boykush/<repo>/plugins/<name>#<sha> # <name>--v<version>
+#
+# These tags are independent of the product's v* releases: they create no
+# GitHub Release, and a tag pushed with GITHUB_TOKEN starts no workflow, so
+# release.yml never sees them.
+#
+# The plugin manifests are the only trigger and the only source of the tag:
+# no manual run, no other file. A plugin that ships both a Claude Code and a
+# Codex manifest is tagged only while the two agree on name and version.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "plugins/*/.claude-plugin/plugin.json"
+      - "plugins/*/.codex-plugin/plugin.json"
+
+permissions: {}
+
+concurrency:
+  group: plugin-tags
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    name: tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create tag refs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # walk plugin.json history to find where a version first appeared
+          persist-credentials: false
+
+      - name: Tag new plugin versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          for dir in plugins/*/; do
+            dir=${dir%/}
+            manifests=()
+            for pj in "$dir/.claude-plugin/plugin.json" "$dir/.codex-plugin/plugin.json"; do
+              [ -f "$pj" ] && manifests+=("$pj")
+            done
+            [ "${#manifests[@]}" -gt 0 ] || continue
+
+            # Every manifest names the same plugin at the same version, or
+            # nothing is tagged: the tag would otherwise promise one number
+            # to Claude Code and another to Codex.
+            name="" version=""
+            for pj in "${manifests[@]}"; do
+              n=$(jq -r '.name // empty' "$pj")
+              v=$(jq -r '.version // empty' "$pj")
+              if [ -z "$n" ] || [ -z "$v" ]; then
+                echo "::error file=$pj::plugin.json needs both name and version"
+                exit 1
+              fi
+              if [ -z "$name" ]; then
+                name=$n version=$v
+              elif [ "$n" != "$name" ] || [ "$v" != "$version" ]; then
+                echo "::error file=$pj::$n@$v does not match $name@$version in ${manifests[0]}"
+                exit 1
+              fi
+            done
+            tag="${name}--v${version}"
+
+            if gh api "repos/${REPO}/git/ref/tags/${tag}" --silent 2>/dev/null; then
+              echo "$tag exists"
+              continue
+            fi
+
+            # The commit where this version first appeared: the oldest of the
+            # unbroken run of commits, newest first, at which every manifest
+            # that existed already carried it. A later commit that only
+            # reworded a description does not move the tag off the bump.
+            commit=""
+            for c in $(git log --format=%H -- "${manifests[@]}"); do
+              ok=true
+              for pj in "${manifests[@]}"; do
+                v=$(git show "$c:$pj" 2>/dev/null | jq -r .version 2>/dev/null) || continue
+                [ "$v" = "$version" ] || { ok=false; break; }
+              done
+              $ok || break
+              commit=$c
+            done
+            commit=${commit:-$GITHUB_SHA}
+
+            gh api "repos/${REPO}/git/refs" -f ref="refs/tags/${tag}" -f sha="$commit" --silent
+            echo "::notice::tagged $tag at $commit"
+          done
