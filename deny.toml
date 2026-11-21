@@ -7,7 +7,15 @@ all-features = true
 # Advisories: check for known vulnerabilities in dependencies
 # https://embarkstudios.github.io/cargo-deny/checks/advisories/cfg.html
 [advisories]
-ignore = []
+ignore = [
+    # chrono and chrono-tz were declared unmaintained on the same day (chronotope/chrono#1768).
+    # Both are informational, with no vulnerability and no release to move to. scraps uses
+    # them for dates and the `timezone` setting; drop these once that moves to another
+    # crate (the advisory recommends jiff or time). rmcp and schemars pull chrono in as well,
+    # so 0543 stays until they move too.
+    { id = "RUSTSEC-2026-0543", reason = "chrono is unmaintained, no replacement release; dates still need it" },
+    { id = "RUSTSEC-2026-0555", reason = "chrono-tz is unmaintained, no replacement release; timezone handling still needs it" },
+]
 
 # Licenses: ensure all dependencies use permissive licenses compatible with MIT
 # https://embarkstudios.github.io/cargo-deny/checks/licenses/cfg.html
