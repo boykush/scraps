@@ -16,7 +16,7 @@ path = "modules/libs"
 aho-corasick = "=1.1.5"
 anyhow = "=1.0.104"
 thiserror = "=2.0.21"
-url = { version = "=2.5.8", features = ["serde"] }
+url = { version = "=2.5.9", features = ["serde"] }
 itertools = "=0.15.0"
 serde = { version = "=1.0.229", features = ["derive"] }
 # preserve_order keeps frontmatter keys in the order the author wrote them,
