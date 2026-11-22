@@ -14,6 +14,16 @@ permissions: {}
 jobs:
   zizmor:
     name: zizmor
+    # Skip the pushes that github-management's own App makes to distribute files: every
+    # target gets the same bytes, so one scan is enough, and that scan runs here in
+    # boykush/github-management, which receives the same commit. Each pin bump in
+    # templates/ otherwise reruns zizmor on every private repo (.github/** matches the
+    # paths filter), each a billed minute. A job skipped by `if:` bills nothing, and the
+    # skip is push-only, so the required check on public repos' PRs is untouched.
+    if: >-
+      github.event_name != 'push' ||
+      github.actor != 'boykush-github-management[bot]' ||
+      github.repository == 'boykush/github-management'
     runs-on: ubuntu-latest
     permissions:
       contents: read # checkout
