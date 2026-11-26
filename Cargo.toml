@@ -23,7 +23,7 @@ serde = { version = "=1.0.229", features = ["derive"] }
 # which is the point of passing them through untouched.
 serde_json = { version = "=1.0.154", features = ["preserve_order"] }
 rayon = "=1.12.0"
-clap = { version = "=4.6.9", features = ["derive", "env"] }
+clap = { version = "=4.6.10", features = ["derive", "env"] }
 config = { version = "=0.15.27", features = ["toml"] }
 tera = { version = "=2.4.0", features = ["glob_fs"] }
 chrono = "=0.4.45"
